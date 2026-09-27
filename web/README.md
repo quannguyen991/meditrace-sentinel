@@ -51,6 +51,8 @@ Giao diện (React)  →  server.ts (chuyển tiếp)  →  python -m src.dich_v
    ```
 
    Biến môi trường: `MEDITRACE_API` (mặc định `http://127.0.0.1:8765`), `PORT` (mặc định 3000).
+   `MEDITRACE_NGUON_DUOC_PHEP`: tên miền được phép gửi yêu cầu ghi ngoài chính máy chủ (cách nhau
+   dấu phẩy), dùng khi có một tên miền khác chuyển tiếp về đây, ví dụ `meditrace-sentinel.vercel.app`.
 
 ## Ba nhãn nguồn — luôn hiện trên giao diện
 
