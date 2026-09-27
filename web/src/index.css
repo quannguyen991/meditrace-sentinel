@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Khối nổi tactile 3D / Embossed "Khối nổi" Shadows */
+.shadow-tactile-box {
+  box-shadow: 
+    0 12px 32px -4px rgba(160, 135, 110, 0.22),
+    0 4px 10px -2px rgba(160, 135, 110, 0.12),
+    inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2.5px 3px 0 rgba(195, 175, 150, 0.25);
+}
+
+.shadow-tactile-pill {
+  box-shadow: 
+    0 3px 8px -1px rgba(150, 125, 95, 0.18),
+    0 1px 3px 0 rgba(150, 125, 95, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 2px 0 rgba(190, 168, 142, 0.22);
+}
+
+.shadow-tactile-pill:hover {
+  box-shadow: 
+    0 5px 14px -2px rgba(150, 125, 95, 0.24),
+    0 2px 4px 0 rgba(150, 125, 95, 0.1),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 2.5px 0 rgba(190, 168, 142, 0.28);
+}
+
+.shadow-tactile-pill:active {
+  box-shadow: 
+    0 1px 2px 0 rgba(150, 125, 95, 0.12),
+    inset 0 1.5px 2.5px 0 rgba(0, 0, 0, 0.08);
+}
+
+.shadow-tactile-dark {
+  box-shadow: 
+    0 4px 14px -2px rgba(43, 27, 34, 0.35),
+    0 2px 4px 0 rgba(43, 27, 34, 0.2),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.shadow-tactile-dark:active {
+  box-shadow: 
+    0 1px 3px 0 rgba(43, 27, 34, 0.25),
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.shadow-tactile-doctor {
+  box-shadow: 
+    0 4px 14px -2px rgba(2, 132, 199, 0.38),
+    0 2px 4px 0 rgba(2, 132, 199, 0.22),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 2px 0 rgba(3, 105, 161, 0.45);
+}
+
+.shadow-tactile-doctor:hover {
+  box-shadow: 
+    0 6px 18px -2px rgba(2, 132, 199, 0.45),
+    0 3px 6px 0 rgba(2, 132, 199, 0.28),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 2px 0 rgba(3, 105, 161, 0.5);
+}
+
+.shadow-tactile-doctor:active {
+  box-shadow: 
+    0 1px 3px 0 rgba(2, 132, 199, 0.3),
+    inset 0 2px 3.5px 0 rgba(3, 105, 161, 0.6);
+}
+
+.shadow-tactile-doctor-card {
+  box-shadow: 
+    0 10px 28px -4px rgba(2, 132, 199, 0.16),
+    0 3px 8px -1px rgba(2, 132, 199, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px 0 rgba(186, 230, 253, 0.4);
+}
+
+.shadow-tactile-doctor-card:hover {
+  box-shadow: 
+    0 16px 36px -6px rgba(2, 132, 199, 0.24),
+    0 6px 14px -2px rgba(2, 132, 199, 0.12),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 3px 0 rgba(186, 230, 253, 0.6);
+}
+
+.shadow-tactile-doctor-pill {
+  box-shadow: 
+    0 3px 10px -1px rgba(2, 132, 199, 0.16),
+    0 1px 3px 0 rgba(2, 132, 199, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 2px 0 rgba(186, 230, 253, 0.45);
+}
+
+.shadow-tactile-doctor-pill:hover {
+  box-shadow: 
+    0 5px 14px -2px rgba(2, 132, 199, 0.22),
+    0 2px 4px 0 rgba(2, 132, 199, 0.1),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 2px 0 rgba(186, 230, 253, 0.6);
+}
+
+.shadow-tactile-doctor-pill:active {
+  box-shadow: 
+    0 1px 2px 0 rgba(2, 132, 199, 0.14),
+    inset 0 1.5px 2.5px 0 rgba(2, 132, 199, 0.18);
+}
+
+.shadow-tactile-card {
+  box-shadow: 
+    0 8px 24px -4px rgba(165, 140, 115, 0.18),
+    0 2px 6px -1px rgba(165, 140, 115, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -2px 3px 0 rgba(195, 175, 150, 0.2);
+}
+
+.shadow-tactile-inset {
+  box-shadow: 
+    inset 0 2px 4px 0 rgba(160, 135, 110, 0.12),
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.04),
+    0 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E0D8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C8C2B8;
+}

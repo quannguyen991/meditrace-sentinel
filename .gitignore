@@ -1,0 +1,29 @@
+*.bin
+*.pyc
+*.safetensors
+.venv/
+__pycache__/
+data/*.jsonl
+docs/*-in.html
+goi-kaggle/
+klog/
+models/
+node_modules/
+package-lock.json
+tham_khao/
+data/**/*.jsonl
+kaggle-ra/
+khoa-giai-ma.json
+*.khac-bo
+
+# 22/09/2026: du lieu doi chung va thu nghiem, cung quy uoc voi data/*.jsonl
+data-gpt/
+data-may/
+data-thu-may/
+data/audio/
+
+# am thanh thu sinh bang mms-tts-vie (CC-BY-NC) va ket qua tho cua benchmark ASR
+data/audio-bench/
+
+# 24/09/2026: nhan so thu tu hien trong File Explorer (xem 00-DOC-TRUOC-BAN-DO.md)
+desktop.ini

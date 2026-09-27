@@ -1,0 +1,15 @@
+{
+  "id": "ten-kaggle/meditrace-chay-tiep-ep-json",
+  "title": "meditrace chay tiep ep json",
+  "code_file": "chay.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "accelerator": "nvidiaTeslaT4x2",
+  "dataset_sources": ["ten-kaggle/meditrace-the-he-7"],
+  "kernel_sources": ["ten-kaggle/meditrace-chay-lai-ep-json"],
+  "competition_sources": [],
+  "model_sources": []
+}

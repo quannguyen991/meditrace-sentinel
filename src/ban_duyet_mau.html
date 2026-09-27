@@ -1,0 +1,797 @@
+<title>Bàn duyệt bệnh án</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  --nen: #edf0f4;
+  --mat: #ffffff;
+  --mat-2: #f5f7fa;
+  --vien: #d3dae3;
+  --muc: #17202c;
+  --muc-nhat: #5b6677;
+  --but: #1f4fa6;
+  --but-nhat: #e4ecfa;
+  --da-quang: #ffe17a;
+  --da-quang-chu: #2b2200;
+  --chan: #b3261e;
+  --chan-nhat: #fcebe9;
+  --canh: #94590a;
+  --canh-nhat: #fff2db;
+  --dat: #1f6e47;
+  --dat-nhat: #e2f3e8;
+  --bong: 0 1px 2px rgba(23, 32, 44, .06), 0 10px 28px rgba(23, 32, 44, .09);
+  --chu-ui: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --chu-to: "Source Serif 4", "Times New Roman", "Noto Serif", serif;
+  --chu-so: "IBM Plex Mono", Consolas, "Cascadia Mono", ui-monospace, monospace;
+  --cao-dau: 64px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --nen: #0e131a; --mat: #161d26; --mat-2: #1b232e; --vien: #29333f;
+    --muc: #e6ebf1; --muc-nhat: #9aa6b5; --but: #8eb1ff; --but-nhat: #1b2944;
+    --da-quang: #6b5816; --da-quang-chu: #fff3c7;
+    --chan: #ff8b80; --chan-nhat: #3a1d1b; --canh: #f0b35b; --canh-nhat: #33260f;
+    --dat: #72d29d; --dat-nhat: #14301f;
+    --bong: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --nen: #0e131a; --mat: #161d26; --mat-2: #1b232e; --vien: #29333f;
+  --muc: #e6ebf1; --muc-nhat: #9aa6b5; --but: #8eb1ff; --but-nhat: #1b2944;
+  --da-quang: #6b5816; --da-quang-chu: #fff3c7;
+  --chan: #ff8b80; --chan-nhat: #3a1d1b; --canh: #f0b35b; --canh-nhat: #33260f;
+  --dat: #72d29d; --dat-nhat: #14301f;
+  --bong: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--nen); color: var(--muc);
+  font: 14px/1.5 var(--chu-ui); -webkit-font-smoothing: antialiased;
+}
+button, select, textarea, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--but); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- dau trang */
+.dau-trang {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px;
+  padding: 10px 18px; background: var(--mat); border-bottom: 1px solid var(--vien);
+}
+.ten-sp { display: grid; gap: 1px; min-width: 0; }
+.ten-sp b { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.ten-sp span { font-size: 11.5px; color: var(--muc-nhat); max-width: 46ch; }
+.nhan-minh-hoa {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--chan); border: 1.5px solid currentColor; border-radius: 3px;
+  padding: 2px 6px; transform: rotate(-2deg); white-space: nowrap;
+}
+.chon-ca { display: flex; align-items: center; gap: 6px; }
+.chon-ca select {
+  background: var(--mat); border: 1px solid var(--vien); border-radius: 6px;
+  padding: 5px 8px; max-width: 280px;
+}
+.nut {
+  border: 1px solid var(--vien); background: var(--mat); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; line-height: 1.3;
+}
+.nut:hover { border-color: var(--but); color: var(--but); }
+.dem { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chip-chan { background: var(--chan-nhat); color: var(--chan); }
+.chip-canh { background: var(--canh-nhat); color: var(--canh); }
+.chip-dat { background: var(--dat-nhat); color: var(--dat); }
+.tien-do {
+  margin-left: auto; display: flex; align-items: center; gap: 14px;
+  font-size: 12.5px; color: var(--muc-nhat); font-variant-numeric: tabular-nums;
+}
+.tien-do b { color: var(--muc); font-weight: 600; }
+
+/* ---------------------------------------------------------------- ba cot */
+.ba-cot {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(400px, 1.3fr) minmax(290px, .95fr);
+  height: calc(100vh - var(--cao-dau));
+}
+.cot { overflow: auto; padding: 16px 18px 48px; min-width: 0; }
+.cot + .cot { border-left: 1px solid var(--vien); }
+.tieu-de-cot {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  flex-wrap: wrap; margin: 0 0 10px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muc-nhat);
+}
+.chu-giai { font-size: 11.5px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+/* hoi thoai */
+.luot {
+  display: grid; grid-template-columns: 28px 1fr; gap: 1px 8px;
+  padding: 8px 6px; border-radius: 6px;
+}
+.luot + .luot { border-top: 1px solid var(--vien); border-radius: 0; }
+.so-luot {
+  grid-row: span 2; font: 500 11.5px/1.9 var(--chu-so); color: var(--muc-nhat);
+  font-variant-numeric: tabular-nums;
+}
+.vai {
+  font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muc-nhat);
+}
+.vai-nv { color: var(--but); }
+.loi { font-size: 14.5px; line-height: 1.6; overflow-wrap: anywhere; }
+mark.trich {
+  background: var(--da-quang); color: var(--da-quang-chu); border-radius: 2px;
+  padding: 0 1px; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.chua-ghi {
+  text-decoration: underline dashed var(--canh); text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.luot.nhay { background: var(--but-nhat); transition: background 1.2s ease; }
+
+/* to benh an */
+.to-benh-an {
+  background: var(--mat); box-shadow: var(--bong); border-radius: 4px;
+  padding: 24px 28px 30px; max-width: 74ch; margin: 0 auto;
+}
+.to-dau {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  border-bottom: 2px solid var(--muc); padding-bottom: 8px; margin-bottom: 6px;
+}
+.to-dau h2 { font: 600 20px/1.2 var(--chu-to); margin: 0; }
+.ma-ca { font: 500 12px var(--chu-so); color: var(--muc-nhat); white-space: nowrap; }
+.muc { margin: 16px 0 0; }
+.muc h3 {
+  font: 600 11.5px/1.3 var(--chu-ui); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muc-nhat); margin: 0 0 4px;
+}
+.dong-chep { margin: 0; padding: 4px 8px 4px 30px; font: 16px/1.55 var(--chu-to); color: var(--muc-nhat); }
+.dong {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: start; gap: 8px;
+  width: 100%; text-align: left; background: none; border: 0; border-radius: 4px;
+  padding: 5px 8px; font: 16px/1.55 var(--chu-to); color: var(--muc); cursor: pointer;
+}
+.dong:hover { background: var(--mat-2); }
+.dong[aria-pressed="true"] { background: var(--but-nhat); box-shadow: inset 0 0 0 1px var(--but); }
+.dau-cham { width: 8px; height: 8px; border-radius: 50%; margin-top: 9px; }
+.nhom-chan .dau-cham { background: var(--chan); }
+.nhom-canh .dau-cham { background: var(--canh); }
+.nhom-dat .dau-cham { box-shadow: inset 0 0 0 1.5px var(--dat); }
+.noi { overflow-wrap: anywhere; }
+.da-loai .noi { text-decoration: line-through; text-decoration-color: var(--chan); color: var(--muc-nhat); }
+.sua { display: block; color: var(--but); font-style: italic; }
+.le-phai { display: flex; align-items: center; gap: 6px; padding-top: 3px; }
+.the {
+  font: 600 11px/1.6 var(--chu-ui); padding: 1px 8px; border-radius: 999px;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.the-chan { background: var(--chan-nhat); color: var(--chan); }
+.the-canh { background: var(--canh-nhat); color: var(--canh); }
+.dau {
+  display: inline-block; font: 700 10px/1 var(--chu-ui); letter-spacing: .1em;
+  text-transform: uppercase; border: 1.5px solid currentColor; border-radius: 3px;
+  padding: 3px 5px 2px; transform: rotate(-4deg); white-space: nowrap;
+}
+.dau-xac_nhan { color: var(--dat); }
+.dau-sua { color: var(--but); }
+.dau-loai { color: var(--chan); }
+@media (prefers-reduced-motion: no-preference) {
+  .dau.moi { animation: dong-dau .18s ease-out; }
+}
+@keyframes dong-dau {
+  from { transform: rotate(-4deg) scale(1.4); opacity: .3; }
+  to { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+.ghi-cau-hoi { margin: 18px 0 0; font-size: 12.5px; color: var(--muc-nhat); }
+
+/* chi tiet */
+.nut-dong-tt { display: none; }
+.chi-tiet h2 { font: 600 17px/1.4 var(--chu-to); margin: 0 0 12px; text-wrap: balance; }
+.truong {
+  display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 5px 10px;
+  margin: 0; font-size: 13.5px;
+}
+.truong dt { color: var(--muc-nhat); }
+.truong dd { margin: 0; overflow-wrap: anywhere; }
+.phan { margin: 20px 0 0; }
+.phan h3 {
+  font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muc-nhat); margin: 0 0 8px;
+}
+.ds { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ly-do {
+  display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline;
+  padding: 6px 9px; border-radius: 6px; font-size: 13.5px;
+}
+.ly-do b { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; }
+.ly-do-chan { background: var(--chan-nhat); color: var(--chan); }
+.ly-do-canh { background: var(--canh-nhat); color: var(--canh); }
+.ly-do-dat { background: var(--dat-nhat); color: var(--dat); }
+.ly-do-trung { background: var(--mat-2); color: var(--muc-nhat); }
+.trich-dan { font: 15px/1.5 var(--chu-to); margin: 0; }
+.trich-dan::before { content: "“"; }
+.trich-dan::after { content: "”"; }
+.phep-tinh { font: 13px/1.6 var(--chu-so); font-variant-numeric: tabular-nums; }
+.nut-luot {
+  font: 500 12px var(--chu-so); border: 1px solid var(--vien); border-radius: 4px;
+  padding: 1px 6px; background: var(--mat); cursor: pointer; margin: 0 4px 4px 0;
+}
+.nut-luot:hover { border-color: var(--but); color: var(--but); }
+.quyet { display: flex; gap: 8px; flex-wrap: wrap; }
+.nut-q {
+  flex: 1 1 0; min-width: 84px; padding: 7px 10px; border-radius: 6px;
+  border: 1.5px solid currentColor; background: var(--mat); font-weight: 600; cursor: pointer;
+}
+.nut-q[data-q="xac_nhan"] { color: var(--dat); }
+.nut-q[data-q="sua"] { color: var(--but); }
+.nut-q[data-q="loai"] { color: var(--chan); }
+.nut-q[aria-pressed="true"] { background: currentColor; }
+.nut-q[aria-pressed="true"] span { color: var(--mat); }
+.o-nhap { display: grid; gap: 6px; margin-top: 10px; }
+.o-nhap label { font-size: 12px; color: var(--muc-nhat); }
+textarea, input[type="text"] {
+  width: 100%; background: var(--mat); border: 1px solid var(--vien); border-radius: 6px;
+  padding: 7px 9px; font-size: 14px;
+}
+textarea { font-family: var(--chu-to); font-size: 15px; resize: vertical; }
+.goi-y { font-size: 12px; color: var(--muc-nhat); }
+.phim { font: 500 11px var(--chu-so); border: 1px solid var(--vien); border-radius: 3px; padding: 0 4px; }
+.cau-hoi {
+  display: grid; gap: 4px; width: 100%; text-align: left; cursor: pointer;
+  padding: 10px 12px; border: 1px solid var(--vien); border-radius: 8px; background: var(--mat);
+}
+.cau-hoi:hover { border-color: var(--but); }
+.cau-hoi .van { font: 15px/1.5 var(--chu-to); }
+.cau-hoi .meta { font-size: 12px; color: var(--muc-nhat); }
+.muc-chua-ghi {
+  display: grid; grid-template-columns: 28px 1fr; gap: 6px; width: 100%; text-align: left;
+  background: none; border: 0; border-radius: 6px; padding: 5px 6px; cursor: pointer;
+}
+.muc-chua-ghi:hover { background: var(--mat-2); }
+.muc-chua-ghi .so-luot { grid-row: auto; line-height: 1.6; }
+.ghi-chu-tg {
+  font-size: 12px; color: var(--muc-nhat); border-top: 1px solid var(--vien);
+  padding-top: 10px; margin: 22px 0 0; max-width: 48ch;
+}
+.tom { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 4px; }
+
+/* hop xuat */
+dialog {
+  width: min(640px, calc(100vw - 32px)); border: 1px solid var(--vien); border-radius: 10px;
+  background: var(--mat); color: var(--muc); padding: 20px 22px; box-shadow: var(--bong);
+}
+dialog::backdrop { background: rgba(10, 14, 20, .45); }
+dialog h2 { font: 600 18px/1.3 var(--chu-to); margin: 0 0 6px; }
+dialog p { margin: 0 0 10px; color: var(--muc-nhat); font-size: 13px; }
+dialog textarea { font: 12px/1.5 var(--chu-so); height: 260px; }
+.hang-nut { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; flex-wrap: wrap; }
+
+@media (max-width: 1100px) {
+  .ba-cot { grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.3fr); height: auto; }
+  .cot { overflow: visible; }
+  .cot-phai { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--vien); }
+}
+@media (max-width: 720px) {
+  .ba-cot { grid-template-columns: minmax(0, 1fr); }
+  .cot + .cot { border-left: 0; border-top: 1px solid var(--vien); }
+  .cot-giua { order: -1; padding: 12px 10px 32px; }
+  .to-benh-an { padding: 18px 14px 24px; }
+  .tien-do { margin-left: 0; }
+  .cot-phai {
+    position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; overflow: auto;
+    background: var(--mat); border-top: 1px solid var(--vien);
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, .18); transform: translateY(105%); z-index: 6;
+  }
+  .cot-phai.mo { transform: none; }
+  .nut-dong-tt { display: inline-block; float: right; }
+}
+@media (max-width: 720px) and (prefers-reduced-motion: no-preference) {
+  .cot-phai { transition: transform .2s ease; }
+}
+</style>
+<!--THAN-->
+<header class="dau-trang">
+  <div class="ten-sp"><b>Bàn duyệt bệnh án</b><span id="nguon"></span></div>
+  <span class="nhan-minh-hoa" id="nhan-minh-hoa" hidden>Minh hoạ</span>
+  <div class="chon-ca">
+    <button type="button" class="nut" id="ca-truoc" aria-label="Ca trước">‹</button>
+    <select id="chon-ca" aria-label="Chọn ca"></select>
+    <button type="button" class="nut" id="ca-sau" aria-label="Ca sau">›</button>
+  </div>
+  <div class="dem" id="dem"></div>
+  <div class="tien-do">
+    <span>Đã duyệt <b id="da-duyet">0/0</b></span>
+    <span title="Đo trên máy này để thử giao diện — chưa có số liệu bác sĩ">Thời gian <b id="dong-ho">0:00</b></span>
+    <button type="button" class="nut" id="mo-xuat">Xuất phản hồi</button>
+  </div>
+</header>
+
+<main class="ba-cot">
+  <section class="cot" aria-label="Hội thoại">
+    <h2 class="tieu-de-cot">Hội thoại
+      <span class="chu-giai"><mark class="trich">được dẫn</mark> · <span class="chua-ghi">chưa dòng nào dẫn</span></span>
+    </h2>
+    <div id="hoi-thoai"></div>
+  </section>
+  <section class="cot cot-giua" aria-label="Bệnh án nháp">
+    <div class="to-benh-an" id="to"></div>
+  </section>
+  <section class="cot cot-phai" id="cot-phai" aria-label="Chi tiết">
+    <h2 class="tieu-de-cot">Chi tiết
+      <button type="button" class="nut nut-dong-tt" id="dong-tt">Đóng</button>
+    </h2>
+    <div class="chi-tiet" id="chi-tiet"></div>
+  </section>
+</main>
+
+<dialog id="hop-xuat">
+  <h2>Phản hồi của người duyệt</h2>
+  <p>Quyết định của mọi ca đã duyệt trên máy này, dạng JSON. Thời gian duyệt đo để thử giao diện — chưa phải số liệu bác sĩ.</p>
+  <textarea id="o-xuat" readonly aria-label="JSON phản hồi"></textarea>
+  <p id="bao-xuat" aria-live="polite"></p>
+  <div class="hang-nut">
+    <button type="button" class="nut" id="tai-xuat">Tải tệp .json</button>
+    <button type="button" class="nut" id="chep-xuat">Chép</button>
+    <button type="button" class="nut" id="dong-xuat">Đóng</button>
+  </div>
+</dialog>
+
+<script id="du-lieu" type="application/json">__DU_LIEU__</script>
+<script>
+(function () {
+  "use strict";
+  var DL = JSON.parse(document.getElementById("du-lieu").textContent);
+  function $(s) { return document.querySelector(s); }
+  var giamChuyenDong = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var KHOA = "ban-duyet:" + DL.ma;
+  var TEN_Q = { xac_nhan: "Xác nhận", sua: "Đã sửa", loai: "Loại" };
+  var TEN_NHOM = { "bị chặn": "chan", "nguy cơ cao": "canh", "đã kiểm chứng": "dat" };
+  var TEN_LOAI = { di_ung: "dị ứng", thuoc: "thuốc", chan_doan: "chẩn đoán",
+                   thoi_gian: "thời gian", khac: "khác" };
+  var kho = docKho();
+  var tt = { i: 0, chon: null, vuaDong: null };
+  var dongHo = { ca: null, tu: null };
+
+  function docKho() {
+    try {
+      var s = localStorage.getItem(KHOA);
+      if (s) { var k = JSON.parse(s); k.quyet = k.quyet || {}; k.thoi_gian = k.thoi_gian || {}; return k; }
+    } catch (e) { /* trinh duyet chan luu tru: van chay, khong nho */ }
+    return { quyet: {}, thoi_gian: {} };
+  }
+  function luuKho() { try { localStorage.setItem(KHOA, JSON.stringify(kho)); } catch (e) { /* bo qua */ } }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function so(x) { return (+x).toFixed(2).replace(".", ","); }
+  function hai(n) { return (n < 10 ? "0" : "") + n; }
+  function ca() { return DL.ca[tt.i]; }
+  function quyetCua(c) { return kho.quyet[c.id] || (kho.quyet[c.id] = {}); }
+  function nhomCua(c, id) { var r = c.rui_ro[id]; return r ? r.nhom : null; }
+  function daXong(c) {
+    var q = kho.quyet[c.id] || {};
+    return c.dong.length > 0 && c.dong.every(function (d) { return q[d.id]; });
+  }
+  function laNhanVien(vai) { return vai === "bác sĩ" || vai === "điều dưỡng" || vai === "y tá"; }
+
+  /* ------------------------------------------------------- dong ho duyet */
+  function batDongHo() {
+    var c = ca();
+    dongHo.ca = c.id;
+    dongHo.tu = daXong(c) || document.hidden ? null : performance.now();
+  }
+  function dungDongHo() {
+    if (dongHo.tu != null) {
+      kho.thoi_gian[dongHo.ca] = (kho.thoi_gian[dongHo.ca] || 0) + performance.now() - dongHo.tu;
+      dongHo.tu = null;
+      luuKho();
+    }
+  }
+  function phut(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + hai(s % 60); }
+  function veDongHo() {
+    var c = ca();
+    var ms = (kho.thoi_gian[c.id] || 0) +
+      (dongHo.tu != null && dongHo.ca === c.id ? performance.now() - dongHo.tu : 0);
+    $("#dong-ho").textContent = phut(ms) + (daXong(c) ? " · xong" : "");
+  }
+
+  /* ------------------------------------------------------------ hoi thoai */
+  function to(van, r) {
+    if (!r.length) return esc(van);
+    var cat = [0, van.length];
+    r.forEach(function (x) { cat.push(x.a, x.b); });
+    cat = cat.filter(function (v, k, a) { return a.indexOf(v) === k; })
+             .sort(function (x, y) { return x - y; });
+    var ra = "";
+    for (var k = 0; k < cat.length - 1; k++) {
+      var a = cat[k], b = cat[k + 1];
+      if (a >= b) continue;
+      var lop = r.filter(function (x) { return x.a <= a && b <= x.b; })
+                 .map(function (x) { return x.c; });
+      var t = esc(van.slice(a, b));
+      if (lop.indexOf("chua-ghi") >= 0) {
+        t = '<span class="chua-ghi" title="Chưa có dòng nào trong bệnh án dẫn tới đoạn này">' + t + "</span>";
+      }
+      if (lop.indexOf("trich") >= 0) t = '<mark class="trich">' + t + "</mark>";
+      ra += t;
+    }
+    return ra;
+  }
+  function veHoiThoai() {
+    var c = ca();
+    var k = tt.chon == null ? null : c.khoa[tt.chon];
+    var chon = k ? k.doan : [];
+    $("#hoi-thoai").innerHTML = c.luot.map(function (l) {
+      var soLuot = l[0], vai = l[1], van = l[2], r = [];
+      chon.forEach(function (d) { if (d[0] === soLuot) r.push({ a: d[1], b: d[2], c: "trich" }); });
+      c.chua_ghi.forEach(function (d) { if (d.luot === soLuot) r.push({ a: d.a, b: d.b, c: "chua-ghi" }); });
+      return '<div class="luot" id="luot-' + soLuot + '"><span class="so-luot">' + hai(soLuot) +
+        '</span><span class="vai' + (laNhanVien(vai) ? " vai-nv" : "") + '">' + esc(vai || "—") +
+        '</span><span class="loi">' + to(van, r) + "</span></div>";
+    }).join("");
+  }
+  function cuonToi(soLuot, nhay) {
+    var el = document.getElementById("luot-" + soLuot);
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: giamChuyenDong ? "auto" : "smooth" });
+    if (nhay) {
+      el.classList.add("nhay");
+      setTimeout(function () { el.classList.remove("nhay"); }, 900);
+    }
+  }
+
+  /* ------------------------------------------------------------- to benh an */
+  function veDong(c, d, qd) {
+    var n = nhomCua(c, d.id), r = c.rui_ro[d.id];
+    var the = "";
+    if (n === "bị chặn") the = '<span class="the the-chan">bị chặn</span>';
+    else if (n === "nguy cơ cao") the = '<span class="the the-canh">nguy cơ ' + so(r.diem) + "</span>";
+    var dau = qd ? '<span class="dau dau-' + qd.loai + (tt.vuaDong === d.id ? " moi" : "") + '">' +
+      TEN_Q[qd.loai] + "</span>" : "";
+    var noi = '<span class="noi">' + esc(d.van) + "</span>" +
+      (qd && qd.loai === "sua" && qd.van ? '<span class="sua">→ ' + esc(qd.van) + "</span>" : "");
+    return '<button type="button" class="dong' + (n ? " nhom-" + TEN_NHOM[n] : "") +
+      (qd && qd.loai === "loai" ? " da-loai" : "") + '" data-id="' + d.id +
+      '" aria-pressed="' + (tt.chon === d.id) + '"><span class="dau-cham" aria-hidden="true"></span><span>' +
+      noi + '</span><span class="le-phai">' + the + dau + "</span></button>";
+  }
+  function veTo() {
+    var c = ca(), q = quyetCua(c), theo = {};
+    c.dong.forEach(function (d) { (theo[d.muc] = theo[d.muc] || []).push(d); });
+    var html = ['<div class="to-dau"><h2>Bệnh án nháp</h2><span class="ma-ca">' + esc(c.id) +
+      " · " + c.dong.length + " dòng</span></div>"];
+    var bs = theo["BỆNH SỬ HIỆN TẠI"];
+    if (bs && bs.length) {
+      html.push('<section class="muc"><h3>Lý do khám bệnh</h3><p class="dong-chep">' +
+        esc(bs[0].van) + ' <span class="goi-y">(chép từ dòng đầu bệnh sử)</span></p></section>');
+    }
+    var thuTu = DL.thu_tu_muc.concat(Object.keys(theo).filter(function (m) {
+      return DL.thu_tu_muc.indexOf(m) < 0;
+    }));
+    thuTu.forEach(function (m) {
+      if (m === "LÝ DO KHÁM BỆNH" || !theo[m]) return;
+      html.push('<section class="muc"><h3>' + esc(m) + "</h3>");
+      theo[m].forEach(function (d) { html.push(veDong(c, d, q[d.id])); });
+      html.push("</section>");
+    });
+    if (c.cau_hoi.length) {
+      html.push('<p class="ghi-cau-hoi">' + c.cau_hoi.length +
+        " câu hỏi làm rõ cho người bệnh — xem cột Chi tiết.</p>");
+    }
+    $("#to").innerHTML = html.join("");
+  }
+
+  /* --------------------------------------------------------------- chi tiet */
+  function tongQuan(c) {
+    var dem = demNhom(c);
+    var html = ["<h2>Ca " + esc(c.id) + "</h2>", '<div class="tom">'];
+    if (dem.chan) html.push('<span class="chip chip-chan">' + dem.chan + " bị chặn</span>");
+    if (dem.canh) html.push('<span class="chip chip-canh">' + dem.canh + " nguy cơ cao</span>");
+    if (dem.dat) html.push('<span class="chip chip-dat">' + dem.dat + " đã kiểm chứng</span>");
+    html.push("</div>");
+    html.push('<p class="goi-y">Bấm một dòng của bệnh án để thấy đoạn hội thoại nó dựa vào. ' +
+      '<span class="phim">J</span>/<span class="phim">K</span> chuyển dòng.</p>');
+    if (c.cau_hoi.length) {
+      html.push('<div class="phan"><h3>Hỏi lại người bệnh</h3><ul class="ds">');
+      c.cau_hoi.forEach(function (h, k) {
+        html.push('<li><button type="button" class="cau-hoi" data-cau="' + k + '"><span class="van">' +
+          esc(h.van) + '</span><span class="meta">' + esc(DL.ly_do[h.ly_do] || h.ly_do) + " · giải quyết " +
+          h.muc_tieu.length + " dòng</span></button></li>");
+      });
+      html.push("</ul></div>");
+    }
+    if (c.chua_ghi.length) {
+      html.push('<div class="phan"><h3>Đoạn hội thoại chưa được ghi</h3><div class="ds">');
+      c.chua_ghi.forEach(function (d) {
+        html.push('<button type="button" class="muc-chua-ghi" data-luot="' + d.luot + '"><span class="so-luot">' +
+          hai(d.luot) + "</span><span>" + esc(d.doan) + "</span></button>");
+      });
+      html.push("</div></div>");
+    }
+    html.push('<div class="hang-nut" style="justify-content:flex-start"><button type="button" class="nut" id="lam-lai">Xoá quyết định của ca này</button></div>');
+    html.push('<p class="ghi-chu-tg">Thời gian duyệt được đo trên máy đang mở trang, để thử giao diện. ' +
+      "Chưa có số liệu bác sĩ thật — không dùng con số này làm kết quả.</p>");
+    return html.join("");
+  }
+  function chiTiet(c) {
+    var d = c.dong.filter(function (x) { return x.id === tt.chon; })[0];
+    var p = c.phat_bieu[tt.chon] || {};
+    var k = c.khoa[tt.chon] || { chan: [], canh_bao: [], doan: [] };
+    var r = c.rui_ro[tt.chon];
+    var qd = quyetCua(c)[tt.chon];
+    var html = ["<h2>" + esc(d ? d.van : p.noi_dung) + "</h2>", '<dl class="truong">'];
+    function hang(t, v) { html.push("<dt>" + t + "</dt><dd>" + v + "</dd>"); }
+    hang("Chủ thể", p.chu_the_id === 0 ? "Bệnh nhân" : esc(p.ten_chu_the || "Người khác"));
+    hang("Người nói", esc(p.nguoi_noi || "—"));
+    hang("Mức chắc chắn", esc(p.do_chac_chan || "chắc chắn") + (p.phu_dinh ? " · phủ định" : ""));
+    hang("Tình huống", esc(p.tinh_huong || "thực tế"));
+    hang("Mốc thời gian", esc(p.moc_thoi_gian || "—"));
+    hang("Trạng thái", esc(p.trang_thai || "còn hiệu lực") +
+      (p.quan_he && p.quan_he !== "không" ? " · " + esc(p.quan_he) +
+        (p.quan_he_voi != null ? " dòng #" + p.quan_he_voi : "") : ""));
+    hang("Loại lời nói", esc(p.hanh_vi || "—"));
+    hang("Lượt dẫn", (p.bang_chung || []).map(function (n) {
+      return '<button type="button" class="nut-luot" data-luot="' + n + '">lượt ' + n + "</button>";
+    }).join("") || "—");
+    html.push("</dl>");
+    if ((p.trich_dan || []).length) {
+      html.push('<div class="phan"><h3>Trích dẫn nguyên văn</h3><div class="ds">');
+      p.trich_dan.forEach(function (t) { html.push('<p class="trich-dan">' + esc(t) + "</p>"); });
+      html.push("</div></div>");
+    }
+    html.push('<div class="phan"><h3>Khoá bằng chứng</h3><ul class="ds">');
+    if (k.khong_co_khoa) {
+      html.push('<li class="ly-do ly-do-trung"><b>—</b><span>Nhánh này không chạy khoá bằng chứng.</span></li>');
+    } else if (!k.chan.length && !k.canh_bao.length) {
+      html.push('<li class="ly-do ly-do-dat"><b>Qua</b><span>Qua cả năm phép kiểm với hội thoại.</span></li>');
+    }
+    k.chan.forEach(function (m) {
+      html.push('<li class="ly-do ly-do-chan"><b>Chặn</b><span>' + esc(DL.ly_do[m] || m) + "</span></li>");
+    });
+    k.canh_bao.forEach(function (m) {
+      html.push('<li class="ly-do ly-do-canh"><b>Cảnh báo</b><span>' + esc(DL.ly_do[m] || m) + "</span></li>");
+    });
+    html.push("</ul></div>");
+    if (r) {
+      html.push('<div class="phan"><h3>Rủi ro</h3><p class="phep-tinh">nghiêm trọng ' + so(r.nghiem_trong) +
+        " (" + esc(TEN_LOAI[r.loai] || r.loai) + ") × thiếu căn cứ " + so(r.thieu) + " = <b>" + so(r.diem) +
+        "</b></p><p class=\"goi-y\">Nhóm: " + esc(r.nhom) + ". Trọng số đặt tay, chờ bác sĩ duyệt.</p></div>");
+    }
+    var ls = c.lich_su.filter(function (e) {
+      return e.id === tt.chon || String(e.ly_do || "").indexOf("#" + tt.chon) >= 0;
+    });
+    if (ls.length) {
+      html.push('<div class="phan"><h3>Lịch sử cập nhật</h3><ul class="ds">');
+      ls.forEach(function (e) {
+        html.push('<li class="ly-do ly-do-trung"><b>#' + e.id + "</b><span>" + esc(e.noi_dung) +
+          (e.moc_thoi_gian ? " (" + esc(e.moc_thoi_gian) + ")" : "") + " — " + esc(e.trang_thai) + ": " +
+          esc(e.ly_do) + "</span></li>");
+      });
+      html.push("</ul></div>");
+    }
+    html.push('<div class="phan"><h3>Quyết định</h3><div class="quyet">');
+    ["xac_nhan", "sua", "loai"].forEach(function (q) {
+      html.push('<button type="button" class="nut-q" data-q="' + q + '" aria-pressed="' +
+        (qd && qd.loai === q ? "true" : "false") + '"><span>' +
+        { xac_nhan: "Xác nhận", sua: "Sửa", loai: "Loại" }[q] + "</span></button>");
+    });
+    html.push("</div>");
+    html.push('<div class="o-nhap"' + (qd && qd.loai === "sua" ? "" : " hidden") + '><label for="van-sua">Dòng đã sửa</label>' +
+      '<textarea id="van-sua" rows="3">' + esc(qd && qd.van != null ? qd.van : (d ? d.van : "")) + "</textarea></div>");
+    html.push('<div class="o-nhap"><label for="ghi-chu-q">Ghi chú của người duyệt (không bắt buộc)</label>' +
+      '<input type="text" id="ghi-chu-q" value="' + esc(qd && qd.ghi_chu || "") + '"></div>');
+    html.push('<p class="goi-y"><span class="phim">X</span> xác nhận · <span class="phim">S</span> sửa · ' +
+      '<span class="phim">L</span> loại · <span class="phim">Esc</span> về tổng quan</p></div>');
+    return html.join("");
+  }
+  function veChiTiet() {
+    var c = ca();
+    $("#chi-tiet").innerHTML = tt.chon == null ? tongQuan(c) : chiTiet(c);
+    $("#cot-phai").classList.toggle("mo", tt.chon != null);
+  }
+
+  /* ------------------------------------------------------------- dau trang */
+  function demNhom(c) {
+    var dem = { chan: 0, canh: 0, dat: 0 };
+    c.dong.forEach(function (d) { var n = TEN_NHOM[nhomCua(c, d.id)]; if (n) dem[n] += 1; });
+    return dem;
+  }
+  function veDauTrang() {
+    var c = ca(), dem = demNhom(c), q = kho.quyet[c.id] || {};
+    var html = [];
+    if (dem.chan) html.push('<span class="chip chip-chan">' + dem.chan + " bị chặn</span>");
+    if (dem.canh) html.push('<span class="chip chip-canh">' + dem.canh + " nguy cơ cao</span>");
+    if (dem.dat) html.push('<span class="chip chip-dat">' + dem.dat + " đã kiểm chứng</span>");
+    $("#dem").innerHTML = html.join("");
+    var da = c.dong.filter(function (d) { return q[d.id]; }).length;
+    $("#da-duyet").textContent = da + "/" + c.dong.length;
+    var chon = $("#chon-ca");
+    Array.prototype.forEach.call(chon.options, function (o, k) {
+      o.textContent = nhanCa(DL.ca[k]);
+    });
+    chon.value = String(tt.i);
+    veDongHo();
+  }
+  function nhanCa(c) {
+    var dem = demNhom(c);
+    return c.id + " — " + dem.chan + " chặn · " + dem.canh + " rủi ro" + (daXong(c) ? " · đã duyệt" : "");
+  }
+  function doDau() {
+    document.documentElement.style.setProperty("--cao-dau", $(".dau-trang").offsetHeight + "px");
+  }
+
+  /* ---------------------------------------------------------- hanh dong */
+  function veTatCa() { veHoiThoai(); veTo(); veChiTiet(); veDauTrang(); tt.vuaDong = null; }
+  function moCa(i) {
+    dungDongHo();
+    tt.i = (i + DL.ca.length) % DL.ca.length;
+    tt.chon = null;
+    veTatCa();
+    batDongHo();
+  }
+  function chonDong(id) {
+    tt.chon = id;
+    veTatCa();
+    var k = id == null ? null : ca().khoa[id];
+    if (k && k.doan.length) cuonToi(k.doan[0][0], false);
+    var el = document.querySelector('.dong[data-id="' + id + '"]');
+    if (el && document.activeElement !== el) el.focus({ preventScroll: true });
+  }
+  function buoc(huong) {
+    var c = ca(), ids = Array.prototype.map.call(document.querySelectorAll(".dong"), function (b) {
+      return +b.getAttribute("data-id");
+    });
+    if (!ids.length) return;
+    var k = ids.indexOf(tt.chon);
+    chonDong(ids[k < 0 ? (huong > 0 ? 0 : ids.length - 1) : Math.min(ids.length - 1, Math.max(0, k + huong))]);
+    if (c) { /* giu tham chieu */ }
+  }
+  function quyet(loai) {
+    if (tt.chon == null) return;
+    var c = ca(), q = quyetCua(c), cu = q[tt.chon] || {};
+    var d = c.dong.filter(function (x) { return x.id === tt.chon; })[0];
+    q[tt.chon] = { loai: loai, van: loai === "sua" ? (cu.van != null ? cu.van : (d ? d.van : "")) : null,
+                   ghi_chu: cu.ghi_chu || "", luc: new Date().toISOString() };
+    tt.vuaDong = tt.chon;
+    luuKho();
+    if (daXong(c)) dungDongHo();
+    var id = tt.chon;
+    veTatCa();
+    if (loai === "sua") {
+      var o = $("#van-sua");
+      if (o) { o.focus(); o.setSelectionRange(o.value.length, o.value.length); }
+    } else {
+      var el = document.querySelector('.dong[data-id="' + id + '"]');
+      if (el) el.focus({ preventScroll: true });
+    }
+  }
+  function xuatJson() {
+    var ra = { bo: DL.ten_bo, ma: DL.ma, luc: new Date().toISOString(),
+               ghi_chu: "Thời gian đo trên máy này để thử giao diện — chưa phải số liệu bác sĩ.",
+               ca: {} };
+    DL.ca.forEach(function (c) {
+      var q = kho.quyet[c.id];
+      if (q && Object.keys(q).length) {
+        ra.ca[c.id] = { quyet_dinh: q, thoi_gian_ms: Math.round(kho.thoi_gian[c.id] || 0),
+                        so_dong: c.dong.length };
+      }
+    });
+    return JSON.stringify(ra, null, 2);
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("button");
+    if (!t) return;
+    if (t.classList.contains("dong")) { chonDong(+t.getAttribute("data-id")); return; }
+    if (t.classList.contains("nut-q")) { quyet(t.getAttribute("data-q")); return; }
+    if (t.classList.contains("cau-hoi")) {
+      var h = ca().cau_hoi[+t.getAttribute("data-cau")];
+      if (h && h.muc_tieu.length) chonDong(h.muc_tieu[0]);
+      return;
+    }
+    if (t.hasAttribute("data-luot")) { cuonToi(+t.getAttribute("data-luot"), true); return; }
+    if (t.id === "lam-lai") {
+      delete kho.quyet[ca().id];
+      delete kho.thoi_gian[ca().id];
+      luuKho();
+      moCa(tt.i);
+      return;
+    }
+    if (t.id === "dong-tt") { chonDong(null); }
+  });
+  document.addEventListener("input", function (e) {
+    if (tt.chon == null) return;
+    var q = quyetCua(ca())[tt.chon];
+    if (e.target.id === "van-sua" && q) { q.van = e.target.value; luuKho(); }
+    if (e.target.id === "ghi-chu-q") {
+      if (!q) return;
+      q.ghi_chu = e.target.value;
+      luuKho();
+    }
+  });
+  document.addEventListener("change", function (e) {
+    if (e.target.id === "van-sua" || e.target.id === "ghi-chu-q") { veTo(); }
+  });
+  document.addEventListener("keydown", function (e) {
+    var dang = e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" ||
+                            e.target.tagName === "SELECT");
+    if (e.key === "Escape") {
+      if (dang) { e.target.blur(); return; }
+      if (tt.chon != null) chonDong(null);
+      return;
+    }
+    if (dang || e.ctrlKey || e.metaKey || e.altKey || $("#hop-xuat").open) return;
+    var k = e.key.toLowerCase();
+    if (k === "j") { buoc(1); e.preventDefault(); }
+    else if (k === "k") { buoc(-1); e.preventDefault(); }
+    else if (k === "x") { quyet("xac_nhan"); e.preventDefault(); }
+    else if (k === "s") { quyet("sua"); e.preventDefault(); }
+    else if (k === "l") { quyet("loai"); e.preventDefault(); }
+  });
+  $("#chon-ca").addEventListener("change", function (e) { moCa(+e.target.value); });
+  $("#ca-truoc").addEventListener("click", function () { moCa(tt.i - 1); });
+  $("#ca-sau").addEventListener("click", function () { moCa(tt.i + 1); });
+  $("#mo-xuat").addEventListener("click", function () {
+    dungDongHo(); batDongHo();
+    $("#o-xuat").value = xuatJson();
+    $("#bao-xuat").textContent = "";
+    if ($("#hop-xuat").showModal) $("#hop-xuat").showModal();
+  });
+  $("#dong-xuat").addEventListener("click", function () { $("#hop-xuat").close(); });
+  $("#tai-xuat").addEventListener("click", function () {
+    try {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([$("#o-xuat").value], { type: "application/json" }));
+      a.download = "phan-hoi-" + DL.ma + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      $("#bao-xuat").textContent = "Đã tạo tệp. Trình duyệt không tải được thì chọn chữ trong ô rồi chép.";
+    } catch (err) {
+      $("#bao-xuat").textContent = "Không tải được tệp ở đây — chọn chữ trong ô rồi chép.";
+    }
+  });
+  $("#chep-xuat").addEventListener("click", function () {
+    var o = $("#o-xuat");
+    var xong = function () { $("#bao-xuat").textContent = "Đã chép vào bộ nhớ tạm."; };
+    var hong = function () {
+      o.focus(); o.select();
+      $("#bao-xuat").textContent = "Không chép tự động được — chữ đã được chọn, bấm Ctrl+C.";
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(o.value).then(xong, hong);
+    } else { hong(); }
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) dungDongHo(); else batDongHo();
+  });
+  window.addEventListener("resize", doDau);
+  window.addEventListener("pagehide", dungDongHo);
+  setInterval(veDongHo, 1000);
+
+  /* ----------------------------------------------------------- khoi dong */
+  $("#nguon").textContent = DL.ghi_chu_nguon || DL.ten_bo;
+  $("#nhan-minh-hoa").hidden = !DL.minh_hoa;
+  // Ban nhung vao trang khac (khong tu chua) thuong khong duoc tai tep: chi con o
+  // chu va nut Chep.
+  $("#tai-xuat").hidden = DL.cho_tai === false;
+  $("#chon-ca").innerHTML = DL.ca.map(function (c, k) {
+    return '<option value="' + k + '">' + esc(nhanCa(c)) + "</option>";
+  }).join("");
+  doDau();
+  moCa(0);
+  // Mo o trang thai lam viec: chon san dong BI CHAN dau tien (man hinh rong).
+  if (window.innerWidth > 720) {
+    var c0 = ca(), chan = c0.dong.filter(function (d) { return nhomCua(c0, d.id) === "bị chặn"; })[0];
+    if (chan) chonDong(chan.id);
+  }
+})();
+</script>

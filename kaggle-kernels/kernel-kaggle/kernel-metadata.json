@@ -1,0 +1,17 @@
+{
+  "id": "ten-kaggle/meditrace-thu-nhip-t4",
+  "title": "meditrace thu nhip t4",
+  "code_file": "chay.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [
+    "ten-kaggle/meditrace-the-he-7"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": [],
+  "accelerator": "nvidiaTeslaT4x2"
+}

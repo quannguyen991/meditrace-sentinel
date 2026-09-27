@@ -1,0 +1,6 @@
+{
+  "name": "MediTrace Sentinel",
+  "description": "Giao diện của MediTrace Sentinel: từ hội thoại khám bệnh tiếng Việt dựng BẢN NHÁP HỒ SƠ LÂM SÀNG CÓ CẤU TRÚC, mỗi dòng kèm lượt hội thoại làm căn cứ để bác sĩ duyệt. Bản nháp do Qwen3-4B chạy tại chỗ; chỉ khi bác sĩ bật công tắc “Mô hình ngoài” thì câu hỏi gợi ý, hỏi đáp và tra nguồn mới gửi ra máy chủ ngoài. Không chẩn đoán, không tư vấn điều trị.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}

@@ -1,0 +1,15 @@
+{
+  "id": "ten-kaggle/meditrace-th8-nhanh-a",
+  "title": "meditrace-th8-nhanh-a",
+  "code_file": "chay.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "accelerator": "nvidiaTeslaT4x2",
+  "dataset_sources": ["ten-kaggle/meditrace-the-he-8"],
+  "kernel_sources": [],
+  "competition_sources": [],
+  "model_sources": []
+}
