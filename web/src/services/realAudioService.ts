@@ -31,6 +31,24 @@ export class RealAudioService {
     this.callbacks = callbacks;
   }
 
+  /**
+   * Nhiều thành phần cùng muốn xem mức âm thanh (dải ghi âm ở đầu trang, khung lời thoại).
+   * `setCallbacks` chỉ giữ MỘT hàm cho mỗi loại nên thành phần gọi sau ghi đè thành phần gọi trước
+   * (lỗi làm thanh âm thanh đứng yên). Đăng ký ở đây thì không ghi đè nhau.
+   */
+  private nguoiNgheMucAm = new Set<(amLuong: number, cacVach: number[]) => void>();
+
+  public theoDoiMucAm(cb: (amLuong: number, cacVach: number[]) => void): () => void {
+    this.nguoiNgheMucAm.add(cb);
+    return () => {
+      this.nguoiNgheMucAm.delete(cb);
+    };
+  }
+
+  private phatMucAm(amLuong: number, cacVach: number[]) {
+    this.nguoiNgheMucAm.forEach((cb) => cb(amLuong, cacVach));
+  }
+
   public setCallbacks(callbacks: RealAudioServiceCallbacks) {
     this.callbacks = { ...this.callbacks, ...callbacks };
   }
@@ -103,9 +121,11 @@ export class RealAudioService {
           this.audioContext = new AudioCtx();
           const source = this.audioContext.createMediaStreamSource(this.mediaStream);
           this.analyser = this.audioContext.createAnalyser();
-          this.analyser.fftSize = 64;
+          this.analyser.fftSize = 512;
+          this.analyser.smoothingTimeConstant = 0.55;
           source.connect(this.analyser);
-          this.startVisualizer();
+          // Trình duyệt có thể để AudioContext ở trạng thái "suspended" nếu chưa có thao tác người dùng.
+          void this.audioContext.resume().catch(() => {});
         }
       } catch (e) {
         console.warn("Không khởi tạo được AudioContext:", e);
@@ -148,6 +168,7 @@ export class RealAudioService {
       //    được làm SAU khi dừng ghi: tệp ghi âm gửi sang /api/transcribe (PhoWhisper tại chỗ).
 
       this.isListening = true;
+      this.startVisualizer();
       return true;
     } catch (err: any) {
       console.error("Lỗi khi mở Micrô:", err);
@@ -227,34 +248,43 @@ export class RealAudioService {
     }
   }
 
+  /** Số vạch của thanh âm thanh hiển thị khi ghi âm. */
+  public static readonly SO_VACH = 32;
+
   private startVisualizer() {
     if (!this.analyser) return;
-
-    const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+    const analyser = this.analyser;
+    const tanSo = new Uint8Array(analyser.frequencyBinCount);
+    const dangSong = new Uint8Array(analyser.fftSize);
 
     const update = () => {
-      if (!this.isListening || !this.analyser) return;
+      if (!this.isListening || this.analyser !== analyser) return;
 
-      this.analyser.getByteFrequencyData(dataArray);
-
-      // Tính âm lượng trung bình
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
+      // Âm lượng chung: căn bậc hai trung bình bình phương của dạng sóng (0 = im lặng).
+      analyser.getByteTimeDomainData(dangSong);
+      let tong = 0;
+      for (let i = 0; i < dangSong.length; i++) {
+        const v = (dangSong[i] - 128) / 128;
+        tong += v * v;
       }
-      const avg = sum / dataArray.length;
-      const normalizedVolume = Math.min(100, Math.round((avg / 128) * 100));
+      const rms = Math.sqrt(tong / dangSong.length);
+      const amLuong = Math.min(100, Math.round(rms * 400));
 
-      // Lấy 8 dải tần số đặc trưng cho visualizer
-      const freqs: number[] = [];
-      const step = Math.floor(dataArray.length / 8);
-      for (let i = 0; i < 8; i++) {
-        freqs.push(Math.round((dataArray[i * step] / 255) * 100));
+      // Các vạch: dải 190 Hz – 6 kHz (giọng nói), chia đều theo bin, mỗi vạch lấy trung bình.
+      analyser.getByteFrequencyData(tanSo);
+      const dauBin = 2;
+      const cuoiBin = Math.min(tanSo.length, 64);
+      const moiVach = (cuoiBin - dauBin) / RealAudioService.SO_VACH;
+      const vach: number[] = [];
+      for (let k = 0; k < RealAudioService.SO_VACH; k++) {
+        const a = Math.floor(dauBin + k * moiVach);
+        const b = Math.max(a + 1, Math.floor(dauBin + (k + 1) * moiVach));
+        let t = 0;
+        for (let i = a; i < b; i++) t += tanSo[i];
+        vach.push(Math.min(100, Math.round(((t / (b - a)) / 255) * 100 * 1.6)));
       }
 
-      if (this.callbacks.onAudioLevel) {
-        this.callbacks.onAudioLevel(normalizedVolume, freqs);
-      }
+      this.phatMucAm(amLuong, vach);
 
       this.animationFrameId = requestAnimationFrame(update);
     };
@@ -270,9 +300,7 @@ export class RealAudioService {
       this.animationFrameId = null;
     }
 
-    if (this.callbacks.onAudioLevel) {
-      this.callbacks.onAudioLevel(0, [0, 0, 0, 0, 0, 0, 0, 0]);
-    }
+    this.phatMucAm(0, new Array(RealAudioService.SO_VACH).fill(0));
 
     if (this.recognition) {
       try {

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ViewMode, Session, DocumentTabItem, ClinicalChatMessage, TemplateItem, Patient } from "./types";
 import { initialSessions, initialEvidenceChat } from "./data/mockData";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Sparkles, Bell } from "lucide-react";
 import { NavigationRail } from "./components/NavigationRail";
+import { MenuTaiKhoan } from "./components/MenuTaiKhoan";
+import { HomeDashboard } from "./components/HomeDashboard";
 import { SessionsSidebar } from "./components/SessionsSidebar";
 import { ScribeHeader } from "./components/ScribeHeader";
 import { DocumentTabs } from "./components/DocumentTabs";
@@ -17,6 +19,7 @@ import { EvidenceView, CheDoHoiDap, NguonTraCuu, TraLoiHoiDap } from "./componen
 import { PatientsView } from "./components/PatientsView";
 import { TasksView } from "./components/TasksView";
 import { TemplatesView } from "./components/TemplatesView";
+import { ThuVienYKhoa } from "./components/ThuVienYKhoa";
 import { VerificationView, NoteMeta, Quyet } from "./components/VerificationView";
 import { DuyetBenCanh, trangThaiMD } from "./components/DuyetBenCanh";
 import { TinhTrangHeThong } from "./components/TinhTrangHeThong";
@@ -42,7 +45,20 @@ type AppProps = { nguoiDung: NguoiDung; onDangXuat: () => Promise<void> };
 
 export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const [activeView, setActiveView] = useState<ViewMode>("scribe");
-  const [taskbarPosition, setTaskbarPosition] = useState<"top" | "left">("top");
+  const [activeNavigationItem, setActiveNavigationItem] = useState("sessions");
+  const [taskbarPosition, setTaskbarPosition] = useState<"top" | "left">(() => {
+    try {
+      const saved = localStorage.getItem("meditrace_taskbar_position");
+      return saved === "top" || saved === "left" ? saved : "left";
+    } catch {
+      return "left";
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("meditrace_taskbar_position", taskbarPosition);
+    } catch {}
+  }, [taskbarPosition]);
   const [sessions, setSessions] = useState<Session[]>(() => {
     try {
       const saved = localStorage.getItem("meditrace_sessions");
@@ -170,6 +186,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [moTinhTrang, setMoTinhTrang] = useState(false);
+  const [promptTraCuuTrangChu, setPromptTraCuuTrangChu] = useState("");
 
   const [isEvidenceLoading, setIsEvidenceLoading] = useState(false);
   const [isGeneratingNote, setIsGeneratingNote] = useState(false);
@@ -186,7 +203,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const [apiError, setApiError] = useState<string | null>(null);
 
   /**
-   * Công tắc gửi ra mô hình ngoài (cổng ai-box). MẶC ĐỊNH TẮT, nhớ theo từng trình duyệt.
+   * Công tắc gửi ra mô hình ngoài (cổng mô hình ngoài). MẶC ĐỊNH TẮT, nhớ theo từng trình duyệt.
    * Bật thì nội dung ca khám được gửi ra máy chủ ngoài cho ba việc phụ: sửa theo lời nhắc,
    * hỏi về ca khám, bản so sánh. Bản nháp chính vẫn luôn do mô hình tại chỗ viết.
    */
@@ -405,6 +422,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     setSessions([newSession, ...sessions]);
     setActiveSessionId(newId);
     setActiveView("scribe");
+    setActiveNavigationItem("sessions");
   };
 
   // Xóa ca khám
@@ -424,6 +442,61 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   // Chuyển tab trong ca khám
   const handleSelectTab = (tabId: string) => {
     handleUpdateSession({ activeTabId: tabId });
+  };
+
+  const handleSelectView = (view: ViewMode) => {
+    const mucTheoView: Record<ViewMode, string> = {
+      home: "home",
+      scribe: "sessions",
+      evidence: "questions",
+      tasks: "tasks",
+      patients: "patients",
+      templates: "templates",
+      verification: "proof",
+      library: "library",
+      settings: "settings",
+    };
+    setActiveView(view);
+    setActiveNavigationItem(mucTheoView[view]);
+  };
+
+  const handleSelectNavigationItem = (item: string) => {
+    setActiveNavigationItem(item);
+    if (item === "home") {
+      setActiveView("home");
+    } else if (item === "sessions") {
+      setActiveView("scribe");
+      setMoDuyetBen(false);
+    } else if (item === "transcript") {
+      setActiveView("scribe");
+      setMoDuyetBen(false);
+      const tab = currentSession.tabs.find((t) => t.type === "transcript");
+      if (tab) handleSelectTab(tab.id);
+    } else if (item === "draft") {
+      setActiveView("scribe");
+      setMoDuyetBen(false);
+      const tab =
+        [...currentSession.tabs].reverse().find((t) => noteMeta && t.content === noteMeta.content) ||
+        [...currentSession.tabs].reverse().find((t) => t.title === "Bản nháp hồ sơ") ||
+        currentSession.tabs.find((t) => t.type === "soap");
+      // Ca chưa có bản nháp: đưa người dùng về tab lời thoại, nơi có nút tạo bản nháp.
+      const chonTab = tab || currentSession.tabs.find((t) => t.type === "transcript");
+      if (chonTab) handleSelectTab(chonTab.id);
+    } else if (item === "proof") {
+      setActiveView("verification");
+    } else if (item === "questions") {
+      setActiveView("evidence");
+    } else if (item === "library") {
+      setActiveView("library");
+    } else if (item === "settings") {
+      setActiveView("settings");
+    } else if (item === "templates") {
+      setActiveView("templates");
+    } else if (item === "tasks") {
+      setActiveView("tasks");
+    } else if (item === "patients") {
+      setActiveView("patients");
+    }
   };
 
   // Đóng một tab
@@ -496,7 +569,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         });
         if (d?.updatedContent) {
           handleUpdateTabContent(
-            `${d.updatedContent}\n\n[Đã sửa bằng mô hình ngoài · ai-box · ${d.model} · theo lời nhắc: ${promptText}]`
+            `${d.updatedContent}\n\n[Đã sửa bằng mô hình ngoài · ${d.model} · chưa qua kiểm căn cứ · theo lời nhắc: ${promptText}]`
           );
         }
       } finally {
@@ -601,7 +674,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       if (!d?.content) return;
       const id = `tab-doc-${Date.now()}`;
       const nhan =
-        `\n\n---\n[Soạn bằng mô hình ngoài · ${d.model} · ${d.seconds}s · từ lời thoại, bản nháp và tab Ngữ cảnh` +
+        `\n\n---\n[Soạn bằng mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · từ lời thoại, bản nháp và tab Ngữ cảnh` +
         `${d.missingCount ? ` · còn ${d.missingCount} chỗ [cần bổ sung]` : ""}. Bác sĩ đọc lại trước khi dùng.]`;
       const tab: DocumentTabItem = {
         id, title: (yeuCau || mau.ten).slice(0, 60), type: "custom", content: `${d.content}${nhan}`, isClosable: true,
@@ -631,7 +704,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                 `${q.luot?.length ? ` (lượt ${q.luot.join(", ")})` : ""}`)
               .join("\n")
           : "Mô hình không đề xuất câu nào.",
-        meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · từ ngữ cảnh, lời thoại và mệnh đề đã tách`,
+        meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · từ ngữ cảnh, lời thoại và mệnh đề đã tách`,
       };
     }
     if (cheDo === "tra_cuu") {
@@ -654,8 +727,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         cauTruc: d.cauTruc || null,
         question: cauHoi.replace(/\s*\(tra nguồn khác\)$/, ""),
         meta: d.caseOnly
-          ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
-          : `Mô hình ngoài · ${d.model} · ${d.seconds}s · ${tuyChon.kemNguCanh ? "ca khám + " : ""}tài liệu server tự tìm` +
+          ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
+          : `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · ${tuyChon.kemNguCanh ? "ca khám + " : ""}tài liệu server tự tìm` +
             `${d.searchTerms?.pubmed ? ` (từ khoá: ${d.searchTerms.pubmed})` : ""} · tham khảo, bác sĩ quyết định`,
       };
     }
@@ -665,7 +738,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       draft: noteMeta?.content || "",
     });
     if (!d) return null;
-    return { content: d.answer, meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chỉ dựa trên hội thoại của ca này` };
+    return { content: d.answer, meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ dựa trên hội thoại của ca này` };
   };
 
   /** Phương án 2 và hỏi về ca khám: cả hai cần mô hình ngoài; ngăn phải khoá ô nhập khi công tắc tắt. */
@@ -700,8 +773,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               removedSources: d.removedSources || 0,
               warning: d.warning,
               meta: d.caseOnly
-                ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
-                : `Mô hình ngoài · ${d.model} · ${d.seconds}s · ca khám + tài liệu server tự tìm (Bộ Y tế, MSD, DailyMed, NICE, WHO, CDC, MedlinePlus, PubMed) · tham khảo, bác sĩ quyết định`,
+                ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
+                : `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · ca khám + tài liệu server tự tìm (Bộ Y tế, MSD, DailyMed, NICE, WHO, CDC, MedlinePlus, PubMed) · tham khảo, bác sĩ quyết định`,
               timestamp: gio(),
             },
           ]);
@@ -721,7 +794,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             role: "assistant",
             mode,
             content: d.answer,
-            meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chỉ dựa trên hội thoại của ca này`,
+            meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ dựa trên hội thoại của ca này`,
             timestamp: gio(),
           },
         ]);
@@ -751,7 +824,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             title: `So sánh · ${d.model}`,
             type: "custom",
             content:
-              `[BẢN SO SÁNH — mô hình ngoài · ai-box · ${d.model} · ${d.seconds}s. ` +
+              `[BẢN SO SÁNH — mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ. ` +
               `Không phải bản nháp của dự án: không có mệnh đề, không có lượt làm căn cứ, không qua cổng rủi ro.]\n\n` +
               d.content,
             isClosable: true,
@@ -800,6 +873,21 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     setSessions([newSession, ...sessions]);
     setActiveSessionId(newId);
     setActiveView("scribe");
+    setActiveNavigationItem("sessions");
+  };
+
+  const pageTitle: Record<string, string> = {
+    home: "Trang chủ",
+    sessions: "Ca khám",
+    transcript: "Ghi âm & ghi chép",
+    draft: "Bản nháp hồ sơ",
+    proof: "Bằng chứng hội thoại",
+    questions: "Hỏi ca khám",
+    library: "Thư viện y khoa",
+    settings: "Cài đặt",
+    templates: "Mẫu bệnh án",
+    tasks: "Nhiệm vụ",
+    patients: "Bệnh nhân",
   };
 
   return (
@@ -812,7 +900,9 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       {/* 1. Thanh điều hướng Taskbar (Phía trên với góc bo tròn mềm mại hoặc dạng thanh bên trái) */}
       <NavigationRail
         activeView={activeView}
-        onSelectView={setActiveView}
+        activeNavigationItem={activeNavigationItem}
+        onSelectNavigationItem={handleSelectNavigationItem}
+        onSelectView={handleSelectView}
         onCreateNewSession={handleCreateNewSession}
         position={taskbarPosition}
         onTogglePosition={() =>
@@ -826,12 +916,62 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
       {/* 2. Khung nhìn chính với bo góc tinh tế và đổ bóng nổi khối */}
       <main
-        className={`flex-1 flex overflow-hidden min-h-0 ${
+        className={`flex-1 flex flex-col overflow-hidden min-h-0 min-w-0 ${
           taskbarPosition === "top"
             ? "mx-2.5 sm:mx-3 mb-2.5 rounded-2xl border border-[#BAE6FD]/70 bg-white shadow-[0_8px_30px_rgba(2,132,199,0.08),0_1px_3px_rgba(0,0,0,0.03)]"
             : ""
         }`}
       >
+        {taskbarPosition === "left" && (
+          <header className="h-14 shrink-0 flex items-center justify-between gap-3 border-b border-[#D9EAF3] bg-white/85 px-4 sm:px-5 lg:px-6">
+            <h1 className="min-w-0 truncate text-[15px] font-semibold tracking-tight text-[#153D5A]">
+              {pageTitle[activeNavigationItem] || "MediTrace"}
+            </h1>
+            <div className="flex shrink-0 items-center gap-1.5 text-[#49667B]">
+              <button
+                onClick={() => handleSelectNavigationItem("questions")}
+                className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#D5EAF6] bg-[#F1F9FE] px-3 text-[12px] font-semibold text-[#0874B9] transition hover:bg-[#E5F4FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+                title="Hỏi về ca khám đang mở"
+              >
+                <Sparkles size={15} />
+                <span className="hidden sm:inline">Hỏi ca</span>
+              </button>
+              <button
+                id="btn-nav-notifications"
+                onClick={() => setMoTinhTrang(true)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-xl transition hover:bg-[#EDF7FC] hover:text-[#0874B9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+                title="Tình trạng hệ thống"
+                aria-label="Tình trạng hệ thống"
+              >
+                <Bell size={17} />
+              </button>
+              <MenuTaiKhoan nguoiDung={nguoiDung} onDangXuat={onDangXuat} huong="top" />
+            </div>
+          </header>
+        )}
+        <div className="flex-1 min-h-0 min-w-0 flex overflow-hidden">
+        {activeView === "home" && (
+          <HomeDashboard
+            choPhepNgoai={choPhepNgoai}
+            onNapCaMau={() => {
+              handleSelectNavigationItem("transcript");
+              void handleLoadSample();
+            }}
+            doctorName={nguoiDung.hoTen}
+            sessions={sessions}
+            onCreateSession={handleCreateNewSession}
+            onOpenTranscript={() => handleSelectNavigationItem("transcript")}
+            onOpenDraft={() => handleSelectNavigationItem("draft")}
+            onOpenEvidence={() => handleSelectNavigationItem("proof")}
+            onOpenTemplates={() => handleSelectNavigationItem("templates")}
+            onOpenSession={(id) => {
+              setActiveSessionId(id);
+              handleSelectNavigationItem("sessions");
+            }}
+            onViewAllSessions={() => handleSelectNavigationItem("sessions")}
+          />
+        )}
+
         {activeView === "scribe" && (
           <div className="flex-1 flex overflow-hidden">
             {/* Sidebar danh sách ca khám */}
@@ -884,7 +1024,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                         : "Đang xử lý tạo hồ sơ... Bác sĩ có thể chuyển sang ca khám khác hoặc bắt đầu ca khám mới."}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#0284C7] font-mono">Qwen3-4B · nhánh C_khoa · chạy tại chỗ</span>
+                  <span className="text-[11px] text-[#0284C7] font-mono">Qwen3-4B · chạy tại chỗ · không gửi dữ liệu ra ngoài</span>
                 </div>
               )}
 
@@ -904,6 +1044,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     {noteMeta.needsConfirmCount > 0 && <>, trong đó <strong>{noteMeta.needsConfirmCount}</strong> máy đưa sang mục cần bác sĩ xác nhận</>}.
                     {noteMeta.source === "chay_truoc" && " Đây là bản ghi đã chạy từ trước."}
                     {noteMeta.source === "bo_dem" && " Khâu trích lấy từ bộ đệm đã chạy trước."}
+                    {noteMeta.source !== "chay_truoc" && noteMeta.source !== "bo_dem" && " Qwen3-4B vừa chạy tại chỗ."}
+                    <span className="ml-1 font-semibold">Chưa có bác sĩ duyệt.</span>
                   </span>
                   <div className="flex flex-wrap items-center gap-2 ml-auto">
                     {choPhepNgoai && (
@@ -934,7 +1076,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               >
                 <span className="min-w-0 line-clamp-2 @2xl:line-clamp-none">
                   {choPhepNgoai
-                    ? "Đang cho phép gửi nội dung ca khám ra máy chủ ai-box (mô hình ngoài) để sửa theo lời nhắc, hỏi về ca khám, gợi ý câu hỏi và làm bản so sánh. Khâu tách mệnh đề và bản nháp chính vẫn do Qwen3-4B của dự án làm."
+                    ? "Đang cho phép gửi nội dung ca khám ra máy chủ của dịch vụ mô hình ngoài (mô hình thương mại) để sửa theo lời nhắc, hỏi về ca khám, gợi ý câu hỏi và làm bản so sánh. Khâu tách mệnh đề và bản nháp chính vẫn do Qwen3-4B của dự án làm."
                     : "Mô hình ngoài đang tắt: không có gì rời khỏi máy này. Bản chép dùng PhoWhisper, bản nháp dùng Qwen3-4B tại chỗ."}
                 </span>
                 <label className="flex items-center gap-1.5 shrink-0 font-semibold cursor-pointer">
@@ -1013,7 +1155,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     setBanSua={setBanSuaDuyet}
                     chonId={chonMD}
                     onChon={chonTuNgan}
-                    onMoToanMan={() => setActiveView("verification")}
+                    onMoToanMan={() => handleSelectNavigationItem("proof")}
                     onDong={() => setMoDuyetBen(false)}
                   />
                 </div>
@@ -1055,12 +1197,14 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             allowExternal={choPhepNgoai}
             onToggleExternal={setChoPhepNgoai}
             hoi={hoiDap}
-            onNavigate={(v) => setActiveView(v)}
+            onNavigate={handleSelectView}
             onOpenCreate={() => {
-              setActiveView("scribe");
+              handleSelectNavigationItem("sessions");
               setIsTemplateModalOpen(true);
             }}
             onSaveToContext={themVaoNguCanh}
+            initialPrompt={promptTraCuuTrangChu}
+            onInitialPromptUsed={() => setPromptTraCuuTrangChu("")}
           />
         )}
 
@@ -1068,7 +1212,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         {activeView === "verification" && (
           <VerificationView
             note={noteMeta}
-            onBack={() => setActiveView("scribe")}
+            onBack={() => handleSelectNavigationItem("draft")}
             patientIdentifier={currentSession.patientIdentifier}
             allowExternal={choPhepNgoai}
             onAskExternalQuestions={deXuatCauHoi}
@@ -1093,9 +1237,68 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             onUseTemplate={(tpl) => {
               handleSelectTemplate(tpl);
               setActiveView("scribe");
+              setActiveNavigationItem("draft");
             }}
           />
         )}
+
+        {activeView === "library" && (
+          <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
+            <ThuVienYKhoa />
+          </section>
+        )}
+
+        {activeView === "settings" && (
+          <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
+            <div className="mx-auto flex max-w-3xl flex-col gap-4">
+              <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
+                <div>
+                  <h2 className="text-[14px] font-semibold text-[#174F70]">Vị trí thanh điều hướng</h2>
+                </div>
+                <div className="mt-4 inline-flex rounded-xl bg-[#EFF7FB] p-1">
+                  {(["left", "top"] as const).map((position) => (
+                    <button
+                      key={position}
+                      onClick={() => setTaskbarPosition(position)}
+                      aria-pressed={taskbarPosition === position}
+                      className={`rounded-lg px-3.5 py-2 text-[12px] font-semibold transition ${
+                        taskbarPosition === position ? "bg-white text-[#0874B9] shadow-sm" : "text-[#607C8E] hover:text-[#174F70]"
+                      }`}
+                    >
+                      {position === "left" ? "Bên trái" : "Trên đầu"}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="max-w-xl">
+                    <h2 className="text-[14px] font-semibold text-[#174F70]">Mô hình ngoài</h2>
+                    <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">Có thể gửi nội dung ca khám tới mô hình ngoài. Bản nháp chính vẫn tạo tại chỗ.</p>
+                  </div>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3 py-2 text-[12px] font-semibold text-[#345F79]">
+                    <input
+                      type="checkbox"
+                      checked={choPhepNgoai}
+                      onChange={(event) => setChoPhepNgoai(event.target.checked)}
+                      className="accent-[#087FC1]"
+                    />
+                    Cho phép mô hình ngoài
+                  </label>
+                </div>
+              </section>
+
+              <button
+                onClick={() => setMoTinhTrang(true)}
+                className="self-start rounded-xl border border-[#CFE4F0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-[#17628B] transition hover:bg-[#EDF7FC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+              >
+                Xem tình trạng hệ thống
+              </button>
+            </div>
+          </section>
+        )}
+        </div>
       </main>
 
       {/* Nút "Tạo": tìm mẫu hoặc gõ yêu cầu để AI soạn văn bản từ ca đang mở */}

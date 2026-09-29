@@ -102,10 +102,6 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
             setInterimText("");
           }
         },
-        onAudioLevel: (volume: number, frequencies: number[]) => {
-          setLiveVolume(volume);
-          setLiveFreqs(frequencies);
-        },
       });
     } else {
       setInterimText("");
@@ -113,6 +109,13 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
       setLiveFreqs([0, 0, 0, 0, 0, 0, 0, 0]);
     }
   }, [isRecording]);
+
+  useEffect(() => {
+    return realAudioService.theoDoiMucAm((volume, frequencies) => {
+      setLiveVolume(volume);
+      setLiveFreqs(frequencies);
+    });
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(transcript);

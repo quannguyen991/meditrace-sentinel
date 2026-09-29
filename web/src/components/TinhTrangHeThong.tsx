@@ -67,7 +67,7 @@ export const TinhTrangHeThong: React.FC<Props> = ({ onClose }) => {
         {ngoai && (
           <div className="mb-3">
             <Dong
-              ten="Mô hình ngoài (ai-box)"
+              ten="Mô hình ngoài (thương mại)"
               gia={ngoai.configured ? (ngoai.reachable ? `kết nối được · ${ngoai.model}` : "không tới được") : "chưa cấu hình khoá"}
               tot={!!(ngoai.configured && ngoai.reachable)}
             />

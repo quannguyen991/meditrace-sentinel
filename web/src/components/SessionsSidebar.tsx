@@ -51,7 +51,7 @@ export const SessionsSidebar: React.FC<SessionsSidebarProps> = ({
     return (
       <div
         id="sessions-sidebar-collapsed"
-        className="w-10 flex-shrink-0 bg-[#F0F7FA] border-r border-[#CCE3F0] flex flex-col items-center py-3 select-none gap-2"
+        className="w-8 sm:w-10 flex-shrink-0 bg-[#F0F7FA] border-r border-[#CCE3F0] flex flex-col items-center py-3 select-none gap-2"
       >
         <button
           onClick={onToggleCollapse}

@@ -240,6 +240,21 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
             </button>
           </form>
 
+          {/* Hướng dẫn tiếng Anh cho người đánh giá ở nước ngoài; giao diện bên trong là tiếng Việt. */}
+          <aside lang="en" className="mt-8 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] p-4 text-[13px] leading-relaxed text-[#0C4A6E]">
+            <p className="font-semibold">For reviewers</p>
+            <p className="mt-1">
+              MediTrace Sentinel turns a Vietnamese doctor–patient conversation into a clinical note draft in which every
+              line links back to the turn it came from. Sign in with the demo account from the submission notes. The
+              interface is in Vietnamese.
+            </p>
+            <ol className="mt-2 list-decimal space-y-0.5 pl-5">
+              <li>On the Home page, click <b>“Xem thử với ca mẫu”</b> (try a sample case). It loads a pre-computed synthetic case instantly.</li>
+              <li>Open <b>“Duyệt từng mệnh đề”</b> (review each statement) to see who each line is about and the source turn.</li>
+              <li>Generating a new draft with the live model takes about 3.5 minutes. All data is synthetic.</li>
+            </ol>
+          </aside>
+
           <p className="mt-8 text-[12.5px] leading-relaxed text-[#64748B]">
             Mật khẩu được băm (scrypt) trước khi lưu; máy chủ không giữ mật khẩu gốc. Phiên đăng nhập hết hạn sau 14
             ngày. Đăng xuất trên máy dùng chung để xoá bản sao ca khám trong trình duyệt.

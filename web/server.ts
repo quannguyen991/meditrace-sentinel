@@ -18,7 +18,7 @@
  * Bản nháp chính và khâu tách mệnh đề KHÔNG bao giờ do mô hình ngoài làm. Các đường phụ —
  * `/api/edit-note`, `/api/clinical-qa`, `/api/questions-external` (phương án 1: đề xuất câu hỏi),
  * `/api/lookup-official` (phương án 2: server tự tìm kcb.vn, nhãn thuốc FDA, PubMed, MedlinePlus; mô hình chỉ tóm tắt),
- * `/api/generate-note-external` — gọi cổng ai-box, nhưng CHỈ khi yêu cầu
+ * `/api/generate-note-external` — gọi cổng mô hình ngoài, nhưng CHỈ khi yêu cầu
  * có `allowExternal: true` (công tắc trên giao diện, mặc định tắt); không có cờ thì trả 403.
  * Xem khối "MÔ HÌNH NGOÀI" bên dưới.
  */
@@ -387,15 +387,15 @@ function docTep(duong: string) {
 function chanNeuChuaChoPhep(req: express.Request) {
   if (req.body?.allowExternal !== true) {
     const e: any = new Error(
-      "Việc này cần mô hình ngoài (ai-box). Bật công tắc “Cho phép gửi ra mô hình ngoài” trước — " +
-        "nội dung ca khám sẽ được gửi ra máy chủ ai-box."
+      "Việc này cần mô hình ngoài (mô hình thương mại). Bật công tắc “Cho phép gửi ra mô hình ngoài” trước — " +
+        "nội dung ca khám sẽ được gửi ra máy chủ của dịch vụ mô hình ngoài."
     );
     e.status = 403;
     e.code = "chua_cho_phep_ngoai";
     throw e;
   }
   if (!NGOAI.key || !NGOAI.base) {
-    const e: any = new Error("Chưa cấu hình cổng ai-box (AIBOX_BASE/AIBOX_BASE_FILE và AIBOX_KEY/AIBOX_KEY_FILE).");
+    const e: any = new Error("Chưa cấu hình cổng mô hình ngoài (AIBOX_BASE/AIBOX_BASE_FILE và AIBOX_KEY/AIBOX_KEY_FILE).");
     e.status = 503;
     throw e;
   }
@@ -429,13 +429,13 @@ async function goiNgoai(heThong: string, nguoiDung: string, maxToken = 1200, the
       }),
     });
   } catch (err: any) {
-    const e: any = new Error(`Không kết nối được cổng ai-box: ${err?.message || err}`);
+    const e: any = new Error(`Không kết nối được cổng mô hình ngoài: ${err?.message || err}`);
     e.status = 502;
     throw e;
   }
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const e: any = new Error(`Cổng ai-box trả mã ${res.status}: ${data?.error?.message || data?.message || ""}`);
+    const e: any = new Error(`Cổng mô hình ngoài trả mã ${res.status}: ${data?.error?.message || data?.message || ""}`);
     e.status = 502;
     throw e;
   }

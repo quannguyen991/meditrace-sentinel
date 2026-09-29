@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { MediTraceLogo } from "./MediTraceLogo";
 import { ThuVienYKhoa } from "./ThuVienYKhoa";
@@ -43,6 +43,8 @@ interface Props {
   onNavigate: (view: "scribe" | "templates") => void;
   onOpenCreate: () => void;
   onSaveToContext: (text: string) => void;
+  initialPrompt?: string;
+  onInitialPromptUsed?: () => void;
 }
 
 type HoiThoai = { id: string; tieuDe: string; caTen: string; tinNhan: ClinicalChatMessage[]; capNhat: number };
@@ -52,12 +54,20 @@ const gio = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "
 
 export const EvidenceView: React.FC<Props> = ({
   caTen, coLoiThoai, allowExternal, onToggleExternal, hoi, onNavigate, onOpenCreate, onSaveToContext,
+  initialPrompt, onInitialPromptUsed,
 }) => {
   const [lichSu, setLichSu] = useKho<HoiThoai>("tra-cuu");
   const [dangMo, setDangMo] = useState<string | null>(null);
   const [man, setMan] = useState<Man>("hoi");
   const [timLS, setTimLS] = useState("");
   const [query, setQuery] = useState("");
+  useEffect(() => {
+    if (!initialPrompt) return;
+    setDangMo(null);
+    setMan("hoi");
+    setQuery(initialPrompt);
+    onInitialPromptUsed?.();
+  }, [initialPrompt, onInitialPromptUsed]);
   // Một ô hỏi (gộp 24/09): mọi câu đi "tra_cuu"; server đọc ca rồi tự quyết định có tra tài liệu không.
   const cheDo = "tra_cuu" as const;
   const [kemNguCanh, setKemNguCanh] = useState(true);
@@ -330,7 +340,7 @@ export const EvidenceView: React.FC<Props> = ({
       <span className="flex items-center gap-1.5">
         {!allowExternal && <Lock size={12} />}
         {allowExternal
-          ? "Mô hình ngoài đang bật: câu hỏi và nội dung ca gửi tới ai-box."
+          ? "Mô hình ngoài đang bật: câu hỏi và nội dung ca gửi tới dịch vụ mô hình ngoài."
           : "Hỏi đáp và tra tài liệu cần mô hình ngoài. Thư viện và máy tính lâm sàng dùng được ngay."}
       </span>
       <label className="flex items-center gap-1.5 font-semibold cursor-pointer">

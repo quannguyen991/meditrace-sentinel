@@ -252,7 +252,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
             </button>
             {!allowExternal && (
               <p className="text-[10.5px] text-[#64748B]">
-                Cần bật “Mô hình ngoài”: nội dung ca khám sẽ được gửi tới máy chủ ngoài (ai-box).
+                Cần bật “Mô hình ngoài”: nội dung ca khám sẽ được gửi tới máy chủ ngoài (dịch vụ mô hình thương mại).
               </p>
             )}
 

@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Search, Sparkles, PenLine, Plus, X, Trash2, Lock, Cpu, Check } from "lucide-react";
 import type { Session } from "../types";
 import type { NoteMeta } from "./VerificationView";
-import { MAU_BAN_NHAP, MAU_CO_SAN, MauVanBan, NhomMau, TEN_NHOM, goiYTheoCa } from "../lib/mauVanBan";
+import { MAU_BAN_NHAP, MAU_CO_SAN, MauVanBan, NhomMau, TEN_NHOM } from "../lib/mauVanBan";
 import { useKho } from "../lib/useKho";
 
 /**
@@ -45,7 +45,6 @@ export const TaoVanBanModal: React.FC<Props> = ({
   }, [isOpen]);
 
   const coNguon = !!(session?.transcript?.trim() || note || session?.tabs.some((t) => t.type === "context" && t.content.trim()));
-  const goiY = useMemo(() => goiYTheoCa(session, note), [session, note]);
 
   const khop = (m: MauVanBan) => {
     const s = q.trim().toLowerCase();
@@ -59,8 +58,7 @@ export const TaoVanBanModal: React.FC<Props> = ({
   const muc: Array<{ nhom: string; mau: MauVanBan; yeuCau?: string }> = [];
   const s = q.trim();
   if (s) muc.push({ nhom: "Tạo bằng AI", mau: { id: "tu-do", ten: s, nhom: "ho_so", chiDan: s }, yeuCau: s });
-  if (khop(MAU_BAN_NHAP)) muc.push({ nhom: "Bản nháp của dự án", mau: MAU_BAN_NHAP });
-  if (!s && loc === "tat_ca") goiY.forEach((m) => muc.push({ nhom: "Gợi ý cho ca này", mau: m }));
+  if (khop(MAU_BAN_NHAP)) muc.push({ nhom: "Bản nháp chính", mau: MAU_BAN_NHAP });
   mauRieng.filter(khop).forEach((m) => muc.push({ nhom: "Mẫu của tôi", mau: m }));
   MAU_CO_SAN.filter(khop).forEach((m) => muc.push({ nhom: "Mẫu", mau: m }));
 
@@ -156,7 +154,7 @@ export const TaoVanBanModal: React.FC<Props> = ({
 
         {!allowExternal && (
           <div className="px-4 sm:px-5 py-2 bg-[#FEF9E7] border-b border-[#F5E6B8] text-[11.5px] text-[#7A4B00] flex flex-wrap items-center justify-between gap-2">
-            <span>Văn bản soạn bằng AI cần bật “Mô hình ngoài”: nội dung ca khám sẽ gửi tới máy chủ ai-box.</span>
+            <span>Văn bản soạn bằng AI cần bật “Mô hình ngoài”: nội dung ca khám sẽ gửi tới máy chủ của dịch vụ mô hình ngoài.</span>
             <button onClick={onEnableExternal} className="px-2.5 py-1 rounded-lg bg-white border border-[#F5E6B8] font-semibold">
               Bật mô hình ngoài
             </button>
@@ -189,7 +187,7 @@ export const TaoVanBanModal: React.FC<Props> = ({
                   title={khoa ? "Cần bật “Mô hình ngoài”" : x.mau.chiDan || "Qwen3-4B tạo tại chỗ"}
                 >
                   <span className="w-7 h-7 rounded-lg bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center flex-shrink-0">
-                    {x.mau.taiCho ? <Cpu size={14} /> : x.yeuCau || x.nhom === "Gợi ý cho ca này" ? <Sparkles size={14} /> : <PenLine size={14} />}
+                    {x.mau.taiCho ? <Cpu size={14} /> : x.yeuCau ? <Sparkles size={14} /> : <PenLine size={14} />}
                   </span>
                   <span className="flex-1 min-w-0 text-[13.5px] text-[#0F172A] truncate">
                     {x.yeuCau ? <>Tạo: <strong>{x.yeuCau}</strong></> : x.mau.ten}

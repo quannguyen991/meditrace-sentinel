@@ -62,17 +62,28 @@ CONG_CU_GHI = {"Write", "Edit", "NotebookEdit"}
 THU_MUC_MA = ("src/", "src\\", "tests/", "tests\\", "tools/", "tools\\")
 
 
+# Dong chu thich anh ma phan mem chen vao ban ghi ("[Image: source: ...]"): khong phai loi cua nguoi dung.
+_CHU_THICH_ANH = re.compile(r"\[Image:[^\n]*\]")
+
+
 def _van_ban(noi_dung):
-    """Loi nhac co the la chuoi, hoac danh sach khoi. Lay phan chu."""
+    """Loi nhac co the la chuoi, hoac danh sach khoi. Lay phan chu.
+
+    Bo dong chu thich anh. Ban ghi chi co anh khong co chu thi bo qua: do khong phai loi nhac, va nhieu
+    ban ghi nhu vay la anh do cong cu doc tep tra ve. Neu de lai thi cong viec bi gan nham cho no, con
+    loi nhac that cua nguoi dung (nam trong ban ghi truoc do) bi mat khoi nhat ky.
+    """
     if isinstance(noi_dung, str):
-        return noi_dung
-    if isinstance(noi_dung, list):
-        phan = []
-        for kh in noi_dung:
-            if isinstance(kh, dict) and kh.get("type") == "text":
-                phan.append(kh.get("text", ""))
-        return "\n".join(phan)
-    return ""
+        van = noi_dung
+    elif isinstance(noi_dung, list):
+        van = "\n".join(kh.get("text", "") for kh in noi_dung
+                        if isinstance(kh, dict) and kh.get("type") == "text")
+    else:
+        return ""
+    if "[Image:" not in van:
+        return van
+    sach = "\n".join(d for d in (_CHU_THICH_ANH.sub("", l).strip() for l in van.split("\n")) if d)
+    return sach   # chi co anh: khong co loi nao de ghi (thuong la anh do cong cu doc tep tra ve)
 
 
 def _la_ma(duong_dan):

@@ -8,7 +8,7 @@ export interface KetQuaDuyet {
   banSua: Record<number, string>;
 }
 
-export type ViewMode = "scribe" | "evidence" | "tasks" | "patients" | "templates" | "verification";
+export type ViewMode = "home" | "scribe" | "evidence" | "tasks" | "patients" | "templates" | "verification" | "library" | "settings";
 
 export interface Session {
   id: string;

@@ -64,36 +64,12 @@ export const MAU_CO_SAN: MauVanBan[] = [
       "(thuốc, dị ứng, bệnh nền), những gì bác sĩ đã kết luận và dặn dò.",
   },
   {
-    id: "tom-tat-ra-vien",
-    ten: "Tóm tắt ra viện",
-    nhom: "ho_so",
-    chiDan:
-      "Viết giấy tóm tắt ra viện: lý do vào viện, quá trình bệnh, kết quả chính, tình trạng lúc ra viện, thuốc " +
-      "khi ra viện, hẹn tái khám. Mục nào hội thoại không có thì ghi [cần bổ sung].",
-  },
-  {
-    id: "hoi-chan",
-    ten: "Biên bản hội chẩn",
-    nhom: "ho_so",
-    chiDan:
-      "Viết biên bản hội chẩn: thành phần [cần bổ sung], tóm tắt bệnh án, vấn đề cần hội chẩn, ý kiến các bác " +
-      "sĩ (CHỈ những ý kiến có trong hội thoại), kết luận.",
-  },
-  {
     id: "huong-dan-ra-ve",
     ten: "Hướng dẫn ra về cho người bệnh",
     nhom: "nguoi_benh",
     chiDan:
       "Viết hướng dẫn chăm sóc tại nhà cho người bệnh, lời lẽ dễ hiểu, xưng hô lịch sự: cách dùng thuốc bác sĩ " +
       "đã dặn, những việc nên và không nên làm mà bác sĩ đã nói, khi nào cần quay lại khám, lịch tái khám.",
-  },
-  {
-    id: "thu-giai-thich",
-    ten: "Thư giải thích cho người bệnh",
-    nhom: "nguoi_benh",
-    chiDan:
-      "Viết thư ngắn giải thích cho người bệnh về lần khám này bằng lời dễ hiểu, không dùng thuật ngữ khó: " +
-      "bác sĩ đã tìm thấy gì, bác sĩ đã nói gì về tình trạng, cần làm gì tiếp.",
   },
   {
     id: "giay-nghi",
@@ -122,16 +98,4 @@ export function lyDoKham(ca?: Session, note?: NoteMeta | null) {
   const phu = (ca?.patientSubtitle || "").trim();
   if (phu && !/^Dữ liệu tổng hợp|^Ca khám bệnh mới/i.test(phu)) return phu;
   return "";
-}
-
-/** Gợi ý theo ca: giống các mẫu trên nhưng gắn lý do khám của CA NÀY vào tên, cho dễ chọn. */
-export function goiYTheoCa(ca?: Session, note?: NoteMeta | null): MauVanBan[] {
-  const ly = lyDoKham(ca, note);
-  const kem = ly ? ` — ${ly}` : "";
-  const lay = (id: string) => MAU_CO_SAN.find((m) => m.id === id)!;
-  return [
-    { ...lay("tom-tat-kham"), id: "goi-y-tom-tat", ten: `Tóm tắt cuộc khám để lưu hồ sơ${kem}` },
-    { ...lay("huong-dan-ra-ve"), id: "goi-y-ra-ve", ten: `Hướng dẫn ra về cho người bệnh${kem}` },
-    { ...lay("giay-nghi"), id: "goi-y-giay-nghi", ten: "Giấy xác nhận đi khám / nghỉ học, nghỉ làm" },
-  ];
 }

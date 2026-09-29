@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Session } from "../types";
 import {
   User,
@@ -22,6 +22,8 @@ import {
   Share2,
   Printer,
 } from "lucide-react";
+import { ThanhAmThanh } from "./ThanhAmThanh";
+import { RealAudioService } from "../services/realAudioService";
 import { AudioDeviceDropdown } from "./AudioDeviceDropdown";
 import { realAudioService } from "../services/realAudioService";
 import { dongTuDoan, moTaTach, soNguoiNoiLonNhat } from "../lib/nguoiNoi";
@@ -61,7 +63,11 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   // Real Audio & Recording state
   const [duration, setDuration] = useState(session.durationSeconds);
   const [isRecording, setIsRecording] = useState(session.isRecording);
-  const [audioFreqs, setAudioFreqs] = useState<number[]>([0, 0, 0, 0, 0]);
+  const khong = () => new Array(RealAudioService.SO_VACH).fill(0);
+  const [audioFreqs, setAudioFreqs] = useState<number[]>(khong);
+  const [amLuong, setAmLuong] = useState(0);
+  const [imLang, setImLang] = useState(false);
+  const lanCuoiCoTieng = useRef(Date.now());
   const [micError, setMicError] = useState<string | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
@@ -86,6 +92,27 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
     return () => clearInterval(timer);
   }, [isRecording]);
 
+  // Đã ghi mà 4 giây liền không có tiếng: báo để người dùng biết micrô có thể không thu được.
+  useEffect(() => {
+    if (!isRecording) {
+      setImLang(false);
+      setAmLuong(0);
+      return;
+    }
+    lanCuoiCoTieng.current = Date.now();
+    const id = setInterval(() => setImLang(Date.now() - lanCuoiCoTieng.current > 4000), 500);
+    return () => clearInterval(id);
+  }, [isRecording]);
+
+  // Theo dõi mức âm thanh của micrô để vẽ thanh âm thanh; đăng ký riêng nên không bị thành phần khác ghi đè.
+  useEffect(() => {
+    return realAudioService.theoDoiMucAm((vol, freqs) => {
+      setAudioFreqs(freqs);
+      setAmLuong(vol);
+      if (vol > 6) lanCuoiCoTieng.current = Date.now();
+    });
+  }, []);
+
   // Clean up when unmounting
   useEffect(() => {
     return () => {
@@ -106,9 +133,6 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             });
           }
         },
-        onAudioLevel: (_vol: number, freqs: number[]) => {
-          setAudioFreqs(freqs.slice(0, 5));
-        },
         onError: (err: string) => {
           setMicError(err);
           setIsRecording(false);
@@ -124,6 +148,9 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
       if (started) {
         setIsRecording(true);
         onUpdateSession({ isRecording: true });
+      } else {
+        // Không mở được micrô: bỏ cờ "đang ghi" mà nút bắt đầu ở giữa màn hình vừa bật.
+        onUpdateSession({ isRecording: false });
       }
     } else {
       // Dừng ghi: MediaRecorder trả tệp qua onAudioReady, tệp đó được gửi sang PhoWhisper.
@@ -131,15 +158,27 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
       realAudioService.stop();
       setIsRecording(false);
       onUpdateSession({ isRecording: false });
-      setAudioFreqs([0, 0, 0, 0, 0]);
+      setAudioFreqs(khong());
     }
   };
+
+  // Nút "Bắt đầu ghi âm" ở giữa màn hình (TranscriptView) chỉ bật cờ session.isRecording.
+  // Cờ đó phải thật sự mở micrô, không chỉ đổi giao diện: khi cờ bật mà micrô chưa chạy thì mở.
+  const dangKhoiDongMic = React.useRef(false);
+  useEffect(() => {
+    if (session.isRecording && !isRecording && !dangKhoiDongMic.current) {
+      dangKhoiDongMic.current = true;
+      toggleRecording().finally(() => {
+        dangKhoiDongMic.current = false;
+      });
+    }
+  }, [session.isRecording]);
 
   const handleFinishAndAnalyze = () => {
     realAudioService.stop();
     setIsRecording(false);
     onUpdateSession({ isRecording: false });
-    setAudioFreqs([0, 0, 0, 0, 0]);
+    setAudioFreqs(khong());
   };
 
   /**
@@ -427,7 +466,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             <div className="flex items-center gap-0.5 h-3">
               {[0, 1, 2, 3, 4].map((idx) => {
                 const heightVal = isRecording
-                  ? Math.max(3, Math.min(12, Math.round((audioFreqs[idx] || 0) / 8)))
+                  ? Math.max(3, Math.min(12, Math.round((audioFreqs[idx * 6] || 0) / 8)))
                   : 4;
                 return (
                   <span
@@ -435,7 +474,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
                     style={{ height: `${heightVal}px` }}
                     className={`w-0.5 sm:w-1 rounded-2xs transition-all duration-75 ${
                       isRecording
-                        ? audioFreqs[idx] > 30
+                        ? audioFreqs[idx * 6] > 30
                           ? "bg-emerald-500"
                           : "bg-emerald-400"
                         : "bg-gray-300"
@@ -503,6 +542,10 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
         </button>
       </div>
     </header>
+
+    {isRecording && (
+      <ThanhAmThanh cacVach={audioFreqs} amLuong={amLuong} imLang={imLang} thoiGian={formatTimer(duration)} />
+    )}
 
     {dangChep && (
       <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-4 py-2 text-xs text-[#0369A1] z-20">
