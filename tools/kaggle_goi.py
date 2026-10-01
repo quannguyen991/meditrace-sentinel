@@ -64,7 +64,7 @@ def main() -> None:
     if not nguon_adapter.is_dir():
         raise SystemExit(
             f"khong thay {nguon_adapter} — keo ve tu HoaiDuc truoc:\n"
-            "  scp -r nguoidung@100.64.0.7:'D:/meditrace-sentinel/models/"
+            "  scp -r nguoidung@100.64.0.7:'D:/meditrace-core/models/"
             "nen-qwen3-4b-trich/best_checkpoint' models/nen-qwen3-4b-trich/")
     shutil.copytree(nguon_adapter, RA / "models" / "nen-qwen3-4b-trich" / "best_checkpoint")
 

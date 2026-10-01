@@ -16,7 +16,7 @@
 # mot lenh goi script truoc khi day xuong duong ong, nen log chi xuat hien khi
 # moi thu da xong - dung luc khong con can no nua. Chuyen huong `*>` ghi theo
 # dong.
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $log = "$goc\logs\bo5000-$(Get-Date -Format 'MMdd-HHmm').log"
 New-Item -ItemType Directory -Force "$goc\logs" | Out-Null
 & "$goc\tools\chay-bo-5000.ps1" *> $log

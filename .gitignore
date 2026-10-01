@@ -13,7 +13,6 @@ package-lock.json
 tham_khao/
 data/**/*.jsonl
 kaggle-ra/
-khoa-giai-ma.json
 *.khac-bo
 
 # 22/09/2026: du lieu doi chung va thu nghiem, cung quy uoc voi data/*.jsonl

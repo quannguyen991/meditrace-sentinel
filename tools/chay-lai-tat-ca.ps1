@@ -15,7 +15,7 @@
 # chay tiep tu tep dem.
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 Set-Location $goc
 

@@ -22,7 +22,7 @@ CACH LOC — theo VIEC DA LAM, khong theo TU KHOA:
   tep da bi ghi thi khong phu thuoc cach dien dat.
 
 RIENG TU: thu muc phien chua ban ghi cua MOI du an tren may nay, khong chi
-du an nay. Bo trich CHI doc phien co lam viec trong `meditrace-sentinel`, va chi
+du an nay. Bo trich CHI doc phien co lam viec trong `meditrace-core`, va chi
 lay loi nhac cua nguoi dung — khong lay noi dung tep, khong lay dau ra lenh.
 
 BO SUNG 17/09/2026 — hai lo hong cua ban 10/09:
@@ -53,7 +53,16 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 THU_MUC_PHIEN = Path.home() / ".claude" / "projects" / "D--Claude"
-DAU_HIEU_DU_AN = "meditrace-sentinel"
+DAU_HIEU_DU_AN = "meditrace-core"      # kho Python
+DAU_HIEU_WEB = "meditrace-sentinel"  # kho giao diện web (thư mục con web/ trong bản công khai)
+# Thu muc ma nguon cua kho web (khong tinh docs, dist, node_modules).
+THU_MUC_MA_WEB = ("src/", "may-chu/", "db/", "server.ts")
+
+
+def _thuoc_du_an(van_ban):
+    """Chuoi (duong dan hoac lenh) co nhac toi mot trong hai kho cua du an khong."""
+    return DAU_HIEU_DU_AN in van_ban or DAU_HIEU_WEB in van_ban
+
 
 # Cong cu co ghi ra tep. Chi nhung cai nay moi tinh la "da sinh ma".
 CONG_CU_GHI = {"Write", "Edit", "NotebookEdit"}
@@ -89,7 +98,7 @@ def _van_ban(noi_dung):
 def _la_ma(duong_dan):
     """Duong dan co phai ma nguon CUA DE TAI NAY khong.
 
-    Phai kiem CA HAI: nam trong kho `meditrace-sentinel`, VA nam trong thu muc ma.
+    Phai kiem CA HAI: nam trong kho `meditrace-core`, VA nam trong thu muc ma.
 
     Ban dau chi kiem ve thu hai, nen mot lenh ghi vao
     `D:/Claude/ielts-writing-task1/src/build.py` cung khop `src/` va lot vao
@@ -98,6 +107,9 @@ def _la_ma(duong_dan):
     VeriSocrates, ReadUp, va mot du an lam logo.
     """
     d = str(duong_dan or "").replace("\\", "/")
+    if DAU_HIEU_WEB in d:
+        goc = d.split(DAU_HIEU_WEB + "/")[-1]
+        return any(goc.startswith(x) for x in THU_MUC_MA_WEB)
     if DAU_HIEU_DU_AN not in d:
         return False
     return any(x.replace("\\", "/") in d for x in THU_MUC_MA)
@@ -130,6 +142,8 @@ MAU_CHE = (
     (re.compile(r"(?<![\d.])\d{1,3}(?:\.\d{1,3}){3}(?![\d.])"), "[đã che: địa chỉ IP]"),
     (re.compile(r"(?<!\d)(?:\+84|0)\d{9,10}(?!\d)"), "[đã che: số điện thoại]"),
     (re.compile(r"\b(?:sk|ghp|gho|hf|xoxb|xoxp)[-_][A-Za-z0-9_-]{16,}"), "[đã che: khoá]"),
+    (re.compile(r"(?i)\b[\w.-]*\.trycloudflare\.com\b"), "[đã che: địa chỉ tạm]"),
+    (re.compile(r"(?i)\bkhoa-(?:phieu|giai-ma)\.json\b"), "[đã che: tệp khoá chấm mù]"),
 )
 
 # Tep nguoi dung dinh kem: giu TEN tep (la thong tin nghien cuu), bo duong dan
@@ -141,12 +155,26 @@ MAU_TEP_KEM = re.compile(
 # bang dau luoc. So khop theo TU (khong khop giua tu): "bds" khong an "bdsx".
 TU_NGOAI_DE_TAI = (
     "bđs", "bds", "bất động sản", "ollama", "readup", "facebook", "victor",
-    "verisocrates", "ielts", "laptop", "lap asus", "ổ d", "sdt", "số điện thoại",
+    "verisocrates", "ielts", "nguyễn nam", "laptop", "lap asus", "ổ d", "sdt", "số điện thoại",
     "đăng nhập", "mật khẩu", "password", "tài khoản", "tk kaggle",
 )
 _MAU_NGOAI = re.compile(
     r"(?<!\w)(?:" + "|".join(re.escape(t) for t in TU_NGOAI_DE_TAI) + r")(?!\w)")
 DAU_LUOC = "[đã lược: nội dung ngoài dự án hoặc riêng tư]"
+
+
+# Cum tu rieng can che (ten tai khoan, ten nguoi...) nam trong TEP RIENG, khong nam trong ma nguon:
+# ma nguon duoc dua len cho nguoi ngoai, nen khong duoc liet ke chinh nhung ten can giau.
+# Moi dong mot cum; khop khong phan biet hoa thuong, theo tu.
+TEP_CHE_THEM = Path("D:/Claude/.secrets/che-them.txt")
+
+
+def _cum_che_them():
+    try:
+        return [d.strip() for d in TEP_CHE_THEM.read_text(encoding="utf-8").splitlines()
+                if d.strip() and not d.startswith("#")]
+    except OSError:
+        return []
 
 
 def che_nhay_cam(van):
@@ -157,6 +185,9 @@ def che_nhay_cam(van):
     so += n
     for mau, thay in MAU_CHE:
         van, n = mau.subn(thay, van)
+        so += n
+    for cum in _cum_che_them():
+        van, n = re.subn(r"(?i)(?<!\w)" + re.escape(cum) + r"(?!\w)", "[đã che: tên riêng]", van)
         so += n
     # Cat theo xuong dong va dau phay/cham: van noi cua nguoi dung it khi co
     # cau hoan chinh, dau phay thuong la ranh gioi y.
@@ -234,15 +265,17 @@ def doc_phien(tep):
                         continue
                     # Moi lenh (ke ca shell) cham toi kho du an: loi nhac nay
                     # du tu cach nhan commit gan theo thoi gian.
-                    if DAU_HIEU_DU_AN in json.dumps(kh.get("input", {}),
-                                                    ensure_ascii=False):
+                    if _thuoc_du_an(json.dumps(kh.get("input", {}),
+                                               ensure_ascii=False)):
                         hien["dung_de_tai"] = True
                     if kh.get("name") not in CONG_CU_GHI:
                         continue
                     dd = kh.get("input", {}).get("file_path", "")
                     if _la_ma(dd):
+                        dd = str(dd).replace("\\", "/")
                         hien["tep_da_ghi"].append(
-                            str(dd).replace("\\", "/").split("meditrace-sentinel/")[-1])
+                            "web/" + dd.split(DAU_HIEU_WEB + "/")[-1]
+                            if DAU_HIEU_WEB in dd else dd.split(DAU_HIEU_DU_AN + "/")[-1])
     return ra
 
 
@@ -259,14 +292,15 @@ def _luc(ts):
         return None
 
 
-def commit_ma():
-    """-> [{ma, luc, tieu_de, tep}] cho moi commit cham thu muc ma nguon."""
+KHO_WEB = Path("D:/meditrace-sentinel")
+
+
+def _commit_kho(repo, thu_muc, tien_to=""):
     try:
-        out = subprocess.run(
-            ["git", "log", "--format=@@%h|%aI|%s", "--name-only", "--",
-             "src", "tests", "tools"],
-            capture_output=True, text=True, encoding="utf-8",
-            errors="replace").stdout
+        cmd = ["git"] + (["-C", str(repo)] if repo else []) + [
+            "log", "--format=@@%h|%aI|%s", "--name-only", "--", *thu_muc]
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                             errors="replace").stdout
     except OSError:
         return []
     ra = []
@@ -276,8 +310,19 @@ def commit_ma():
             ma, luc, tieu_de = dong[2:].split("|", 2)
             ra.append({"ma": ma, "luc": _luc(luc), "tieu_de": tieu_de, "tep": []})
         elif dong and ra:
-            ra[-1]["tep"].append(dong)
+            ra[-1]["tep"].append(tien_to + dong)
     return [c for c in ra if c["luc"] is not None]
+
+
+def commit_ma():
+    """-> [{ma, luc, tieu_de, tep}] cho moi commit cham thu muc ma nguon cua CA HAI kho.
+
+    Tep cua kho web co tien to `web/`. Kho web khong co tren may thi bo qua.
+    """
+    ra = _commit_kho(None, ("src", "tests", "tools"))
+    if KHO_WEB.exists():
+        ra += _commit_kho(KHO_WEB, ("src", "may-chu", "db", "server.ts"), "web/")
+    return ra
 
 
 def gan_commit(tat_ca, commits):
@@ -354,7 +399,8 @@ def dung_bang(muc):
          "## Phạm vi của tài liệu này",
          "",
          "Tài liệu ghi lại các lời nhắc đã dẫn tới **thay đổi trong mã nguồn**",
-         "(`src/`, `tests/`, `tools/`), trích tự động từ bản ghi phiên làm việc.",
+         "(`src/`, `tests/`, `tools/` của phần xử lý; `src/`, `may-chu/`, `db/`, `server.ts`",
+         "của giao diện web, ghi là `web/…`), trích tự động từ bản ghi phiên làm việc.",
          "",
          "**Không** bao gồm: lời nhắc chỉ dẫn tới tài liệu trong `docs/`, câu hỏi,",
          "và trao đổi. Phụ lục hướng dẫn sử dụng AI yêu cầu nhật ký lời nhắc ở",
@@ -372,7 +418,8 @@ def dung_bang(muc):
          "   gắn theo cách này ghi rõ *“qua commit”*.",
          "",
          "Bản ghi phiên trên máy chứa cả các dự án khác; bộ trích chỉ lấy lời nhắc",
-         "của người dùng, và chỉ lấy lời nhắc có phần việc chạm tới `meditrace-sentinel`.",
+         "của người dùng, và chỉ lấy lời nhắc có phần việc chạm tới kho phần xử lý",
+         "(`meditrace-core`) hoặc kho giao diện web (`meditrace-sentinel`).",
          "",
          "Giờ ghi theo **giờ Việt Nam (UTC+7)**.",
          "",

@@ -26,7 +26,7 @@ GHI RA THU MUC RIENG. Ten tep `ra_<nhanh>_<tap>.jsonl` khong kem ten mo hinh, ne
 phai chay voi MEDITRACE_DATA tro vao thu muc rieng, neu khong se de len ket qua cua mo
 hinh da huan luyen.
 
-    MEDITRACE_DATA=D:/Claude/meditrace-sentinel/data-gpt \
+    MEDITRACE_DATA=D:/Claude/meditrace-core/data-gpt \
         python tools/doi-chung-thuong-mai.py --model gpt-6-astra --tap <bo>
 """
 import argparse

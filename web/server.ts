@@ -106,7 +106,7 @@ async function goiDichVu(duong: string, tuyChon?: RequestInit) {
   } catch (err: any) {
     const e: any = new Error(
       `Không kết nối được dịch vụ MediTrace ở ${API}. Chạy: python -m src.dich_vu --cong 8765 ` +
-        `trong thư mục D:\\Claude\\meditrace-sentinel (${err?.message || err}).`
+        `trong thư mục D:\\Claude\\meditrace-core (${err?.message || err}).`
     );
     e.status = 503;
     throw e;
@@ -152,7 +152,7 @@ function menhDeChoGiaoDien(r: any) {
         drug: thuoc ? Object.entries(thuoc).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(", ") : null,
         evidenceTurns: p.bang_chung || [],
         quotes: p.trich_dan || [],
-        // Lop canh bao (meditrace-sentinel/src/canh_bao): canh bao CHINH, toi da 2 canh bao
+        // Lop canh bao (meditrace-core/src/canh_bao): canh bao CHINH, toi da 2 canh bao
         // khac nhom du nang, ma phu da gop, va trang thai theo chinh sach D.
         warning: canhBaoGiaoDien(cb?.theo_phat_bieu?.[String(p.id)]?.chinh),
         otherWarnings: (cb?.theo_phat_bieu?.[String(p.id)]?.khac || []).map(canhBaoGiaoDien),

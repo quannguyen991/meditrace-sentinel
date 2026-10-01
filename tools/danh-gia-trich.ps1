@@ -15,7 +15,7 @@
 # 2 da du de ket luan huong.
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 $adapter = "models/nen-qwen3-4b-trich/best_checkpoint"
 Set-Location $goc

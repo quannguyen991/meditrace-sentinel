@@ -10,7 +10,7 @@
 # Lo~i nay co tu ban the he 5 va chua bao gio lo ra, vi chuoi the he 5 chua tung
 # chay. Bon bo thach thuc da xong roi nen chi can chay lai hai buoc nay.
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 Set-Location $goc
 

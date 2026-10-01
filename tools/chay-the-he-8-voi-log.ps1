@@ -1,7 +1,7 @@
 # Boc `chay-the-he-8.ps1` de LUU LOG, va tra GPU cho BDS khi xong.
 #
 # CHI DUNG ASCII trong tep nay - PowerShell 5.1 doc UTF-8 khong BOM theo ANSI.
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $log = "$goc\logs\the-he-8-$(Get-Date -Format 'MMdd-HHmm').log"
 New-Item -ItemType Directory -Force "$goc\logs" | Out-Null
 & "$goc\tools\chay-the-he-8.ps1" *> $log

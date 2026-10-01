@@ -26,19 +26,19 @@ def _phien(tmp_path, ban_ghi, ten="phien.jsonl"):
     return p
 
 
-def _user(van, ts="2026-09-05T10:00:00Z", cwd=r"D:\Claude\meditrace-sentinel"):
+def _user(van, ts="2026-09-05T10:00:00Z", cwd=r"D:\Claude\meditrace-core"):
     return {"type": "user", "timestamp": ts, "cwd": cwd,
             "message": {"role": "user", "content": van}}
 
 
-def _ket_qua_cong_cu(cwd=r"D:\Claude\meditrace-sentinel"):
+def _ket_qua_cong_cu(cwd=r"D:\Claude\meditrace-core"):
     """Ban ghi ket qua cong cu — cung mang type "user"."""
     return {"type": "user", "cwd": cwd, "message": {
         "role": "user",
         "content": [{"type": "tool_result", "content": "xong"}]}}
 
 
-def _ghi(duong_dan, cwd=r"D:\Claude\meditrace-sentinel"):
+def _ghi(duong_dan, cwd=r"D:\Claude\meditrace-core"):
     return {"type": "assistant", "cwd": cwd, "message": {
         "role": "assistant",
         "content": [{"type": "tool_use", "name": "Write",
@@ -51,11 +51,11 @@ def test_ket_qua_cong_cu_KHONG_cat_lien_ket(tmp_path):
     """Loi that: sau lenh dau tien, moi tep ghi sau do deu bi mat."""
     p = _phien(tmp_path, [
         _user("viết bộ sinh dữ liệu"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
         _ket_qua_cong_cu(),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\b.py"),      # sau ket qua cong cu
+        _ghi(r"D:\Claude\meditrace-core\src\b.py"),      # sau ket qua cong cu
         _ket_qua_cong_cu(),
-        _ghi(r"D:\Claude\meditrace-sentinel\tests\test_a.py"),
+        _ghi(r"D:\Claude\meditrace-core\tests\test_a.py"),
     ])
     muc = nk.doc_phien(p)
     assert len(muc) == 1
@@ -67,9 +67,9 @@ def test_ket_qua_cong_cu_KHONG_cat_lien_ket(tmp_path):
 def test_chi_lay_loi_nhac_dan_toi_MA_NGUON(tmp_path):
     p = _phien(tmp_path, [
         _user("viết mã"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
         _user("xuất pdf báo cáo mẫu cho tôi học"),
-        _ghi(r"D:\Claude\meditrace-sentinel\docs\bao-cao-mau.md"),
+        _ghi(r"D:\Claude\meditrace-core\docs\bao-cao-mau.md"),
     ])
     muc = [m for m in nk.doc_phien(p) if m["tep_da_ghi"]]
     assert len(muc) == 1
@@ -81,7 +81,7 @@ def test_loi_nhac_chi_sinh_tai_lieu_thi_KHONG_vao(tmp_path):
     loi nhac, vi de bi hieu nham la AI viet bao cao."""
     p = _phien(tmp_path, [
         _user("làm cho tôi bản báo cáo mẫu để học"),
-        _ghi(r"D:\Claude\meditrace-sentinel\docs\mau.md"),
+        _ghi(r"D:\Claude\meditrace-core\docs\mau.md"),
     ])
     assert [m for m in nk.doc_phien(p) if m["tep_da_ghi"]] == []
 
@@ -105,7 +105,7 @@ def test_bo_qua_viec_cua_du_an_KHAC(tmp_path):
 def test_bo_qua_viec_cua_tac_tu_con(tmp_path):
     p = _phien(tmp_path, [
         dict(_user("việc của tác tử con"), isSidechain=True),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     assert [m for m in nk.doc_phien(p) if m["tep_da_ghi"]] == []
 
@@ -113,7 +113,7 @@ def test_bo_qua_viec_cua_tac_tu_con(tmp_path):
 def test_bo_qua_nhac_he_thong(tmp_path):
     p = _phien(tmp_path, [
         _user("<system-reminder>gì đó</system-reminder>"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     assert [m for m in nk.doc_phien(p) if m["tep_da_ghi"]] == []
 
@@ -143,9 +143,9 @@ def test_dong_thoi_gian_khong_lam_mat_muc(tmp_path):
     """Hai loi nhac cung mot phut phai giu ca hai."""
     p = _phien(tmp_path, [
         _user("việc một", ts="2026-09-05T10:00:00Z"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
         _user("việc hai", ts="2026-09-05T10:00:00Z"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\b.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\b.py"),
     ])
     muc = [m for m in nk.doc_phien(p) if m["tep_da_ghi"]]
     assert len(muc) == 2
@@ -170,7 +170,7 @@ def test_bo_ghi_vao_du_an_KHAC_du_duong_dan_co_src(tmp_path):
 def test_giu_lai_khi_duong_dan_THUOC_de_tai(tmp_path):
     p = _phien(tmp_path, [
         _user("viết bộ sinh"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     assert len([m for m in nk.doc_phien(p) if m["tep_da_ghi"]]) == 1
 
@@ -182,7 +182,7 @@ def test_mot_phien_lam_HAI_du_an_chi_lay_phan_dung(tmp_path):
         _user("xong front end verisocrates nhé"),
         _ghi(r"D:\verisocrates\src\app.js"),
         _user("viết bộ sinh dữ liệu"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     muc = [m for m in nk.doc_phien(p) if m["tep_da_ghi"]]
     assert len(muc) == 1
@@ -200,7 +200,7 @@ def test_bo_van_ban_khong_phai_loi_nhac(tmp_path, van):
     """Nhung thu nay nam o ban ghi "user" nhung khong phai nguoi dung go."""
     p = _phien(tmp_path, [
         _user(van),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     assert [m for m in nk.doc_phien(p) if m["tep_da_ghi"]] == []
 
@@ -209,7 +209,7 @@ def test_loi_nhac_that_van_duoc_giu(tmp_path):
     """Doi chung: bo loc khong duoc bat nham loi nhac ngan cua nguoi dung."""
     p = _phien(tmp_path, [
         _user("ok làm tiếp đi"),
-        _ghi(r"D:\Claude\meditrace-sentinel\src\a.py"),
+        _ghi(r"D:\Claude\meditrace-core\src\a.py"),
     ])
     assert len([m for m in nk.doc_phien(p) if m["tep_da_ghi"]]) == 1
 
@@ -313,7 +313,7 @@ def test_lenh_shell_cham_de_tai_danh_dau_dung_de_tai(tmp_path):
         _user("sửa bộ chấm"),
         {"type": "assistant", "message": {"role": "assistant", "content": [
             {"type": "tool_use", "name": "Bash",
-             "input": {"command": "cd D:/Claude/meditrace-sentinel && python - <<EOF"}}]}},
+             "input": {"command": "cd D:/Claude/meditrace-core && python - <<EOF"}}]}},
     ])
     muc = nk.doc_phien(p)
     assert muc[0]["dung_de_tai"] is True and muc[0]["tep_da_ghi"] == []
@@ -331,3 +331,36 @@ def test_bang_da_che_noi_dung_nhay_cam():
                        "loi_nhac": "ssh nguoidung@100.64.0.7 rồi sửa src",
                        "tep_da_ghi": ["src/a.py"]}])
     assert "100.64" not in t and "Số chỗ đã che:** 1" in t
+
+
+# ------------------------------------------------------ kho giao diện web (29/09/2026)
+
+def test_kho_web_tinh_la_ma_nguon_chi_o_thu_muc_ma():
+    assert nk._la_ma("D:/meditrace-sentinel/src/App.tsx")
+    assert nk._la_ma("D:/meditrace-sentinel/may-chu/tai-khoan.ts".replace("/", chr(92)))  # dấu gạch ngược kiểu Windows
+    assert nk._la_ma("D:/meditrace-sentinel/server.ts")
+    assert not nk._la_ma("D:/meditrace-sentinel/dist/server.cjs")
+    assert not nk._la_ma("D:/meditrace-sentinel/README.md")
+    assert not nk._la_ma("D:/Claude/ielts-writing-task1/src/build.py")
+
+
+def test_che_cum_rieng_tu_tep_ngoai_ma_nguon(tmp_path, monkeypatch):
+    """Tên tài khoản, tên người nằm trong tệp riêng (không nằm trong mã đưa công khai)."""
+    tep = tmp_path / "che-them.txt"
+    tep.write_text("# ghi chú" + chr(10) + "TaiKhoanThu" + chr(10), encoding="utf-8")
+    monkeypatch.setattr(nk, "TEP_CHE_THEM", tep)
+    van, so = nk.che_nhay_cam("vào TaiKhoanThu rồi thử; taikhoanthuX thì không che")
+    assert "TaiKhoanThu" not in van and "taikhoanthuX" in van and so >= 1
+    monkeypatch.setattr(nk, "TEP_CHE_THEM", tmp_path / "khong-co.txt")
+    assert nk.che_nhay_cam("TaiKhoanThu")[0] == "TaiKhoanThu"        # không có tệp: không che thêm, không lỗi
+
+
+def test_che_dia_chi_tam_va_tep_khoa_cham_mu():
+    van, so = nk.che_nhay_cam("link https://abc-def-ghi.trycloudflare.com, mở " + "khoa" + "-phieu.json")
+    assert "trycloudflare" not in van and ("khoa" + "-phieu") not in van and so >= 2
+
+
+def test_ban_ghi_chi_co_anh_khong_thanh_loi_nhac():
+    assert nk._van_ban([{"type": "text", "text": "[Image: source: C:\a\b.png]"}]) == ""
+    con_chu = nk._van_ban([{"type": "text", "text": "[Image: source: x.png]\nlàm giúp tôi"}])
+    assert con_chu == "làm giúp tôi"

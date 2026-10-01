@@ -39,28 +39,42 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-THU_MUC_MA = ("src", "tests", "tools")
+THU_MUC_MA = ("src", "tests", "tools", "web")
+KHO_WEB = Path("D:/meditrace-sentinel")
+THU_MUC_MA_WEB = ("src", "may-chu", "db", "server.ts")   # trong kho web; ghi là web/...
 
 
-def _git(*doi):
-    return subprocess.run(["git", *doi], capture_output=True, text=True,
+def _git(*doi, repo=None):
+    lenh = ["git"] + (["-C", str(repo)] if repo else []) + list(doi)
+    return subprocess.run(lenh, capture_output=True, text=True,
                           encoding="utf-8", errors="replace").stdout
 
 
 def lich_su_tep():
-    """-> {duong_dan: {so_lan_sua, ngay_dau, ngay_cuoi, commit: [...]}}."""
+    """-> {duong_dan: {so_lan_sua, ngay_dau, ngay_cuoi, commit: [...]}}.
+
+    Gom CA HAI kho: phan xu ly (src, tests, tools) va giao dien web (ghi la web/...).
+    """
     ra = defaultdict(lambda: {"so_lan_sua": 0, "ngay": [], "commit": []})
-    ma = ngay = None
-    for dong in _git("log", "--format=@@%h|%ad|%s", "--date=short",
-                     "--name-only", "--", *THU_MUC_MA).splitlines():
-        dong = dong.strip()
-        if dong.startswith("@@"):
-            ma, ngay, _tieu_de = dong[2:].split("|", 2)
-        elif dong and ma and dong.split("/")[0] in THU_MUC_MA:
-            m = ra[dong]
-            m["so_lan_sua"] += 1
-            m["ngay"].append(ngay)
-            m["commit"].append(ma)
+
+    def doc(repo, thu_muc, tien_to):
+        ma = ngay = None
+        for dong in _git("log", "--format=@@%h|%ad|%s", "--date=short",
+                         "--name-only", "--", *thu_muc, repo=repo).splitlines():
+            dong = dong.strip()
+            if dong.startswith("@@"):
+                ma, ngay, _tieu_de = dong[2:].split("|", 2)
+            elif dong and ma and (repo or dong.split("/")[0] in THU_MUC_MA):
+                if repo and dong.split("/")[0] not in THU_MUC_MA_WEB and dong not in THU_MUC_MA_WEB:
+                    continue
+                m = ra[tien_to + dong]
+                m["so_lan_sua"] += 1
+                m["ngay"].append(ngay)
+                m["commit"].append(ma)
+
+    doc(None, ("src", "tests", "tools"), "")
+    if KHO_WEB.exists():
+        doc(KHO_WEB, THU_MUC_MA_WEB, "web/")
     for m in ra.values():
         m["ngay_dau"], m["ngay_cuoi"] = min(m["ngay"]), max(m["ngay"])
     return dict(ra)
@@ -91,7 +105,7 @@ def dung_bang(lich_su, theo_tep):
          "",
          "## Khai báo",
          "",
-         "**Toàn bộ mã nguồn trong `src/`, `tests/`, `tools/` do AI viết**, dưới",
+         "**Toàn bộ mã nguồn trong `src/`, `tests/`, `tools/` (phần xử lý) và `web/` (giao diện) do AI viết**, dưới",
          "sự chỉ đạo của học sinh. Không có tệp nào được viết tay hoàn toàn.",
          "",
          "Nhật ký lời nhắc kèm theo: `docs/nhat-ky-loi-nhac.md`.",

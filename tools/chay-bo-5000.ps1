@@ -23,7 +23,7 @@
 #         /sc once /st 23:59 /f
 #     schtasks /run /tn MEDITRACE_BO5000
 #
-# (<goc> la D: cheo meditrace-sentinel. Viet bang gach cheo xuoi o day co chu dinh:
+# (<goc> la D: cheo meditrace-core. Viet bang gach cheo xuoi o day co chu dinh:
 #  duong dan Windows trong chu thich da bi mot doan ma sinh tep nuot mat dau
 #  gach nguoc: `\t` cua `\tools\` thanh mot ky tu tab. Lan thu tu trong du an.)
 #
@@ -36,7 +36,7 @@
 # de doan. Task Scheduler thi thuoc ve he dieu hanh, khong thuoc phien ssh.
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 $tap = "viet_phat_trien"
 Set-Location $goc

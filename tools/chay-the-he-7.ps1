@@ -22,7 +22,7 @@
 # phong chuoi nay khi da thong nhat cach nhuong GPU.
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 $do_dai_trich = 3072
 Set-Location $goc

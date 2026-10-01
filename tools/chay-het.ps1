@@ -17,7 +17,7 @@
 #   powershell -File chay-het.ps1
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 $adapter = "models/nen-qwen3-4b/best_checkpoint"
 Set-Location $goc

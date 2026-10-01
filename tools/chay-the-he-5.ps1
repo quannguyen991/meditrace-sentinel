@@ -23,7 +23,7 @@
 # CHI SAU KHI chuoi the he 4 da xong va tac vu khoi dong lai cua no da tat.
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
 # 3072, KHONG phai 2048. Nhan the he 5 dai hon 34% vi co trich dan nguyen van. Do
 # bang chinh tokenizer tren may nay ngay 11/09/2026: o 2048 bi LOAI 3.339/3.759

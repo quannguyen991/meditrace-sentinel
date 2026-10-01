@@ -29,12 +29,12 @@ Bản do AI Studio dựng ban đầu gọi thẳng Gemini cho mọi việc. Ph�
 
 ```
 Giao diện (React)  →  server.ts (chuyển tiếp)  →  python -m src.dich_vu  →  MediTrace
-   npm run dev            cổng 3000/3100              cổng 8765            (D:\Claude\meditrace-sentinel)
+   npm run dev            cổng 3000/3100              cổng 8765            (D:\Claude\meditrace-core)
 ```
 
 ## Cách chạy
 
-1. Bật dịch vụ MediTrace (thư mục `D:\Claude\meditrace-sentinel`):
+1. Bật dịch vụ MediTrace (thư mục `D:\Claude\meditrace-core`):
 
    ```
    D:\meditrace-venv-lap\Scripts\python -m src.dich_vu --cong 8765

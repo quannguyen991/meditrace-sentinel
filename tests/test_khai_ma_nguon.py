@@ -86,8 +86,9 @@ def test_phan_biet_go_ma_voi_quyet_dinh_thiet_ke():
     assert "không câu nào là một dòng mã" in t
 
 
-def test_co_du_ba_thu_muc_ma():
-    assert set(km.THU_MUC_MA) == {"src", "tests", "tools"}
+def test_co_du_cac_thu_muc_ma():
+    # ba thư mục của phần xử lý + `web` (giao diện, kho riêng, ghi là web/...)
+    assert set(km.THU_MUC_MA) == {"src", "tests", "tools", "web"}
 
 
 def test_bang_co_so_lan_sua_va_ngay():

@@ -17,7 +17,7 @@
 # KHONG tu bat lai Ollama Serve, va khong dung duong ham cua laptop: hai viec do co
 # chu cua no (`chay-the-he-7-voi-log.ps1` va `duong-ham-bds.ps1`).
 
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $log = "$goc\logs\canh-chuoi.log"
 $task = "MEDITRACE_THE_HE_7"
 

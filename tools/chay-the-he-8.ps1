@@ -19,7 +19,7 @@
 #   models\nen-qwen3-4b-trich   -> doi ten thanh ...-the-he-7, de train the he 8 tu dau
 
 $py = "D:\meditrace-venv\Scripts\python.exe"
-$goc = "D:\meditrace-sentinel"
+$goc = "D:\meditrace-core"
 $moi = "$goc\giai-doan-the-he-8"
 $luu = "$goc\luu-the-he-7"
 $mo_hinh = "D:/hf-models/Qwen3-4B"
