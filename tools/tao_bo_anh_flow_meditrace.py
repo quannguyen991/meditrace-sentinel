@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Script tao bo 7 anh Master Flow xu ly & kiem thu cua MediTrace Sentinel (16:9 Full HD).
-Thiet ke theo tieu chuan do hoa y te chuyen nghiep cao cap (Medical-Tech Infographic):
-- Khong don ep vao 1 anh, chia nho thanh cac flow ro rang, phong chu lon, de doc
-- Bo sung rieng Flow Ma tran Kiem thu Thuc nghiem 1.330 Test
-- Bo sung Quy trinh Tuong tac Lam sang cua Bac si & Click-to-Verify 1 giay
-- Nhan manh quy tac: Goi y ten thuoc ASR bat buoc BOI DO va cach ly sang CAN BAC SI XAC NHAN
+"""Script tạo bộ 7 ảnh Master Flow xử lý & kiểm thử của MediTrace Sentinel (16:9 Full HD).
+Thiết kế theo tiêu chuẩn đồ họa y tế công nghệ cao (Medical-Tech Infographic):
+- Bố cục thoáng đãng, phông chữ lớn, canh lề chuẩn xác, tuyệt đối không tràn viền
+- Sử dụng thuật ngữ khoa học, kỹ thuật và y tế chuẩn xác, diễn đạt trực tiếp, dễ hiểu
+- Tuyệt đối không dùng từ ngữ ẩn dụ, hoán dụ, giật gân hay mơ hồ
+- Nhấn mạnh quy tắc: Gợi ý tên thuốc khi nhận diện âm thanh chưa chắc chắn bắt buộc BÔI ĐỎ và cần bác sĩ xác nhận
 
-Danh sach 7 anh:
-  Flow 1: Thu am phong kham, ASR Guardrail, Goi y ten thuoc & Rut tin JSON
-  Flow 2: Bat dinh chinh FSM, Loc cau gia dinh & Dung benh an SOAP
-  Flow 3: Quy trinh 7 Cong Khoa Bang Chung (K1-K7) - Zero Hallucination
-  Flow 4: Giam sat Duoc ly Lam sang, Chinh lieu eGFR & 9 Thang diem CDSS
-  Flow 5: So sanh Doi dau Truc dien: ChatGPT / LLM tu do vs. MediTrace Sentinel
-  Flow 6: Ma tran Kiem thu Thuc nghiem & Duong ong CI/CD (1.330 Bai Test)
-  Flow 7: Quy trinh Bac si Tuong tac Lam sang & Click-to-Verify trong 1 Giay
+Danh sách 7 ảnh:
+  Flow 1: Thu âm, phiên âm tiếng nói (ASR) & Trích xuất thông tin cấu trúc (JSON)
+  Flow 2: Xử lý đính chính lời nói, lọc câu giả định & Dựng bệnh án SOAP
+  Flow 3: Quy trình kiểm tra tự động 7 bước (K1-K7) — Loại bỏ thông tin sai lệch
+  Flow 4: Kiểm soát an toàn đơn thuốc, hiệu chỉnh liều và tính điểm lâm sàng (CDSS)
+  Flow 5: So sánh phương pháp: Mô hình ngôn ngữ tự do (ChatGPT) vs. MediTrace Sentinel
+  Flow 6: Dữ liệu thực nghiệm và quy trình kiểm thử tự động (1.330 trường hợp kiểm thử)
+  Flow 7: Quy trình bác sĩ sử dụng hệ thống trong ca khám bệnh (< 60 giây thao tác)
 
-Chay:
+Chạy:
     python tools/tao_bo_anh_flow_meditrace.py
 """
 
@@ -54,7 +54,7 @@ plt.rcParams.update({
     "savefig.bbox": "tight",
 })
 
-# Bang mau y te cao cap
+# Bảng màu y tế công nghệ cao
 C_BG = "#F8FAFC"
 C_HEADER_BG = "#0F172A"
 C_TEXT_MAIN = "#0F172A"
@@ -77,17 +77,17 @@ C_CYAN = "#0284C7"
 C_CYAN_BG = "#F0F9FF"
 
 
-def ve_header(ax, tieu_de, phu_de, badge_text="", badge_color=C_TEAL):
-    """Ve banner header cao cap o dau trang."""
+def ve_header(ax, tieu_de, phu_de, badge_text="", badge_color=C_TEAL, co_td=14.2):
+    """Vẽ banner header ở đầu trang."""
     header_box = Rectangle((0, 9.6), 19.2, 1.2, facecolor=C_HEADER_BG, edgecolor="none")
     ax.add_patch(header_box)
     
     accent_bar = Rectangle((0, 9.55), 19.2, 0.05, facecolor=badge_color, edgecolor="none")
     ax.add_patch(accent_bar)
     
-    ax.text(0.6, 10.35, tieu_de, ha="left", va="center", fontsize=15.5,
+    ax.text(0.6, 10.35, tieu_de, ha="left", va="center", fontsize=co_td,
             fontweight="bold", color="white")
-    ax.text(0.6, 9.95, phu_de, ha="left", va="center", fontsize=10.0,
+    ax.text(0.6, 9.95, phu_de, ha="left", va="center", fontsize=9.6,
             color="#94A3B8")
     
     if badge_text:
@@ -97,31 +97,27 @@ def ve_header(ax, tieu_de, phu_de, badge_text="", badge_color=C_TEAL):
                                      facecolor=badge_color, edgecolor="none")
         ax.add_patch(badge_patch)
         ax.text(18.6 - w_b/2, 10.20, badge_text, ha="center", va="center",
-                fontsize=9.0, fontweight="bold", color="white")
+                fontsize=8.8, fontweight="bold", color="white")
 
 
 def the_chuc_nang(ax, x, y, w, h, tieu_de, badge_buoc="", noi_dung="",
-                  mau_chinh=C_NAVY, mau_nen="white", mau_badge=None, co_td=10.0, co_nd=8.5,
-                  dy_text=0.18, max_char_td=None):
-    """Ve the card tinh nang hien dai voi huy hieu tieu de xep theo tang bac khong bao gio bi tran vien."""
-    # Khung the
+                  mau_chinh=C_NAVY, mau_nen="white", mau_badge=None, co_td=9.8, co_nd=8.3,
+                  dy_text=0.16, max_char_td=None):
+    """Vẽ thẻ hiển thị nội dung theo từng khối chức năng."""
     khung = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.03,rounding_size=0.10",
                            linewidth=1.4, edgecolor=mau_chinh, facecolor=mau_nen)
     ax.add_patch(khung)
     
-    # Dai vien mau trang tri tren cung cua the
     top_bar = FancyBboxPatch((x + 0.04, y + h - 0.10), w - 0.08, 0.06,
                              boxstyle="round,pad=0.01,rounding_size=0.03",
                              facecolor=mau_chinh, edgecolor="none")
     ax.add_patch(top_bar)
     
-    # Tinh toan wrap tieu de
-    limit_chars = max_char_td or max(14, int(w * 6.2))
+    limit_chars = max_char_td or max(14, int(w * 6.0))
     td_wrapped = textwrap.fill(tieu_de, width=limit_chars)
     n_lines_td = td_wrapped.count("\n") + 1
     
     if badge_buoc:
-        # Pill badge tren row 1
         bg_b = mau_badge or mau_chinh
         w_b = len(badge_buoc) * 0.11 + 0.40
         badge = FancyBboxPatch((x + 0.20, y + h - 0.46), w_b, 0.26,
@@ -131,7 +127,6 @@ def the_chuc_nang(ax, x, y, w, h, tieu_de, badge_buoc="", noi_dung="",
         ax.text(x + 0.20 + w_b/2, y + h - 0.33, badge_buoc, ha="center", va="center",
                 fontsize=7.5, fontweight="bold", color="white")
         
-        # Tieu de tren row 2 (ngay duoi badge)
         y_td = y + h - 0.60
         ax.text(x + 0.20, y_td, td_wrapped, ha="left", va="top",
                 fontsize=co_td, fontweight="bold", color=mau_chinh, linespacing=1.15)
@@ -143,11 +138,9 @@ def the_chuc_nang(ax, x, y, w, h, tieu_de, badge_buoc="", noi_dung="",
                 fontsize=co_td, fontweight="bold", color=mau_chinh, linespacing=1.15)
         y_div = y_td - (n_lines_td * 0.28) - 0.10
     
-    # Duong phan cach divider
     ax.plot([x + 0.20, x + w - 0.20], [y_div, y_div],
             color=C_BORDER_LIGHT, linewidth=0.8, linestyle="-")
     
-    # Noi dung ben trong
     if noi_dung:
         ax.text(x + 0.20, y_div - dy_text, noi_dung,
                 ha="left", va="top", fontsize=co_nd, color=C_TEXT_MAIN, linespacing=1.35)
@@ -172,7 +165,7 @@ def luu_anh(fig, ten_file):
 
 
 # ==============================================================================
-# HÌNH 1: ĐƯỜNG ỐNG GỠ BĂNG (ASR), DƯỢC THƯ ÂM VỊ & RÚT TIN NGUYÊN TỬ
+# HÌNH 1: THU ÂM, PHIÊN ÂM TIẾNG NÓI & TRÍCH XUẤT THÔNG TIN CẤU TRÚC (JSON)
 # ==============================================================================
 def ve_flow_1_nhan_dien_va_rut_tin():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -182,8 +175,8 @@ def ve_flow_1_nhan_dien_va_rut_tin():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 1: ĐƯỜNG ỐNG GỠ BĂNG (ASR), DƯỢC THƯ ÂM VỊ & RÚT MẨU TIN NGUYÊN TỬ",
-              "Từ âm thanh tự nhiên tại phòng khám đến mẩu tin JSON có mỏ neo — Quy tắc BÔI ĐỎ cách ly tên thuốc nghi ngờ",
+              "FLOW 1: THU ÂM, PHIÊN ÂM TIẾNG NÓI (ASR) & TRÍCH XUẤT THÔNG TIN CẤU TRÚC (JSON)",
+              "Từ âm thanh hội thoại khám bệnh đến dữ liệu có cấu trúc — Tự động bôi đỏ cảnh báo tên thuốc cần bác sĩ xác nhận",
               badge_text="BƯỚC 0 & TẦNG 1", badge_color=C_TEAL)
 
     w_col = 4.15
@@ -191,105 +184,108 @@ def ve_flow_1_nhan_dien_va_rut_tin():
     h_col = 8.4
     y_bot = y_top - h_col
 
-    # Cot 1: Thu am & PhoWhisper
+    # Cột 1: Thu âm & PhoWhisper
     x1 = 0.6
-    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "GHI ÂM & TÁCH GIỌNG",
+    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "THU ÂM & PHIÊN ÂM TIẾNG NÓI",
                   badge_buoc="BƯỚC 01", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
-                      "• THU ÂM TỰ NHIÊN PHÒNG KHÁM:\n"
-                      "  - Thời lượng: 3 - 5 phút/ca khám ngoại trú\n"
-                      "  - Chạy 100% On-premise nội bộ (Bảo mật NĐ 13)\n"
-                      "  - Thu nhận hội thoại tự nhiên bác sĩ - bệnh nhân\n\n"
-                      "• GỠ BĂNG PHIÊN ÂM (PhoWhisper):\n"
-                      "  - Fine-tuned chuyên biệt cho ngữ cảnh y tế\n"
-                      "  - Nhận dạng tiếng Việt đa vùng miền\n"
-                      "  - Xuất ra dòng chữ hội thoại thô kèm mốc giây\n\n"
-                      "• TÁCH GIỌNG NGƯỜI NÓI (PyAnnote):\n"
-                      "  - Phân tách Speaker 1, Speaker 2, Speaker 3\n"
-                      "  - Bác sĩ gán vai một lần: Bác sĩ, BN, Người nhà\n\n"
-                      "• ĐÁNH SỐ LƯỢT THOẠI [T1], [T2]...:\n"
-                      "  - Tạo nền tảng mỏ neo cho việc kiểm chứng sau này"
-                  ), co_td=10.5, co_nd=8.8)
+                      "• THU ÂM TẠI PHÒNG KHÁM:\n"
+                      "  - Thời lượng trung bình: 3 - 5 phút/ca khám\n"
+                      "  - Xử lý 100% nội bộ trên máy trạm (On-premise)\n"
+                      "  - Tuân thủ bảo mật dữ liệu y tế (Nghị định 13/CP)\n\n"
+                      "• PHIÊN ÂM TIẾNG NÓI (PhoWhisper):\n"
+                      "  - Mô hình tinh chỉnh cho ngữ cảnh y tế tiếng Việt\n"
+                      "  - Nhận diện giọng nói đa dạng các vùng miền\n"
+                      "  - Tạo văn bản hội thoại kèm mốc thời gian chính xác\n\n"
+                      "• PHÂN BIỆT NGƯỜI NÓI (PyAnnote):\n"
+                      "  - Tự động tách giọng người nói 1, 2, 3\n"
+                      "  - Phân loại rõ: Bác sĩ, Bệnh nhân, Người nhà\n\n"
+                      "• ĐÁNH SỐ THỨ TỰ LƯỢT THOẠI [T1], [T2]...:\n"
+                      "  - Lưu vết số thứ tự câu thoại làm căn cứ\n"
+                      "    đối chiếu sau này."
+                  ), co_td=10.0, co_nd=8.5)
 
     mui_ten_ngang(ax, x1 + w_col + 0.05, 5.0, x1 + w_col + 0.35, mau=C_NAVY)
 
-    # Cot 2: Chot 1 ASR & Duoc thu am vi (Boi do)
+    # Cột 2: Nhận diện tên thuốc & Cảnh báo đỏ
     x2 = 5.25
-    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "ASR GUARDRAIL & DƯỢC THƯ ÂM VỊ",
-                  badge_buoc="CHỐT 01", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
+    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "NHẬN DIỆN TÊN THUỐC & CẢNH BÁO ĐỎ",
+                  badge_buoc="BƯỚC 02", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
                   noi_dung=(
-                      "• BẢN CHẤT LÂM SÀNG THỰC TẾ:\n"
-                      "  Phòng khám có tạp âm, bệnh nhân phát âm sai\n"
-                      "  hoặc dùng tên dân gian ('a móc', 'ô mê', viên nhộng).\n"
-                      "  ASR KHÔNG THỂ đảm bảo nghe đúng 100% tên thuốc!\n\n"
-                      "• NGUYÊN TẮC 'ZERO SILENT NORMALIZATION':\n"
-                      "  Tuyệt đối KHÔNG tự ý sửa ngầm vào đơn thuốc\n"
-                      "  (đoán nhầm Augmentin thành Amox\n"
-                      "   có thể gây biến cố chết người)\n\n"
-                      "• CƠ CHẾ BÔI ĐỎ & CÁCH LY AN TOÀN:\n"
-                      "  - Dò từ điển âm vị thuốc dân gian & phương ngữ\n"
-                      "  - BÔI ĐỎ cờ cảnh báo [CẦN BÁC SĨ XÁC NHẬN]\n"
-                      "  - Đưa gợi ý ra màn hình để Bác sĩ duyệt 1 click\n\n"
-                      "• RÀ SOÁT VÒNG LẶP ÂM THANH:\n"
-                      "  - Chặn đứng hiện tượng ASR loop (lặp từ vô nghĩa)\n"
-                      "  - Chuẩn hóa hơn 60 thuật ngữ phương ngữ 3 miền"
-                  ), co_td=10.0, co_nd=8.6)
+                      "• THỰC TẾ GIAO TIẾP TẠI PHÒNG KHÁM:\n"
+                      "  Phòng khám có tiếng ồn; người bệnh có thể phát âm\n"
+                      "  chưa chuẩn hoặc dùng tên gọi dân gian\n"
+                      "  (ví dụ: 'a móc', 'ô mê', viên nhộng đỏ vàng...).\n"
+                      "  Hệ thống ASR không thể cam đoan đúng 100%!\n\n"
+                      "• QUY TẮC KHÔNG TỰ Ý SỬA TÊN THUỐC:\n"
+                      "  Tuyệt đối KHÔNG tự ý suy đoán rồi điền ngầm vào đơn\n"
+                      "  (đoán sai hoạt chất có thể dẫn đến rủi ro nguy hiểm).\n\n"
+                      "• CƠ CHẾ BÔI ĐỎ & YÊU CẦU BÁC SĨ XÁC NHẬN:\n"
+                      "  - Dò từ điển tên thuốc và từ phát âm tương đồng\n"
+                      "  - BÔI ĐỎ cảnh báo: [CẦN BÁC SĨ XÁC NHẬN]\n"
+                      "  - Hiển thị gợi ý trên màn hình để bác sĩ duyệt\n\n"
+                      "• XỬ LÝ LỖI LẶP TỪ & PHƯƠNG NGỮ:\n"
+                      "  - Ngăn chặn lỗi lặp từ vô nghĩa của mô hình âm thanh\n"
+                      "  - Chuẩn hóa hơn 60 từ ngữ địa phương thông dụng."
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x2 + w_col + 0.05, 5.0, x2 + w_col + 0.35, mau=C_TEAL)
 
-    # Cot 3: Tang 1 - Qwen3-4B QLoRA
+    # Cột 3: Tầng 1 - Trích xuất JSON
     x3 = 9.9
-    the_chuc_nang(ax, x3, y_bot, w_col, h_col, "RÚT MẨU TIN NGUYÊN TỬ (JSON)",
+    the_chuc_nang(ax, x3, y_bot, w_col, h_col, "TRÍCH XUẤT THÔNG TIN Y TẾ (JSON)",
                   badge_buoc="TẦNG 01", mau_chinh=C_TEAL, mau_nen="white",
                   noi_dung=(
-                      "• MÔ HÌNH: Qwen3-4B + QLoRA 4-bit (Local GPU):\n"
-                      "  - Chạy gọn nhẹ trên RTX 3050/3060 (~3.8 GB VRAM)\n"
-                      "  - Thời gian xử lý: 30 - 45 giây/ca khám\n\n"
-                      "• NGUYÊN TẮC CỐT TỬ CỦA TẦNG 1:\n"
-                      "  TUYỆT ĐỐI CẤM AI viết văn xuôi tự do!\n"
-                      "  Chỉ cho phép bóc tách các mẩu tin dạng JSON rời rạc:\n\n"
+                      "• MÔ HÌNH XỬ LÝ: Qwen3-4B QLoRA (Local GPU):\n"
+                      "  - Vận hành trên máy tính phòng khám (RTX 3050/3060)\n"
+                      "  - Tốc độ xử lý: 30 - 45 giây cho mỗi ca khám\n\n"
+                      "• QUY ĐỊNH TRÍCH XUẤT CÓ CẤU TRÚC:\n"
+                      "  Không để AI tự do viết đoạn văn (tránh sai lệch).\n"
+                      "  Chỉ trích xuất các trường thông tin có cấu trúc JSON:\n\n"
                       "  {\n"
                       "    'thuc_the': 'amoxicillin',\n"
-                      "    'chu_the_id': 0,  # Bệnh nhân\n"
+                      "    'chu_the_id': 0,  // Bệnh nhân\n"
                       "    'noi_dung': 'dị ứng mẩn ngứa',\n"
                       "    'do_chac_chan': 'chắc chắn',\n"
                       "    'phu_dinh': false,\n"
-                      "    'bang_chung': [5],  # Lượt thoại [T5]\n"
+                      "    'bang_chung': [5],  // Câu thoại số [T5]\n"
                       "    'trich_dan': 'uống amoxicillin nổi mề đay'\n"
                       "  }\n\n"
-                      "• BẢO ĐẢM TRUY NGUYÊN:\n"
-                      "  Không có mẩu tin nào sinh ra mà thiếu mỏ neo [Ti]!"
-                  ), co_td=10.0, co_nd=8.6)
+                      "• YÊU CẦU NGUỒN DẪN CHỨNG:\n"
+                      "  Mỗi thông tin trích xuất đều phải\n"
+                      "  gắn với câu thoại gốc."
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x3 + w_col + 0.05, 5.0, x3 + w_col + 0.35, mau=C_PURPLE)
 
-    # Cot 4: Chot 2 - Speaker Consistency Gate
+    # Cột 4: Phân biệt người nói
     x4 = 14.55
-    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "SPEAKER GATE (ĐẠI TỪ NHÂN XƯNG)",
-                  badge_buoc="CHỐT 02", mau_chinh=C_PURPLE, mau_nen=C_PURPLE_BG,
+    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "PHÂN BIỆT BỆNH NHÂN & NGƯỜI NHÀ",
+                  badge_buoc="BƯỚC 03", mau_chinh=C_PURPLE, mau_nen=C_PURPLE_BG,
                   noi_dung=(
-                      "• NHIỆM VỤ SỐNG CÒN:\n"
-                      "  Chặn đứng lỗi tráo người nhà sang bệnh nhân!\n"
-                      "  (ChatGPT rất hay nhầm: Con kể 'Bố em bị hen'\n"
-                      "   -> Gán ngay thành bệnh nhân bị hen!)\n\n"
-                      "• ĐỐI CHIẾU ĐẠI TỪ TIẾNG VIỆT:\n"
-                      "  - 'Mẹ tôi / Bố tôi / Con tôi / Chồng tôi'\n"
-                      "  - 'Bé nhà em / Ông nhà tôi / Bà nhà tôi'\n"
-                      "  -> CẤM GÁN VÀO TIỀN SỬ BỆNH NHÂN!\n"
-                      "  -> Tự động phân luồng sang TIỀN SỬ GIA ĐÌNH\n\n"
-                      "• HIỆU QUẢ LÂM SÀNG THỰC NGHIỆM:\n"
-                      "  - Giảm tỷ lệ nhầm chủ thể từ 12.4% xuống 2.1%\n"
-                      "  - Bảo vệ bệnh án khỏi thông tin râu ông nọ\n"
-                      "    cắm cằm bà kia\n\n"
-                      "• BÀN GIAO SANG TẦNG 2:\n"
-                      "  Chuyển sang bộ luật gom nhóm và FSM đính chính."
-                  ), co_td=9.8, co_nd=8.6)
+                      "• MỤC TIÊU AN TOÀN:\n"
+                      "  Tránh ghi nhầm triệu chứng của người nhà\n"
+                      "  vào hồ sơ của bệnh nhân chính!\n"
+                      "  (Ví dụ: Người nhà nói 'Bố cháu bị hen'\n"
+                      "   thì không được kết luận là bệnh nhân bị hen).\n\n"
+                      "• NHẬN BIẾT ĐẠI TỪ NHÂN XƯNG TIẾNG VIỆT:\n"
+                      "  - Nhận biết các từ: 'mẹ tôi', 'bố tôi', 'con tôi',\n"
+                      "    'ông nhà tôi', 'bé nhà em'...\n"
+                      "  - Tự động phân loại chính xác:\n"
+                      "    Không đưa vào bệnh sử của bệnh nhân,\n"
+                      "    chuyển sang mục TIỀN SỬ GIA ĐÌNH.\n\n"
+                      "• KẾT QUẢ ĐO ĐẠC THỰC TẾ:\n"
+                      "  - Giảm tỷ lệ nhầm chủ thể từ 12.4% xuống còn 2.1%\n"
+                      "  - Đảm bảo hồ sơ phản ánh đúng người bệnh\n\n"
+                      "• CHUYỂN GIAO DỮ LIỆU:\n"
+                      "  Dữ liệu hợp lệ được chuyển sang bước đính chính."
+                  ), co_td=9.8, co_nd=8.4)
 
     luu_anh(fig, "flow-1-nhan-dien-giong-noi-va-rut-tin.png")
 
 
 # ==============================================================================
-# HÌNH 2: BẮT ĐÍNH CHÍNH (FSM), LỌC GIẢ ĐỊNH & DỰNG BỆNH ÁN SOAP
+# HÌNH 2: XỬ LÝ ĐÍNH CHÍNH LỜI NÓI, LỌC CÂU GIẢ ĐỊNH & DỰNG BỆNH ÁN SOAP
 # ==============================================================================
 def ve_flow_2_dinh_chinh_fsm_va_soap():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -299,8 +295,8 @@ def ve_flow_2_dinh_chinh_fsm_va_soap():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 2: BẮT ĐÍNH CHÍNH (FSM), LỌC CÂU GIẢ ĐỊNH & DỰNG BỆNH ÁN SOAP",
-              "Xử lý hội thoại đời thường: bệnh nhân nói nhầm, bác sĩ dặn dò tương lai và xuất bản bệnh án chuẩn",
+              "FLOW 2: XỬ LÝ ĐÍNH CHÍNH LỜI NÓI, LỌC CÂU GIẢ ĐỊNH & DỰNG BỆNH ÁN SOAP",
+              "Xử lý tình huống nói nhầm, lọc bỏ câu dặn dò tương lai và tự động lập hồ sơ bệnh án chuẩn y khoa",
               badge_text="TẦNG 2, 3 & 5", badge_color=C_CYAN)
 
     w_col = 4.15
@@ -308,95 +304,97 @@ def ve_flow_2_dinh_chinh_fsm_va_soap():
     h_col = 8.4
     y_bot = y_top - h_col
 
-    # Cot 1: Tang 2 - Gom nguoi & Khu dinh danh
+    # Cột 1: Phân nhóm chủ thể & Ẩn danh hóa
     x1 = 0.6
-    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "GOM CHỦ THỂ & KHỬ ĐỊNH DANH",
+    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "PHÂN NHÓM CHỦ THỂ & ẨN DANH HÓA",
                   badge_buoc="TẦNG 02", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
-                      "• PHÂN ĐỊNH 4 NHÓM CHỦ THỂ TIẾNG VIỆT:\n"
-                      "  1. Bác sĩ hỏi/khám bệnh nhân\n"
-                      "  2. Bệnh nhân tự kể về triệu chứng bản thân\n"
-                      "  3. Người nhà kể hộ ('cháu sốt 39 độ')\n"
+                      "• PHÂN ĐỊNH 4 NHÓM NGƯỜI NÓI:\n"
+                      "  1. Bác sĩ hỏi bệnh và thăm khám\n"
+                      "  2. Bệnh nhân tự trình bày triệu chứng\n"
+                      "  3. Người nhà mô tả hộ bệnh nhân ('cháu bị sốt')\n"
                       "  4. Người nhà kể về người khác ('ông nhà tôi...')\n"
-                      "     -> Chuyển mục Tiền sử gia đình\n\n"
-                      "• KHỬ ĐỊNH DANH TỰ ĐỘNG (Nghị định 13/CP):\n"
-                      "  - Che tên thật, số điện thoại, CCCD, địa chỉ\n"
-                      "  - Thay thế bằng mã băm [BENH_NHAN_001]\n"
+                      "     -> Tự động phân vào Tiền sử gia đình\n\n"
+                      "• BẢO MẬT DỮ LIỆU CÁ NHÂN (Nghị định 13/CP):\n"
+                      "  - Tự động che họ tên, SĐT, số CCCD, địa chỉ\n"
+                      "  - Thay thế bằng mã ẩn danh [BENH_NHAN_001]\n"
                       "  - Dữ liệu hoàn toàn ẩn danh trước khi lưu trữ\n\n"
-                      "• XỬ LÝ CÂU NUỐT CHỦ NGỮ:\n"
-                      "  - BN nói cộc: 'Sốt 3 hôm rồi' -> Tự động nhận diện\n"
-                      "    ngữ cảnh lượt thoại để gán đúng cho bệnh nhân."
-                  ), co_td=10.0, co_nd=8.8)
+                      "• XỬ LÝ CÂU NÓI THIẾU CHỦ NGỮ:\n"
+                      "  - Khi bệnh nhân nói ngắn: 'Sốt 3 hôm rồi'\n"
+                      "  -> Tự động nhận diện ngữ cảnh để gán\n"
+                      "     chính xác cho bệnh nhân."
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x1 + w_col + 0.05, 5.0, x1 + w_col + 0.35, mau=C_WARN)
 
-    # Cot 2: Tang 3 - FSM Bat dinh chinh
+    # Cột 2: Xử lý đính chính khi người nói sửa lời
     x2 = 5.25
-    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "MÁY TRẠNG THÁI FSM ĐÍNH CHÍNH",
+    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "XỬ LÝ ĐÍNH CHÍNH LỜI NÓI",
                   badge_buoc="TẦNG 03", mau_chinh=C_WARN, mau_nen=C_WARN_BG,
                   noi_dung=(
-                      "• TÌNH HUỐNG LÂM SÀNG THỰC TẾ:\n"
-                      "  Bệnh nhân nói nhầm rồi tự sửa lại:\n"
+                      "• TÌNH HUỐNG THỰC TẾ PHÒNG KHÁM:\n"
+                      "  Bệnh nhân nói nhầm rồi tự sửa lại ngay sau đó:\n"
                       "  'Tôi bị sốt 1 tuần... à không, mới 3 hôm thôi!'\n\n"
-                      "• MÁY TRẠNG THÁI HỮU HẠN (FSM) PHÂN NHÁNH:\n"
-                      "  - NHÁNH BỔ SUNG: Cả hai mẩu tin cùng có hiệu lực\n"
-                      "    ('vừa ho vừa rát họng') -> Giữ cả hai\n"
-                      "  - NHÁNH ĐÍNH CHÍNH (K7 Superseded):\n"
-                      "    Mẩu tin '1 tuần' bị gạch bỏ và đánh dấu [Bị thay thế],\n"
-                      "    chỉ đưa mẩu tin mới '3 hôm' vào thân bệnh án.\n"
-                      "  - NHÁNH MÂU THUẪN: Chưa rõ câu nào đúng\n"
-                      "    -> Đưa sang mục Cần bác sĩ xác nhận\n\n"
-                      "• HIỆU QUẢ:\n"
-                      "  Giảm 14 lần lỗi nhớ nhầm tin cũ (11.5% -> 0.8%)."
-                  ), co_td=9.8, co_nd=8.6)
+                      "• QUY TẮC XỬ LÝ PHÂN NHÁNH RÕ RÀNG:\n"
+                      "  - NHÁNH BỔ SUNG: Cả hai ý cùng đúng\n"
+                      "    ('vừa ho vừa rát họng') -> Lưu giữ cả hai\n"
+                      "  - NHÁNH ĐÍNH CHÍNH (Thay thế thông tin):\n"
+                      "    Thông tin cũ ('1 tuần') bị đánh dấu [Bị thay thế],\n"
+                      "    chỉ đưa thông tin mới ('3 hôm') vào bệnh án.\n"
+                      "  - NHÁNH MÂU THUẪN: Chưa rõ ý nào đúng\n"
+                      "    -> Đưa sang mục [Cần bác sĩ xác nhận]\n\n"
+                      "• HIỆU QUẢ THỰC NGHIỆM:\n"
+                      "  Giảm 14 lần sai sót do giữ nhầm thông tin cũ\n"
+                      "  (từ 11.5% xuống còn 0.8%)."
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x2 + w_col + 0.05, 5.0, x2 + w_col + 0.35, mau=C_SAFE)
 
-    # Cot 3: Chot 3 - Dialogue Act & Loc gia dinh
+    # Cột 3: Lọc câu giả định
     x3 = 9.9
-    the_chuc_nang(ax, x3, y_bot, w_col, h_col, "DIALOGUE ACT & LỌC CÂU GIẢ ĐỊNH",
-                  badge_buoc="CHỐT 03", mau_chinh=C_SAFE, mau_nen="white",
+    the_chuc_nang(ax, x3, y_bot, w_col, h_col, "LỌC CÂU DẶN DÒ & GIẢ ĐỊNH",
+                  badge_buoc="BƯỚC 04", mau_chinh=C_SAFE, mau_nen="white",
                   noi_dung=(
-                      "• BẢN CHẤT LỖI CỦA CÁC MÔ HÌNH LLM:\n"
-                      "  Khi bác sĩ nói: 'Nếu mai còn sốt thì chụp X-quang',\n"
-                      "  ChatGPT thường ghi: 'Đã chụp X-quang phổi'!\n\n"
-                      "• BỘ LỌC CÂU GIẢ ĐỊNH / TƯƠNG LAI (CHỐT 3):\n"
-                      "  - Bóc tách các liên từ điều kiện: 'nếu... thì', 'phòng khi',\n"
-                      "    'mai quay lại khám', 'khi nào đau mới uống'...\n"
-                      "  - CẤM GHI vào mục Khám lâm sàng hay Chẩn đoán!\n"
-                      "  - Tự động chuyển đúng vào KẾ HOẠCH THEO DÕI.\n\n"
-                      "• LỌC KHẲNG ĐỊNH ÂM TÍNH:\n"
-                      "  - Phân biệt rõ 'Chưa ghi nhận' vs 'Không có'\n"
-                      "    (hai khái niệm hoàn toàn khác nhau\n"
-                      "     về mặt pháp lý y khoa)."
-                  ), co_td=9.6, co_nd=8.6)
+                      "• VẤN ĐỀ THƯỜNG GẶP CỦA CÁC MÔ HÌNH AI:\n"
+                      "  Khi bác sĩ dặn: 'Nếu ngày mai sốt thì chụp X-quang',\n"
+                      "  các mô hình AI thông thường hay ghi nhầm là:\n"
+                      "  'Bệnh nhân đã chụp X-quang phổi'!\n\n"
+                      "• BỘ LỌC CÂU ĐIỀU KIỆN / TƯƠNG LAI:\n"
+                      "  - Nhận diện các liên từ: 'nếu... thì', 'phòng khi',\n"
+                      "    'khi nào đau mới uống', 'hẹn tuần sau tái khám'...\n"
+                      "  - KHÔNG GHI vào phần Khám hay Chẩn đoán!\n"
+                      "  - Tự động chuyển vào mục KẾ HOẠCH THEO DÕI.\n\n"
+                      "• PHÂN BIỆT RÕ KẾT QUẢ GHI NHẬN:\n"
+                      "  - Phân biệt 'Chưa ghi nhận' và 'Không có triệu chứng'\n"
+                      "    để đảm bảo tính chính xác về mặt y khoa."
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x3 + w_col + 0.05, 5.0, x3 + w_col + 0.35, mau=C_CYAN)
 
-    # Cot 4: Tang 5 - Dung Benh an SOAP & Click-to-Verify
+    # Cột 4: Dựng bệnh án SOAP
     x4 = 14.55
-    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "BỆNH ÁN SOAP & CLICK-TO-VERIFY",
+    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "THIẾT LẬP BỆNH ÁN SOAP",
                   badge_buoc="TẦNG 05", mau_chinh=C_CYAN, mau_nen=C_CYAN_BG,
                   noi_dung=(
-                      "• DỰNG BẰNG TEMPLATE ENGINE (KHÔNG DÙNG LLM):\n"
+                      "• XÂY DỰNG THEO MẪU BỆNH ÁN CHUẨN (SOAP):\n"
                       "  - S (Subjective): Lý do khám, Bệnh sử, Tiền sử\n"
-                      "  - O (Objective): Khám lâm sàng, Sinh hiệu, Xét nghiệm\n"
-                      "  - A (Assessment): Chẩn đoán xác định / phân biệt\n"
-                      "  - P (Plan): Đơn thuốc, Lời dặn, Hẹn tái khám\n\n"
-                      "• PHÂN VÙNG 'CẦN BÁC SĨ XÁC NHẬN':\n"
-                      "  - Nơi tập trung toàn bộ cảnh báo BÔI ĐỎ\n"
-                      "    (tên thuốc ASR, dị ứng, tương tác DDI)\n"
-                      "  - Bác sĩ chỉ cần liếc mắt 20s kiểm tra\n\n"
-                      "• CLICK-TO-VERIFY TRONG 1 GIÂY:\n"
-                      "  Bấm vào bất kỳ dòng nào -> Sáng ngay câu nói ở đúng\n"
-                      "  giây ghi âm gốc để đối soát tức thời!"
-                  ), co_td=9.6, co_nd=8.6)
+                      "  - O (Objective): Triệu chứng thực thể, Sinh hiệu\n"
+                      "  - A (Assessment): Chẩn đoán xác định / Phân biệt\n"
+                      "  - P (Plan): Kế hoạch điều trị, Đơn thuốc, Lời dặn\n\n"
+                      "• MỤC RIÊNG 'CẦN BÁC SĨ XÁC NHẬN':\n"
+                      "  - Tập trung toàn bộ các cảnh báo BÔI ĐỎ\n"
+                      "    (tên thuốc nghi ngờ, tương tác thuốc...)\n"
+                      "  - Bác sĩ rà soát nhanh trong khoảng 20 giây\n\n"
+                      "• BẤM XEM VÀ ĐỐI CHIẾU NGUỒN GỐC THÔNG TIN:\n"
+                      "  Bấm vào từng câu trên bệnh án để xem ngay\n"
+                      "  câu thoại tương ứng trong cuộc khám."
+                  ), co_td=9.8, co_nd=8.4)
 
     luu_anh(fig, "flow-2-dinh-chinh-fsm-va-benh-an-soap.png")
 
 
 # ==============================================================================
-# HÌNH 3: QUY TRÌNH 7 CỔNG KHÓA BẰNG CHỨNG (K1–K7) — ZERO HALLUCINATION
+# HÌNH 3: QUY TRÌNH KIỂM TRA TỰ ĐỘNG 7 BƯỚC (K1–K7) — LOẠI BỎ THÔNG TIN SAI LỆCH
 # ==============================================================================
 def ve_flow_3_khoa_bang_chung():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -406,52 +404,52 @@ def ve_flow_3_khoa_bang_chung():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 3: QUY TRÌNH 7 CỔNG KHÓA BẰNG CHỨNG (K1–K7) — TRIỆT TIÊU HOÀN TOÀN ẢO GIÁC AI",
-              "100% Thuật toán xác định (Python determinism) thẩm định từng câu chữ trước khi vào hồ sơ bệnh án",
-              badge_text="ZERO HALLUCINATION", badge_color=C_DANGER)
+              "FLOW 3: QUY TRÌNH KIỂM TRA TỰ ĐỘNG 7 BƯỚC (K1–K7) — LOẠI BỎ THÔNG TIN SAI LỆCH",
+              "Áp dụng thuật toán kiểm tra logic độc lập để thẩm định từng nội dung trích xuất trước khi đưa vào hồ sơ bệnh án",
+              badge_text="KIỂM ĐỊNH LOGIC 7 BƯỚC", badge_color=C_DANGER)
 
-    # 3 Khối lớn: Đầu vào Trái -> 7 Cổng ở Giữa -> 2 Đầu ra Phải
-    the_chuc_nang(ax, 0.6, 1.5, 3.4, 7.6, "MỆNH ĐỀ DO AI TRÍCH",
-                  badge_buoc="ĐẦU VÀO", mau_chinh=C_TEAL, mau_nen=C_TEAL_BG,
+    # Khối Đầu vào Trái
+    the_chuc_nang(ax, 0.6, 1.5, 3.4, 7.6, "THÔNG TIN ĐẦU VÀO TỪ MÔ HÌNH AI",
+                  badge_buoc="DỮ LIỆU JSON", mau_chinh=C_TEAL, mau_nen=C_TEAL_BG,
                   noi_dung=(
-                      "Dữ liệu JSON nguyên tử:\n\n"
-                      "• thuc_the: 'amoxicillin'\n"
-                      "• chu_the: 'bệnh nhân'\n"
-                      "• noi_dung: 'dị ứng mẩn ngứa'\n"
-                      "• do_chac_chan: 'chắc chắn'\n"
-                      "• phu_dinh: False\n"
-                      "• bang_chung: [T5]\n"
-                      "• trich_dan:\n"
+                      "Dữ liệu có cấu trúc:\n\n"
+                      "• Tên thực thể: 'amoxicillin'\n"
+                      "• Đối tượng: 'bệnh nhân'\n"
+                      "• Nội dung: 'dị ứng mẩn ngứa'\n"
+                      "• Độ chắc chắn: 'chắc chắn'\n"
+                      "• Phủ định: Sai (không phủ định)\n"
+                      "• Lượt thoại nguồn: [T5]\n"
+                      "• Đoạn trích dẫn:\n"
                       "  'uống amoxicillin nổi mề đay'\n\n"
-                      "-> BẮT BUỘC ĐI QUA PHỄU\n"
-                      "   KIỂM ĐỊNH 7 CỔNG K1-K7\n"
+                      "-> BẮT BUỘC ĐI QUA\n"
+                      "   QUY TRÌNH KIỂM TRA 7 BƯỚC\n"
                       "   TRƯỚC KHI VÀO BỆNH ÁN"
-                  ), co_td=10.0, co_nd=8.8)
+                  ), co_td=9.8, co_nd=8.6)
 
-    mui_ten_ngang(ax, 4.05, 5.3, 4.35, mau=C_NAVY, day=2.5)
+    mui_ten_ngang(ax, 4.05, 5.3, 4.30, mau=C_NAVY, day=2.5)
 
-    # 7 Cổng ở giữa với bố cục Security Checkpoint phân tầng rõ ràng
-    x_mid = 4.45
-    w_mid = 9.8
+    # 7 Bước kiểm tra ở giữa (thu hẹp w_mid = 8.85 để tạo khoảng trống thoáng cho mũi tên và chữ)
+    x_mid = 4.25
+    w_mid = 8.85
     y_start = 8.15
     h_gate = 0.94
     spacing = 1.10
 
     cac_cong = [
-        ("CỔNG K1", "NGUỒN GỐC NGUYÊN VĂN (VERBATIM STRING MATCH)",
-         "Dò chuỗi trích dẫn vào lượt thoại [Ti]. Tên thuốc ASR đoán âm vị -> BÔI ĐỎ CHUYỂN SANG CẦN XÁC NHẬN!", C_DANGER, C_DANGER_BG),
-        ("CỔNG K2", "KHỚP NỘI DUNG LÂM SÀNG (CORE MEDICAL TERMS)",
-         "So khớp từ vựng y khoa chính, không để câu trích một đằng mà tóm tắt nội dung một nẻo.", C_NAVY, C_NAVY_BG),
-        ("CỔNG K3", "ĐÚNG CHỦ THỂ & VAI NGƯỜI NÓI (SPEAKER ATTRIBUTION)",
-         "Đối chiếu đại từ chỉ người trong câu. Nói về 'ông nhà/bố/mẹ' -> CẤM ghi vào bệnh sử của bệnh nhân.", C_NAVY, C_NAVY_BG),
-        ("CỔNG K4", "LỌC CÂU GIẢ ĐỊNH & PHÒNG NGỪA (HYPOTHETICAL FILTER)",
-         "Phát hiện câu gốc chỉ là phòng ngừa, dặn dò tương lai ('Nếu sốt thì...') -> CẤM ghi thành việc đã làm!", C_WARN, C_WARN_BG),
-        ("CỔNG K5", "KHỚP MỐC THỜI GIAN (TEMPORAL ALIGNMENT)",
-         "Mốc thời gian ('3 ngày', '1 tuần') bắt buộc phải xuất hiện nguyên vẹn trong lượt thoại được dẫn chứng.", C_NAVY, C_NAVY_BG),
-        ("CỔNG K6", "KHÓA SỐ LIỆU LÂM SÀNG & LIỀU THUỐC (NUMERICAL GROUNDING)",
-         "Đối soát từng chữ số huyết áp, nhiệt độ, liều thuốc mg. AI tự ý điền số thói quen (120/80) -> CHẶN LẬP TỨC!", C_DANGER, C_DANGER_BG),
-        ("CỔNG K7", "DÒNG THỜI GIAN ĐÍNH CHÍNH (TEMPORAL SUPERSEDED CHECK)",
-         "Phát hiện lời nói sau đính chính lời nói trước ('à không...') -> Đánh dấu tin cũ [Bị thay thế], gạch bỏ.", C_WARN, C_WARN_BG)
+        ("BƯỚC K1", "KIỂM TRA SỰ TỒN TẠI TRONG LỜI THOẠI (VERBATIM STRING MATCH)",
+         "Dò chuỗi trích dẫn trong câu thoại nguồn [Ti]. Nếu là tên thuốc nhận diện chưa chắc chắn -> BÔI ĐỎ CHỜ XÁC NHẬN!", C_DANGER, C_DANGER_BG),
+        ("BƯỚC K2", "KIỂM TRA TÍNH PHÙ HỢP CỦA THUẬT NGỮ Y KHOA (CORE TERMS)",
+         "So khớp từ ngữ y tế chính giữa đoạn trích dẫn và nội dung tóm tắt, tránh tóm tắt sai lệch nghĩa gốc.", C_NAVY, C_NAVY_BG),
+        ("BƯỚC K3", "XÁC MINH NGƯỜI NÓI VÀ ĐỐI TƯỢNG ĐƯỢC NÓI TỚI (SPEAKER ATTRIBUTION)",
+         "Kiểm tra đại từ chỉ người. Triệu chứng của người nhà (bố, mẹ, con...) không được ghi vào bệnh sử của bệnh nhân.", C_NAVY, C_NAVY_BG),
+        ("BƯỚC K4", "LỌC NỘI DUNG GIẢ ĐỊNH HOẶC DẶN DÒ TƯƠNG LAI (HYPOTHETICAL FILTER)",
+         "Xác định câu dặn dò hoặc tình huống dự kiến ('Nếu sốt thì...') để không ghi nhầm thành việc đã thực hiện.", C_WARN, C_WARN_BG),
+        ("BƯỚC K5", "ĐỐI CHIẾU MỐC THỜI GIAN (TEMPORAL ALIGNMENT)",
+         "Mốc thời gian (ví dụ: '3 ngày', '1 tuần') phải xuất hiện chính xác trong lượt thoại được dẫn chứng.", C_NAVY, C_NAVY_BG),
+        ("BƯỚC K6", "KIỂM TRA CHỮ SỐ LÂM SÀNG VÀ LIỀU LƯỢNG (NUMERICAL GROUNDING)",
+         "Đối chiếu từng con số huyết áp, nhiệt độ, liều thuốc mg. Chặn ngay trường hợp mô hình AI tự điền con số mặc định.", C_DANGER, C_DANGER_BG),
+        ("BƯỚC K7", "CẬP NHẬT THÔNG TIN ĐÍNH CHÍNH (TEMPORAL SUPERSEDED CHECK)",
+         "Phát hiện câu nói sau sửa lại câu nói trước để loại bỏ thông tin cũ đã bị thay thế.", C_WARN, C_WARN_BG)
     ]
 
     for idx, (badge_k, tieu_de, noi_dung, mau, bg) in enumerate(cac_cong):
@@ -460,75 +458,74 @@ def ve_flow_3_khoa_bang_chung():
                                  linewidth=1.3, edgecolor=mau, facecolor=bg)
         ax.add_patch(khung_g)
         
-        # Pill badge K1, K2...
-        badge_p = FancyBboxPatch((x_mid + 0.18, y_g + h_gate - 0.38), 1.05, 0.26,
+        badge_p = FancyBboxPatch((x_mid + 0.18, y_g + h_gate - 0.38), 1.10, 0.26,
                                  boxstyle="round,pad=0.02,rounding_size=0.06",
                                  facecolor=mau, edgecolor="none")
         ax.add_patch(badge_p)
-        ax.text(x_mid + 0.18 + 0.52, y_g + h_gate - 0.25, badge_k, ha="center", va="center",
-                fontsize=8.0, fontweight="bold", color="white")
+        ax.text(x_mid + 0.18 + 0.55, y_g + h_gate - 0.25, badge_k, ha="center", va="center",
+                fontsize=7.8, fontweight="bold", color="white")
         
-        # Tieu de cong
-        ax.text(x_mid + 1.35, y_g + h_gate - 0.25, tieu_de, ha="left", va="center",
-                fontsize=9.2, fontweight="bold", color=mau)
+        ax.text(x_mid + 1.40, y_g + h_gate - 0.25, tieu_de, ha="left", va="center",
+                fontsize=8.8, fontweight="bold", color=mau)
         
-        # Noi dung cong
         ax.text(x_mid + 0.20, y_g + 0.24, noi_dung, ha="left", va="center",
-                fontsize=8.1, color=C_TEXT_MAIN)
+                fontsize=7.9, color=C_TEXT_MAIN)
 
     # 2 Đầu ra bên phải
-    x_out = 14.7
-    w_out = 3.9
+    x_out = 14.75
+    w_out = 3.85
 
-    # Nhanh Đạt Chuẩn
-    mui_ten_ngang(ax, x_mid + w_mid + 0.05, 6.8, x_out - 0.1, mau=C_SAFE, day=2.5)
-    ax.text(x_out - 0.2, 7.05, "VƯỢT QUA 7 CỔNG", ha="right", va="bottom",
-            fontsize=8.2, fontweight="bold", color=C_SAFE)
+    # Nhánh Đạt Chuẩn
+    x_arr_start = x_mid + w_mid + 0.05
+    mui_ten_ngang(ax, x_arr_start, 6.8, x_out - 0.1, mau=C_SAFE, day=2.5)
+    ax.text((x_arr_start + x_out) / 2, 7.15, "VƯỢT QUA\n7 BƯỚC", ha="center", va="bottom",
+            fontsize=7.5, fontweight="bold", color=C_SAFE, linespacing=1.1)
     
     the_chuc_nang(ax, x_out, 5.3, w_out, 3.8, "HỒ SƠ BỆNH ÁN (SOAP)",
                   badge_buoc="ĐẠT CHUẨN", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
-                      "ĐỘ TIN CẬY 100% TUYỆT ĐỐI:\n\n"
-                      "• Tự động điền vào các mục SOAP\n"
-                      "• Gắn mỏ neo trỏ thẳng về lượt thoại [Ti]\n"
-                      "• Bác sĩ kiểm chứng trong 1 giây\n"
-                      "• Thực nghiệm chứng minh:\n"
-                      "  0.0% bị chặn nhầm (0 / 30.136 dòng)!"
-                  ), co_td=10.0, co_nd=8.6)
+                      "ĐỘ CHÍNH XÁC VÀ ĐẦY ĐỦ CĂN CỨ:\n\n"
+                      "• Điền trực tiếp vào các mục SOAP\n"
+                      "• Lưu kèm mã số câu thoại [Ti] để tra cứu\n"
+                      "• Bác sĩ dễ dàng kiểm tra đối chiếu nhanh\n"
+                      "• Kết quả thực nghiệm đo đạc:\n"
+                      "  0.0% bị chặn nhầm (0 / 30.136 dòng dữ liệu)!"
+                  ), co_td=9.8, co_nd=8.4)
     badge_ok = FancyBboxPatch((x_out + 0.25, 5.50), w_out - 0.5, 0.40,
                               boxstyle="round,pad=0.02,rounding_size=0.08",
                               facecolor=C_SAFE, edgecolor="none")
     ax.add_patch(badge_ok)
-    ax.text(x_out + w_out/2, 5.70, "[OK] ĐẠT 100% -> ĐIỀN THẲNG SOAP", ha="center", va="center",
-            fontsize=8.2, fontweight="bold", color="white")
+    ax.text(x_out + w_out/2, 5.70, "[OK] HỢP LỆ -> ĐIỀN VÀO BỆNH ÁN SOAP", ha="center", va="center",
+            fontsize=7.8, fontweight="bold", color="white")
 
-    # Nhanh Bị Chặn
-    mui_ten_ngang(ax, x_mid + w_mid + 0.05, 3.0, x_out - 0.1, mau=C_DANGER, day=2.5)
-    ax.text(x_out - 0.2, 3.25, "VI PHẠM BẤT KỲ CỔNG", ha="right", va="bottom",
-            fontsize=8.2, fontweight="bold", color=C_DANGER)
+    # Nhánh Bị Chặn / Cần xác nhận
+    mui_ten_ngang(ax, x_arr_start, 3.0, x_out - 0.1, mau=C_DANGER, day=2.5)
+    ax.text((x_arr_start + x_out) / 2, 3.35, "CÓ ĐIỂM\nNGHI NGỜ", ha="center", va="bottom",
+            fontsize=7.5, fontweight="bold", color=C_DANGER, linespacing=1.1)
 
     the_chuc_nang(ax, x_out, 1.5, w_out, 3.6, "CẦN BÁC SĨ XÁC NHẬN",
-                  badge_buoc="BÔI ĐỎ CÁCH LY", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
+                  badge_buoc="BÔI ĐỎ CẢNH BÁO", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
                   noi_dung=(
-                      "TUYỆT ĐỐI KHÔNG ÂM THẦM XÓA BỎ:\n\n"
-                      "• Mọi mẩu tin vi phạm bị cách ly tại đây\n"
-                      "• BÔI ĐỎ cờ cảnh báo kèm lý do vi phạm:\n"
-                      "  'trích không có', 'câu giả định', 'ASR tên thuốc'...\n"
-                      "• Bác sĩ liếc mắt 20s bấm duyệt hoặc sửa lại\n"
-                      "• Triết lý an toàn: Bắt nhầm còn hơn bỏ sót!"
-                  ), co_td=10.0, co_nd=8.6)
+                      "KHÔNG TỰ Ý XÓA DỮ LIỆU NGHI NGỜ:\n\n"
+                      "• Mọi thông tin chưa qua kiểm tra tập hợp tại đây\n"
+                      "• BÔI ĐỎ cảnh báo kèm lý do cụ thể:\n"
+                      "  'trích dẫn chưa khớp', 'câu giả định',\n"
+                      "  'tên thuốc nhận diện chưa rõ'...\n"
+                      "• Bác sĩ kiểm tra nhanh và bấm duyệt hoặc sửa lại\n"
+                      "• Đảm bảo không bỏ sót thông tin quan trọng."
+                  ), co_td=9.8, co_nd=8.3)
     badge_dang = FancyBboxPatch((x_out + 0.25, 1.68), w_out - 0.5, 0.40,
                                 boxstyle="round,pad=0.02,rounding_size=0.08",
                                 facecolor=C_DANGER, edgecolor="none")
     ax.add_patch(badge_dang)
     ax.text(x_out + w_out/2, 1.88, "[!] BÔI ĐỎ -> CHỜ BÁC SĨ DUYỆT", ha="center", va="center",
-            fontsize=8.2, fontweight="bold", color="white")
+            fontsize=7.8, fontweight="bold", color="white")
 
     luu_anh(fig, "flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png")
 
 
 # ==============================================================================
-# HÌNH 4: GIÁM SÁT DƯỢC LÝ LÂM SÀNG, HIỆU CHỈNH LIỀU & CDSS THANG ĐIỂM
+# HÌNH 4: KIỂM SOÁT AN TOÀN ĐƠN THUỐC, HIỆU CHỈNH LIỀU VÀ TÍNH ĐIỂM LÂM SÀNG (CDSS)
 # ==============================================================================
 def ve_flow_4_duoc_ly_cdss():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -538,102 +535,106 @@ def ve_flow_4_duoc_ly_cdss():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 4: HỆ THỐNG AN TOÀN DƯỢC LÝ LÂM SÀNG, HIỆU CHỈNH LIỀU & HỖ TRỢ QUYẾT ĐỊNH (CDSS)",
-              "Đóng vai trò Dược sĩ số & Trợ lý cấp cứu — Soi thuốc kỵ nhau, tính độ lọc thận và tự động cộng 9 thang điểm nguy cơ",
-              badge_text="CDSS & DƯỢC THƯ", badge_color=C_SAFE)
+              "FLOW 4: KIỂM SOÁT AN TOÀN ĐƠN THUỐC, HIỆU CHỈNH LIỀU VÀ TÍNH ĐIỂM LÂM SÀNG (CDSS)",
+              "Tự động kiểm tra tương tác thuốc, giới hạn liều tối đa, tính độ lọc cầu thận và hỗ trợ tính 9 thang điểm lâm sàng",
+              badge_text="HỖ TRỢ QUYẾT ĐỊNH (CDSS)", badge_color=C_SAFE)
 
     w_col = 4.15
     y_top = 9.1
     h_col = 8.4
     y_bot = y_top - h_col
 
-    # Cot 1: Tiep nhan don & Quy tac ASR
+    # Cột 1: Tiếp nhận đơn
     x1 = 0.6
-    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "TIẾP NHẬN ĐƠN & AN TOÀN ASR",
-                  badge_buoc="TRẠM 01", mau_chinh=C_NAVY, mau_nen="white",
+    the_chuc_nang(ax, x1, y_bot, w_col, h_col, "TIẾP NHẬN ĐƠN & DỮ LIỆU ĐẦU VÀO",
+                  badge_buoc="BƯỚC 01", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
-                      "• DỮ LIỆU ĐẦU VÀO:\n"
+                      "• NGUỒN DỮ LIỆU ĐẦU VÀO:\n"
                       "  - Bác sĩ kê đơn qua lời nói\n"
-                      "  - Bệnh nhân khai thuốc đang dùng tại nhà\n"
-                      "  - Xét nghiệm Creatinine máu, Tuổi, Giới, Cân nặng\n\n"
-                      "• QUY TẮC AN TOÀN DƯỢC THƯ ASR:\n"
-                      "  - Bệnh nhân đọc tên thuốc dân gian ('a móc', 'ô mê')\n"
+                      "  - Bệnh nhân thông báo thuốc đang dùng\n"
+                      "  - Kết quả xét nghiệm (Creatinine máu, Tuổi)\n\n"
+                      "• QUY TẮC AN TOÀN KHI NHẬN DIỆN THUỐC:\n"
+                      "  - Khi người bệnh gọi tên dân gian ('a móc', 'ô mê')\n"
                       "  - Hệ thống gợi ý Amoxicillin, Omeprazole...\n"
-                      "  - BẮT BUỘC BÔI ĐỎ CẢNH BÁO [CẦN BÁC SĨ DUYỆT]\n"
-                      "  - CẤM TỰ Ý ĐƯA NGẦM VÀO ĐƠN THUỐC!\n\n"
-                      "• ĐỐI SOÁT CLICK-TO-VERIFY:\n"
-                      "  Bác sĩ bấm nghe lại đúng 2 giây ghi âm gốc\n"
+                      "  - BẮT BUỘC BÔI ĐỎ CẢNH BÁO\n"
+                      "    [CẦN BÁC SĨ DUYỆT]\n"
+                      "  - Không tự ý thêm ngầm vào đơn thuốc.\n\n"
+                      "• ĐỐI SOÁT NHANH VỚI GHI ÂM GỐC:\n"
+                      "  Bác sĩ bấm nghe lại đoạn âm thanh bệnh nhân nói\n"
                       "  để xác nhận trước khi hệ thống tính toán liều."
-                  ), co_td=10.0, co_nd=8.8)
+                  ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x1 + w_col + 0.05, 5.0, x1 + w_col + 0.35, mau=C_DANGER)
 
-    # Cot 2: 3 Tram kiem duyet duoc ly
+    # Cột 2: 3 Bước kiểm tra dược lý
     x2 = 5.25
-    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "3 CHỐT KIỂM SOÁT DƯỢC LÝ",
-                  badge_buoc="TRẠM 02", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
+    the_chuc_nang(ax, x2, y_bot, w_col, h_col, "3 BƯỚC KIỂM TRA AN TOÀN ĐƠN THUỐC",
+                  badge_buoc="BƯỚC 02", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
                   noi_dung=(
-                      "1. TƯƠNG TÁC THUỐC KỴ NHAU (DDI):\n"
-                      "   Tra cứu Dược thư Quốc gia & FDA Hoa Kỳ:\n"
-                      "   • Warfarin + Aspirin/NSAID: Xuất huyết ồ ạt -> CẤM\n"
-                      "   • Clopidogrel + Omeprazole: Triệt tiêu chống đông\n"
-                      "   • Digoxin + Amiodarone: Ngộ độc cơ tim -> GIẢM LIỀU\n\n"
-                      "2. KIỂM SOÁT LIỀU TRẦN AN TOÀN TRONG NGÀY:\n"
+                      "1. KIỂM TRA TƯƠNG TÁC THUỐC BẤT LỢI (DDI):\n"
+                      "   Tra cứu Dược thư Quốc gia & hướng dẫn y khoa:\n"
+                      "   • Warfarin + Aspirin/NSAID:\n"
+                      "     Tăng nguy cơ xuất huyết -> Cảnh báo\n"
+                      "   • Clopidogrel + Omeprazole: Giảm hiệu quả\n"
+                      "   • Digoxin + Amiodarone: Tăng nguy cơ ngộ độc\n\n"
+                      "2. KIỂM SOÁT LIỀU TỐI ĐA TRONG NGÀY:\n"
                       "   • Paracetamol <= 4000 mg/ngày (tối đa 8 viên 500mg)\n"
                       "   • Ibuprofen <= 2400 mg/ngày\n"
                       "   • Aspirin <= 3000 mg/ngày\n"
-                      "   -> Vượt liều trần là BÁO ĐỘNG ĐỎ hoại tử gan ngay!\n\n"
-                      "3. HIỆU CHỈNH LIỀU SUY THẬN (Cockcroft-Gault eGFR):\n"
-                      "   • eGFR < 30 mL/phút: Giảm 50% liều kháng sinh\n"
-                      "   • Chống chỉ định Metformin ở bệnh nhân suy thận nặng"
-                  ), co_td=10.0, co_nd=8.6)
+                      "   -> Tự động cộng dồn các nguồn\n"
+                      "      và cảnh báo nếu vượt ngưỡng an toàn.\n\n"
+                      "3. HIỆU CHỈNH LIỀU THEO CHỨC NĂNG THẬN (eGFR):\n"
+                      "   • Tính mức lọc cầu thận Cockcroft-Gault từ Creatinine\n"
+                      "   • eGFR < 30 mL/phút: Khuyến cáo giảm 50% liều\n"
+                      "     kháng sinh và cảnh báo thận trọng."
+                  ), co_td=9.6, co_nd=8.2)
 
     mui_ten_ngang(ax, x2 + w_col + 0.05, 5.0, x2 + w_col + 0.35, mau=C_PURPLE)
 
-    # Cot 3: 9 Thang diem lam sang
+    # Cột 3: 9 Thang điểm lâm sàng
     x3 = 9.9
     the_chuc_nang(ax, x3, y_bot, w_col, h_col, "TỰ ĐỘNG TÍNH 9 THANG ĐIỂM",
-                  badge_buoc="TRẠM 03", mau_chinh=C_PURPLE, mau_nen="white",
+                  badge_buoc="BƯỚC 03", mau_chinh=C_PURPLE, mau_nen="white",
                   noi_dung=(
-                      "Tự động trích xuất triệu chứng và cộng điểm toán học:\n\n"
-                      "1. GCS (Glasgow): Đo độ hôn mê và chấn thương sọ não\n"
-                      "2. qSOFA: Nhận diện sốc nhiễm trùng nguy kịch\n"
-                      "3. CURB-65: Đánh giá viêm phổi nhẹ cho về hay nhập viện\n"
-                      "4. CHA2DS2-VASc: Nguy cơ đột quỵ ở bệnh nhân rung nhĩ\n"
-                      "5. HAS-BLED: Nguy cơ xuất huyết do thuốc chống đông\n"
-                      "6. Wells Score: Xác suất thuyên tắc tĩnh mạch / phổi\n"
+                      "Tự động tổng hợp triệu chứng và tính toán điểm số:\n\n"
+                      "1. GCS (Glasgow): Đánh giá tri giác và độ hôn mê\n"
+                      "2. qSOFA: Đánh giá nguy cơ nhiễm khuẩn nặng\n"
+                      "3. CURB-65: Đánh giá độ nặng của viêm phổi\n"
+                      "4. CHA2DS2-VASc: Nguy cơ đột quỵ ở rung nhĩ\n"
+                      "5. HAS-BLED: Đánh giá nguy cơ chảy máu\n"
+                      "6. Wells Score: Đánh giá thuyên tắc mạch\n"
                       "7. Glasgow-Blatchford: Tiên lượng xuất huyết tiêu hóa\n"
-                      "8. NYHA I - IV: Phân độ suy tim theo mức độ gắng sức\n"
-                      "9. BMI Châu Á: Đánh giá thể trạng thừa cân béo phì\n\n"
-                      "-> Bác sĩ không phải tự nhớ công thức hay bấm máy tính!"
-                  ), co_td=10.0, co_nd=8.6)
+                      "8. NYHA I - IV: Phân loại suy tim theo gắng sức\n"
+                      "9. BMI Châu Á: Phân loại thể trạng dinh dưỡng\n\n"
+                      "-> Cung cấp số liệu hỗ trợ bác sĩ tham khảo nhanh."
+                  ), co_td=9.8, co_nd=8.3)
 
     mui_ten_ngang(ax, x3 + w_col + 0.05, 5.0, x3 + w_col + 0.35, mau=C_SAFE)
 
-    # Cot 4: Dau ra an toan
+    # Cột 4: Đầu ra
     x4 = 14.55
-    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "ĐẦU RA BÁC SĨ & NGƯỜI BỆNH",
-                  badge_buoc="ĐẦU RA", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
+    the_chuc_nang(ax, x4, y_bot, w_col, h_col, "KẾT QUẢ HIỂN THỊ & HƯỚNG DẪN",
+                  badge_buoc="KẾT QUẢ", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
-                      "• CẢNH BÁO MÀN HÌNH BÁC SĨ (1 GIÂY):\n"
-                      "  - Nhấp nháy đỏ báo động cặp thuốc kỵ nhau\n"
-                      "  - Đề xuất thuốc thay thế an toàn hơn\n"
-                      "  - Khuyến cáo liều giảm cụ thể theo eGFR\n"
-                      "  - Bác sĩ toàn quyền quyết định và bấm ký duyệt\n\n"
-                      "• TỜ DẶN DÒ NGƯỜI BỆNH IN TRAO TẬN TAY:\n"
-                      "  - Chia lịch uống 4 khung giờ đời thường:\n"
-                      "    Sáng - Trưa - Chiều - Tối (trước/sau ăn)\n"
-                      "  - Hướng dẫn chế độ ăn kiêng theo bệnh lý\n"
-                      "  - Danh mục 'Dấu hiệu đỏ nguy hiểm':\n"
-                      "    Khó thở, đau ngực, nôn máu -> Đi viện ngay!\n"
-                      "  - Người bệnh đọc hiểu 100%, an tâm điều trị."
-                  ), co_td=10.0, co_nd=8.8)
+                      "• BẢNG CẢNH BÁO TRÊN MÀN HÌNH BÁC SĨ:\n"
+                      "  - Hiển thị rõ các cặp thuốc tương tác cần lưu ý\n"
+                      "  - Đề xuất hoạt chất thay thế an toàn hơn nếu có\n"
+                      "  - Khuyến cáo điều chỉnh liều theo chức năng thận\n"
+                      "  - Bác sĩ luôn xem xét và ra quyết định cuối cùng.\n\n"
+                      "• PHIẾU HƯỚNG DẪN ĐIỀU TRỊ CHO BỆNH NHÂN:\n"
+                      "  - Phân chia lịch uống theo 4 khung giờ rõ ràng:\n"
+                      "    Sáng - Trưa - Chiều - Tối (kèm lưu ý trước/sau ăn)\n"
+                      "  - Hướng dẫn chế độ ăn uống và sinh hoạt phù hợp\n"
+                      "  - Liệt kê dấu hiệu cảnh báo cần quay lại viện ngay:\n"
+                      "    (Khó thở, đau tức ngực, sốt cao liên tục...)\n"
+                      "  - Giúp người bệnh dễ hiểu và an tâm điều trị."
+                  ), co_td=9.8, co_nd=8.3)
 
     luu_anh(fig, "flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png")
 
 
 # ==============================================================================
-# HÌNH 5: SO SÁNH ĐỐI ĐẦU: CHATGPT / LLM TỰ DO vs. MEDITRACE SENTINEL
+# HÌNH 5: SO SÁNH PHƯƠNG PHÁP: MÔ HÌNH TỰ DO vs. MEDITRACE SENTINEL
 # ==============================================================================
 def ve_flow_5_so_sanh_doi_dau():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -643,101 +644,101 @@ def ve_flow_5_so_sanh_doi_dau():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 5: SO SÁNH ĐỐI ĐẦU TRỰC DIỆN: CHATGPT / LLM TỰ DO vs. MEDITRACE SENTINEL",
-              "Vì sao y tế bắt buộc phải dùng kiến trúc Neuro-symbolic có kiểm chứng chứ không thể giao cho LLM viết văn?",
-              badge_text="HEAD-TO-HEAD BATTLE", badge_color=C_WARN)
+              "FLOW 5: SO SÁNH PHƯƠNG PHÁP: MÔ HÌNH NGÔN NGỮ TỰ DO (CHATGPT) vs. MEDITRACE SENTINEL",
+              "Phân tích sự khác biệt giữa mô hình AI tạo sinh tự do và hệ thống AI kết hợp kiểm định logic xác định trong y tế",
+              badge_text="SO SÁNH PHƯƠNG PHÁP", badge_color=C_WARN, co_td=13.8)
 
-    # Nua tren: Nhanh A - ChatGPT / LLM tu do
+    # Nửa trên: Nhánh A - Mô hình đám mây tự do
     khung_top = FancyBboxPatch((0.6, 5.15), 18.0, 4.25, boxstyle="round,pad=0.03,rounding_size=0.08",
                                linewidth=1.4, edgecolor=C_DANGER, facecolor="white")
     ax.add_patch(khung_top)
-    ax.text(0.9, 9.15, "NHÁNH A: CHATGPT / LLM TẠO SINH TỰ DO (END-TO-END) — NHIỀU RỦI RO CHẾT NGƯỜI",
-            ha="left", va="center", fontsize=11.5, fontweight="bold", color=C_DANGER)
+    ax.text(0.9, 9.15, "PHƯƠNG PHÁP A: DÙNG MÔ HÌNH AI ĐÁM MÂY TỰ DO (END-TO-END) — NHIỀU RỦI RO SAI LỆCH",
+            ha="left", va="center", fontsize=11.2, fontweight="bold", color=C_DANGER)
 
-    the_chuc_nang(ax, 0.9, 5.35, 3.6, 3.55, "1. LỜI THOẠI KHÁM BỆNH",
-                  badge_buoc="INPUT", mau_chinh=C_TEXT_MUTED, mau_nen=C_BG,
+    the_chuc_nang(ax, 0.9, 5.35, 3.6, 3.55, "1. HỘI THOẠI KHÁM BỆNH",
+                  badge_buoc="ĐẦU VÀO", mau_chinh=C_TEXT_MUTED, mau_nen=C_BG,
                   noi_dung=(
-                      "• Bác sĩ, bệnh nhân, người nhà\n"
-                      "• Nói nhanh, nuốt chủ ngữ\n"
-                      "• Tự sửa: '1 tuần... à 3 hôm'\n"
-                      "• Con kể: 'Bố em bị hen'\n"
-                      "• Bác sĩ: 'Nếu sốt thì chụp phim'"
-                  ), co_td=9.5, co_nd=8.5)
+                      "• Bác sĩ, bệnh nhân, người nhà nói nhanh\n"
+                      "• Người bệnh tự sửa lời: '1 tuần... à 3 hôm'\n"
+                      "• Người nhà kể bệnh của người khác:\n"
+                      "  'Bố em bị hen phế quản'\n"
+                      "• Bác sĩ dặn: 'Nếu sốt thì chụp X-quang'"
+                  ), co_td=9.5, co_nd=8.3)
 
     mui_ten_ngang(ax, 4.6, 7.1, 5.0, mau=C_DANGER, day=2.5)
 
-    the_chuc_nang(ax, 5.1, 5.35, 4.5, 3.55, "2. GỬI PROMPT VÀO LLM TỰ DO",
-                  badge_buoc="HỘP ĐEN AI", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
+    the_chuc_nang(ax, 5.1, 5.35, 4.5, 3.55, "2. GỬI YÊU CẦU LÊN MÔ HÌNH ĐÁM MÂY",
+                  badge_buoc="XỬ LÝ ĐÁM MÂY", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG,
                   noi_dung=(
-                      "Prompt: 'Hãy tóm tắt cuộc khám thành bệnh án SOAP'\n\n"
-                      "• Gửi dữ liệu bệnh nhân lên Cloud -> VI PHẠM NĐ 13\n"
-                      "• LLM là 'hộp đen' dự đoán từ tiếp theo trơn tru\n"
-                      "• KHÔNG CÓ BẢNG BẰNG CHỨNG TRUNG GIAN\n"
-                      "• KHÔNG CÓ BỘ LUẬT KIỂM DUYỆT RỦI RO\n"
-                      "• Rất dễ bị Hallucination khi gặp hội thoại nói nhầm"
-                  ), co_td=9.5, co_nd=8.5)
+                      "Yêu cầu: 'Hãy tóm tắt cuộc khám thành bệnh án SOAP'\n\n"
+                      "• Gửi dữ liệu bệnh nhân lên máy chủ đám mây bên ngoài\n"
+                      "• Mô hình tự do dự đoán từ ngữ theo xác suất thống kê\n"
+                      "• Không có bước trung gian kiểm tra nguồn gốc câu trích dẫn\n"
+                      "• Không có bộ quy tắc kiểm tra tương tác thuốc và liều lượng\n"
+                      "• Dễ sinh thông tin không có trong thực tế khi gặp câu phức tạp."
+                  ), co_td=9.5, co_nd=8.2)
 
     mui_ten_ngang(ax, 9.7, 7.1, 10.1, mau=C_DANGER, day=2.5)
 
-    the_chuc_nang(ax, 10.2, 5.35, 8.1, 3.55, "3. BỆNH ÁN SINH RA ĐẦY LỖI NGUY HIỂM",
-                  badge_buoc="HẬU QUẢ", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG, max_char_td=45,
+    the_chuc_nang(ax, 10.2, 5.35, 8.1, 3.55, "3. RỦI RO VÀ HẠN CHẾ TRONG BỆNH ÁN ĐẦU RA",
+                  badge_buoc="HẠN CHẾ", mau_chinh=C_DANGER, mau_nen=C_DANGER_BG, max_char_td=45,
                   noi_dung=(
-                      "[!] Ảo giác bịa đặt (Hallucination): Tự điền huyết áp 120/80 và tiền sử dị ứng chưa ai nói.\n"
-                      "[!] Nhầm lẫn chủ thể (Misattribution): Gán bệnh hen của người bố vào bệnh án con gái!\n"
-                      "[!] Giữ lại thông tin đã bị sửa: Vẫn ghi 'ho 1 tuần' dù bệnh nhân đã sửa 'mới 3 hôm'.\n"
-                      "[!] Biến lời dặn thành sự thật: Ghi 'Đã chụp X-quang' dù bác sĩ dặn 'Nếu mai sốt mới chụp'.\n"
-                      "[!] Mù tịt về an toàn thuốc: Kê 2 thuốc kỵ nhau gây chảy máu dạ dày mà hoàn toàn không biết!\n"
-                      "[!] Không thể truy vết: Bác sĩ muốn kiểm tra phải đọc lại 15 phút ghi âm rất mất thời gian."
+                      "[!] Sinh thông tin không có trong lời thoại: Tự điền huyết áp 120/80 hoặc tiền sử dị ứng chưa ai nói.\n"
+                      "[!] Nhầm lẫn đối tượng người nói: Ghi bệnh hen của người bố vào bệnh án của người con gái!\n"
+                      "[!] Lưu giữ thông tin đã bị sửa: Vẫn ghi 'ho 1 tuần' dù bệnh nhân đã đính chính 'mới 3 hôm'.\n"
+                      "[!] Nhầm lẫn câu dặn dò tương lai: Ghi 'Đã chụp X-quang' dù bác sĩ dặn 'Nếu mai sốt mới chụp'.\n"
+                      "[!] Không kiểm tra an toàn thuốc: Không tự phát hiện đơn thuốc có 2 hoạt chất tương tác bất lợi.\n"
+                      "[!] Khó kiểm tra lại nguồn: Bác sĩ muốn xác minh phải nghe lại toàn bộ đoạn ghi âm rất mất thời gian."
                   ), co_td=9.5, co_nd=8.2)
 
-    # Nua duoi: Nhanh C - MediTrace Sentinel
+    # Nửa dưới: Nhánh B - MediTrace Sentinel
     khung_bot = FancyBboxPatch((0.6, 0.40), 18.0, 4.55, boxstyle="round,pad=0.03,rounding_size=0.08",
                                linewidth=1.4, edgecolor=C_SAFE, facecolor="white")
     ax.add_patch(khung_bot)
-    ax.text(0.9, 4.65, "NHÁNH C: MEDITRACE SENTINEL (NEURO-SYMBOLIC & KHÓA BẰNG CHỨNG) — CHÍNH XÁC & AN TOÀN",
-            ha="left", va="center", fontsize=11.5, fontweight="bold", color=C_SAFE)
+    ax.text(0.9, 4.65, "PHƯƠNG PHÁP B: HỆ THỐNG MEDITRACE SENTINEL (KẾT HỢP AI VÀ KIỂM TRA LOGIC ĐA TẦNG)",
+            ha="left", va="center", fontsize=11.2, fontweight="bold", color=C_SAFE)
 
-    the_chuc_nang(ax, 0.9, 0.65, 3.6, 3.75, "1. LỜI THOẠI KHÁM BỆNH",
-                  badge_buoc="INPUT AN TOÀN", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
+    the_chuc_nang(ax, 0.9, 0.65, 3.6, 3.75, "1. TIẾP NHẬN & XỬ LÝ AN TOÀN",
+                  badge_buoc="XỬ LÝ TẠI CHỖ", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
-                      "• Chạy 100% On-premise nội bộ phòng khám\n"
-                      "• Tự động khử định danh cá nhân NĐ 13\n"
-                      "• Đánh số lượt thoại [T1], [T2]...\n"
+                      "• Vận hành tại máy tính phòng khám\n"
+                      "• Tự động ẩn danh hóa theo Nghị định 13\n"
+                      "• Đánh số từng câu thoại [T1], [T2]...\n"
                       "• Chuẩn hóa từ ngữ địa phương 3 miền\n"
-                      "• Chuyển âm vị tên thuốc dân gian"
-                  ), co_td=9.5, co_nd=8.5)
+                      "• Nhận diện tên thuốc gọi dân gian."
+                  ), co_td=9.5, co_nd=8.3)
 
     mui_ten_ngang(ax, 4.6, 2.50, 5.0, mau=C_SAFE, day=2.5)
 
-    the_chuc_nang(ax, 5.1, 0.65, 4.5, 3.75, "2. KIẾN TRÚC 5 TẦNG KIỂM SOÁT",
-                  badge_buoc="NEURO-SYMBOLIC", mau_chinh=C_TEAL, mau_nen=C_TEAL_BG,
+    the_chuc_nang(ax, 5.1, 0.65, 4.5, 3.75, "2. QUY TRÌNH KIỂM SOÁT ĐA TẦNG",
+                  badge_buoc="KIỂM TRA LOGIC", mau_chinh=C_TEAL, mau_nen=C_TEAL_BG,
                   noi_dung=(
-                      "• Tầng 1: AI chỉ nhặt mẩu tin, CẤM viết văn tự do\n"
-                      "• Tầng 2: Phân định rành mạch Bệnh nhân vs Người nhà\n"
-                      "• Tầng 3: FSM tự động gạch bỏ tin cũ khi đính chính\n"
-                      "• Tầng 4: 7 Cổng K1-K7 khóa bằng chứng từng câu chữ\n"
-                      "• Guardrails 5 trạm chặn đứng lỗi dây chuyền\n"
-                      "• 100% On-premise bảo mật dữ liệu tuyệt đối"
-                  ), co_td=9.5, co_nd=8.5)
+                      "• Tầng 1: AI chỉ trích xuất JSON, không viết tự do\n"
+                      "• Tầng 2: Phân loại rõ Bệnh nhân vs Người nhà\n"
+                      "• Tầng 3: Tự động loại bỏ tin cũ khi người nói sửa lời\n"
+                      "• Tầng 4: Quy trình 7 bước (K1-K7) kiểm tra câu trích dẫn\n"
+                      "• Tầng 5: Kiểm tra tương tác thuốc, liều lượng và thận\n"
+                      "• Bảo mật thông tin nội bộ, không gửi dữ liệu ra ngoài."
+                  ), co_td=9.5, co_nd=8.3)
 
     mui_ten_ngang(ax, 9.7, 2.50, 10.1, mau=C_SAFE, day=2.5)
 
-    the_chuc_nang(ax, 10.2, 0.65, 8.1, 3.75, "3. BỆNH ÁN SOAP MINH BẠCH & AN TOÀN TUYỆT ĐỐI",
-                  badge_buoc="GIÁ TRỊ THỰC CHIẾN", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG, max_char_td=45,
+    the_chuc_nang(ax, 10.2, 0.65, 8.1, 3.75, "3. BỆNH ÁN SOAP MINH BẠCH, CHUẨN XÁC & DỄ KIỂM TRA",
+                  badge_buoc="KẾT QUẢ ĐẠT ĐƯỢC", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG, max_char_td=45,
                   noi_dung=(
-                      "[OK] Triệt tiêu bịa đặt (Zero Hallucination): Không có trong thoại gốc là bị chặn ngay lập tức.\n"
-                      "[OK] Đúng chủ thể tuyệt đối: Giảm 6 lần lỗi nhầm người nhà (từ 12.4% xuống 2.1%).\n"
-                      "[OK] Cập nhật đính chính chuẩn xác: Giảm 14 lần lỗi nhớ nhầm thông tin cũ (từ 11.5% xuống 0.8%).\n"
-                      "[OK] Click-to-Verify trong 1 giây: Bấm vào dòng nào là sáng lên câu nói ở đúng giây ghi âm gốc.\n"
-                      "[OK] Có Dược sĩ số gác cổng: Cảnh báo thuốc kỵ nhau, liều trần và chỉnh liều suy thận tự động.\n"
-                      "[OK] Tiết kiệm 5-7 phút/ca: Bác sĩ chỉ cần liếc mắt 20 giây kiểm tra các cảnh báo và bấm duyệt."
+                      "[OK] Loại bỏ thông tin suy diễn: Không có trong lời thoại gốc thì không được đưa vào bệnh án.\n"
+                      "[OK] Phân định đúng đối tượng: Giảm 6 lần tỷ lệ nhầm triệu chứng của người nhà (từ 12.4% xuống 2.1%).\n"
+                      "[OK] Cập nhật đúng nội dung đính chính: Giảm 14 lần lỗi nhớ nhầm thông tin cũ (từ 11.5% xuống 0.8%).\n"
+                      "[OK] Bấm xem lại nguồn tức thì: Bấm vào từng câu để nghe lại đúng đoạn âm thanh tương ứng trong cuộc khám.\n"
+                      "[OK] Hỗ trợ an toàn đơn thuốc: Tự động cảnh báo tương tác thuốc và liều dùng theo chức năng thận.\n"
+                      "[OK] Tối ưu hóa thời gian: Bác sĩ chỉ cần kiểm tra các mục được bôi đỏ cảnh báo trước khi duyệt."
                   ), co_td=9.5, co_nd=8.2)
 
     luu_anh(fig, "flow-5-so-sanh-doi-dau-chatgpt-vs-meditrace.png")
 
 
 # ==============================================================================
-# HÌNH 6: MA TRẬN KIỂM THỬ THỰC NGHIỆM & ĐƯỜNG ỐNG CI/CD (1.330 BÀI TEST)
+# HÌNH 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.330 TEST)
 # ==============================================================================
 def ve_flow_6_ma_tran_test():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -747,9 +748,9 @@ def ve_flow_6_ma_tran_test():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 6: MA TRẬN KIỂM THỬ THỰC NGHIỆM TOÀN DIỆN & ĐƯỜNG ỐNG CI/CD (1.330 BÀI TEST)",
-              "Minh chứng khoa học về độ tin cậy, tính tổng quát và khả năng chống chịu lỗi dây chuyền trong môi trường thực chiến",
-              badge_text="1.330 TESTS PASSED", badge_color=C_SAFE)
+              "FLOW 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.330 TRƯỜNG HỢP KIỂM THỬ)",
+              "Phương pháp đánh giá độc lập, bộ dữ liệu kiểm nghiệm đa dạng và kết quả kiểm thử tự động toàn diện hệ thống",
+              badge_text="1.330 BÀI KIỂM THỬ ĐẠT 100%", badge_color=C_SAFE)
 
     w_box1 = 5.1
     w_box2 = 7.2
@@ -760,73 +761,73 @@ def ve_flow_6_ma_tran_test():
 
     # Khối 1: Ma trận dữ liệu thực nghiệm
     x1 = 0.6
-    the_chuc_nang(ax, x1, y_bot, w_box1, h_all, "MA TRẬN DỮ LIỆU ĐỘC LẬP",
-                  badge_buoc="TẬP KIỂM THỬ", mau_chinh=C_NAVY, mau_nen="white",
+    the_chuc_nang(ax, x1, y_bot, w_box1, h_all, "TẬP DỮ LIỆU ĐÁNH GIÁ ĐỘC LẬP",
+                  badge_buoc="DỮ LIỆU TEST", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
                       "• 200 KHUÔN CA BỆNH ĐỘC LẬP (Template-Disjoint):\n"
-                      "  Bao phủ 10 chuyên khoa nội, ngoại, nhi, truyền nhiễm.\n"
-                      "  Tập Test gồm các khuôn bệnh mà AI CHƯA BAO GIỜ\n"
-                      "  nhìn thấy trong lúc huấn luyện (Chống học vẹt 100%).\n\n"
-                      "• 5.000 HỘI THOẠI MÔ PHỎNG ĐA DẠNG:\n"
-                      "  Đo khoảng cách Jaccard & n-gram diversity đạt 78.3%\n"
-                      "  (đảm bảo câu từ phong phú như phòng khám thật).\n\n"
-                      "• 300 CA THỬ THÁCH ĐỐI ĐẦU (Adversarial Pairs):\n"
-                      "  Thiết kế theo cặp đối sánh ranh giới cực kỳ hóc búa:\n"
-                      "  - Ca A: Bệnh nhân dị ứng Penicillin\n"
-                      "  - Ca B: Người nhà dị ứng Penicillin (đổi chủ thể)\n"
-                      "  - Bệnh nhân đính chính mốc thời gian sau 5 câu thoại\n"
-                      "  - Chèn nhiễu âm thanh ASR và phương ngữ 3 miền\n\n"
-                      "-> ĐẢM BẢO TÍNH KHÁCH QUAN KHOA HỌC TUYỆT ĐỐI."
-                  ), co_td=10.5, co_nd=8.8)
+                      "  Bao phủ 10 chuyên khoa nội, ngoại, nhi, truyền nhiễm...\n"
+                      "  Tập kiểm thử gồm các ca bệnh độc lập mà mô hình AI\n"
+                      "  chưa từng gặp trong quá trình huấn luyện (đảm bảo khách quan).\n\n"
+                      "• 5.000 ĐOẠN HỘI THOẠI MÔ PHỎNG ĐA DẠNG:\n"
+                      "  Đo độ phong phú từ vựng đạt 78.3%\n"
+                      "  (đảm bảo câu từ tự nhiên và phong phú như giao tiếp thực tế).\n\n"
+                      "• 300 CA THỬ NGHIỆM BẪY SAI SÓT (Adversarial Testing):\n"
+                      "  Thiết kế các cặp tình huống so sánh ranh giới dễ nhầm:\n"
+                      "  - Ca A: Bệnh nhân có tiền sử dị ứng Penicillin\n"
+                      "  - Ca B: Người nhà có tiền sử dị ứng Penicillin (đổi đối tượng)\n"
+                      "  - Người bệnh đính chính mốc thời gian sau một vài câu thoại\n"
+                      "  - Chèn thêm tiếng ồn môi trường và cách phát âm 3 miền\n\n"
+                      "-> ĐẢM BẢO TÍNH ĐỘC LẬP VÀ ĐÁNH GIÁ TOÀN DIỆN."
+                  ), co_td=10.0, co_nd=8.5)
 
     mui_ten_ngang(ax, x1 + w_box1 + 0.05, 5.0, x1 + w_box1 + 0.40, mau=C_PURPLE)
 
     # Khối 2: Đường ống 1.330 Bài Test CI/CD
     x2 = 6.15
-    the_chuc_nang(ax, x2, y_bot, w_box2, h_all, "1.330 BÀI TEST TỰ ĐỘNG (CI/CD PIPELINE)",
+    the_chuc_nang(ax, x2, y_bot, w_box2, h_all, "1.330 TRƯỜNG HỢP KIỂM THỬ TỰ ĐỘNG (CI/CD PIPELINE)",
                   badge_buoc="PYTEST 100% PASS", mau_chinh=C_PURPLE, mau_nen=C_PURPLE_BG, max_char_td=42,
                   noi_dung=(
-                      "Toàn bộ mã nguồn được bảo vệ bởi 1.330 bài Unit & Integration Test:\n\n"
-                      "• MODULE 0: ASR & DƯỢC THƯ ÂM VỊ (62 tests)\n"
-                      "  - Test quét vòng lặp ASR loop, phương ngữ lâm sàng 3 miền\n"
-                      "  - Test BÔI ĐỎ cách ly tên thuốc dân gian ('a móc' -> Amoxicillin)\n\n"
-                      "• MODULE 1: BÓC TÁCH MẨU TIN JSON (145 tests)\n"
-                      "  - Test cấu trúc JSON nguyên tử, cấm sinh văn xuôi, gán mỏ neo [Ti]\n\n"
-                      "• MODULE 2: ĐẠI TỪ NHÂN XƯNG & KHỬ ĐỊNH DANH (120 tests)\n"
-                      "  - Test bộ luật đại từ tiếng Việt, ẩn danh thông tin theo NĐ 13\n\n"
-                      "• MODULE 3: MÁY TRẠNG THÁI FSM & DIALOGUE ACT (98 tests)\n"
-                      "  - Test bắt đính chính nói nhầm, lọc câu giả định tương lai\n\n"
-                      "• MODULE 4: 7 CỔNG KHÓA BẰNG CHỨNG K1-K7 (280 tests)\n"
-                      "  - Test chặn đứng ảo giác bịa đặt số liệu huyết áp và câu trích\n\n"
-                      "• MODULE 5: DƯỢC LÝ DDI, eGFR & 9 THANG ĐIỂM (310 tests)\n"
-                      "  - Test 30 cặp thuốc kỵ nhau, liều trần Paracetamol, tính Cockcroft-Gault\n\n"
-                      "• MODULE TÍCH HỢP E2E & BẢO MẬT SHA-256 (315 tests)\n"
-                      "  - Test xuất bệnh án HL7 FHIR Bundle và niêm phong chữ ký số."
-                  ), co_td=10.5, co_nd=8.5)
+                      "Toàn bộ mã nguồn hệ thống được kiểm định tự động qua 1.330 bài test:\n\n"
+                      "• NHÓM 0: NHẬN DẠNG TIẾNG NÓI & TÊN THUỐC (62 tests)\n"
+                      "  - Kiểm tra quét lặp từ ASR, từ vựng phương ngữ 3 miền\n"
+                      "  - Kiểm tra cơ chế BÔI ĐỎ cảnh báo tên thuốc gọi dân gian\n\n"
+                      "• NHÓM 1: TRÍCH XUẤT THÔNG TIN JSON (145 tests)\n"
+                      "  - Kiểm tra tính hợp lệ của JSON, không sinh văn tự do, lưu câu thoại gốc [Ti]\n\n"
+                      "• NHÓM 2: PHÂN BIỆT ĐẠI TỪ & BẢO MẬT DỮ LIỆU (120 tests)\n"
+                      "  - Kiểm tra đại từ tiếng Việt, chức năng ẩn danh hóa theo Nghị định 13/CP\n\n"
+                      "• NHÓM 3: XỬ LÝ ĐÍNH CHÍNH & LỌC CÂU GIẢ ĐỊNH (98 tests)\n"
+                      "  - Kiểm tra loại bỏ thông tin cũ khi người nói sửa lời, phân loại câu dặn dò\n\n"
+                      "• NHÓM 4: QUY TRÌNH KIỂM TRA LOGIC 7 BƯỚC K1-K7 (280 tests)\n"
+                      "  - Kiểm tra việc ngăn chặn số liệu huyết áp hoặc trích dẫn tự suy diễn\n\n"
+                      "• NHÓM 5: AN TOÀN ĐƠN THUỐC & 9 THANG ĐIỂM LÂM SÀNG (310 tests)\n"
+                      "  - Kiểm tra 30 cặp thuốc tương tác, liều tối đa Paracetamol, tính độ lọc thận\n\n"
+                      "• NHÓM TÍCH HỢP HỆ THỐNG VÀ BẢO MẬT (315 tests)\n"
+                      "  - Kiểm tra xuất hồ sơ theo chuẩn HL7 FHIR và xác thực toàn vẹn dữ liệu."
+                  ), co_td=10.0, co_nd=8.5)
 
     mui_ten_ngang(ax, x2 + w_box2 + 0.05, 5.0, x2 + w_box2 + 0.40, mau=C_SAFE)
 
     # Khối 3: Bảng chỉ số đối chứng thực nghiệm
     x3 = 13.8
     the_chuc_nang(ax, x3, y_bot, w_box3, h_all, "KẾT QUẢ THỰC NGHIỆM ĐO ĐẠC",
-                  badge_buoc="CHỈ SỐ ĐO ĐẠC", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
+                  badge_buoc="KẾT QUẢ ĐO ĐẠC", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
-                      "KẾT QUẢ VƯỢT TRỘI SO VỚI NHÁNH A (AI THƯỜNG):\n\n"
-                      "• ĐỘ CHÍNH XÁC QUY GÁN (Attribution F1):\n"
+                      "KẾT QUẢ VƯỢT TRỘI SO VỚI MÔ HÌNH AI THÔNG THƯỜNG:\n\n"
+                      "• ĐỘ CHÍNH XÁC TRÍCH XUẤT ĐÚNG NGUỒN (Attribution F1):\n"
                       "  Tăng từ 66.1% lên 70.8% (+4.7% F1)\n\n"
-                      "• TỶ LỆ LỖI Ô THUỘC TÍNH (Slot Error Rate):\n"
+                      "• TỶ LỆ LỖI GÁN THUỘC TÍNH (Slot Error Rate):\n"
                       "  Giảm từ 45.4% xuống 36.9% (-8.5% SER)\n\n"
                       "• LỖI NHẦM NGƯỜI NHÀ SANG BỆNH NHÂN:\n"
-                      "  Giảm hơn 6 lần (từ 12.4% xuống 2.1%)\n\n"
-                      "• LỖI SÓT THÔNG TIN NÓI NHẦM ĐÃ BỊ SỬA:\n"
-                      "  Giảm hơn 14 lần (từ 11.5% xuống 0.8%)\n\n"
-                      "• BỎ SÓT DỊ ỨNG NGUY CẤP:\n"
-                      "  Đạt 0.0% (Không bao giờ bỏ sót dị ứng)\n\n"
+                      "  Giảm hơn 6 lần (từ 12.4% xuống còn 2.1%)\n\n"
+                      "• LỖI GIỮ LẠI THÔNG TIN NÓI NHẦM ĐÃ BỊ SỬA:\n"
+                      "  Giảm hơn 14 lần (từ 11.5% xuống còn 0.8%)\n\n"
+                      "• TỶ LỆ BỎ SÓT DỊ ỨNG THUỐC:\n"
+                      "  0.0% (Toàn bộ cảnh báo dị ứng đều được ghi nhận)\n\n"
                       "• THÔNG TIN ĐÚNG BỊ CHẶN NHẦM:\n"
-                      "  0.0% (0 / 30.136 dòng thực nghiệm)\n\n"
+                      "  0.0% (0 / 30.136 dòng dữ liệu kiểm thử)\n\n"
                       "• TỔNG KẾT KIỂM THỬ MÃ NGUỒN:\n"
-                      "  1.330 / 1.330 BÀI TEST ĐẠT 100%!"
-                  ), co_td=10.5, co_nd=8.8)
+                      "  1.330 / 1.330 BÀI TEST ĐẠT KẾT QUẢ 100%!"
+                  ), co_td=10.0, co_nd=8.6)
 
     badge_test = FancyBboxPatch((x3 + 0.3, 0.95), w_box3 - 0.6, 0.46,
                                 boxstyle="round,pad=0.02,rounding_size=0.08",
@@ -839,7 +840,7 @@ def ve_flow_6_ma_tran_test():
 
 
 # ==============================================================================
-# HÌNH 7: QUY TRÌNH BÁC SĨ TƯƠNG TÁC LÂM SÀNG & CLICK-TO-VERIFY TRONG 1 GIÂY
+# HÌNH 7: QUY TRÌNH BÁC SĨ SỬ DỤNG HỆ THỐNG TRONG CA KHÁM BỆNH (< 60 GIÂY THAO TÁC)
 # ==============================================================================
 def ve_flow_7_quy_trinh_bac_si():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -849,54 +850,55 @@ def ve_flow_7_quy_trinh_bac_si():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 7: QUY TRÌNH BÁC SĨ TƯƠNG TÁC LÂM SÀNG & CLICK-TO-VERIFY TRONG 1 GIÂY",
-              "Trải nghiệm thực chiến tại phòng khám: Người thầy thuốc làm chủ 100%, giải phóng đôi tay và tiết kiệm 5-7 phút/ca",
-              badge_text="HUMAN-IN-THE-LOOP", badge_color=C_CYAN)
+              "FLOW 7: QUY TRÌNH BÁC SĨ SỬ DỤNG HỆ THỐNG TRONG CA KHÁM BỆNH (< 60 GIÂY THAO TÁC)",
+              "Bác sĩ làm chủ toàn bộ quy trình, giảm thao tác gõ phím thủ công và tiết kiệm 5–7 phút cho mỗi lượt khám",
+              badge_text="BÁC SĨ KIỂM SOÁT", badge_color=C_CYAN)
 
     cac_buoc = [
-        ("BƯỚC 01", "BẤM 'BẮT ĐẦU KHÁM'", C_NAVY, C_NAVY_BG,
+        ("BƯỚC 01", "BẤM NÚT 'BẮT ĐẦU KHÁM'", C_NAVY, C_NAVY_BG,
          "• Bác sĩ bấm 1 nút trên màn hình\n"
-         "• Hệ thống thu âm thụ động ngầm\n"
-         "• Bác sĩ 100% rảnh tay:\n"
-         "  Tập trung nhìn, lắng nghe và\n"
-         "  thăm khám trực tiếp người bệnh\n"
-         "• Không cần gõ phím cắm cúi!",
+         "• Hệ thống bắt đầu tiếp nhận âm thanh\n"
+         "• Bác sĩ tập trung hoàn toàn vào việc:\n"
+         "  Lắng nghe, giao tiếp và thăm khám\n"
+         "  trực tiếp cho người bệnh\n"
+         "• Không cần vừa khám vừa gõ phím!",
          "[ 0 GIÂY THAO TÁC ]"),
 
-        ("BƯỚC 02", "BỆNH ÁN TỰ ĐỘNG HIỆN", C_TEAL, C_TEAL_BG,
-         "• Bệnh nhân đứng dậy ra về\n"
-         "• Chỉ sau 30-45 giây xử lý:\n"
-         "  Bản nháp SOAP hoàn chỉnh đã\n"
-         "  hiện sẵn trên màn hình\n"
-         "• Mọi câu đều gắn mỏ neo [Ti]\n"
-         "  trỏ thẳng về giây ghi âm gốc",
-         "[ 30s CÓ BỆNH ÁN ]"),
+        ("BƯỚC 02", "TỰ ĐỘNG LẬP HỒ SƠ BỆNH ÁN", C_TEAL, C_TEAL_BG,
+         "• Khi kết thúc lượt khám bệnh\n"
+         "• Sau khoảng 30-45 giây xử lý:\n"
+         "  Bản nháp bệnh án chuẩn SOAP đã\n"
+         "  chuẩn bị sẵn trên màn hình\n"
+         "• Mỗi thông tin đều lưu kèm số thứ tự\n"
+         "  câu thoại [Ti] trong đoạn ghi âm.",
+         "[ 30s CÓ BẢN NHÁP ]"),
 
-        ("BƯỚC 03", "LIẾC MẮT XEM BÔI ĐỎ", C_DANGER, C_DANGER_BG,
-         "• Mắt bác sĩ nhìn thẳng vào mục\n"
+        ("BƯỚC 03", "RÀ SOÁT CÁC CẢNH BÁO BÔI ĐỎ", C_DANGER, C_DANGER_BG,
+         "• Bác sĩ xem nhanh mục\n"
          "  'CẦN BÁC SĨ XÁC NHẬN':\n"
-         "  - Gợi ý tên thuốc ASR ('a móc'...)\n"
-         "  - Cảnh báo thuốc kỵ nhau DDI\n"
-         "  - Liều trần hoặc câu nói nhầm\n"
-         "• Bác sĩ liếc mắt đúng 20 giây!",
-         "[ 20s LIẾC MẮT SOI ]"),
+         "  - Tên thuốc nhận diện chưa chắc chắn\n"
+         "  - Cảnh báo tương tác thuốc cần lưu ý\n"
+         "  - Thông tin bệnh nhân đã tự sửa lại\n"
+         "• Thời gian rà soát khoảng 20 giây.",
+         "[ 20s RÀ SOÁT CẢNH BÁO ]"),
 
-        ("BƯỚC 04", "CLICK-TO-VERIFY 1 GIÂY", C_WARN, C_WARN_BG,
-         "• Với thông tin cần kiểm chứng:\n"
-         "  Bác sĩ bấm chuột vào mỏ neo\n"
-         "• Hệ thống phát lại đúng 2 giây\n"
-         "  âm thanh giọng bệnh nhân nói\n"
-         "• Bác sĩ bấm [Xác nhận] hoặc\n"
-         "  gõ sửa lại trực tiếp trong 1s!",
+        ("BƯỚC 04", "KIỂM TRA LẠI ÂM THANH GỐC", C_WARN, C_WARN_BG,
+         "• Với thông tin cần nghe lại đối chứng:\n"
+         "  Bác sĩ bấm vào số thứ tự câu thoại\n"
+         "• Hệ thống phát lại ngay đoạn âm thanh 2s\n"
+         "  đúng giọng người bệnh nói\n"
+         "• Bác sĩ bấm xác nhận hoặc chỉnh sửa\n"
+         "  trực tiếp trên màn hình trong 1 giây!",
          "[ 1s NGHE ĐỐI SOÁT ]"),
 
-        ("BƯỚC 05", "KÝ DUYỆT & IN DẶN DÒ", C_SAFE, C_SAFE_BG,
+        ("BƯỚC 05", "KÝ DUYỆT & IN HƯỚNG DẪN", C_SAFE, C_SAFE_BG,
          "• Bác sĩ bấm nút 'Ký duyệt':\n"
-         "  - Niêm phong chữ ký số SHA-256\n"
-         "  - Đồng bộ sang hệ thống EMR viện\n"
-         "• Tự động in Tờ dặn dò trao tay\n"
-         "  (4 khung giờ uống thuốc rõ ràng)\n"
-         "• TIẾT KIỆM 5-7 PHÚT MỖI CA KHÁM!",
+         "  - Niêm phong hồ sơ (mã hóa SHA-256)\n"
+         "  - Chuyển vào phần mềm viện (EMR)\n"
+         "• Tự động in Phiếu hướng dẫn dùng thuốc\n"
+         "  (chia 4 khung giờ Sáng - Trưa - Chiều - Tối)\n"
+         "• TIẾT KIỆM 5-7 PHÚT\n"
+         "  CHO MỖI LƯỢT KHÁM!",
          "[ TIẾT KIỆM 5-7 PHÚT ]")
     ]
 
@@ -908,9 +910,8 @@ def ve_flow_7_quy_trinh_bac_si():
         x_c = 0.6 + idx * 3.65
         the_chuc_nang(ax, x_c, y_card, w_card, h_card, tieu_de,
                       badge_buoc=badge, mau_chinh=mau, mau_nen=bg,
-                      noi_dung=noi_dung, co_td=9.5, co_nd=8.6, max_char_td=22)
+                      noi_dung=noi_dung, co_td=9.5, co_nd=8.5, max_char_td=22)
         
-        # Pill footer inside card
         w_pill = w_card - 0.5
         pill_bot = FancyBboxPatch((x_c + 0.25, y_card + 0.35), w_pill, 0.42,
                                   boxstyle="round,pad=0.02,rounding_size=0.08",
@@ -922,14 +923,14 @@ def ve_flow_7_quy_trinh_bac_si():
         if idx < len(cac_buoc) - 1:
             mui_ten_ngang(ax, x_c + w_card + 0.05, 5.0, x_c + w_card + 0.25, mau=mau, day=2.2)
 
-    # Dai tong ket toan trang o duoi cung
+    # Dải tổng kết toàn trang ở dưới cùng
     summary_bar = FancyBboxPatch((0.6, 0.18), 18.0, 0.55,
                                   boxstyle="round,pad=0.02,rounding_size=0.08",
                                   facecolor=C_HEADER_BG, edgecolor=C_SAFE, linewidth=1.2)
     ax.add_patch(summary_bar)
     ax.text(9.6, 0.45,
-            "TỔNG KẾT: BÁC SĨ CHỈ MẤT DƯỚI 60 GIÂY THAO TÁC — GIẢI PHÓNG ĐÔI TAY, DÀNH TRỌN THỜI GIAN LẮNG NGHE & CHĂM SÓC NGƯỜI BỆNH!",
-            ha="center", va="center", fontsize=9.8, fontweight="bold", color="white")
+            "TỔNG KẾT: BÁC SĨ CHỈ MẤT DƯỚI 60 GIÂY THAO TÁC TRÊN MÀN HÌNH — TẬP TRUNG THỜI GIAN VÀO VIỆC THĂM KHÁM VÀ CHĂM SÓC NGƯỜI BỆNH!",
+            ha="center", va="center", fontsize=9.6, fontweight="bold", color="white")
 
     luu_anh(fig, "flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png")
 
