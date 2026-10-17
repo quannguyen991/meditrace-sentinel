@@ -137,16 +137,30 @@ export function lapTaiKhoan(app: express.Express) {
   // Chặn gửi biểu mẫu từ trang khác: yêu cầu ghi phải là JSON, và nếu có Origin thì phải cùng máy chủ,
   // hoặc nằm trong danh sách MEDITRACE_NGUON_DUOC_PHEP (tên miền, cách nhau dấu phẩy) — dùng cho tên
   // miền cố định trên Vercel chuyển tiếp về đây, nơi Host là đường hầm còn Origin là tên miền Vercel.
-  const nguonDuocPhep = new Set(
-    (process.env.MEDITRACE_NGUON_DUOC_PHEP || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
-  );
+  const nguonDuocPhep = new Set([
+    "meditrace-sentinel.vercel.app",
+    "meditrace-sentinel-siu6.vercel.app",
+    ...(process.env.MEDITRACE_NGUON_DUOC_PHEP || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
+  ]);
   app.use("/api", (req, res, next) => {
     if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
     const nguon = req.get("origin");
     if (nguon) {
       try {
         const may = new URL(nguon).host.toLowerCase();
-        if (may !== req.get("host") && !nguonDuocPhep.has(may))
+        const reqHost = (req.get("host") || "").toLowerCase().split(":")[0];
+        const fwdHost = (req.get("x-forwarded-host") || "").toLowerCase().split(":")[0];
+        const mayClean = may.split(":")[0];
+        const hopLe =
+          mayClean === reqHost ||
+          mayClean === fwdHost ||
+          nguonDuocPhep.has(may) ||
+          nguonDuocPhep.has(mayClean) ||
+          mayClean.endsWith(".vercel.app") ||
+          mayClean.endsWith(".trycloudflare.com") ||
+          mayClean === "localhost" ||
+          mayClean === "127.0.0.1";
+        if (!hopLe)
           return res.status(403).json({ error: "Yêu cầu từ trang khác bị từ chối" });
       } catch {
         return res.status(403).json({ error: "Origin không hợp lệ" });
