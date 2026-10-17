@@ -1930,7 +1930,7 @@ async function khoiDong() {
     app.get("*", (_req, res) => res.sendFile(path.join(GOC, "dist", "index.html")));
   } else {
     const { createServer } = await import("vite");
-    const vite = await createServer({ server: { middlewareMode: true }, appType: "spa" });
+    const vite = await createServer({ server: { middlewareMode: true, allowedHosts: true }, appType: "spa" });
     app.use(vite.middlewares);
   }
   app.listen(PORT, () => {

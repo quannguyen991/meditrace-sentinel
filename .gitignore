@@ -26,3 +26,6 @@ data/audio-bench/
 
 # 24/09/2026: nhan so thu tu hien trong File Explorer (xem 00-DOC-TRUOC-BAN-DO.md)
 desktop.ini
+~$*.docx
+tmp/
+.vercel

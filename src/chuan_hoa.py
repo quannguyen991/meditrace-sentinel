@@ -68,11 +68,27 @@ BANG = [
     # --- giu cho: nghia co the, KHONG phai phuong ngu
     (_tu("bả vai"), 0, "", None, ""),
     (_tu("chi (dưới|trên)"), 0, "", None, ""),
+    (_tu("trằn trọc"), 0, "", None, ""),
+    (r"(?<!\w)(?:đầu|móng) giò(?!\w)", 0, "", None, ""),
+    (r"(?<!\w)(?:hung|độc) ác(?!\w)", 0, "", None, ""),
     (r"(?<!\w)(mọc|đau|sâu|nhổ|cái|chiếc|hàm|chải|đánh|niềng) răng(?!\w)", 0,
      "", None, ""),
     (r"(?<!\w)răng (sữa|hàm|khôn|miệng|cửa)(?!\w)", 0, "", None, ""),
     (r"(?<!\w)(chụp|tấm|bức|hình) ảnh(?!\w)", 0, "", None, ""),
+    (_tu("bẹ (cải|chuối|ngô|bắp|dừa)"), 0, "", None, ""),
     # --- cum nhieu tu, mot nghia
+    (_tu("cái bụng dưới nó cứ trằn xuống"), 0, "vùng bụng dưới cứ nặng tức", CHAC, ""),
+    (_tu("bọng đái bị trằn"), 0, "bàng quang bị nặng tức", CHAC, ""),
+    (_tu("sáng dậy sưng hai cái giò"), 0, "sáng dậy sưng hai chân", CHAC, ""),
+    (_tu("trặc giò"), 0, "trật chân", CHAC, ""),
+    (_tu("uống rượu vô đau thắt"), 0, "uống rượu vào đau thắt", CHAC, ""),
+    (r"(?<!\w)(?:uống rượu vào đau thắt|uống rượu vô đau thắt)\s+(mỏ ác)(?!\w)", 1, "vùng thượng vị", CHAC, ""),
+    (r"(?<!\w)(?:cháu|bé|trẻ|tháng).*?\b(mỏ ác)\b", 1, "thóp trước", CHAC, ""),
+    (_tu("trong mình cứ rười rượi mấy bữa rày"), 0, "trong người cứ uể oải mấy ngày nay", CHAC, ""),
+    (_tu("sau cơn sốt người rười rượi"), 0, "sau cơn sốt người kiệt sức", CHAC, ""),
+    (r"(?<!\w)(?:tiểu|đái|thấy)\s+(thốn)(?=\s+dữ dội(?!\w))", 1, "buốt", CHAC, ""),
+    (_tu("thốn gót"), 0, "đau nhói gót", CHAC, ""),
+    (_tu("cái bẹ"), 0, "bả vai", CHAC, ""),
     (_tu("có chi mô"), 0, "không có gì", CHAC, ""),
     (_tu("mần răng"), 0, "làm sao", CHAC, ""),
     (_tu("làm răng"), 0, "làm sao", CHAC, ""),
@@ -86,6 +102,20 @@ BANG = [
     (_tu("đi cầu"), 0, "đi đại tiện", CHAC, ""),
     (_tu("lừ đừ"), 0, "mệt mỏi", CHAC, ""),
     (_tu("dữ lắm"), 0, "rất nhiều", CHAC, ""),
+    (_tu("mỏ ác"), 0, "mũi ức", CAN_HOI, "người lớn: thượng vị, trẻ em: thóp trước"),
+    (_tu("chấn thủy"), 0, "Vùng thượng vị", CHAC, "" ),
+    (_tu("Màng tang"), 0, "Thái dương", CHAC, ""),
+    (_tu("Lóng tay"), 0, "Khớp liên đốt ngón tay", CHAC, ""),
+    (_tu("Cù chỏ"), 0, "Khớp khuỷu tay", CHAC, ""),
+    (_tu("Ống điếu"), 0, "Xương cẳng chân", CHAC, ""),
+    (_tu("Trái khế"), 0, "Yết Hầu", CHAC, ""),
+    (_tu("Trái cấm "), 0, "Yết Hầu", CHAC, ""),
+    (_tu("Rần rần"), 0, "Dị cảm thần kinh", CHAC, ""),
+    (_tu("Nê bụng"), 0, "Chướng bụng", CHAC, ""),
+    (_tu("Dằm xóc "), 0, "Đau rát bỏng", CHAC, ""),
+    (_tu("bữa ni"), 0, "hôm nay", CHAC, ""),
+    (_tu("bữa nớ"), 0, "hôm đó", CHAC, ""),
+    (_tu("khi nớ"), 0, "khi đó", CHAC, ""),
     (_tu("nóng hầm hập"), 0, "nóng nhiều có thể sốt", CAN_HOI,
      "người nói chưa đo nhiệt độ — không tự đổi thành sốt"),
     (_tu("tới công chuyện"), 0, "trở nặng", CAN_HOI,
@@ -126,6 +156,10 @@ BANG = [
     (_tu("hỉ"), 0, "nhỉ", CHAC, ""),
     (_tu("nớ"), 0, "đó", CHAC, ""),
     (_tu("mần"), 0, "làm", CHAC, ""),
+    (_tu("bẹ"), 0, "bả vai", CHAC, ""),
+    (_tu("Giò"), 0, "Toàn bộ chi dưới / Cẳng chân", CHAC, ""),
+    (_tu("Xốn"), 0, "Cảm giác dị vật", CHAC, ""),
+    (_tu("tui"), 0, "tôi", CHAC, ""),
 ]
 _BANG = [(re.compile(bt), nhom, nghia, muc, ly) for bt, nhom, nghia, muc, ly in BANG]
 
@@ -182,3 +216,21 @@ def chuan_hoa(van: str, gom_can_hoi: bool = True, gom_giu_lai: bool = False) -> 
 def can_hoi(van: str) -> List[ChoDoi]:
     """Cac cho MO HO trong doan — ung vien cho tang hoi lai."""
     return [c for c in phan_tich(van) if c.muc_tin == CAN_HOI]
+
+if __name__ == "__main__":
+    CAU_VI_DU = [
+        "Bữa ni tui đi khám.",
+        "Bữa nớ tui bị ói.",
+        "Khi nớ tui đang ở nhà.",
+        "Tui bị tê chân.",
+        "Mệ bị đau đầu.",
+    ]
+
+    for cau in CAU_VI_DU:
+        print("Nguyên văn:", cau)
+        print("Chuẩn hóa:", chuan_hoa(cau))
+
+        for muc in can_hoi(cau):
+            print("Cần hỏi:", muc.goc, "-", muc.ly_do)
+
+        print()

@@ -351,6 +351,16 @@ class May(BaseHTTPRequestHandler):
                 return self._tra({"phien": phien,
                                   "doan": [_doan_ra_json(t) for t in pipe.transcript(phien)],
                                   "tach_nguoi_noi": pipe.store.load(phien).get("tach_nguoi_noi") or {}})
+            if duong in ("/copilot", "/ui", "/"):
+                tep_ui = duong_dan.GOC_DU_AN / "src" / "giao_dien_copilot.html"
+                if tep_ui.exists():
+                    du = tep_ui.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    self.send_header("Content-Length", str(len(du)))
+                    self.end_headers()
+                    self.wfile.write(du)
+                    return
             raise LoiDichVu("khong_co_duong", f"không có đường {duong}", 404)
         except Exception as exc:
             self._bao_loi(exc)

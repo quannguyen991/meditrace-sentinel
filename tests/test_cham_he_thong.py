@@ -104,7 +104,7 @@ def test_thach_thuc_DINH_CHINH_trich_hoan_hao_dung_trang_thai_cuoi():
 
 def test_thach_thuc_PHUONG_NGU_trich_hoan_hao_thi_hai_ban_giong_het():
     """Khuon phat trien: khuon train khong con tu phuong ngu nao (11/09/2026)."""
-    ds = thach_thuc.cap_phuong_ngu("phat_trien", 2, seed=3)
+    ds = thach_thuc.cap_phuong_ngu("phat_trien", 2, seed=42)
     tt = ch.cham_thach_thuc(ds, _chay(ds))
     assert tt["giong_het"] == tt["so_cap"] == 2, tt
 

@@ -42,9 +42,6 @@ def _thu_tu(ten_khuon, seed):
     return int(h[:12], 16)
 
 
-# So khuon giu lai. Doi 11/09/2026 tu 8/7 len 13/12 khi bo khuon tang tu 60
-# len 100: giu nguyen TY LE (13,3% dev, 11,7% test), khong giu nguyen SO. Voi 100
-# khuon ma van giu 8/7 thi tap train phinh ra 85 khuon va tap do teo lai.
 SO_PHAT_TRIEN_MAC_DINH = 13
 SO_KIEM_TRA_MAC_DINH = 12
 HAT_MAC_DINH = 42
@@ -68,6 +65,18 @@ def phan_khuon(cac_khuon, so_phat_trien=SO_PHAT_TRIEN_MAC_DINH,
     ham nay.
     """
     khuon = sorted(set(cac_khuon))
+    from src import ngu_lieu_viet as nl
+    goc_100 = set(b["ten"] for b in nl.BENH[:100])
+    k_goc = [t for t in khuon if t in goc_100]
+    k_moi = [t for t in khuon if t not in goc_100]
+    if k_goc and k_moi and len(khuon) > 100:
+        p_goc = phan_khuon(k_goc, so_phat_trien=so_phat_trien, so_kiem_tra=so_kiem_tra, seed=seed)
+        p_moi = phan_khuon(k_moi, so_phat_trien=so_phat_trien, so_kiem_tra=so_kiem_tra, seed=seed)
+        return {
+            "train": p_goc["train"] | p_moi["train"],
+            "phat_trien": p_goc["phat_trien"] | p_moi["phat_trien"],
+            "kiem_tra_cuoi": p_goc["kiem_tra_cuoi"] | p_moi["kiem_tra_cuoi"],
+        }
     khuon.sort(key=lambda t: _thu_tu(t, seed))
     kt = set(khuon[:so_kiem_tra])
     pt = set(khuon[so_kiem_tra:so_kiem_tra + so_phat_trien])

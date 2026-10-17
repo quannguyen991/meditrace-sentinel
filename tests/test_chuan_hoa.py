@@ -73,3 +73,51 @@ def test_dau_ket_nhan_ra_cau_hoi():
     d = doan_van.cac_doan(van)
     assert doan_van.dau_ket(van, d[0]) == "?"
     assert doan_van.dau_ket(van, d[1]) == "."
+
+def test_BE_la_ba_vai_KHONG_nham_thanh_ben():
+    """Bệnh nhân miền Trung: 'bẹ' là vùng lưng/bả vai, không được nhầm thành 'bẹn háng'"""
+    assert ch.chuan_hoa("mấy nay nhức cái bẹ bên phải quá") == "mấy nay nhức bả vai bên phải quá"
+    assert ch.chuan_hoa("đau nhức sau bẹ") == "đau nhức sau bả vai"
+
+    assert ch.chuan_hoa("nổi hạch ở vùng bẹn") == "nổi hạch ở vùng bẹn"
+    assert ch.chuan_hoa("ăn canh bẹ cải bị nghẹn") == "ăn canh bẹ cải bị nghẹn"
+
+
+def test_TRAN_la_tuc_ha_vi_KHONG_nham_thanh_mat_ngu():
+    """'Trằn' vùng bụng dưới là tức hạ vị, không đổi thành 'trằn trọc'"""
+    assert ch.chuan_hoa("cái bụng dưới nó cứ trằn xuống") == "vùng bụng dưới cứ nặng tức"
+    assert ch.chuan_hoa("bọng đái bị trằn khó chịu") == "bàng quang bị nặng tức khó chịu"
+    assert ch.chuan_hoa("nửa đêm trằn trọc không ngủ được") == "nửa đêm trằn trọc không ngủ được"
+
+
+def test_GIO_la_chi_duoi_KHONG_nham_thiet_bi_hoac_thuc_pham():
+    """'Giò' là chân khi nói về cơ thể, giữ nguyên khi là thiết bị hoặc món ăn"""
+    assert ch.chuan_hoa("sáng dậy sưng hai cái giò") == "sáng dậy sưng hai chân"
+    assert ch.chuan_hoa("bị trặc giò đi không nổi") == "bị trật chân đi không nổi"
+    assert ch.chuan_hoa("bác sĩ đặt đầu giò siêu âm lên bụng") == "bác sĩ đặt đầu giò siêu âm lên bụng"
+    assert ch.chuan_hoa("hồi trưa có ăn cháo móng giò") == "hồi trưa có ăn cháo móng giò"
+
+
+def test_MO_AC_phan_biet_nguoi_lon_va_tre_nho():
+    """Người lớn: mỏ ác là thượng vị; trẻ sơ sinh: mỏ ác là thóp trước"""
+    assert ch.chuan_hoa("uống rượu vô đau thắt mỏ ác") == "uống rượu vào đau thắt vùng thượng vị"
+    assert ch.chuan_hoa("cháu 4 tháng mà mỏ ác bị lõm sâu") == "cháu 4 tháng mà thóp trước bị lõm sâu"
+    assert ch.chuan_hoa("tính tình hung ác quá") == "tính tình hung ác quá"
+
+
+def test_RUOI_RUOI_la_suy_nhuoc_KHONG_nham_thanh_mat_me():
+    """'Rười rượi' trong bệnh cảnh là mệt lả, kiệt sức"""
+    assert ch.chuan_hoa("sau cơn sốt người rười rượi không nhấc nổi tay") == "sau cơn sốt người kiệt sức không nhấc nổi tay"
+    assert ch.chuan_hoa("trong mình cứ rười rượi mấy bữa rày") == "trong người cứ uể oải mấy ngày nay"
+
+
+def test_THON_la_dau_buot_noi_tang_KHONG_nham_cam_xuc():
+    """'Thốn' là tính chất đau nhói cấp tính"""
+    assert ch.chuan_hoa("mỗi lần đi tiểu thấy thốn dữ dội") == "mỗi lần đi tiểu thấy buốt dữ dội"
+    assert ch.chuan_hoa("bước chân xuống đất bị thốn gót") == "bước chân xuống đất bị đau nhói gót"
+
+
+def test_CAN_HOI_LAI_khi_tu_ngu_mo_ho():
+    """Giữ nguyên từ và gắn cờ cần hỏi lại khi ngữ cảnh chưa đủ rõ"""
+    c = ch.phan_tich("bị đau mỏ ác")
+    assert c and c[0].muc_tin == ch.CAN_HOI

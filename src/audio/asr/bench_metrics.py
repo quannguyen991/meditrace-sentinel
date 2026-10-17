@@ -10,7 +10,7 @@ from typing import Any
 
 from . import critical_tokens as ct
 
-LOAI = ("thuoc", "lieu", "tan_suat", "thoi_gian", "phu_dinh", "trang_thai", "nguoi")
+LOAI = ("thuoc", "lieu", "tan_suat", "thoi_gian", "phu_dinh", "trang_thai", "nguoi", "muc_do_dau")
 
 
 def chuan_hoa_do(text: str) -> list[str]:

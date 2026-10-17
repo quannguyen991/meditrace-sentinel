@@ -63,5 +63,31 @@ def test_cach_C_trieu_chung_co_canh_bao_o_lai_than():
 
 
 def test_khong_canh_bao_thi_van_la_da_kiem_chung():
-    dg = [cr.DanhGia(0, "khac", 0.3, 0.0, 0.0, cr.DA_KIEM_CHUNG, [])]
+    dg = [cr.DanhGia(0, "khac", 0.3, 0.0, 0.0, 0.0, cr.DA_KIEM_CHUNG, [])]
     assert cr.dua_sang_xac_nhan(dg) == {}
+
+
+def test_thuoc_khoang_dieu_tri_hep_xep_loai_nti():
+    p = pb(0, "đang dùng thuốc warfarin 2mg hàng ngày", [2], ["uống warfarin ạ"])
+    loai = cr.loai_thong_tin(p)
+    assert loai == "thuoc_nti"
+    assert cr.MUC_NGHIEM_TRONG[loai] == 1.0
+
+
+def test_co_dia_nhay_cam_khuech_dai_rui_ro():
+    # Bệnh nhân mang thai 10 tuần và suy thận nặng
+    bn = {"mang_thai": True, "tuan_thai": 10, "egfr": 25}
+    tt = cr.phan_tich_co_dia_benh_nhan(bn)
+    assert tt.he_so_tong > 1.0
+    assert any("Thai kỳ 3 tháng đầu" in y for y in tt.cac_yeu_to)
+    assert any("Suy thận nặng" in y for y in tt.cac_yeu_to)
+
+
+def test_giai_trinh_lam_sang_tu_dong():
+    bn = {"mang_thai": True}
+    ps = [pb(0, "dị ứng penicillin", [2], ["dị ứng penicillin ạ"])]
+    kq = kbc.khoa_ca(ps, HT)["ket_qua"]
+    danh_gia = cr.cham(ps, kq, thong_tin_benh_nhan=bn)
+    assert danh_gia[0].giai_trinh
+    assert "Khuếch đại" in danh_gia[0].giai_trinh
+

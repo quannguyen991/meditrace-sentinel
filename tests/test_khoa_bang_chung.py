@@ -198,3 +198,61 @@ def test_bia_trich_dan_LUON_bi_chan(bo_train):
 def test_gia_dinh_thanh_that_LUON_bi_chan(bo_train):
     ket, ly = do_bat_loi(bo_train, "gia_dinh_thanh_that", seed=3)
     assert ket["chan"] > 0 and ket["lot"] == 0, (ket, ly)
+
+
+# --------------------------------------- cac ca lam sang moi: dinh chinh ngam & chong chan oan
+
+def test_dinh_chinh_ngam_va_kiem_nghiem_bi_chan():
+    # 1. Tuong la di ung nhung test da am tinh -> bi chan
+    ht1 = "Bệnh nhân: Hồi đầu tưởng là dị ứng tôm nhưng đi test da thì âm tính."
+    k1 = _k(pb(0, "dị ứng tôm", [1], ["dị ứng tôm"], tinh_huong="thực tế", phu_dinh=False), ht1)
+    assert "dinh_chinh_ngam" in k1.chan
+
+    # 2. Noi soi binh thuong chu khong phai viem loet -> bi chan
+    ht2 = "Bệnh nhân: Đi nội soi thì bình thường chứ không phải viêm loét dạ dày."
+    k2 = _k(pb(0, "viêm loét dạ dày", [1], ["viêm loét dạ dày"], tinh_huong="thực tế", phu_dinh=False), ht2)
+    assert "dinh_chinh_ngam" in k2.chan
+
+    # 3. Neu mo hinh ghi nhan phu dinh (khong di ung tom) -> KHONG chan
+    k3 = _k(pb(0, "dị ứng tôm", [1], ["dị ứng tôm"], tinh_huong="thực tế", phu_dinh=True), ht1)
+    assert "dinh_chinh_ngam" not in k3.chan
+
+
+def test_chi_dinh_phong_ngua_va_truong_hop_KHONG_chan_oan():
+    # 1. Aspirin phong ngua dot quy -> thuoc thuc te, khong bi chan
+    ht1 = "Bệnh nhân: Tôi đang uống aspirin phòng ngừa đột quỵ hàng ngày."
+    k1 = _k(pb(0, "aspirin", [1], ["uống aspirin phòng ngừa"], tinh_huong="thực tế"), ht1)
+    assert "dieu_kien" not in k1.chan
+
+    # 2. Truong hop cua bac la viem phe quan -> chan doan thuc te, khong bi chan
+    ht2 = "Bác sĩ: Trường hợp của bác là viêm phế quản cấp."
+    k2 = _k(pb(0, "viêm phế quản cấp", [1], ["viêm phế quản cấp"], tinh_huong="thực tế", nguoi_noi="bác sĩ"), ht2)
+    assert "dieu_kien" not in k2.chan
+
+    # 3. Cau ghep ve dieu kien va ve thuc te da dien ra -> ve sau khong bi chan oan
+    ht3 = "Bệnh nhân: Nếu mai sốt lại thì đi khám, còn hôm nay tôi đã uống paracetamol rồi."
+    k3 = _k(pb(0, "paracetamol", [1], ["đã uống paracetamol rồi"], tinh_huong="thực tế"), ht3)
+    assert "dieu_kien" not in k3.chan
+
+    # 4. Cau gia dinh tuong lai that su -> BI CHAN
+    ht4 = "Bác sĩ: Bác uống thuốc phòng trường hợp sốt lại."
+    k4 = _k(pb(0, "sốt", [1], ["phòng trường hợp sốt lại"], tinh_huong="thực tế"), ht4)
+    assert "dieu_kien" in k4.chan
+
+
+def test_k7_thong_tin_bi_thay_the_superseded_bi_chan():
+    """K7 Supersession: Claim tung co evidence that trong transcript (K1-K3 PASS),
+    nhung da bi dinh chinh/thay the boi luot sau thi K7 phai CHAN (khong vao than benh an)."""
+    ht = ("Bệnh nhân: Em đang uống amlodipine 5 mg mỗi ngày.\n"
+          "Bác sĩ: Huyết áp chưa ổn định, tôi đổi sang 10 mg từ hôm nay nhé.\n"
+          "Bệnh nhân: Dạ vâng bác sĩ.")
+    p_cu = pb(0, "amlodipine", [1], ["amlodipine 5 mg"], thuoc={"ten": "amlodipine", "lieu": "5 mg"}, trang_thai="bị thay thế")
+    k_cu = _k(p_cu, ht)
+    assert not k_cu.qua
+    assert "bi_thay_the" in k_cu.chan
+
+    p_moi = pb(1, "amlodipine", [2], ["đổi sang 10 mg"], thuoc={"ten": "amlodipine", "lieu": "10 mg"}, trang_thai="còn hiệu lực")
+    k_moi = _k(p_moi, ht)
+    assert k_moi.qua
+    assert not k_moi.chan
+

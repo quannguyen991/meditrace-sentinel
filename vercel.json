@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "meditrace-sentinel",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://automatic-messenger-resulting-conservative.trycloudflare.com/$1"
+    }
+  ]
+}

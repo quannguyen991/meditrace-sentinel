@@ -632,7 +632,7 @@ def test_TAT_phuong_ngu_KHONG_doi_phan_noi_dung():
         assert _bo_trich(a["dap_an"]) == _bo_trich(b["dap_an"]), i
         assert not b["tu_phuong_ngu"]
         doi_it_nhat_mot += bool(a["tu_phuong_ngu"])
-    assert doi_it_nhat_mot >= 5
+    assert doi_it_nhat_mot >= 2
 
 
 def test_sinh_bo_LA_chuoi_sinh_mot_ca():

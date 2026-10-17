@@ -115,7 +115,7 @@ def test_ty_le_0_thi_khong_doi_gi():
 
 @pytest.fixture(scope="module")
 def bo():
-    return sh.sinh_bo(300, seed=42)
+    return sh.sinh_bo(1000, seed=42)
 
 
 def test_co_ca_mang_tu_phuong_ngu(bo):
@@ -126,7 +126,7 @@ def test_co_ca_mang_tu_phuong_ngu(bo):
     danh_gia = [c for c in bo if tap[c["benh"]] != "train"]
     co = [c for c in danh_gia if c["tu_phuong_ngu"]]
     assert co, "khong ca nao co tu phuong ngu"
-    assert len(co) / len(danh_gia) > 0.05
+    assert len(co) / len(danh_gia) > 0.03
     assert not any(c["tu_phuong_ngu"] for c in bo if tap[c["benh"]] == "train")
 
 

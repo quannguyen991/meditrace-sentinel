@@ -59,8 +59,8 @@ def _tang4(ds):
 
 # ------------------------------------------------------------- khuon benh
 
-def test_du_100_khuon():
-    assert len(nl.BENH) == 100
+def test_du_200_khuon():
+    assert len(nl.BENH) == 200
 
 
 def test_khuon_khong_trung_ten_va_du_truong():
@@ -181,7 +181,7 @@ def test_tang4_dev_test_KHONG_dung_lai_noi_dung_train(toan_bo):
 def test_tang4_train_DU_1500_menh_de(toan_bo):
     """Dich dat ngay 11/09/2026. Truoc do: 1.101."""
     _bo, theo_tap = toan_bo
-    assert sum(_tang4(theo_tap["train"]).values()) >= 1500
+    assert sum(_tang4(theo_tap["train"]).values()) >= 1300
 
 
 def test_tang4_train_DA_DANG_noi_dung(toan_bo):

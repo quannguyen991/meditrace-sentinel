@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediTrace Sentinel — Bàn Làm Việc Bác Sĩ & Trợ Lý Lâm Sàng Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-sub: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --purple: #8b5cf6;
+      --purple-light: #ede9fe;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #090d16;
+      --surface: #111827;
+      --surface-sub: #1f2937;
+      --border: #374151;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary-light: #1e3a5f;
+      --danger-light: #3f1d1d;
+      --warning-light: #3a2e15;
+      --success-light: #133829;
+      --purple-light: #2e1a47;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #0284c7, #0d9488);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary {
+      background: var(--surface-sub);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover { filter: brightness(0.9); }
+    .sha-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--surface-sub);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* MAIN 3-COLUMN WORKSPACE */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 420px 1fr;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .column:last-child { border-right: none; }
+
+    .column-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .badge-blue { background: var(--primary-light); color: var(--primary); }
+    .badge-red { background: var(--danger-light); color: var(--danger); }
+    .badge-green { background: var(--success-light); color: var(--success); }
+    .badge-amber { background: var(--warning-light); color: var(--warning); }
+
+    .column-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* COLUMN 1: DIALOGUE & AUDIO */
+    .audio-card {
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .audio-player-mock {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .play-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .waveform {
+      flex: 1;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .wave-bar {
+      width: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse { from { height: 6px; } to { height: 22px; } }
+
+    .pii-switch-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--purple-light);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .bubble {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .bubble:hover { border-color: var(--primary); }
+    .bubble.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .bubble-role {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .role-doctor { color: #0284c7; }
+    .role-patient { color: #10b981; }
+
+    /* COLUMN 2: GUARDRAILS & ACTIVE CLARIFICATION */
+    .guardrail-card {
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .guardrail-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .guardrail-item:last-child { border-bottom: none; }
+
+    .alert-banner {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    .alert-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #fca5a5; }
+    .alert-warning { background: var(--warning-light); color: #b45309; border: 1px solid #fcd34d; }
+
+    .clarification-card {
+      background: var(--surface);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      background: var(--surface-sub);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .chip:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* COLUMN 3: CLINICAL NOTE 3-PARTITIONS */
+    .note-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .note-section-header {
+      padding: 10px 14px;
+      background: var(--surface-sub);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .note-content {
+      padding: 12px 14px;
+      font-size: 13px;
+      outline: none;
+    }
+    .note-content[contenteditable="true"]:focus {
+      background: var(--primary-light);
+    }
+
+    .confirm-box {
+      border: 2px solid var(--warning);
+      background: #fffbeb;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    [data-theme="dark"] .confirm-box {
+      background: #2a200e;
+    }
+    .confirm-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: var(--surface);
+      width: 650px;
+      max-height: 80vh;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      background: var(--surface-sub);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-badge">M</div>
+      <div>
+        <div class="brand-title">MediTrace Sentinel <span class="badge badge-blue">v2.5 Enterprise</span></div>
+        <div class="brand-subtitle">Trợ Lý Lâm Sàng & Kiểm Duyệt Hồ Sơ Bệnh Án An Toàn Đa Tầng</div>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="sha-tag" title="Chữ ký băm bảo mật SHA-256 chống can thiệp bệnh án">
+        <span>🔒 SHA-256:</span>
+        <strong id="shaSig">a9c8f21e...7b42</strong>
+      </div>
+
+      <button class="btn btn-secondary" onclick="toggleTheme()" title="Đổi giao diện Sáng / Tối">
+        🌓 Giao diện
+      </button>
+
+      <button class="btn btn-secondary" onclick="moModalFHIR()">
+        ⚡ Xuất HL7 FHIR R4
+      </button>
+
+      <button class="btn btn-secondary" onclick="inBenhAn()">
+        🖨️ In Bệnh Án
+      </button>
+
+      <button class="btn btn-secondary" onclick="inDanDo()">
+        💚 In Dặn Dò Người Bệnh
+      </button>
+
+      <button class="btn btn-success" onclick="xacNhanPheDuyet()">
+        ✅ Phê Duyệt Hồ Sơ (1-Click)
+      </button>
+    </div>
+  </header>
+
+  <!-- 3-COLUMN WORKSPACE -->
+  <main class="workspace">
+    
+    <!-- CỘT 1: HỘI THOẠI & ÂM THANH KHÁM BỆNH -->
+    <section class="column">
+      <div class="column-header">
+        <span>🎙️ Băng Ghi Âm & Hội Thoại</span>
+        <span class="badge badge-green">Đã gỡ băng</span>
+      </div>
+
+      <div class="column-body">
+        <!-- Audio Player Mockup -->
+        <div class="audio-card">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">TỆP GHI ÂM CA KHÁM #BN_7718</div>
+          <div class="audio-player-mock">
+            <button class="play-btn" id="btnPlay" onclick="togglePlay()">▶</button>
+            <div class="waveform">
+              <div class="wave-bar" style="height: 12px;"></div>
+              <div class="wave-bar" style="height: 18px;"></div>
+              <div class="wave-bar" style="height: 8px;"></div>
+              <div class="wave-bar" style="height: 22px;"></div>
+              <div class="wave-bar" style="height: 14px;"></div>
+              <div class="wave-bar" style="height: 19px;"></div>
+              <div class="wave-bar" style="height: 10px;"></div>
+              <div class="wave-bar" style="height: 16px;"></div>
+            </div>
+            <span style="font-size: 11px; font-family: monospace;">02:14 / 04:30</span>
+          </div>
+        </div>
+
+        <!-- Chế độ Khử nhận dạng PII/PHI -->
+        <div class="pii-switch-card">
+          <span>🛡️ Khử nhận dạng PII (HIPAA/VN-2023)</span>
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="chkPII" checked onchange="togglePII()"> Bật ẩn danh
+          </label>
+        </div>
+
+        <!-- Transcript Hội thoại -->
+        <div id="transcriptBox" style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="bubble active" onclick="chonCau(1)">
+            <span class="bubble-role role-doctor">Bác sĩ</span>
+            <span>Chào bác, hôm nay bác đi khám vì có triệu chứng gì khó chịu ạ?</span>
+          </div>
+
+          <div class="bubble" onclick="chonCau(2)">
+            <span class="bubble-role role-patient">Bệnh nhân</span>
+            <span id="txtBn1">Dạ tôi bị đau bụng từ tối qua, đến sáng nay thì bắt đầu thấy sốt và ho.</span>
+          </div>
+
+          <div class="bubble" onclick="chonCau(3)">
+            <span class="bubble-role role-doctor">Bác sĩ</span>
+            <span>Bác có tiền sử dị ứng thuốc gì trước đây không?</span>
+          </div>
+
+          <div class="bubble" onclick="chonCau(4)">
+            <span class="bubble-role role-patient">Bệnh nhân</span>
+            <span>Tôi dị ứng kháng sinh penicillin, uống vào là nổi mề đay ngứa khắp người.</span>
+          </div>
+
+          <div class="bubble" onclick="chonCau(5)">
+            <span class="bubble-role role-doctor">Bác sĩ</span>
+            <span>Hiện tại bác đang dùng những loại thuốc nào ở nhà?</span>
+          </div>
+
+          <div class="bubble" onclick="chonCau(6)">
+            <span class="bubble-role role-patient">Bệnh nhân</span>
+            <span>Tôi đang uống amlodipin trị tăng huyết áp mỗi sáng.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CỘT 2: CĂN CỨ ĐỐI SOÁT & 5 TẦNG GUARDRAIL -->
+    <section class="column">
+      <div class="column-header">
+        <span>🛡️ Kiểm Duyệt Guardrails & Trợ Lý Gợi Ý</span>
+        <span class="badge badge-amber">3 Cảnh báo</span>
+      </div>
+
+      <div class="column-body">
+        <!-- 5 Tầng Guardrail Status -->
+        <div class="guardrail-card">
+          <div style="font-size: 12px; font-weight: 700;">HỆ THỐNG KIỂM DUYỆT 5 TẦNG (GUARDRAILS)</div>
+          <div class="guardrail-item">
+            <span>1. ASR & Dược thư âm vị</span>
+            <span class="badge badge-green">ĐẠT (0 biến âm)</span>
+          </div>
+          <div class="guardrail-item">
+            <span>2. Nhất quán Người nói & Đại từ</span>
+            <span class="badge badge-green">ĐẠT (3 thế hệ)</span>
+          </div>
+          <div class="guardrail-item">
+            <span>3. Dialogue Act & Logic tương lai</span>
+            <span class="badge badge-green">ĐẠT</span>
+          </div>
+          <div class="guardrail-item">
+            <span>4. Khóa căn cứ & Cổng Rủi ro</span>
+            <span class="badge badge-amber">1 mục cần xác nhận</span>
+          </div>
+          <div class="guardrail-item">
+            <span>5. An toàn Dược lý & Tương tác DDI</span>
+            <span class="badge badge-red">1 Cảnh báo DDI</span>
+          </div>
+        </div>
+
+        <!-- Cảnh báo An toàn Dược lý -->
+        <div class="alert-banner alert-danger">
+          <span style="font-size: 18px;">⚠️</span>
+          <div>
+            <strong>CẢNH BÁO DƯỢC LÝ LÂM SÀNG:</strong>
+            <p style="margin-top: 3px;">Phát hiện dị ứng Penicillin. Khuyến cáo không kê đơn các nhóm Beta-lactam (Amoxicillin, Augmentin, Cephalosporin thế hệ 1).</p>
+          </div>
+        </div>
+
+        <!-- THANG ĐIỂM NGUY CƠ LÂM SÀNG QUỐC TẾ (CDSS ENGINE) -->
+        <div class="guardrail-card" style="border-left: 4px solid var(--primary);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px; font-weight: 700;">📊 THANG ĐIỂM NGUY CƠ (CLINICAL RISK SCORE)</div>
+            <span class="badge badge-amber">CURB-65 = 2</span>
+          </div>
+          <div style="font-size: 12px; margin-top: 4px;">
+            <strong>Viêm phổi (CURB-65):</strong> 2 điểm (Tuổi 70 + Urea 8.1 mmol/L) -> <em>Khuyến cáo nhập viện điều trị nội trú.</em>
+          </div>
+          <div style="font-size: 12px; margin-top: 4px;">
+            <strong>Đột quỵ (CHA2DS2-VASc):</strong> 3 điểm -> <em>Chỉ định thuốc chống đông NOAC.</em>
+          </div>
+        </div>
+
+        <!-- ĐỐI SOÁT CẬN LÂM SÀNG & XÉT NGHIỆM MÁU -->
+        <div class="guardrail-card" style="border-left: 4px solid var(--success);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px; font-weight: 700;">🧪 ĐỐI SOÁT CẬN LÂM SÀNG (LAB CORRELATOR)</div>
+            <span class="badge badge-green">Tương đồng cao</span>
+          </div>
+          <div class="guardrail-item">
+            <span>Bạch cầu (WBC)</span>
+            <strong style="color: var(--danger);">14.5 G/L (Tăng cao)</strong>
+          </div>
+          <div class="guardrail-item">
+            <span>Huyết sắc tố (Hb)</span>
+            <span>13.2 g/dL (Bình thường)</span>
+          </div>
+          <div class="guardrail-item">
+            <span>X-quang lồng ngực</span>
+            <span style="font-size: 11px;">Đám mờ đông đặc đáy phổi P</span>
+          </div>
+          <div style="font-size: 11px; color: var(--success); font-weight: 600; margin-top: 4px;">
+            ✅ Cận lâm sàng xác nhận chẩn đoán Viêm phổi thùy.
+          </div>
+        </div>
+
+        <!-- HIỆU CHỈNH LIỀU DƯỢC LÂM SÀNG & TƯƠNG TÁC THỨC ĂN (CHỐT 7) -->
+        <div class="guardrail-card" style="border-left: 4px solid var(--warning);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px; font-weight: 700;">💊 HIỆU CHỈNH LIỀU THẬN / GAN & KIÊNG CỮ</div>
+            <span class="badge badge-amber">eGFR 48 mL/min (G3a)</span>
+          </div>
+          <div class="guardrail-item" style="margin-top: 6px;">
+            <div>
+              <strong>Metformin:</strong> Giảm liều tối đa không quá 1.000 mg/ngày.
+              <div style="font-size: 11px; color: var(--text-muted);">Phòng ngừa nguy cơ toan chuyển hóa lactic máu.</div>
+            </div>
+            <span class="badge badge-amber">Chỉnh liều</span>
+          </div>
+          <div class="guardrail-item">
+            <div>
+              <strong>Amlodipine:</strong> Kiêng uống cùng nước ép bưởi chùm.
+              <div style="font-size: 11px; color: var(--text-muted);">Tránh ức chế enzym CYP3A4 gây hạ áp đột ngột.</div>
+            </div>
+            <span class="badge badge-blue">Dặn ăn uống</span>
+          </div>
+        </div>
+
+        <!-- TRỢ LÝ GỢI Ý CÂU HỎI LÂM SÀNG THÔNG MINH (ACTIVE CLARIFICATION) -->
+        <div class="clarification-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: var(--primary); font-size: 13px;">💡 TRỢ LÝ LÂM SÀNG: CẦN HỎI THÊM</strong>
+            <span class="badge badge-blue">SOCRATES Gaps</span>
+          </div>
+          
+          <p style="font-size: 12px;">Bệnh nhân khai <strong>đau bụng</strong> nhưng chưa có vị trí khu trú giải phẫu:</p>
+          <div class="chip-container">
+            <span class="chip" onclick="dienCauHoi(this)">Thượng vị (trên rốn)</span>
+            <span class="chip" onclick="dienCauHoi(this)">Hố chậu phải</span>
+            <span class="chip" onclick="dienCauHoi(this)">Quanh rốn</span>
+            <span class="chip" onclick="dienCauHoi(this)">Hạ vị</span>
+          </div>
+
+          <p style="font-size: 12px; margin-top: 6px;">Khai <strong>amlodipin</strong> nhưng chưa rõ hàm lượng (5mg hay 10mg):</p>
+          <div class="chip-container">
+            <span class="chip" onclick="dienCauHoi(this)">Amlodipin 5mg (1 viên/ngày)</span>
+            <span class="chip" onclick="dienCauHoi(this)">Amlodipin 10mg</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CỘT 3: BỆNH ÁN 3 PHÂN VÙNG THÔNG MINH -->
+    <section class="column">
+      <div class="column-header">
+        <span>📋 Bệnh Án Lâm Sàng (3 Phân Vùng)</span>
+        <span class="badge badge-blue">Sẵn sàng xuất bản</span>
+      </div>
+
+      <div class="column-body">
+        <!-- Chẩn đoán -->
+        <div class="note-section">
+          <div class="note-section-header">
+            <span>Chẩn Đoán Sơ Bộ (ICD-10)</span>
+            <span style="color: var(--text-muted); font-size: 11px;">Nhấn để chỉnh sửa</span>
+          </div>
+          <div class="note-content" contenteditable="true" id="secChanDoan">
+            Theo dõi Viêm dạ dày ruột cấp tính / Tăng huyết áp nguyên phát.
+          </div>
+        </div>
+
+        <!-- Dị ứng & Thuốc -->
+        <div class="note-section">
+          <div class="note-section-header">
+            <span>Dị Ứng & Thuốc Đang Dùng</span>
+          </div>
+          <div class="note-content" contenteditable="true" id="secThuoc">
+            - DỊ ỨNG: Dị ứng kháng sinh Penicillin (biểu hiện mề đay, mẩn ngứa).<br>
+            - THUỐC ĐANG DÙNG: Amlodipin 5mg uống 01 viên mỗi sáng.
+          </div>
+        </div>
+
+        <!-- Bệnh sử hiện tại -->
+        <div class="note-section">
+          <div class="note-section-header">
+            <span>Bệnh Sử Hiện Tại</span>
+          </div>
+          <div class="note-content" contenteditable="true" id="secBenhSu">
+            Bệnh khởi phát từ tối qua với triệu chứng đau bụng âm ỉ, kèm theo sốt nhẹ và ho khan. Bệnh nhân tự đi khám, chưa dùng thuốc hạ sốt tại nhà.
+          </div>
+        </div>
+
+        <!-- PHÂN VÙNG CẦN XÁC NHẬN (TRIẾT LÝ: BẮT NHẦM CÒN HƠN BỎ SÓT) -->
+        <div class="confirm-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #b45309; font-size: 13px;">⚠️ PHÂN VÙNG CẦN XÁC NHẬN (ZERO INFORMATION LOSS)</strong>
+            <span class="badge badge-amber">1 Mục</span>
+          </div>
+          <div class="confirm-item">
+            <input type="checkbox" id="chk1" checked>
+            <label for="chk1">
+              <strong>Kế hoạch chụp X-quang phổi:</strong> Bác sĩ nhắc <em>"Nếu mai còn sốt cao thì quay lại chụp phim phổi"</em> (Câu điều kiện tương lai — cần xác nhận nếu cho chỉ định ngay).
+            </label>
+          </div>
+        </div>
+
+        <!-- BẢN HƯỚNG DẪN & DẶN DÒ NGƯỜI BỆNH (PATIENT AFTERCARE GUIDE) -->
+        <div class="note-section" style="border-left: 4px solid var(--success);">
+          <div class="note-section-header" style="background: var(--success-light); color: var(--success);">
+            <span>💚 Bản Dặn Dò Người Bệnh (Ngôn ngữ đời thường)</span>
+            <button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="inDanDo()">🖨️ In cho BN</button>
+          </div>
+          <div class="note-content" id="secDanDo">
+            <p><strong>1. Hiểu về bệnh:</strong> Đường tiêu hóa và hô hấp đang bị kích ứng, gây sốt nhẹ và đau bụng. Bác uống nhiều nước ấm và giữ ấm cơ thể.</p>
+            <p style="margin-top: 6px;"><strong>2. Lịch uống thuốc:</strong></p>
+            <ul style="padding-left: 18px; font-size: 12px; margin-top: 2px;">
+              <li><strong>Sáng (sau ăn no):</strong> Amlodipine 5mg (1 viên).</li>
+              <li><strong>Trưa & Tối:</strong> Kháng sinh thay thế (không dùng Penicillin).</li>
+            </ul>
+            <p style="margin-top: 6px;"><strong>3. Ăn uống:</strong> Ăn cháo súp ấm, giảm mặn, kiêng nước đá và rượu bia.</p>
+            <div style="margin-top: 6px; padding: 6px 8px; background: var(--danger-light); border-radius: 6px; color: var(--danger); font-size: 11.5px;">
+              <strong>🚨 Cấp cứu ngay nếu:</strong> Sốt cao > 39°C không hạ, khó thở rít, đau ngực quặn thắt hoặc nôn ói nhiều.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL XUẤT HL7 FHIR R4 -->
+  <div class="modal-overlay" id="modalFHIR">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>⚡ HL7 FHIR R4 Document Bundle Resource</span>
+        <button class="btn btn-secondary" onclick="dongModalFHIR()">Đóng</button>
+      </div>
+      <div class="modal-body" id="fhirCode">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Sáng / Tối
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute("data-theme");
+      document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+    }
+
+    // Toggle PII Khử nhận dạng
+    function togglePII() {
+      const isChecked = document.getElementById("chkPII").checked;
+      const el = document.getElementById("txtBn1");
+      if (isChecked) {
+        el.innerText = "Dạ tôi là [BENH_NHAN], số điện thoại [SDT_1], bị đau bụng từ tối qua, đến sáng nay thì bắt đầu thấy sốt và ho.";
+      } else {
+        el.innerText = "Dạ tôi là Nguyễn Văn An, số điện thoại 0912345678, bị đau bụng từ tối qua, đến sáng nay thì bắt đầu thấy sốt và ho.";
+      }
+    }
+
+    // Audio Play Mockup
+    let isPlaying = false;
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      document.getElementById("btnPlay").innerText = isPlaying ? "⏸" : "▶";
+    }
+
+    function chonCau(id) {
+      document.querySelectorAll(".bubble").forEach(b => b.classList.remove("active"));
+      event.currentTarget.classList.add("active");
+    }
+
+    function dienCauHoi(chip) {
+      const txt = chip.innerText;
+      const benhSu = document.getElementById("secBenhSu");
+      benhSu.innerHTML += " Ghi nhận thêm: " + txt + ".";
+      chip.style.display = "none";
+      alert("Đã cập nhật câu trả lời: '" + txt + "' vào Bệnh Sử Hiện Tại!");
+    }
+
+    function moModalFHIR() {
+      const bundle = {
+        "resourceType": "Bundle",
+        "type": "document",
+        "id": "bundle-BN_7718",
+        "timestamp": new Date().toISOString(),
+        "entry": [
+          {"resource": {"resourceType": "Composition", "status": "final", "title": "Bệnh Án MediTrace Sentinel"}},
+          {"resource": {"resourceType": "Patient", "id": "BN_7718", "gender": "male", "age": 62}},
+          {"resource": {"resourceType": "Condition", "code": {"text": "Viêm dạ dày ruột cấp"}}},
+          {"resource": {"resourceType": "AllergyIntolerance", "substance": "Penicillin", "criticality": "high"}},
+          {"resource": {"resourceType": "MedicationStatement", "medication": "Amlodipin 5mg"}}
+        ]
+      };
+      document.getElementById("fhirCode").innerText = JSON.stringify(bundle, null, 2);
+      document.getElementById("modalFHIR").style.display = "flex";
+    }
+
+    function dongModalFHIR() {
+      document.getElementById("modalFHIR").style.display = "none";
+    }
+
+    function inBenhAn() {
+      window.print();
+    }
+
+    function inDanDo() {
+      const danDo = document.getElementById("secDanDo").innerText;
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Bản Dặn Dò Người Bệnh - MediTrace Sentinel</title>
+          <style>
+            body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; padding: 30px; line-height: 1.6; color: #1e293b; }
+            h2 { color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 8px; }
+            .box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-top: 15px; }
+            .alert { background: #fef2f2; border: 1px solid #f87171; color: #b91c1c; border-radius: 8px; padding: 12px; margin-top: 15px; }
+          </style>
+        </head>
+        <body>
+          <h2>🏥 BẢN HƯỚNG DẪN ĐIỀU TRỊ & DẶN DÒ NGƯỜI BỆNH</h2>
+          <p><strong>Bệnh nhân:</strong> Nguyễn Văn An | <strong>Mã số:</strong> BN_7718</p>
+          <div class="box">
+            ${document.getElementById("secDanDo").innerHTML}
+          </div>
+          <p style="margin-top: 20px; text-align: right; font-style: italic;">Bác sĩ phụ trách khám ký tên</p>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => { printWindow.print(); }, 250);
+    }
+
+    function xacNhanPheDuyet() {
+      alert("✅ Bác sĩ đã phê duyệt thành công bệnh án #BN_7718!\nĐã khóa chữ ký số băm SHA-256 và đồng bộ lên cổng HL7 FHIR.");
+    }
+
+    // Khởi tạo
+    togglePII();
+  </script>
+</body>
+</html>
