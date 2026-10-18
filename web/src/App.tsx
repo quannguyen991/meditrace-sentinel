@@ -352,6 +352,12 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const setBanSuaDuyet: React.Dispatch<React.SetStateAction<Record<number, string>>> = (u) => capNhatDuyet("banSua", u);
   const [moDuyetBen, setMoDuyetBen] = useState(false);
   const [chonMD, setChonMD] = useState<number | null>(null);
+  const [luotKiemChung, setLuotKiemChung] = useState<number | null>(null);
+
+  const handleKiemChungLuot = (soLuot: number) => {
+    setLuotKiemChung(soLuot);
+    handleSelectNavigationItem("proof");
+  };
   // Màn hẹp (< 896px vùng giữa): không đủ chỗ cho hai bên -> chuyển qua lại "Bản nháp | Duyệt".
   const [xemHep, setXemHep] = useState<"nhap" | "duyet">("duyet");
   const vungGiuaRef = useRef<HTMLDivElement>(null);
@@ -1150,6 +1156,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     }
                     chonId={moDuyetBen ? chonMD : null}
                     onChonMenhDe={chonTuBanNhap}
+                    transcript={noteMeta?.transcript || currentSession.transcript}
+                    onKiemChungLuot={handleKiemChungLuot}
                   />
                 )}
               </div>
@@ -1229,6 +1237,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             setQuyetChung={setQuyetDuyet}
             banSuaChung={banSuaDuyet}
             setBanSuaChung={setBanSuaDuyet}
+            chonBanDau={luotKiemChung ? { loai: "t", so: luotKiemChung } : undefined}
           />
         )}
 

@@ -166,6 +166,7 @@ interface Props {
   setQuyetChung?: React.Dispatch<React.SetStateAction<Record<number, Quyet>>>;
   banSuaChung?: Record<number, string>;
   setBanSuaChung?: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  chonBanDau?: Chon;
 }
 
 type Chon = { loai: "p"; id: number } | { loai: "t"; so: number } | null;
@@ -192,6 +193,7 @@ export const VerificationView: React.FC<Props> = ({
   setQuyetChung,
   banSuaChung,
   setBanSuaChung,
+  chonBanDau,
 }) => {
   const [cauHoiNgoai, setCauHoiNgoai] = useState<{ questions: CauHoiNgoai[]; model: string } | null>(null);
   const [dangHoi, setDangHoi] = useState(false);
@@ -206,7 +208,7 @@ export const VerificationView: React.FC<Props> = ({
   const [moBanNhap, setMoBanNhap] = useState(false);
   const [xep, setXep] = useState<"luot" | "muc">("luot");
   const [chon, setChon] = useState<Chon>(null);
-  const [ghim, setGhim] = useState<Chon>(null);
+  const [ghim, setGhim] = useState<Chon>(chonBanDau || null);
   const [day, setDay] = useState<Day[]>([]);
   const [khung, setKhung] = useState({ w: 0, h: 0 });
   const [rong, setRong] = useState(false);
@@ -221,9 +223,17 @@ export const VerificationView: React.FC<Props> = ({
     if (!setBanSuaChung) setBanSuaRieng({});
     setSuaId(null);
     setCauHoiNgoai(null);
-    setGhim(null);
+    setGhim(chonBanDau || null);
     setBoQua({});
-  }, [note?.caseId, note?.content]);
+  }, [note?.caseId, note?.content, chonBanDau]);
+
+  useEffect(() => {
+    if (chonBanDau && chonBanDau.loai === "t") {
+      setTimeout(() => {
+        luotRef.current.get(chonBanDau.so)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  }, [chonBanDau]);
 
   const loiThoai = note?.transcript || transcript || "";
   const luot = useMemo(() => tachLuot(loiThoai), [loiThoai]);

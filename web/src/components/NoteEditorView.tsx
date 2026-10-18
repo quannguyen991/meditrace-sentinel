@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { DocumentTabItem } from "../types";
 import { ghepMenhDe } from "../lib/ghepMenhDe";
 import {
@@ -31,7 +31,11 @@ import {
   HeartPulse,
   FileHeart,
   Users,
+  Quote,
+  ArrowRight,
+  X,
 } from "lucide-react";
+import { tachLuot } from "./VerificationView";
 
 /** Một mệnh đề cần tô trong bản nháp khi ngăn duyệt đang mở. */
 export type DanhDauMD = {
@@ -51,6 +55,10 @@ interface NoteEditorViewProps {
   danhDau?: DanhDauMD[];
   chonId?: number | null;
   onChonMenhDe?: (id: number | null) => void;
+  /** Lời thoại ca khám để đối chiếu căn cứ lượt thoại T1, T2... */
+  transcript?: string;
+  /** Chuyển sang màn hình đối chiếu & đường nối căn cứ toàn màn hình */
+  onKiemChungLuot?: (soLuot: number) => void;
 }
 
 const MAU_TO: Record<DanhDauMD["trangThai"], string> = {
@@ -98,7 +106,12 @@ function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
 }
 
 /** Định dạng văn bản nội tuyến: bỏ dấu **, in đậm, định dạng trích dẫn [T..] và chữ nghiêng */
-function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
+function renderDinhDangChu(
+  vanBan: string,
+  isAlert = false,
+  onXemLuot?: (so: number) => void,
+  banDoLuot?: Map<number, { so: number; vai: string; chu: string }>
+): React.ReactNode {
   if (!vanBan) return null;
   // Loại bỏ triệt để các nhãn chỉ dẫn thừa như [BÔI ĐỎ...] vì giao diện đã được bôi đỏ cảnh báo trực quan
   const vanBanSach = vanBan.replace(/\*?\*?\[(?:BÔI ĐỎ[^\]]*|CẦN BÁC SĨ DUYỆT)\]:?\*?\*?[ \t]*/gi, "");
@@ -135,17 +148,34 @@ function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
         </strong>
       );
     } else if (token.startsWith("[T") && token.endsWith("]")) {
+      // Tách từng số lượt thoại trong [T2, T10] thành các nút căn cứ độc lập
+      const turnNumbers = Array.from(token.matchAll(/\d+/g), (m) => parseInt(m[0], 10));
       parts.push(
-        <span
-          key={match.index}
-          className={`inline-flex items-center px-1.5 py-0.2 mx-0.5 text-[11px] font-mono font-medium rounded ${
-            isAlert
-              ? "bg-red-100 text-red-800 border border-red-200"
-              : "bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]"
-          }`}
-          title="Lượt lời thoại làm căn cứ lâm sàng"
-        >
-          {token}
+        <span key={match.index} className="inline-flex items-center gap-1 mx-1 select-none align-baseline">
+          {turnNumbers.map((so) => {
+            const luotInfo = banDoLuot?.get(so);
+            const vai = luotInfo?.vai || "Hội thoại";
+            const trichDan = luotInfo?.chu ? `"${luotInfo.chu.slice(0, 65)}..."` : "";
+            return (
+              <button
+                key={so}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onXemLuot?.(so);
+                }}
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-mono text-[11px] font-semibold border transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group ${
+                  isAlert
+                    ? "bg-red-50 hover:bg-red-600 hover:text-white text-red-800 border-red-300"
+                    : "bg-[#F0F9FF] hover:bg-[#0284C7] hover:text-white text-[#0284C7] border-[#BAE6FD]"
+                }`}
+                title={`[T${so}] ${vai}: ${trichDan} (Bấm để xem câu thoại gốc và kiểm chứng)`}
+              >
+                <Quote size={10} className="opacity-70 group-hover:opacity-100" />
+                <span>T{so}</span>
+              </button>
+            );
+          })}
         </span>
       );
     } else if (token.startsWith("*") && token.endsWith("*")) {
@@ -176,6 +206,8 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   danhDau,
   chonId = null,
   onChonMenhDe,
+  transcript = "",
+  onKiemChungLuot,
 }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<boolean | null>(null);
@@ -186,6 +218,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   // Dictation state (Đọc chính tả trực tiếp bằng giọng nói)
   const [isDictating, setIsDictating] = useState(false);
   const [dangSua, setDangSua] = useState(false);
+  const [luotDangXem, setLuotDangXem] = useState<number | null>(null);
+
+  // Danh sách lượt thoại để đối chiếu căn cứ [T1, T2...]
+  const dsLuot = useMemo(() => tachLuot(transcript), [transcript]);
+  const banDoLuot = useMemo(() => new Map(dsLuot.map((l) => [l.so, l])), [dsLuot]);
+
   const giayRef = useRef<HTMLDivElement>(null);
   // Mở ô sửa thì luôn đặt con trỏ vào ô (autoFocus không chắc chạy). Ô chỉ quay về bản định dạng khi
   // MẤT con trỏ; nếu con trỏ chưa từng vào ô thì ô kẹt ở chế độ sửa (gặp 24/09).
@@ -488,6 +526,21 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <Redo size={13} />
           </button>
 
+          {/* Nút bật/tắt chế độ sửa văn bản thô thủ công (Chỉ mở khi bác sĩ chủ động bấm) */}
+          <button
+            type="button"
+            onClick={() => setDangSua(!dangSua)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 ${
+              dangSua
+                ? "bg-amber-50 border-amber-300 text-amber-800 font-semibold"
+                : "text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
+            }`}
+            title={dangSua ? "Bấm để quay về bản xem định dạng chuẩn" : "Bấm để chỉnh sửa văn bản thô (Markdown)"}
+          >
+            <Edit2 size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden sm:inline">{dangSua ? "Xem định dạng" : "Sửa văn bản"}</span>
+          </button>
+
           {/* Nút Sao chép & Menu Xuất file */}
           <div className="relative flex-shrink-0">
             <div className="flex items-center bg-[#0284C7] text-white rounded-xl overflow-hidden shadow-tactile-doctor hover:bg-[#0369A1] transition-all whitespace-nowrap">
@@ -576,28 +629,35 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
         )}
 
         <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#BAE6FD] shadow-tactile-doctor-card p-6 sm:p-10 min-h-[500px] print:border-none print:shadow-none print:p-0 print:max-w-none">
-          {/* Textarea không in đậm được từng dòng: bình thường hiện bản đã định dạng (tiêu đề mục đậm),
-              bấm vào là sửa, bấm ra ngoài là về bản định dạng. Chưa có nội dung thì mở sẵn ô sửa. */}
-          {dangSua || !tab.content.trim() ? (
-            <textarea
-              ref={oSuaRef}
-              value={tab.content}
-              onChange={(e) => handleTextChange(e.target.value)}
-              onBlur={() => setDangSua(false)}
-              placeholder="Nhập hoặc chỉnh sửa chi tiết hồ sơ bệnh án lâm sàng tại đây..."
-              className="w-full h-full min-h-[460px] bg-transparent resize-none border-none focus:outline-none text-[15px] leading-relaxed text-[#0F172A] font-sans selection:bg-[#BAE6FD]/40"
-              spellCheck={false}
-            />
+          {/* Luôn giữ bản định dạng chuẩn y khoa (Ảnh 2), chỉ hiển thị ô sửa thô (Ảnh 1) khi bấm nút Sửa văn bản trên thanh công cụ */}
+          {dangSua ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-200">
+                <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+                  <Edit2 size={13} className="text-[#0284C7]" />
+                  <span>Đang ở chế độ chỉnh sửa văn bản (Markdown)</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDangSua(false)}
+                  className="px-3 py-1 bg-[#0284C7] text-white rounded-lg text-xs font-semibold hover:bg-[#0369A1] shadow-tactile-doctor transition-all"
+                >
+                  Xong (Xem định dạng đẹp)
+                </button>
+              </div>
+              <textarea
+                ref={oSuaRef}
+                value={tab.content}
+                onChange={(e) => handleTextChange(e.target.value)}
+                placeholder="Nhập hoặc chỉnh sửa chi tiết hồ sơ bệnh án lâm sàng tại đây..."
+                className="w-full h-full min-h-[460px] bg-transparent resize-none border-none focus:outline-none text-[15px] leading-relaxed text-[#0F172A] font-sans selection:bg-[#BAE6FD]/40"
+                spellCheck={false}
+              />
+            </div>
           ) : (
             <div
-              role="textbox"
-              tabIndex={0}
-              aria-label="Hồ sơ bệnh án — bấm để sửa"
-              title="Bấm để sửa"
-              onClick={() => setDangSua(true)}
-              onKeyDown={(e) => e.key === "Enter" && setDangSua(true)}
               ref={giayRef}
-              className="min-h-[460px] cursor-text text-[15px] leading-relaxed text-[#0F172A] font-sans focus:outline-none rounded-lg"
+              className="min-h-[460px] text-[15px] leading-relaxed text-[#0F172A] font-sans focus:outline-none rounded-lg cursor-default select-text"
             >
               {tab.content.split("\n").map((dong, i) => {
                 const dongTrim = dong.trim();
@@ -631,7 +691,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                       key={i}
                       className="flex flex-wrap items-center gap-x-2 text-[14px] text-slate-700 py-1 mb-2 font-normal"
                     >
-                      {renderDinhDangChu(dongTrim)}
+                      {renderDinhDangChu(dongTrim, false, setLuotDangXem, banDoLuot)}
                     </div>
                   );
                 }
@@ -749,14 +809,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                               : "hover:ring-1 hover:ring-[#93C5FD]"
                           }`}
                         >
-                          {renderDinhDangChu(d.chu, isCanhBao)}
+                          {renderDinhDangChu(d.chu, isCanhBao, setLuotDangXem, banDoLuot)}
                         </span>
                       ) : (
-                        <span key={j}>{renderDinhDangChu(d.chu, isCanhBao)}</span>
+                        <span key={j}>{renderDinhDangChu(d.chu, isCanhBao, setLuotDangXem, banDoLuot)}</span>
                       )
                     );
                   }
-                  return renderDinhDangChu(txt, isCanhBao);
+                  return renderDinhDangChu(txt, isCanhBao, setLuotDangXem, banDoLuot);
                 };
 
                 // PHẦN CẦN XÁC NHẬN -> BÔI ĐỎ THEO YÊU CẦU CỦA BÁC SĨ
@@ -880,6 +940,101 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           <span>Bản nháp — bác sĩ duyệt rồi mới dùng</span>
         </div>
       </div>
+
+      {/* Modal / Popover hiển thị chi tiết câu thoại gốc tương ứng khi bấm vào [T...] */}
+      {luotDangXem !== null && (() => {
+        const l = banDoLuot.get(luotDangXem);
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+            onClick={() => setLuotDangXem(null)}
+          >
+            <div
+              className="bg-white rounded-2xl border border-[#BAE6FD] shadow-2xl max-w-lg w-full p-5 text-left transform transition-all animate-in zoom-in-95 duration-150"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold font-mono text-xs shadow-2xs">
+                    T{luotDangXem}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                      <Quote size={14} className="text-[#0284C7]" />
+                      <span>Căn cứ lời thoại gốc trong cuộc hội thoại</span>
+                    </h3>
+                    <p className="text-[11.5px] text-slate-500">
+                      Bằng chứng đối chiếu trực tiếp từ lời nói thực tế của ca khám
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setLuotDangXem(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  title="Đóng"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Speaker & Content */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold ${
+                      l?.vai?.toLowerCase().includes("bác sĩ")
+                        ? "bg-slate-200 text-slate-700"
+                        : l?.vai?.toLowerCase().includes("người nhà")
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-sky-100 text-sky-800"
+                    }`}
+                  >
+                    {l?.vai || `Lượt thoại [T${luotDangXem}]`}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    Lượt #{luotDangXem}
+                  </span>
+                </div>
+                <p className="text-[14.5px] leading-relaxed text-slate-800 font-sans italic">
+                  “{l?.chu || "Không tìm thấy nội dung của lượt thoại này trong bản chép."}”
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                <span className="text-[11px] text-slate-400">
+                  Đối chiếu căn cứ lâm sàng MediTrace
+                </span>
+                <div className="flex items-center gap-2">
+                  {onKiemChungLuot && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const so = luotDangXem;
+                        setLuotDangXem(null);
+                        onKiemChungLuot(so);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0284C7] hover:bg-[#0369A1] text-white rounded-xl text-xs font-semibold shadow-tactile-doctor transition-all"
+                      title="Mở màn hình kiểm chứng với sơ đồ đường nối căn cứ"
+                    >
+                      <span>Mở đối chiếu toàn màn hình</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setLuotDangXem(null)}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
