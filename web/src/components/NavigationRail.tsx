@@ -111,7 +111,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
     return (
       <header
         id="main-top-taskbar"
-        className="w-full px-2 sm:px-3.5 pt-2 pb-1 bg-[#F0F7FA] flex-shrink-0 select-none z-30"
+        className="w-full px-2 sm:px-3.5 pt-2 pb-1 bg-[#F0F7FA] flex-shrink-0 select-none z-30 no-print"
       >
         <div className="w-full bg-[#FFFFFF] border border-[#CCE3F0] rounded-2xl shadow-[0_4px_16px_-3px_rgba(2,132,199,0.08),0_1px_3px_rgba(0,0,0,0.03)] px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-between gap-2 sm:gap-3">
           {/* Cụm Trái: Logo dự án + Tên MediTrace & Nút Tạo ca khám */}
@@ -219,7 +219,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   return (
     <aside
       id="main-navigation-rail"
-      className="w-14 sm:w-[4.5rem] lg:w-[16rem] xl:w-[17rem] min-h-0 flex-shrink-0 overflow-y-auto bg-gradient-to-b from-white via-[#F8FCFF] to-[#EDF7FD] border-r border-[#D6EAF4] flex flex-col items-center lg:items-stretch px-2 lg:px-3.5 py-3.5 select-none z-30"
+      className="w-14 sm:w-[4.5rem] lg:w-[16rem] xl:w-[17rem] min-h-0 flex-shrink-0 overflow-y-auto bg-gradient-to-b from-white via-[#F8FCFF] to-[#EDF7FD] border-r border-[#D6EAF4] flex flex-col items-center lg:items-stretch px-2 lg:px-3.5 py-3.5 select-none z-30 no-print"
     >
       <div className="mb-3 flex items-center justify-center lg:justify-start">
         <button

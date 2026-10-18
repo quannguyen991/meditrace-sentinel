@@ -164,15 +164,15 @@ function renderDinhDangChu(
                   e.stopPropagation();
                   onXemLuot?.(so);
                 }}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-mono text-[11px] font-semibold border transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-mono text-[11px] font-semibold border transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group print:bg-transparent print:border-none print:shadow-none print:p-0 print:text-[10px] print:text-slate-500 ${
                   isAlert
                     ? "bg-red-50 hover:bg-red-600 hover:text-white text-red-800 border-red-300"
                     : "bg-[#F0F9FF] hover:bg-[#0284C7] hover:text-white text-[#0284C7] border-[#BAE6FD]"
                 }`}
                 title={`[T${so}] ${vai}: ${trichDan} (Bấm để xem câu thoại gốc và kiểm chứng)`}
               >
-                <Quote size={10} className="opacity-70 group-hover:opacity-100" />
-                <span>T{so}</span>
+                <Quote size={10} className="opacity-70 group-hover:opacity-100 print:hidden" />
+                <span className="print:font-normal">[T{so}]</span>
               </button>
             );
           })}
@@ -405,7 +405,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       className="flex-1 flex flex-col bg-[#F8FBFC] overflow-hidden select-none"
     >
       {/* Subheader Toolbar */}
-      <div className="flex items-center justify-between px-2.5 sm:px-5 py-2 border-b border-[#CCE3F0] bg-[#F8FBFC] shadow-[0_1px_4px_rgba(2,132,199,0.04)] gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex items-center justify-between px-2.5 sm:px-5 py-2 border-b border-[#CCE3F0] bg-[#F8FBFC] shadow-[0_1px_4px_rgba(2,132,199,0.04)] gap-2 overflow-x-auto no-scrollbar no-print">
         {/* Trái: Nhãn tài liệu & Chọn định dạng phong cách */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-[#E0F2FE] border border-[#BAE6FD] shadow-tactile-doctor-pill text-xs font-semibold text-[#0369A1] whitespace-nowrap flex-shrink-0">
@@ -541,6 +541,17 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden sm:inline">{dangSua ? "Xem định dạng" : "Sửa văn bản"}</span>
           </button>
 
+          {/* Nút In / Xuất PDF trực tiếp */}
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] text-[#0D9488] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="In hồ sơ bệnh án hoặc Lưu tệp PDF chuẩn y khoa (Ctrl+P)"
+          >
+            <Printer size={12} className="text-[#0D9488]" />
+            <span className="text-[11px]">In / Xuất PDF</span>
+          </button>
+
           {/* Nút Sao chép & Menu Xuất file */}
           <div className="relative flex-shrink-0">
             <div className="flex items-center bg-[#0284C7] text-white rounded-xl overflow-hidden shadow-tactile-doctor hover:bg-[#0369A1] transition-all whitespace-nowrap">
@@ -605,10 +616,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                       setIsExportMenuOpen(false);
                       window.print();
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE] border-t border-[#CCE3F0]"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE] border-t border-[#CCE3F0] font-semibold"
                   >
-                    <Printer size={13} className="text-[#0284C7]" />
-                    <span>In hồ sơ bệnh án</span>
+                    <Printer size={13} className="text-[#0D9488]" />
+                    <span>In / Lưu PDF (Ctrl+P)</span>
                   </button>
                 </div>
               </>
@@ -628,7 +639,30 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           </div>
         )}
 
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#BAE6FD] shadow-tactile-doctor-card p-6 sm:p-10 min-h-[500px] print:border-none print:shadow-none print:p-0 print:max-w-none">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#BAE6FD] shadow-tactile-doctor-card p-6 sm:p-10 min-h-[500px] printable-clinical-note print:border-none print:shadow-none print:p-0 print:max-w-none print:m-0">
+          {/* Tiêu đề y tế chính quy khi in / xuất PDF */}
+          <div className="hidden print:block mb-6 pb-4 border-b-2 border-slate-900 break-inside-avoid">
+            <div className="flex justify-between items-start text-xs text-slate-800 leading-normal">
+              <div>
+                <div className="font-bold uppercase tracking-wider text-slate-950">SỞ Y TẾ · PHÒNG KHÁM ĐA KHOA LÂM SÀNG</div>
+                <div className="font-semibold text-slate-700">HỆ THỐNG TRỢ LÝ Y KHOA MEDITRACE SENTINEL</div>
+                <div className="text-[10px] text-slate-500">Mã bệnh án: MT-{tab.id.slice(0, 8).toUpperCase()}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-bold text-slate-950">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div className="font-semibold text-slate-700">Độc lập - Tự do - Hạnh phúc</div>
+                <div className="text-[10px] text-slate-500 italic mt-0.5">---o0o---</div>
+              </div>
+            </div>
+            <div className="text-center mt-5">
+              <h1 className="text-xl font-bold uppercase tracking-wider text-slate-950 font-serif">
+                HỒ SƠ BỆNH ÁN KHÁM BỆNH LÂM SÀNG
+              </h1>
+              <p className="text-[11px] text-slate-600 mt-1">
+                Thời gian lập: {new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })} lúc {new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+          </div>
           {/* Luôn giữ bản định dạng chuẩn y khoa (Ảnh 2), chỉ hiển thị ô sửa thô (Ảnh 1) khi bấm nút Sửa văn bản trên thanh công cụ */}
           {dangSua ? (
             <div className="space-y-3">
@@ -824,7 +858,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                   return (
                     <div
                       key={i}
-                      className="my-3 p-3.5 rounded-xl border border-red-300 bg-gradient-to-r from-red-50/95 via-rose-50/80 to-red-50/40 border-l-4 border-l-red-500 shadow-xs text-red-950 flex items-start gap-2.5 transition-all hover:shadow-md print:bg-red-50 print:border-red-500"
+                      className="my-3 p-3.5 rounded-xl border border-red-300 bg-gradient-to-r from-red-50/95 via-rose-50/80 to-red-50/40 border-l-4 border-l-red-500 shadow-xs text-red-950 flex items-start gap-2.5 transition-all hover:shadow-md print:bg-red-50 print:border-red-500 break-inside-avoid page-break-inside-avoid"
                     >
                       <div className="flex-shrink-0 mt-0.5 p-1 rounded-lg bg-red-100 text-red-600">
                         <AlertTriangle size={17} className="animate-pulse" />
@@ -898,11 +932,29 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               })}
             </div>
           )}
+
+          {/* Khối chữ ký Bác sĩ điều trị khi in / xuất PDF */}
+          <div className="hidden print:block mt-8 pt-4 border-t border-slate-300 page-break-inside-avoid break-inside-avoid">
+            <div className="flex justify-between items-start text-xs text-slate-800">
+              <div className="text-[10.5px] text-slate-500 italic max-w-xs leading-relaxed">
+                * Bệnh án lâm sàng được tổng hợp từ hội thoại thực tế với sự hỗ trợ của hệ thống MediTrace Sentinel AI. Bác sĩ điều trị đã đối chiếu, kiểm chứng từng mệnh đề căn cứ và chịu trách nhiệm chuyên môn.
+              </div>
+              <div className="text-center min-w-[220px]">
+                <p className="italic text-slate-600 text-[11px]">
+                  Ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+                </p>
+                <p className="font-bold uppercase text-slate-900 mt-1">BÁC SĨ ĐIỀU TRỊ</p>
+                <p className="text-[10px] text-slate-500 italic">(Ký và ghi rõ họ tên)</p>
+                <div className="h-16" />
+                <p className="font-semibold text-slate-800 text-xs">BS. Chuyên khoa phụ trách</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Dưới cùng: Đánh giá chất lượng & Trạng thái thống kê */}
-      <div className="flex flex-wrap items-center justify-between px-3 sm:px-6 py-2.5 border-t border-[#BAE6FD] bg-gradient-to-b from-[#F8FBFC] to-[#F0F9FF] shadow-[0_-2px_12px_rgba(2,132,199,0.06)] text-xs text-[#0369A1] gap-2">
+      <div className="flex flex-wrap items-center justify-between px-3 sm:px-6 py-2.5 border-t border-[#BAE6FD] bg-gradient-to-b from-[#F8FBFC] to-[#F0F9FF] shadow-[0_-2px_12px_rgba(2,132,199,0.06)] text-xs text-[#0369A1] gap-2 no-print">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <div className="flex items-center gap-1 sm:gap-1.5">
             <button
@@ -946,7 +998,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
         const l = banDoLuot.get(luotDangXem);
         return (
           <div
-            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150 no-print"
             onClick={() => setLuotDangXem(null)}
           >
             <div

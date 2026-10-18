@@ -164,3 +164,101 @@ body {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   BẢN IN & XUẤT PDF HỒ SƠ BỆNH ÁN LÂM SÀNG (A4 PRINT & PDF EXPORT)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 14mm 14mm;
+  }
+
+  /* Reset toàn bộ layout flexbox/overflow full-height của app để trình duyệt tự động ngắt trang đa trang */
+  html,
+  body,
+  #root {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ẩn các thành phần giao diện không thuộc nội dung bệnh án */
+  .no-print,
+  #main-navigation-rail,
+  #main-top-taskbar,
+  #sessions-sidebar,
+  .sessions-sidebar,
+  header:not(.printable-header),
+  aside,
+  nav,
+  footer,
+  button:not(.printable),
+  [role="tooltip"],
+  .shadow-tactile-box,
+  .shadow-tactile-doctor,
+  .shadow-tactile-doctor-card,
+  .shadow-tactile-doctor-pill {
+    display: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Mở rộng các container cha không bị cuộn hay gò bó chiều cao */
+  main,
+  main > div,
+  .flex-1,
+  #note-editor-view {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Khổ giấy in bệnh án sạch sẽ, đúng tỷ lệ trang A4 */
+  .printable-clinical-note {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-radius: 0 !important;
+  }
+
+  /* Tránh ngắt trang xấu ở giữa các đề mục y khoa */
+  .break-inside-avoid,
+  .page-break-inside-avoid,
+  h1, h2, h3, h4,
+  .alert-box {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Đảm bảo chữ in đậm tương phản cao */
+  strong, b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  /* Tắt gạch chân ngầm của link */
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}

@@ -937,7 +937,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         }`}
       >
         {taskbarPosition === "left" && (
-          <header className="h-14 shrink-0 flex items-center justify-between gap-3 border-b border-[#D9EAF3] bg-white/85 px-4 sm:px-5 lg:px-6">
+          <header className="h-14 shrink-0 flex items-center justify-between gap-3 border-b border-[#D9EAF3] bg-white/85 px-4 sm:px-5 lg:px-6 no-print">
             <h1 className="min-w-0 truncate text-[15px] font-semibold tracking-tight text-[#153D5A]">
               {pageTitle[activeNavigationItem] || "MediTrace"}
             </h1>
@@ -989,45 +989,49 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         {activeView === "scribe" && (
           <div className="flex-1 flex overflow-hidden">
             {/* Sidebar danh sách ca khám */}
-            <SessionsSidebar
-              sessions={sessions}
-              activeSessionId={activeSessionId}
-              onSelectSession={(id) => {
-                setActiveSessionId(id);
-                // Màn hẹp: danh sách ca đè lên vùng soạn, chọn xong thì thu lại.
-                if (window.innerWidth < 768) setIsSessionsSidebarCollapsed(true);
-              }}
-              onCreateSession={handleCreateNewSession}
-              onDeleteSession={handleDeleteSession}
-              isCollapsed={isSessionsSidebarCollapsed}
-              onToggleCollapse={handleToggleSessionsSidebar}
-            />
+            <div className="no-print">
+              <SessionsSidebar
+                sessions={sessions}
+                activeSessionId={activeSessionId}
+                onSelectSession={(id) => {
+                  setActiveSessionId(id);
+                  // Màn hẹp: danh sách ca đè lên vùng soạn, chọn xong thì thu lại.
+                  if (window.innerWidth < 768) setIsSessionsSidebarCollapsed(true);
+                }}
+                onCreateSession={handleCreateNewSession}
+                onDeleteSession={handleDeleteSession}
+                isCollapsed={isSessionsSidebarCollapsed}
+                onToggleCollapse={handleToggleSessionsSidebar}
+              />
+            </div>
 
             {/* Khu vực soạn thảo & ghi âm trung tâm */}
             <div className="@container flex-1 flex flex-col min-w-0 bg-[#F0F7FA] h-full overflow-hidden">
-              <ScribeHeader
-                session={currentSession}
-                onUpdateSession={handleUpdateSession}
-                onDeleteSession={() => handleDeleteSession()}
-                onCreateNewDocument={() => setIsTemplateModalOpen(true)}
-                isRightDrawerOpen={isRightDrawerOpen}
-                onToggleRightDrawer={handleToggleRightDrawer}
-                choPhepNgoai={choPhepNgoai}
-                onToggleChoPhepNgoai={setChoPhepNgoai}
-              />
+              <div className="no-print">
+                <ScribeHeader
+                  session={currentSession}
+                  onUpdateSession={handleUpdateSession}
+                  onDeleteSession={() => handleDeleteSession()}
+                  onCreateNewDocument={() => setIsTemplateModalOpen(true)}
+                  isRightDrawerOpen={isRightDrawerOpen}
+                  onToggleRightDrawer={handleToggleRightDrawer}
+                  choPhepNgoai={choPhepNgoai}
+                  onToggleChoPhepNgoai={setChoPhepNgoai}
+                />
 
-              {/* Thanh các Tab tài liệu */}
-              <DocumentTabs
-                tabs={currentSession.tabs}
-                activeTabId={currentSession.activeTabId}
-                onSelectTab={handleSelectTab}
-                onCloseTab={handleCloseTab}
-                onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
-              />
+                {/* Thanh các Tab tài liệu */}
+                <DocumentTabs
+                  tabs={currentSession.tabs}
+                  activeTabId={currentSession.activeTabId}
+                  onSelectTab={handleSelectTab}
+                  onCloseTab={handleCloseTab}
+                  onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
+                />
+              </div>
 
               {/* Banner trạng thái đang phân tích & sinh văn bản AI (Ảnh 1 & 2) */}
               {isGeneratingNote && (
-                <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-[#0369A1] animate-in fade-in duration-200">
+                <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-[#0369A1] animate-in fade-in duration-200 no-print">
                   <div className="flex items-center gap-2">
                     <RefreshCw size={13} className="animate-spin text-[#0284C7]" />
                     <span className="font-medium">
@@ -1046,7 +1050,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
               {/* Lỗi của dịch vụ: hiện thẳng, không nuốt vào console */}
               {apiError && (
-                <div className="bg-[#FDE8E8] border-b border-[#F5C2C2] px-4 py-2 flex items-start justify-between gap-3 text-xs text-[#8C1D26]">
+                <div className="bg-[#FDE8E8] border-b border-[#F5C2C2] px-4 py-2 flex items-start justify-between gap-3 text-xs text-[#8C1D26] no-print">
                   <span className="font-medium">{apiError}</span>
                   <button onClick={() => setApiError(null)} className="font-bold shrink-0">đóng</button>
                 </div>
@@ -1054,7 +1058,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
               {/* Có bản nháp thì mời sang màn Duyệt — đó mới là bước bác sĩ phải làm */}
               {noteMeta && (
-                <div className="bg-[#E6F4F1] border-b border-[#BCE3DB] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-[#0D5F57]">
+                <div className="bg-[#E6F4F1] border-b border-[#BCE3DB] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-[#0D5F57] no-print">
                   <span>
                     Bản nháp có <strong>{noteMeta.propositions.length}</strong> mệnh đề
                     {noteMeta.needsConfirmCount > 0 && <>, trong đó <strong>{noteMeta.needsConfirmCount}</strong> máy đưa sang mục cần bác sĩ xác nhận</>}.
@@ -1145,31 +1149,35 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               </div>
 
               {/* Thanh nhập lệnh AI dưới đáy */}
-              <BottomPromptBar
-                onSubmitPrompt={handleBottomPrompt}
-                isLoading={isGeneratingNote}
-                allowExternal={choPhepNgoai}
-                onToggleAllowExternal={setChoPhepNgoai}
-              />
+              <div className="no-print">
+                <BottomPromptBar
+                  onSubmitPrompt={handleBottomPrompt}
+                  isLoading={isGeneratingNote}
+                  allowExternal={choPhepNgoai}
+                  onToggleAllowExternal={setChoPhepNgoai}
+                />
+              </div>
             </div>
 
             {/* 3. Bảng phụ trợ bên phải: "Câu hỏi cho Người bệnh & Chứng cứ" */}
-            <ClinicalEvidenceDrawer
-              key={currentSession.id}
-              isOpen={isRightDrawerOpen}
-              onClose={() => setIsRightDrawerOpen(false)}
-              chatHistory={evidenceChat}
-              onSendMessage={handleSendEvidenceMessage}
-              onNewChat={() => setEvidenceChat([])}
-              isLoading={isEvidenceLoading}
-              patientContext={currentSession.patientSubtitle}
-              ruleQuestions={noteMeta?.questions || []}
-              hasDraft={!!noteMeta}
-              allowExternal={choPhepNgoai}
-              hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
-              onSuggestQuestions={deXuatCauHoi}
-              onAddToContext={themVaoNguCanh}
-            />
+            <div className="no-print">
+              <ClinicalEvidenceDrawer
+                key={currentSession.id}
+                isOpen={isRightDrawerOpen}
+                onClose={() => setIsRightDrawerOpen(false)}
+                chatHistory={evidenceChat}
+                onSendMessage={handleSendEvidenceMessage}
+                onNewChat={() => setEvidenceChat([])}
+                isLoading={isEvidenceLoading}
+                patientContext={currentSession.patientSubtitle}
+                ruleQuestions={noteMeta?.questions || []}
+                hasDraft={!!noteMeta}
+                allowExternal={choPhepNgoai}
+                hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
+                onSuggestQuestions={deXuatCauHoi}
+                onAddToContext={themVaoNguCanh}
+              />
+            </div>
           </div>
         )}
 
