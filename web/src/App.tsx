@@ -107,10 +107,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`mã ${r.status}`))))
       .then((d) => {
         if (huy) return;
-        if (Array.isArray(d.sessions) && d.sessions.length && (d.savedAt || 0) > mocTrinhDuyet) {
-          const ds: Session[] = d.sessions.map(sauKhiNap);
-          setSessions(ds);
-          setActiveSessionId((id) => (ds.some((s) => s.id === id) ? id : ds[0].id));
+        if (Array.isArray(d.sessions) && d.sessions.length) {
+          const trinhDuyetTrong = !mocTrinhDuyet || sessions.length === 0 || (sessions.length === 1 && !sessions[0].transcript && sessions[0].patientIdentifier.includes("Thêm tên"));
+          if ((d.savedAt || 0) > mocTrinhDuyet || trinhDuyetTrong) {
+            const ds: Session[] = d.sessions.map(sauKhiNap);
+            setSessions(ds);
+            setActiveSessionId((id) => (ds.some((s) => s.id === id) ? id : ds[0].id));
+          }
         }
         setKhoServer("san_sang");
       })
