@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Share2,
   Printer,
+  Cloud,
 } from "lucide-react";
 import { ThanhAmThanh } from "./ThanhAmThanh";
 import { RealAudioService } from "../services/realAudioService";
@@ -35,6 +36,8 @@ interface ScribeHeaderProps {
   onCreateNewDocument: () => void;
   isRightDrawerOpen: boolean;
   onToggleRightDrawer: () => void;
+  choPhepNgoai?: boolean;
+  onToggleChoPhepNgoai?: (val: boolean) => void;
 }
 
 export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
@@ -44,6 +47,8 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   onCreateNewDocument,
   isRightDrawerOpen,
   onToggleRightDrawer,
+  choPhepNgoai = false,
+  onToggleChoPhepNgoai,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(session.patientIdentifier);
@@ -527,6 +532,28 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             mode="speaker"
           />
         </div>
+
+        {/* Nút bật/tắt Mô hình ngoài - gọn gàng, tinh tế, không chiếm diện tích */}
+        {onToggleChoPhepNgoai && (
+          <button
+            onClick={() => onToggleChoPhepNgoai(!choPhepNgoai)}
+            className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer active:scale-95 ${
+              choPhepNgoai
+                ? "bg-[#FEF2F2] border-[#FECACA] text-[#991B1B] hover:bg-[#FEE2E2]"
+                : "bg-white border-[#DDD7CE] text-[#475569] hover:bg-[#F8FAFC]"
+            }`}
+            title={
+              choPhepNgoai
+                ? "Mô hình ngoài đang BẬT: Đang cho phép gửi ca khám tới API mô hình ngoài để hỗ trợ hỏi đáp/sửa nhanh. Bấm để tắt."
+                : "Mô hình ngoài đang TẮT: Dữ liệu hoàn toàn xử lý nội bộ (Qwen3-4B & PhoWhisper). Bấm để bật."
+            }
+          >
+            <Cloud size={13} className={choPhepNgoai ? "text-[#DC2626]" : "text-[#94A3B8]"} />
+            <span className="text-[11px] font-semibold whitespace-nowrap">
+              {choPhepNgoai ? "Mô hình ngoài: Bật" : "Mô hình ngoài: Tắt"}
+            </span>
+          </button>
+        )}
 
         {/* Nút bật/tắt bảng Hỏi đáp & Chứng cứ lâm sàng bên phải */}
         <button

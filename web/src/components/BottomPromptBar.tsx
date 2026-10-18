@@ -17,12 +17,16 @@ interface BottomPromptBarProps {
   onSubmitPrompt: (prompt: string) => void;
   isLoading?: boolean;
   onOpenVerification?: () => void;
+  allowExternal?: boolean;
+  onToggleAllowExternal?: (val: boolean) => void;
 }
 
 export const BottomPromptBar: React.FC<BottomPromptBarProps> = ({
   onSubmitPrompt,
   isLoading = false,
   onOpenVerification,
+  allowExternal = false,
+  onToggleAllowExternal,
 }) => {
   const [prompt, setPrompt] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -134,16 +138,30 @@ export const BottomPromptBar: React.FC<BottomPromptBarProps> = ({
             className="flex-1 bg-transparent border-none text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none min-w-0"
           />
 
-          {/* Model token badge: [M] +7k */}
-          <div
-            className="hidden @lg:flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[10px] font-semibold text-[#0369A1] cursor-pointer hover:bg-[#BAE6FD] shadow-tactile-doctor-pill transition-colors flex-shrink-0"
-            title="Bản nháp do Qwen3-4B chạy tại chỗ"
+          {/* Model token badge: [M] Qwen3-4B (Nội bộ) / [E] Mô hình ngoài (Cloud) */}
+          <button
+            type="button"
+            onClick={() => onToggleAllowExternal?.(!allowExternal)}
+            className={`hidden @lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-semibold cursor-pointer transition-colors flex-shrink-0 shadow-tactile-doctor-pill ${
+              allowExternal
+                ? "bg-[#FEF2F2] border-[#FECACA] text-[#991B1B] hover:bg-[#FEE2E2]"
+                : "bg-[#E0F2FE] border-[#BAE6FD] text-[#0369A1] hover:bg-[#BAE6FD]"
+            }`}
+            title={
+              allowExternal
+                ? "Đang cho phép gọi Mô hình ngoài (Cloud). Bấm để chuyển về chỉ dùng Qwen3-4B nội bộ."
+                : "Đang dùng Qwen3-4B chạy tại chỗ (Nội bộ, bảo mật tuyệt đối). Bấm để bật mô hình ngoài."
+            }
           >
-            <span className="w-3.5 h-3.5 rounded-full bg-[#0284C7] text-white flex items-center justify-center text-[8px] font-bold shadow-2xs">
-              M
+            <span
+              className={`w-3.5 h-3.5 rounded-full text-white flex items-center justify-center text-[8px] font-bold shadow-2xs ${
+                allowExternal ? "bg-[#DC2626]" : "bg-[#0284C7]"
+              }`}
+            >
+              {allowExternal ? "E" : "M"}
             </span>
-            <span>Qwen3-4B</span>
-          </div>
+            <span>{allowExternal ? "Mô hình ngoài" : "Qwen3-4B (Nội bộ)"}</span>
+          </button>
 
 
           {/* Send Button */}

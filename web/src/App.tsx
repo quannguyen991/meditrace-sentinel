@@ -1012,6 +1012,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                 onCreateNewDocument={() => setIsTemplateModalOpen(true)}
                 isRightDrawerOpen={isRightDrawerOpen}
                 onToggleRightDrawer={handleToggleRightDrawer}
+                choPhepNgoai={choPhepNgoai}
+                onToggleChoPhepNgoai={setChoPhepNgoai}
               />
 
               {/* Thanh các Tab tài liệu */}
@@ -1087,27 +1089,6 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                 </div>
               )}
 
-              {/* Công tắc mô hình ngoài — mặc định tắt; bật thì cảnh báo rõ dữ liệu đi đâu */}
-              <div
-                className={`px-3 @md:px-4 py-1.5 border-b flex items-center justify-between gap-3 text-[11px] ${
-                  choPhepNgoai ? "bg-[#FDE8E8] border-[#F5C2C2] text-[#8C1D26]" : "bg-[#F8FBFC] border-[#E2ECE9] text-[#64748B]"
-                }`}
-              >
-                <span className="min-w-0 line-clamp-2 @2xl:line-clamp-none">
-                  {choPhepNgoai
-                    ? "Đang cho phép gửi nội dung ca khám ra máy chủ của dịch vụ mô hình ngoài (mô hình thương mại) để sửa theo lời nhắc, hỏi về ca khám, gợi ý câu hỏi và làm bản so sánh. Khâu tách mệnh đề và bản nháp chính vẫn do Qwen3-4B của dự án làm."
-                    : "Mô hình ngoài đang tắt: không có gì rời khỏi máy này. Bản chép dùng PhoWhisper, bản nháp dùng Qwen3-4B tại chỗ."}
-                </span>
-                <label className="flex items-center gap-1.5 shrink-0 font-semibold cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={choPhepNgoai}
-                    onChange={(e) => setChoPhepNgoai(e.target.checked)}
-                  />
-                  Mô hình ngoài
-                </label>
-              </div>
-
               {/* Nội dung tab đang hiển thị (Bản nháp chiếm trọn chiều rộng rộng rãi) */}
               <div ref={vungGiuaRef} className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative">
@@ -1167,6 +1148,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               <BottomPromptBar
                 onSubmitPrompt={handleBottomPrompt}
                 isLoading={isGeneratingNote}
+                allowExternal={choPhepNgoai}
+                onToggleAllowExternal={setChoPhepNgoai}
               />
             </div>
 
@@ -1283,10 +1266,12 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="max-w-xl">
-                    <h2 className="text-[14px] font-semibold text-[#174F70]">Mô hình ngoài</h2>
-                    <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">Có thể gửi nội dung ca khám tới mô hình ngoài. Bản nháp chính vẫn tạo tại chỗ.</p>
+                    <h2 className="text-[14px] font-semibold text-[#174F70]">Mô hình ngoài (Dịch vụ đám mây / API thương mại)</h2>
+                    <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">
+                      Cho phép gửi nội dung ca khám ra dịch vụ mô hình ngoài để hỗ trợ sửa theo lời nhắc, hỏi đáp về ca khám, gợi ý câu hỏi và so sánh mô hình. Khâu tách mệnh đề và bản nháp chính mặc định vẫn do mô hình Qwen3–4B của dự án xử lý tại chỗ để đảm bảo quyền riêng tư y tế.
+                    </p>
                   </div>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3 py-2 text-[12px] font-semibold text-[#345F79]">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3.5 py-2 text-[12px] font-semibold text-[#345F79] hover:bg-[#EAF4FA] transition-colors">
                     <input
                       type="checkbox"
                       checked={choPhepNgoai}
