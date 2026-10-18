@@ -106,6 +106,7 @@ const leaflet1 = `# HƯỚNG DẪN CẤP CỨU & CẢNH BÁO NGUY HIỂM TÍNH M
 
 const noteMeta1 = {
   content: soap1,
+  transcript: transcript1,
   source: "mo_hinh",
   seconds: 38.6,
   needsConfirmCount: 3,
@@ -286,6 +287,7 @@ const leaflet2 = `# BẢNG HƯỚNG DẪN DÙNG THUỐC & CẢNH BÁO TỬ VONG 
 
 const noteMeta2 = {
   content: soap2,
+  transcript: transcript2,
   source: "mo_hinh",
   seconds: 34.2,
   needsConfirmCount: 2,
@@ -454,6 +456,7 @@ const leaflet3 = `# HƯỚNG DẪN XỬ TRÍ CẤP CỨU & CẢNH BÁO THUỐC B
 
 const noteMeta3 = {
   content: soap3,
+  transcript: transcript3,
   source: "mo_hinh",
   seconds: 41.3,
   needsConfirmCount: 3,

@@ -318,7 +318,12 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
   // Bản nháp và hỏi đáp gắn với TỪNG CA (trước đây là biến chung: F5 là mất, đổi ca vẫn thấy
   // bản nháp của ca trước). Hàm ghi chốt mã ca lúc gọi, nên lời gọi chậm vẫn ghi đúng ca.
-  const noteMeta: NoteMeta | null = currentSession?.note ?? null;
+  const noteMeta: NoteMeta | null = currentSession?.note
+    ? {
+        ...currentSession.note,
+        transcript: currentSession.note.transcript || currentSession.transcript,
+      }
+    : null;
   const setNoteMeta = (m: NoteMeta | null) => handleUpdateSession({ note: m });
   const evidenceChat: ClinicalChatMessage[] = currentSession?.evidenceChat || [];
 
@@ -1134,7 +1139,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     onRegenerateNote={handleRegenerateNoteStyle}
                     isGenerating={isGeneratingNote}
                     danhDau={
-                      moDuyetBen && noteMeta
+                      noteMeta?.propositions
                         ? noteMeta.propositions.map((pp) => ({
                             id: pp.id,
                             text: pp.text,
@@ -1215,6 +1220,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         {activeView === "verification" && (
           <VerificationView
             note={noteMeta}
+            transcript={currentSession.transcript}
             onBack={() => handleSelectNavigationItem("draft")}
             patientIdentifier={currentSession.patientIdentifier}
             allowExternal={choPhepNgoai}

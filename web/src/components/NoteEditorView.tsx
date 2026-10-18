@@ -20,6 +20,17 @@ import {
   Download,
   Printer,
   FileCode,
+  AlertTriangle,
+  AlertCircle,
+  ShieldAlert,
+  CheckCircle2,
+  User,
+  Stethoscope,
+  Activity,
+  Pill,
+  HeartPulse,
+  FileHeart,
+  Users,
 } from "lucide-react";
 
 /** Một mệnh đề cần tô trong bản nháp khi ngăn duyệt đang mở. */
@@ -57,6 +68,95 @@ function laTieuDeMuc(dong: string) {
   if (!t) return false;
   if (/^#{1,4}\s+\S/.test(t)) return true;
   return t.length <= 60 && /\p{Lu}/u.test(t) && t === t.toLocaleUpperCase("vi") && !/[.;]$/.test(t);
+}
+
+/** Kiểm tra dòng có chứa cảnh báo cần bác sĩ xác nhận hoặc tương tác nguy hiểm để bôi đỏ */
+function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
+  laCanhBao: boolean;
+  mucDo: "khan_cap" | "xac_nhan";
+  nhan: string;
+} {
+  const t = dong.trim();
+  if (!t) return { laCanhBao: false, mucDo: "xac_nhan", nhan: "" };
+
+  if (
+    /BÁO ĐỘNG ĐỎ|BLACK-BOX|TƯƠNG TÁC ĐỘ 1|NGƯNG NGAY LẬP TỨC|CHỐNG CHỈ ĐỊNH TỬ VONG/i.test(t) ||
+    /^[ \t]*[-*]?[ \t]*[🚨⛔]/.test(t)
+  ) {
+    return { laCanhBao: true, mucDo: "khan_cap", nhan: "BÁO ĐỘNG ĐỎ KHẨN CẤP" };
+  }
+
+  if (
+    /\[BÔI ĐỎ|CẦN BÁC SĨ XÁC NHẬN|CẦN BÁC SĨ DUYỆT|CẦN XÁC NHẬN|ĐÍNH CHÍNH LIỀU/i.test(t) ||
+    /^[ \t]*[-*]?[ \t]*⚠️/.test(t) ||
+    mdTrongDong?.some((m) => m.trangThai === "canh")
+  ) {
+    return { laCanhBao: true, mucDo: "xac_nhan", nhan: "CẦN BÁC SĨ XÁC NHẬN / BÔI ĐỎ" };
+  }
+
+  return { laCanhBao: false, mucDo: "xac_nhan", nhan: "" };
+}
+
+/** Định dạng văn bản nội tuyến: bỏ dấu **, in đậm, định dạng trích dẫn [T..] và chữ nghiêng */
+function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
+  if (!vanBan) return null;
+  const regex = /(\*\*[^*]+\*\*|\[T\d+(?:,\s*T\d+)*\]|\*[^*]+\*)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(vanBan)) !== null) {
+    if (match.index > lastIndex) {
+      const chunk = vanBan.slice(lastIndex, match.index).replace(/\*\*/g, "");
+      if (chunk) parts.push(chunk);
+    }
+    const token = match[0];
+    if (token.startsWith("**") && token.endsWith("**")) {
+      const inner = token.slice(2, -2).trim();
+      parts.push(
+        <strong
+          key={match.index}
+          className={`font-bold ${
+            isAlert
+              ? "text-red-950 bg-red-100/90 px-1 py-0.5 rounded border border-red-200/80"
+              : "text-[#0F172A]"
+          }`}
+        >
+          {inner}
+        </strong>
+      );
+    } else if (token.startsWith("[T") && token.endsWith("]")) {
+      parts.push(
+        <span
+          key={match.index}
+          className={`inline-flex items-center px-1.5 py-0.2 mx-0.5 text-[11px] font-mono font-semibold rounded border ${
+            isAlert
+              ? "bg-red-100 text-red-800 border-red-300"
+              : "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]"
+          }`}
+          title="Lượt lời thoại làm căn cứ lâm sàng"
+        >
+          {token}
+        </span>
+      );
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      const inner = token.slice(1, -1).trim();
+      parts.push(
+        <em
+          key={match.index}
+          className={`italic ${isAlert ? "text-red-800 font-medium" : "text-[#64748B]"}`}
+        >
+          {inner}
+        </em>
+      );
+    }
+    lastIndex = match.index + token.length;
+  }
+  if (lastIndex < vanBan.length) {
+    const chunk = vanBan.slice(lastIndex).replace(/\*\*/g, "");
+    if (chunk) parts.push(chunk);
+  }
+  return parts.length ? parts : vanBan.replace(/\*\*/g, "");
 }
 
 export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
@@ -466,7 +566,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           </div>
         )}
 
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#BAE6FD] shadow-tactile-doctor-card p-5 sm:p-8 min-h-[500px]">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#BAE6FD] shadow-tactile-doctor-card p-6 sm:p-10 min-h-[500px] print:border-none print:shadow-none print:p-0 print:max-w-none">
           {/* Textarea không in đậm được từng dòng: bình thường hiện bản đã định dạng (tiêu đề mục đậm),
               bấm vào là sửa, bấm ra ngoài là về bản định dạng. Chưa có nội dung thì mở sẵn ô sửa. */}
           {dangSua || !tab.content.trim() ? (
@@ -490,43 +590,251 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               ref={giayRef}
               className="min-h-[460px] cursor-text text-[15px] leading-relaxed text-[#0F172A] font-sans focus:outline-none rounded-lg"
             >
-              {tab.content.split("\n").map((dong, i) =>
-                laTieuDeMuc(dong) ? (
-                  <div key={i} className="font-bold text-[#0C4A6E] tracking-wide mt-5 first:mt-0 mb-0.5">
-                    {dong.replace(/^#{1,4}\s*/, "").trim()}
+              {tab.content.split("\n").map((dong, i) => {
+                const dongTrim = dong.trim();
+                if (!dongTrim) {
+                  return <div key={i} className="h-2.5" />;
+                }
+
+                // Đường kẻ ngang
+                if (/^---|^___|^\*\*\*$/.test(dongTrim)) {
+                  return <hr key={i} className="my-4 border-[#CCE3F0]" />;
+                }
+
+                // Tiêu đề chính của hồ sơ bệnh án
+                if (/^#+\s+(?:BỆNH ÁN|HỒ SƠ BỆNH ÁN|SOAP)/i.test(dongTrim)) {
+                  return (
+                    <div key={i} className="border-b-2 border-[#BAE6FD] pb-3 mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] flex items-center justify-center text-white shadow-tactile-doctor-pill">
+                            <FileHeart size={20} />
+                          </div>
+                          <div>
+                            <h1 className="text-xl sm:text-2xl font-serif font-bold text-[#0C2340] tracking-tight">
+                              {dongTrim.replace(/^#+\s*/, "")}
+                            </h1>
+                            <p className="text-[11.5px] text-[#0369A1] font-semibold flex items-center gap-1.5 mt-0.5">
+                              <ShieldAlert size={13} className="text-[#0284C7]" />
+                              BỆNH ÁN ĐÃ ĐỐI CHIẾU CĂN CỨ LỜI THOẠI & PHÁT HIỆN BẪY LÂM SÀNG
+                            </p>
+                          </div>
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold self-start sm:self-auto">
+                          <CheckCircle2 size={13} /> Sẵn sàng kiểm duyệt
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Thẻ thông tin hành chính bệnh nhân
+                if (
+                  (dongTrim.includes("Bệnh nhân:") && dongTrim.includes("Tuổi:")) ||
+                  (dongTrim.includes("Ngày khám:") && dongTrim.includes("Bác sĩ"))
+                ) {
+                  return (
+                    <div
+                      key={i}
+                      className="p-3.5 bg-gradient-to-r from-[#F0F9FF] via-[#E0F2FE]/50 to-[#F8FBFC] border border-[#BAE6FD] rounded-xl mb-3 text-[13.5px] text-[#0C4A6E] font-medium shadow-2xs flex flex-wrap items-center gap-x-4 gap-y-1"
+                    >
+                      <div className="flex items-center gap-1.5 text-[#0284C7] font-semibold mr-1">
+                        <User size={15} />
+                        <span>Thông tin:</span>
+                      </div>
+                      {renderDinhDangChu(dongTrim)}
+                    </div>
+                  );
+                }
+
+                // Các mục SOAP chính
+                if (/S\s*[—–-]\s*SUBJECTIVE|BỆNH SỬ\s*&\s*TIỀN SỬ/i.test(dongTrim)) {
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 mt-6 mb-2.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E0F2FE] to-[#F0F9FF] border-l-4 border-[#0284C7] font-bold text-[#0369A1] text-[15px] shadow-2xs"
+                    >
+                      <Activity size={17} className="text-[#0284C7]" />
+                      <span>{dongTrim.replace(/^#{1,4}\s*/, "").trim()}</span>
+                    </div>
+                  );
+                }
+
+                if (/O\s*[—–-]\s*OBJECTIVE|THỰC THỂ\s*&\s*CẬN LÂM SÀNG/i.test(dongTrim)) {
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 mt-6 mb-2.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E6F4F1] to-[#F0FDF4] border-l-4 border-[#0D9488] font-bold text-[#0D9488] text-[15px] shadow-2xs"
+                    >
+                      <Stethoscope size={17} className="text-[#0D9488]" />
+                      <span>{dongTrim.replace(/^#{1,4}\s*/, "").trim()}</span>
+                    </div>
+                  );
+                }
+
+                if (/A\s*[—–-]\s*ASSESSMENT|CHẨN ĐOÁN/i.test(dongTrim)) {
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 mt-6 mb-2.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FEF3C7] to-[#FFFBEB] border-l-4 border-[#D97706] font-bold text-[#92400E] text-[15px] shadow-2xs"
+                    >
+                      <AlertTriangle size={17} className="text-[#D97706]" />
+                      <span>{dongTrim.replace(/^#{1,4}\s*/, "").trim()}</span>
+                    </div>
+                  );
+                }
+
+                if (/P\s*[—–-]\s*PLAN|KẾ HOẠCH|XỬ TRÍ/i.test(dongTrim)) {
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 mt-6 mb-2.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#DCFCE7] to-[#F0FDF4] border-l-4 border-[#16A34A] font-bold text-[#15803D] text-[15px] shadow-2xs"
+                    >
+                      <Pill size={17} className="text-[#16A34A]" />
+                      <span>{dongTrim.replace(/^#{1,4}\s*/, "").trim()}</span>
+                    </div>
+                  );
+                }
+
+                // Tiêu đề mục thông thường
+                if (laTieuDeMuc(dong)) {
+                  return (
+                    <div
+                      key={i}
+                      className="font-bold text-[#0C4A6E] tracking-wide mt-5 first:mt-0 mb-1.5 text-[15px] border-b border-[#E2ECF3] pb-1"
+                    >
+                      {dongTrim.replace(/^#{1,4}\s*/, "").trim()}
+                    </div>
+                  );
+                }
+
+                // Ghi chú phân định người nói K3
+                if (/\(Ghi chú phân định người nói/i.test(dongTrim)) {
+                  return (
+                    <div
+                      key={i}
+                      className="my-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[12.5px] text-[#475569] flex items-center gap-2 italic"
+                    >
+                      <span className="p-1 rounded-md bg-slate-200 text-slate-600 flex-shrink-0">
+                        <Users size={14} />
+                      </span>
+                      <span>{renderDinhDangChu(dongTrim.replace(/^\s*[-*]\s*/, ""))}</span>
+                    </div>
+                  );
+                }
+
+                // Lấy các mệnh đề thuộc dòng này (nếu có)
+                const mdTrongDong = (ghep?.get(i) || [])
+                  .map((g) => mdTheoId.get(g.id))
+                  .filter(Boolean) as DanhDauMD[];
+                const canhBao = kiemTraCanXacNhan(dongTrim, mdTrongDong);
+
+                // Helper render nội dung có liên kết mệnh đề
+                const renderDongText = (txt: string, isCanhBao: boolean) => {
+                  if (ghep) {
+                    const doan = catDong(txt, i);
+                    return doan.map((d, j) =>
+                      d.md ? (
+                        <span
+                          key={j}
+                          data-md={d.md.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onChonMenhDe?.(chonId === d.md!.id ? null : d.md!.id);
+                          }}
+                          title={
+                            d.ganDung
+                              ? `Câu đã được sửa so với chữ máy trích: “${d.md.text}” — bấm để xem mệnh đề ở ngăn duyệt`
+                              : "Bấm để xem mệnh đề này ở ngăn duyệt"
+                          }
+                          className={`rounded px-1 -mx-0.5 underline decoration-2 underline-offset-4 cursor-pointer transition-shadow ${
+                            d.ganDung ? "decoration-dotted" : ""
+                          } ${MAU_TO[d.md.trangThai]} ${
+                            chonId === d.md.id
+                              ? "ring-2 ring-[#0284C7] bg-[#E0F2FE]"
+                              : "hover:ring-1 hover:ring-[#93C5FD]"
+                          }`}
+                        >
+                          {renderDinhDangChu(d.chu, isCanhBao)}
+                        </span>
+                      ) : (
+                        <span key={j}>{renderDinhDangChu(d.chu, isCanhBao)}</span>
+                      )
+                    );
+                  }
+                  return renderDinhDangChu(txt, isCanhBao);
+                };
+
+                // PHẦN CẦN XÁC NHẬN -> BÔI ĐỎ THEO YÊU CẦU CỦA BÁC SĨ
+                if (canhBao.laCanhBao) {
+                  return (
+                    <div
+                      key={i}
+                      className="my-3 p-3.5 rounded-xl border border-red-300 bg-gradient-to-r from-red-50/95 via-rose-50/80 to-red-50/40 border-l-4 border-l-red-500 shadow-xs text-red-950 flex items-start gap-2.5 transition-all hover:shadow-md print:bg-red-50 print:border-red-500"
+                    >
+                      <div className="flex-shrink-0 mt-0.5 p-1 rounded-lg bg-red-100 text-red-600">
+                        <AlertTriangle size={17} className="animate-pulse" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-600 text-white shadow-2xs">
+                            {canhBao.nhan}
+                          </span>
+                        </div>
+                        <div className="text-[14.5px] leading-relaxed">
+                          {renderDongText(dongTrim.replace(/^[ \t]*[-*][ \t]*/, ""), true)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Dòng gạch đầu dòng cấp 2 (thụt vào)
+                if (/^[ \t]{2,}[-*]\s*/.test(dong)) {
+                  return (
+                    <div key={i} className="flex items-start gap-2 my-1 pl-6 leading-relaxed text-[14px]">
+                      <span className="w-1.5 h-1.5 rounded-sm bg-slate-400 mt-2 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        {renderDongText(dong.replace(/^[ \t]{2,}[-*]\s*/, ""), false)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Dòng gạch đầu dòng cấp 1
+                if (/^[ \t]*[-*]\s*/.test(dong)) {
+                  return (
+                    <div key={i} className="flex items-start gap-2.5 my-1.5 pl-1 leading-relaxed text-[14.5px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0284C7] mt-2 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        {renderDongText(dong.replace(/^[ \t]*[-*]\s*/, ""), false)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Dòng đánh số (1. 2. 3...)
+                if (/^[ \t]*\d+\.\s*/.test(dong)) {
+                  const mSo = dong.match(/^[ \t]*\d+\./);
+                  return (
+                    <div key={i} className="flex items-start gap-2.5 my-1.5 pl-1 leading-relaxed text-[14.5px]">
+                      <span className="font-bold text-[#0284C7] min-w-[20px] flex-shrink-0">
+                        {mSo ? mSo[0].trim() : "•"}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {renderDongText(dong.replace(/^[ \t]*\d+\.\s*/, ""), false)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Dòng văn bản bình thường
+                return (
+                  <div key={i} className="my-1.5 text-[14.5px] leading-relaxed text-[#0F172A]">
+                    {renderDongText(dong, false)}
                   </div>
-                ) : dong.trim() ? (
-                  <div key={i} className="whitespace-pre-wrap break-words">
-                    {ghep
-                      ? catDong(dong, i).map((d, j) =>
-                          d.md ? (
-                            <span
-                              key={j}
-                              data-md={d.md.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onChonMenhDe?.(chonId === d.md!.id ? null : d.md!.id);
-                              }}
-                              title={d.ganDung
-                                ? `Câu đã được sửa so với chữ máy trích: “${d.md.text}” — bấm để xem mệnh đề ở ngăn duyệt`
-                                : "Bấm để xem mệnh đề này ở ngăn duyệt"}
-                              className={`rounded px-0.5 -mx-0.5 underline decoration-2 underline-offset-4 cursor-pointer transition-shadow ${
-                                d.ganDung ? "decoration-dotted" : ""} ${MAU_TO[d.md.trangThai]} ${
-                                chonId === d.md.id ? "ring-2 ring-[#0284C7] bg-[#E0F2FE]" : "hover:ring-1 hover:ring-[#93C5FD]"
-                              }`}
-                            >
-                              {d.chu}
-                            </span>
-                          ) : (
-                            <span key={j}>{d.chu}</span>
-                          )
-                        )
-                      : dong}
-                  </div>
-                ) : (
-                  <div key={i} className="h-3" />
-                )
-              )}
+                );
+              })}
             </div>
           )}
         </div>

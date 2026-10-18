@@ -88,7 +88,7 @@ const NHAN_NGUON: Record<string, { chu: string; mau: string }> = {
 };
 
 // Màu dây và thẻ. Xanh = máy không cảnh báo; đỏ = máy đưa sang cần xác nhận; xám = bác sĩ đã bỏ.
-const MAU = { ok: "#34B889", canh: "#E86A6A", bo: "#CBD5E1", mo: "#E2E8F0" };
+const MAU = { ok: "#059669", canh: "#EF4444", bo: "#94A3B8", mo: "#E2E8F0" };
 
 /** Tách bản nháp thành các mục theo dòng tiêu đề viết hoa. */
 function tachMuc(van: string) {
@@ -154,6 +154,7 @@ export function canXacNhan(p: Proposition) {
 
 interface Props {
   note: NoteMeta | null;
+  transcript?: string;
   onBack: () => void;
   patientIdentifier?: string;
   /** Có bật mô hình ngoài không — chỉ khi bật mới hiện nút gợi ý câu hỏi. */
@@ -168,10 +169,21 @@ interface Props {
 }
 
 type Chon = { loai: "p"; id: number } | { loai: "t"; so: number } | null;
-type Day = { d: string; mau: string; sang: boolean; x1: number; y1: number; x2: number; y2: number; key: string };
+type Day = {
+  d: string;
+  mau: string;
+  sang: boolean;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  key: string;
+  canh: boolean;
+};
 
 export const VerificationView: React.FC<Props> = ({
   note,
+  transcript,
   onBack,
   patientIdentifier,
   allowExternal,
@@ -213,7 +225,8 @@ export const VerificationView: React.FC<Props> = ({
     setBoQua({});
   }, [note?.caseId, note?.content]);
 
-  const luot = useMemo(() => tachLuot(note?.transcript), [note?.transcript]);
+  const loiThoai = note?.transcript || transcript || "";
+  const luot = useMemo(() => tachLuot(loiThoai), [loiThoai]);
   const muc = useMemo(() => tachMuc(note?.content || ""), [note?.content]);
   const ds = useMemo(() => {
     const goc = note?.propositions || [];
@@ -272,6 +285,8 @@ export const VerificationView: React.FC<Props> = ({
       const r2 = the.getBoundingClientRect();
       const x2 = r2.left - gk.left;
       const y2 = r2.top - gk.top + 26;
+      const q = quyet[p.id] || "cho";
+      const laCanh = canXacNhan(p) && q !== "giu" && q !== "sua";
       for (const t of p.evidenceTurns) {
         const o = luotRef.current.get(t);
         if (!o) continue;
@@ -281,13 +296,23 @@ export const VerificationView: React.FC<Props> = ({
         const dx = Math.max(24, (x2 - x1) / 2);
         const sang = pSang(p) && tSang(t);
         ra.push({
-          key: `${t}-${p.id}`, x1, y1, x2, y2, sang, mau: mauMD(p),
+          key: `${t}-${p.id}`,
+          x1,
+          y1,
+          x2,
+          y2,
+          sang,
+          mau: mauMD(p),
+          canh: laCanh,
           d: `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`,
         });
       }
     }
-    // Dây đang sáng vẽ sau cùng để nằm trên.
-    ra.sort((a, b) => Number(a.sang) - Number(b.sang));
+    // Dây đang sáng và dây cảnh báo vẽ sau cùng để nằm trên.
+    ra.sort((a, b) => {
+      if (a.sang !== b.sang) return Number(a.sang) - Number(b.sang);
+      return Number(a.canh) - Number(b.canh);
+    });
     setDay(ra);
   }, [ds, quyet, chon, ghim]);
 
@@ -301,11 +326,20 @@ export const VerificationView: React.FC<Props> = ({
     const ro = new ResizeObserver(() => ve());
     ro.observe(k);
     window.addEventListener("resize", ve);
+
+    // Bắt nhịp đo lại sau khi DOM/font load
+    const t1 = requestAnimationFrame(ve);
+    const t2 = setTimeout(ve, 80);
+    const t3 = setTimeout(ve, 350);
+
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", ve);
+      cancelAnimationFrame(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
-  }, [ve]);
+  }, [ve, luot.length, ds.length]);
 
   if (!note) {
     return (
@@ -422,14 +456,64 @@ export const VerificationView: React.FC<Props> = ({
       <div className="px-4 sm:px-8 pb-6 max-w-[1400px] mx-auto w-full">
         <div ref={khungRef} className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-5 lg:gap-x-20">
           {rong && (
-            <svg className="absolute inset-0 pointer-events-none z-10" width={khung.w} height={khung.h} aria-hidden="true">
-              {day.map((d) => (
-                <g key={d.key} opacity={d.sang ? 1 : 0.18}>
-                  <path d={d.d} fill="none" stroke={d.mau} strokeWidth={d.sang && dangChon ? 2.5 : 1.75} />
-                  <circle cx={d.x1} cy={d.y1} r={4} fill={d.mau} />
-                  <circle cx={d.x2} cy={d.y2} r={4} fill={d.mau} />
-                </g>
-              ))}
+            <svg
+              className="absolute inset-0 pointer-events-none z-10 overflow-visible"
+              width={khung.w}
+              height={khung.h}
+              aria-hidden="true"
+            >
+              <defs>
+                <filter id="glow-canh" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#EF4444" floodOpacity="0.4" />
+                </filter>
+              </defs>
+              {day.map((d) => {
+                const laCanh = d.canh && d.mau === MAU.canh;
+                const doDay = d.sang && dangChon ? (laCanh ? 3.5 : 2.8) : (laCanh ? 2.5 : 1.8);
+                const doMo = d.sang ? (laCanh ? 1 : 0.85) : 0.15;
+                return (
+                  <g key={d.key} opacity={doMo} className="transition-opacity duration-150">
+                    {/* Hào quang đỏ làm nổi bật đường nối cho phần cần xác nhận */}
+                    {laCanh && (
+                      <path
+                        d={d.d}
+                        fill="none"
+                        stroke="#EF4444"
+                        strokeWidth={doDay + 3}
+                        strokeOpacity="0.25"
+                      />
+                    )}
+                    <path
+                      d={d.d}
+                      fill="none"
+                      stroke={d.mau}
+                      strokeWidth={doDay}
+                      strokeDasharray={laCanh ? "7 3.5" : undefined}
+                      filter={laCanh ? "url(#glow-canh)" : undefined}
+                    />
+                    {/* Đầu mút bên cột hội thoại */}
+                    <circle
+                      cx={d.x1}
+                      cy={d.y1}
+                      r={laCanh ? 5.5 : 4}
+                      fill={d.mau}
+                      stroke="#FFFFFF"
+                      strokeWidth={laCanh ? 2 : 1.5}
+                      className="drop-shadow-xs"
+                    />
+                    {/* Đầu mút bên cột mệnh đề cần duyệt */}
+                    <circle
+                      cx={d.x2}
+                      cy={d.y2}
+                      r={laCanh ? 5.5 : 4}
+                      fill={d.mau}
+                      stroke="#FFFFFF"
+                      strokeWidth={laCanh ? 2 : 1.5}
+                      className="drop-shadow-xs"
+                    />
+                  </g>
+                );
+              })}
             </svg>
           )}
 
