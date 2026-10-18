@@ -83,7 +83,7 @@ function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
     /BÁO ĐỘNG ĐỎ|BLACK-BOX|TƯƠNG TÁC ĐỘ 1|NGƯNG NGAY LẬP TỨC|CHỐNG CHỈ ĐỊNH TỬ VONG/i.test(t) ||
     /^[ \t]*[-*]?[ \t]*[🚨⛔]/.test(t)
   ) {
-    return { laCanhBao: true, mucDo: "khan_cap", nhan: "BÁO ĐỘNG ĐỎ KHẨN CẤP" };
+    return { laCanhBao: true, mucDo: "khan_cap", nhan: "CẢNH BÁO NGUY HIỂM KHẨN CẤP" };
   }
 
   if (
@@ -91,7 +91,7 @@ function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
     /^[ \t]*[-*]?[ \t]*⚠️/.test(t) ||
     mdTrongDong?.some((m) => m.trangThai === "canh")
   ) {
-    return { laCanhBao: true, mucDo: "xac_nhan", nhan: "CẦN BÁC SĨ XÁC NHẬN / BÔI ĐỎ" };
+    return { laCanhBao: true, mucDo: "xac_nhan", nhan: "CẦN BÁC SĨ XÁC NHẬN" };
   }
 
   return { laCanhBao: false, mucDo: "xac_nhan", nhan: "" };
@@ -100,14 +100,17 @@ function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
 /** Định dạng văn bản nội tuyến: bỏ dấu **, in đậm, định dạng trích dẫn [T..] và chữ nghiêng */
 function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
   if (!vanBan) return null;
+  // Loại bỏ triệt để các nhãn chỉ dẫn thừa như [BÔI ĐỎ...] vì giao diện đã được bôi đỏ cảnh báo trực quan
+  const vanBanSach = vanBan.replace(/\*?\*?\[(?:BÔI ĐỎ[^\]]*|CẦN BÁC SĨ DUYỆT)\]:?\*?\*?[ \t]*/gi, "");
+  if (!vanBanSach) return null;
   const regex = /(\*\*[^*]+\*\*|\[T\d+(?:,\s*T\d+)*\]|\*[^*]+\*|\|)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
-  while ((match = regex.exec(vanBan)) !== null) {
+  while ((match = regex.exec(vanBanSach)) !== null) {
     if (match.index > lastIndex) {
-      const chunk = vanBan.slice(lastIndex, match.index).replace(/\*\*/g, "");
+      const chunk = vanBanSach.slice(lastIndex, match.index).replace(/\*\*/g, "");
       if (chunk) parts.push(chunk);
     }
     const token = match[0];
@@ -158,11 +161,11 @@ function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
     }
     lastIndex = match.index + token.length;
   }
-  if (lastIndex < vanBan.length) {
-    const chunk = vanBan.slice(lastIndex).replace(/\*\*/g, "");
+  if (lastIndex < vanBanSach.length) {
+    const chunk = vanBanSach.slice(lastIndex).replace(/\*\*/g, "");
     if (chunk) parts.push(chunk);
   }
-  return parts.length ? parts : vanBan.replace(/\*\*/g, "");
+  return parts.length ? parts : vanBanSach.replace(/\*\*/g, "");
 }
 
 export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
@@ -773,7 +776,14 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                           </span>
                         </div>
                         <div className="text-[14.5px] leading-relaxed">
-                          {renderDongText(dongTrim.replace(/^[ \t]*[-*][ \t]*/, ""), true)}
+                          {renderDongText(
+                            dongTrim
+                              .replace(/^[ \t]*[-*][ \t]*/, "")
+                              .replace(/^[⚠️🚨⛔][ \t]*/, "")
+                              .replace(/\*?\*?\[(?:BÔI ĐỎ[^\]]*|CẦN BÁC SĨ DUYỆT)\]:?\*?\*?[ \t]*/gi, "")
+                              .trim(),
+                            true
+                          )}
                         </div>
                       </div>
                     </div>

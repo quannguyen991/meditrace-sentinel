@@ -60,12 +60,12 @@ const soap1 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (CẢNH BÁ
 - **Lý do khám:** Tức nặng ngực trái âm ỉ, mệt, chóng mặt khi đứng dậy [T2, T10].
 - **Tiền sử tim mạch:** Đặt Stent động mạch vành 6 tháng nay [T2].
 - **Bẫy âm vị tên thuốc LASA & Tự ý đổi liều (K1, K7):**
-  - ⚠️ **[BÔI ĐỎ — CẦN BÁC SĨ DUYỆT]:** Phát âm nhầm "la-xích... pla-vích" -> Nhận diện hoạt chất: **Plavix (Clopidogrel 75mg)** [T4].
-  - ⚠️ **[BÔI ĐỎ — CẦN BÁC SĨ DUYỆT]:** Tên thuốc huyết áp "co-va-xin / co-ve-xin" -> Xác nhận: **Coversyl (Perindopril 5mg)** [T4].
-  - ⚠️ **[BÔI ĐỎ — ĐÍNH CHÍNH LIỀU 3 TẦNG]:** Bệnh nhân tự ý đổi liều Coversyl (kê ban đầu 1v x 2l -> giảm 0.5v/sáng -> 3 ngày nay tự ý uống lại 1v x 2l/ngày) [T6].
+  - **Nhận diện thuốc LASA (cần xác nhận):** Phát âm nhầm "la-xích... pla-vích" -> Nhận diện hoạt chất: **Plavix (Clopidogrel 75mg)** [T4].
+  - **Nhận diện thuốc huyết áp (cần xác nhận):** Tên thuốc "co-va-xin / co-ve-xin" -> Xác nhận: **Coversyl (Perindopril 5mg)** [T4].
+  - **Đính chính liều 3 tầng (cần xác nhận):** Bệnh nhân tự ý đổi liều Coversyl (kê ban đầu 1v x 2l -> giảm 0.5v/sáng -> 3 ngày nay tự ý uống lại 1v x 2l/ngày) [T6].
 - **Báo động tương tác thuốc nguy hiểm & Xuất huyết tiêu hóa:**
-  - 🚨 **[BÔI ĐỎ KHẨN CẤP — TƯƠNG TÁC ĐỘ 1 BLACK-BOX]:** Tự mua **Omeprazole 20mg/ngày** uống cùng **Plavix (Clopidogrel)** 2 tuần nay -> Omeprazole ức chế CYP2C19 làm mất tác dụng chống đông của Clopidogrel -> NGUY CƠ TẮC HUYẾT KHỐI TRONG STENT TỬ VONG! [T8, T12].
-  - 🚨 **[BÔI ĐỎ BÁO ĐỘNG ĐỎ]:** Đi cầu phân đen như bã cà phê 2 ngày nay + chóng mặt tư thế -> Dấu hiệu **Xuất huyết tiêu hóa trên** do phối hợp thuốc chống đông với thuốc giảm đau NSAID tự mua ngoài tiệm [T8, T10, T12].
+  - **Tương tác thuốc Black-box (cần xác nhận):** Tự mua **Omeprazole 20mg/ngày** uống cùng **Plavix (Clopidogrel)** 2 tuần nay -> Omeprazole ức chế CYP2C19 làm mất tác dụng chống đông của Clopidogrel -> NGUY CƠ TẮC HUYẾT KHỐI TRONG STENT TỬ VONG! [T8, T12].
+  - **Báo động xuất huyết tiêu hóa (cần xác nhận):** Đi cầu phân đen như bã cà phê 2 ngày nay + chóng mặt tư thế -> Dấu hiệu **Xuất huyết tiêu hóa trên** do phối hợp thuốc chống đông với thuốc giảm đau NSAID tự mua ngoài tiệm [T8, T10, T12].
 - *(Ghi chú phân định người nói K3: Hệ thống loại bỏ hoàn toàn thông tin người nhà kể về mẹ sụt 3 cân, tê bì chân tay tại [T11]).*
 
 ### O — OBJECTIVE (THỰC THỂ & CẬN LÂM SÀNG)
@@ -240,7 +240,7 @@ const soap2 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (CHỐNG CH
 - **Bẫy người nhà lẫn lộn đại từ (K3 Guardrail):**
   - 🛡️ **[ĐÃ LỌC BỎ — BƯỚC K3]:** Người nhà tại lượt [T3] khai *"bố sụt 4 cân, đường huyết 11.5 mmol/L"*. Hệ thống nhận diện đại từ chỉ người khác ("bố tôi"), KHÔNG ghi các triệu chứng này vào bệnh án của cô Thủy.
 - **Báo động chống chỉ định thuốc tử vong:**
-  - 🚨 **[BÔI ĐỎ KHẨN CẤP — CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI]:** Bệnh nhân xin kê **Aspirin / Ibuprofen** để trị đau khớp gối [T6]. Kích hoạt quy tắc an toàn: Chống chỉ định tuyệt đối nhóm NSAID ở bệnh nhân Hen phế quản (Hội chứng Widal / Co thắt phế quản ác tính gây tử vong do ức chế tổng hợp Prostaglandin PGE2) [T7].
+  - **Chống chỉ định tuyệt đối nhóm NSAID (cần xác nhận):** Bệnh nhân xin kê **Aspirin / Ibuprofen** để trị đau khớp gối [T6]. Kích hoạt quy tắc an toàn: Chống chỉ định tuyệt đối nhóm NSAID ở bệnh nhân Hen phế quản (Hội chứng Widal / Co thắt phế quản ác tính gây tử vong do ức chế tổng hợp Prostaglandin PGE2) [T7].
 
 ### O — OBJECTIVE (THỰC THỂ LÂM SÀNG)
 - **Sinh hiệu:** SpO2 94% khí trời, Nhịp thở 24 lần/phút, Nhiệt độ 36.8°C [T9].
@@ -410,9 +410,9 @@ const soap3 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (ĐA BỆNH
   - Cân nặng tăng vọt "hai cân rưỡi" trong 1 tuần -> **Tăng 2.5 kg do ứ dịch suy tim mất bù** [T4].
   - Chân "ấn vô lún một lỗ sâu hoắm" -> **Phù mềm ấn lõm độ 3** hai chi dưới [T2].
 - **Mâu thuẫn lâm sàng nội tại (Self-Contradiction Gate):**
-  - ⚠️ **[BÔI ĐỎ — CẦN BÁC SĨ THẨM ĐỊNH LẠI]:** Bệnh nhân câu trước nói *"Tôi không thấy sốt đâu"*, ngay câu sau khai *"tối qua rét run đắp hai chăn, cặp nhiệt độ gần ba chín độ"* [T6]. Khạc đờm vàng xanh quánh đặc -> Dấu hiệu đợt cấp bội nhiễm.
+  - **Mâu thuẫn khai báo sốt (cần xác nhận):** Bệnh nhân câu trước nói *"Tôi không thấy sốt đâu"*, ngay câu sau khai *"tối qua rét run đắp hai chăn, cặp nhiệt độ gần ba chín độ"* [T6]. Khạc đờm vàng xanh quánh đặc -> Dấu hiệu đợt cấp bội nhiễm.
 - **Báo động tác dụng phụ gây Bí tiểu cấp:**
-  - 🚨 **[BÔI ĐỎ KHẨN CẤP — TÁC DỤNG PHỤ KHÁNG CHOLINERGIC]:** Tự mua uống **Clorpheniramin (Chlorpheniramine)** 2 viên/ngày trị ngứa sổ mũi [T8]. Thuốc kháng Histamin H1 thế hệ 1 có hoạt tính kháng Cholinergic mạnh -> Gây liệt cơ bàng quang dẫn đến **Bí tiểu cấp / Cầu bàng quang căng** trên nền U xơ tiền liệt tuyến (BPH), đồng thời làm đặc đờm gây bít tắc đường thở COPD! [T8, T9].
+  - **Tác dụng phụ kháng Cholinergic (cần xác nhận):** Tự mua uống **Clorpheniramin (Chlorpheniramine)** 2 viên/ngày trị ngứa sổ mũi [T8]. Thuốc kháng Histamin H1 thế hệ 1 có hoạt tính kháng Cholinergic mạnh -> Gây liệt cơ bàng quang dẫn đến **Bí tiểu cấp / Cầu bàng quang căng** trên nền U xơ tiền liệt tuyến (BPH), đồng thời làm đặc đờm gây bít tắc đường thở COPD! [T8, T9].
 
 ### O — OBJECTIVE (THỰC THỂ & DẤU HIỆU CẤP CỨU)
 - **Sinh hiệu cấp cứu:** SpO2 tụt còn **89% khí trời** (suy hô hấp), Nhịp thở 28 l/p co kéo hõm ức, Nhịp tim nhanh 105 l/p, Huyết áp 160/90 mmHg [T10].
