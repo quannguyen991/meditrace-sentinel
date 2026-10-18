@@ -53,7 +53,6 @@ Bác sĩ: Xử trí khẩn: Ngưng ngay lập tức Omeprazole và các thuốc 
 
 const soap1 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (CẢNH BÁO BẬC CAO)
 **Bệnh nhân:** Đặng Đình Phúc | **Tuổi:** 62 | **Giới:** Nam
-**Ngày khám:** Hôm nay | **Bác sĩ phụ trách:** BS. Quan Nguyen
 
 ---
 
@@ -230,7 +229,6 @@ Bác sĩ: Lời dặn dò cấp cứu: Nếu nửa đêm lên cơn khó thở c�
 
 const soap2 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (CHỐNG CHỈ ĐỊNH ACUTE)
 **Bệnh nhân:** Vũ Thị Bích Thủy | **Tuổi:** 49 | **Giới:** Nữ
-**Ngày khám:** Hôm nay | **Bác sĩ phụ trách:** BS. Quan Nguyen
 
 ---
 
@@ -402,7 +400,6 @@ Bác sĩ: Xử trí khẩn cấp: 1. Thở oxy gọng kính 2 lít/phút duy tr�
 
 const soap3 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL (ĐA BỆNH LÝ & BẪY MÂU THUẪN)
 **Bệnh nhân:** Bùi Văn Thành | **Tuổi:** 72 | **Giới:** Nam
-**Ngày khám:** Hôm nay | **Bác sĩ phụ trách:** BS. Quan Nguyen
 
 ---
 

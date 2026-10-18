@@ -100,7 +100,7 @@ function kiemTraCanXacNhan(dong: string, mdTrongDong?: DanhDauMD[]): {
 /** Định dạng văn bản nội tuyến: bỏ dấu **, in đậm, định dạng trích dẫn [T..] và chữ nghiêng */
 function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
   if (!vanBan) return null;
-  const regex = /(\*\*[^*]+\*\*|\[T\d+(?:,\s*T\d+)*\]|\*[^*]+\*)/g;
+  const regex = /(\*\*[^*]+\*\*|\[T\d+(?:,\s*T\d+)*\]|\*[^*]+\*|\|)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -111,16 +111,22 @@ function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
       if (chunk) parts.push(chunk);
     }
     const token = match[0];
-    if (token.startsWith("**") && token.endsWith("**")) {
-      const inner = token.slice(2, -2).trim();
+    if (token === "|") {
+      parts.push(
+        <span key={match.index} className="mx-2 text-slate-300 font-normal select-none">
+          |
+        </span>
+      );
+    } else if (token.startsWith("**") && token.endsWith("**")) {
+      const inner = token.slice(2, -2);
       parts.push(
         <strong
           key={match.index}
-          className={`font-bold ${
+          className={
             isAlert
-              ? "text-red-950 bg-red-100/90 px-1 py-0.5 rounded border border-red-200/80"
-              : "text-[#0F172A]"
-          }`}
+              ? "font-bold text-red-950 underline decoration-red-300 underline-offset-2"
+              : "font-semibold text-[#0F172A]"
+          }
         >
           {inner}
         </strong>
@@ -129,10 +135,10 @@ function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
       parts.push(
         <span
           key={match.index}
-          className={`inline-flex items-center px-1.5 py-0.2 mx-0.5 text-[11px] font-mono font-semibold rounded border ${
+          className={`inline-flex items-center px-1.5 py-0.2 mx-0.5 text-[11px] font-mono font-medium rounded ${
             isAlert
-              ? "bg-red-100 text-red-800 border-red-300"
-              : "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]"
+              ? "bg-red-100 text-red-800 border border-red-200"
+              : "bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]"
           }`}
           title="Lượt lời thoại làm căn cứ lâm sàng"
         >
@@ -140,11 +146,11 @@ function renderDinhDangChu(vanBan: string, isAlert = false): React.ReactNode {
         </span>
       );
     } else if (token.startsWith("*") && token.endsWith("*")) {
-      const inner = token.slice(1, -1).trim();
+      const inner = token.slice(1, -1);
       parts.push(
         <em
           key={match.index}
-          className={`italic ${isAlert ? "text-red-800 font-medium" : "text-[#64748B]"}`}
+          className={`italic ${isAlert ? "text-red-800 font-medium" : "text-[#475569]"}`}
         >
           {inner}
         </em>
@@ -604,47 +610,32 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                 // Tiêu đề chính của hồ sơ bệnh án
                 if (/^#+\s+(?:BỆNH ÁN|HỒ SƠ BỆNH ÁN|SOAP)/i.test(dongTrim)) {
                   return (
-                    <div key={i} className="border-b-2 border-[#BAE6FD] pb-3 mb-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] flex items-center justify-center text-white shadow-tactile-doctor-pill">
-                            <FileHeart size={20} />
-                          </div>
-                          <div>
-                            <h1 className="text-xl sm:text-2xl font-serif font-bold text-[#0C2340] tracking-tight">
-                              {dongTrim.replace(/^#+\s*/, "")}
-                            </h1>
-                            <p className="text-[11.5px] text-[#0369A1] font-semibold flex items-center gap-1.5 mt-0.5">
-                              <ShieldAlert size={13} className="text-[#0284C7]" />
-                              BỆNH ÁN ĐÃ ĐỐI CHIẾU CĂN CỨ LỜI THOẠI & PHÁT HIỆN BẪY LÂM SÀNG
-                            </p>
-                          </div>
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold self-start sm:self-auto">
-                          <CheckCircle2 size={13} /> Sẵn sàng kiểm duyệt
-                        </div>
-                      </div>
+                    <div key={i} className="border-b border-[#E2E8F0] pb-2.5 mb-3">
+                      <h1 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
+                        {dongTrim.replace(/^#+\s*/, "")}
+                      </h1>
                     </div>
                   );
                 }
 
-                // Thẻ thông tin hành chính bệnh nhân
+                // Thông tin hành chính bệnh nhân (tinh gọn, thanh lịch, bỏ các ô bôi màu và thông tin thừa)
                 if (
-                  (dongTrim.includes("Bệnh nhân:") && dongTrim.includes("Tuổi:")) ||
-                  (dongTrim.includes("Ngày khám:") && dongTrim.includes("Bác sĩ"))
+                  dongTrim.includes("Bệnh nhân:") &&
+                  (dongTrim.includes("Tuổi:") || dongTrim.includes("Cân nặng:") || dongTrim.includes("Giới:"))
                 ) {
                   return (
                     <div
                       key={i}
-                      className="p-3.5 bg-gradient-to-r from-[#F0F9FF] via-[#E0F2FE]/50 to-[#F8FBFC] border border-[#BAE6FD] rounded-xl mb-3 text-[13.5px] text-[#0C4A6E] font-medium shadow-2xs flex flex-wrap items-center gap-x-4 gap-y-1"
+                      className="flex flex-wrap items-center gap-x-2 text-[14px] text-slate-700 py-1 mb-2 font-normal"
                     >
-                      <div className="flex items-center gap-1.5 text-[#0284C7] font-semibold mr-1">
-                        <User size={15} />
-                        <span>Thông tin:</span>
-                      </div>
                       {renderDinhDangChu(dongTrim)}
                     </div>
                   );
+                }
+
+                // Bỏ bớt dòng thông tin phụ không cần thiết bên dưới (Ngày khám, Bác sĩ phụ trách)
+                if (dongTrim.includes("Ngày khám:") && dongTrim.includes("Bác sĩ")) {
+                  return null;
                 }
 
                 // Các mục SOAP chính
