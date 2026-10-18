@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "https://automatic-messenger-resulting-conservative.trycloudflare.com/$1"
+      "destination": "https://knock-methodology-mails-triple.trycloudflare.com/$1"
     }
   ]
 }
