@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ViewMode, Session, DocumentTabItem, ClinicalChatMessage, TemplateItem, Patient } from "./types";
 import { initialSessions, initialEvidenceChat } from "./data/mockData";
-import { RefreshCw, Sparkles, Bell } from "lucide-react";
+import { RefreshCw, Sparkles, Bell, CheckCircle2 } from "lucide-react";
 import { NavigationRail } from "./components/NavigationRail";
 import { MenuTaiKhoan } from "./components/MenuTaiKhoan";
 import { HomeDashboard } from "./components/HomeDashboard";
@@ -1072,11 +1072,16 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       </button>
                     )}
                     <button
-                      onClick={() => (moDuyetBen ? setMoDuyetBen(false) : moNganDuyet())}
-                      className={`px-2.5 py-1 rounded-lg font-semibold ${moDuyetBen ? "bg-white text-[#0D9488] border border-[#0D9488]" : "bg-[#0D9488] text-white"}`}
-                      title="Duyệt ngay cạnh bản nháp; màn đầy đủ có dây nối mở từ nút trong ngăn duyệt"
+                      onClick={() => {
+                        setChonMD(null);
+                        setLuotKiemChung(null);
+                        handleSelectNavigationItem("proof");
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold bg-[#0D9488] hover:bg-[#0B7A6F] text-white shadow-tactile-doctor transition-all cursor-pointer text-xs"
+                      title="Chuyển sang trang đối chiếu toàn màn hình: Hội thoại, mệnh đề và đường nối căn cứ"
                     >
-                      {moDuyetBen ? "Đóng ngăn duyệt" : "Duyệt từng mệnh đề"}
+                      <CheckCircle2 size={13} />
+                      <span>Duyệt từng mệnh đề</span>
                     </button>
                   </div>
                 </div>
@@ -1103,79 +1108,59 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                 </label>
               </div>
 
-              {/* Nội dung tab đang hiển thị (+ ngăn duyệt cạnh bản nháp khi mở) */}
-              {moDuyetBen && noteMeta && (
-                <div className="@4xl:hidden grid grid-cols-2 gap-0.5 p-0.5 mx-3 mt-2 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[12px]" role="tablist">
-                  {([["nhap", "Bản nháp"], ["duyet", `Duyệt${noteMeta.needsConfirmCount ? ` · ${noteMeta.needsConfirmCount} cần xác nhận` : ""}`]] as const).map(([id, chu]) => (
-                    <button key={id} role="tab" aria-selected={xemHep === id} onClick={() => setXemHep(id)}
-                      className={`py-1.5 rounded-md font-semibold ${xemHep === id ? "bg-white text-[#0369A1] shadow-sm" : "text-[#0C4A6E]/70"}`}>
-                      {chu}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div ref={vungGiuaRef} className="flex-1 flex flex-col @4xl:flex-row min-h-0 overflow-hidden">
-              <div className={`flex-1 flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative ${
-                moDuyetBen && noteMeta && xemHep === "duyet" ? "hidden @4xl:flex" : "flex"}`}>
-                {currentTab?.type === "transcript" && (
-                  <TranscriptView
-                    transcript={currentSession.transcript}
-                    onUpdateTranscript={handleUpdateTranscript}
-                    isRecording={currentSession.isRecording}
-                    audioUrl={currentSession.audioUrl}
-                    onStartRecording={() => handleUpdateSession({ isRecording: true })}
-                    onOpenTemplates={() => setIsTemplateModalOpen(true)}
-                    onLoadSample={handleLoadSample}
-                  />
-                )}
+              {/* Nội dung tab đang hiển thị (Bản nháp chiếm trọn chiều rộng rộng rãi) */}
+              <div ref={vungGiuaRef} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative">
+                  {currentTab?.type === "transcript" && (
+                    <TranscriptView
+                      transcript={currentSession.transcript}
+                      onUpdateTranscript={handleUpdateTranscript}
+                      isRecording={currentSession.isRecording}
+                      audioUrl={currentSession.audioUrl}
+                      onStartRecording={() => handleUpdateSession({ isRecording: true })}
+                      onOpenTemplates={() => setIsTemplateModalOpen(true)}
+                      onLoadSample={handleLoadSample}
+                    />
+                  )}
 
-                {currentTab?.type === "context" && (
-                  <ContextView
-                    tab={currentTab}
-                    onUpdateContent={handleUpdateTabContent}
-                  />
-                )}
+                  {currentTab?.type === "context" && (
+                    <ContextView
+                      tab={currentTab}
+                      onUpdateContent={handleUpdateTabContent}
+                    />
+                  )}
 
-                {(currentTab?.type === "soap" ||
-                  currentTab?.type === "leaflet" ||
-                  currentTab?.type === "custom") && (
-                  <NoteEditorView
-                    tab={currentTab}
-                    onUpdateContent={handleUpdateTabContent}
-                    onRegenerateNote={handleRegenerateNoteStyle}
-                    isGenerating={isGeneratingNote}
-                    danhDau={
-                      noteMeta?.propositions
-                        ? noteMeta.propositions.map((pp) => ({
-                            id: pp.id,
-                            text: pp.text,
-                            textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
-                            trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
-                          }))
-                        : undefined
-                    }
-                    chonId={moDuyetBen ? chonMD : null}
-                    onChonMenhDe={chonTuBanNhap}
-                    transcript={noteMeta?.transcript || currentSession.transcript}
-                    onKiemChungLuot={handleKiemChungLuot}
-                  />
-                )}
-              </div>
-              {moDuyetBen && noteMeta && (
-                <div className={`flex-1 @4xl:flex-none @4xl:w-[380px] @6xl:w-[420px] min-h-0 ${xemHep === "nhap" ? "hidden @4xl:block" : "block"}`}>
-                  <DuyetBenCanh
-                    note={noteMeta}
-                    quyet={quyetDuyet}
-                    setQuyet={setQuyetDuyet}
-                    banSua={banSuaDuyet}
-                    setBanSua={setBanSuaDuyet}
-                    chonId={chonMD}
-                    onChon={chonTuNgan}
-                    onMoToanMan={() => handleSelectNavigationItem("proof")}
-                    onDong={() => setMoDuyetBen(false)}
-                  />
+                  {(currentTab?.type === "soap" ||
+                    currentTab?.type === "leaflet" ||
+                    currentTab?.type === "custom") && (
+                    <NoteEditorView
+                      tab={currentTab}
+                      onUpdateContent={handleUpdateTabContent}
+                      onRegenerateNote={handleRegenerateNoteStyle}
+                      isGenerating={isGeneratingNote}
+                      danhDau={
+                        noteMeta?.propositions
+                          ? noteMeta.propositions.map((pp) => ({
+                              id: pp.id,
+                              text: pp.text,
+                              textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
+                              trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
+                            }))
+                          : undefined
+                      }
+                      chonId={chonMD}
+                      onChonMenhDe={(id) => {
+                        setChonMD(id);
+                        if (id !== null) {
+                          setLuotKiemChung(null);
+                          handleSelectNavigationItem("proof");
+                        }
+                      }}
+                      transcript={noteMeta?.transcript || currentSession.transcript}
+                      onKiemChungLuot={handleKiemChungLuot}
+                    />
+                  )}
                 </div>
-              )}
               </div>
 
               {/* Thanh nhập lệnh AI dưới đáy */}
@@ -1237,7 +1222,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             setQuyetChung={setQuyetDuyet}
             banSuaChung={banSuaDuyet}
             setBanSuaChung={setBanSuaDuyet}
-            chonBanDau={luotKiemChung ? { loai: "t", so: luotKiemChung } : undefined}
+            chonBanDau={
+              chonMD
+                ? { loai: "p", id: chonMD }
+                : luotKiemChung
+                ? { loai: "t", so: luotKiemChung }
+                : undefined
+            }
           />
         )}
 
