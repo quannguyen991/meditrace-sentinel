@@ -1,0 +1,380 @@
+{
+  "phien_ban_canh_bao": "canh-bao-2026-09-24b",
+  "phien_ban_bo_cham": "2026-09-22",
+  "chinh_sach_C": "C-2026-09-22",
+  "chinh_sach_D": "D-2026-09-24",
+  "thu_muc": "D:\\Claude\\meditrace-ma-nguon\\data\\thach_thuc",
+  "cac_tap": [
+    "thach_thuc_dinh_chinh_phat_trien",
+    "thach_thuc_doi_chu_the_phat_trien",
+    "thach_thuc_nhieu_asr_phat_trien",
+    "thach_thuc_phuong_ngu_phat_trien"
+  ],
+  "nhanh": "C_khoa",
+  "so_phat_bieu_con_hieu_luc": 2789,
+  "so_menh_de": 2789,
+  "ghi_chu": "So voi BO CHAM TU DONG, khong phai nhan nguoi. Tham do tren tap phat trien da nhin.",
+  "theo_ma": [
+    {
+      "ma": "SPEAKER_SUBJECT_MISMATCH",
+      "nhom": "SUBJECT_ATTRIBUTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 382,
+      "chinh_xac_cung_loai": 0.058,
+      "chinh_xac_co_loi_bat_ky": 0.44,
+      "so_lan_doi_trang_thai": 89
+    },
+    {
+      "ma": "UNSUPPORTED_INFORMATION",
+      "nhom": "UNSUPPORTED",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 253,
+      "chinh_xac_cung_loai": 0.289,
+      "chinh_xac_co_loi_bat_ky": 0.518,
+      "so_lan_doi_trang_thai": 74
+    },
+    {
+      "ma": "CONTRADICTION_UNRESOLVED",
+      "nhom": "STATE_UPDATE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 149,
+      "chinh_xac_cung_loai": 0.866,
+      "chinh_xac_co_loi_bat_ky": 0.96,
+      "so_lan_doi_trang_thai": 149
+    },
+    {
+      "ma": "SUBJECT_AMBIGUOUS",
+      "nhom": "SUBJECT_ATTRIBUTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 144,
+      "chinh_xac_cung_loai": 0.59,
+      "chinh_xac_co_loi_bat_ky": 0.722,
+      "so_lan_doi_trang_thai": 38
+    },
+    {
+      "ma": "DUPLICATE_INFORMATION",
+      "nhom": "QUALITY",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 108,
+      "chinh_xac_cung_loai": 0.056,
+      "chinh_xac_co_loi_bat_ky": 0.704,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "IMPORTANT_MODIFIER_DROPPED",
+      "nhom": "QUALITY",
+      "tin_cay": "thu_nghiem",
+      "so_lan_bao": 84,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.179,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "CERTAINTY_INCREASED",
+      "nhom": "NEGATION_ASSERTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 69,
+      "chinh_xac_cung_loai": 0.42,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 69
+    },
+    {
+      "ma": "POSSIBLE_NEGATION_ERROR",
+      "nhom": "NEGATION_ASSERTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 69,
+      "chinh_xac_cung_loai": 0.319,
+      "chinh_xac_co_loi_bat_ky": 0.406,
+      "so_lan_doi_trang_thai": 7
+    },
+    {
+      "ma": "FAMILY_PATIENT_MIXUP",
+      "nhom": "SUBJECT_ATTRIBUTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 50,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.28,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "WRONG_SUBJECT",
+      "nhom": "SUBJECT_ATTRIBUTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 39,
+      "chinh_xac_cung_loai": 0.846,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 39
+    },
+    {
+      "ma": "PAST_CURRENT_CONFUSION",
+      "nhom": "TEMPORAL",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 24,
+      "chinh_xac_cung_loai": 0.333,
+      "chinh_xac_co_loi_bat_ky": 0.458,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "FABRICATED_QUOTE",
+      "nhom": "UNSUPPORTED",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 17,
+      "chinh_xac_cung_loai": 0.176,
+      "chinh_xac_co_loi_bat_ky": 0.412,
+      "so_lan_doi_trang_thai": 17
+    },
+    {
+      "ma": "ROUTE_MISMATCH",
+      "nhom": "ENTITY_VALUE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 16,
+      "chinh_xac_cung_loai": 0.875,
+      "chinh_xac_co_loi_bat_ky": 0.938,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "NEGATION_FLIP",
+      "nhom": "NEGATION_ASSERTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 11,
+      "chinh_xac_cung_loai": 0.455,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 11
+    },
+    {
+      "ma": "EVIDENCE_CONTEXT_MISSING",
+      "nhom": "EVIDENCE_PROVENANCE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 7,
+      "chinh_xac_cung_loai": 0.143,
+      "chinh_xac_co_loi_bat_ky": 0.429,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "DOCTOR_STATEMENT_AS_PATIENT_FACT",
+      "nhom": "SUBJECT_ATTRIBUTION",
+      "tin_cay": "thu_nghiem",
+      "so_lan_bao": 6,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.833,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "APPROXIMATION_LOST",
+      "nhom": "NEGATION_ASSERTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 5,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "UNSUPPORTED_FACT_COMBINATION",
+      "nhom": "RELATION_CAUSALITY",
+      "tin_cay": "thu_nghiem",
+      "so_lan_bao": 4,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "NEGATION_SCOPE_ERROR",
+      "nhom": "NEGATION_ASSERTION",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 4,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 4
+    },
+    {
+      "ma": "TEMPORAL_MISMATCH",
+      "nhom": "TEMPORAL",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 4,
+      "chinh_xac_cung_loai": 0.25,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "CONTRADICTORY_INFORMATION",
+      "nhom": "STATE_UPDATE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 4,
+      "chinh_xac_cung_loai": 0.5,
+      "chinh_xac_co_loi_bat_ky": 0.5,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "CORRECTION_NOT_APPLIED",
+      "nhom": "STATE_UPDATE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 3,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 3
+    },
+    {
+      "ma": "DOSE_MISMATCH",
+      "nhom": "ENTITY_VALUE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 3,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 3
+    },
+    {
+      "ma": "WRONG_EVIDENCE",
+      "nhom": "EVIDENCE_PROVENANCE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 2,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.5,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "FREQUENCY_MISMATCH",
+      "nhom": "ENTITY_VALUE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 2,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 1
+    },
+    {
+      "ma": "QUESTION_AS_FACT",
+      "nhom": "PLAN_FACT_CONDITIONAL",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 2,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.5,
+      "so_lan_doi_trang_thai": 2
+    },
+    {
+      "ma": "OVER_NORMALIZATION",
+      "nhom": "UNSUPPORTED",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 2,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "SEMANTIC_DUPLICATE",
+      "nhom": "QUALITY",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 1,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 0.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "FAMILY_STATEMENT_AS_CLINICIAN_PLAN",
+      "nhom": "PLAN_FACT_CONDITIONAL",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 1,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 0
+    },
+    {
+      "ma": "FABRICATED_MEDICATION",
+      "nhom": "UNSUPPORTED",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 1,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 1
+    },
+    {
+      "ma": "FABRICATED_ALLERGY",
+      "nhom": "UNSUPPORTED",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 1,
+      "chinh_xac_cung_loai": 0.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 1
+    }
+  ],
+  "do_phu_theo_loi_bo_cham": {
+    "ban_cu": {
+      "so_loi": 160,
+      "co_canh_bao_cung_loai": 0.819,
+      "co_canh_bao_bat_ky": 0.994
+    },
+    "khong_can_cu": {
+      "so_loi": 235,
+      "co_canh_bao_cung_loai": 0.336,
+      "co_canh_bao_bat_ky": 0.528
+    },
+    "sai_chu_the": {
+      "so_loi": 218,
+      "co_canh_bao_cung_loai": 0.642,
+      "co_canh_bao_bat_ky": 0.725
+    },
+    "sai_muc": {
+      "so_loi": 87,
+      "co_canh_bao_cung_loai": 0.218,
+      "co_canh_bao_bat_ky": 0.885
+    },
+    "sai_muc_chac_chan": {
+      "so_loi": 33,
+      "co_canh_bao_cung_loai": 0.879,
+      "co_canh_bao_bat_ky": 0.97
+    },
+    "sai_muc_phu_dinh": {
+      "so_loi": 52,
+      "co_canh_bao_cung_loai": 0.5,
+      "co_canh_bao_bat_ky": 0.865
+    },
+    "sai_muc_tinh_huong": {
+      "so_loi": 5,
+      "co_canh_bao_cung_loai": 0.2,
+      "co_canh_bao_bat_ky": 0.4
+    },
+    "sai_thoi_gian": {
+      "so_loi": 19,
+      "co_canh_bao_cung_loai": 0.053,
+      "co_canh_bao_bat_ky": 0.368
+    },
+    "sai_thuoc": {
+      "so_loi": 109,
+      "co_canh_bao_cung_loai": 0.11,
+      "co_canh_bao_bat_ky": 0.587
+    }
+  },
+  "chinh_sach": {
+    "C": {
+      "so_phat_bieu": 2789,
+      "co_loi": 765,
+      "vao_than": 2348,
+      "lot": 485,
+      "ty_le_lot": 0.634,
+      "lot_nguy_hiem": 98,
+      "loi_nguy_hiem": 217,
+      "ty_le_lot_nguy_hiem": 0.452,
+      "chan_thua": 161,
+      "ty_le_chan_thua": 0.08
+    },
+    "D": {
+      "so_phat_bieu": 2789,
+      "co_loi": 765,
+      "vao_than": 2378,
+      "lot": 477,
+      "ty_le_lot": 0.624,
+      "lot_nguy_hiem": 94,
+      "loi_nguy_hiem": 217,
+      "ty_le_lot_nguy_hiem": 0.433,
+      "chan_thua": 123,
+      "ty_le_chan_thua": 0.061
+    }
+  },
+  "canh_bao_hien_moi_phat_bieu": 0.382,
+  "bo_sot": {
+    "dap_an_sot": 200,
+    "sot_co_canh_bao": 25,
+    "canh_bao": 887,
+    "canh_bao_trung_sot": 25,
+    "do_phu": 0.125,
+    "chinh_xac": 0.028
+  }
+}

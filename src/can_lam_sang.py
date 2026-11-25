@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 import re
 from typing import Any, Dict, List, Optional
 
+from src.chuan_hoa_don_vi_xet_nghiem import chuan_hoa_du_lieu_xet_nghiem
+
 
 @dataclass
 class ChiSoXetNghiem:
@@ -49,6 +51,7 @@ class ParaclinicalCorrelator:
         chan_doan_so_bo: str = ""
     ) -> KetQuaDoiSoatCanLamSang:
         """Phân tích các chỉ số xét nghiệm và đối chiếu tương quan với bệnh cảnh lâm sàng."""
+        du_lieu_xet_nghiem = chuan_hoa_du_lieu_xet_nghiem(du_lieu_xet_nghiem)
         danh_sach: List[ChiSoXetNghiem] = []
         bao_dong_do: List[str] = []
         xac_nhan: List[str] = []
@@ -171,13 +174,52 @@ class ParaclinicalCorrelator:
         # ----------------------------------------------------------------------
         # 5. CREATININE & EGFR (CHỨC NĂNG THẬN)
         # ----------------------------------------------------------------------
-        creat = du_lieu_xet_nghiem.get("creatinine")
+        creat_umol = du_lieu_xet_nghiem.get("creatinine_umol_l")
         egfr = du_lieu_xet_nghiem.get("egfr")
-        if creat is not None:
-            creat_val = float(creat)
+        if creat_umol is not None:
+            creat_val = float(creat_umol)
             tt = "TANG_CAO" if creat_val > 115 else "BINH_THUONG"
             yn = "Chức năng lọc cầu thận suy giảm." if tt == "TANG_CAO" else "Creatinine trong giới hạn."
             danh_sach.append(ChiSoXetNghiem("CREATININE", "Creatinine huyết thanh", creat_val, "umol/L", "60 - 110", tt, yn))
+
+        # ----------------------------------------------------------------------
+        # 5b. GLUCOSE & UREA (CHUYỂN HÓA & THẬN)
+        # ----------------------------------------------------------------------
+        glu_mmol = du_lieu_xet_nghiem.get("glucose_mmol_l")
+        if glu_mmol is not None:
+            glu_val = float(glu_mmol)
+            if glu_val < 2.8:
+                tt = "NGUY_KICH"
+                yn = "HẠ ĐƯỜNG HUYẾT NẶNG: Nguy cơ hôn mê hạ đường huyết đe dọa tính mạng."
+                bao_dong_do.append(f"Glucose máu = {glu_val} mmol/L: Hạ đường huyết nặng (< 2.8 mmol/L), cần bù đường tĩnh mạch khẩn.")
+            elif glu_val >= 22.2:
+                tt = "NGUY_KICH"
+                yn = "TĂNG ĐƯỜNG HUYẾT RẤT CAO: Nguy cơ nhiễm toan ceton (DKA) hoặc tăng áp lực thẩm thấu (HHS)."
+                bao_dong_do.append(f"Glucose máu = {glu_val} mmol/L: Tăng đường huyết nguy kịch (>= 22.2 mmol/L), tầm soát ceton và toan chuyển hóa.")
+            elif glu_val > 7.0:
+                tt = "TANG_CAO"
+                yn = "Đường huyết tăng cao trên ngưỡng bình thường lúc đói."
+            elif glu_val < 3.9:
+                tt = "GIAM_THAP"
+                yn = "Đường huyết giảm nhẹ."
+            else:
+                tt = "BINH_THUONG"
+                yn = "Đường huyết trong giới hạn bình thường."
+            danh_sach.append(ChiSoXetNghiem("GLUCOSE", "Glucose máu", glu_val, "mmol/L", "3.9 - 6.4", tt, yn))
+
+        urea_mmol = du_lieu_xet_nghiem.get("urea_mmol_l")
+        if urea_mmol is not None:
+            urea_val = float(urea_mmol)
+            if urea_val > 15.0:
+                tt = "NGUY_KICH"
+                yn = "Ure máu tăng rất cao: Suy thận cấp/mạn nặng hoặc xuất huyết tiêu hóa trên."
+            elif urea_val > 7.5:
+                tt = "TANG_CAO"
+                yn = "Ure máu tăng nhẹ đến vừa."
+            else:
+                tt = "BINH_THUONG"
+                yn = "Ure máu trong giới hạn bình thường."
+            danh_sach.append(ChiSoXetNghiem("UREA", "Ure máu", urea_val, "mmol/L", "2.5 - 7.5", tt, yn))
 
         if egfr is not None:
             egfr_val = float(egfr)

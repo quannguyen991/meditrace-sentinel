@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { DocumentTabItem } from "../types";
+import { DocumentTabItem, SignOffRecord } from "../types";
 import { ghepMenhDe } from "../lib/ghepMenhDe";
+import { taoPhieuSbar, tachMucHis } from "../lib/sbar";
+import type { CanhBaoMauThuanLanKham } from "../lib/doiChieuLanKham";
+import type { Quyet } from "./VerificationView";
 import {
   FileText,
   Edit2,
@@ -30,12 +33,19 @@ import {
   Pill,
   HeartPulse,
   FileHeart,
+  Cpu,
   Users,
   Quote,
   ArrowRight,
   X,
 } from "lucide-react";
-import { tachLuot } from "./VerificationView";
+import { tachLuot, type NoteMeta } from "./VerificationView";
+import { NhatKyTienTrinhAIModal } from "./NhatKyTienTrinhAIModal";
+import { HO_SO_MAU, HoSoDD, ToDanDoBenhNhanModal } from "./ToDanDoBenhNhanModal";
+import { CrossVisitBanner } from "./CrossVisitBanner";
+import { HisSmartCopyPopover } from "./HisSmartCopyPopover";
+import { BhytPrecheckModal, type BhytPrecheckResult } from "./BhytPrecheckModal";
+import { SbarModal } from "./SbarModal";
 
 /** Một mệnh đề cần tô trong bản nháp khi ngăn duyệt đang mở. */
 export type DanhDauMD = {
@@ -59,6 +69,14 @@ interface NoteEditorViewProps {
   transcript?: string;
   /** Chuyển sang màn hình đối chiếu & đường nối căn cứ toàn màn hình */
   onKiemChungLuot?: (soLuot: number) => void;
+  /** Dữ liệu mệnh đề & kiểm duyệt lâm sàng nâng cao từ backend */
+  noteMeta?: NoteMeta | null;
+  patientIdentifier?: string;
+  quyetDuyet?: Record<number, Quyet>;
+  banSuaDuyet?: Record<number, string>;
+  signOff?: SignOffRecord;
+  onSignOff?: () => Promise<void> | void;
+  crossVisitAlerts?: CanhBaoMauThuanLanKham[];
 }
 
 const MAU_TO: Record<DanhDauMD["trangThai"], string> = {
@@ -208,6 +226,13 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   onChonMenhDe,
   transcript = "",
   onKiemChungLuot,
+  noteMeta = null,
+  patientIdentifier = "",
+  quyetDuyet = {},
+  banSuaDuyet = {},
+  signOff,
+  onSignOff,
+  crossVisitAlerts = [],
 }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<boolean | null>(null);
@@ -218,7 +243,26 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   // Dictation state (Đọc chính tả trực tiếp bằng giọng nói)
   const [isDictating, setIsDictating] = useState(false);
   const [dangSua, setDangSua] = useState(false);
+  const [moModalTienTrinhAI, setMoModalTienTrinhAI] = useState(false);
+  const [moModalDanDo, setMoModalDanDo] = useState(false);
+  const [moModalSbar, setMoModalSbar] = useState(false);
+  const [moPanelHis, setMoPanelHis] = useState(false);
+  const [dangKyDuyet, setDangKyDuyet] = useState(false);
+  const [moModalBhyt, setMoModalBhyt] = useState(false);
+  const [dangKiemBhyt, setDangKiemBhyt] = useState(false);
+  const [kqBhyt, setKqBhyt] = useState<BhytPrecheckResult | null>(null);
+  // Tờ dặn dò sửa tay của từng ca, theo mã tab, để chuyển tab rồi quay lại vẫn còn.
+  const [hoSoDanDo, setHoSoDanDo] = useState<Record<string, HoSoDD>>({});
   const [luotDangXem, setLuotDangXem] = useState<number | null>(null);
+
+  const phieuSbar = useMemo(
+    () => taoPhieuSbar(noteMeta?.propositions || [], quyetDuyet, banSuaDuyet, patientIdentifier),
+    [noteMeta?.propositions, quyetDuyet, banSuaDuyet, patientIdentifier]
+  );
+  const cacMucHis = useMemo(
+    () => tachMucHis(noteMeta?.propositions || [], quyetDuyet, banSuaDuyet),
+    [noteMeta?.propositions, quyetDuyet, banSuaDuyet]
+  );
 
   // Danh sách lượt thoại để đối chiếu căn cứ [T1, T2...]
   const dsLuot = useMemo(() => tachLuot(transcript), [transcript]);
@@ -326,6 +370,64 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
     URL.revokeObjectURL(url);
     setIsExportMenuOpen(false);
   };
+
+  // Tải gói chuẩn liên thông HL7 FHIR R4 & BHYT XML 130/4750 (.json)
+  const handleDownloadFhirBhytJson = () => {
+    const payload = {
+      caseId: noteMeta?.caseId || tab.id,
+      exportedAt: new Date().toISOString(),
+      bhyt_qd130_4750: noteMeta?.clinicalSafety?.bhyt_icd10 || null,
+      stage_45_omission_recovery: noteMeta?.clinicalSafety?.khoi_phuc_bo_sot_tang_45 || [],
+      audit_trail_worm: noteMeta?.clinicalSafety?.audit_trail_worm || null,
+      hl7_fhir_r4_bundle: noteMeta?.clinicalSafety?.fhir_bundle || null,
+      propositions: noteMeta?.propositions || [],
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `MediTrace_FHIR_BHYT_${(noteMeta?.caseId || "ca_kham").replace(/[^a-z0-9_-]/gi, "_")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setIsExportMenuOpen(false);
+  };
+
+  // Dựng tờ dặn dò động từ dữ liệu ca khám thật (nếu có), nếu không thì lùi về HO_SO_MAU
+  const hoSoDanDoTuCa = useMemo<HoSoDD>(() => {
+    const icd = noteMeta?.clinicalSafety?.bhyt_icd10?.ma_icd10_chinh;
+    const props = noteMeta?.propositions || [];
+    const dsThuoc = props.filter(
+      (p) => p.status === "than" && (p.drug || p.section === "THUỐC ĐANG DÙNG" || p.section === "KẾ HOẠCH ĐIỀU TRỊ")
+    );
+    if (!icd && dsThuoc.length === 0) return HO_SO_MAU;
+    const chanDoanCa = icd
+      ? `${icd.ten_benh_byt} [ICD-10: ${icd.ma_icd10}]`
+      : props.find((p) => p.section === "CHẨN ĐOÁN")?.text || HO_SO_MAU.chanDoan;
+    const thuocCa =
+      dsThuoc.length > 0
+        ? dsThuoc.slice(0, 6).map((p, idx) => ({
+            id: idx + 1,
+            ten: p.drug || p.text,
+            loai: p.section === "THUỐC ĐANG DÙNG" ? "Thuốc đang điều trị" : "Y lệnh / Kế hoạch điều trị",
+            nhan: p.warning ? "LƯU Ý" : "ĐÃ KIỂM CHỨNG",
+            mau: p.warning
+              ? "bg-amber-50 text-amber-800 border-amber-200"
+              : "bg-emerald-50 text-emerald-700 border-emerald-200",
+            sang: "Theo chỉ định",
+            trua: "—",
+            chieu: "—",
+            toi: "—",
+            loiDan: `${p.text} (Căn cứ lượt thoại T${(p.evidenceTurns || []).join(", T") || "1"})`,
+          }))
+        : HO_SO_MAU.thuoc;
+    return {
+      ...HO_SO_MAU,
+      soHoSo: noteMeta?.caseId || HO_SO_MAU.soHoSo,
+      ngayIn: new Date().toLocaleDateString("vi-VN"),
+      chanDoan: chanDoanCa,
+      thuoc: thuocCa,
+    };
+  }, [noteMeta]);
 
   // Toggle Đọc chính tả trực tiếp bằng giọng nói
   const toggleDictation = () => {
@@ -541,6 +643,101 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden sm:inline">{dangSua ? "Xem định dạng" : "Sửa văn bản"}</span>
           </button>
 
+          {/* Nút mở nhật ký tiến trình AI và 8 chốt */}
+          <button
+            type="button"
+            onClick={() => setMoModalTienTrinhAI(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
+            title="Xem quá trình Qwen3-4B bóc tách và 8 chốt an toàn"
+          >
+            <Cpu size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden sm:inline">Tiến trình AI</span>
+          </button>
+
+          {/* Nút Tiền kiểm BHYT & ICD-10 */}
+          <button
+            type="button"
+            disabled={dangKiemBhyt}
+            onClick={async () => {
+              setMoModalBhyt(true);
+              setDangKiemBhyt(true);
+              try {
+                const r = await fetch("/api/bhyt/precheck", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    propositions: (noteMeta?.propositions || []).filter((p) => quyetDuyet[p.id] !== "bo"),
+                    transcript,
+                  }),
+                });
+                if (r.ok) setKqBhyt(await r.json());
+              } finally {
+                setDangKiemBhyt(false);
+              }
+            }}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#7A4B00] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="Tiền kiểm mã ICD-10 (4 ký tự) & Cảnh báo xuất toán BHYT"
+          >
+            <ShieldAlert size={12} className="text-[#B45309]" />
+            <span className="text-[11px] hidden lg:inline">{dangKiemBhyt ? "Đang kiểm..." : "BHYT / ICD-10"}</span>
+          </button>
+
+          {/* Nút Tạo phiếu bàn giao SBAR */}
+          <button
+            type="button"
+            onClick={() => setMoModalSbar(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="Tạo phiếu bàn giao SBAR nhanh cho ca trực / khoa nội trú"
+          >
+            <FileText size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden md:inline">SBAR</span>
+          </button>
+
+          {/* Nút Chép nhanh sang HIS */}
+          <button
+            type="button"
+            onClick={() => setMoPanelHis((v) => !v)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0 ${
+              moPanelHis ? "border-[#0284C7] bg-[#E0F2FE] text-[#0369A1] font-semibold" : "border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] font-medium"
+            }`}
+            title="Chép nhanh từng ô sang phần mềm HIS (VNPT-HIS, Viettel HIS, FPT.eHospital)"
+          >
+            <Copy size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden md:inline">Chép HIS</span>
+          </button>
+
+          {/* Nút Ký duyệt pháp lý WORM */}
+          {onSignOff && (
+            <button
+              type="button"
+              disabled={dangKyDuyet}
+              onClick={async () => {
+                setDangKyDuyet(true);
+                try { await onSignOff(); } finally { setDangKyDuyet(false); }
+              }}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl font-semibold transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0 ${
+                signOff
+                  ? "border-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] text-[#0D9488] shadow-tactile-doctor-pill"
+                  : "border-[#0284C7] bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-tactile-doctor"
+              }`}
+              title={signOff ? `Đã ký duyệt lúc ${new Date(signOff.signedAt).toLocaleString("vi-VN")} (WORM #${signOff.wormSeq ?? ""})` : "Chốt & Ký duyệt pháp lý WORM"}
+            >
+              <CheckCircle2 size={12} />
+              <span className="text-[11px]">{signOff ? `Đã ký #${signOff.wormSeq ?? "WORM"}` : dangKyDuyet ? "Đang ký..." : "Ký duyệt"}</span>
+            </button>
+          )}
+
+          {/* Nút mở tờ dặn dò người bệnh */}
+          <button
+            type="button"
+            onClick={() => setMoModalDanDo(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
+            title="Xem và in tờ dặn dò trao tay người bệnh"
+          >
+            <FileHeart size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden sm:inline">Tờ dặn dò</span>
+          </button>
+
           {/* Nút In / Xuất PDF trực tiếp */}
           <button
             type="button"
@@ -612,6 +809,13 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                     <span>Tải tệp Markdown (.md)</span>
                   </button>
                   <button
+                    onClick={handleDownloadFhirBhytJson}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                  >
+                    <FileCode size={13} className="text-[#0D9488]" />
+                    <span>Tải HL7 FHIR & BHYT (.json)</span>
+                  </button>
+                  <button
                     onClick={() => {
                       setIsExportMenuOpen(false);
                       window.print();
@@ -630,6 +834,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
       {/* Editor Main Content Area: Giấy bệnh án nổi khối */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 relative bg-gradient-to-b from-[#F0F7FA] via-[#F8FBFC] to-[#EEF6FB]">
+        <CrossVisitBanner alerts={crossVisitAlerts} />
         {isGenerating && (
           <div className="absolute inset-0 bg-white/80 backdrop-blur-2xs flex items-center justify-center z-10">
             <div className="flex items-center gap-2.5 px-5 py-3 bg-white rounded-2xl shadow-[0_8px_30px_rgba(2,132,199,0.12)] border border-[#BAE6FD] text-xs text-[#0F172A]">
@@ -644,7 +849,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           <div className="hidden print:block mb-6 pb-4 border-b-2 border-slate-900 break-inside-avoid">
             <div className="flex justify-between items-start text-xs text-slate-800 leading-normal">
               <div>
-                <div className="font-bold uppercase tracking-wider text-slate-950">SỞ Y TẾ · PHÒNG KHÁM ĐA KHOA LÂM SÀNG</div>
+                <div className="font-bold uppercase tracking-wider text-slate-950">CƠ SỞ KHÁM BỆNH: ______________________________</div>
                 <div className="font-semibold text-slate-700">HỆ THỐNG TRỢ LÝ Y KHOA MEDITRACE SENTINEL</div>
                 <div className="text-[10px] text-slate-500">Mã bệnh án: MT-{tab.id.slice(0, 8).toUpperCase()}</div>
               </div>
@@ -946,7 +1151,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                 <p className="font-bold uppercase text-slate-900 mt-1">BÁC SĨ ĐIỀU TRỊ</p>
                 <p className="text-[10px] text-slate-500 italic">(Ký và ghi rõ họ tên)</p>
                 <div className="h-16" />
-                <p className="font-semibold text-slate-800 text-xs">BS. Chuyên khoa phụ trách</p>
+                <p className="font-semibold text-slate-800 text-xs">Họ tên và mã người hành nghề: __________________</p>
               </div>
             </div>
           </div>
@@ -1087,6 +1292,46 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           </div>
         );
       })()}
+
+      {/* Modal Tiến Trình AI & 8 Chốt Phòng Vệ */}
+      <NhatKyTienTrinhAIModal
+        isOpen={moModalTienTrinhAI}
+        onClose={() => setMoModalTienTrinhAI(false)}
+        patientName={tab.title || "Người bệnh"}
+        transcript={transcript}
+        noteContent={tab.content}
+        clinicalSafety={noteMeta?.clinicalSafety}
+        propositions={noteMeta?.propositions}
+      />
+
+      {/* Modal Tờ Dặn Dò Người Bệnh Bình Dân */}
+      <ToDanDoBenhNhanModal
+        isOpen={moModalDanDo}
+        onClose={() => setMoModalDanDo(false)}
+        patientName={tab.title || "Người bệnh"}
+        noteContent={tab.content}
+        hoSo={hoSoDanDo[tab.id] ?? hoSoDanDoTuCa}
+        onDoiHoSo={(hoSo) => setHoSoDanDo((cu) => ({ ...cu, [tab.id]: hoSo }))}
+      />
+
+      <HisSmartCopyPopover
+        open={moPanelHis}
+        items={cacMucHis}
+        onClose={() => setMoPanelHis(false)}
+      />
+
+      <BhytPrecheckModal
+        open={moModalBhyt}
+        loading={dangKiemBhyt}
+        result={kqBhyt}
+        onClose={() => setMoModalBhyt(false)}
+      />
+
+      <SbarModal
+        open={moModalSbar}
+        sbarText={phieuSbar.vanBan}
+        onClose={() => setMoModalSbar(false)}
+      />
     </div>
   );
 };

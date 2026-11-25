@@ -46,6 +46,23 @@ SO_PHAT_TRIEN_MAC_DINH = 13
 SO_KIEM_TRA_MAC_DINH = 12
 HAT_MAC_DINH = 42
 
+# Khuon mo rong (xem `phan_khuon`): 200 khuon dau la khuon goc; tu khuon thu 201 tro di chia
+# theo dot, moi dot mot nhom rieng. Ty le phat trien va kiem tra moi dot: 10% moi loai.
+SO_KHUON_GOC = 200
+KICH_THUOC_DOT_MO_RONG = 200
+TY_LE_MO_RONG_PHAT_TRIEN = 0.10
+TY_LE_MO_RONG_KIEM_TRA = 0.10
+
+
+def _cat_nhom(khuon, so_phat_trien, so_kiem_tra, seed):
+    """Cat mot nhom khuon thanh train / phat trien / kiem tra cuoi theo hang bam on dinh."""
+    khuon = sorted(set(khuon), key=lambda t: _thu_tu(t, seed))
+    kt = set(khuon[:so_kiem_tra])
+    pt = set(khuon[so_kiem_tra:so_kiem_tra + so_phat_trien])
+    tr = set(khuon) - kt - pt
+    assert not (kt & pt) and not (kt & tr) and not (pt & tr)
+    return {"train": tr, "phat_trien": pt, "kiem_tra_cuoi": kt}
+
 
 def phan_khuon(cac_khuon, so_phat_trien=SO_PHAT_TRIEN_MAC_DINH,
                so_kiem_tra=SO_KIEM_TRA_MAC_DINH, seed=HAT_MAC_DINH):
@@ -67,22 +84,44 @@ def phan_khuon(cac_khuon, so_phat_trien=SO_PHAT_TRIEN_MAC_DINH,
     khuon = sorted(set(cac_khuon))
     from src import ngu_lieu_viet as nl
     goc_100 = set(b["ten"] for b in nl.BENH[:100])
-    k_goc = [t for t in khuon if t in goc_100]
-    k_moi = [t for t in khuon if t not in goc_100]
-    if k_goc and k_moi and len(khuon) > 100:
-        p_goc = phan_khuon(k_goc, so_phat_trien=so_phat_trien, so_kiem_tra=so_kiem_tra, seed=seed)
-        p_moi = phan_khuon(k_moi, so_phat_trien=so_phat_trien, so_kiem_tra=so_kiem_tra, seed=seed)
-        return {
-            "train": p_goc["train"] | p_moi["train"],
-            "phat_trien": p_goc["phat_trien"] | p_moi["phat_trien"],
-            "kiem_tra_cuoi": p_goc["kiem_tra_cuoi"] | p_moi["kiem_tra_cuoi"],
-        }
-    khuon.sort(key=lambda t: _thu_tu(t, seed))
-    kt = set(khuon[:so_kiem_tra])
-    pt = set(khuon[so_kiem_tra:so_kiem_tra + so_phat_trien])
-    tr = set(khuon) - kt - pt
-    assert not (kt & pt) and not (kt & tr) and not (pt & tr)
-    return {"train": tr, "phat_trien": pt, "kiem_tra_cuoi": kt}
+    # KHUON MO RONG (them 22/11/2026): khuon o vi tri >= 200 trong `nl.BENH` KHONG vao
+    # nhom `k_moi` cung 101-200. Neu vao, hang cua ca 101-200 doi (xep hang bang bam trong
+    # nhom) va 12 khuon cu nhay tap (7 phat trien -> train, 5 kiem tra -> phat trien):
+    # mo hinh hoc tren bo moi se thay khuon cua tap phat trien/kiem tra DA DONG BANG.
+    # Moi dot `KICH_THUOC_DOT_MO_RONG` khuon la mot nhom RIENG, chia doc lap.
+    from src import kho_khuon
+    dot_cua = kho_khuon.dot_cua_khuon()
+    # MOI KHUON MO RONG thuoc mot dot; dot chia theo THANH VIEN DAY DU cua dot (lay tu kho),
+    # roi moi giao voi cac ten duoc truyen vao. Nho vay tap cua mot khuon chi phu thuoc ten va
+    # dot cua no, KHONG phu thuoc ham goi truyen vao bo ten nao (do 23/11/2026: truyen 270, 400,
+    # 500 ten cho ra tap khac nhau cho 3, 0, 7 khuon, nen bang tap cua bo sinh va buoc chia co the
+    # lech nhau).
+    k_goc, k_moi, co_mat_dot = [], [], {}
+    for t in khuon:
+        d = dot_cua.get(t)
+        if d is not None:
+            co_mat_dot.setdefault(d, set()).add(t)
+        elif t in goc_100:
+            k_goc.append(t)
+        else:
+            k_moi.append(t)
+    nhom = [g for g in (k_goc, k_moi) if g]
+    if len(nhom) + len(co_mat_dot) >= 2 and len(khuon) > 100:
+        kq = {"train": set(), "phat_trien": set(), "kiem_tra_cuoi": set()}
+        for g in nhom:
+            p = phan_khuon(g, so_phat_trien=so_phat_trien, so_kiem_tra=so_kiem_tra, seed=seed)
+            for k in kq:
+                kq[k] |= p[k]
+        tv = kho_khuon.thanh_vien_dot()
+        for d, co_mat in sorted(co_mat_dot.items()):
+            day_du = tv[d]
+            n = max(1, round(TY_LE_MO_RONG_PHAT_TRIEN * len(day_du)))
+            m = max(1, round(TY_LE_MO_RONG_KIEM_TRA * len(day_du)))
+            p = _cat_nhom(list(day_du), n, m, seed)
+            for k in kq:
+                kq[k] |= p[k] & co_mat
+        return kq
+    return _cat_nhom(khuon, so_phat_trien, so_kiem_tra, seed)
 
 
 def tap_cua_khuon(ten, cac_khuon, **kw):
@@ -141,7 +180,7 @@ def main():
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--nguon", default="hoi_thoai_viet_3000.jsonl")
+    ap.add_argument("--nguon", default="hoi_thoai_viet_5000.jsonl")
     # Mac dinh doc tu HANG SO dung chung voi bo sinh. Truyen so khac thi tap cua
     # khuon khong con khop voi be noi dung nguoi nha ma bo sinh da chon — va
     # `kiem_khop_bo_sinh` se dung lai truoc khi ghi tep nao.
@@ -152,6 +191,8 @@ def main():
     # ten, va de mac dinh thi moi lan sinh lai deu mang cung mot nhan.
     ap.add_argument("--the-he", required=True,
                     help="ten nguoi doc dung de goi bo nay, vi du 3 hoac 2b")
+    ap.add_argument("--hau-to", default="",
+                    help="hau to them vao ten tep ra, vi du _v2")
     a = ap.parse_args()
 
     d = duong_dan.THU_MUC_DU_LIEU
@@ -161,7 +202,8 @@ def main():
     print(f"{'Tap':16}{'ca':>6}{'menh de':>10}{'khac BN':>9}{'ty le':>8}   khuon")
     for ten, ds in (("viet_train", tr), ("viet_phat_trien", pt),
                     ("viet_kiem_tra_cuoi", kt)):
-        dp = d / f"{ten}.jsonl"
+        ten_tep = f"{ten}{a.hau_to}"
+        dp = d / f"{ten_tep}.jsonl"
         dp.write_text("\n".join(json.dumps(k, ensure_ascii=False) for k in ds),
                       encoding="utf-8")
         # Van tay ghi CUNG LUC voi bo. Ghi bo roi dan nhan sau thi co mot khoang
@@ -171,7 +213,7 @@ def main():
                        ghi_chu=f"chia tu {a.nguon}, tach theo khuon benh")
         n, md, kb, ty = _thong_ke(ds)
         khoa = ten.replace("viet_", "")
-        print(f"{ten:16}{n:>6}{md:>10}{kb:>9}{ty:>7.1f}%   "
+        print(f"{ten_tep:16}{n:>6}{md:>10}{kb:>9}{ty:>7.1f}%   "
               + ", ".join(khuon[khoa]))
 
     # Khong khuon nao duoc nam o hai tap. Kiem lai ngay day chu khong tin.

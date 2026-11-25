@@ -104,7 +104,7 @@ export const EvidenceView: React.FC<Props> = ({
 
   const gui = async (cau: string, che: CheDoHoiDap = cheDo, nguonGhiDe?: NguonTraCuu) => {
     const text = cau.trim();
-    if (!text || isLoading || !allowExternal) return;
+    if (!text || isLoading || (che !== "tra_cuu" && !allowExternal)) return;
     setMan("hoi");
     let id = dangMo;
     const tinHoi: ClinicalChatMessage = {
@@ -249,11 +249,10 @@ export const EvidenceView: React.FC<Props> = ({
             gui(query);
           }
         }}
-        disabled={!allowExternal}
+        disabled={false}
         placeholder={
-          !allowExternal ? "Bật “Mô hình ngoài” ở trên để hỏi"
-            : kemNguCanh ? "VD: bệnh nhân này dùng amoxicillin được không? · ai bị dị ứng thuốc?"
-              : "VD: corticoid cho liệt mặt ngoại biên — nên dùng trong bao lâu?"
+          kemNguCanh ? "VD: bệnh nhân này dùng amoxicillin được không? · ai bị dị ứng thuốc? (luồng ẩn danh)"
+            : "VD: corticoid cho liệt mặt ngoại biên — nên dùng trong bao lâu? (luồng ẩn danh)"
         }
         className="w-full h-16 sm:h-20 text-[13px] sm:text-sm text-[#0F172A] placeholder-[#94A3B8] bg-transparent resize-none border-none focus:outline-none leading-relaxed disabled:cursor-not-allowed"
       />
@@ -323,7 +322,7 @@ export const EvidenceView: React.FC<Props> = ({
             {ghi === "dang_ghi" ? <Square size={11} className="fill-current" /> : ghi === "dang_chep" ? <RefreshCw size={12} className="animate-spin" /> : <Mic size={14} />}
           </button>
           <button
-            type="submit" disabled={!query.trim() || isLoading || !allowExternal || (cheDo === "tra_cuu" && soNguon === 0)}
+            type="submit" disabled={!query.trim() || isLoading || (cheDo === "tra_cuu" && soNguon === 0)}
             className="w-7 h-7 rounded-lg bg-[#0284C7] text-white hover:bg-[#0369A1] disabled:opacity-40 shadow-tactile-doctor flex items-center justify-center active:translate-y-0.5"
             title="Gửi"
           >

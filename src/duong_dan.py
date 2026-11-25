@@ -39,7 +39,10 @@ THU_MUC_MO_HINH = GOC_DU_AN / "models"
 
 MODEL_NHO = "Qwen/Qwen3-1.7B"
 MODEL_GO_LOI = "Qwen/Qwen3-4B"
-MODEL_CHINH = "Qwen/Qwen3-8B"
+# Qwen3-4B: moi lan huan luyen va chay that deu dung 4B. Qwen3-8B chua huan luyen
+# kem 4B da huan luyen (F1 28,0 so voi 66,1 o bo doi chu the; xem docs/final).
+# Doi tu 8B sang 4B ngay 21/11/2026 de hang so khop thuc te.
+MODEL_CHINH = "Qwen/Qwen3-4B"
 
 for _d in (THU_MUC_KET_QUA, THU_MUC_DU_LIEU, THU_MUC_MO_HINH):
     _d.mkdir(parents=True, exist_ok=True)

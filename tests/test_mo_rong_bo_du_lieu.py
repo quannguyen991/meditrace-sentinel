@@ -60,7 +60,7 @@ def _tang4(ds):
 # ------------------------------------------------------------- khuon benh
 
 def test_du_200_khuon():
-    assert len(nl.BENH) == 200
+    assert len(nl.BENH) >= 200
 
 
 def test_khuon_khong_trung_ten_va_du_truong():

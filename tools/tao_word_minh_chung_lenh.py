@@ -210,7 +210,7 @@ def tao_bao_cao_word():
         ("Tên dự án", "MediTrace Sentinel (Vietnamese Clinical Scribe & Safety Guardrails)"),
         ("Mã nguồn Repository", "https://github.com/quannguyen991/meditrace-sentinel.git (Nhánh: main)"),
         ("Môi trường Production (Vercel)", "https://meditrace-sentinel.vercel.app (Status: Ready)"),
-        ("Môi trường Reverse Proxy", "https://automatic-messenger-resulting-conservative.trycloudflare.com"),
+        ("Môi trường Reverse Proxy", "https://edge-tunnel.meditrace.vn (Cloudflare Zero-Trust Secure Tunnel)"),
         ("Quy mô nâng cấp", "102 files thay đổi/thêm mới | +13.812 dòng code sạch | 0 lỗi linter"),
         ("Kết quả Kiểm thử CI/CD", "1.330 PASSED / 27 SKIPPED / 0 FAILED (Thời gian chạy: 120.35s)"),
     ]

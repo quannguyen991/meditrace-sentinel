@@ -111,6 +111,32 @@ Giải đáp câu hỏi: *"Dữ liệu kiểm thử có bị trùng lặp với 
 * Hiệu năng trích xuất khi gặp ca bệnh hoàn toàn mới chỉ giảm **1.6%** (từ 72.4% xuống 70.8%), chứng minh hệ thống học được **cấu trúc logic y khoa** chứ không phải học thuộc lòng câu chữ.
 * Việc bao phủ phương ngữ 3 miền giúp hệ thống vận hành ổn định trên thực tế giao tiếp tại các bệnh viện ở nhiều địa phương.
 
+### 4.4. Bảng tiến hóa độ lặp câu và độ đa dạng từ vựng (Bộ cũ v1 vs. Bộ Mở rộng v2 — 5.000 ca)
+Đo lường bằng công cụ toán học xác định `src/do_lap_cau.py` trên toàn bộ 5.000 ca:
+
+| Chỉ số đo lường thực nghiệm | Bộ cũ v1 (`mo_rong=False`) | Bộ mở rộng v2 (657 khuôn, seed 2611) | Mức độ cải thiện thực tế |
+| :--- | :---: | :---: | :---: |
+| **Số khuôn ca bệnh** | 200 khuôn | **657 khuôn (21 hệ cơ quan)** | +457 khuôn mới (+228,5%) |
+| **Tổng số lượt thoại** | 87.473 lượt | **87.097 lượt** | Chuẩn hóa cấu trúc lâm sàng |
+| **Số câu duy nhất (khác nhau)** | 20.190 câu | **45.835 câu** | **+25.645 câu (+127,0%)** |
+| **Tỷ lệ lặp mọi câu** | 76,92% | **47,37%** | **Giảm 29,55 điểm %** |
+| **Tỷ lệ lặp câu $\ge 8$ từ** | 69,60% | **42,19%** | **Giảm 27,41 điểm %** |
+| **Độ phong phú từ vựng MTLD** | 93,0 | **145,4** | **+56,3%** |
+| **Độ đa dạng Bigram Distinct-2** | 0,0188 | **0,0468** | **+148,9%** |
+| **Trích dẫn chuỗi con nguyên văn (Axis 2)** | Không đo tự động | **100,0000% (52.634 / 52.634)** | Triệt tiêu 100% ảo giác trích dẫn |
+| **Lỗi ngữ pháp/hạt thừa (6 quy tắc)** | Chưa kiểm soát | **0 lỗi / 87.097 lượt (0,000%)** | Triệt tiêu 100% lỗi ghép câu |
+
+*Ghi chú về giới hạn dừng:* Tỷ lệ lặp câu mọi câu dừng ở mức 47,37% (câu $\ge 8$ từ lặp 42,19%) do đặc thù tự nhiên của 5.000 ca khám chứa các lượt đáp ngắn lịch sự của bệnh nhân ("của tôi ạ.", "vâng ạ."); toàn bộ câu hỏi bác sĩ đã được ngữ cảnh hóa và không còn câu nào trong top 20 lặp nhiều nhất.
+
+### 4.5. Thí nghiệm đo Tỷ lệ Bỏ sót Mệnh đề Lâm sàng (Omission Evaluation — 30 ca phát triển)
+Đo bằng `tools/do_bo_sot_tren_tap.py` trên 30 ca đầu tập phát triển (304 mệnh đề đáp án, khoảng tin cậy Wilson 95%):
+
+| Mô hình kiểm nghiệm | Số mệnh đề đáp án | Bị bỏ sót | Tỷ lệ bỏ sót (%) | Khoảng tin cậy 95% | Số ca JSON lỗi |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Qwen3-4B chưa huấn luyện (Zero-shot)** | 304 | 131 | **43,1%** | 37,6% – 48,7% | 0 / 30 |
+| **Qwen3-4B + adapter (best_checkpoint)** | 304 | 35 | **11,5%** | **8,4% – 15,6%** | 0 / 30 |
+| **Mức độ giảm thiểu bỏ sót** | — | **-96 mệnh đề** | **Giảm 31,6 điểm %** | P-value < 0.001 | 0 lỗi cú pháp |
+
 ---
 
 <a name="bang-5"></a>

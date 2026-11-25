@@ -45,6 +45,41 @@ class _TachLoiCauHinh:
         raise RuntimeError(self.ma)
 
 
+def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Gợi ý vai người nói tự động ('doctor' / 'patient') khi diarization lùi về 1 người nói.
+    Không ghi đè `speaker_role` (giữ nguyên để bác sĩ xác nhận), chỉ gắn `suggested_role`.
+    """
+    import re
+    re_bac_si = re.compile(
+        r"(?i)\b(chào\s+(?:bác|anh|chị|cô|chú|ông|bà|em|cháu)|"
+        r"(?:bác|anh|chị|em|cháu)\s+(?:đau|sốt|ho|khó\s+thở|uống|dùng|bị)\s+(?:ở\s+đâu|bao\s+lâu|mấy\s+ngày|gì|chưa|không)|"
+        r"để\s+(?:tôi|em|bác\s+sĩ)\s+(?:khám|nghe|đo|kê)|"
+        r"(?:tôi|bác\s+sĩ)\s+(?:kê\s+đơn|cho\s+thuốc|hẹn\s+tái\s+khám|chỉ\s+định)|"
+        r"huyết\s+áp\s+(?:đo\s+được|của\s+(?:bác|anh|chị)))\b"
+    )
+    re_benh_nhan = re.compile(
+        r"(?i)\b(bác\s+sĩ\s+ơi|dạ\s+(?:vâng|có|không|đúng|thưa)|"
+        r"(?:tôi|em|cháu|nhà\s+tôi)\s+(?:bị|đau|sốt|ho|mệt|khó\s+thở|uống|dùng|có\s+tiền\s+sử|dị\s+ứng)|"
+        r"(?:tôi|em|cháu)\s+đau\s+quá)\b"
+    )
+    for seg in transcript:
+        txt = (seg.get("text_normalized") or seg.get("text_original") or "").strip()
+        if not txt:
+            continue
+        m_bs = re_bac_si.search(txt)
+        m_bn = re_benh_nhan.search(txt)
+        if m_bs and not m_bn:
+            seg["suggested_role"] = "doctor"
+            seg["suggested_role_reason"] = f"Khớp mẫu câu hỏi/chỉ định bác sĩ: '{m_bs.group(0)}'"
+        elif m_bn and not m_bs:
+            seg["suggested_role"] = "patient"
+            seg["suggested_role_reason"] = f"Khớp mẫu lời kể bệnh nhân: '{m_bn.group(0)}'"
+        elif txt.endswith("?"):
+            seg["suggested_role"] = "doctor"
+            seg["suggested_role_reason"] = "Câu hỏi lâm sàng kết thúc bằng dấu hỏi"
+    return transcript
+
+
 class AudioPipeline:
     def __init__(self, store: SessionStore, asr=None, preprocessor=None, vad=None, diarization=None, settings=None):
         self.store = store
@@ -143,6 +178,8 @@ class AudioPipeline:
                     and self.settings.gop_luot_cung_nguoi_noi):
                 doan = gop_lien_tiep(doan)
             transcript = [s.to_dict() for s in doan]
+            if not tach_info.get("tach_that") or (tach_info.get("so_nguoi_noi") or 1) <= 1:
+                goi_y_vai_nguoi_noi(transcript)
             self._flag_disagreements(session_id, processed, raw, transcript, asr_info)
             self.store.path(session_id, "transcript.json").write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
             value = self.store.update(session_id, status=SessionStatus.TRANSCRIPT_READY.value, transcript_status="ready")

@@ -12,8 +12,10 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import {
   ArrowLeft, Check, ChevronDown, ChevronUp, FileText, HelpCircle, Pencil, ShieldAlert, Trash2, Undo2,
   MessageSquare, ListTree, AlertTriangle, CheckCircle2, Users, Sparkles, Pill, Clock, CalendarClock,
-  GitCompare, SearchX, Quote, EyeOff, Copy, Link2, Mic, Eye, EyeOff as BoQua, Info,
+  GitCompare, SearchX, Quote, EyeOff, Copy, Link2, Mic, Eye, EyeOff as BoQua, Info, Play, Square, FileAudio,
 } from "lucide-react";
+import type { TranscriptSegment } from "../types";
+import { khoangPhatLaiLuot } from "../lib/asrHighlight";
 
 export interface Proposition {
   id: number;
@@ -68,6 +70,7 @@ export interface NoteMeta {
   transcript?: string;
   caseWarnings?: CanhBaoUI[];
   warningPolicy?: string | null;
+  clinicalSafety?: any;
 }
 
 export interface CauHoiNgoai {
@@ -167,6 +170,8 @@ interface Props {
   banSuaChung?: Record<number, string>;
   setBanSuaChung?: React.Dispatch<React.SetStateAction<Record<number, string>>>;
   chonBanDau?: Chon;
+  audioUrl?: string;
+  segments?: TranscriptSegment[];
 }
 
 type Chon = { loai: "p"; id: number } | { loai: "t"; so: number } | null;
@@ -194,6 +199,8 @@ export const VerificationView: React.FC<Props> = ({
   banSuaChung,
   setBanSuaChung,
   chonBanDau,
+  audioUrl,
+  segments,
 }) => {
   const [cauHoiNgoai, setCauHoiNgoai] = useState<{ questions: CauHoiNgoai[]; model: string } | null>(null);
   const [dangHoi, setDangHoi] = useState(false);
@@ -202,6 +209,49 @@ export const VerificationView: React.FC<Props> = ({
   const setQuyet = setQuyetChung ?? setQuyetRieng;
   const [suaId, setSuaId] = useState<number | null>(null);
   const [chuSua, setChuSua] = useState("");
+  const [dangPhatLuot, setDangPhatLuot] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ketThucPhatRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [audioUrl]);
+
+  const phatDoanLuot = (so: number) => {
+    if (!audioUrl) return;
+    if (dangPhatLuot === so && audioRef.current) {
+      audioRef.current.pause();
+      setDangPhatLuot(null);
+      return;
+    }
+    const khoang = khoangPhatLaiLuot(so, segments);
+    if (!khoang) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(audioUrl);
+    } else if (audioRef.current.src !== audioUrl) {
+      audioRef.current.src = audioUrl;
+    }
+    const au = audioRef.current;
+    ketThucPhatRef.current = khoang.end_s;
+    au.ontimeupdate = () => {
+      if (ketThucPhatRef.current !== null && au.currentTime >= ketThucPhatRef.current) {
+        au.pause();
+        setDangPhatLuot(null);
+      }
+    };
+    au.onended = () => setDangPhatLuot(null);
+    const batDauPhat = () => {
+      au.currentTime = khoang.start_s;
+      au.play().then(() => setDangPhatLuot(so)).catch(() => setDangPhatLuot(null));
+    };
+    if (au.readyState >= 1) batDauPhat();
+    else au.onloadedmetadata = batDauPhat;
+  };
   const [banSuaRieng, setBanSuaRieng] = useState<Record<number, string>>({});
   const banSua = banSuaChung ?? banSuaRieng;
   const setBanSua = setBanSuaChung ?? setBanSuaRieng;
@@ -225,7 +275,13 @@ export const VerificationView: React.FC<Props> = ({
     setCauHoiNgoai(null);
     setGhim(chonBanDau || null);
     setBoQua({});
-  }, [note?.caseId, note?.content, chonBanDau]);
+  }, [
+    note?.caseId,
+    note?.content,
+    chonBanDau?.loai,
+    chonBanDau?.loai === "p" ? chonBanDau.id : null,
+    chonBanDau?.loai === "t" ? chonBanDau.so : null,
+  ]);
 
   useEffect(() => {
     if (chonBanDau && chonBanDau.loai === "t") {
@@ -233,7 +289,7 @@ export const VerificationView: React.FC<Props> = ({
         luotRef.current.get(chonBanDau.so)?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 150);
     }
-  }, [chonBanDau]);
+  }, [chonBanDau?.loai, chonBanDau?.loai === "t" ? chonBanDau.so : null]);
 
   const loiThoai = note?.transcript || transcript || "";
   const luot = useMemo(() => tachLuot(loiThoai), [loiThoai]);
@@ -275,6 +331,34 @@ export const VerificationView: React.FC<Props> = ({
     setGhim({ loai: "t", so });
     luotRef.current.get(so)?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
+
+  // Phim tat duyet nhanh 15 giay (J/K di chuyen menh de, Enter giu, Backspace bo)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || suaId !== null) return;
+      if (!ds.length) return;
+      if (e.key === "j" || e.key === "J" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        const curIdx = ghim?.loai === "p" ? ds.findIndex((p) => p.id === ghim.id) : -1;
+        const delta = e.key.toLowerCase() === "j" ? 1 : -1;
+        const nextIdx = curIdx < 0 ? 0 : (curIdx + delta + ds.length) % ds.length;
+        const nextP = ds[nextIdx];
+        if (nextP) {
+          setGhim({ loai: "p", id: nextP.id });
+          mdRef.current.get(nextP.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      } else if (e.key === "Enter" && ghim?.loai === "p") {
+        e.preventDefault();
+        setQuyet((q) => ({ ...q, [ghim.id]: "giu" }));
+      } else if (e.key === "Backspace" && ghim?.loai === "p") {
+        e.preventDefault();
+        setQuyet((q) => ({ ...q, [ghim.id]: "bo" }));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [ds, ghim, suaId, setQuyet]);
 
   // Vẽ dây: đo vị trí thật của từng lượt và từng thẻ mệnh đề trong khung chung.
   const ve = useCallback(() => {
@@ -535,6 +619,14 @@ export const VerificationView: React.FC<Props> = ({
               </h2>
               <span className="text-[12px] text-[#64748B]">{luot.length} lượt</span>
             </div>
+            {audioUrl && (
+              <div className="mb-3 rounded-2xl border border-[#BAE6FD] bg-[#F0F9FF] p-2.5 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#0369A1]">
+                  <FileAudio size={13} /> Ghi âm gốc để đối chiếu từng mệnh đề
+                </div>
+                <audio src={audioUrl} controls className="w-full h-8" />
+              </div>
+            )}
             {luot.length === 0 && <p className="text-[12px] text-[#64748B]">Bản nháp này không kèm lời thoại.</p>}
             <ol className="relative flex flex-col gap-1.5">
               <span className="absolute left-[15px] top-3 bottom-3 w-px bg-[#E2E8F0]" aria-hidden="true" />
@@ -578,7 +670,26 @@ export const VerificationView: React.FC<Props> = ({
                       )}
                       {soMD ? (
                         <>
-                          {l.vai && <div className={`text-[10.5px] font-semibold uppercase tracking-wide ${mv.chu}`}>{l.vai}</div>}
+                          <div className="flex items-center justify-between gap-2">
+                            {l.vai && <div className={`text-[10.5px] font-semibold uppercase tracking-wide ${mv.chu}`}>{l.vai}</div>}
+                            {audioUrl && khoangPhatLaiLuot(l.so, segments) && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  phatDoanLuot(l.so);
+                                }}
+                                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[10px] font-semibold cursor-pointer ${
+                                  dangPhatLuot === l.so
+                                    ? "bg-[#0284C7] text-white border-[#0284C7]"
+                                    : "bg-white text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                                }`}
+                              >
+                                {dangPhatLuot === l.so ? <Square size={9} /> : <Play size={9} />}
+                                {dangPhatLuot === l.so ? "Dừng" : "Nghe lại"}
+                              </button>
+                            )}
+                          </div>
                           <p className="text-[13px] text-[#1E293B] leading-snug select-text">{l.chu}</p>
                         </>
                       ) : (
@@ -842,10 +953,96 @@ export const VerificationView: React.FC<Props> = ({
         </div>
         {rong && (
           <p className="text-[11px] text-[#64748B] mt-3">
-            Di chuột vào một mệnh đề hoặc một lượt để làm sáng dây nối; bấm để ghim. Dây xanh: không cần xác nhận · dây đỏ: cần bác sĩ xác nhận · dây xám: đã bỏ. Thẻ vàng: có lưu ý nhưng không bắt buộc xác nhận.
+            Di chuột vào một mệnh đề hoặc một lượt để làm sáng dây nối; bấm để ghim. <strong>Phím tắt duyệt nhanh:</strong> <code className="px-1 py-0.5 rounded bg-slate-100 text-slate-700">J / K</code> chuyển mệnh đề · <code className="px-1 py-0.5 rounded bg-slate-100 text-slate-700">Enter</code> Xác nhận giữ · <code className="px-1 py-0.5 rounded bg-slate-100 text-slate-700">Backspace</code> Bỏ.
           </p>
         )}
       </div>
+
+      {/* Tầng 4.5 Khôi phục bỏ sót & Tiền kiểm BHYT ICD-10 (QĐ 130/4750/QĐ-BYT) & WORM SHA-256 */}
+      {note.clinicalSafety && (
+        <div className="px-4 sm:px-8 pb-4 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl border border-[#BCE3DB] p-4">
+            <h2 className="text-sm font-bold text-[#0C2340] mb-2 flex items-center gap-1.5">
+              <CheckCircle2 size={15} className="text-[#0D9488]" /> Mã ICD-10 & Tiền kiểm BHYT (QĐ 4750/QĐ-BYT)
+            </h2>
+            {note.clinicalSafety.bhyt_icd10?.ma_icd10_chinh ? (
+              <div className="text-[12px] text-[#334155] space-y-1.5">
+                <div>
+                  <span className="font-semibold text-[#0D9488]">
+                    [{note.clinicalSafety.bhyt_icd10.ma_icd10_chinh.ma_icd10}]
+                  </span>{" "}
+                  <span className="font-semibold">
+                    {note.clinicalSafety.bhyt_icd10.ma_icd10_chinh.ten_benh_byt}
+                  </span>
+                </div>
+                {note.clinicalSafety.bhyt_icd10.ma_icd10_kem_theo?.length > 0 && (
+                  <p className="text-[11px] text-[#64748B]">
+                    Bệnh kèm theo:{" "}
+                    {note.clinicalSafety.bhyt_icd10.ma_icd10_kem_theo
+                      .map((x: any) => `${x.ma_icd10} (${x.ten_benh_byt})`)
+                      .join(", ")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-[12px] text-[#64748B]">Chưa xác định mã ICD-10 chính từ mệnh đề.</p>
+            )}
+            {note.clinicalSafety.bhyt_icd10?.canh_bao_xuat_toan_bhyt?.length > 0 && (
+              <ul className="mt-2 space-y-1 text-[11.5px] text-[#B4232C] bg-[#FDF2F2] border border-[#F5C2C2] rounded-xl p-2">
+                {note.clinicalSafety.bhyt_icd10.canh_bao_xuat_toan_bhyt.map((cb: string, idx: number) => (
+                  <li key={idx}>• {cb}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#F2DFA8] p-4">
+            <h2 className="text-sm font-bold text-[#0C2340] mb-2 flex items-center gap-1.5">
+              <ShieldAlert size={15} className="text-[#A16207]" /> Tầng 4.5: Khôi phục bỏ sót & Đa thuốc
+            </h2>
+            {note.clinicalSafety.khoi_phuc_bo_sot_tang_45?.length > 0 ? (
+              <ul className="text-[11.5px] text-[#334155] space-y-1.5">
+                {note.clinicalSafety.khoi_phuc_bo_sot_tang_45.slice(0, 3).map((item: any, idx: number) => (
+                  <li key={idx} className="p-1.5 rounded-lg bg-[#FEF6E0] border border-[#F2DFA8]">
+                    <span className="font-semibold text-[#9A5B00]">Lượt {item.luot}:</span> {item.noi_dung_goi_y}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[12px] text-[#0D6B50]">
+                Không phát hiện thực thể thuốc, dị ứng hay triệu chứng âm tính bị bỏ sót ở các đoạn thoại chưa ghi.
+              </p>
+            )}
+            {note.clinicalSafety.bhyt_icd10?.canh_bao_da_thuoc_dong_tay_y?.map((c: string, i: number) => (
+              <p key={i} className="mt-1.5 text-[11px] text-[#B4232C] font-medium">
+                {c}
+              </p>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#E2ECF3] p-4">
+            <h2 className="text-sm font-bold text-[#0C2340] mb-2 flex items-center gap-1.5">
+              <FileText size={15} className="text-[#0284C7]" /> Chuẩn CDSS Mức 6–7 (TT 54) & Niêm phong SHA-256
+            </h2>
+            <div className="text-[11.5px] text-[#334155] space-y-1">
+              <p>
+                • HL7 FHIR R4 Bundle:{" "}
+                <strong>{note.clinicalSafety.fhir_r4_summary?.totalEntries ?? 0} resources</strong>
+              </p>
+              <p>
+                • Chốt kiểm toán tự động:{" "}
+                <strong>{note.clinicalSafety.audit_trail_worm?.cac_chot_kiem_soat?.length ?? 8} chốt</strong> (
+                {note.clinicalSafety.audit_trail_worm?.tong_thoi_gian_ms ?? 0} ms)
+              </p>
+              {note.clinicalSafety.audit_trail_worm?.chu_ky_bam_sha256 && (
+                <p className="font-mono text-[10.5px] text-[#0369A1] truncate" title={note.clinicalSafety.audit_trail_worm.chu_ky_bam_sha256}>
+                  SHA-256: {note.clinicalSafety.audit_trail_worm.chu_ky_bam_sha256.slice(0, 28)}…
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Phần phụ */}
       <div className="px-4 sm:px-8 pb-16 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -29,9 +29,12 @@ from src.phat_bieu import PhatBieu
 
 
 from src.can_lam_sang import ParaclinicalCorrelator
+from src.chuan_hoa_don_vi_xet_nghiem import chuan_hoa_du_lieu_xet_nghiem
 from src.thang_diem_lam_sang import ClinicalRiskScoringEngine
 from src.hieu_chinh_lieu import kiem_tra_hieu_chinh_lieu
 from src.dan_do_benh_nhan import sinh_ban_dan_do_benh_nhan
+from src.khu_dinh_danh import ClinicalDeidentifier
+from src.tro_ly_lam_sang import ActiveClinicalClarificationAgent, KetQuaTroLyLamSang
 
 
 @dataclass
@@ -69,6 +72,42 @@ class KetQuaDieuPhoi:
     thang_diem_nguy_co: Optional[Dict[str, Any]] = None
     hieu_chinh_lieu: Optional[Dict[str, Any]] = None
     ban_dan_do_benh_nhan: Optional[Dict[str, Any]] = None
+    hoi_thoai_da_khu_dinh_danh: str = ""
+    tro_ly_lam_sang: Optional[Any] = None
+
+
+def _trich_danh_sach_thuoc_hop_le(danh_sach_phat_bieu: List[PhatBieu]) -> List[str]:
+    """Lọc thuốc đang dùng hoặc được kê trong kế hoạch điều trị của chính bệnh nhân (chu_the_id == 0),
+    loại bỏ phủ định, phát biểu bị thay thế, và thuốc đã ngừng."""
+    ket_qua: List[str] = []
+    for p in danh_sach_phat_bieu:
+        if getattr(p, "chu_the_id", 0) != 0:
+            continue
+        if getattr(p, "phu_dinh", False):
+            continue
+        if getattr(p, "trang_thai", "còn hiệu lực") == "bị thay thế":
+            continue
+
+        thuoc_dict = getattr(p, "thuoc", None)
+        muc = getattr(p, "muc", "") or ""
+        noi_dung = (getattr(p, "noi_dung", "") or "").strip()
+        nd_low = noi_dung.lower()
+
+        if isinstance(thuoc_dict, dict):
+            if thuoc_dict.get("trang_thai_dung") == "đã ngừng":
+                continue
+            ten = (thuoc_dict.get("ten") or "").strip()
+            if ten:
+                ket_qua.append(ten)
+                continue
+
+        if any(kw in nd_low for kw in ("đã ngừng", "ngừng dùng", "ngưng dùng", "đã ngưng")):
+            continue
+
+        if muc in ("THUỐC ĐANG DÙNG", "KẾ HOẠCH ĐIỀU TRỊ") or getattr(p, "hanh_vi", None) == "kế hoạch" or "thuốc" in nd_low or isinstance(thuoc_dict, dict):
+            if noi_dung:
+                ket_qua.append(noi_dung)
+    return ket_qua
 
 
 class MediTracePipelineOrchestrator:
@@ -84,6 +123,8 @@ class MediTracePipelineOrchestrator:
         now_str = datetime.now(timezone.utc).isoformat()
         chot_kiem_soat: List[AuditCheckpoint] = []
         tat_ca_canh_bao: List[str] = []
+        ten_bn = (thong_tin_benh_nhan.get("ten") or thong_tin_benh_nhan.get("ho_ten")) if thong_tin_benh_nhan else None
+        ban_sao_an_danh = ClinicalDeidentifier.an_danh_van_ban(hoi_thoai, ten_benh_nhan=ten_bn)
 
         # ----------------------------------------------------------------------
         # CHỐT 1: ASR & Dược thư âm vị
@@ -148,7 +189,8 @@ class MediTracePipelineOrchestrator:
         t_c4 = time.perf_counter()
         kq_khoa = khoa_bang_chung.khoa_ca(danh_sach_phat_bieu, hoi_thoai)
         danh_gia_rr = cong_rui_ro.cham(danh_sach_phat_bieu, kq_khoa["ket_qua"], thong_tin_benh_nhan)
-        xac_nhan_map = cong_rui_ro.dua_sang_xac_nhan(danh_gia_rr)
+        ly_do_khoa_map = khoa_bang_chung.ly_do_chan(kq_khoa["ket_qua"])
+        xac_nhan_map = {**ly_do_khoa_map, **cong_rui_ro.dua_sang_xac_nhan(danh_gia_rr)}
 
         # BỔ SUNG QUY TẮC AN TOÀN DƯỢC THƯ ASR (HUMAN-IN-THE-LOOP):
         # Mọi tên thuốc do ASR nhận diện từ âm vị dân gian hoặc có thể nghe sai ('a móc', 'ô mê'...)
@@ -175,17 +217,19 @@ class MediTracePipelineOrchestrator:
         # CHỐT 5: Tầng Kiểm duyệt Dược lý Lâm sàng Nâng cao (Trụ cột 1)
         # ----------------------------------------------------------------------
         t_c5 = time.perf_counter()
-        danh_sach_thuoc = [
-            p.noi_dung for p in danh_sach_phat_bieu
-            if "thuốc" in p.noi_dung.lower() or getattr(p, "muc", "") == "THUỐC ĐANG DÙNG"
-        ]
+        danh_sach_thuoc = _trich_danh_sach_thuoc_hop_le(danh_sach_phat_bieu)
         duoc_ly = ClinicalPharmacovigilanceEngine.kiem_duyet_toan_dien(danh_sach_thuoc, thong_tin_benh_nhan)
         dur_c5 = round((time.perf_counter() - t_c5) * 1000, 2)
+        so_atc = len((duoc_ly.ganh_nang_da_thuoc or {}).get("trung_nhom_atc") or {})
         chot_kiem_soat.append(AuditCheckpoint(
             ten_chot="Guardrail 5: Kiểm duyệt Dược lý & Tương tác DDI",
             thoi_gian_ms=dur_c5,
             trang_thai="DAT" if duoc_ly.hop_le else "CANH_BAO",
-            chi_tiet=f"Phát hiện {len(duoc_ly.canh_bao_ddi)} tương tác, {len(duoc_ly.chong_chi_dinh_co_dia)} chống chỉ định.",
+            chi_tiet=(
+                f"Phát hiện {len(duoc_ly.canh_bao_ddi)} tương tác, "
+                f"{len(duoc_ly.chong_chi_dinh_co_dia)} chống chỉ định, "
+                f"{so_atc} trùng nhóm ATC."
+            ),
             canh_bao=duoc_ly.giai_trinh_duoc_ly
         ))
         tat_ca_canh_bao.extend(duoc_ly.giai_trinh_duoc_ly)
@@ -199,6 +243,7 @@ class MediTracePipelineOrchestrator:
         ban_nhap_dict = {
             "CHẨN ĐOÁN": "",
             "TIỀN SỬ BỆNH": "",
+            "TIỀN SỬ GIA ĐÌNH VÀ XÃ HỘI": "",
             "DỊ ỨNG": "",
             "THUỐC ĐANG DÙNG": "",
             "BỆNH SỬ HIỆN TẠI": "",
@@ -211,6 +256,8 @@ class MediTracePipelineOrchestrator:
         for p in parts:
             if p in ban_nhap_dict or p in sinh_benh_an.THU_TU_MUC:
                 curr_muc = p
+                if curr_muc not in ban_nhap_dict:
+                    ban_nhap_dict[curr_muc] = ""
             elif curr_muc and curr_muc in ban_nhap_dict:
                 if ban_nhap_dict[curr_muc]:
                     ban_nhap_dict[curr_muc] += "\n" + p
@@ -226,7 +273,8 @@ class MediTracePipelineOrchestrator:
         # CHỐT 6: Đối soát Cận lâm sàng & Thang điểm Nguy cơ Quốc tế
         # ----------------------------------------------------------------------
         t_c6 = time.perf_counter()
-        du_lieu_cls = du_lieu_xet_nghiem or (thong_tin_benh_nhan.get("xet_nghiem") if thong_tin_benh_nhan else None) or {}
+        du_lieu_cls_tho = du_lieu_xet_nghiem or (thong_tin_benh_nhan.get("xet_nghiem") if thong_tin_benh_nhan else None) or {}
+        du_lieu_cls = chuan_hoa_du_lieu_xet_nghiem(du_lieu_cls_tho) if du_lieu_cls_tho else {}
         kq_cls = None
         thang_diem_dict = {}
         cb_cls = []
@@ -244,12 +292,37 @@ class MediTracePipelineOrchestrator:
             if "viêm phổi" in hoi_thoai.lower() or "sốt" in hoi_thoai.lower() or "wbc" in du_lieu_cls:
                 curb = ClinicalRiskScoringEngine.tinh_curb65(
                     tuoi=tuoi,
-                    urea_mmol_l=du_lieu_cls.get("urea") or du_lieu_cls.get("ure"),
+                    urea_mmol_l=du_lieu_cls.get("urea_mmol_l") or du_lieu_cls.get("urea") or du_lieu_cls.get("ure"),
                     van_ban_kham=hoi_thoai
                 )
                 thang_diem_dict["CURB-65"] = asdict(curb)
 
         dur_c6 = round((time.perf_counter() - t_c6) * 1000, 2)
+        # Các thang điểm khác chỉ chạy khi caller cung cấp dữ liệu có cấu trúc.
+        # Không tự suy đoán tiêu chí còn thiếu từ văn bản tự do.
+        scores = (thong_tin_benh_nhan or {}).get("thang_diem", {})
+        if isinstance(scores, dict):
+            score_functions = {
+                "cha2ds2_vasc": (
+                    "CHA2DS2-VASc", ClinicalRiskScoringEngine.tinh_cha2ds2_vasc,
+                    {"tuoi", "gioi_tinh", "tien_su_suy_tim", "tien_su_tang_huyet_ap",
+                     "tien_su_dai_thao_duong", "tien_su_dot_quy_tia", "tien_su_benh_mach_mau"}
+                ),
+                "wells_pe": (
+                    "Wells PE", ClinicalRiskScoringEngine.tinh_wells_pe,
+                    {"dau_hieu_dvt", "pe_la_chan_doan_hang_dau", "nhip_tim_tren_100",
+                     "bat_dong_hoac_phau_thuat_gan_day", "tien_su_dvt_pe", "ho_ra_mau", "ung_thu_dang_dieu_tri"}
+                ),
+                "glasgow_blatchford": (
+                    "Glasgow-Blatchford", ClinicalRiskScoringEngine.tinh_glasgow_blatchford,
+                    {"urea_mmol_l", "hb_g_dl", "gioi_tinh", "huyet_ap_tam_thu", "nhip_tim",
+                     "di_ngoai_phan_den", "co_con_ngat", "tien_su_benh_gan", "tien_su_suy_tim"}
+                ),
+            }
+            for key, (label, calculate, required) in score_functions.items():
+                values = scores.get(key)
+                if isinstance(values, dict) and required.issubset(values.keys()):
+                    thang_diem_dict[label] = asdict(calculate(**values))
         if du_lieu_cls:
             chot_kiem_soat.append(AuditCheckpoint(
                 ten_chot="Chốt 6: Đối soát Cận lâm sàng & Thang điểm lâm sàng",
@@ -294,13 +367,35 @@ class MediTracePipelineOrchestrator:
         ))
         tat_ca_canh_bao.extend(cb_hieu_chinh)
 
+        # ----------------------------------------------------------------------
+        # CHỐT 8: Trợ lý Phát hiện Khoảng trống & Gợi ý Lâm sàng SOCRATES
+        # ----------------------------------------------------------------------
+        t_c8 = time.perf_counter()
+        kq_tro_ly = ActiveClinicalClarificationAgent.phan_tich_khoang_trong(
+            hoi_thoai=hoi_thoai,
+            danh_sach_phat_bieu=danh_sach_phat_bieu,
+            thong_tin_benh_nhan=thong_tin_benh_nhan
+        )
+        dur_c8 = round((time.perf_counter() - t_c8) * 1000, 2)
+        cb_tro_ly = [f"[{g.muc_do_uu_tien}] {g.chu_de}: {g.khoang_trong}" for g in kq_tro_ly.danh_sach_goi_y]
+        chot_kiem_soat.append(AuditCheckpoint(
+            ten_chot="Chốt 8: Trợ lý Gợi ý Câu hỏi Lâm sàng SOCRATES",
+            thoi_gian_ms=dur_c8,
+            trang_thai="CANH_BAO" if kq_tro_ly.tong_so_khoang_trong > 0 else "DAT",
+            chi_tiet=f"Đã rà soát SOCRATES, phát hiện {kq_tro_ly.tong_so_khoang_trong} khoảng trống bệnh sử.",
+            canh_bao=cb_tro_ly
+        ))
+        tat_ca_canh_bao.extend(cb_tro_ly)
+
         t_tong = round((time.perf_counter() - t0) * 1000, 2)
 
-        # Tạo chữ ký băm bảo mật SHA256 cho toàn bộ kết quả để chống can thiệp (Tamper-evident)
+        # Tạo dấu vân tay SHA-256 để đối chiếu nội dung. Đây không phải chữ ký số;
+        # cần lưu giá trị ở nơi tin cậy và xác minh riêng để phát hiện thay đổi.
         content_for_hash = f"{ma_ca}:{now_str}:{vb_benh_an}:{json.dumps(fhir_bundle, sort_keys=True)}"
         sha256_sig = hashlib.sha256(content_for_hash.encode("utf-8")).hexdigest()
 
         co_nguy_co_nghiem_trong = (
+            not duoc_ly.hop_le or
             len(duoc_ly.chong_chi_dinh_co_dia) > 0 or
             len(duoc_ly.canh_bao_ddi) > 0 or
             (kq_cls and kq_cls.co_gia_tri_nguy_kich) or
@@ -327,5 +422,7 @@ class MediTracePipelineOrchestrator:
             doi_soat_can_lam_sang=kq_cls,
             thang_diem_nguy_co=thang_diem_dict,
             hieu_chinh_lieu=kq_hieu_chinh,
-            ban_dan_do_benh_nhan=ban_dan_do
+            ban_dan_do_benh_nhan=ban_dan_do,
+            hoi_thoai_da_khu_dinh_danh=ban_sao_an_danh.van_ban_da_an_danh,
+            tro_ly_lam_sang=asdict(kq_tro_ly)
         )

@@ -104,5 +104,5 @@ def test_danh_sach_gioi_cu_bi_bao_canh():
 def test_200_khuon_hien_co_khong_co_loi_cau_truc():
     """Bo khuon that phai qua tang cau truc. Canh bao thi duoc, loi thi khong."""
     ket = kk.kiem_tat_ca(nl.BENH, nl.CHI_NU, nl.CHI_NAM, nl.GIOI_THEO_KHUON)
-    assert ket.so_khuon == 200
+    assert ket.so_khuon >= 250
     assert ket.dat, kk.bao_cao(ket)

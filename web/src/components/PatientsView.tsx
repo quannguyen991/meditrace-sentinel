@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BangDuLieuMinhHoa } from "./BangDuLieuMinhHoa";
-import { Patient } from "../types";
+import { Patient, Session } from "../types";
 import { samplePatients } from "../data/mockData";
+import { useKho } from "../lib/useKho";
 import {
+  Activity,
+  TrendingUp,
   Upload,
   Plus,
   Search,
@@ -10,6 +13,68 @@ import {
   Users,
   X,
 } from "lucide-react";
+
+export interface DiemXuHuongKham {
+  ngay: string;
+  huyetApTamThu?: number;
+  huyetApTamTruong?: number;
+  nhipTim?: number;
+  hba1c?: number;
+  egfr?: number;
+}
+
+const XU_HUONG_MINH_HOA: DiemXuHuongKham[] = [
+  { ngay: "Lần 1 (08/2026)", huyetApTamThu: 152, huyetApTamTruong: 94, nhipTim: 84, hba1c: 8.1, egfr: 68 },
+  { ngay: "Lần 2 (09/2026)", huyetApTamThu: 144, huyetApTamTruong: 88, nhipTim: 78, hba1c: 7.6, egfr: 66 },
+  { ngay: "Lần 3 (10/2026)", huyetApTamThu: 136, huyetApTamTruong: 84, nhipTim: 74, hba1c: 7.2, egfr: 65 },
+  { ngay: "Lần 4 (11/2026)", huyetApTamThu: 128, huyetApTamTruong: 80, nhipTim: 72, hba1c: 6.8, egfr: 67 },
+];
+
+function trichXuHuongTuPhien(sessions: Session[], patientName: string): { diem: DiemXuHuongKham[]; laMinhHoa: boolean } {
+  const khop = sessions
+    .filter((s) => s.patientIdentifier?.toLowerCase() === patientName.toLowerCase())
+    .slice(0, 6)
+    .reverse();
+
+  const diem: DiemXuHuongKham[] = [];
+  for (const s of khop) {
+    const gop = [
+      s.transcript || "",
+      ...(s.tabs || []).map((t) => t.content || ""),
+    ].join("\n");
+    const ha = gop.match(/huyết\s*áp\s*[:=]?\s*(\d{2,3})\s*\/\s*(\d{2,3})/i);
+    const mach = gop.match(/(?:mạch|nhịp\s*tim)\s*[:=]?\s*(\d{2,3})/i);
+    const hba1c = gop.match(/hba1c\s*[:=]?\s*(\d+(?:[.,]\d+)?)/i);
+    const egfr = gop.match(/(?:egfr|mlct)\s*[:=]?\s*(\d+(?:[.,]\d+)?)/i);
+    if (ha || mach || hba1c || egfr) {
+      diem.push({
+        ngay: s.date || s.time || "Lần khám",
+        ...(ha ? { huyetApTamThu: Number(ha[1]), huyetApTamTruong: Number(ha[2]) } : {}),
+        ...(mach ? { nhipTim: Number(mach[1]) } : {}),
+        ...(hba1c ? { hba1c: Number(hba1c[1].replace(",", ".")) } : {}),
+        ...(egfr ? { egfr: Number(egfr[1].replace(",", ".")) } : {}),
+      });
+    }
+  }
+  if (diem.length >= 2) return { diem, laMinhHoa: false };
+  return { diem: XU_HUONG_MINH_HOA, laMinhHoa: true };
+}
+
+function taoChuoiToaDoSVG(values: Array<number | undefined>, width: number, height: number, pad = 16): string {
+  const valid = values.filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
+  if (valid.length < 2) return "";
+  const min = Math.min(...valid);
+  const max = Math.max(...valid);
+  const span = max - min || 1;
+  const pts: string[] = [];
+  values.forEach((v, i) => {
+    if (typeof v !== "number" || Number.isNaN(v)) return;
+    const x = pad + (i / Math.max(1, values.length - 1)) * (width - pad * 2);
+    const y = height - pad - ((v - min) / span) * (height - pad * 2);
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  });
+  return pts.join(" ");
+}
 
 interface PatientsViewProps {
   onStartSessionWithPatient?: (patient: Patient) => void;
@@ -19,8 +84,15 @@ export const PatientsView: React.FC<PatientsViewProps> = ({
   onStartSessionWithPatient,
 }) => {
   const [patients, setPatients] = useState<Patient[]>(samplePatients);
+  const [sessions] = useKho<Session>("ca-kham");
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(samplePatients[0] || null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const xuHuong = useMemo(
+    () => (selectedPatient ? trichXuHuongTuPhien(sessions, selectedPatient.name) : null),
+    [selectedPatient, sessions],
+  );
 
   // Form thêm bệnh nhân
   const [newName, setNewName] = useState("");
@@ -163,19 +235,118 @@ export const PatientsView: React.FC<PatientsViewProps> = ({
                     <td className="py-3.5 px-4 text-[#64748B]">{patient.dob}</td>
                     <td className="py-3.5 px-4 text-[#64748B]">{patient.lastConsultation}</td>
                     <td className="py-3.5 px-4 text-right">
-                      {onStartSessionWithPatient && (
+                      <div className="inline-flex items-center gap-1.5">
                         <button
-                          onClick={() => onStartSessionWithPatient(patient)}
-                          className="px-3 py-1.5 rounded-xl bg-[#0284C7] text-white text-xs font-semibold hover:bg-[#0369A1] transition-all shadow-tactile-doctor active:translate-y-0.5"
+                          type="button"
+                          onClick={() => setSelectedPatient(patient)}
+                          className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-colors ${
+                            selectedPatient?.id === patient.id
+                              ? "border-[#0284C7] bg-[#E0F2FE] text-[#0369A1]"
+                              : "border-[#BAE6FD] bg-white text-[#0C4A6E] hover:bg-[#F0F9FF]"
+                          }`}
                         >
-                          Khám bệnh (Scribe)
+                          Xu hướng XN
                         </button>
-                      )}
+                        {onStartSessionWithPatient && (
+                          <button
+                            onClick={() => onStartSessionWithPatient(patient)}
+                            className="px-3 py-1.5 rounded-xl bg-[#0284C7] text-white text-xs font-semibold hover:bg-[#0369A1] transition-all shadow-tactile-doctor active:translate-y-0.5"
+                          >
+                            Khám bệnh (Scribe)
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Biểu đồ xu hướng Sinh hiệu & Xét nghiệm xuyên lần khám */}
+        {selectedPatient && xuHuong && (
+          <div className="mt-6 bg-white rounded-2xl border border-[#BAE6FD] p-5 shadow-tactile-doctor-card">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-[#CCE3F0]">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={16} className="text-[#0284C7]" />
+                <h3 className="font-serif text-base font-bold text-[#0F172A]">
+                  Xu hướng Sinh hiệu &amp; Xét nghiệm — {selectedPatient.name}
+                </h3>
+              </div>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] font-semibold">
+                {xuHuong.laMinhHoa ? "Dữ liệu minh họa xuyên lần khám" : `${xuHuong.diem.length} lần khám đã lưu`}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Huyết áp & Nhịp tim */}
+              <div className="rounded-xl border border-[#E0F2FE] bg-[#F8FBFC] p-3.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-[#0C4A6E] mb-2">
+                  <span className="flex items-center gap-1.5"><Activity size={13} className="text-[#0284C7]" /> Huyết áp (mmHg) &amp; Mạch</span>
+                  <span className="text-[11px] text-[#64748B]">Tâm thu / Tâm trương</span>
+                </div>
+                <svg viewBox="0 0 280 96" className="w-full h-24 overflow-visible">
+                  <polyline
+                    fill="none"
+                    stroke="#0284C7"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={taoChuoiToaDoSVG(xuHuong.diem.map((d) => d.huyetApTamThu), 280, 96)}
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="#38BDF8"
+                    strokeWidth="2"
+                    strokeDasharray="4 3"
+                    points={taoChuoiToaDoSVG(xuHuong.diem.map((d) => d.huyetApTamTruong), 280, 96)}
+                  />
+                </svg>
+                <div className="flex items-center justify-between text-[11px] text-[#475569] mt-1">
+                  {xuHuong.diem.map((d, idx) => (
+                    <span key={idx} className="text-center">
+                      <strong className="text-[#0F172A]">{d.huyetApTamThu ?? "—"}/{d.huyetApTamTruong ?? "—"}</strong>
+                      <span className="block text-[10px] text-[#64748B]">{d.ngay.split(" ")[0]}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* HbA1c & eGFR */}
+              <div className="rounded-xl border border-[#E0F2FE] bg-[#F8FBFC] p-3.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-[#0C4A6E] mb-2">
+                  <span>HbA1c (%) &amp; eGFR (mL/phút)</span>
+                  <span className="text-[11px] text-[#64748B]">Chỉ số chuyển hóa &amp; thận</span>
+                </div>
+                <svg viewBox="0 0 280 96" className="w-full h-24 overflow-visible">
+                  <polyline
+                    fill="none"
+                    stroke="#D97706"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={taoChuoiToaDoSVG(xuHuong.diem.map((d) => d.hba1c), 280, 96)}
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="#059669"
+                    strokeWidth="2"
+                    strokeDasharray="4 3"
+                    points={taoChuoiToaDoSVG(xuHuong.diem.map((d) => d.egfr), 280, 96)}
+                  />
+                </svg>
+                <div className="flex items-center justify-between text-[11px] text-[#475569] mt-1">
+                  {xuHuong.diem.map((d, idx) => (
+                    <span key={idx} className="text-center">
+                      <strong className="text-[#B45309]">{d.hba1c ?? "—"}%</strong>
+                      <span className="text-[#059669] ml-1">({d.egfr ?? "—"})</span>
+                      <span className="block text-[10px] text-[#64748B]">{d.ngay.split(" ")[0]}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

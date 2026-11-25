@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Check, CheckCircle2, Info, Maximize2, MessageSquare, Pencil, Trash2, Undo2, X, AlertTriangle,
+  Check, CheckCircle2, Info, Maximize2, MessageSquare, Pencil, Play, Square, Trash2, Undo2, X, AlertTriangle,
 } from "lucide-react";
 import { NoteMeta, Proposition, Quyet, canXacNhan, tachLuot } from "./VerificationView";
+import type { TranscriptSegment } from "../types";
+import { khoangPhatLaiLuot, phanTichVungMoAsr } from "../lib/asrHighlight";
 
 /**
  * NGĂN DUYỆT CẠNH BẢN NHÁP (24/09). Bác sĩ vừa đọc bản nháp vừa duyệt từng mệnh đề, không phải
@@ -44,16 +46,64 @@ interface Props {
   onChon: (id: number | null) => void;
   onMoToanMan: () => void;
   onDong: () => void;
+  audioUrl?: string;
+  segments?: TranscriptSegment[];
 }
 
 export const DuyetBenCanh: React.FC<Props> = ({
-  note, quyet, setQuyet, banSua, setBanSua, chonId, onChon, onMoToanMan, onDong,
+  note, quyet, setQuyet, banSua, setBanSua, chonId, onChon, onMoToanMan, onDong, audioUrl, segments,
 }) => {
   const [loc, setLoc] = useState<Loc>("tat_ca");
   const [suaId, setSuaId] = useState<number | null>(null);
   const [chuSua, setChuSua] = useState("");
   const [moLuot, setMoLuot] = useState<Record<number, boolean>>({});
+  const [dangPhatLuot, setDangPhatLuot] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ketThucPhatRef = useRef<number | null>(null);
   const theRef = useRef(new Map<number, HTMLDivElement>());
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [audioUrl]);
+
+  const phatDoanLuot = (so: number) => {
+    if (!audioUrl) return;
+    if (dangPhatLuot === so && audioRef.current) {
+      audioRef.current.pause();
+      setDangPhatLuot(null);
+      return;
+    }
+    const khoang = khoangPhatLaiLuot(so, segments);
+    if (!khoang) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(audioUrl);
+    } else if (audioRef.current.src !== audioUrl) {
+      audioRef.current.src = audioUrl;
+    }
+    const au = audioRef.current;
+    ketThucPhatRef.current = khoang.end_s;
+    au.ontimeupdate = () => {
+      if (ketThucPhatRef.current !== null && au.currentTime >= ketThucPhatRef.current) {
+        au.pause();
+        setDangPhatLuot(null);
+      }
+    };
+    au.onended = () => setDangPhatLuot(null);
+    const batDauPhat = () => {
+      au.currentTime = khoang.start_s;
+      au.play().then(() => setDangPhatLuot(so)).catch(() => setDangPhatLuot(null));
+    };
+    if (au.readyState >= 1) {
+      batDauPhat();
+    } else {
+      au.onloadedmetadata = batDauPhat;
+    }
+  };
 
   const luot = useMemo(() => tachLuot(note.transcript), [note.transcript]);
   // Thứ tự như trong bản nháp: mệnh đề cần xác nhận lên trước để bác sĩ xử lý trước.
@@ -170,18 +220,49 @@ export const DuyetBenCanh: React.FC<Props> = ({
                 </div>
               )}
 
-              {/* Căn cứ: lượt hội thoại, bấm để xem nguyên câu */}
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {p.evidenceTurns.length === 0 && <span className="px-1.5 py-0.5 rounded-md bg-[#FDE8E8] text-[#B4232C] text-[10.5px] font-semibold">Không dẫn lượt nào</span>}
-                {p.evidenceTurns.map((so) => (
-                  <button key={so} onClick={() => setMoLuot((m) => ({ ...m, [p.id]: !m[p.id] }))}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white border border-[#E2E8F0] text-[10.5px] text-[#475569] hover:border-[#0284C7]">
-                    <MessageSquare size={10} /> lượt {so}
-                  </button>
-                ))}
-                {p.subject && <span className="px-1.5 py-0.5 rounded-md bg-[#E0EDFF] text-[#1E4E9C] text-[10.5px]">nói về: {p.subject}</span>}
-                {p.negated && <span className="px-1.5 py-0.5 rounded-md bg-[#FEE2E2] text-[#991B1B] text-[10.5px] font-bold">phủ định</span>}
-              </div>
+              {/* Căn cứ: lượt hội thoại, bấm để xem nguyên câu hoặc nghe lại 3s */}
+              {(() => {
+                const asr = phanTichVungMoAsr(p, segments);
+                return (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {p.evidenceTurns.length === 0 && <span className="px-1.5 py-0.5 rounded-md bg-[#FDE8E8] text-[#B4232C] text-[10.5px] font-semibold">Không dẫn lượt nào</span>}
+                    {p.evidenceTurns.map((so) => {
+                      const coAmThanh = Boolean(audioUrl && khoangPhatLaiLuot(so, segments));
+                      const dangPhat = dangPhatLuot === so;
+                      return (
+                        <span key={so} className="inline-flex items-center gap-0.5">
+                          <button onClick={() => setMoLuot((m) => ({ ...m, [p.id]: !m[p.id] }))}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white border border-[#E2E8F0] text-[10.5px] text-[#475569] hover:border-[#0284C7]">
+                            <MessageSquare size={10} /> lượt {so}
+                          </button>
+                          {coAmThanh && (
+                            <button
+                              type="button"
+                              onClick={() => phatDoanLuot(so)}
+                              title={dangPhat ? "Dừng nghe" : "Nghe lại đoạn ghi âm gốc của lượt này"}
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[10.5px] font-semibold ${
+                                dangPhat
+                                  ? "bg-[#0284C7] text-white border-[#0284C7]"
+                                  : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                              }`}
+                            >
+                              {dangPhat ? <Square size={9} /> : <Play size={9} />}
+                              {dangPhat ? "Dừng" : "Nghe lại"}
+                            </button>
+                          )}
+                        </span>
+                      );
+                    })}
+                    {asr.nhan && t !== "bo" && (
+                      <span className="px-1.5 py-0.5 rounded-md bg-[#FFF7ED] border border-[#FED7AA] text-[#C2410C] text-[10.5px] font-semibold">
+                        {asr.nhan}
+                      </span>
+                    )}
+                    {p.subject && <span className="px-1.5 py-0.5 rounded-md bg-[#E0EDFF] text-[#1E4E9C] text-[10.5px]">nói về: {p.subject}</span>}
+                    {p.negated && <span className="px-1.5 py-0.5 rounded-md bg-[#FEE2E2] text-[#991B1B] text-[10.5px] font-bold">phủ định</span>}
+                  </div>
+                );
+              })()}
               {moLuot[p.id] && p.evidenceTurns.length > 0 && (
                 <div className="mt-1.5 rounded-lg bg-white border border-[#E2E8F0] p-2 text-[11.5px] text-[#334155] space-y-1">
                   {p.evidenceTurns.map((so) => {

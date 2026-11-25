@@ -33,6 +33,7 @@ import binascii
 import io
 import json
 import os
+import re
 import sys
 import threading
 import time
@@ -177,7 +178,26 @@ class Loi:
             tok = model = prefix_fn = None
             kq_tho, nguon = [dem], "bo_dem"
         elif self.mo_hinh_xa:
-            return self._ho_so_xa(ca_id, hoi_thoai, nhanh)
+            from src.khu_dinh_danh import ClinicalDeidentifier
+            kq_ad = ClinicalDeidentifier.an_danh_van_ban(hoi_thoai)
+            r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh)
+            if kq_ad.bang_anh_xa_giai_ma:
+                # Khôi phục cục bộ các token PII sau khi máy xa xử lý xong (máy xa không bao giờ thấy PII gốc)
+                def _giai_ma(obj):
+                    if isinstance(obj, str):
+                        s = obj
+                        for tok, goc in kq_ad.bang_anh_xa_giai_ma.items():
+                            s = s.replace(tok, goc)
+                        return s
+                    if isinstance(obj, list):
+                        return [_giai_ma(x) for x in obj]
+                    if isinstance(obj, dict):
+                        return {k: _giai_ma(v) for k, v in obj.items()}
+                    return obj
+                r_xa = _giai_ma(r_xa)
+            r_xa["da_khu_dinh_danh_truoc_gui_xa"] = True
+            r_xa["so_pii_da_chan"] = kq_ad.tong_so_thuc_the
+            return r_xa
         else:
             tok, model, prefix_fn = self.nap()
             kq_tho, nguon = None, "mo_hinh"
@@ -224,9 +244,24 @@ class AmThanh:
 def _doan_ra_json(t):
     return {k: t.get(k) for k in ("segment_id", "start_time", "end_time", "text_original",
                                   "text_normalized", "speaker_id", "speaker_role",
+                                  "suggested_role", "suggested_role_reason",
                                   "asr_confidence", "asr_provider", "asr_model",
                                   "asr_review_required", "asr_review_reason", "asr_candidates",
                                   "reviewed", "edited")}
+
+
+_WORM_LOGGER = None
+_WORM_LOCK = threading.Lock()
+
+
+def lay_worm_logger():
+    """Singleton thread-safe WormAuditLogger cho dịch vụ HTTP."""
+    global _WORM_LOGGER
+    with _WORM_LOCK:
+        if _WORM_LOGGER is None:
+            from src.worm_audit_log import WormAuditLogger
+            _WORM_LOGGER = WormAuditLogger(duong_dan.GOC_DU_AN / "data" / "audit_log_worm.db")
+    return _WORM_LOGGER
 
 
 def ghi_chu_tach(tach: dict | None) -> str:
@@ -309,10 +344,30 @@ class May(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(du)))
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        # Chi cho phep Origin noi bo (localhost / 127.0.0.1) hoac danh sach cau hinh,
+        # chan trang web la tren trinh duyet goi truc tiep vao cong 8765.
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin and re.match(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$", origin, re.I):
+            self.send_header("Access-Control-Allow-Origin", origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:3000")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-MediTrace-Internal-Token")
         self.end_headers()
         self.wfile.write(du)
+
+    def _kiem_khoa_noi_bo(self):
+        khoa_env = os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip()
+        if khoa_env:
+            nhan = (self.headers.get("X-MediTrace-Internal-Token") or "").strip()
+            if nhan != khoa_env:
+                raise LoiDichVu("khong_hop_le_token_noi_bo", "Thiếu hoặc sai khóa xác thực nội bộ", 403)
+
+    @staticmethod
+    def _kiem_ma_phien(phien: str) -> str:
+        phien_sach = str(phien or "").strip()
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", phien_sach) or ".." in phien_sach:
+            raise LoiDichVu("ma_phien_khong_hop_le", "Mã phiên âm thanh không hợp lệ", 400)
+        return phien_sach
 
     def _than(self):
         n = int(self.headers.get("Content-Length") or 0)
@@ -346,7 +401,8 @@ class May(BaseHTTPRequestHandler):
             if duong == "/api/ca-mau":
                 return self._tra({"ca": ca_mau(tham.get("bo"))})
             if duong.startswith("/api/phien/"):
-                phien = duong[len("/api/phien/"):]
+                self._kiem_khoa_noi_bo()
+                phien = self._kiem_ma_phien(duong[len("/api/phien/"):])
                 pipe = self.am.pipeline()
                 return self._tra({"phien": phien,
                                   "doan": [_doan_ra_json(t) for t in pipe.transcript(phien)],
@@ -378,12 +434,13 @@ class May(BaseHTTPRequestHandler):
 
     def _xu_ly_post(self):
         try:
+            self._kiem_khoa_noi_bo()
             duong = self.path.split("?")[0]
             than = self._than()
             if duong == "/api/chep-am":
                 return self._tra(self._chep_am(than))
             if duong == "/api/gan-vai":
-                phien = than.get("phien")
+                phien = self._kiem_ma_phien(than.get("phien") or "")
                 vai = than.get("vai") or {}
                 if not phien or not vai:
                     raise LoiDichVu("thieu_tham_so", "cần `phien` và `vai`")
@@ -391,6 +448,33 @@ class May(BaseHTTPRequestHandler):
                 return self._tra({"phien": phien, "doan": [_doan_ra_json(t) for t in doan]})
             if duong == "/api/ho-so":
                 return self._tra(self._ho_so(than))
+            if duong == "/api/bhyt/precheck":
+                from src.kiem_duyet_bhyt_va_bo_sot import tien_kiem_bhyt_tu_du_lieu
+                kq = tien_kiem_bhyt_tu_du_lieu(
+                    than.get("propositions") or [],
+                    than.get("transcript") or "",
+                )
+                return self._tra(kq)
+            if duong == "/api/ocr/phieu-cu":
+                txt = str(than.get("text") or "").strip()
+                if not txt:
+                    raise LoiDichVu("thieu_noi_dung", "Cần `text` phiếu xét nghiệm / đơn thuốc cũ", 400)
+                from src.ocr_lam_sang import boc_tach_phieu_cu
+                kq = boc_tach_phieu_cu(
+                    van_ban=txt,
+                    tuoi=than.get("tuoi", 50),
+                    la_nu=bool(than.get("laNu", False)),
+                    can_nang_kg=than.get("canNangKg"),
+                )
+                return self._tra(kq)
+            if duong == "/api/quy-ket-loi":
+                from src.kiem_duyet_bhyt_va_bo_sot import ClinicalHarmWeightedEvaluator
+                kq = ClinicalHarmWeightedEvaluator.quy_ket_nguoc_tang_loi(
+                    thao_tac_bac_si=str(than.get("thao_tac") or ""),
+                    menh_de_goc=than.get("menh_de_goc"),
+                    menh_de_sua=than.get("menh_de_sua"),
+                )
+                return self._tra({"ok": True, "quy_ket": kq})
             raise LoiDichVu("khong_co_duong", f"không có đường {duong}", 404)
         except Exception as exc:
             self._bao_loi(exc)
@@ -419,7 +503,28 @@ class May(BaseHTTPRequestHandler):
                 "ghi_chu": ghi_chu_tach(tach)}
 
     def _ho_so(self, than):
-        return _them_canh_bao(self._ho_so_tho(than))
+        thong_tin_bn = than.get("thong_tin_benh_nhan")
+        du_lieu_xn = than.get("du_lieu_xet_nghiem")
+        kq = _them_canh_bao(
+            self._ho_so_tho(than),
+            thong_tin_benh_nhan=thong_tin_bn if isinstance(thong_tin_bn, dict) else None,
+            du_lieu_xet_nghiem=du_lieu_xn if isinstance(du_lieu_xn, dict) else None,
+        )
+        try:
+            user_id = str(than.get("user_id") or "system_dich_vu")
+            ma_ca = str(kq.get("id") or than.get("ca_id") or "ca_kham")
+            worm_ev = lay_worm_logger().append_event(
+                user_id=user_id,
+                action="HO_SO_TAO_BAN_NHAP",
+                case_id=ma_ca,
+                payload={"nhanh": kq.get("nhanh"), "nguon": kq.get("nguon"), "so_phat_bieu": len(kq.get("phat_bieu") or [])},
+                details="Sinh bản nháp & kiểm duyệt 8 chốt",
+            )
+            kq["worm_seq"] = worm_ev.get("seq")
+            kq["worm_hash"] = worm_ev.get("curr_hash")
+        except Exception:
+            traceback.print_exc()
+        return kq
 
     def _ho_so_tho(self, than):
         nhanh = than.get("nhanh") or "C_khoa"
@@ -453,19 +558,77 @@ class May(BaseHTTPRequestHandler):
         print(f"[dich-vu] {self.address_string()} {dang % a}", flush=True)
 
 
-def _them_canh_bao(r):
+def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
     """Ban ghi chay truoc / tu may xa chua co lop canh bao (24/09/2026): tinh tai day
-    tu phat bieu va loi thoai. Chi THEM truong `canh_bao`; ban nhap giu nguyen."""
-    if not isinstance(r, dict) or r.get("canh_bao") or not r.get("phat_bieu") or not r.get("input"):
+    tu phat bieu va loi thoai. Dong thoi ket noi 14 module lam sang nang cao
+    (`dieu_phoi_ha_tang` + `kiem_duyet_bhyt_va_bo_sot`) vao truong `lam_sang_nang_cao`."""
+    if not isinstance(r, dict) or not r.get("phat_bieu") or not r.get("input"):
         return r
+    from dataclasses import asdict
     from src.canh_bao import gop
     from src.phat_bieu import PhatBieu
     try:
-        ps = [PhatBieu(**d) for d in r["phat_bieu"]]
-        r["canh_bao"] = gop.to_dict(gop.chay(ps, r["input"]))
+        ps = [
+            PhatBieu(**{k: v for k, v in d.items() if k in PhatBieu.__dataclass_fields__})
+            if isinstance(d, dict) else d
+            for d in r["phat_bieu"]
+        ]
+        if not r.get("canh_bao"):
+            r["canh_bao"] = gop.to_dict(gop.chay(ps, r["input"]))
     except Exception:
         traceback.print_exc()
         r["canh_bao_loi"] = "không tính được lớp cảnh báo cho bản ghi này"
+        return r
+
+    if not r.get("lam_sang_nang_cao"):
+        try:
+            from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
+            from src.kiem_duyet_bhyt_va_bo_sot import (
+                ActiveOmissionRecoveryEngine,
+                BHYTXmlPreChecker,
+                xuat_goi_xml_1_5_qd130,
+            )
+            ma_ca = str(r.get("id") or "ca_kham")
+            dp = MediTracePipelineOrchestrator.xu_ly_ca_kham(
+                ma_ca=ma_ca,
+                hoi_thoai=r["input"],
+                danh_sach_phat_bieu=ps,
+                thong_tin_benh_nhan=thong_tin_benh_nhan,
+                du_lieu_xet_nghiem=du_lieu_xet_nghiem,
+            )
+            bo_sot = ActiveOmissionRecoveryEngine.quet_khoi_phuc(ps, r["input"])
+            bhyt = BHYTXmlPreChecker.kiem_duyet_ho_so(ma_ca, ps, r["input"])
+            xml_1_5 = xuat_goi_xml_1_5_qd130(
+                ma_lk=ma_ca,
+                ket_qua_bhyt=bhyt,
+                danh_sach_phat_bieu=ps,
+                thong_tin_benh_nhan=thong_tin_benh_nhan,
+                hoi_thoai=r["input"],
+            )
+            from src.canh_bao import lam_sang
+            from src.canh_bao.phat_hien import NguCanh
+            r["lam_sang_nang_cao"] = {
+                # 25/11/2026: lieu / tuong tac / di ung theo ma cua lop canh bao (thu nghiem, co muc
+                # tin cay), doc tu cung tri_thuc_thuoc voi cac truong ben duoi.
+                "lop_canh_bao_lam_sang": [c.to_dict() for c in lam_sang.quet(NguCanh(r["input"]), ps)],
+                "bhyt_icd10": bhyt.to_dict(),
+                "goi_xml_1_5": xml_1_5,
+                "khoi_phuc_bo_sot_tang_45": [x.to_dict() for x in bo_sot],
+                "duoc_ly_ddi": asdict(dp.kiem_duyet_duoc_ly),
+                "doi_soat_can_lam_sang": asdict(dp.doi_soat_can_lam_sang) if dp.doi_soat_can_lam_sang else None,
+                "thang_diem_nguy_co": dp.thang_diem_nguy_co,
+                "hieu_chinh_lieu": dp.hieu_chinh_lieu,
+                "tro_ly_socrates": dp.tro_ly_lam_sang,
+                "ban_dan_do_benh_nhan": dp.ban_dan_do_benh_nhan,
+                "audit_trail_worm": dp.audit_trail.to_dict(),
+                "fhir_r4_summary": {
+                    "resourceType": dp.fhir_bundle.get("resourceType", "Bundle"),
+                    "totalEntries": len(dp.fhir_bundle.get("entry") or []),
+                },
+                "fhir_bundle": dp.fhir_bundle,
+            }
+        except Exception:
+            traceback.print_exc()
     return r
 
 

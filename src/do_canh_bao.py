@@ -32,10 +32,19 @@ from src.canh_bao import gop, nhat_ky
 from src.canh_bao.loai import LOAI, PHIEN_BAN
 from src.phat_bieu import PhatBieu
 
-THU_MUC = duong_dan.GOC_DU_AN / "kaggle-ra" / "the-he-8-chinh-sach-C"
-CAC_TAP = ("thach_thuc_dinh_chinh_phat_trien", "thach_thuc_doi_chu_the_phat_trien",
-           "thach_thuc_nhieu_asr_phat_trien", "thach_thuc_phuong_ngu_phat_trien")
+THU_MUC = duong_dan.GOC_DU_AN / "data" / "thach_thuc"
 NHANH = "C_khoa"
+
+
+def cac_tap(thu_muc, nhanh=NHANH):
+    """Ten cac tap trong thu muc co ca tep goc `<tap>.jsonl` lan dau ra `ra_<nhanh>_<tap>.jsonl`.
+    Tap kiem tra cuoi (`*_kiem_tra*`) bi bo qua: khong duoc mo truoc Giai doan 5."""
+    thu_muc = Path(thu_muc)
+    ra = sorted(p.stem for p in thu_muc.glob("thach_thuc_*.jsonl")
+                if "kiem_tra" not in p.stem and (thu_muc / f"ra_{nhanh}_{p.stem}.jsonl").exists())
+    if not ra:
+        raise FileNotFoundError(f"khong co tap nao kem dau ra ra_{nhanh}_* trong {thu_muc}")
+    return ra
 
 # Nhom canh bao -> ma loi cua bo cham cung loai. Nhom khong co ma tuong ung (bo sot,
 # chat luong, chep am, quan he) khong tinh recall theo loai.
@@ -59,16 +68,18 @@ def _p(x):
     return round(x, 3) if x == x else None
 
 
-def chay():
+def chay(thu_muc=THU_MUC, nhanh=NHANH):
+    thu_muc = Path(thu_muc)
+    tap_list = cac_tap(thu_muc, nhanh)
     thong_ke_ma = defaultdict(lambda: Counter())       # ma -> {ban, dung_loai, co_loi}
     recall = defaultdict(lambda: Counter())            # ma bo cham -> {tong, co_canh_bao_cung_loai, co_canh_bao}
     chinh_sach = {k: Counter() for k in ("C", "D")}
     so_hien, so_pb = [], 0
     nhat = []
     bo_sot = Counter()
-    for tap in CAC_TAP:
-        goc = {c["id"]: c for c in du_lieu.nap_mau(THU_MUC / f"{tap}.jsonl")}
-        for r in du_lieu.nap_mau(THU_MUC / f"ra_{NHANH}_{tap}.jsonl"):
+    for tap in tap_list:
+        goc = {c["id"]: c for c in du_lieu.nap_mau(thu_muc / f"{tap}.jsonl")}
+        for r in du_lieu.nap_mau(thu_muc / f"ra_{nhanh}_{tap}.jsonl"):
             ca = goc[r["id"]]
             ps = [PhatBieu(**d) for d in r["phat_bieu"]]
             loi, sot = cham_he_thong.loi_phat_bieu(ca, r["phat_bieu"])
@@ -141,7 +152,8 @@ def chay():
     ra = {
         "phien_ban_canh_bao": PHIEN_BAN, "phien_ban_bo_cham": cham_he_thong.PHIEN_BAN,
         "chinh_sach_C": cong_rui_ro.CHINH_SACH, "chinh_sach_D": gop.CHINH_SACH_D,
-        "cac_tap": CAC_TAP, "nhanh": NHANH, "so_phat_bieu_con_hieu_luc": so_pb,
+        "thu_muc": str(thu_muc), "cac_tap": tap_list, "nhanh": nhanh,
+        "so_phat_bieu_con_hieu_luc": so_pb, "so_menh_de": so_pb,
         "ghi_chu": "So voi BO CHAM TU DONG, khong phai nhan nguoi. Tham do tren tap phat trien da nhin.",
         "theo_ma": bang_ma, "do_phu_theo_loi_bo_cham": bang_recall,
         "chinh_sach": {k: ty(v) for k, v in chinh_sach.items()},
@@ -152,12 +164,20 @@ def chay():
     return ra, nhat
 
 
-def main():
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--thu-muc", default=str(THU_MUC))
+    ap.add_argument("--nhanh", default=NHANH)
+    ap.add_argument("--ra-json", default=None, help="mac dinh <THU_MUC_KET_QUA>/canh-bao.json")
+    a = ap.parse_args(argv)
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-    ra, nhat = chay()
+    ra, nhat = chay(a.thu_muc, a.nhanh)
     dich = duong_dan.THU_MUC_KET_QUA
-    (dich / "canh-bao.json").write_text(json.dumps(ra, ensure_ascii=False, indent=2), encoding="utf-8")
-    tep_nk = dich / "canh-bao-nhat-ky.jsonl"
+    tep_json = Path(a.ra_json) if a.ra_json else dich / "canh-bao.json"
+    tep_json.parent.mkdir(parents=True, exist_ok=True)
+    tep_json.write_text(json.dumps(ra, ensure_ascii=False, indent=2), encoding="utf-8")
+    tep_nk = tep_json.with_name(tep_json.stem + "-nhat-ky.jsonl")
     tep_nk.unlink(missing_ok=True)
     nhat_ky.ghi(tep_nk, nhat)
     print(json.dumps({k: ra[k] for k in ("so_phat_bieu_con_hieu_luc", "chinh_sach", "canh_bao_hien_moi_phat_bieu",
@@ -167,7 +187,7 @@ def main():
         print(f"{d['ma']:38} {d['so_lan_bao']:5d} {str(d['chinh_xac_cung_loai']):>8} "
               f"{str(d['chinh_xac_co_loi_bat_ky']):>7} {d['so_lan_doi_trang_thai']:6d}  {d['tin_cay']}")
     print("do phu:", json.dumps(ra["do_phu_theo_loi_bo_cham"], ensure_ascii=False))
-    print(f"\nGhi {dich / 'canh-bao.json'} va {tep_nk}")
+    print(f"\nGhi {tep_json} va {tep_nk}")
 
 
 if __name__ == "__main__":

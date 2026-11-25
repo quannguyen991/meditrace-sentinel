@@ -100,3 +100,127 @@ def test_canh_bao_suy_gan_paracetamol_va_nsaid():
     nsaid_cb = [c for c in cb_gan if "NSAID" in c["thuoc"]][0]
     assert nsaid_cb["muc_do"] == "CRITICAL"
     assert "CHỐNG CHỈ ĐỊNH" in nsaid_cb["khuyen_cao"]
+
+
+def test_tinh_egfr_ckd_epi_2021_race_free():
+    """Kiểm tra độ chính xác của công thức KDIGO CKD-EPI 2021 (loại bỏ chủng tộc)."""
+    from src.hieu_chinh_lieu import tinh_egfr_ckd_epi_2021
+    
+    # Nữ 60 tuổi, Creatinine 1.0 mg/dL: eGFR xấp xỉ 65.6 mL/phút/1.73m2
+    egfr_nu = tinh_egfr_ckd_epi_2021(creatinine_mg_dl=1.0, tuoi=60, la_nu=True)
+    assert 64.0 <= egfr_nu <= 67.0
+    
+    # Nam 60 tuổi, Creatinine 1.0 mg/dL: eGFR = 142 * (1.0/0.9)^(-1.2) * 0.9938^60 = 86.2 mL/phút/1.73m2
+    egfr_nam = tinh_egfr_ckd_epi_2021(creatinine_mg_dl=1.0, tuoi=60, la_nu=False)
+    assert 84.0 <= egfr_nam <= 88.0
+    
+    # Bệnh nhân suy thận nặng: Nữ 70 tuổi, Creatinine 2.5 mg/dL
+    egfr_nang = tinh_egfr_ckd_epi_2021(creatinine_mg_dl=2.5, tuoi=70, la_nu=True)
+    assert egfr_nang < 30.0  # Giai đoạn G4/G5
+
+
+def test_fallback_kdigo_ckd_epi_khi_khuyet_can_nang():
+    """Khi hồ sơ ngoại trú khuyết thiếu cân nặng/chiều cao, hệ thống tự động fallback sang KDIGO CKD-EPI 2021."""
+    # Bệnh nhân nữ 72 tuổi, khuyết thiếu hoàn toàn cân nặng và không có sẵn eGFR từ lab
+    kq = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Metformin 1000mg", "Aspirin 81mg"],
+        ket_qua_xet_nghiem={"creatinine": 2.2},  # Creatinine tăng cao
+        thong_tin_benh_nhan={"tuoi": 72, "can_nang_kg": None, "la_nu": True}  # can_nang_kg là None!
+    )
+    
+    # Không crash, tự động fallback sang KDIGO CKD-EPI 2021
+    assert kq["chuc_nang_than"]["crcl_cockcroft_gault"] is None  # CrCl không thể tính khi thiếu cân nặng
+    assert kq["chuc_nang_than"]["egfr_ckd_epi"] is not None
+    assert kq["chuc_nang_than"]["egfr_ckd_epi"] < 30.0  # eGFR ~ 22.8 mL/min
+    assert kq["chuc_nang_than"]["phuong_phap_uoc_tinh"] == "KDIGO_CKD_EPI_2021_Race_Free"
+    assert kq["chuc_nang_than"]["phan_do"]["giai_doan"] in ("G4", "G5")
+    
+    # Bắt buộc phải kích hoạt cảnh báo CRITICAL chống chỉ định Metformin
+    assert kq["co_canh_bao_critical"] is True
+    assert any("Metformin" in c["thuoc"] and c["muc_do"] == "CRITICAL" for c in kq["canh_bao_hieu_chinh_than"])
+
+
+def test_nonetype_guards_an_toan_tuyet_doi():
+    """Kiểm thử phòng vệ: các trường None hoặc dữ liệu bất thường không bao giờ làm sập hệ thống."""
+    # Toàn bộ dữ liệu bị None hoặc rỗng
+    kq = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=[None, "", "  "],
+        ket_qua_xet_nghiem={"creatinine": None, "ast": None, "alt": None, "bilirubin": None, "egfr": None},
+        thong_tin_benh_nhan={"tuoi": None, "can_nang_kg": None, "la_nu": None}
+    )
+    
+    assert kq["tong_so_canh_bao"] == 0
+    assert kq["co_canh_bao_critical"] is False
+    assert kq["chuc_nang_than"]["crcl_cockcroft_gault"] is None
+    assert kq["chuc_nang_than"]["egfr_ckd_epi"] is None
+    assert kq["chuc_nang_gan"]["bat_thuong"] is False
+
+
+def test_chot_chan_nhi_khoa_bedside_schwartz():
+    """Ràng buộc lâm sàng: Bệnh nhân < 18 tuổi không dùng CKD-EPI, chuyển sang Bedside Schwartz."""
+    from src.hieu_chinh_lieu import tinh_egfr_bedside_schwartz_nhi_khoa
+
+    # Trẻ em 10 tuổi, cao 130 cm, Creatinine 0.6 mg/dL
+    # eGFR = (0.413 * 130) / 0.6 = 89.5 mL/phút/1.73m2
+    egfr_nhi = tinh_egfr_bedside_schwartz_nhi_khoa(creatinine_mg_dl=0.6, chieu_cao_cm=130.0)
+    assert egfr_nhi == 89.5
+
+    # Đánh giá qua kiem_tra_hieu_chinh_lieu khi có chiều cao
+    kq_co_chieu_cao = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Ciprofloxacin 250mg"],
+        ket_qua_xet_nghiem={"creatinine": 1.8},  # Suy thận ở trẻ em
+        thong_tin_benh_nhan={"tuoi": 12, "chieu_cao_cm": 140.0, "can_nang_kg": 35.0}
+    )
+    assert kq_co_chieu_cao["chuc_nang_than"]["phuong_phap_uoc_tinh"] == "KDIGO_Bedside_Schwartz_Nhi_Khoa"
+    # eGFR = (0.413 * 140) / 1.8 = 32.1 mL/min
+    assert 31.0 <= kq_co_chieu_cao["chuc_nang_than"]["egfr_ckd_epi"] <= 33.0
+    assert kq_co_chieu_cao["chuc_nang_than"]["crcl_cockcroft_gault"] is None  # Cockcroft-Gault không dùng cho trẻ em
+
+    # Khi trẻ em thiếu chiều cao: Không áp dụng CKD-EPI bừa bãi, trả về None kèm cờ cảnh báo
+    kq_thieu_chieu_cao = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Paracetamol 250mg"],
+        ket_qua_xet_nghiem={"creatinine": 0.8},
+        thong_tin_benh_nhan={"tuoi": 8, "can_nang_kg": 25.0}  # Không có chieu_cao_cm
+    )
+    assert kq_thieu_chieu_cao["chuc_nang_than"]["egfr_ckd_epi"] is None
+    assert kq_thieu_chieu_cao["chuc_nang_than"]["phuong_phap_uoc_tinh"] == "Nhi_Khoa_Thieu_Chieu_Cao_Bedside_Schwartz"
+
+
+def test_hieu_chinh_lieu_thuoc_moi_suy_than():
+    """Kiểm tra hiệu chỉnh liều các thuốc mới (Methotrexate, Colchicine, Ethambutol, Digoxin)."""
+    # 1. Methotrexate khi suy thận nặng (eGFR < 30) -> CRITICAL
+    kq_mtx = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Methotrexate 10mg"],
+        ket_qua_xet_nghiem={"egfr": 22.0},
+        thong_tin_benh_nhan={"tuoi": 65}
+    )
+    assert kq_mtx["co_canh_bao_critical"] is True
+    assert any("Methotrexate" in c["thuoc"] and c["muc_do"] == "CRITICAL" for c in kq_mtx["canh_bao_hieu_chinh_than"])
+
+    # 2. Colchicine khi suy thận nặng (eGFR < 30) -> CRITICAL
+    kq_col = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Colchicine 1mg"],
+        ket_qua_xet_nghiem={"egfr": 25.0},
+        thong_tin_benh_nhan={"tuoi": 70}
+    )
+    assert kq_col["co_canh_bao_critical"] is True
+    assert any("Colchicine" in c["thuoc"] and c["muc_do"] == "CRITICAL" for c in kq_col["canh_bao_hieu_chinh_than"])
+
+    # 3. Ethambutol khi suy thận nặng (eGFR < 30) -> WARNING (giãn cách liều)
+    kq_emb = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Ethambutol 400mg"],
+        ket_qua_xet_nghiem={"egfr": 20.0},
+        thong_tin_benh_nhan={"tuoi": 55}
+    )
+    assert any("Ethambutol" in c["thuoc"] and c["muc_do"] == "WARNING" for c in kq_emb["canh_bao_hieu_chinh_than"])
+
+    # 4. Digoxin khi suy thận vừa (eGFR < 50) -> WARNING
+    kq_dig = kiem_tra_hieu_chinh_lieu(
+        danh_sach_thuoc=["Digoxin 0.25mg"],
+        ket_qua_xet_nghiem={"egfr": 42.0},
+        thong_tin_benh_nhan={"tuoi": 80}
+    )
+    assert any("Digoxin" in c["thuoc"] and c["muc_do"] == "WARNING" for c in kq_dig["canh_bao_hieu_chinh_than"])
+
+
+

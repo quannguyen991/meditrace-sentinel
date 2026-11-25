@@ -42,9 +42,11 @@ import re
 import sys
 import unicodedata
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Optional
 
 from src import duong_dan, ngu_lieu_viet as nl, tach_tap_viet
+from src import kho_khuon
 
 # Ten bay. Moi ca ghi lai minh chua nhung bay nao, de do duoc ty le loi THEO
 # TUNG BAY thay vi chi mot con so chung.
@@ -285,14 +287,16 @@ def _hoa(s: str) -> str:
 # ------------------------------------------------------------------- sinh ca
 
 def sinh_ca(ma: str, rng: random.Random, chi_tap: Optional[str] = None,
-            ep_mien: Optional[str] = None, ep_nguoi_ke: bool = False) -> Ca:
+            ep_mien: Optional[str] = None, ep_nguoi_ke: bool = False,
+            mo_rong: bool = False) -> Ca:
     """`chi_tap`, `ep_mien`, `ep_nguoi_ke`: chi bo thach thuc dung (xem
     `TuyChon`). Moi tuy chon van RUT dung so lan nhu khi khong dung no."""
+    ds_benh = kho_khuon.ds_khuon(mo_rong)
     if chi_tap is None:
-        benh = rng.choice(nl.BENH)
+        benh = rng.choice(ds_benh)
     else:
-        bang = bang_tap_khuon()
-        benh = rng.choice([b for b in nl.BENH if bang[b["ten"]] == chi_tap])
+        bang = bang_tap_khuon(mo_rong=mo_rong)
+        benh = rng.choice([b for b in ds_benh if bang[b["ten"]] == chi_tap])
     if benh["nhom"] == "nhi":
         la_tre = True
     elif benh["nhom"] == "người lớn":
@@ -338,7 +342,7 @@ class _Soan:
     nho vay benh an khong bao gio chua thong tin khong co trong hoi thoai."""
 
     def __init__(self, ca: Ca, rng: random.Random, ap_phuong_ngu: bool = True,
-                 ap_ngu_vuc: bool = True):
+                 ap_ngu_vuc: bool = True, mo_rong: bool = False):
         self.ca, self.rng = ca, rng
         self.luot: List[tuple] = []
         # Loi thoai TRUOC tang ngu vuc va tang vung, cung chi so voi `luot`.
@@ -355,7 +359,9 @@ class _Soan:
         hat = rng.getrandbits(48)
         self.rng_vung = random.Random(2 * hat + 1)
         self.rng_ngu_vuc = random.Random(2 * hat + 2)
+        self.rng_mo_rong = random.Random(2 * hat + 3)
         self.ap_phuong_ngu, self.ap_ngu_vuc = ap_phuong_ngu, ap_ngu_vuc
+        self.mo_rong = mo_rong
 
     def tt(self) -> str:
         """Tieu tu cho CAU HOI va CAU KE — chi "a" hoac de trong."""
@@ -383,6 +389,9 @@ class _Soan:
         """
         if self.luot and self.luot[-1][0] not in self.VAI_NHAN_VIEN:
             return ""
+        if getattr(self, "mo_rong", False):
+            from src import bien_the_cau as btc
+            return btc.chon_da(self.ca.mien, phu_dinh, self.rng_mo_rong)
         cac = self.vung["da_vang"]
         if phu_dinh:
             # "Vang, khong a" nghe nhu vua dong y vua phu nhan: cau tra loi PHU
@@ -601,11 +610,27 @@ def _lo_danh_tinh_nguoi_ke(s, ca: Ca, rng: random.Random) -> None:
         # Chen rieng cho ca co nguoi nha thi so luot lai lo bay: cac bay can nguoi
         # nha (`di_ung_nguoi_nha`, `nguon_khac_nhau`) don ve nhom dai hon —
         # `test_do_dai_KHONG_lo_ca_nao_co_bay` da bao do (0,755 > 0,72).
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_hoi, cau_ke = btc.sinh_danh_tinh_tu_kham(ca, s.rng_mo_rong)
+            s.bs(cau_hoi)
+            s.ke(cau_ke)
+            return
         s.bs(f"{_hoa(ca.goi_bn)} đi khám cho mình phải không ạ?")
-        s.ke(f"{s.da()}{ca.tu_xung_bn} khám cho {ca.tu_xung_bn} ạ.")
+        cach = [f"{ca.tu_xung_bn} khám cho {ca.tu_xung_bn} ạ.",
+                f"{ca.tu_xung_bn} tự đi khám ạ.",
+                f"đúng rồi ạ, {ca.tu_xung_bn} tự đến khám.",
+                f"{ca.tu_xung_bn} đi khám thật ạ."]
+        s.ke(f"{s.da()}{rng.choice(cach)}")
         return
     ca.lo_danh_tinh = True
     bn3 = _bn_ngoi_ba(ca)
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        cau_hoi, cau_ke = btc.sinh_danh_tinh_nguoi_nha(ca, bn3, s.rng_mo_rong)
+        s.bs(cau_hoi)
+        s.ke(cau_ke)
+        return
     s.bs(f"{_hoa(ca.nguoi_ke[1])} là gì của {bn3} ạ?")
     s.ke(f"{s.da()}{ca.nguoi_ke[2]} là {ca.nguoi_ke[3]} của {bn3} ạ.")
 
@@ -723,11 +748,19 @@ def _y_lenh_thuoc(s, ca: Ca, rng: random.Random, tt) -> None:
         ten, duong = md.thuoc["ten"], md.thuoc["duong_dung"]
         # KHONG viet "khong ... nua": tu phu dinh trong doan dan lam khoa bang chung
         # canh bao phu dinh cho mot cau khong he phu dinh.
-        l = s.bs(f"Từ hôm nay ngừng {duong} {ten} nhé{tt()}.")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            l = s.bs(btc.sinh_y_lenh_ngung(ten, duong, s.rng_mo_rong, tt()))
+        else:
+            l = s.bs(f"Từ hôm nay ngừng {duong} {ten} nhé{tt()}.")
         s.ghi("bệnh nhân", f"ngừng {ten}", "KẾ HOẠCH ĐIỀU TRỊ", l,
               tinh_huong="kế hoạch", thuoc=_thuoc(ten, duong, "đã ngừng"))
         return
-    l = s.bs(f"Tôi kê {ten_moi} {lieu}, {duong_moi} {so_lan} nhé{tt()}.")
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        l = s.bs(btc.sinh_y_lenh_ke(ten_moi, lieu, duong_moi, so_lan, s.rng_mo_rong, tt()))
+    else:
+        l = s.bs(f"Tôi kê {ten_moi} {lieu}, {duong_moi} {so_lan} nhé{tt()}.")
     s.ghi("bệnh nhân", f"kê {ten_moi}", "KẾ HOẠCH ĐIỀU TRỊ", l,
           tinh_huong="kế hoạch",
           thuoc=_thuoc(ten_moi, duong_moi, "được kê, chưa dùng", lieu=lieu,
@@ -759,6 +792,7 @@ class TuyChon:
     ap_ngu_vuc: bool = True
     di_ung_cua_nguoi_ke: bool = False   # bay di ung nguoi nha: luon la nguoi ke
     doi_chu_the: bool = False           # dao nguoi mang di ung — xem bay di ung
+    mo_rong: bool = False               # True: dung kho 270 khuon; False: 200 khuon goc
 
 
 def _muc_chan_doan(cd: str):
@@ -784,7 +818,7 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
     # dien bien, va mot ten trung se de len tuy chon o giua ham.
     tuy = tuy or TuyChon()
     s = _Soan(ca, rng, ap_phuong_ngu=tuy.ap_phuong_ngu,
-              ap_ngu_vuc=tuy.ap_ngu_vuc)
+              ap_ngu_vuc=tuy.ap_ngu_vuc, mo_rong=tuy.mo_rong)
     tt = s.tt
     benh = ca.benh
     # Hai cach goi KHAC NHAU cho cung mot benh nhan:
@@ -798,15 +832,32 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
         # Vai thu ba. `nguoi_noi` cua luoc do co san "dieu duong", nhung truoc
         # 10/09/2026 khong hoi thoai nao dung toi — nen mo hinh chua bao gio
         # gap mot ca co ba nguoi noi.
-        s.noi("Điều dưỡng", f"Em chào bác sĩ. {_hoa(ca.goi_bn)} này "
-                            f"{rng.choice(['vào từ sáng', 'mới đăng ký khám', 'chờ từ nãy'])}"
-                            f", em đã đo sinh hiệu rồi ạ.")
-        s.bs(f"Cảm ơn em. {_hoa(ca.goi_bn)} kể tôi nghe xem thế nào{tt()}.")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            tt_dd, xong_dd = s.rng_mo_rong.choice(btc.DIEU_DUONG_MO_RONG_THEM)
+            s.noi("Điều dưỡng", f"Em chào bác sĩ. {_hoa(ca.goi_bn)} này {tt_dd}, {xong_dd}")
+        else:
+            s.noi("Điều dưỡng", f"Em chào bác sĩ. {_hoa(ca.goi_bn)} này "
+                                f"{rng.choice(['vào từ sáng', 'mới đăng ký khám', 'chờ từ nãy'])}"
+                                f", em đã đo sinh hiệu rồi ạ.")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_bs = s.rng_mo_rong.choice(btc.BAC_SI_DIEU_DUONG_MO_RONG)
+            # Evaluate format using eval or safe format
+            cau_bs_fmt = cau_bs.replace("{_hoa(ca.goi_bn)}", _hoa(ca.goi_bn)).replace("{tt()}", tt())
+            s.bs(cau_bs_fmt)
+        else:
+            s.bs(f"Cảm ơn em. {_hoa(ca.goi_bn)} kể tôi nghe xem thế nào{tt()}.")
     elif ca.boi_canh == "tai_kham":
         thuoc_cu = rng.choice(nl.THUOC_TRE_EM if ca.la_tre_em else nl.THUOC)
-        s.bs(f"Lần trước tôi kê {thuoc_cu} cho "
-             f"{ca.goi_bn if not ca.nguoi_ke else _bn_ngoi_ba(ca)}, "
-             f"dùng thấy thế nào{tt()}?")
+        ai_tk = ca.goi_bn if not ca.nguoi_ke else _bn_ngoi_ba(ca)
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            s.bs(s.rng_mo_rong.choice(btc.TAI_KHAM_MO_RONG).format(thuoc=thuoc_cu, ai=ai_tk, tt=tt()))
+        else:
+            s.bs(f"Lần trước tôi kê {thuoc_cu} cho "
+                 f"{ai_tk}, "
+                 f"dùng thấy thế nào{tt()}?")
         # DONG TU theo duong dung (15/09/2026): truoc do moi thuoc deu "uong", ke ca
         # salbutamol la thuoc xit.
         duong = _duong_dung_cua(ca, thuoc_cu)
@@ -829,16 +880,31 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
     elif ca.boi_canh == "nguoi_nha_thay_mat":
         # Benh nhan KHONG co mat. Moi thong tin deu di qua nguoi thu ba, nen
         # duong tat "chu the chinh la nguoi vua noi" luon SAI o boi canh nay.
-        s.bs(f"Hôm nay {ca.nguoi_ke[1]} đi một mình à, "
-             f"{_bn_ngoi_ba(ca)} không đến được{tt()}?")
-        s.ke(f"{s.da()}{goi_bn_trong_loi} mệt quá nên "
-             f"{ca.nguoi_ke[2]} đi thay{tt()}.")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_bs = s.rng_mo_rong.choice(btc.NGUOI_NHA_THAY_MAT_BS).format(
+                nn=ca.nguoi_ke[1], nn_hoa=_hoa(ca.nguoi_ke[1]), bn3=_bn_ngoi_ba(ca), tt=tt())
+            cau_ke = s.rng_mo_rong.choice(btc.NGUOI_NHA_THAY_MAT_KE).format(
+                da=s.da(), gbn=goi_bn_trong_loi, tx=ca.nguoi_ke[2], tt=tt())
+            s.bs(cau_bs)
+            s.ke(cau_ke)
+        else:
+            s.bs(f"Hôm nay {ca.nguoi_ke[1]} đi một mình à, "
+                 f"{_bn_ngoi_ba(ca)} không đến được{tt()}?")
+            s.ke(f"{s.da()}{goi_bn_trong_loi} mệt quá nên "
+                 f"{ca.nguoi_ke[2]} đi thay{tt()}.")
     elif ca.nguoi_ke:
         mau = rng.choice(nl.MO_DAU_NGUOI_NHA)
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            mau = s.rng_mo_rong.choice(btc.MO_DAU_NGUOI_NHA_MO_RONG)
         s.bs(mau.format(goi_nn=ca.nguoi_ke[1], goi_nn_hoa=_hoa(ca.nguoi_ke[1]),
                         goi_bs=ca.goi_bn, goi_bs_hoa=_hoa(ca.goi_bn), tt=tt()))
     else:
         mau = rng.choice(nl.MO_DAU)
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            mau = s.rng_mo_rong.choice(btc.MO_DAU_MO_RONG)
         s.bs(mau.format(goi=ca.goi_bn, goi_hoa=_hoa(ca.goi_bn), tt=tt()))
 
     _lo_danh_tinh_nguoi_ke(s, ca, rng)
@@ -849,14 +915,14 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
     # Moc thoi gian phai hop DIEN TIEN cua benh. "Sot nua thang" roi chan
     # doan "cum mua" la mot ca ma bac si doc qua la thay sai.
     moc = rng.choice(nl.MOC_MAN if benh["dien_tien"] == "mạn" else nl.MOC_CAP)
-    if "luoc_chu_ngu" in ca.bay:
-        # Khong co chu ngu — nguoi doc phai suy ra tu ngu canh. Day la dang cau
-        # RAT thuong gap trong tieng Viet noi va gan nhu vang mat trong ban dich.
-        cau = f"{s.da()}{chinh} {moc} rồi{tt()}."
-    elif ca.nguoi_ke:
-        cau = f"{s.da()}{goi_bn_trong_loi} {chinh} {moc} rồi{tt()}."
-    else:
-        cau = f"{s.da()}{ca.tu_xung_bn} {chinh} {moc} rồi{tt()}."
+    chu = "" if "luoc_chu_ngu" in ca.bay else (
+        goi_bn_trong_loi + " " if ca.nguoi_ke else ca.tu_xung_bn + " ")
+    cau = f"{s.da()}{chu}{chinh} {moc} rồi{tt()}."
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        cau_mau = s.rng_mo_rong.choice(btc.CACH_KE_CHINH)
+        cau = f"{s.da()}" + cau_mau.format(
+            chu=chu, chinh=chinh, moc=moc, tt=tt())
     l = s.ke(cau)
     md_chinh = s.ghi("bệnh nhân", chinh, "BỆNH SỬ HIỆN TẠI", l, moc_thoi_gian=moc)
     s.ghi("bệnh nhân", chinh, "LÝ DO KHÁM BỆNH", l)
@@ -872,10 +938,13 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
         ro = nl.MOC_MAN if benh["dien_tien"] == "mạn" else nl.MOC_CAP
         moc_khac = rng.choice([m for m in ro if m != moc])
         tx_bn = ca.tu_xung_bn
-        l2 = s.ke(rng.choice([
+        cau_nkn = rng.choice([
             f"Không đúng đâu, {tx_bn} {chinh} {moc_khac} rồi{tt()}.",
             f"Theo {tx_bn} thì {moc_khac} mới đúng{tt()}.",
-        ]), vai="Bệnh nhân")
+        ])
+        if getattr(s, "mo_rong", False):
+            cau_nkn = cau_nkn.replace(" rồi rồi", " rồi")
+        l2 = s.ke(cau_nkn, vai="Bệnh nhân")
         # Moi ban giu LUOT CUA CHINH NO, khong gop hai luot nhu bay `mau_thuan`:
         # o day hai ban do HAI nguoi noi, va phep do chia tang theo nguoi noi
         # cua luot bang chung — gop lai thi ban cua nguoi nha mang luot cua
@@ -986,12 +1055,21 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
              f"mình xác nhận lại sau nhé{tt()}.")
 
     # --- hoi them trieu chung
-    s.bs(rng.choice(nl.HOI_THEM).format(tt=tt()))
+    cau_them = rng.choice(nl.HOI_THEM).format(tt=tt())
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        cau_them = btc.sinh_cau_hoi_them_ngu_canh(chinh, ca, s.rng_mo_rong)
+    s.bs(cau_them)
     phu = rng.sample(benh["phu"], k=rng.randint(1, min(2, len(benh["phu"]))))
     cum = ", ".join(phu)
     chu = "" if "luoc_chu_ngu" in ca.bay else (
         goi_bn_trong_loi + " " if ca.nguoi_ke else ca.tu_xung_bn + " ")
-    l = s.ke(f"{s.da()}{chu}còn {cum} nữa{tt()}.")
+    cau_phu = f"{s.da()}{chu}còn {cum} nữa{tt()}."
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        cau_mau = s.rng_mo_rong.choice(btc.CACH_KE_PHU)
+        cau_phu = f"{s.da()}" + cau_mau.format(chu=chu, cum=cum, tt=tt())
+    l = s.ke(cau_phu)
     md_phu = [s.ghi("bệnh nhân", p, "BỆNH SỬ HIỆN TẠI", l) for p in phu]
 
     # --- BAY BO SUNG: them CHI TIET cho mot menh de da noi, khong doi no
@@ -1030,7 +1108,11 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
 
     # --- tien su ban than
     if rng.random() < 0.55:
-        s.bs(rng.choice(nl.HOI_TIEN_SU).format(tt=tt()))
+        cau_ts = rng.choice(nl.HOI_TIEN_SU).format(tt=tt())
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_ts = btc.sinh_cau_hoi_tien_su_ngu_canh(chinh, ca, s.rng_mo_rong)
+        s.bs(cau_ts)
         if rng.random() < 0.7:
             ts = rng.choice(nl.TIEN_SU_TRE_EM if ca.la_tre_em else nl.TIEN_SU_NGUOI_LON)
             chu = "" if "luoc_chu_ngu" in ca.bay else (
@@ -1038,13 +1120,22 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
             l = s.ke(f"{s.da()}{chu}có {ts}{tt()}.")
             s.ghi("bệnh nhân", ts, "TIỀN SỬ BỆNH", l)
         else:
-            s.ke(f"{s.da(phu_dinh=True)}không có gì{tt()}.")
+            if getattr(s, "mo_rong", False):
+                from src import bien_the_cau as btc
+                cau_dap = btc.sinh_dap_khong_tien_su(ca, s.rng_mo_rong, tt=tt())
+            else:
+                cau_dap = f"{s.da(phu_dinh=True)}không có gì{tt()}."
+            s.ke(cau_dap)
 
     # --- BAY QUAN TRONG NHAT: tien su cua NGUOI NHA, ke xen vao
     if "tien_su_gia_dinh" in ca.bay:
-        s.bs(rng.choice(nl.HOI_GIA_DINH).format(tt=tt()))
+        cau_gd = rng.choice(nl.HOI_GIA_DINH).format(tt=tt())
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_gd = btc.sinh_cau_hoi_gia_dinh_ngu_canh(benh.get("he_co_quan", ""), s.rng_mo_rong)
+        s.bs(cau_gd)
         ai = _nguoi_nha_khac(ca, rng)
-        benh_nha = _benh_hop_tuoi(ai, ca, rng)
+        benh_nha = _benh_hop_tuoi(ai, ca, rng, mo_rong=tuy.mo_rong)
         tu_xung = ca.nguoi_ke[2] if ca.nguoi_ke else ca.tu_xung_bn
         if ai == "người kể":
             # Chinh nguoi dang ke lai noi ve benh CUA HO. Day la cho de gan nham
@@ -1072,7 +1163,7 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
     if "nguoi_ke_benh_minh" in ca.bay and ca.nguoi_ke:
         tu_xung = ca.nguoi_ke[2]
         ten_that = _ten_nguoi_ke(ca)
-        benh_minh = _benh_hop_tuoi("người kể", ca, rng)
+        benh_minh = _benh_hop_tuoi("người kể", ca, rng, mo_rong=tuy.mo_rong)
         mau_cau = rng.choice([
             "{tx} cũng đang {benh}, nên {tx} hay lo{tt}.",
             "{tx} bị {benh} mấy năm nay rồi{tt}.",
@@ -1085,7 +1176,11 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
 
     # --- di ung
     if rng.random() < 0.6 or "di_ung_nguoi_nha" in ca.bay:
-        s.bs(rng.choice(nl.HOI_DI_UNG).format(tt=tt()))
+        cau_du = rng.choice(nl.HOI_DI_UNG).format(tt=tt())
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_du = btc.sinh_cau_hoi_di_ung_ngu_canh(ca, s.rng_mo_rong)
+        s.bs(cau_du)
         if "di_ung_nguoi_nha" in ca.bay:
             ai = _nguoi_nha_khac(ca, rng, cho_phep_nguoi_ke=True)
             if tuy.di_ung_cua_nguoi_ke and ca.nguoi_ke:
@@ -1094,7 +1189,7 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
                 ai = "người kể"
             # Di ung cua NGUOI NHA: be rieng, chia theo tap. Di ung cua benh
             # nhan (nhanh `elif` ben duoi) van dung THUOC_DI_UNG, khong chia.
-            thuoc = rng.choice(be_theo_tap(nl.DI_UNG_NGUOI_NHA, tap_cua_ca(ca)))
+            thuoc = rng.choice(be_theo_tap(nl.DI_UNG_NGUOI_NHA, tap_cua_ca(ca, mo_rong=tuy.mo_rong)))
             tu_xung = ca.nguoi_ke[2] if ca.nguoi_ke else ca.tu_xung_bn
             ten_that = (_ten_nguoi_ke(ca) if (ai == "người kể" and ca.nguoi_ke) else ai)
             xung = tu_xung if ai == "người kể" else ai
@@ -1117,10 +1212,22 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
                       do_chac_chan="chưa ghi nhận", doan=-1)
         elif rng.random() < 0.35:
             thuoc = rng.choice(nl.THUOC_DI_UNG)
-            l = s.ke(f"{s.da()}có, dị ứng {thuoc}{tt()}.")
+            cau_dap = f"{s.da()}có, dị ứng {thuoc}{tt()}."
+            if getattr(s, "mo_rong", False):
+                from src import bien_the_cau as btc
+                mau_dap = s.rng_mo_rong.choice(btc.DAP_CO_DI_UNG)
+                if ca.nguoi_ke:
+                    mau_dap = mau_dap.replace("tôi", goi_bn_trong_loi).replace("mình", goi_bn_trong_loi)
+                cau_dap = f"{s.da()}" + mau_dap.format(thuoc=thuoc, tt=tt())
+            l = s.ke(cau_dap)
             s.ghi("bệnh nhân", f"dị ứng {thuoc}", "DỊ ỨNG", l)
         else:
-            l = s.ke(f"{s.da(phu_dinh=True)}không{tt()}.")
+            if getattr(s, "mo_rong", False):
+                from src import bien_the_cau as btc
+                cau_dap = btc.sinh_dap_khong_di_ung(ca, s.rng_mo_rong, tt=tt())
+            else:
+                cau_dap = f"{s.da(phu_dinh=True)}không{tt()}."
+            l = s.ke(cau_dap)
             # Tra loi TAT: "Da, khong a" khong mang noi dung, cap hoi–dap moi du
             # nghia — xem `_Soan.ghi(kem_cau_hoi)`.
             s.ghi("bệnh nhân", "dị ứng thuốc", "DỊ ỨNG", l, phu_dinh=True,
@@ -1128,13 +1235,22 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
 
     # --- thuoc dang dung
     if rng.random() < 0.5:
-        s.bs(rng.choice(nl.HOI_THUOC).format(tt=tt()))
+        cau_thuoc = rng.choice(nl.HOI_THUOC).format(tt=tt())
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_thuoc = btc.sinh_cau_hoi_thuoc_ngu_canh(chinh, ca, s.rng_mo_rong)
+        s.bs(cau_thuoc)
         if rng.random() < 0.65:
             chu = "" if "luoc_chu_ngu" in ca.bay else (
                 goi_bn_trong_loi + " " if ca.nguoi_ke else ca.tu_xung_bn + " ")
             _ke_thuoc(s, ca, rng, chu, tt)
         else:
-            s.ke(f"{s.da(phu_dinh=True)}chưa uống gì{tt()}.")
+            if getattr(s, "mo_rong", False):
+                from src import bien_the_cau as btc
+                cau_dap = btc.sinh_dap_chua_uong_thuoc(ca, s.rng_mo_rong, tt=tt())
+            else:
+                cau_dap = f"{s.da(phu_dinh=True)}chưa uống gì{tt()}."
+            s.ke(cau_dap)
 
     # Benh nhan VANG MAT (nguoi nha di thay): bac si noi VE benh nhan o ngoi thu
     # ba, va KHONG kham duoc. Truoc 11/09/2026 boi canh nay van "Toi kham qua mot
@@ -1144,12 +1260,22 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
 
     # --- bac si hoi ma KHONG ai tra loi
     if "hoi_khong_dap" in ca.bay:
-        s.bs(rng.choice([
-            f"Gần đây {goi_hoi} có đi đâu xa không{tt()}?",
-            f"{_hoa(goi_hoi)} ngủ nghỉ thế nào{tt()}?",
-            f"Ăn uống dạo này ra sao{tt()}?"]))
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            s.bs(s.rng_mo_rong.choice(btc.HOI_KHONG_DAP_MO_RONG).format(
+                goi=goi_hoi, goi_hoa=_hoa(goi_hoi), tt=tt()))
+        else:
+            s.bs(rng.choice([
+                f"Gần đây {goi_hoi} có đi đâu xa không{tt()}?",
+                f"{_hoa(goi_hoi)} ngủ nghỉ thế nào{tt()}?",
+                f"Ăn uống dạo này ra sao{tt()}?"]))
     if not vang_mat:
-        s.bs(rng.choice(nl.CHUYEN_KHAM).format(goi=ca.goi_bn, goi_hoa=_hoa(ca.goi_bn)) + s.dn() + ".")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_ck = btc.sinh_chuyen_kham(ca.goi_bn, _hoa(ca.goi_bn), s.rng_mo_rong)
+        else:
+            cau_ck = rng.choice(nl.CHUYEN_KHAM).format(goi=ca.goi_bn, goi_hoa=_hoa(ca.goi_bn)) + s.dn() + "."
+        s.bs(cau_ck)
 
     # --- kham
     if vang_mat:
@@ -1158,10 +1284,19 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
         # Sinh hieu do DIEU DUONG doc, khong phai bac si. Chu the van la benh
         # nhan — day la mot bay quy gan them: nguoi noi la vai thu ba, hoan
         # toan khong lien quan toi noi dung.
-        l = s.noi("Điều dưỡng", f"Sinh hiệu em đo được: {benh['kham']}")
+        if getattr(s, "mo_rong", False):
+            loi_kham = benh['kham']
+            l = s.noi("Điều dưỡng", loi_kham)
+        else:
+            l = s.noi("Điều dưỡng", f"Sinh hiệu em đo được: {benh['kham']}")
         s.ghi("bệnh nhân", benh["kham"].rstrip("."), "KHÁM LÂM SÀNG", l)
     else:
-        l = s.bs(benh["kham"])
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            loi_kham = btc.sinh_kham(benh['kham'], s.rng_mo_rong)
+            l = s.bs(loi_kham)
+        else:
+            l = s.bs(benh["kham"])
         s.ghi("bệnh nhân", benh["kham"].rstrip("."), "KHÁM LÂM SÀNG", l)
 
     # --- chan doan va ke hoach, khac nhau theo BOI CANH
@@ -1193,20 +1328,42 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
         # Chua kham thi chua ket luan: nhan dinh ghi "nghi ngo", ke hoach la dua
         # benh nhan den kham truc tiep — khong ke don cho nguoi khong co mat.
         nghi, _muc = _muc_chan_doan(benh["chan_doan"])
-        l_nghi = s.bs(f"Nghe {ca.nguoi_ke[1]} kể thì tôi nghĩ nhiều đến "
-                      f"{nghi[:1].lower() + nghi[1:]}, nhưng chưa khám trực tiếp "
-                      f"nên chưa kết luận được{tt()}.")
-        s.ghi("bệnh nhân", nghi, "CHẨN ĐOÁN", l_nghi, do_chac_chan="nghi ngờ")
-        l = s.bs(f"{_hoa(ca.nguoi_ke[1])} đưa {goi_hoi} đến để tôi khám trực "
-                 f"tiếp{s.dn()}.")
-        s.ghi("bệnh nhân", "đưa bệnh nhân đến khám trực tiếp", "KẾ HOẠCH ĐIỀU TRỊ",
-              l, tinh_huong="kế hoạch")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            cau_cd = s.rng_mo_rong.choice(btc.VANG_MAT_CHAN_DOAN).format(
+                nn=ca.nguoi_ke[1], nghi=nghi[:1].lower() + nghi[1:], tt=tt())
+            cau_kh = s.rng_mo_rong.choice(btc.VANG_MAT_KE_HOACH).format(
+                nn=ca.nguoi_ke[1], nn_hoa=_hoa(ca.nguoi_ke[1]), goi_hoi=goi_hoi, dn=s.dn())
+            l_nghi = s.bs(cau_cd)
+            s.ghi("bệnh nhân", nghi, "CHẨN ĐOÁN", l_nghi, do_chac_chan="nghi ngờ")
+            l = s.bs(cau_kh)
+            s.ghi("bệnh nhân", "đưa bệnh nhân đến khám trực tiếp", "KẾ HOẠCH ĐIỀU TRỊ",
+                  l, tinh_huong="kế hoạch")
+        else:
+            l_nghi = s.bs(f"Nghe {ca.nguoi_ke[1]} kể thì tôi nghĩ nhiều đến "
+                          f"{nghi[:1].lower() + nghi[1:]}, nhưng chưa khám trực tiếp "
+                          f"nên chưa kết luận được{tt()}.")
+            s.ghi("bệnh nhân", nghi, "CHẨN ĐOÁN", l_nghi, do_chac_chan="nghi ngờ")
+            l = s.bs(f"{_hoa(ca.nguoi_ke[1])} đưa {goi_hoi} đến để tôi khám trực "
+                     f"tiếp{s.dn()}.")
+            s.ghi("bệnh nhân", "đưa bệnh nhân đến khám trực tiếp", "KẾ HOẠCH ĐIỀU TRỊ",
+                  l, tinh_huong="kế hoạch")
     else:
-        l = s.bs(f"{benh['chan_doan']}")
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            loi_cd = btc.sinh_chan_doan(benh['chan_doan'], s.rng_mo_rong)
+            l = s.bs(loi_cd)
+        else:
+            l = s.bs(f"{benh['chan_doan']}")
         cd, muc_cd = _muc_chan_doan(benh["chan_doan"])
         s.ghi("bệnh nhân", cd, "CHẨN ĐOÁN", l, do_chac_chan=muc_cd)
 
-        l = s.bs(benh["ke_hoach"])
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            loi_kh = btc.sinh_ke_hoach(benh['ke_hoach'], s.rng_mo_rong)
+            l = s.bs(loi_kh)
+        else:
+            l = s.bs(benh["ke_hoach"])
         s.ghi("bệnh nhân", benh["ke_hoach"].rstrip("."), "KẾ HOẠCH ĐIỀU TRỊ", l,
               tinh_huong="kế hoạch")
 
@@ -1236,7 +1393,12 @@ def sinh_hoi_thoai(ca: Ca, rng: random.Random, tuy: Optional[TuyChon] = None):
     tx = ca.nguoi_ke[2] if ca.nguoi_ke else ca.tu_xung_bn
     hop = [c for c in s.vung["chao_cuoi"]
            if set(re.findall(r"(?<!\w)(tôi|em|cháu|con)(?!\w)", c.lower())) <= {tx}]
-    s.ke(rng.choice(hop) if hop else f"{s.da()}{tx} cảm ơn bác sĩ{tt()}.")
+    if getattr(s, "mo_rong", False):
+        from src import bien_the_cau as btc
+        cau_chao = btc.sinh_chao_cuoi(ca, tx, s.rng_mo_rong)
+    else:
+        cau_chao = rng.choice(hop) if hop else f"{s.da()}{tx} cảm ơn bác sĩ{tt()}."
+    s.ke(cau_chao)
     return s
 
 
@@ -1287,29 +1449,31 @@ def _bang_tap_khuon(cac_khuon):
     return {ten: tap for tap, cac in p.items() for ten in cac}
 
 
-def bang_tap_khuon():
+def bang_tap_khuon(mo_rong: bool = False):
     """-> {ten khuon: tap} MA BO SINH GIA DINH khi chon be noi dung nguoi nha.
 
     `tach_tap_viet.kiem_khop_bo_sinh` doi chieu buoc chia voi bang nay.
     """
-    return dict(_bang_tap_khuon(tuple(b["ten"] for b in nl.BENH)))
+    ds = kho_khuon.ds_khuon(mo_rong)
+    return dict(_bang_tap_khuon(tuple(b["ten"] for b in ds)))
 
 
-def tap_cua_ca(ca):
+def tap_cua_ca(ca, mo_rong: bool = False):
     """-> tap ma ca nay se roi vao sau buoc chia. Suy tu TEN KHUON."""
-    return _bang_tap_khuon(tuple(b["ten"] for b in nl.BENH))[ca.benh["ten"]]
+    ds = kho_khuon.ds_khuon(mo_rong)
+    return _bang_tap_khuon(tuple(b["ten"] for b in ds))[ca.benh["ten"]]
 
 
 def _hop_gioi(benh, vai):
     """"Bo bi u xo tu cung" thi bac si doc qua la thay sai ngay."""
-    if vai in nl.VAI_NAM and benh in nl.CHI_NU:
+    if vai in nl.VAI_NAM and benh in kho_khuon.chi_nu():
         return False
-    if vai in nl.VAI_NU and benh in nl.CHI_NAM:
+    if vai in nl.VAI_NU and benh in kho_khuon.chi_nam():
         return False
     return True
 
 
-def _benh_hop_tuoi(ai: str, ca: Ca, rng: random.Random) -> str:
+def _benh_hop_tuoi(ai: str, ca: Ca, rng: random.Random, mo_rong: bool = False) -> str:
     """Benh phai hop lua tuoi VA GIOI cua nguoi mang no, va thuoc be cua TAP.
 
     Mot nguoi me tre dua con di kham ma "bi tai bien mach mau nao" thi bac si
@@ -1318,7 +1482,7 @@ def _benh_hop_tuoi(ai: str, ca: Ca, rng: random.Random) -> str:
     11/09/2026 be co benh chi co o mot gioi (xem `nl.CHI_NU`, `nl.CHI_NAM`).
     """
     thuc = ai if ai != "người kể" else (_ten_nguoi_ke(ca) if ca.nguoi_ke else "bệnh nhân")
-    tap = tap_cua_ca(ca)
+    tap = tap_cua_ca(ca, mo_rong=mo_rong)
     if thuc in nl.NGUOI_LON_TUOI and rng.random() < 0.55:
         ung = [b for b in be_theo_tap(nl.TIEN_SU_GIA_DINH_LON_TUOI, tap)
                if _hop_gioi(b, thuc)]
@@ -1470,8 +1634,14 @@ def _xa_giao(s, ca, rng) -> None:
     """
     for _ in range(rng.choice((0, 1, 1, 2))):
         hoi, dap = rng.choice(nl.XA_GIAO)
-        s.bs(hoi.format(goi=ca.goi_bn, goi_hoa=_hoa(ca.goi_bn)))
-        s.ke(dap)
+        if getattr(s, "mo_rong", False):
+            from src import bien_the_cau as btc
+            hoi_mr, dap_mr = btc.sinh_xa_giao(ca, s.rng_mo_rong)
+            s.bs(hoi_mr)
+            s.ke(dap_mr)
+        else:
+            s.bs(hoi.format(goi=ca.goi_bn, goi_hoa=_hoa(ca.goi_bn)))
+            s.ke(dap)
 
 
 def sinh_mot_ca(ma: str, rng: random.Random,
@@ -1481,10 +1651,10 @@ def sinh_mot_ca(ma: str, rng: random.Random,
     co test canh."""
     tuy = tuy or TuyChon()
     ca = sinh_ca(ma, rng, chi_tap=tuy.chi_tap, ep_mien=tuy.ep_mien,
-                 ep_nguoi_ke=tuy.ep_nguoi_ke)
+                 ep_nguoi_ke=tuy.ep_nguoi_ke, mo_rong=tuy.mo_rong)
     # Tat phuong ngu SAU khi rut khuon: `_Soan` rut hat giong cho lop phuong ngu
     # tren mot `rng` rieng, nen tat hay bat khong doi gi khac trong ca.
-    if tuy.ap_phuong_ngu and not PHUONG_NGU_TRONG_TRAIN and tap_cua_ca(ca) == "train":
+    if tuy.ap_phuong_ngu and not PHUONG_NGU_TRONG_TRAIN and tap_cua_ca(ca, mo_rong=tuy.mo_rong) == "train":
         from dataclasses import replace
         tuy = replace(tuy, ap_phuong_ngu=False)
     ca.bay = _chon_bay(rng)
@@ -1523,7 +1693,7 @@ def sinh_mot_ca(ma: str, rng: random.Random,
     # `_giu_loi_nguoi_noi`. Doi truoc thi trich dan lui ve ca luot.
     dap_an = _dap_an(s.menh_de, s.luot, s.luot_goc)
     _giu_loi_nguoi_noi(s.menh_de, dap_an)
-    return {
+    ket_qua = {
         "id": ca.ma,
         "input": hoi_thoai,
         "output": sinh_benh_an(s.menh_de),
@@ -1538,6 +1708,10 @@ def sinh_mot_ca(ma: str, rng: random.Random,
         "cum_dan_thuong": sorted(set(s.cum_dan_thuong)),
         "dap_an": dap_an,
     }
+    if tuy and tuy.mo_rong:
+        ket_qua["khuon_da_duyet"] = ca.benh.get("da_duyet", False)
+        ket_qua["he_co_quan"] = ca.benh.get("he_co_quan", "")
+    return ket_qua
 
 
 def _giu_loi_nguoi_noi(menh_de: List[MenhDe], dap_an: List[dict]) -> None:
@@ -1555,9 +1729,11 @@ def _giu_loi_nguoi_noi(menh_de: List[MenhDe], dap_an: List[dict]) -> None:
 # Seed 42 la seed DA DUNG de sinh `hoi_thoai_viet_3000.jsonl`. Mac dinh
 # truoc day la 2026, khong khop voi tep dang nam trong kho — chay lai lenh
 # mac dinh se ra mot bo KHAC, va khong ai biet cho toi khi so lieu lech.
-def sinh_bo(so_ca: int, seed: int = 42) -> List[dict]:
+def sinh_bo(so_ca: int, seed: int = 42, mo_rong: bool = False) -> List[dict]:
     rng = random.Random(seed)
-    return [sinh_mot_ca(f"hv_{i + 1:04d}", rng) for i in range(so_ca)]
+    tuy = TuyChon(mo_rong=mo_rong) if mo_rong else None
+    prefix = "v2mr" if mo_rong else "hv"
+    return [sinh_mot_ca(f"{prefix}_{i + 1:04d}", rng, tuy=tuy) for i in range(so_ca)]
 
 
 def _dap_an(menh_de: List[MenhDe], luot=None, luot_goc=None) -> List[dict]:
@@ -1659,15 +1835,57 @@ def _trich_dan(md: MenhDe, luot, luot_goc) -> List[str]:
     return [_trich_mot_luot(md, so, luot, luot_goc) for so in md.luot]
 
 
+def _xuat_mau_duyet(cac_ca: list[dict], duong_dan_md: Path, so_ca: int = 50) -> None:
+    lines = [
+        f"# MẪU DUYỆT LÂM SÀNG BỘ DỮ LIỆU V2 MỞ RỘNG ({so_ca} CA ĐẦU TIÊN)",
+        "",
+        "> **Mục đích:** Bác sĩ / Hội đồng chuyên môn đọc kiểm tra độ tự nhiên, tính hợp lý lâm sàng, "
+        "đại từ xưng hô, và tính toàn vẹn của trích dẫn.",
+        "",
+        "---",
+        ""
+    ]
+    for idx, ca in enumerate(cac_ca[:so_ca], 1):
+        lines.append(f"## Ca {idx:02d} — Mã: `{ca['id']}`")
+        lines.append(f"- **Khuôn bệnh:** `{ca.get('benh', 'N/A')}`")
+        lines.append(f"- **Miền:** `{ca.get('mien', 'N/A')}` | **Bối cảnh:** `{ca.get('boi_canh', 'N/A')}`")
+        lines.append(f"- **Bẫy quy gán:** `{', '.join(ca.get('bay', [])) or 'Không có'}`")
+        lines.append("")
+        lines.append("### Hội thoại Lâm sàng (Input):")
+        lines.append("```text")
+        lines.append(ca["input"].strip())
+        lines.append("```")
+        lines.append("")
+        lines.append("### Đáp án Mệnh đề (Trích xuất):")
+        lines.append("| Mục | Chủ thể | Nội dung | Tình huống | Độ chắc chắn | Trích dẫn |")
+        lines.append("|---|---|---|---|---|---|")
+        for md in ca.get("dap_an", []):
+            muc = md.get("muc", "")
+            ct = md.get("chu_the", "")
+            nd = md.get("noi_dung", "")
+            th = md.get("tinh_huong", "")
+            dc = md.get("do_chac_chan", "")
+            tc = "; ".join(md.get("trich_dan", []))
+            lines.append(f"| {muc} | {ct} | {nd} | {th} | {dc} | {tc} |")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+    duong_dan_md.write_text("\n".join(lines), encoding="utf-8")
+
+
 def main():
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--so-ca", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--ra", default=None)
+    ap.add_argument("--ra", "--dau-ra", default=None)
+    ap.add_argument("--mo-rong", action="store_true", default=False,
+                    help="Bat cac bien the cau da tang va khuon mo rong v2")
+    ap.add_argument("--xuat-mau-duyet", default=None,
+                    help="Xuat tep markdown doc mau N ca (mac dinh 50 ca)")
     a = ap.parse_args()
 
-    bo = sinh_bo(a.so_ca, a.seed)
+    bo = sinh_bo(a.so_ca, a.seed, mo_rong=a.mo_rong)
     # `--ra` la TEN TEP trong thu muc du lieu, khong phai duong dan tuong doi
     # theo cho dang dung. Truoc day no la duong dan tho, nen
     # `--ra hoi_thoai_viet_3000.jsonl` ghi vao goc kho chu khong vao `data/`,
@@ -1681,6 +1899,13 @@ def main():
     with open(dp, "w", encoding="utf-8") as f:
         for m in bo:
             f.write(json.dumps(m, ensure_ascii=False) + "\n")
+
+    if a.xuat_mau_duyet:
+        p_md = Path(a.xuat_mau_duyet)
+        dp_mau = p_md if p_md.is_absolute() else duong_dan.GOC_DU_AN / p_md
+        dp_mau.parent.mkdir(parents=True, exist_ok=True)
+        _xuat_mau_duyet(bo, dp_mau, so_ca=50)
+        print(f"da xuat mau duyet: {dp_mau}")
 
     import collections
     dem_bay = collections.Counter(b for m in bo for b in m["bay"])

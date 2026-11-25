@@ -73,7 +73,8 @@ TU_BENH_NHAN_RO = (
     "ông ấy", "bà ấy", "anh ấy", "chị ấy", "bệnh nhân", "trẻ",
     "bé nhà tôi", "con nhà tôi", "cháu nhà em", "cháu nhà tôi",
     "cháu tôi", "con tôi", "con em", "nhà tôi", "ông nhà tôi",
-    "bà nhà tôi", "cô ấy", "chú ấy", "bác ấy", "em ấy"
+    "bà nhà tôi", "cô ấy", "chú ấy", "bác ấy", "em ấy",
+    "thằng nhỏ", "con bé", "bé út", "mấy nhỏ", "thằng bé"
 )
 TU_HO_HANG = (
     "con trai", "con gái", "anh trai", "chị gái", "em trai", "em gái",
@@ -210,6 +211,57 @@ def _chuan_ban_do(van):
 def _chuan_trich(t):
     t = re.sub(r"\s+", " ", _nfc(t).lower()).strip()
     return t.strip(" .,;:!?…\"'“”‘’")
+
+
+_SO_CHU_VIET = [
+    (r"\bmột\s+(viên|gói|ống|vỉ|nhát|giọt|muỗng|thìa)\s+rưỡi\b", r"1.5 \1"),
+    (r"\bhai\s+(viên|gói|ống|vỉ|nhát|giọt|muỗng|thìa)\s+rưỡi\b", r"2.5 \1"),
+    (r"\b(1|2|3)\s+(viên|gói|ống|vỉ|nhát|giọt|muỗng|thìa)\s+rưỡi\b", r"\1.5 \2"),
+    (r"\bnửa\s+(viên|gói|ống|vỉ|muỗng|thìa)\b", r"0.5 \1"),
+    (r"\b1/2\s*(viên|gói|ống|vỉ|muỗng|thìa)\b", r"0.5 \1"),
+    (r"\b0,5\b", "0.5"),
+    (r"\b1,5\b", "1.5"),
+    (r"\b2,5\b", "2.5"),
+    (r"\bnăm\s+trăm\b", "500"),
+    (r"\bhai\s+trăm\s+năm\s+mươi\b", "250"),
+    (r"\bmột\s+trăm\b", "100"),
+    (r"\bnăm\s+mươi\b", "50"),
+    (r"\bhai\s+mươi\b", "20"),
+    (r"\bmười\s+lăm\b", "15"),
+    (r"\bmười\s+bốn\b", "14"),
+    (r"\bmười\b", "10"),
+    (r"\bmột\s+chục\b", "10"),
+    (r"\bchín\b", "9"),
+    (r"\btám\b", "8"),
+    (r"\bbảy\b", "7"),
+    (r"\bsáu\b", "6"),
+    (r"\bnăm\b", "5"),
+    (r"\bbốn\b", "4"),
+    (r"\bba\b", "3"),
+    (r"\bhai\b", "2"),
+    (r"\bmột\b", "1"),
+    (r"(\d+(?:\.\d+)?)\s*(mg|g|ml|mcg|iu|%)\b", r"\1 \2"),
+]
+
+
+def _chuan_so_lieu_thuoc(s: str) -> str:
+    t = _chuan_trich(s)
+    for pat, rep in _SO_CHU_VIET:
+        t = re.sub(pat, rep, t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _khop_chi_tiet_thuoc(chi_tiet: str, van_dan: str) -> bool:
+    ct_tho = _chuan_trich(chi_tiet)
+    if ct_tho in van_dan:
+        return True
+    ct_chuan = _chuan_so_lieu_thuoc(chi_tiet)
+    vd_chuan = _chuan_so_lieu_thuoc(van_dan)
+    if not ct_chuan:
+        return True
+    # Dùng ranh giới số để "50 mg" không bao giờ khớp nhầm vào "500 mg"
+    pat = rf"(?<!\d){re.escape(ct_chuan)}(?!\d)"
+    return bool(re.search(pat, vd_chuan))
 
 
 def tim_trich(trich, van) -> Optional[Tuple[int, int]]:
@@ -435,10 +487,10 @@ def khoa_mot(p, cac_luot, bat_buoc_trich_dan=True) -> KetQua:
     t = getattr(p, "thuoc", None)
     if t:
         van_dan = _chuan_trich(" ".join(cac_luot[s][1] for s in nguon))
-        if t.get("lieu") and _chuan_trich(t["lieu"]) not in van_dan:
+        if t.get("lieu") and not _khop_chi_tiet_thuoc(t["lieu"], van_dan):
             _them(kq, CHAN, "lieu_khong_thay")
         for khoa in ("so_lan", "bat_dau", "ngung"):
-            if t.get(khoa) and _chuan_trich(t[khoa]) not in van_dan:
+            if t.get(khoa) and not _khop_chi_tiet_thuoc(t[khoa], van_dan):
                 _them(kq, CANH_BAO, "chi_tiet_thuoc_khong_thay")
         duong = t.get("duong_dung")
         if duong and not re.search(rf"(?<!\w){re.escape(duong)}(?!\w)", van_dan):
@@ -453,20 +505,81 @@ def khoa_mot(p, cac_luot, bat_buoc_trich_dan=True) -> KetQua:
 
 
 # ----------------------------------------------------- kiem day du
-def doan_chua_ghi(ket_qua: List[KetQua], ps, cac_luot) -> List[dict]:
-    phu, tu_theo_luot = {}, {}
+# None = tieu chi cu (chung MOT tu noi dung voi menh de dan toi luot la da ghi). Doi o day
+# de do (Task 2.3); mac dinh giu None de khong doi so cua chinh sach C.
+NGUONG_PHU_MAC_DINH: Optional[float] = None
+_THUC_THE_SO = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+def _thuoc_moi(doan: str, chu_menh_de: str) -> bool:
+    """Doan co hoat chat nao khong xuat hien trong cac menh de dan toi luot do."""
+    from src import tri_thuc_thuoc
+
+    def hc(t):
+        return {tri_thuc_thuoc.hoat_chat(m.group(0)) or m.group(0).lower()
+                for m in thuc_the.THUOC_TU_DIEN.finditer(t)}
+    trong_doan = hc(doan)
+    return bool(trong_doan) and not trong_doan <= hc(chu_menh_de)
+
+
+_DI_UNG_CHAT = re.compile(r"(?<!\w)(dị ứng|mẫn cảm)(?!\w)\s*(?:với\s+)?([^,;.?!]*)")
+_NGAT_CHAT = re.compile(r"(?<!\w)(còn|nhưng|và|mà|thì|nên|khi|lúc|từ|hồi)(?!\w)")
+_KHONG_PHAI_CHAT = {"gì", "cả", "đâu", "ạ", "nào", "bao", "giờ", "hết", "nữa", "luôn", "rồi", "thôi", "nhé", "à",
+                    "không", "chưa", "có", "bị", "thì", "lắm", "đó", "này", "ấy"}
+
+
+def _di_ung_moi(doan: str, chu_menh_de: str) -> bool:
+    """Doan noi "dị ứng X" ma chat X chua co trong menh de nao dan toi luot do: "anh trai dị ứng trứng"
+    khong duoc che boi "bé chưa dị ứng thuốc" chi vi chung chu "dị ứng" (vong 5 cay loi 25/11/2026)."""
+    m = _DI_UNG_CHAT.search(doan.lower())
+    if not m:
+        return False
+    chat = [w for w in _NGAT_CHAT.split(m.group(2))[0].split() if w not in _KHONG_PHAI_CHAT]
+    co = set(chu_menh_de.split())
+    return bool(chat) and any(w not in co for w in chat)
+
+
+def _thuc_the(t: str) -> set:
+    """Ten thuoc va con so trong doan — thu khong duoc mat khi ghi."""
+    return {m.group(0).lower() for m in thuc_the.THUOC_TU_DIEN.finditer(t)} | set(_THUC_THE_SO.findall(t))
+
+
+def doan_chua_ghi(ket_qua: List[KetQua], ps, cac_luot, nguong_phu: Optional[float] = "mac_dinh") -> List[dict]:
+    """Doan hoi thoai co noi dung ma khong phat bieu nao dan toi.
+
+    `nguong_phu=None`: tieu chi cu — doan da ghi neu giao voi mot khoang trich dan HOAC
+    chung mot tu noi dung voi menh de dan toi luot do. Tren luot dai, mot tu chung la du
+    che ca y khac (do 25/11/2026: 172/200 menh de bi sot nam o luot da duoc dan).
+    `nguong_phu=x`: da ghi khi nam TRON trong khoang trich dan, HOAC ti le tu noi dung cua
+    doan co trong menh de >= x, HOAC moi thuc the (thuoc, con so) cua doan co trong menh de."""
+    if nguong_phu == "mac_dinh":
+        nguong_phu = NGUONG_PHU_MAC_DINH
+    phu, tu_theo_luot, chu_theo_luot = {}, {}, {}
     for kq, p in zip(ket_qua, ps):
         luot_cua = {s for s, _a, _b in kq.doan} | \
                    {n for n in (p.bang_chung or []) if n in cac_luot}
         tu = set(_tu_noi_dung(chuan_hoa.chuan_hoa(p.noi_dung)))
+        # Ban BI THAY THE khong che thuc the: "amoxicillin 250 mg, à nhầm, 500 mg" chi con ban cu thi ban
+        # moi van la chua ghi (vong 5 cay loi 25/11/2026).
+        thay_the = getattr(p, "trang_thai", "còn hiệu lực") == "bị thay thế"
         for s in luot_cua:
             tu_theo_luot.setdefault(s, set()).update(tu)
+            if thay_the:
+                continue
+            ten_thuoc = ((getattr(p, "thuoc", None) or {}).get("ten")) or ""
+            chu_theo_luot[s] = f"{chu_theo_luot.get(s, '')} {str(p.noi_dung or '').lower()} {ten_thuoc.lower()}"
         for s, a, b in kq.doan:
             phu.setdefault(s, []).append((a, b))
+    from src.canh_bao.loi_noi import co_dau_cau, nhan_cau_hoi, tach_y
     ra = []
     for so, (vai, van) in sorted(cac_luot.items()):
-        for a, b in cac_doan(van):
-            if dau_ket(van, (a, b)) == "?":
+        # Luot khong dau cau (chep tu am thanh): tach theo tu noi, nhan cau hoi theo tieu
+        # tu. Luot co dau giu nguyen cach cu. Them 25/11/2026 (Task 3.1).
+        co_dau = co_dau_cau(van)
+        for a, b in (cac_doan(van) if co_dau else tach_y(van)):
+            # Chi bo cau hoi cua NHAN VIEN: loi nguoi benh khong dau ma doan nham la cau hoi se
+            # mat het canh bao bo sot (ra soat 25/11).
+            if dau_ket(van, (a, b)) == "?" or (not co_dau and la_vai_nhan_vien(vai) and nhan_cau_hoi(van[a:b])):
                 continue
             doan = van[a:b]
             if THU_TUC.search(doan.lower()):
@@ -474,19 +587,75 @@ def doan_chua_ghi(ket_qua: List[KetQua], ps, cac_luot) -> List[dict]:
             tu = set(_tu_noi_dung(chuan_hoa.chuan_hoa(doan)))
             if not tu:
                 continue
-            if any(x < b and a < y for x, y in phu.get(so, ())):
+            # Ten thuoc chua co trong menh de nao cua luot: LUON la chua ghi, du chung chu "dị ứng"
+            # voi mot menh de khac ("không dị ứng thức ăn, dị ứng penicillin") — ra soat 25/11.
+            if _thuoc_moi(doan, chu_theo_luot.get(so, "")) or _di_ung_moi(doan, chu_theo_luot.get(so, "")):
+                ra.append({"luot": so, "vai": vai, "doan": doan, "bat_dau": a, "ket_thuc": b})
                 continue
-            if tu & tu_theo_luot.get(so, set()):
-                continue
+            if nguong_phu is None:
+                if any(x < b and a < y for x, y in phu.get(so, ())):
+                    continue
+                if tu & tu_theo_luot.get(so, set()):
+                    continue
+            else:
+                if any(x <= a and b <= y for x, y in phu.get(so, ())):
+                    continue
+                if len(tu & tu_theo_luot.get(so, set())) / len(tu) >= nguong_phu:
+                    continue
+                tt = _thuc_the(doan.lower())
+                if tt and tt <= _thuc_the(chu_theo_luot.get(so, "")):
+                    continue
             ra.append({"luot": so, "vai": vai, "doan": doan,
                        "bat_dau": a, "ket_thuc": b})
+    return ra
+
+
+CHU_DE_HOI = (
+    ("di_ung", re.compile(r"(?<!\w)(dị ứng|mẫn cảm|phản vệ)(?!\w)")),
+    ("thuoc", re.compile(r"(?<!\w)(thuốc|uống|tiêm|xịt|bôi|đơn thuốc|kháng sinh)(?!\w)")),
+    ("tien_su", re.compile(r"(?<!\w)(trước (giờ|đây|nay)|tiền sử|mạn tính|từng|mổ|phẫu thuật|trong nhà|gia đình"
+                           r"|ai bị|bệnh gì|nằm viện)(?!\w)")),
+    ("trieu_chung", re.compile(r"(?<!\w)(sốt|ho|đau|nôn|buồn nôn|khó thở|tiêu chảy|mệt|chóng mặt|ngứa|sưng|phù"
+                               r"|chảy máu|ra máu|đi ngoài|táo bón|tức ngực|khò khè|co giật|nổi|ăn uống|ngủ)(?!\w)")),
+)
+SO_TU_TRA_LOI_TOI_DA = 6
+
+
+def cap_hoi_dap_chua_ghi(ket_qua: List[KetQua], ps, cac_luot) -> List[dict]:
+    """Cap (luot nhan vien la cau hoi, luot ngay sau cua nguoi benh / nguoi nha, <= 6 chu)
+    ma KHONG phat bieu nao dan toi luot tra loi. Them 25/11/2026 (L4 trong
+    docs/superpowers/plans/2026-11-25-cai-thien-bo-luat.md).
+
+    Nhan cau hoi bang `canh_bao.loi_noi.nhan_cau_hoi`, chiu duoc van khong dau cau.
+    `chu_de` suy tu cau hoi; "khac" khi khong khop chu de lam sang nao."""
+    from src.canh_bao.loi_noi import nhan_cau_hoi
+    da_dan = set()
+    for kq, p in zip(ket_qua, ps):
+        da_dan |= {s for s, _a, _b in kq.doan}
+    for p in ps:
+        da_dan |= {n for n in (getattr(p, "bang_chung", None) or []) if n in cac_luot}
+    ra = []
+    so = sorted(cac_luot)
+    for hoi, dap in zip(so, so[1:]):
+        if dap != hoi + 1:
+            continue
+        (vai_h, van_h), (vai_d, van_d) = cac_luot[hoi], cac_luot[dap]
+        if not la_vai_nhan_vien(vai_h) or la_vai_nhan_vien(vai_d) or dap in da_dan:
+            continue
+        if not nhan_cau_hoi(van_h) or len(van_d.split()) > SO_TU_TRA_LOI_TOI_DA or not van_d.strip():
+            continue
+        t = unicodedata.normalize("NFC", van_h).lower()
+        chu_de = next((ten for ten, bt in CHU_DE_HOI if bt.search(t)), "khac")
+        ra.append({"luot_hoi": hoi, "luot_dap": dap, "cau_hoi": van_h, "tra_loi": van_d,
+                   "chu_de": chu_de, "vai": vai_d})
     return ra
 
 
 def khoa_ca(ps, hoi_thoai, bat_buoc_trich_dan=True) -> dict:
     cac_luot = _luot(hoi_thoai)
     kq = [khoa_mot(p, cac_luot, bat_buoc_trich_dan) for p in ps]
-    return {"ket_qua": kq, "doan_chua_ghi": doan_chua_ghi(kq, ps, cac_luot)}
+    return {"ket_qua": kq, "doan_chua_ghi": doan_chua_ghi(kq, ps, cac_luot),
+            "cap_hoi_dap_chua_ghi": cap_hoi_dap_chua_ghi(kq, ps, cac_luot)}
 
 
 def ly_do_chan(ket_qua: List[KetQua]) -> Dict[int, str]:

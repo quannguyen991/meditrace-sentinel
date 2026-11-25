@@ -50,6 +50,9 @@ NHOM = {
     "QUALITY": "Chất lượng bản ghi",
     # Loi TRUOC khau AI (chep am). Tach rieng: khong tinh la loi cua mo hinh sinh.
     "ASR_UPSTREAM": "Bản chép âm chưa chắc",
+    # Them 25/11/2026: kiem tra dua tren tri thuc thuoc (lieu, tuong tac, di ung). Khong phai loi
+    # cua ban ghi ma la dieu bac si can xem; doc so tu `tri_thuc_thuoc` (chua duyet -> can xem).
+    "CLINICAL_KNOWLEDGE": "Kiến thức lâm sàng (liều, tương tác, dị ứng)",
 }
 
 LOI_PHAT_HIEN = "loi_phat_hien"
@@ -196,6 +199,18 @@ LOAI: Dict[str, Loai] = {
     "OMITTED_PLAN": _l("OMISSION", "Có thể bỏ sót kế hoạch", "Bác sĩ dặn hoặc chỉ định; bản ghi không ghi.", TRUNG, 13),
     "OMITTED_NUMERIC_VALUE": _l("OMISSION", "Có thể bỏ sót một con số", "Hội thoại có con số (liều, thời gian, chỉ số) không được ghi.", TRUNG, 13),
     "OMITTED_DURATION": _l("OMISSION", "Có thể bỏ sót thời gian bệnh", "Hội thoại nói thời gian bệnh; bản ghi không dẫn tới.", TRUNG, 13),
+    # --- kien thuc lam sang (25/11/2026) — `canh_bao.lam_sang`, thu nghiem: chi hien
+    "DOSE_OVER_MAX": _l("CLINICAL_KNOWLEDGE", "Liều vượt mức tối đa",
+                        "Tổng liều một ngày vượt mức tối đa người lớn trong bảng tri thức thuốc.", CAO, 12, THU_NGHIEM),
+    "DRUG_INTERACTION": _l("CLINICAL_KNOWLEDGE", "Có thể có tương tác thuốc",
+                           "Hai thuốc người bệnh đang dùng hoặc được kê nằm trong bảng tương tác.", CAO, 12, THU_NGHIEM),
+    "CONTRAINDICATION": _l("CLINICAL_KNOWLEDGE", "Kê thuốc người bệnh đang dị ứng",
+                           "Thuốc được kê hoặc đang dùng chứa chất mà bản ghi nói người bệnh dị ứng.", CAO, 12, THU_NGHIEM),
+    # Them 25/11/2026: cap "Bác sĩ hỏi — người bệnh đáp ngắn" ma khong dong nao dan toi cau dap.
+    # `doan_chua_ghi` khong thay cap nay (bo cau hoi; cau dap khong co tu noi dung).
+    "OMITTED_ANSWER": _l("OMISSION", "Có thể bỏ sót một câu trả lời",
+                         "Bác sĩ hỏi và người bệnh đã trả lời, nhưng bản ghi không có dòng nào dẫn tới câu trả lời.",
+                         CAO, 13, THU_NGHIEM),
     "POSSIBLE_IMPORTANT_OMISSION": _l("OMISSION", "Có đoạn hội thoại chưa được ghi",
                                       "Đoạn có nội dung lâm sàng nhưng không dòng nào dẫn tới.", THAP, 22),
     # --- chat luong: khong doi trang thai

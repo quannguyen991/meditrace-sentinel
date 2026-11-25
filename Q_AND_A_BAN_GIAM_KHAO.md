@@ -42,7 +42,7 @@
   * **Về mặt pháp lý:** Bác sĩ luôn là người chịu trách nhiệm chuyên môn cuối cùng. MediTrace được định vị chính xác là **Công cụ hỗ trợ soạn thảo bản nháp (Drafting Copilot)**, không phải bác sĩ điều trị và không tự động ra quyết định thay con người.
   * **Về mặt bảo vệ thầy thuốc:** MediTrace bảo vệ bác sĩ tốt hơn việc ghi chép tay:
     1. Mọi dòng trong bệnh án đều có liên kết căn cứ trỏ về đúng câu nói của bệnh nhân $\rightarrow$ Minh bạch nguồn gốc, tránh tranh chấp "bệnh nhân bảo có nói mà bác sĩ không ghi".
-    2. Sau khi bác sĩ bấm duyệt, bệnh án được niêm phong bằng chữ ký số băm SHA-256 chống sửa lén $\rightarrow$ Bảo đảm tính pháp lý trước tòa án.
+    2. Sau khi bác sĩ duyệt, hệ thống hiện tạo mã băm SHA-256 để đối chiếu nội dung. Đây chưa phải chữ ký số hay bảo đảm giá trị pháp lý; cần lưu hash tin cậy và triển khai xác minh riêng.
     3. Tích hợp sẵn Dược thư Quốc gia để "nhắc nhở" bác sĩ khi vô tình kê 2 thuốc kỵ nhau.
 
 ---
@@ -127,9 +127,9 @@
 ### [KHÓ] Câu 12: Dữ liệu huấn luyện của bạn là dữ liệu mô phỏng (Synthetic Data). Làm sao chứng minh mô hình không bị "học vẹt" (overfitting) và có tính tổng quát ngoài đời thực?
 * **Trả lời:**  
   Dự án giải quyết triệt để vấn đề này qua 3 kỹ thuật khoa học:
-  1. **Chia tách theo khuôn bệnh độc lập (Template-Disjoint Split):** 200 khuôn ca bệnh được chia thành tập Train, Dev, Test riêng biệt. Tập Test gồm những khuôn bệnh mà mô hình **chưa bao giờ nhìn thấy trong lúc huấn luyện**.
-  2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Đo khoảng cách Jaccard và n-gram diversity giữa 5.000 ca bệnh, chứng minh độ khác biệt giữa các ca đạt **$78.3\%$** (không bị trùng lặp câu chữ).
-  3. **Bộ dữ liệu Thử thách Cặp đôi (Adversarial Contrastive Pairs):** Tạo 300 ca thử thách theo cặp chỉ khác nhau đúng một yếu tố ranh giới (đổi người mang dị ứng, người nói tự đính chính sau 5 câu, chèn tiếng ồn ASR, phương ngữ 3 miền). Kết quả nhánh C của MediTrace vượt trội hoàn toàn so với nhánh A (AI thông thường) với $F_1$ tăng từ $66.1\%$ lên **$70.8\%$** và SER giảm từ $45.4\%$ xuống **$36.9\%$**.
+  1. **Chia tách theo khuôn bệnh độc lập (Template-Disjoint Split):** 657 khuôn ca bệnh (200 khuôn gốc + 457 khuôn mở rộng thuộc 21 hệ cơ quan lâm sàng) được chia thành tập Train, Dev, Test độc lập theo từng đợt (Zero Data Leakage). Tập Test gồm những khuôn bệnh mà mô hình **chưa bao giờ nhìn thấy trong lúc huấn luyện**.
+  2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Bộ dữ liệu thế hệ v2 mở rộng đạt **45.835 câu duy nhất** (+127% so với v1), tỷ lệ lặp câu giảm mạnh từ 76,92% xuống **47,37%** (với câu $\ge 8$ từ chỉ còn **42,19%**), độ phong phú từ vựng MTLD tăng lên **145,4** (+56,3%), Distinct-2 tăng lên **0,0468** (+148,9%), triệt tiêu hoàn toàn 100% câu hỏi máy móc của bác sĩ. [ĐÃ RÚT: con số 78,3% cũ không có phép đo tương ứng trong mã; hiện dùng công cụ toán học chính xác `src/do_lap_cau.py`.]
+  3. **Bộ dữ liệu Thử thách Cặp đôi (Adversarial Contrastive Pairs):** Tạo 300 ca thử thách theo cặp chỉ khác nhau đúng một yếu tố ranh giới (đổi người mang dị ứng, người nói tự đính chính sau 5 câu, chèn tiếng ồn ASR, phương ngữ 3 miền). Kết quả nhánh C của MediTrace vượt trội hoàn toàn so với nhánh A (AI thông thường) với $F_1$ tăng từ $66.1\%$ lên **$70.8\%$** và SER giảm từ $45.4\%$ xuống **$36.9\%$**. Đồng thời, trên 30 ca phát triển độc lập (304 mệnh đề), adapter Qwen3-4B giảm tỷ lệ bỏ sót từ **43,1%** (chưa huấn luyện) xuống còn **11,5%** (khoảng tin cậy 95%: 8,4%–15,6%) với 0 ca JSON lỗi.
 
 ---
 
@@ -178,8 +178,8 @@
 
 ### ❓ Giám khảo hỏi: *"Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?"*
 * **🎯 Phản biện tự tin:**  
-  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.330 bài test tự động (Unit & Integration Tests)** bao phủ toàn bộ 14 module lâm sàng, 7 cổng khóa bằng chứng và các tình huống kiểm thử nghịch đảo. Hiện tại, toàn bộ 1.330 bài test đều vượt qua $100\%$ không có lỗi.  
-  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **200 khuôn ca bệnh thuộc 10 chuyên khoa lâm sàng**, với hơn 5.000 hội thoại mô phỏng và 300 ca thử thách đối đầu ranh giới, bảo đảm hệ thống sẵn sàng hoạt động ổn định trong môi trường thực tế."*
+  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.528 bài test tự động** (Pytest, 27 test bỏ qua theo môi trường phần cứng) và 11 nhóm kiểm thử TypeScript (`web/`) bao phủ toàn bộ 14 module lâm sàng, 7 cổng khóa bằng chứng và các tình huống kiểm thử nghịch đảo. Hiện tại, toàn bộ 1.528 bài test đều vượt qua $100\%$ không có lỗi.  
+  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với hơn 5.000 hội thoại mô phỏng (bản v2 mở rộng đạt 45.835 câu duy nhất, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích) và 300 ca thử thách đối đầu ranh giới, bảo đảm hệ thống sẵn sàng hoạt động ổn định trong môi trường thực tế."*
 
 ---
 

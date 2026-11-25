@@ -17,7 +17,7 @@ chinh sach cua moi con so da bao cao; D chi bat khi goi ro `chinh_sach="D"`.
 from typing import Dict, List, Optional
 
 from src import cong_rui_ro
-from src.canh_bao import asr, phat_hien, toan_ca
+from src.canh_bao import asr, lam_sang, phat_hien, toan_ca
 from src.canh_bao.loai import (CAN_XEM, LOAI, LOI_PHAT_HIEN, NGHI_RUI_RO, ON_DINH, PHIEN_BAN, CanhBao, _HANG)
 
 CHINH_SACH_D = "D-2026-09-24"
@@ -114,6 +114,7 @@ def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict]
         tho += phat_hien.dinh_chinh(ctx, p, loai[p.id], cac_sua)
     tho += toan_ca.mau_thuan(ctx, ps, loai)
     tho += toan_ca.ghi_lap(ctx, ps, loai)
+    tho += lam_sang.quet(ctx, ps)
     if meta_asr:
         tho += asr.canh_bao(ctx, ps, meta_asr, loai)
     gop = _gop_cung_ma(tho)
@@ -125,7 +126,7 @@ def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict]
         theo_p[p.id] = cb
         tt, ly = trang_thai_D(p, cb, kq_theo_id.get(p.id))
         trang_thai[p.id] = {"trang_thai": tt, "ly_do": ly}
-    toan = toan_ca.bo_sot(ctx, kk.get("doan_chua_ghi", []))
+    toan = toan_ca.bo_sot(ctx, kk.get("doan_chua_ghi", []), ps, kk.get("cap_hoi_dap_chua_ghi", []))
     return {
         "phien_ban": PHIEN_BAN,
         "chinh_sach": CHINH_SACH_D,

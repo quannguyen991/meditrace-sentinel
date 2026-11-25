@@ -22,13 +22,9 @@ MUC_NGHIEM_TRONG = {
 }
 
 # Danh muc hoat chat khoang dieu tri hep & thuoc canh bao cao (High-Alert Medications)
-THUOC_KHOANG_DIEU_TRI_HEP = {
-    "warfarin", "sintrom", "heparin", "enoxaparin",
-    "digoxin", "theophylline", "aminophylline",
-    "phenytoin", "carbamazepine", "valproat", "lithium",
-    "insulin", "methotrexate", "cyclosporine", "tacrolimus",
-    "amiodarone", "gentamicin", "vancomycin"
-}
+# 25/11/2026: doc tu MOT nguon (data/tri_thuc_thuoc.json, chua duyet).
+from src import tri_thuc_thuoc as _ttt
+THUOC_KHOANG_DIEU_TRI_HEP = _ttt.ten_nti()
 
 # Do thieu can cu tu khoa bang chung (0.0 -> 1.0)
 DO_THIEU = {

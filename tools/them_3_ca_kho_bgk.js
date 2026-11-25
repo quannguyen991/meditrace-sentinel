@@ -561,7 +561,9 @@ try {
   const now = Date.now();
 
   for (const u of [1, 2]) {
-    db.prepare("DELETE FROM ca_kham WHERE nguoi_dung_id = ?").run(u);
+    // Chỉ thay các ca mẫu của script này; tuyệt đối không xóa ca khám khác của người dùng.
+    db.prepare("DELETE FROM ca_kham WHERE nguoi_dung_id = ? AND id IN (?, ?, ?)")
+      .run(u, ...dsCa.map((s) => s.id));
 
     for (let idx = 0; idx < dsCa.length; idx++) {
       const s = dsCa[idx];
@@ -590,7 +592,7 @@ try {
   }
 
   db.exec("COMMIT");
-  console.log("✅ HOAN TAT: Da nap 3 ca mau do kho cao thanh cong vao SQLite!");
+  console.log("✅ HOAN TAT: Da thay 3 ca mau kho (chi cac ID cua bo mau) vao SQLite!");
 } catch (err) {
   db.exec("ROLLBACK");
   console.error("[-] Loi khi nap ca:", err);

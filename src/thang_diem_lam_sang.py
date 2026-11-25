@@ -173,13 +173,13 @@ class ClinicalRiskScoringEngine:
         nguong_chi_dinh = 2 if la_nu else 1
         if diem == 0 or (la_nu and diem == 1):
             nguy_co = "THAP"
-            khuyen_cao = "Nguy cơ đột quỵ thấp. Không chỉ định thuốc chống đông (OAC) hoặc thuốc chống ngưng tập tiểu cầu."
+            khuyen_cao = "Điểm số thuộc nhóm thấp theo ngưỡng của công cụ. Không dùng riêng kết quả này để quyết định kê hoặc ngừng thuốc; bác sĩ đánh giá toàn cảnh và hướng dẫn hiện hành."
         elif diem == nguong_chi_dinh:
             nguy_co = "TRUNG_BINH"
-            khuyen_cao = "Nguy cơ đột quỵ trung bình. Khuyến cáo cân nhắc chỉ định thuốc chống đông đường uống thế hệ mới (NOAC/DOAC)."
+            khuyen_cao = "Điểm số thuộc nhóm cần đánh giá cá thể hóa. Bác sĩ cân nhắc lợi ích-nguy cơ và hướng dẫn hiện hành trước quyết định chống đông."
         else:
             nguy_co = "CAO"
-            khuyen_cao = "Nguy cơ đột quỵ CAO. CHỈ ĐỊNH BẮT BUỘC thuốc chống đông đường uống (NOAC: Rivaroxaban, Apixaban, Dabigatran hoặc Kháng vitamin K)."
+            khuyen_cao = "Điểm số thuộc nhóm cao theo ngưỡng của công cụ. Bác sĩ cần đánh giá chỉ định chống đông, nguy cơ chảy máu, chức năng thận, tương tác và hướng dẫn hiện hành; điểm số không tự kê thuốc."
 
         return KetQuaThangDiem("CHA2DS2-VASc", diem, nguy_co, khuyen_cao, tieu_chi)
 

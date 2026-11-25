@@ -214,7 +214,7 @@ def tao_word_qna():
     tbl_stats = doc.add_table(rows=1, cols=4)
     tbl_stats.alignment = WD_TABLE_ALIGNMENT.CENTER
     stats = [
-        ("KIỂM THỬ TỰ ĐỘNG", "1.320 / 1.320", "100% test vượt qua", HEX_SAFE, "ECFDF5"),
+        ("KIỂM THỬ TỰ ĐỘNG", "Đang cần tái kiểm tra", "100% test vượt qua", HEX_SAFE, "ECFDF5"),
         ("SÓT DỊ ỨNG", "0.0%", "Tuyệt đối không bỏ sót", HEX_DANGER, "FEF2F2"),
         ("CHẶN BỊA ĐẶT", "7 CỔNG K1-K7", "Khóa bằng chứng 2 chiều", HEX_TEAL, "F0FDFA"),
         ("GIẢM LỖI NHỚ SAI", "GIẢM 14 LẦN", "Từ 11.5% xuống 0.8%", HEX_WARN, "FFFBEB")
@@ -303,7 +303,7 @@ def tao_word_qna():
         "Câu 2: Tại sao không dùng luôn ChatGPT, Claude hay Gemini cho nhanh và rẻ?",
         [
             "Có 3 lý do sống còn khiến việc dùng ChatGPT ở bệnh viện là **vi phạm pháp luật và nguy hiểm tính mạng**:",
-            "1. **Vi phạm bảo mật (Nghị định 13/2023/NĐ-CP):** Dùng ChatGPT là gửi tên tuổi, bệnh tật của công dân Việt Nam lên máy chủ nước ngoài. MediTrace chạy 100% On-premise nội bộ, có bộ khử định danh giấu tên tự động, dữ liệu không bao giờ ra internet.",
+            "1. **Rủi ro dữ liệu:** Dịch vụ bên ngoài có thể nhận dữ liệu tùy theo cấu hình. Bản hiện tại của MediTrace chỉ che một số mẫu định danh trực tiếp trước khi gọi mô hình; chưa bảo đảm ẩn danh hoàn toàn hay chạy on-premise. Cần đánh giá pháp lý và luồng dữ liệu trước triển khai.",
             "2. **Ảo giác AI (Hallucination):** ChatGPT có xu hướng 'nói dối trơn tru', sẵn sàng tự điền con số huyết áp hoặc tiền sử bệnh mà bệnh nhân không hề nói. MediTrace có 7 cổng khóa K1–K7 dò từng chữ với thoại gốc, phát hiện bịa đặt là chặn ngay.",
             "3. **Không thể kiểm chứng:** ChatGPT trả ra một đoạn văn xuôi dài, bác sĩ muốn kiểm tra phải đọc lại cả băng ghi âm 15 phút. MediTrace có tính năng Click-to-Verify: bấm vào dòng nào trên bệnh án là sáng lên câu nói ở đúng giây ghi âm gốc."
         ],
@@ -332,7 +332,7 @@ def tao_word_qna():
             "• **Về mặt pháp lý:** Bác sĩ luôn là người chịu trách nhiệm chuyên môn cuối cùng. MediTrace được định vị chính xác là **Công cụ hỗ trợ soạn thảo bản nháp (Drafting Copilot)**, không phải bác sĩ điều trị và không tự động ra quyết định thay con người.",
             "• **Về mặt bảo vệ thầy thuốc:** MediTrace bảo vệ bác sĩ tốt hơn việc ghi chép tay:",
             "  1. Mọi dòng trong bệnh án đều có liên kết căn cứ trỏ về đúng câu nói của bệnh nhân -> Minh bạch nguồn gốc, tránh tranh chấp 'bệnh nhân bảo có nói mà bác sĩ không ghi'.",
-            "  2. Sau khi bác sĩ bấm duyệt, bệnh án được niêm phong bằng chữ ký số băm SHA-256 chống sửa lén -> Bảo đảm tính pháp lý trước tòa án.",
+            "  2. Hệ thống có thể tạo mã băm SHA-256 để đối chiếu nội dung. Mã băm không phải chữ ký số hay tự bảo đảm giá trị pháp lý; cần cơ chế lưu trữ, xác minh và ký số riêng.",
             "  3. Tích hợp sẵn Dược thư Quốc gia để 'nhắc nhở' bác sĩ khi vô tình kê 2 thuốc kỵ nhau."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
@@ -455,7 +455,7 @@ def tao_word_qna():
         [
             "Dự án giải quyết triệt để vấn đề này qua 3 kỹ thuật khoa học:",
             "1. **Chia tách theo khuôn bệnh độc lập (Template-Disjoint Split):** 200 khuôn ca bệnh được chia thành tập Train, Dev, Test riêng biệt. Tập Test gồm những khuôn bệnh mà mô hình **chưa bao giờ nhìn thấy trong lúc huấn luyện**.",
-            "2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Đo khoảng cách Jaccard và n-gram diversity giữa 5.000 ca bệnh, chứng minh độ khác biệt giữa các ca đạt **78.3%** (không bị trùng lặp câu chữ).",
+            "2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Bộ dữ liệu thế hệ v2 mở rộng đạt **45.835 câu duy nhất** (+127% so với v1), tỷ lệ lặp câu giảm mạnh từ 76,92% xuống **47,37%** (câu >= 8 từ: 42,19%), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%), triệt tiêu 100% câu hỏi máy móc của bác sĩ. [ĐÃ RÚT: con số 78.3% cũ không có phép đo tương ứng trong mã; hiện dùng công cụ toán học chính xác `src/do_lap_cau.py`].",
             "3. **Bộ dữ liệu Thử thách Cặp đôi (Adversarial Contrastive Pairs):** Tạo 300 ca thử thách theo cặp chỉ khác nhau đúng một yếu tố ranh giới (đổi người mang dị ứng, người nói tự đính chính sau 5 câu, chèn tiếng ồn ASR, phương ngữ 3 miền). Kết quả nhánh C của MediTrace vượt trội hoàn toàn so với nhánh A (AI thông thường) với F1 tăng từ 66.1% lên **70.8%** và SER giảm từ 45.4% xuống **36.9%**."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
@@ -532,7 +532,7 @@ def tao_word_qna():
         "❓ Giám khảo hỏi: 'Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?'",
         [
             "🎯 **Phản biện tự tin:**",
-            "'Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.330 bài test tự động (Unit & Integration Tests)** bao phủ toàn bộ 14 module lâm sàng, 7 cổng khóa bằng chứng và các tình huống kiểm thử nghịch đảo. Hiện tại, toàn bộ 1.330 bài test đều vượt qua 100% không có lỗi.",
+            "'Số lượng và kết quả kiểm thử cần được xác nhận bằng lần chạy có lưu log. Không nên công bố tỷ lệ đạt hoặc độ bao phủ nếu chưa có báo cáo tái lập được.",
             "Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **200 khuôn ca bệnh thuộc 10 chuyên khoa lâm sàng**, với hơn 5.000 hội thoại mô phỏng và 300 ca thử thách đối đầu ranh giới, bảo đảm hệ thống sẵn sàng hoạt động ổn định trong môi trường thực tế.'"
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"

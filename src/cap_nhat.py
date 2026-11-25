@@ -14,10 +14,31 @@ buoc nay thi khi ket qua sai se khong tach duoc loi trich xuat khoi loi cap nhat
                   mat cau dau. "Hom qua dau, hom nay het dau" — ca hai deu dung.
     mâu thuẫn     ca hai -> chua giai quyet, dua vao muc can xac nhan
 """
+import re
 from src.phat_bieu import PhatBieu
 
+DAU_DONG_THUAN_CHEO = re.compile(
+    r"(?i)\b(à ừ|ừ nhỉ|đúng rồi|chính xác rồi|nhớ nhầm|tôi nhầm|mẹ nhầm|em nhầm|vâng đúng)\b"
+)
 
-def ap_luat(danh_sach):
+
+def _co_dong_thuan_cheo(p, truoc, hoi_thoai) -> bool:
+    """Neu nguoi B dinh chinh nguoi A o luot t, va tai luot t+1 nguoi A xac nhan
+    dong thuan ('A u nhi', 'Dung roi, toi nho nham'), thi chap nhan dinh chinh."""
+    if not hoi_thoai:
+        return False
+    from src import thuc_the
+    luot_map = {so: (vai, van) for so, vai, van in thuc_the.tach_luot(hoi_thoai)}
+    luot_sua = max(getattr(p, "bang_chung", None) or [0])
+    for ke_tiep in (luot_sua + 1, luot_sua + 2):
+        if ke_tiep in luot_map:
+            vai_kt, van_kt = luot_map[ke_tiep]
+            if vai_kt == getattr(truoc, "nguoi_noi", None) and DAU_DONG_THUAN_CHEO.search(van_kt):
+                return True
+    return False
+
+
+def ap_luat(danh_sach, hoi_thoai=None):
     """Tra ve danh sach MOI voi trang_thai da cap nhat. Khong sua ban goc."""
     ra = [PhatBieu(**p.to_dict()) for p in danh_sach]
     theo_id = {p.id: p for p in ra}
@@ -35,11 +56,11 @@ def ap_luat(danh_sach):
             pass                                    # ca hai giu nguyen
 
         elif p.quan_he == "đính chính":
-            # CHI chap nhan dinh chinh cua CHINH nguoi da noi ban truoc (tu sua).
-            # Nguoi khac noi khac di — ke ca bac si — la HAI NGUON khac nhau va
-            # khong co can cu chon ben: ha ve mau thuan, cho xac nhan. Truoc
-            # 11/09/2026 ban sau luon thang, bat ke ai noi.
-            if _cung_nguon(p, truoc):
+            # CHI chap nhan dinh chinh cua CHINH nguoi da noi ban truoc (tu sua),
+            # HOAC khi nguoi noi ban truoc xac nhan dong thuan ngay o luot ke tiep.
+            # Nguoi khac noi khac di ma chua duoc xac nhan la HAI NGUON khac nhau va
+            # khong co can cu chon ben: ha ve mau thuan, cho xac nhan.
+            if _cung_nguon(p, truoc) or _co_dong_thuan_cheo(p, truoc, hoi_thoai):
                 truoc.trang_thai = "bị thay thế"
                 p.trang_thai = "còn hiệu lực"
             else:

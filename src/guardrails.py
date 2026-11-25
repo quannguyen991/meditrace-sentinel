@@ -16,6 +16,7 @@ Kien truc gom 5 Guardrail doc lap:
 from dataclasses import dataclass, field
 import difflib
 import re
+import unicodedata
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Danh muc hoat chat & thuoc thuong gap theo Duoc thu Quoc gia Viet Nam
@@ -53,11 +54,71 @@ class GuardrailResult:
     chi_tiet: str = ""
 
 
+# Biến âm vùng miền 3 miền phổ biến trong hội thoại y khoa (l/n, tr/ch, s/x, hỏi/ngã)
+BIEN_AM_VUNG_MIEN: Dict[str, str] = {
+    "xốt": "sốt",
+    "xưng": "sưng",
+    "xuyễn": "suyễn",
+    "xỏi": "sỏi",
+    "chĩ": "trĩ",
+    "chàn dịch": "tràn dịch",
+    "tróng mặt": "chóng mặt",
+    "tỉnh mạch": "tĩnh mạch",
+    "lên cơn": "lên cơn",
+    "nên cơn": "lên cơn",
+    "lôn": "nôn",
+    "lôn mửa": "nôn mửa",
+    "lặng ngực": "nặng ngực",
+    "khó thỡ": "khó thở",
+    "mệt mõi": "mệt mỏi",
+    "đau nhứt": "đau nhức",
+    "tê bĩ": "tê bì",
+}
+
+
+def tao_khoa_am_vi_vung_mien(van_ban: str) -> str:
+    """Chuẩn hóa biến âm vùng miền 3 miền (l/n -> n, tr/ch -> ch, s/x -> s, thanh ngã -> thanh hỏi)."""
+    s = unicodedata.normalize("NFD", (van_ban or "").lower().strip())
+    # Đồng nhất thanh ngã (\u0303) và thanh hỏi (\u0309)
+    s = s.replace("\u0303", "\u0309")
+    s = unicodedata.normalize("NFC", s)
+    # Đồng nhất phụ âm đầu theo từ: l/n -> n, tr/ch -> ch, s/x -> s
+    tu_moi: List[str] = []
+    for w in s.split():
+        if w.startswith("tr"):
+            w = "ch" + w[2:]
+        elif w.startswith("l"):
+            w = "n" + w[1:]
+        elif w.startswith("x"):
+            w = "s" + w[1:]
+        tu_moi.append(w)
+    return " ".join(tu_moi)
+
+
 # ==============================================================================
 # GUARDRAIL 1: ASR & Duoc thu am vi
 # ==============================================================================
 class ASRQualityGuardrail:
     """Kiem soat chat luong am thanh & phien am tu ASR truoc khi dua vao rut thong tin."""
+
+    @staticmethod
+    def chuan_hoa_bien_am_vung_mien(van_ban: str) -> Dict[str, Any]:
+        """Phát hiện và chuẩn hóa các lỗi biến âm vùng miền 3 miền (l/n, tr/ch, s/x, hỏi/ngã)."""
+        thap = (van_ban or "").lower()
+        thay_the: Dict[str, str] = {}
+        vb_chuan = van_ban or ""
+        for bien_am, chuan in BIEN_AM_VUNG_MIEN.items():
+            if bien_am == chuan:
+                continue
+            pat = re.compile(rf"(?<!\w){re.escape(bien_am)}(?!\w)", re.IGNORECASE)
+            if pat.search(thap):
+                thay_the[bien_am] = chuan
+                vb_chuan = pat.sub(chuan, vb_chuan)
+        return {
+            "van_ban_chuan": vb_chuan,
+            "thay_the": thay_the,
+            "khoa_am_vi": tao_khoa_am_vi_vung_mien(vb_chuan),
+        }
 
     @staticmethod
     def kiem_tra_phien_am(van_ban_phien_am: str) -> GuardrailResult:
@@ -80,7 +141,12 @@ class ASRQualityGuardrail:
         if tu_lap:
             canh_bao.append(f"Phát hiện vòng lặp âm thanh ASR bất thường: lặp từ '{tu_lap[0]}'")
 
-        # 4. Rà soát phương ngữ & khẩu ngữ dân gian lâm sàng 3 miền
+        # 4. Rà soát phương ngữ & khẩu ngữ dân gian lâm sàng 3 miền + biến âm (l/n, tr/ch, s/x, hỏi/ngã)
+        bien_am = ASRQualityGuardrail.chuan_hoa_bien_am_vung_mien(van_ban_phien_am)
+        for tu_bien, tu_chuan in bien_am["thay_the"].items():
+            goi_y[tu_bien] = tu_chuan
+            canh_bao.append(f"Chuẩn hóa biến âm vùng miền: '{tu_bien}' -> '{tu_chuan}'")
+
         try:
             from src.phuong_ngu_lam_sang import ClinicalDialectEngine
             kq_pn = ClinicalDialectEngine.phan_tich_va_chuan_hoa(van_ban_phien_am, doi_thuat_ngu_y_khoa=False)
@@ -292,22 +358,22 @@ class EvidenceIntegrityGuardrail:
         h_low = (hoat_chat or "").strip().lower()
         
         # Bảng liều trần tối đa tham chiếu Dược thư
-        LIEU_TRAN = {
-            "paracetamol": 4000.0, "panadol": 4000.0, "hapacol": 4000.0,
-            "ibuprofen": 2400.0, "aspirin": 3000.0, "metformin": 2550.0,
-            "amlodipin": 10.0, "omeprazole": 40.0, "salbutamol": 16.0
-        }
-
-        for hc, max_mg in LIEU_TRAN.items():
-            if hc in h_low:
-                if lieu_dung_mg > max_mg:
-                    return GuardrailResult(
-                        hop_le=False,
-                        canh_bao=[f"CẢNH BÁO QUÁ LIỀU NGUY HIỂM: Liều {lieu_dung_mg}mg vượt liều trần an toàn {max_mg}mg/ngày theo Dược thư Quốc gia cho {hc}"],
-                        goi_y={"lieu_tran_mg": max_mg, "hoat_chat": hc},
-                        chi_tiet="OVERDOSE_HAZARD"
-                    )
-                return GuardrailResult(True, [], {"lieu_tran_mg": max_mg}, "SAFE_DOSE")
+        # 25/11/2026: doc tu MOT nguon (data/tri_thuc_thuoc.json, chua duyet), tra theo HOAT CHAT
+        # (ra soat: do chuoi con tren 114 ten khien "kháng sinh" khop "inh" -> isoniazid 300 mg).
+        from src import tri_thuc_thuoc
+        hc = tri_thuc_thuoc.hoat_chat(h_low)
+        l = tri_thuc_thuoc.lieu_toi_da(hc, "nguoi_lon") if hc else None
+        if l is not None:
+            max_mg = l.gia_tri
+            if lieu_dung_mg > max_mg:
+                return GuardrailResult(
+                    hop_le=False,
+                    canh_bao=[f"CẢNH BÁO QUÁ LIỀU NGUY HIỂM: Liều {lieu_dung_mg}mg vượt liều trần an toàn "
+                              f"{max_mg}mg/ngày cho {hc}" + ("" if l.da_duyet else " (ngưỡng chưa được duyệt)")],
+                    goi_y={"lieu_tran_mg": max_mg, "hoat_chat": hc},
+                    chi_tiet="OVERDOSE_HAZARD"
+                )
+            return GuardrailResult(True, [], {"lieu_tran_mg": max_mg}, "SAFE_DOSE")
 
         return GuardrailResult(True, [], {}, "UNKNOWN_CEILING")
 

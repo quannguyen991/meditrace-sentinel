@@ -91,15 +91,15 @@ Toàn bộ ảnh gốc độ phân giải cao đã được lưu đồng thời 
 
 ---
 
-### Flow 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.330 TRƯỜNG HỢP KIỂM THỬ)
+### Flow 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.528+ TRƯỜNG HỢP KIỂM THỬ)
 - **Tên file ảnh:** `flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png`
 - **Phân tầng:** Quy trình thẩm định chất lượng và kiểm thử hồi quy CI/CD
 - **Ý nghĩa kỹ thuật và lâm sàng:**
   1. **Tập dữ liệu đánh giá độc lập:**
-     - 200 khuôn ca bệnh độc lập (Template-Disjoint) bao phủ 10 chuyên khoa; toàn bộ là các ca bệnh mà mô hình AI chưa từng gặp trong quá trình huấn luyện (đảm bảo tính khách quan).
-     - 5.000 đoạn hội thoại mô phỏng với độ phong phú từ vựng đạt 78.3%.
+     - 657 khuôn ca bệnh độc lập (Template-Disjoint) bao phủ 21 hệ cơ quan; chia độc lập từng đợt để mô hình không nhìn thấy bài kiểm tra trước lúc đánh giá.
+     - 5.000 đoạn hội thoại mô phỏng thế hệ v2 đạt 45.835 câu duy nhất (+127% so với v1), tỷ lệ lặp giảm từ 76,92% xuống 47,37% (câu $\ge 8$ từ: 42,19%), MTLD đạt 145,4, Distinct-2 đạt 0,0468, 100% trích dẫn chuỗi con nguyên văn (52.634/52.634) và 0 lỗi quy tắc câu. [ĐÃ RÚT: con số 78,3% cũ không có phép đo tương ứng trong mã].
      - 300 ca thử nghiệm bẫy sai sót (Adversarial Testing) hoán đổi người nói, đính chính thời gian và chèn tiếng ồn môi trường.
-  2. **Hệ thống 1.330 bài kiểm thử tự động (CI/CD Pipeline):**
+  2. **Hệ thống 1.528 bài kiểm thử tự động (Pytest) và 11 nhóm test TypeScript:**
      - Nhóm 0: Nhận dạng âm thanh và từ điển tên thuốc (62 tests)
      - Nhóm 1: Trích xuất thông tin JSON có cấu trúc (145 tests)
      - Nhóm 2: Phân biệt người nói và bảo mật thông tin theo NĐ 13 (120 tests)

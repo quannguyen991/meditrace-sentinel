@@ -24,15 +24,27 @@ from typing import Dict, Iterable, List, Set, Tuple
 NHOM_HOP_LE = {"nhi", "người lớn", "cả hai"}
 DIEN_TIEN_HOP_LE = {"cấp", "mạn"}
 TRUONG_BAT_BUOC = {"ten", "nhom", "dien_tien", "chinh", "phu", "kham", "chan_doan", "ke_hoach"}
+TRUONG_HOP_LE = TRUONG_BAT_BUOC | {"da_duyet", "he_co_quan"}
 
 # Nguong trung lap: Jaccard tren tap tu cua trieu chung chinh + phu.
-NGUONG_TRUNG = 0.5
+NGUONG_TRUNG = 0.20
 
 # Tu khong mang nghia benh: bo khi so trung trieu chung.
 TU_DUNG = {
+    # 1. Hư từ, quan hệ từ, liên từ
     "và", "của", "là", "có", "đang", "một", "các", "những", "bị", "khi", "từ",
     "vì", "ở", "trong", "hay", "với", "cho", "thì", "đã", "rồi", "nên", "hơn",
     "cả", "sau", "trước", "nhiều", "ít", "ra", "vào", "lên", "xuống", "nhẹ", "mạnh",
+    # 2. Từ chỉ định, phó từ, trạng từ, phương hướng, thời gian chung
+    "đi", "lại", "về", "lúc", "kèm", "theo", "do", "bằng", "làm", "như", "thành",
+    "tại", "này", "được", "rất", "thường", "xuyên", "liên", "tục", "không", "thấy",
+    "cảm", "giác", "vừa", "từng", "cơn", "mỗi", "quá", "khắp", "hai", "bên", "vùng",
+    "gần", "ngày", "đêm", "sáng", "chiều", "tối", "khác", "chung", "tự", "rõ",
+    "nhất", "cực", "kỳ", "khoảng", "đều", "gặp", "tăng", "giảm", "mức", "độ",
+    "gắng", "sức", "tầm", "phía", "chỗ", "phần", "qua", "nào", "gì", "sao",
+    "nặng", "vừa", "kéo", "dài", "thoảng", "đôi", "chút", "dần", "nhanh", "chậm",
+    # 3. Triệu chứng toàn thân chung không mang tính định danh bệnh lý
+    "đau", "mệt", "khó", "sốt", "mỏi", "chán", "ăn", "ngủ", "buồn", "nôn",
 }
 
 # Tu chi dac thu cho mot nhom tuoi (khop nguyen tu, dung bieu thuc chinh quy).
@@ -74,12 +86,16 @@ def _chuan(s: str) -> str:
 
 
 def _tu_khoa(cum: Iterable[str]) -> Set[str]:
-    tu = set()
+    tokens = set()
     for c in cum:
-        for t in re.findall(r"[^\W\d_]+", _chuan(c).lower()):
-            if len(t) > 1 and t not in TU_DUNG:
-                tu.add(t)
-    return tu
+        words = [w for w in re.findall(r"[^\W\d_]+", _chuan(c).lower()) if len(w) > 1 and w not in TU_DUNG]
+        if not words:
+            continue
+        for i in range(len(words) - 1):
+            tokens.add(f"{words[i]}_{words[i+1]}")
+        for w in words:
+            tokens.add(w)
+    return tokens
 
 
 def _jaccard(a: Set[str], b: Set[str]) -> float:
@@ -97,7 +113,7 @@ def kiem_mot(b: dict, chi_nu: Set[str], chi_nam: Set[str], nhan_gioi: Dict[str, 
     if thieu:
         out.append(VanDe("LOI", ten, f"thieu truong {sorted(thieu)}"))
         return out
-    extra = set(b) - TRUONG_BAT_BUOC
+    extra = set(b) - TRUONG_HOP_LE
     if extra:
         out.append(VanDe("CANH", ten, f"truong la {sorted(extra)}, bo sinh co the khong dung"))
 
@@ -166,7 +182,7 @@ def kiem_mot(b: dict, chi_nu: Set[str], chi_nam: Set[str], nhan_gioi: Dict[str, 
     if b.get("dien_tien") == "mạn" and re.search(r"\bcấp\b", _chuan(b.get("chan_doan", "")).lower()):
         out.append(VanDe("CANH", ten, "dien_tien man nhung chan doan ghi 'cap'"))
 
-    if ten not in DA_DUYET_BAC_SI:
+    if ten not in DA_DUYET_BAC_SI and not b.get("da_duyet", False):
         out.append(VanDe("INFO", ten, "chua co bac si duyet"))
     return out
 

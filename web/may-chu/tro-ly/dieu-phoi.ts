@@ -1,0 +1,470 @@
+/**
+ * ĐIỀU PHỐI nhiều tác tử cho trợ lý (thiết kế mục 4–5).
+ *
+ *  - `lapKePhach`: mô hình thương mại lập kế phác (tối đa 6 mục) CHỈ từ câu hỏi đã qua máy ẩn danh và hai
+ *    cờ có/không; không thấy dòng nào của ca. Sai khuôn hoặc lỗi gọi thì dùng kế phác dự phòng theo luật.
+ *  - `chayKePhach`: chạy theo thứ tự phụ thuộc, mục độc lập chạy song song. Mỗi bước ghi trạng thái
+ *    `dang` TRƯỚC khi chạy và `xong` (kèm `dau`) SAU khi hàm của bước trả về; bước đã `xong` có `dau`
+ *    được dùng lại khi chạy lại, nên khởi động lại không trả tiền hai lần.
+ *  - Mọi thứ đi ra mô hình ngoài đều qua `an-danh.ts`. Hai tác tử tại chỗ không gọi gì ra ngoài.
+ */
+import { type CaAnDanh, chuoiGuiRa, kiemCauHoi, xayCaAnDanh } from "./an-danh";
+import type { Buoc, KetQuaTroLy, MucKePhach, TacTuMa, TienTrinh, YeuCauTroLy } from "./kieu";
+import { chuDeCanBan, doiChieuThuocDiUng } from "./tac-tu-tai-cho";
+
+export type Phu = {
+  goiNgoai(heThong: string, nguoiDung: string, maxToken: number): Promise<{ text: string; model: string; usage: { prompt_tokens?: number; completion_tokens?: number } | null; seconds: number }>;
+  datTuKhoa(truyVan: string): Promise<{ tuKhoa: unknown; token: number; giay: number }>;
+  timTaiLieu(tuKhoa: unknown, cauHoi: string, nguon?: Record<string, boolean>): Promise<{ taiLieu: unknown[]; daTra: unknown[]; loiTim: string[]; boLacDe: number; tuKhoaRa: unknown }>;
+  soanTraLoi(args: { cauHoi: string; caAnDanh: string; taiLieu: unknown[]; daTra: unknown[]; boLacDe: number; loiTim: string[]; tuKhoaRa: unknown }): Promise<{ traLoi: unknown; token: number; giay: number }>;
+  ngoaiMo(): boolean;
+  /** Đồng hồ (ms), tách ra để kiểm thử. */
+  bay(): number;
+};
+
+const TOI_DA_MUC = 6;
+const HET_GIO_BUOC_MS = 90_000;
+const TAC_TU_LAP_DUOC: ReadonlySet<string> = new Set(["tim_kiem", "tra_loi", "doi_chieu", "chu_de_can_ban", "doi_chieu_thuoc"]);
+
+const TEN_TAC_TU: Record<TacTuMa, string> = {
+  dieu_phoi: "Điều phối",
+  tim_kiem: "Tìm kiếm",
+  tra_loi: "Trả lời có nguồn",
+  doi_chieu: "Đối chiếu",
+  chu_de_can_ban: "Chủ đề cần bàn",
+  doi_chieu_thuoc: "Đối chiếu thuốc và dị ứng",
+};
+
+/** Bước của từng tác tử: `ma` ngắn dùng nội bộ, `ten` là chữ hiển thị. */
+const BUOC_CUA: Record<TacTuMa, Array<{ ma: string; ten: string }>> = {
+  dieu_phoi: [],
+  tim_kiem: [
+    { ma: "dat_tu_khoa", ten: "Đặt từ khoá tìm" },
+    { ma: "tim_tai_lieu", ten: "Tìm tài liệu ở các nguồn" },
+  ],
+  tra_loi: [{ ma: "soan_tra_loi", ten: "Soạn câu trả lời có nguồn" }],
+  doi_chieu: [
+    { ma: "kiem_bang_may", ten: "Máy kiểm đoạn trích và số liệu" },
+    { ma: "xet_tung_y", ten: "Xét từng ý có căn cứ không" },
+  ],
+  chu_de_can_ban: [{ ma: "chu_de", ten: "Rà các chủ đề đã bàn" }],
+  doi_chieu_thuoc: [{ ma: "doi_chieu_thuoc", ten: "Đối chiếu thuốc và dị ứng" }],
+};
+
+export const maBuoc = (chiSo: number, tacTu: TacTuMa, maNho: string) => `${chiSo}.${tacTu}.${maNho}`;
+
+/* ------------------------------------------------------------------ kế phác */
+
+export function kiemKePhach(raw: unknown, batTacTu: ReadonlySet<TacTuMa>): MucKePhach[] | null {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > TOI_DA_MUC) return null;
+  const ra: MucKePhach[] = [];
+  for (const m of raw as any[]) {
+    if (!m || typeof m !== "object") return null;
+    if (typeof m.tacTu !== "string" || !TAC_TU_LAP_DUOC.has(m.tacTu) || !batTacTu.has(m.tacTu as TacTuMa)) return null;
+    if (typeof m.nhiemVu !== "string") return null;
+    const pt = m.phuThuoc ?? [];
+    if (!Array.isArray(pt) || !pt.every((n: unknown) => Number.isInteger(n))) return null;
+    ra.push({ tacTu: m.tacTu as TacTuMa, nhiemVu: m.nhiemVu.trim().slice(0, 300), phuThuoc: [...new Set<number>(pt)] });
+  }
+  // chỉ số hợp lệ, không tự trỏ vào mình, không vòng (Kahn)
+  for (let i = 0; i < ra.length; i++) {
+    for (const n of ra[i].phuThuoc) if (n < 0 || n >= ra.length || n === i) return null;
+  }
+  const xong = new Set<number>();
+  let doi = true;
+  while (doi) {
+    doi = false;
+    for (let i = 0; i < ra.length; i++) {
+      if (xong.has(i)) continue;
+      if (ra[i].phuThuoc.every((n) => xong.has(n))) {
+        xong.add(i);
+        doi = true;
+      }
+    }
+  }
+  if (xong.size !== ra.length) return null;
+  // Ràng buộc nghiệp vụ: mỗi tác tử một lần; trả lời phải đứng sau tìm kiếm, đối chiếu sau trả lời
+  // (không thì chạy ra lỗi "chưa có tài liệu"); tối đa 6 lời gọi trả tiền được giữ bằng giới hạn trùng lặp.
+  if (new Set(ra.map((m) => m.tacTu)).size !== ra.length) return null;
+  const phuThuocTac = (i: number, tacTu: TacTuMa) => ra[i].phuThuoc.some((n) => ra[n].tacTu === tacTu);
+  for (let i = 0; i < ra.length; i++) {
+    if (ra[i].tacTu === "tra_loi" && !phuThuocTac(i, "tim_kiem")) return null;
+    if (ra[i].tacTu === "doi_chieu" && !phuThuocTac(i, "tra_loi")) return null;
+  }
+  return ra;
+}
+
+/**
+ * Kế phác dự phòng theo luật. Chuỗi tìm kiếm → trả lời → đối chiếu LUÔN có (miễn tác tử đang bật), kể cả khi mô hình ngoài
+ * đóng: khi chạy, các bước đó hiện "bỏ qua: chưa bật mô hình ngoài" để bác sĩ thấy vì sao không có câu trả lời có nguồn.
+ */
+export function kePhachDuPhong(ctx: { coMenhDe: boolean; batTacTu: ReadonlySet<TacTuMa> }): MucKePhach[] {
+  const kh: MucKePhach[] = [];
+  const them = (tacTu: TacTuMa, nhiemVu: string, phuThuoc: number[] = []) => {
+    kh.push({ tacTu, nhiemVu, phuThuoc });
+    return kh.length - 1;
+  };
+  if (ctx.coMenhDe) {
+    if (ctx.batTacTu.has("chu_de_can_ban")) them("chu_de_can_ban", "Rà xem hồ sơ còn thiếu chủ đề nào");
+    if (ctx.batTacTu.has("doi_chieu_thuoc")) them("doi_chieu_thuoc", "Đối chiếu thuốc đang dùng với dị ứng");
+  }
+  if (ctx.batTacTu.has("tim_kiem")) {
+    const a = them("tim_kiem", "Tìm tài liệu y khoa cho câu hỏi");
+    if (ctx.batTacTu.has("tra_loi")) {
+      const b = them("tra_loi", "Soạn câu trả lời từ tài liệu đã tìm", [a]);
+      if (ctx.batTacTu.has("doi_chieu")) them("doi_chieu", "Đối chiếu câu trả lời với tài liệu", [b]);
+    }
+  }
+  return kh;
+}
+
+const HE_THONG_DIEU_PHOI =
+  "Bạn là bộ điều phối của trợ lý cho bác sĩ. Nhiệm vụ: lập KẾ PHÁC ngắn (tối đa 6 mục) giao việc cho các tác tử bên dưới. " +
+  "Chỉ dùng tác tử trong danh sách. Mỗi mục có tacTu, nhiemVu (một câu), phuThuoc (danh sách chỉ số mục phải xong trước, bắt đầu từ 0; " +
+  "tra_loi phụ thuộc tim_kiem; doi_chieu phụ thuộc tra_loi). Chỉ trả DUY NHẤT JSON: " +
+  '{"keHoach":[{"tacTu":"…","nhiemVu":"…","phuThuoc":[]}]}';
+
+const MO_TA_TAC_TU: Record<string, string> = {
+  tim_kiem: "tim_kiem: tìm tài liệu y khoa (Bộ Y tế, FDA, PubMed...) cho câu hỏi",
+  tra_loi: "tra_loi: soạn câu trả lời có nguồn từ tài liệu đã tìm",
+  doi_chieu: "doi_chieu: kiểm câu trả lời với tài liệu, sửa tối đa một lần",
+  chu_de_can_ban: "chu_de_can_ban: chỉ ra mục hồ sơ còn thiếu (tại chỗ, không tốn tiền)",
+  doi_chieu_thuoc: "doi_chieu_thuoc: đối chiếu thuốc với dị ứng và liều (tại chỗ, không tốn tiền)",
+};
+
+/**
+ * Điều phối CHỈ nhận `cauHoiDaChe` và hai cờ `coMenhDe`, `coCa`; không nhận `caAnDanh.dong`.
+ */
+export async function lapKePhach(
+  phu: Phu,
+  yeuCau: YeuCauTroLy,
+  caAnDanh: CaAnDanh,
+  cauHoiDaChe: string,
+): Promise<{ keHoach: MucKePhach[]; tuMoHinh: boolean; token: number; giay: number }> {
+  const bat = new Set<TacTuMa>(yeuCau.batTacTu);
+  const coMenhDe = (yeuCau.menhDe || []).length > 0;
+  const coCa = caAnDanh.dong.length > 0;
+  const duPhong = () => kePhachDuPhong({ coMenhDe, batTacTu: bat });
+  // Không gọi điều phối khi mô hình ngoài đóng, hoặc khi người dùng đã tắt hết tác tử cần mô hình ngoài
+  // (không có gì để giao, và câu hỏi không được gửi ra vô ích).
+  const conTacTuNgoai = ["tim_kiem", "tra_loi", "doi_chieu"].some((t) => bat.has(t as TacTuMa));
+  if (!phu.ngoaiMo() || !conTacTuNgoai) return { keHoach: duPhong(), tuMoHinh: false, token: 0, giay: 0 };
+
+  const danhSach = [...bat].filter((t) => TAC_TU_LAP_DUOC.has(t)).map((t) => `- ${MO_TA_TAC_TU[t]}`).join("\n");
+  const nguoiDung =
+    `Câu hỏi của bác sĩ (đã ẩn danh): ${cauHoiDaChe}\n` +
+    `Ca khám có mệnh đề đã trích: ${coMenhDe ? "có" : "không"}\n` +
+    `Có thông tin ca đã ẩn danh: ${coCa ? "có" : "không"}\n` +
+    `Tác tử đang bật:\n${danhSach}`;
+  try {
+    const r = await phu.goiNgoai(HE_THONG_DIEU_PHOI, nguoiDung, 600);
+    const token = (r.usage?.prompt_tokens || 0) + (r.usage?.completion_tokens || 0);
+    let raw: unknown = null;
+    try {
+      const j = JSON.parse(r.text.match(/\{[\s\S]*\}|\[[\s\S]*\]/)?.[0] ?? r.text);
+      raw = Array.isArray(j) ? j : j?.keHoach;
+    } catch {
+      raw = null;
+    }
+    const kh = kiemKePhach(raw, bat);
+    if (kh) return { keHoach: kh, tuMoHinh: true, token, giay: r.seconds || 0 };
+    return { keHoach: duPhong(), tuMoHinh: false, token, giay: r.seconds || 0 };
+  } catch {
+    return { keHoach: duPhong(), tuMoHinh: false, token: 0, giay: 0 };
+  }
+}
+
+/* ------------------------------------------------------------------ chạy kế phác */
+
+type Phan = KetQuaTroLy["phan"][number];
+
+const vuotGio = <T>(p: Promise<T>, ms: number): Promise<T> =>
+  new Promise<T>((ok, hong) => {
+    const h = setTimeout(() => hong(new Error(`hết giờ sau ${Math.round(ms / 1000)} giây`)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(h);
+        ok(v);
+      },
+      (e) => {
+        clearTimeout(h);
+        hong(e);
+      },
+    );
+  });
+
+const thongDiep = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/** Nhặt token/giây đã ghi trong `dau` của các bước đã xong. */
+function tongKet(tt: TienTrinh) {
+  let token = 0;
+  let giay = 0;
+  for (const b of tt.buoc) {
+    if (b.trangThai !== "xong" || !b.dau || typeof b.dau !== "object") continue;
+    const d = b.dau as { token?: unknown; giay?: unknown };
+    if (typeof d.token === "number") token += d.token;
+    if (typeof d.giay === "number") giay += d.giay;
+  }
+  return { token, giay };
+}
+
+type TL = { so?: number; ten?: string; noiDung?: string };
+type KetQuaTim = { taiLieu: TL[]; daTra: unknown[]; loiTim: string[]; boLacDe: number; tuKhoaRa: unknown };
+type KetQuaSoan = { traLoi: any; token: number; giay: number };
+
+const HE_THONG_XET =
+  "Bạn kiểm câu trả lời y khoa cho bác sĩ. Với từng phương án/ý trong câu trả lời, xem tài liệu được cung cấp có đủ căn cứ không. " +
+  'Chỉ trả DUY NHẤT JSON: {"thieu_can_cu":[{"y":số thứ tự ý,"ly_do":"dưới 25 từ"}]}; nếu mọi ý đều có căn cứ thì để mảng rỗng.';
+
+export async function chayKePhach(
+  phu: Phu,
+  yeuCau: YeuCauTroLy,
+  keHoach: MucKePhach[],
+  tt: TienTrinh,
+  ghi: (tt: TienTrinh) => void,
+  tuyChon: { hetGioMs?: number } = {},
+): Promise<KetQuaTroLy> {
+  const hetGio = tuyChon.hetGioMs ?? HET_GIO_BUOC_MS;
+  const kiem = kiemCauHoi(yeuCau.cauHoi);
+  const cauHoi = kiem.ok ? kiem.cau : "";
+  const ca = xayCaAnDanh(yeuCau.menhDe, yeuCau.nguCanh);
+  // Chuỗi ca đã ẩn danh, không kèm câu hỏi (câu hỏi đi riêng).
+  const chuoiCa = ca.dong.length ? chuoiGuiRa(ca, "").split("\nCâu hỏi:")[0] : "";
+  let loiGoi = 0;
+
+  tt.keHoach = keHoach;
+  keHoach.forEach((m, i) => {
+    for (const b of BUOC_CUA[m.tacTu]) {
+      const ma = maBuoc(i, m.tacTu, b.ma);
+      if (!tt.buoc.some((x) => x.ma === ma)) tt.buoc.push({ ma, tacTu: m.tacTu, ten: b.ten, trangThai: "cho" });
+    }
+  });
+  const chup = () => ghi(JSON.parse(JSON.stringify(tt)) as TienTrinh);
+  const timBuoc = (i: number, tacTu: TacTuMa, maNho: string): Buoc => tt.buoc.find((x) => x.ma === maBuoc(i, tacTu, maNho))!;
+
+  async function chayBuoc<T>(i: number, tacTu: TacTuMa, maNho: string, fn: () => Promise<T>): Promise<T> {
+    const b = timBuoc(i, tacTu, maNho);
+    if (b.trangThai === "xong" && b.dau !== undefined) return b.dau as T;
+    b.trangThai = "dang";
+    b.batDau = phu.bay();
+    delete b.ghiChu;
+    chup();
+    try {
+      const kq = await vuotGio(fn(), hetGio);
+      b.trangThai = "xong";
+      b.ketThuc = phu.bay();
+      b.dau = kq;
+      chup();
+      return kq;
+    } catch (e) {
+      b.trangThai = "loi";
+      b.ketThuc = phu.bay();
+      b.ghiChu = thongDiep(e);
+      loiGoi++;
+      chup();
+      throw e;
+    }
+  }
+  function boQuaMuc(i: number, tacTu: TacTuMa, ghiChu: string) {
+    for (const x of BUOC_CUA[tacTu]) {
+      const b = timBuoc(i, tacTu, x.ma);
+      if (b.trangThai === "xong") continue;
+      b.trangThai = "bo_qua";
+      b.ghiChu = ghiChu;
+    }
+    chup();
+  }
+  /** Lấy `dau` của một bước đã xong ở mục khác (ưu tiên mục mình phụ thuộc). */
+  function dauCua(i: number, tacTu: TacTuMa, maNho: string): { chiSo: number; dau: unknown } | null {
+    const thuTu = [...keHoach[i].phuThuoc, ...keHoach.map((_, j) => j)];
+    for (const j of thuTu) {
+      if (keHoach[j].tacTu !== tacTu) continue;
+      const b = timBuoc(j, tacTu, maNho);
+      if (b.trangThai === "xong" && b.dau !== undefined) return { chiSo: j, dau: b.dau };
+    }
+    return null;
+  }
+  const phanLoi = (tacTu: TacTuMa, canhBao: string): Phan => ({ tacTu, ten: TEN_TAC_TU[tacTu], noiDung: "", canhBao });
+
+  /** Chặn tác tử ngoài khi ngoài đóng hoặc câu hỏi còn danh tính; trả phần thay thế nếu chặn. */
+  function chanNgoai(i: number, tacTu: TacTuMa): Phan | null {
+    if (!phu.ngoaiMo()) {
+      boQuaMuc(i, tacTu, "chưa bật mô hình ngoài");
+      return phanLoi(tacTu, "chưa bật mô hình ngoài");
+    }
+    if (!kiem.ok) {
+      boQuaMuc(i, tacTu, "câu hỏi còn dấu hiệu danh tính, không gửi ra ngoài");
+      return phanLoi(tacTu, "Câu hỏi còn dấu hiệu danh tính (đã chặn, không gửi ra ngoài). Hãy bỏ tên, ngày, địa chỉ, số liên lạc rồi hỏi lại.");
+    }
+    return null;
+  }
+
+  const tacTuChay: Record<TacTuMa, (i: number) => Promise<Phan>> = {
+    dieu_phoi: async () => phanLoi("dieu_phoi", "Điều phối không phải mục để chạy."),
+
+    async tim_kiem(i) {
+      const chan = chanNgoai(i, "tim_kiem");
+      if (chan) return chan;
+      const dk = await chayBuoc(i, "tim_kiem", "dat_tu_khoa", () => phu.datTuKhoa(chuoiGuiRa(ca, cauHoi)));
+      const tl = (await chayBuoc(i, "tim_kiem", "tim_tai_lieu", () => phu.timTaiLieu(dk.tuKhoa, cauHoi, yeuCau.nguon))) as KetQuaTim;
+      return {
+        tacTu: "tim_kiem",
+        ten: TEN_TAC_TU.tim_kiem,
+        noiDung: `Đã tra ${tl.daTra.length} nguồn, được ${tl.taiLieu.length} tài liệu${tl.boLacDe ? `, bỏ ${tl.boLacDe} bài lạc đề` : ""}.`,
+        traLoi: { daTra: tl.daTra, soTaiLieu: tl.taiLieu.length },
+        ...(tl.loiTim.length ? { canhBao: `Một nguồn tìm bị lỗi: ${tl.loiTim.join("; ")}` } : {}),
+      };
+    },
+
+    async tra_loi(i) {
+      const chan = chanNgoai(i, "tra_loi");
+      if (chan) return chan;
+      const tim = dauCua(i, "tim_kiem", "tim_tai_lieu")?.dau as KetQuaTim | undefined;
+      const r = (await chayBuoc(i, "tra_loi", "soan_tra_loi", async () => {
+        if (!tim) throw new Error("chưa có tài liệu từ bước tìm kiếm");
+        return phu.soanTraLoi({ cauHoi, caAnDanh: chuoiCa, taiLieu: tim.taiLieu, daTra: tim.daTra, boLacDe: tim.boLacDe, loiTim: tim.loiTim, tuKhoaRa: tim.tuKhoaRa });
+      })) as KetQuaSoan;
+      return {
+        tacTu: "tra_loi",
+        ten: TEN_TAC_TU.tra_loi,
+        noiDung: String(r.traLoi?.answer ?? ""),
+        traLoi: r.traLoi,
+        ...(r.traLoi?.warning ? { canhBao: String(r.traLoi.warning) } : {}),
+      };
+    },
+
+    async doi_chieu(i) {
+      const chan = chanNgoai(i, "doi_chieu");
+      if (chan) return chan;
+      const soan = dauCua(i, "tra_loi", "soan_tra_loi");
+      const sl = soan?.dau as KetQuaSoan | undefined;
+      const tim = dauCua(i, "tim_kiem", "tim_tai_lieu")?.dau as KetQuaTim | undefined;
+
+      const may = await chayBuoc(i, "doi_chieu", "kiem_bang_may", async () => {
+        if (!sl) throw new Error("chưa có câu trả lời để đối chiếu");
+        const lech: string[] = [];
+        for (const nhom of [sl.traLoi?.cauTruc?.phuong_an, sl.traLoi?.cauTruc?.an_toan]) {
+          for (const y of Array.isArray(nhom) ? nhom : []) {
+            if (Array.isArray(y?.lech) && y.lech.length) lech.push(`${String(y.ten || y.noi_dung || "ý").slice(0, 60)}: số liệu lệch ${y.lech.join(", ")}`);
+          }
+        }
+        return { lech, canhBaoMay: sl.traLoi?.warning ? String(sl.traLoi.warning) : null };
+      });
+
+      const xet = await chayBuoc(i, "doi_chieu", "xet_tung_y", async () => {
+        if (!sl || !tim) throw new Error("chưa có câu trả lời hoặc tài liệu để xét");
+        let token = 0;
+        let giay = 0;
+        let thoXet = "";
+        const xetMot = async (tra: any): Promise<{ thieu: string[]; docDuoc: boolean }> => {
+          const pa: any[] = Array.isArray(tra?.cauTruc?.phuong_an) ? tra.cauTruc.phuong_an : [];
+          const ds = pa.length
+            ? pa.map((y, n) => `${n + 1}. ${y.ten} — ${y.noi_dung} ${(y.nguon || []).map((k: number) => `[${k}]`).join("")}`).join("\n")
+            : String(tra?.answer ?? "");
+          const vanBan = tim.taiLieu.map((t) => `[${t.so}] ${t.ten}\n${String(t.noiDung ?? "").slice(0, 700)}`).join("\n\n");
+          const r = await phu.goiNgoai(HE_THONG_XET, `Câu hỏi: ${cauHoi}\n\nCÂU TRẢ LỜI CẦN XÉT:\n${ds}\n\nTÀI LIỆU:\n${vanBan}`, 1200);
+          token += (r.usage?.prompt_tokens || 0) + (r.usage?.completion_tokens || 0);
+          giay += r.seconds || 0;
+          try {
+            const sach = r.text.replace(/```(?:json)?/gi, "");
+            const j = JSON.parse(sach.match(/\{[\s\S]*\}/)?.[0] ?? sach);
+            if (!Array.isArray(j?.thieu_can_cu)) throw new Error("thiếu khoá thieu_can_cu");
+            return { thieu: j.thieu_can_cu.map((x: any) => (typeof x === "string" ? x : `ý ${x?.y ?? "?"}: ${x?.ly_do ?? "thiếu căn cứ"}`)), docDuoc: true };
+          } catch {
+            thoXet = r.text.slice(0, 300); // giữ đầu câu trả lời để biết vì sao không đọc được
+            return { thieu: [], docDuoc: false };
+          }
+        };
+        const lan1 = await xetMot(sl.traLoi);
+        if (lan1.thieu.length === 0) return { thieu: [], daSua: false, conThieu: [], docDuoc: lan1.docDuoc, thoXet, token, giay };
+        // Sửa đúng MỘT lần: soạn lại kèm ghi chú các ý thiếu căn cứ, rồi xét lại; không sửa lần hai.
+        const moi = await phu.soanTraLoi({
+          cauHoi: `${cauHoi}\n\nLưu ý: các ý sau thiếu căn cứ trong tài liệu, hãy bỏ hoặc nêu rõ là chưa có căn cứ: ${lan1.thieu.join("; ")}`,
+          caAnDanh: chuoiCa,
+          taiLieu: tim.taiLieu,
+          daTra: tim.daTra,
+          boLacDe: tim.boLacDe,
+          loiTim: tim.loiTim,
+          tuKhoaRa: tim.tuKhoaRa,
+        });
+        token += moi.token || 0;
+        giay += moi.giay || 0;
+        const lan2 = await xetMot(moi.traLoi);
+        return { thieu: lan1.thieu, daSua: true, traLoiMoi: moi.traLoi, conThieu: lan2.thieu, docDuoc: lan2.docDuoc, thoXet, token, giay };
+      });
+
+      if (xet.daSua && soan) suaTraLoi.set(soan.chiSo, xet.traLoiMoi);
+      const cb = [
+        ...may.lech,
+        ...(xet.conThieu.length ? [`Còn ${xet.conThieu.length} ý thiếu căn cứ sau khi sửa: ${xet.conThieu.join("; ")}`] : []),
+        ...(xet.docDuoc ? [] : ["Không đọc được kết quả xét từng ý."]),
+      ];
+      return {
+        tacTu: "doi_chieu",
+        ten: TEN_TAC_TU.doi_chieu,
+        noiDung:
+          `Máy kiểm: ${may.lech.length ? `${may.lech.length} ý có số liệu lệch` : "không thấy số liệu lệch"}. ` +
+          `Xét từng ý: ${xet.thieu.length ? `${xet.thieu.length} ý thiếu căn cứ${xet.daSua ? ", đã sửa một lần" : ""}` : "mọi ý đều có căn cứ"}.`,
+        traLoi: { lech: may.lech, thieu: xet.thieu, daSua: xet.daSua, conThieu: xet.conThieu },
+        ...(cb.length ? { canhBao: cb.join(" ") } : {}),
+      };
+    },
+
+    async chu_de_can_ban(i) {
+      const r = await chayBuoc(i, "chu_de_can_ban", "chu_de", async () => chuDeCanBan(yeuCau.menhDe));
+      return {
+        tacTu: "chu_de_can_ban",
+        ten: TEN_TAC_TU.chu_de_can_ban,
+        noiDung: r.chuaBan.length
+          ? `Hồ sơ chưa có mệnh đề ở: ${r.chuaBan.map((c) => c.ten).join(", ")}.`
+          : "Các chủ đề chính trong hồ sơ đều đã có mệnh đề.",
+        traLoi: r,
+      };
+    },
+
+    async doi_chieu_thuoc(i) {
+      const r = await chayBuoc(i, "doi_chieu_thuoc", "doi_chieu_thuoc", async () => doiChieuThuocDiUng(yeuCau.menhDe));
+      const cb = [...r.mauThuan, ...r.thieu];
+      return {
+        tacTu: "doi_chieu_thuoc",
+        ten: TEN_TAC_TU.doi_chieu_thuoc,
+        noiDung: `Thuốc ghi nhận: ${r.thuoc.length ? r.thuoc.join("; ") : "chưa có"}. Dị ứng ghi nhận: ${r.diUng.length ? r.diUng.join("; ") : "chưa có"}.`,
+        traLoi: r,
+        ...(cb.length ? { canhBao: cb.join("; ") } : {}),
+      };
+    },
+  };
+
+  const suaTraLoi = new Map<number, unknown>();
+  const phan: Array<Phan | undefined> = new Array(keHoach.length).fill(undefined);
+  const daXong = new Set<number>();
+  chup();
+
+  // Theo từng "đợt": mục nào đủ phụ thuộc thì chạy cùng nhau; một mục lỗi không dừng mục khác.
+  while (daXong.size < keHoach.length) {
+    const san = keHoach.map((_, i) => i).filter((i) => !daXong.has(i) && keHoach[i].phuThuoc.every((n) => daXong.has(n)));
+    if (!san.length) break; // kế phác đã qua kiemKePhach nên không xảy ra; chặn vòng vô hạn cho chắc
+    await Promise.allSettled(
+      san.map(async (i) => {
+        const m = keHoach[i];
+        try {
+          phan[i] = await tacTuChay[m.tacTu](i);
+        } catch (e) {
+          phan[i] = phanLoi(m.tacTu, `${TEN_TAC_TU[m.tacTu]}: ${thongDiep(e)}`);
+        }
+      }),
+    );
+    for (const i of san) daXong.add(i);
+  }
+
+  // Câu trả lời cuối là bản đã sửa (nếu đối chiếu có sửa).
+  for (const [j, moi] of suaTraLoi) {
+    const p = phan[j];
+    if (p) {
+      p.traLoi = moi;
+      p.noiDung = String((moi as any)?.answer ?? p.noiDung);
+    }
+  }
+  const { token, giay } = tongKet(tt);
+  return { phan: phan.filter((p): p is Phan => !!p), thongKe: { token, giay, loiGoi } };
+}

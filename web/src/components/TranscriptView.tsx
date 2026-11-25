@@ -16,14 +16,18 @@ import {
   Download,
   Edit3,
   ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { realAudioService } from "../services/realAudioService";
 import { cacNguoiNoiChuaGan, dongTuDoan, ganVaiNguoiNoi, moTaTach, soNguoiNoiLonNhat } from "../lib/nguoiNoi";
+import { quetRadarCoDo } from "../lib/radarCoDo";
 
 interface TranscriptViewProps {
   transcript: string;
+  gioiTinh?: string;
   onUpdateTranscript: (newText: string) => void;
+  onUpdateSegments?: (newSegments: import("../types").TranscriptSegment[]) => void;
   isRecording?: boolean;
   onStartRecording?: () => void;
   onOpenTemplates?: () => void;
@@ -59,7 +63,9 @@ function chuanVai(x: string) {
 
 export const TranscriptView: React.FC<TranscriptViewProps> = ({
   transcript,
+  gioiTinh,
   onUpdateTranscript,
+  onUpdateSegments,
   isRecording = false,
   onStartRecording,
   onOpenTemplates,
@@ -177,6 +183,15 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
       // "Chưa rõ vai" — vai Bác sĩ / Bệnh nhân / Người nhà luôn do người dùng gán.
       // Không chèn dòng tiêu đề: dòng nào trong lời thoại cũng bị tính là một lượt nói.
       const moi = dongTuDoan(doan, data.diarization, soNguoiNoiLonNhat(transcript)).join("\n");
+      const offsetLuot = transcript ? transcript.split("\n").filter((l) => l.trim()).length : 0;
+      if (onUpdateSegments && Array.isArray(data.transcriptSegments) && data.transcriptSegments.length > 0) {
+        onUpdateSegments(
+          data.transcriptSegments.map((s: any, idx: number) => ({
+            ...s,
+            luot: offsetLuot + idx + 1,
+          }))
+        );
+      }
       onUpdateTranscript(transcript ? `${transcript.trimEnd()}\n${moi}` : moi);
       setGhiChuTach(moTaTach(data.diarization));
     } catch (err: any) {
@@ -403,6 +418,43 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
             </div>
           </section>
         )}
+
+        {/* Radar Câu hỏi Cờ đỏ theo thời gian thực (0 token, chạy tại chỗ) */}
+        {(() => {
+          const coDo = quetRadarCoDo(transcript, gioiTinh);
+          if (coDo.length === 0) return null;
+          return (
+            <section className="mb-4 rounded-2xl border border-[#F5E6B8] bg-[#FEF9E7] px-4 py-3 shadow-tactile-doctor-card space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#7A4B00]">
+                  <AlertTriangle size={14} className="text-[#B45309]" />
+                  Radar câu hỏi cờ đỏ (tại chỗ · 0 token)
+                </span>
+                <span className="text-[10.5px] font-medium text-[#92400E]">Tự đánh dấu ✓ khi bác sĩ đã hỏi</span>
+              </div>
+              <div className="space-y-1.5">
+                {coDo.map((g) => (
+                  <div
+                    key={g.id}
+                    className={`flex items-start justify-between gap-2 rounded-xl px-3 py-2 text-xs border ${
+                      g.daHoi
+                        ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46] line-through opacity-80"
+                        : g.mucDo === "khan"
+                        ? "bg-[#FFF5F5] border-[#F5C2C2] text-[#B4232C]"
+                        : "bg-white border-[#F5E6B8] text-[#7A4B00]"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <span className="font-semibold">{g.daHoi ? "✓ Đã hỏi: " : "Gợi ý hỏi: "}</span>
+                      <span>{g.cauHoi}</span>
+                      <span className="block text-[11px] opacity-85 mt-0.5">{g.lyDo}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* Trình phát âm thanh thực tế nếu đã có bản ghi âm */}
         {audioUrl && (

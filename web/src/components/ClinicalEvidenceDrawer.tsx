@@ -20,10 +20,12 @@ import {
   Lock,
   Stethoscope,
   ListPlus,
+  Bot,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { CauHoiNgoai } from "./VerificationView";
 import { TraLoiCoNguon } from "./TraLoiCoNguon";
+import { BangTacTu, PhanKhacTroLy, TheTienDoTroLy } from "./TroLyTacTu";
 
 /** Nguồn bật/tắt khi hỏi lại ("Tra nguồn khác" bỏ các nhóm nguồn đã trích). */
 export type NguonBat = Partial<Record<"kcb" | "msd" | "fda" | "nice" | "who" | "cdc" | "medlineplus" | "pubmed" | "statpearls" | "aafp", boolean>>;
@@ -70,6 +72,10 @@ interface ClinicalEvidenceDrawerProps {
   hasMaterial: boolean;
   onSuggestQuestions: () => Promise<{ questions: CauHoiNgoai[]; model: string; seconds?: number } | null>;
   onAddToContext: (text: string) => void;
+  /** Tiến trình của việc trợ lý đang chạy (kế hoạch + bước); null khi chưa có. */
+  tienDoTroLy?: any | null;
+  /** Hiện công tắc toàn hệ thống trong bảng tác tử. */
+  laQuanTri?: boolean;
 }
 
 const MAU_NHOM: Record<string, string> = {
@@ -98,6 +104,8 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
   hasMaterial,
   onSuggestQuestions,
   onAddToContext,
+  tienDoTroLy = null,
+  laQuanTri = false,
 }) => {
   const [inputText, setInputText] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -108,6 +116,9 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
   const [dangDeXuat, setDangDeXuat] = useState(false);
   const [daThem, setDaThem] = useState<Set<string>>(new Set());
   const [moNguon, setMoNguon] = useState<Record<string, boolean>>({});
+  const [moBangTacTu, setMoBangTacTu] = useState(false);
+  // Đường hỏi/tra cứu đã ẩn danh nên luôn mở, không cần công tắc "Mô hình ngoài"; công tắc đó chỉ còn cho phần đề xuất câu hỏi.
+  const duongHoiMo = true;
 
   // Tin mới: gập khối câu hỏi, cuộn tới đầu tin cuối (đọc câu trả lời từ đầu, không nhảy xuống đáy).
   const vungCuon = useRef<HTMLDivElement>(null);
@@ -139,7 +150,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim() || isLoading || !allowExternal) return;
+    if (!inputText.trim() || isLoading || !duongHoiMo) return;
     onSendMessage(inputText.trim(), "tra_cuu");
     setInputText("");
   };
@@ -345,6 +356,14 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
               <span className="text-[11px] font-medium hidden sm:inline">Hỏi mới</span>
             </button>
             <button
+              onClick={() => setMoBangTacTu(!moBangTacTu)}
+              className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border transition-colors whitespace-nowrap ${moBangTacTu ? "border-[#0284C7] bg-[#E0F2FE] text-[#0369A1]" : "border-[#CCE3F0] text-[#0C4A6E] hover:bg-[#E0F2FE]"}`}
+              title="Bật tắt các tác tử của trợ lý"
+            >
+              <Bot size={12} />
+              <span className="text-[11px] font-medium hidden sm:inline">Tác tử</span>
+            </button>
+            <button
               onClick={() => setIsExpandedFull(!isExpandedFull)}
               className="p-1 rounded-lg text-[#64748B] hover:bg-[#E0F2FE] hover:text-[#0369A1] transition-colors hidden sm:flex"
               title={isExpandedFull ? "Thu nhỏ bảng" : "Mở rộng bảng"}
@@ -362,6 +381,8 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
         </div>
 
         <div ref={vungCuon} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 text-left">
+          {moBangTacTu && <BangTacTu laQuanTri={laQuanTri} />}
+
           {khoiCauHoi}
 
           {chatHistory.length > 0 && <div className="border-t border-[#CCE3F0]" />}
@@ -395,9 +416,9 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                   )}
                   <TraLoiCoNguon
                     msg={msg}
-                    onAsk={(q) => !isLoading && allowExternal && onSendMessage(q, "tra_cuu")}
+                    onAsk={(q) => !isLoading && duongHoiMo && onSendMessage(q, "tra_cuu")}
                     onCheckOther={(m) => {
-                      if (isLoading || !allowExternal || !m.question) return;
+                      if (isLoading || !duongHoiMo || !m.question) return;
                       const daDung = new Set((m.sources || []).filter((x) => x.cited).map((x) => x.nhom));
                       const nguon: NguonBat = Object.fromEntries(TAT_CA_NHOM.map((k) => [k, !daDung.has(k)]));
                       if (!Object.values(nguon).some(Boolean)) return;
@@ -405,6 +426,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                     }}
                     onAddToContext={onAddToContext}
                   />
+                  {msg.troLy && <PhanKhacTroLy phan={msg.troLy.phanKhac} />}
                 </motion.div>
               );
             }
@@ -513,7 +535,8 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
             );
           })}
 
-          {isLoading && (
+          {isLoading && tienDoTroLy !== null && <TheTienDoTroLy tt={tienDoTroLy} />}
+          {isLoading && tienDoTroLy === null && (
             <div className="bg-white rounded-2xl border border-[#CCE3F0] p-3.5 flex items-start gap-3">
               <RefreshCw size={14} className="animate-spin text-[#0284C7] mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0 text-xs text-[#475569] space-y-1">
@@ -538,7 +561,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
         </div>
 
         <div className="p-3 border-t border-[#BAE6FD] bg-gradient-to-b from-[#F8FBFC] to-[#F0F9FF] shadow-[0_-4px_16px_rgba(2,132,199,0.06)] space-y-1.5">
-          {allowExternal && chatHistory.length === 0 && (   // có hội thoại thì dùng "Hỏi tiếp" trong câu trả lời
+          {duongHoiMo && chatHistory.length === 0 && (   // có hội thoại thì dùng "Hỏi tiếp" trong câu trả lời
             <div className="flex flex-wrap gap-1.5">
               {GOI_Y_NHANH.map((g) => (
                 <button
@@ -572,17 +595,13 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                   // Enter gửi luôn (không trông vào gửi ngầm của form); đang gõ dấu (IME) thì bỏ qua.
                   if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) handleSubmit(e);
                 }}
-                disabled={!allowExternal}
-                placeholder={
-                  !allowExternal
-                    ? "Bật “Mô hình ngoài” để hỏi"
-                    : "VD: bệnh nhân này dùng amoxicillin được không? · ai bị dị ứng thuốc?"
-                }
+                disabled={!duongHoiMo}
+                placeholder="VD: bệnh nhân này dùng amoxicillin được không? · ai bị dị ứng thuốc?"
                 className="flex-1 min-w-0 text-xs text-[#0F172A] placeholder-[#94A3B8] bg-transparent border-none focus:outline-none px-1 py-1 disabled:cursor-not-allowed"
               />
               <button
                 type="submit"
-                disabled={!inputText.trim() || isLoading || !allowExternal}
+                disabled={!inputText.trim() || isLoading || !duongHoiMo}
                 className="w-7 h-7 rounded-full bg-[#0284C7] text-white flex items-center justify-center hover:bg-[#0369A1] disabled:opacity-40 transition-all flex-shrink-0 active:translate-y-0.5"
                 title="Gửi câu hỏi"
               >
@@ -595,7 +614,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
             className="text-[10px] text-[#0369A1]/80 text-center px-1 leading-snug"
             title="Nguồn: Bộ Y tế (phác đồ + kcb.vn), MSD Manual, DailyMed/FDA, StatPearls, AAFP, NICE, WHO, CDC, MedlinePlus, PubMed/PMC"
           >
-            Đọc ca khám + 11 nguồn chính thống · chỉ để tham khảo, bác sĩ quyết định
+            Mô hình ngoài chỉ nhận dữ liệu đã ẩn danh (không tên, ngày, địa chỉ, trích dẫn) · chỉ để tham khảo, bác sĩ quyết định
           </p>
         </div>
       </motion.div>

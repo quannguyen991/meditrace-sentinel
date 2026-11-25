@@ -1,0 +1,800 @@
+{
+ "ghi_chu": "Tren loi cay nhan tao, ban sach = dap an. Khong phai do chinh xac thuc te.",
+ "seed": 42,
+ "so_ca": 400,
+ "sach": {
+  "so_ca": 400,
+  "bao_nham_moi_ca": 7.11,
+  "theo_ma": {
+   "POSSIBLE_IMPORTANT_OMISSION": 1564,
+   "SPEAKER_SUBJECT_MISMATCH": 250,
+   "CONTRADICTION_UNRESOLVED": 122,
+   "UNSUPPORTED_INFORMATION": 106,
+   "OMITTED_ANSWER": 104,
+   "OMITTED_MEDICATION": 101,
+   "IMPORTANT_MODIFIER_DROPPED": 97,
+   "CERTAINTY_INCREASED": 78,
+   "DUPLICATE_INFORMATION": 76,
+   "PAST_CURRENT_CONFUSION": 73,
+   "FAMILY_PATIENT_MIXUP": 70,
+   "POSSIBLE_NEGATION_ERROR": 45,
+   "SUBJECT_AMBIGUOUS": 37,
+   "NOT_YET_AS_NEGATIVE": 31,
+   "CONDITION_AS_FACT": 29,
+   "SEMANTIC_DUPLICATE": 11,
+   "OMITTED_ALLERGY": 8,
+   "CONTRADICTORY_INFORMATION": 6,
+   "INTERNAL_CONTRADICTION": 6,
+   "WRONG_SUBJECT": 6,
+   "APPROXIMATION_LOST": 4,
+   "CONDITION_AS_CONFIRMED_PLAN": 4,
+   "CLINICALLY_IRRELEVANT": 3,
+   "CONTRAINDICATION": 3,
+   "DURATION_MISMATCH": 3,
+   "PLAN_AS_FACT": 2,
+   "SEVERITY_CHANGED": 2,
+   "EVIDENCE_CONTEXT_MISSING": 1,
+   "NUMERIC_MISMATCH": 1,
+   "OLD_AND_NEW_VALUE_DUPLICATED": 1
+  },
+  "chan_thua_D": 0.064
+ },
+ "theo_loai": {
+  "so_lech_nho": {
+   "so_lan": 261,
+   "bat_dung_loai": 247,
+   "bat_bat_ky": 250,
+   "khong_ap_dung": 139,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 57,
+   "do_nhay": 0.946,
+   "do_nhay_bat_ky": 0.958,
+   "wilson": [
+    0.912,
+    0.968
+   ]
+  },
+  "doi_don_vi_thoi_gian": {
+   "so_lan": 252,
+   "bat_dung_loai": 241,
+   "bat_bat_ky": 247,
+   "khong_ap_dung": 148,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 145,
+   "do_nhay": 0.956,
+   "do_nhay_bat_ky": 0.98,
+   "wilson": [
+    0.924,
+    0.975
+   ]
+  },
+  "doi_ben": {
+   "so_lan": 260,
+   "bat_dung_loai": 65,
+   "bat_bat_ky": 122,
+   "khong_ap_dung": 140,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 77,
+   "do_nhay": 0.25,
+   "do_nhay_bat_ky": 0.469,
+   "wilson": [
+    0.201,
+    0.306
+   ]
+  },
+  "doi_muc_do": {
+   "so_lan": 330,
+   "bat_dung_loai": 165,
+   "bat_bat_ky": 192,
+   "khong_ap_dung": 70,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 57,
+   "do_nhay": 0.5,
+   "do_nhay_bat_ky": 0.582,
+   "wilson": [
+    0.446,
+    0.554
+   ]
+  },
+  "doi_tan_suat": {
+   "so_lan": 163,
+   "bat_dung_loai": 153,
+   "bat_bat_ky": 160,
+   "khong_ap_dung": 237,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 145,
+   "do_nhay": 0.939,
+   "do_nhay_bat_ky": 0.982,
+   "wilson": [
+    0.891,
+    0.966
+   ]
+  },
+  "nguoi_nha_thanh_benh_nhan": {
+   "so_lan": 149,
+   "bat_dung_loai": 86,
+   "bat_bat_ky": 88,
+   "khong_ap_dung": 251,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 74,
+   "do_nhay": 0.577,
+   "do_nhay_bat_ky": 0.591,
+   "wilson": [
+    0.497,
+    0.654
+   ]
+  },
+  "bo_tu_nghi": {
+   "so_lan": 160,
+   "bat_dung_loai": 140,
+   "bat_bat_ky": 140,
+   "khong_ap_dung": 240,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 140,
+   "do_nhay": 0.875,
+   "do_nhay_bat_ky": 0.875,
+   "wilson": [
+    0.815,
+    0.918
+   ]
+  },
+  "thuoc_gan_giong": {
+   "so_lan": 247,
+   "bat_dung_loai": 212,
+   "bat_bat_ky": 218,
+   "khong_ap_dung": 153,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 214,
+   "do_nhay": 0.858,
+   "do_nhay_bat_ky": 0.883,
+   "wilson": [
+    0.809,
+    0.896
+   ]
+  },
+  "phu_dinh_trong_chuoi": {
+   "so_lan": 9,
+   "bat_dung_loai": 6,
+   "bat_bat_ky": 7,
+   "khong_ap_dung": 391,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 1,
+   "do_nhay": 0.667,
+   "do_nhay_bat_ky": 0.778,
+   "wilson": [
+    0.354,
+    0.879
+   ]
+  },
+  "qua_khu_hien_tai": {
+   "so_lan": 337,
+   "bat_dung_loai": 4,
+   "bat_bat_ky": 81,
+   "khong_ap_dung": 63,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 26,
+   "do_nhay": 0.012,
+   "do_nhay_bat_ky": 0.24,
+   "wilson": [
+    0.005,
+    0.03
+   ]
+  },
+  "bo_dieu_kien": {
+   "so_lan": 46,
+   "bat_dung_loai": 46,
+   "bat_bat_ky": 46,
+   "khong_ap_dung": 354,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 46,
+   "do_nhay": 1.0,
+   "do_nhay_bat_ky": 1.0,
+   "wilson": [
+    0.923,
+    1.0
+   ]
+  },
+  "dinh_chinh_nguoc": {
+   "so_lan": 33,
+   "bat_dung_loai": 0,
+   "bat_bat_ky": 0,
+   "khong_ap_dung": 367,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 0,
+   "do_nhay": 0.0,
+   "do_nhay_bat_ky": 0.0,
+   "wilson": [
+    0.0,
+    0.104
+   ]
+  },
+  "bia_phu_dinh": {
+   "so_lan": 400,
+   "bat_dung_loai": 389,
+   "bat_bat_ky": 399,
+   "khong_ap_dung": 0,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 60,
+   "do_nhay": 0.973,
+   "do_nhay_bat_ky": 0.998,
+   "wilson": [
+    0.951,
+    0.985
+   ]
+  },
+  "gan_nham_luot": {
+   "so_lan": 355,
+   "bat_dung_loai": 355,
+   "bat_bat_ky": 355,
+   "khong_ap_dung": 45,
+   "luot_con_duoc_dan": 0,
+   "d_can_xac_nhan": 84,
+   "do_nhay": 1.0,
+   "do_nhay_bat_ky": 1.0,
+   "wilson": [
+    0.989,
+    1.0
+   ]
+  }
+ },
+ "do_nhay_trung_binh": 0.682,
+ "theo_ma_trong_cay": {
+  "POSSIBLE_IMPORTANT_OMISSION": {
+   "so_lan_bao": 11729,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 3.91
+  },
+  "SPEAKER_SUBJECT_MISMATCH": {
+   "so_lan_bao": 2176,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.625
+  },
+  "UNSUPPORTED_INFORMATION": {
+   "so_lan_bao": 1289,
+   "dung": 451,
+   "chinh_xac": 0.35,
+   "bao_nham_moi_ca_sach": 0.265
+  },
+  "CONTRADICTION_UNRESOLVED": {
+   "so_lan_bao": 988,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.305
+  },
+  "OMITTED_MEDICATION": {
+   "so_lan_bao": 924,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.253
+  },
+  "IMPORTANT_MODIFIER_DROPPED": {
+   "so_lan_bao": 884,
+   "dung": 62,
+   "chinh_xac": 0.07,
+   "bao_nham_moi_ca_sach": 0.242
+  },
+  "OMITTED_ANSWER": {
+   "so_lan_bao": 780,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.26
+  },
+  "CERTAINTY_INCREASED": {
+   "so_lan_bao": 735,
+   "dung": 121,
+   "chinh_xac": 0.165,
+   "bao_nham_moi_ca_sach": 0.195
+  },
+  "PAST_CURRENT_CONFUSION": {
+   "so_lan_bao": 630,
+   "dung": 19,
+   "chinh_xac": 0.03,
+   "bao_nham_moi_ca_sach": 0.182
+  },
+  "DUPLICATE_INFORMATION": {
+   "so_lan_bao": 593,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.19
+  },
+  "FAMILY_PATIENT_MIXUP": {
+   "so_lan_bao": 586,
+   "dung": 12,
+   "chinh_xac": 0.02,
+   "bao_nham_moi_ca_sach": 0.175
+  },
+  "DURATION_MISMATCH": {
+   "so_lan_bao": 366,
+   "dung": 299,
+   "chinh_xac": 0.817,
+   "bao_nham_moi_ca_sach": 0.007
+  },
+  "POSSIBLE_NEGATION_ERROR": {
+   "so_lan_bao": 362,
+   "dung": 6,
+   "chinh_xac": 0.017,
+   "bao_nham_moi_ca_sach": 0.113
+  },
+  "WRONG_EVIDENCE": {
+   "so_lan_bao": 355,
+   "dung": 355,
+   "chinh_xac": 1.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "SUBJECT_AMBIGUOUS": {
+   "so_lan_bao": 267,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.092
+  },
+  "CONDITION_AS_FACT": {
+   "so_lan_bao": 239,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.072
+  },
+  "NOT_YET_AS_NEGATIVE": {
+   "so_lan_bao": 235,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.077
+  },
+  "FABRICATED_MEDICATION": {
+   "so_lan_bao": 211,
+   "dung": 211,
+   "chinh_xac": 1.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "SEMANTIC_DUPLICATE": {
+   "so_lan_bao": 211,
+   "dung": 24,
+   "chinh_xac": 0.114,
+   "bao_nham_moi_ca_sach": 0.028
+  },
+  "NUMERIC_MISMATCH": {
+   "so_lan_bao": 190,
+   "dung": 156,
+   "chinh_xac": 0.821,
+   "bao_nham_moi_ca_sach": 0.003
+  },
+  "FREQUENCY_MISMATCH": {
+   "so_lan_bao": 178,
+   "dung": 155,
+   "chinh_xac": 0.871,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "TEMPORAL_MISMATCH": {
+   "so_lan_bao": 177,
+   "dung": 118,
+   "chinh_xac": 0.667,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "SEVERITY_CHANGED": {
+   "so_lan_bao": 155,
+   "dung": 140,
+   "chinh_xac": 0.903,
+   "bao_nham_moi_ca_sach": 0.005
+  },
+  "WRONG_SUBJECT": {
+   "so_lan_bao": 139,
+   "dung": 74,
+   "chinh_xac": 0.532,
+   "bao_nham_moi_ca_sach": 0.015
+  },
+  "OMITTED_ALLERGY": {
+   "so_lan_bao": 91,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.02
+  },
+  "OMITTED_NUMERIC_VALUE": {
+   "so_lan_bao": 84,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "CONDITION_AS_CONFIRMED_PLAN": {
+   "so_lan_bao": 78,
+   "dung": 46,
+   "chinh_xac": 0.59,
+   "bao_nham_moi_ca_sach": 0.01
+  },
+  "FAMILY_STATEMENT_AS_CLINICIAN_PLAN": {
+   "so_lan_bao": 63,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "LATERALITY_CHANGED": {
+   "so_lan_bao": 63,
+   "dung": 63,
+   "chinh_xac": 1.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "INTERNAL_CONTRADICTION": {
+   "so_lan_bao": 52,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.015
+  },
+  "EVIDENCE_CONTEXT_MISSING": {
+   "so_lan_bao": 49,
+   "dung": 42,
+   "chinh_xac": 0.857,
+   "bao_nham_moi_ca_sach": 0.003
+  },
+  "CONTRADICTORY_INFORMATION": {
+   "so_lan_bao": 46,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.015
+  },
+  "MEDICATION_ENTITY_MISMATCH": {
+   "so_lan_bao": 42,
+   "dung": 1,
+   "chinh_xac": 0.024,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "FABRICATED_ALLERGY": {
+   "so_lan_bao": 35,
+   "dung": 34,
+   "chinh_xac": 0.971,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "ROUTE_MISMATCH": {
+   "so_lan_bao": 33,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "NEGATION_FLIP": {
+   "so_lan_bao": 30,
+   "dung": 19,
+   "chinh_xac": 0.633,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "DOSE_MISMATCH": {
+   "so_lan_bao": 27,
+   "dung": 3,
+   "chinh_xac": 0.111,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "APPROXIMATION_LOST": {
+   "so_lan_bao": 24,
+   "dung": 3,
+   "chinh_xac": 0.125,
+   "bao_nham_moi_ca_sach": 0.01
+  },
+  "CLINICALLY_IRRELEVANT": {
+   "so_lan_bao": 24,
+   "dung": 1,
+   "chinh_xac": 0.042,
+   "bao_nham_moi_ca_sach": 0.007
+  },
+  "CONTRAINDICATION": {
+   "so_lan_bao": 23,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.007
+  },
+  "CORRECTION_NOT_APPLIED": {
+   "so_lan_bao": 18,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "DOSE_OVER_MAX": {
+   "so_lan_bao": 14,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "ALLERGEN_MISMATCH": {
+   "so_lan_bao": 13,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "PLAN_AS_FACT": {
+   "so_lan_bao": 12,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.005
+  },
+  "OLD_AND_NEW_VALUE_DUPLICATED": {
+   "so_lan_bao": 6,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.003
+  },
+  "OMITTED_DURATION": {
+   "so_lan_bao": 6,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "RANGE_COLLAPSED": {
+   "so_lan_bao": 4,
+   "dung": 4,
+   "chinh_xac": 1.0,
+   "bao_nham_moi_ca_sach": 0.0
+  },
+  "UNSUPPORTED_CAUSALITY": {
+   "so_lan_bao": 1,
+   "dung": 0,
+   "chinh_xac": 0.0,
+   "bao_nham_moi_ca_sach": 0.0
+  }
+ },
+ "vi_du_lot": {
+  "doi_muc_do": [
+   {
+    "ca": "v2mr_0003",
+    "phat_bieu_id": 7,
+    "mo_ta": "Rối loạn tăng động giảm chú ý thể kết hợp -> Rối loạn tăng động tăng chú ý thể kết hợp",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0014",
+    "phat_bieu_id": 8,
+    "mo_ta": "Uống nhiều nước, chườm ấm xoa nắn tuyến, ngậm lát chanh kích thích tống sỏi nhỏ và dùng kháng sinh nếu bội nhiễm -> Uống ít nước, chườm ấm xoa nắn tuyến, ngậm lát chanh kích thích tống sỏi nhỏ và dùng kháng sinh nếu bội nhiễm",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0036",
+    "phat_bieu_id": 4,
+    "mo_ta": "nồng độ ceruloplasmin huyết thanh giảm thấp và bài tiết đồng trong nước tiểu 24 giờ tăng rất cao -> nồng độ ceruloplasmin huyết thanh tăng thấp và bài tiết đồng trong nước tiểu 24 giờ tăng rất cao",
+    "canh_bao_tren_dong": [
+     "SPEAKER_SUBJECT_MISMATCH"
+    ]
+   }
+  ],
+  "thuoc_gan_giong": [
+   {
+    "ca": "v2mr_0003",
+    "phat_bieu_id": 5,
+    "mo_ta": "amoxicillin -> amoxicillin-clavulanate",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0078",
+    "phat_bieu_id": 8,
+    "mo_ta": "amoxicillin -> amoxicillin-clavulanate",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0135",
+    "phat_bieu_id": 4,
+    "mo_ta": "amoxicillin -> amoxicillin-clavulanate",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "qua_khu_hien_tai": [
+   {
+    "ca": "v2mr_0003",
+    "phat_bieu_id": 0,
+    "mo_ta": "-> quá khứ: không thể ngồi yên một chỗ liên tục ngọ nguậy tay chân",
+    "canh_bao_tren_dong": [
+     "SPEAKER_SUBJECT_MISMATCH"
+    ]
+   },
+   {
+    "ca": "v2mr_0009",
+    "phat_bieu_id": 2,
+    "mo_ta": "-> quá khứ: đau tức căng cứng mặt trước hoặc mặt ngoài đùi ngay sau khi bị va đập mạnh trực tiếp (như đầu gối húc vào đùi khi đá bóng hoặc ngã đập đùi)",
+    "canh_bao_tren_dong": [
+     "CONTRADICTION_UNRESOLVED",
+     "DUPLICATE_INFORMATION",
+     "UNSUPPORTED_INFORMATION"
+    ]
+   },
+   {
+    "ca": "v2mr_0014",
+    "phat_bieu_id": 7,
+    "mo_ta": "-> quá khứ: Viêm tuyến nước bọt mang tai do sỏi ống Wharton gây tắc nghẽn cấp",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "doi_don_vi_thoi_gian": [
+   {
+    "ca": "v2mr_0009",
+    "phat_bieu_id": 5,
+    "mo_ta": "vài ngày -> vài tuần",
+    "canh_bao_tren_dong": [
+     "FAMILY_PATIENT_MIXUP"
+    ]
+   },
+   {
+    "ca": "v2mr_0514",
+    "phat_bieu_id": 2,
+    "mo_ta": "vài giờ -> vài ngày",
+    "canh_bao_tren_dong": [
+     "CORRECTION_NOT_APPLIED",
+     "SEMANTIC_DUPLICATE"
+    ]
+   },
+   {
+    "ca": "v2mr_1195",
+    "phat_bieu_id": 2,
+    "mo_ta": "vài ngày -> vài tuần",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "nguoi_nha_thanh_benh_nhan": [
+   {
+    "ca": "v2mr_0009",
+    "phat_bieu_id": 7,
+    "mo_ta": "người nhà -> bệnh nhân: cường giáp",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0157",
+    "phat_bieu_id": 7,
+    "mo_ta": "mẹ -> bệnh nhân: máu khó đông",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0312",
+    "phat_bieu_id": 4,
+    "mo_ta": "bà nội -> bệnh nhân: ung thư thực quản",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "doi_ben": [
+   {
+    "ca": "v2mr_0014",
+    "phat_bieu_id": 0,
+    "mo_ta": "vùng góc hàm hoặc dưới hàm sưng phồng căng tức đột ngột mỗi khi ăn nhai -> vùng góc hàm hoặc trên hàm sưng phồng căng tức đột ngột mỗi khi ăn nhai",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0030",
+    "phat_bieu_id": 1,
+    "mo_ta": "mảng màu trắng đục sừng hóa bám chặt trên niêm mạc má hoặc bờ lưỡi -> mảng màu trắng đục sừng hóa bám chặt dưới niêm mạc má hoặc bờ lưỡi",
+    "canh_bao_tren_dong": [
+     "SEMANTIC_DUPLICATE"
+    ]
+   },
+   {
+    "ca": "v2mr_0063",
+    "phat_bieu_id": 2,
+    "mo_ta": "siêu âm tim qua thành ngực hoặc thực quản thấy nốt sùi di động trên van tim -> siêu âm tim qua thành ngực hoặc thực quản thấy nốt sùi di động dưới van tim",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "doi_tan_suat": [
+   {
+    "ca": "v2mr_0078",
+    "phat_bieu_id": 7,
+    "mo_ta": "Kê kem bôi estrogen estriol hoặc estradiol tại chỗ đặt âm đạo liều thấp ban đêm trong 2-3 tuần đầu sau đó giảm liều duy trì tuần 2 lần, hướng dẫn sử dụng chất giữ ẩm âm đạo không nội tiết thường xuyên và gel bôi trơn khi sinh hoạt tình dục, vệ sinh bằng dung dịch dịu nhẹ tránh thụt rửa -> Kê kem bôi estrogen estriol hoặc estradiol tại chỗ đặt âm đạo liều thấp ban đêm trong 2-3 tuần đầu sau đó giảm liều duy trì tuần 3 lần, hướng dẫn sử dụng chất giữ ẩm âm đạo không nội tiết thường xuyên và gel bôi trơn khi sinh hoạt tình dục, vệ sinh bằng dung dịch dịu nhẹ tránh thụt rửa",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0497",
+    "phat_bieu_id": 3,
+    "mo_ta": "nhức đầu ê ẩm vùng trán mỗi sáng sau khi thức dậy -> nhức đầu ê ẩm vùng trán mỗi tối sau khi thức dậy",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0867",
+    "phat_bieu_id": 2,
+    "mo_ta": "cứng gân gót vào buổi sáng -> cứng gân gót vào buổi tối",
+    "canh_bao_tren_dong": [
+     "IMPORTANT_MODIFIER_DROPPED"
+    ]
+   }
+  ],
+  "dinh_chinh_nguoc": [
+   {
+    "ca": "v2mr_0135",
+    "phat_bieu_id": 4,
+    "mo_ta": "giữ bản cũ #5 (None), bỏ bản mới (None)",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0250",
+    "phat_bieu_id": 1,
+    "mo_ta": "giữ bản cũ #2 (từ năm ngoái), bỏ bản mới (nửa năm rồi)",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0581",
+    "phat_bieu_id": 7,
+    "mo_ta": "giữ bản cũ #8 (None), bỏ bản mới (None)",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "bo_tu_nghi": [
+   {
+    "ca": "v2mr_0230",
+    "phat_bieu_id": 9,
+    "mo_ta": "nhiễm khuẩn sơ sinh sớm ngày thứ hai -> chắc chắn: nhiễm khuẩn sơ sinh sớm ngày thứ hai",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0298",
+    "phat_bieu_id": 7,
+    "mo_ta": "Bệnh celiac ở trẻ em thể điển hình kém hấp thu -> chắc chắn: Bệnh celiac ở trẻ em thể điển hình kém hấp thu",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0420",
+    "phat_bieu_id": 8,
+    "mo_ta": "nhiễm khuẩn sơ sinh sớm ngày thứ hai -> chắc chắn: nhiễm khuẩn sơ sinh sớm ngày thứ hai",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "bia_phu_dinh": [
+   {
+    "ca": "v2mr_0250",
+    "phat_bieu_id": 12,
+    "mo_ta": "không buồn nôn (bịa, lượt 6)",
+    "canh_bao_tren_dong": [
+     "NEGATION_FLIP"
+    ]
+   },
+   {
+    "ca": "v2mr_0865",
+    "phat_bieu_id": 12,
+    "mo_ta": "không đau đầu (bịa, lượt 2)",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_1009",
+    "phat_bieu_id": 11,
+    "mo_ta": "không ho ra máu (bịa, lượt 8)",
+    "canh_bao_tren_dong": [
+     "NEGATION_FLIP"
+    ]
+   }
+  ],
+  "so_lech_nho": [
+   {
+    "ca": "v2mr_0270",
+    "phat_bieu_id": 1,
+    "mo_ta": "2 -> 1",
+    "canh_bao_tren_dong": [
+     "SEMANTIC_DUPLICATE"
+    ]
+   },
+   {
+    "ca": "v2mr_0730",
+    "phat_bieu_id": 6,
+    "mo_ta": "1 -> 2",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_0819",
+    "phat_bieu_id": 6,
+    "mo_ta": "1 -> 2",
+    "canh_bao_tren_dong": []
+   }
+  ],
+  "phu_dinh_trong_chuoi": [
+   {
+    "ca": "v2mr_2389",
+    "phat_bieu_id": 4,
+    "mo_ta": "đảo phủ định trong lượt có cả có/không: vùng da đầu tại mảng rụng tóc hoàn toàn nhẵn bóng không có sẹo không có vảy",
+    "canh_bao_tren_dong": []
+   },
+   {
+    "ca": "v2mr_2663",
+    "phat_bieu_id": 4,
+    "mo_ta": "đảo phủ định trong lượt có cả có/không: sốt nhẹ đến vừa kèm ớn lạnh và chán ăn",
+    "canh_bao_tren_dong": [
+     "SPEAKER_SUBJECT_MISMATCH"
+    ]
+   },
+   {
+    "ca": "v2mr_3336",
+    "phat_bieu_id": 5,
+    "mo_ta": "đảo phủ định trong lượt có cả có/không: ngứa da dai dẳng toàn thân không đáp ứng thuốc chống dị ứng thông thường",
+    "canh_bao_tren_dong": []
+   }
+  ]
+ },
+ "kho": true,
+ "tap": "dieu_chinh"
+}

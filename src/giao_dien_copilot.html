@@ -426,15 +426,15 @@
     <div class="brand">
       <div class="logo-badge">M</div>
       <div>
-        <div class="brand-title">MediTrace Sentinel <span class="badge badge-blue">v2.5 Enterprise</span></div>
+        <div class="brand-title">MediTrace Sentinel <span class="badge badge-blue">Bản trình diễn</span></div>
         <div class="brand-subtitle">Trợ Lý Lâm Sàng & Kiểm Duyệt Hồ Sơ Bệnh Án An Toàn Đa Tầng</div>
       </div>
     </div>
 
     <div class="topbar-actions">
-      <div class="sha-tag" title="Chữ ký băm bảo mật SHA-256 chống can thiệp bệnh án">
-        <span>🔒 SHA-256:</span>
-        <strong id="shaSig">a9c8f21e...7b42</strong>
+      <div class="sha-tag" title="Mã minh họa, không phải chữ ký số hoặc dấu xác thực hồ sơ">
+        <span>Mã minh họa:</span>
+        <strong id="shaSig">DEMO-ONLY</strong>
       </div>
 
       <button class="btn btn-secondary" onclick="toggleTheme()" title="Đổi giao diện Sáng / Tối">
@@ -458,6 +458,10 @@
       </button>
     </div>
   </header>
+
+  <div role="status" style="padding:10px 18px;background:#fff7ed;border-bottom:1px solid #fed7aa;color:#9a3412;font-size:13px;font-weight:600">
+    Bản trình diễn giao diện với dữ liệu giả lập. Các thao tác duyệt, mã SHA-256 và xuất FHIR tại đây chưa kết nối hệ thống lưu trữ hay bệnh viện.
+  </div>
 
   <!-- 3-COLUMN WORKSPACE -->
   <main class="workspace">
@@ -841,7 +845,7 @@
     }
 
     function xacNhanPheDuyet() {
-      alert("✅ Bác sĩ đã phê duyệt thành công bệnh án #BN_7718!\nĐã khóa chữ ký số băm SHA-256 và đồng bộ lên cổng HL7 FHIR.");
+      alert("Đây là bản trình diễn. Chưa lưu phê duyệt, tạo chữ ký số hoặc đồng bộ hồ sơ lên hệ thống bệnh viện.");
     }
 
     // Khởi tạo

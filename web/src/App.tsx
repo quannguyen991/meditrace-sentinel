@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { ViewMode, Session, DocumentTabItem, ClinicalChatMessage, TemplateItem, Patient } from "./types";
+import { chuyenKetQuaThanhTin, gonMenhDeGui, hoiTroLy } from "./lib/troLy";
 import { initialSessions, initialEvidenceChat } from "./data/mockData";
 import { RefreshCw, Sparkles, Bell, CheckCircle2 } from "lucide-react";
 import { NavigationRail } from "./components/NavigationRail";
@@ -25,21 +26,9 @@ import { DuyetBenCanh, trangThaiMD } from "./components/DuyetBenCanh";
 import { TinhTrangHeThong } from "./components/TinhTrangHeThong";
 import type { NguoiDung } from "./lib/taiKhoan";
 import { cacNguoiNoiChuaGan } from "./lib/nguoiNoi";
-
-/** Trạng thái không còn đúng sau khi tải lại trang: đang ghi âm, đường dẫn blob của bản ghi. */
-function truocKhiLuu(s: Session): Session {
-  const { audioUrl, ...con } = s;
-  return { ...con, isRecording: false };
-}
-function sauKhiNap(s: Session): Session {
-  return { ...s, isRecording: false, audioUrl: undefined };
-}
-/** Băm ngắn (djb2) để làm khoá kết quả duyệt theo nội dung bản nháp. Không dùng cho bảo mật. */
-function bamChuoi(s: string) {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
-  return (h >>> 0).toString(36);
-}
+import { trichNguCanhChoTroLy } from "./lib/nguCanhTroLy";
+import { phatHienMauThuanXuyenLanKham } from "./lib/doiChieuLanKham";
+import { bamChuoi, useSessionsStore } from "./hooks/useSessionsStore";
 
 type AppProps = { nguoiDung: NguoiDung; onDangXuat: () => Promise<void> };
 
@@ -59,87 +48,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       localStorage.setItem("meditrace_taskbar_position", taskbarPosition);
     } catch {}
   }, [taskbarPosition]);
-  const [sessions, setSessions] = useState<Session[]>(() => {
-    try {
-      const saved = localStorage.getItem("meditrace_sessions");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(sauKhiNap);
-      }
-    } catch (e) {}
-    return initialSessions;
-  });
-  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
-    try {
-      const id = localStorage.getItem("meditrace_ca_dang_mo");
-      if (id && sessions.some((s) => s.id === id)) return id;
-    } catch {}
-    return sessions[0]?.id || initialSessions[0].id;
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem("meditrace_ca_dang_mo", activeSessionId);
-    } catch {}
-  }, [activeSessionId]);
-
-  /**
-   * Lưu ca khám ở hai nơi: trình duyệt (nhanh, có ngay khi F5) và cơ sở dữ liệu trên server
-   * (bảng ca_kham của tài khoản đang đăng nhập — còn khi xoá dữ liệu trình duyệt, mở được từ máy khác).
-   * Khi mở trang, bản nào mới hơn (savedAt) thì dùng bản đó. Chưa đọc xong kho server thì
-   * chưa ghi lên server, để không đè bản mới hơn bằng bản cũ trong trình duyệt.
-   */
-  const [khoServer, setKhoServer] = useState<"dang_doc" | "san_sang" | "loi">("dang_doc");
-  // Mốc lưu của bản trong trình duyệt, đọc MỘT LẦN lúc mở trang — trước khi effect lưu bên dưới
-  // ghi mốc mới. (Đọc trong effect thì ở chế độ dev React chạy effect hai lần, lần hai đọc phải
-  // mốc vừa ghi, tưởng bản trình duyệt mới hơn và ghi đè kho server.)
-  const [mocTrinhDuyet] = useState<number>(() => {
-    try {
-      return localStorage.getItem("meditrace_sessions")
-        ? Number(localStorage.getItem("meditrace_sessions_luc") || 0)
-        : 0;
-    } catch {
-      return 0;
-    }
-  });
-  useEffect(() => {
-    let huy = false;
-    fetch("/api/ca-kham")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`mã ${r.status}`))))
-      .then((d) => {
-        if (huy) return;
-        if (Array.isArray(d.sessions) && d.sessions.length) {
-          const trinhDuyetTrong = !mocTrinhDuyet || sessions.length === 0 || (sessions.length === 1 && !sessions[0].transcript && sessions[0].patientIdentifier.includes("Thêm tên"));
-          if ((d.savedAt || 0) > mocTrinhDuyet || trinhDuyetTrong) {
-            const ds: Session[] = d.sessions.map(sauKhiNap);
-            setSessions(ds);
-            setActiveSessionId((id) => (ds.some((s) => s.id === id) ? id : ds[0].id));
-          }
-        }
-        setKhoServer("san_sang");
-      })
-      .catch(() => !huy && setKhoServer("loi"));
-    return () => {
-      huy = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    const luc = Date.now();
-    const goi = sessions.map(truocKhiLuu);
-    try {
-      localStorage.setItem("meditrace_sessions", JSON.stringify(goi));
-      localStorage.setItem("meditrace_sessions_luc", String(luc));
-    } catch (e) {}
-    if (khoServer !== "san_sang") return;
-    const hen = setTimeout(() => {
-      fetch("/api/ca-kham", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessions: goi, savedAt: luc }),
-      }).catch(() => {});
-    }, 800);
-    return () => clearTimeout(hen);
-  }, [sessions, khoServer]);
+  const { sessions, setSessions, activeSessionId, setActiveSessionId, khoServer } = useSessionsStore();
 
   // Quản lý thu gọn thanh bên thông minh theo kích thước màn hình Tablet
   const [isSessionsSidebarCollapsed, setIsSessionsSidebarCollapsed] = useState(() => {
@@ -192,6 +101,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const [promptTraCuuTrangChu, setPromptTraCuuTrangChu] = useState("");
 
   const [isEvidenceLoading, setIsEvidenceLoading] = useState(false);
+  /** Kế hoạch + bước của việc trợ lý đang chạy, để ngăn phải vẽ thẻ tiến độ thật. */
+  const [tienDoTroLy, setTienDoTroLy] = useState<any | null>(null);
   const [isGeneratingNote, setIsGeneratingNote] = useState(false);
   /** Việc tạo bản nháp đang chạy nền trên máy chủ: lúc bắt đầu, số việc xếp trước. */
   const [tienDoNhap, setTienDoNhap] = useState<{ batDau: number; truoc: number } | null>(null);
@@ -352,7 +263,16 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const setBanSuaDuyet: React.Dispatch<React.SetStateAction<Record<number, string>>> = (u) => capNhatDuyet("banSua", u);
   const [moDuyetBen, setMoDuyetBen] = useState(false);
   const [chonMD, setChonMD] = useState<number | null>(null);
+  const [moDuyetBenCanh, setMoDuyetBenCanh] = useState(true);
   const [luotKiemChung, setLuotKiemChung] = useState<number | null>(null);
+  const chonBanDau = useMemo(
+    () => chonMD
+      ? { loai: "p" as const, id: chonMD }
+      : luotKiemChung
+      ? { loai: "t" as const, so: luotKiemChung }
+      : undefined,
+    [chonMD, luotKiemChung]
+  );
 
   const handleKiemChungLuot = (soLuot: number) => {
     setLuotKiemChung(soLuot);
@@ -722,28 +642,38 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       };
     }
     if (cheDo === "tra_cuu") {
-      // Một ô hỏi (gộp 24/09, như ngăn phải): gắn ca khám thì gửi cả lời thoại + bản nháp, server tự
-      // quyết định trả lời từ ca hay tra tài liệu. Bỏ gắn ca thì chỉ tra tài liệu theo câu hỏi.
-      const ly = lyDoKham(currentSession, noteMeta);
-      const d = await goiNgoai("/api/lookup-official", {
-        question: cauHoi,
-        context: tuyChon.kemNguCanh ? [ly && `Lý do khám: ${ly}`, nguCanh()].filter(Boolean).join("\n") : "",
-        nguon: tuyChon.nguon,
-        ...(tuyChon.kemNguCanh
-          ? { transcript: noteMeta?.transcript || currentSession.transcript, draft: noteMeta?.content || "" }
-          : {}),
-      });
-      if (!d) return null;
+      // Thống nhất dùng `hoiTroLy` (luồng ẩn danh của TroLyTacTu) — chỉ gửi dữ liệu đã ẩn danh, không gửi lời thoại thô.
+      const cauHoiGoc = cauHoi.replace(/\s*\(tra nguồn khác\)$/, "");
+      const nguCanhThat = tuyChon.kemNguCanh
+        ? trichNguCanhChoTroLy({
+            patientSubtitle: currentSession.patientSubtitle,
+            contextNotes: nguCanh(),
+            propositions: noteMeta?.propositions,
+          })
+        : { tuoi: null, gioi: null, coThai: null };
+      const kq = await hoiTroLy(
+        {
+          cauHoi: cauHoiGoc,
+          menhDe: tuyChon.kemNguCanh ? gonMenhDeGui(noteMeta?.propositions) : [],
+          nguCanh: nguCanhThat,
+          nguon: tuyChon.nguon,
+        },
+        (tt) => setTienDoTroLy(tt),
+      );
+      setTienDoTroLy(null);
+      if ("loi" in kq) {
+        setApiError(kq.loi);
+        return null;
+      }
+      const tin = chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, { source: kq.source, model: kq.model });
       return {
-        content: d.answer,
-        sources: d.sources || [],
-        warning: d.warning,
-        cauTruc: d.cauTruc || null,
-        question: cauHoi.replace(/\s*\(tra nguồn khác\)$/, ""),
-        meta: d.caseOnly
-          ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
-          : `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · ${tuyChon.kemNguCanh ? "ca khám + " : ""}tài liệu server tự tìm` +
-            `${d.searchTerms?.pubmed ? ` (từ khoá: ${d.searchTerms.pubmed})` : ""} · tham khảo, bác sĩ quyết định`,
+        content: tin.content || "",
+        sources: tin.sources || [],
+        warning: tin.warning,
+        removedSources: tin.removedSources,
+        cauTruc: tin.cauTruc || null,
+        question: cauHoiGoc,
+        meta: tin.meta || "Trợ lý nhiều tác tử (ẩn danh) · tham khảo, bác sĩ quyết định",
       };
     }
     const d = await goiNgoai("/api/clinical-qa", {
@@ -765,34 +695,38 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     setIsEvidenceLoading(true);
     try {
       if (mode === "tra_cuu") {
-        // Một ô hỏi: gửi cả ca khám; server tự quyết định có tra tài liệu không.
-        const d = await goiNgoai("/api/lookup-official", {
-          question: query,
-          context: nguCanh(),
-          transcript: noteMeta?.transcript || currentSession.transcript,
-          draft: noteMeta?.content || currentTab?.content || "",
-          ...(nguon ? { nguon } : {}),
+        // Trợ lý nhiều tác tử (23/11/2026): điều phối giao việc cho các tác tử; chỉ dữ liệu đã ẩn danh đi ra ngoài,
+        // nên không cần công tắc "Mô hình ngoài". Chữ trong hội thoại và trích dẫn không bao giờ được gửi.
+        const cauHoiGoc = query.replace(/\s*\(tra nguồn khác\)$/, "");
+        setApiError(null);
+        setTienDoTroLy({ keHoach: [], keHoachTuMoHinh: false, buoc: [], xemTruoc: null });
+        const nguCanhThat = trichNguCanhChoTroLy({
+          patientSubtitle: currentSession.patientSubtitle,
+          contextNotes: nguCanh(),
+          propositions: noteMeta?.propositions,
         });
-        if (d) {
-          setEvidenceChat((prev) => [
-            ...prev,
-            {
-              id: `asst-${Date.now()}`,
-              role: "assistant",
-              mode,
-              content: d.answer,
-              sources: d.sources || [],
-              cauTruc: d.cauTruc || null,
-              question: query.replace(/\s*\(tra nguồn khác\)$/, ""),
-              removedSources: d.removedSources || 0,
-              warning: d.warning,
-              meta: d.caseOnly
-                ? `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ từ hội thoại và bản nháp của ca này (không cần tra tài liệu)`
-                : `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · ca khám + tài liệu server tự tìm (Bộ Y tế, MSD, DailyMed, NICE, WHO, CDC, MedlinePlus, PubMed) · tham khảo, bác sĩ quyết định`,
-              timestamp: gio(),
-            },
-          ]);
+        const kq = await hoiTroLy(
+          { cauHoi: cauHoiGoc, menhDe: gonMenhDeGui(noteMeta?.propositions), nguCanh: nguCanhThat, ...(nguon ? { nguon } : {}) },
+          (tt) => setTienDoTroLy(tt),
+        );
+        if ("loi" in kq) {
+          if (kq.code === "cau_hoi_co_danh_tinh") {
+            // Câu bị chặn: bỏ tin của người dùng khỏi hội thoại, báo viết lại, không có tin trợ lý.
+            setEvidenceChat((prev) => prev.filter((m, i) => !(i === prev.length - 1 && m.role === "user" && m.content === query)));
+          }
+          setApiError(kq.loi);
+          return;
         }
+        setEvidenceChat((prev) => [
+          ...prev,
+          {
+            id: `asst-${Date.now()}`,
+            role: "assistant",
+            mode,
+            timestamp: gio(),
+            ...chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, { source: kq.source, model: kq.model }),
+          } as ClinicalChatMessage,
+        ]);
         return;
       }
       const d = await goiNgoai("/api/clinical-qa", {
@@ -815,6 +749,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       }
     } finally {
       setIsEvidenceLoading(false);
+      setTienDoTroLy(null);
     }
   };
 
@@ -1099,7 +1034,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   {currentTab?.type === "transcript" && (
                     <TranscriptView
                       transcript={currentSession.transcript}
+                      gioiTinh={currentSession.patientSubtitle}
                       onUpdateTranscript={handleUpdateTranscript}
+                      onUpdateSegments={(segs) =>
+                        handleUpdateSession({
+                          transcriptSegments: [...(currentSession.transcriptSegments || []), ...segs],
+                        })
+                      }
                       isRecording={currentSession.isRecording}
                       audioUrl={currentSession.audioUrl}
                       onStartRecording={() => handleUpdateSession({ isRecording: true })}
@@ -1112,38 +1053,109 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     <ContextView
                       tab={currentTab}
                       onUpdateContent={handleUpdateTabContent}
+                      patientSubtitle={currentSession.patientSubtitle}
                     />
                   )}
 
                   {(currentTab?.type === "soap" ||
                     currentTab?.type === "leaflet" ||
                     currentTab?.type === "custom") && (
-                    <NoteEditorView
-                      tab={currentTab}
-                      onUpdateContent={handleUpdateTabContent}
-                      onRegenerateNote={handleRegenerateNoteStyle}
-                      isGenerating={isGeneratingNote}
-                      danhDau={
-                        noteMeta?.propositions
-                          ? noteMeta.propositions.map((pp) => ({
-                              id: pp.id,
-                              text: pp.text,
-                              textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
-                              trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
-                            }))
-                          : undefined
-                      }
-                      chonId={chonMD}
-                      onChonMenhDe={(id) => {
-                        setChonMD(id);
-                        if (id !== null) {
-                          setLuotKiemChung(null);
-                          handleSelectNavigationItem("proof");
-                        }
-                      }}
-                      transcript={noteMeta?.transcript || currentSession.transcript}
-                      onKiemChungLuot={handleKiemChungLuot}
-                    />
+                    <div className="flex-1 flex flex-col @4xl:flex-row min-h-0 overflow-hidden @container">
+                      <div className="flex-1 min-w-0 min-h-0 flex flex-col relative">
+                        {noteMeta && (noteMeta.propositions?.length || 0) > 0 && !moDuyetBenCanh && (
+                          <button
+                            type="button"
+                            onClick={() => setMoDuyetBenCanh(true)}
+                            className="no-print absolute top-3 right-3 z-20 px-3 py-1.5 rounded-xl bg-white border border-[#BAE6FD] text-xs font-semibold text-[#0369A1] shadow-tactile-doctor-pill hover:bg-[#F0F9FF] cursor-pointer"
+                          >
+                            Mở ngăn duyệt ({noteMeta.propositions.length})
+                          </button>
+                        )}
+                        <NoteEditorView
+                          tab={currentTab}
+                          onUpdateContent={handleUpdateTabContent}
+                          onRegenerateNote={handleRegenerateNoteStyle}
+                          isGenerating={isGeneratingNote}
+                          danhDau={
+                            noteMeta?.propositions
+                              ? noteMeta.propositions.map((pp) => ({
+                                  id: pp.id,
+                                  text: pp.text,
+                                  textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
+                                  trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
+                                }))
+                              : undefined
+                          }
+                          chonId={chonMD}
+                          onChonMenhDe={(id) => {
+                            setChonMD(id);
+                            if (id !== null) {
+                              setMoDuyetBenCanh(true);
+                            }
+                          }}
+                          transcript={noteMeta?.transcript || currentSession.transcript}
+                          onKiemChungLuot={handleKiemChungLuot}
+                          noteMeta={noteMeta}
+                          patientIdentifier={currentSession.patientIdentifier}
+                          quyetDuyet={quyetDuyet}
+                          banSuaDuyet={banSuaDuyet}
+                          signOff={currentSession.signOff}
+                          crossVisitAlerts={phatHienMauThuanXuyenLanKham(currentSession, sessions)}
+                          onSignOff={async () => {
+                            const ds = noteMeta?.propositions || [];
+                            const soGiu = ds.filter((p) => quyetDuyet[p.id] === "giu").length;
+                            const soSua = ds.filter((p) => quyetDuyet[p.id] === "sua").length;
+                            const soBo = ds.filter((p) => quyetDuyet[p.id] === "bo").length;
+                            const coNguon = ds.filter((p) => p.evidenceTurns.length > 0).length;
+                            const tyLeCoNguon = ds.length ? Math.round((coNguon / ds.length) * 100) : 100;
+                            const res = await fetch(`/api/sessions/${encodeURIComponent(currentSession.id)}/sign-off`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                tongMenhDe: ds.length,
+                                soGiu,
+                                soSua,
+                                soBo,
+                                tyLeCoNguon,
+                                contentHash: bamChuoi(currentTab.content),
+                              }),
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              handleUpdateSession({
+                                signOff: {
+                                  signedAt: data.signedAt,
+                                  tongMenhDe: data.tongMenhDe,
+                                  soGiu: data.soGiu,
+                                  soSua: data.soSua,
+                                  soBo: data.soBo,
+                                  tyLeCoNguon: data.tyLeCoNguon,
+                                  hash: data.hash,
+                                  wormSeq: data.wormSeq,
+                                },
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                      {noteMeta && (noteMeta.propositions?.length || 0) > 0 && moDuyetBenCanh && (
+                        <div className="w-full @4xl:w-80 xl:w-96 flex-shrink-0 min-h-0 max-h-[45vh] @4xl:max-h-none no-print">
+                          <DuyetBenCanh
+                            note={noteMeta}
+                            quyet={quyetDuyet}
+                            setQuyet={setQuyetDuyet}
+                            banSua={banSuaDuyet}
+                            setBanSua={setBanSuaDuyet}
+                            chonId={chonMD}
+                            onChon={setChonMD}
+                            onMoToanMan={() => handleSelectNavigationItem("proof")}
+                            onDong={() => setMoDuyetBenCanh(false)}
+                            audioUrl={currentSession.audioUrl}
+                            segments={currentSession.transcriptSegments}
+                          />
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -1176,6 +1188,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                 hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
                 onSuggestQuestions={deXuatCauHoi}
                 onAddToContext={themVaoNguCanh}
+                tienDoTroLy={tienDoTroLy}
+                laQuanTri={nguoiDung.vai === "quan_tri"}
               />
             </div>
           </div>
@@ -1213,13 +1227,9 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             setQuyetChung={setQuyetDuyet}
             banSuaChung={banSuaDuyet}
             setBanSuaChung={setBanSuaDuyet}
-            chonBanDau={
-              chonMD
-                ? { loai: "p", id: chonMD }
-                : luotKiemChung
-                ? { loai: "t", so: luotKiemChung }
-                : undefined
-            }
+            chonBanDau={chonBanDau}
+            audioUrl={currentSession.audioUrl}
+            segments={currentSession.transcriptSegments}
           />
         )}
 
@@ -1276,7 +1286,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   <div className="max-w-xl">
                     <h2 className="text-[14px] font-semibold text-[#174F70]">Mô hình ngoài (Dịch vụ đám mây / API thương mại)</h2>
                     <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">
-                      Cho phép gửi nội dung ca khám ra dịch vụ mô hình ngoài để hỗ trợ sửa theo lời nhắc, hỏi đáp về ca khám, gợi ý câu hỏi và so sánh mô hình. Khâu tách mệnh đề và bản nháp chính mặc định vẫn do mô hình Qwen3–4B của dự án xử lý tại chỗ để đảm bảo quyền riêng tư y tế.
+                      Khi bật, nội dung gửi ra được che một số mẫu định danh trực tiếp mà hệ thống nhận diện được. Đây chỉ là giảm thiểu rủi ro, không bảo đảm ẩn danh hoàn toàn; hãy chỉ gửi dữ liệu phù hợp với chính sách cơ sở. Bản nháp chính vẫn do Qwen3–4B xử lý tại chỗ.
                     </p>
                   </div>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3.5 py-2 text-[12px] font-semibold text-[#345F79] hover:bg-[#EAF4FA] transition-colors">

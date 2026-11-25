@@ -47,6 +47,7 @@ def _nap_mo_hinh(ten_mo_hinh, adapter=None):
                              bnb_4bit_quant_type="nf4",
                              bnb_4bit_compute_dtype=torch.bfloat16)
     model = AutoModelForCausalLM.from_pretrained(ten_mo_hinh, quantization_config=bnb,
+                                                 torch_dtype=torch.bfloat16,
                                                  device_map="auto")
     if adapter:
         from peft import PeftModel

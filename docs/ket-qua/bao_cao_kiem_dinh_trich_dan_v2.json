@@ -1,0 +1,83 @@
+{
+  "tep_du_lieu": "D:\\Claude\\meditrace-ma-nguon\\data\\hoi_thoai_viet_v2_mo_rong.jsonl",
+  "kich_thuoc_bytes": 43643561,
+  "tong_so_ca": 5000,
+  "tong_so_menh_de": 47530,
+  "tong_so_trich_dan": 52634,
+  "so_khop_tuyet_doi": 52634,
+  "ty_le_khop_tuyet_doi_pct": 100.0,
+  "so_ca_kiem_trie": 50,
+  "so_trich_dan_kiem_trie": 529,
+  "so_khop_trie": 529,
+  "ty_le_khop_trie_pct": 100.0,
+  "tong_loi": 0,
+  "thoi_gian_giay": 4.354,
+  "toc_do_ca_giay": 1148.5,
+  "chi_tiet_loi": {
+    "do_dai_khong_khop": [],
+    "luot_ngoai_khoang": [],
+    "trich_dan_rong": [],
+    "khong_phai_chuoi_con": [],
+    "khong_khop_trie": []
+  },
+  "phan_bo": {
+    "muc": {
+      "BỆNH SỬ HIỆN TẠI": 16338,
+      "KẾ HOẠCH ĐIỀU TRỊ": 6482,
+      "LÝ DO KHÁM BỆNH": 5000,
+      "CHẨN ĐOÁN": 5000,
+      "KHÁM LÂM SÀNG": 4755,
+      "DỊ ỨNG": 3171,
+      "TIỀN SỬ BỆNH": 2597,
+      "TIỀN SỬ GIA ĐÌNH VÀ XÃ HỘI": 2290,
+      "THUỐC ĐANG DÙNG": 1897
+    },
+    "chu_the": {
+      "bệnh nhân": 45240,
+      "người nhà": 685,
+      "mẹ": 330,
+      "bố": 250,
+      "bà ngoại": 181,
+      "bà nội": 172,
+      "vợ": 137,
+      "chồng": 122,
+      "chị gái": 111,
+      "anh trai": 88,
+      "ông nội": 88,
+      "con gái": 70,
+      "con trai": 56
+    },
+    "trang_thai": {
+      "còn hiệu lực": 45269,
+      "chưa giải quyết": 1524,
+      "bị thay thế": 737
+    },
+    "mien": {
+      "chưa rõ": 5000
+    },
+    "he_co_quan": {
+      "Đa cơ quan / Tổng quát": 5000
+    },
+    "bay": {
+      "nguoi_nha_ke_ho": 1944,
+      "nguoi_ke_benh_minh": 1347,
+      "tien_su_gia_dinh": 666,
+      "luoc_chu_ngu": 636,
+      "dien_bien": 631,
+      "hoi_khong_dap": 630,
+      "bo_sung": 608,
+      "dinh_chinh": 600,
+      "gia_dinh": 596,
+      "dai_tu_ho_hang": 587,
+      "mau_thuan": 524,
+      "di_ung_nguoi_nha": 277,
+      "nguon_khac_nhau": 238,
+      "lieu_dinh_chinh": 137
+    }
+  },
+  "thong_ke_do_dai_trich_dan": {
+    "ngan_nhat": 3,
+    "dai_nhat": 533,
+    "trung_binh": 79.94
+  }
+}

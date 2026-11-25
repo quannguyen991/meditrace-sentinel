@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>MediTrace Sentinel — Bàn Làm Việc Bác Sĩ & Thanh Công Cụ Tích Hợp</title>
+  <link rel="stylesheet" href="../web/dist/assets/index-DKIiyCUN.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      margin: 0;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- Container Note Editor -->
+  <div style="width: 1140px; max-width: 100%;" class="bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col font-sans">
+    
+    <!-- Header Note Editor Bar (Chuẩn Bàn Làm Việc Bác Sĩ) -->
+    <div class="px-5 py-3 border-b border-slate-200 bg-white flex items-center justify-between gap-3 shadow-xs">
+      
+      <!-- Trái: Tab thông tin ca khám -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Hồ Sơ Bệnh Án SOAP — Bác Đặng Đình Phúc (62T)</h3>
+            <span class="px-2 py-0.2 rounded text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ✓ 8 CHỐT ĐÃ DUYỆT
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            Chẩn đoán: LAD Stent Post-PCI (6M) • Mọi thông tin gắn mỏ neo dẫn chứng [T1, T2...]
+          </p>
+        </div>
+      </div>
+
+      <!-- Phải: Nhóm công cụ chuyên dụng của Bác Sĩ -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Nút 1: Bật Terminal / Live AI Pipeline Trace (Aesthetic Dark Antigravity Style Pill) -->
+        <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-900 hover:bg-slate-800 text-slate-100 rounded-lg font-mono font-medium shadow-sm transition-all border border-slate-700 active:scale-95 cursor-pointer">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span class="text-[11px]">Tiến trình AI (8 Chốt)</span>
+        </button>
+
+        <!-- Nút 2: Tờ dặn dò người bệnh (Clinical Discharge Sheet) -->
+        <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg font-semibold border border-emerald-200 shadow-sm transition-all active:scale-95 cursor-pointer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span class="text-[11px]">Tờ Dặn Dò Xuất Viện</span>
+        </button>
+
+        <!-- Nút 3: In / Xuất PDF Hồ Sơ Bệnh Án -->
+        <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium border border-slate-300 shadow-xs transition-all active:scale-95 cursor-pointer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span class="text-[11px]">In Bệnh Án</span>
+        </button>
+
+        <!-- Nút 4: Sao chép hồ sơ -->
+        <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-semibold shadow-sm transition-all active:scale-95 cursor-pointer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="text-[11px]">Sao chép</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Nội dung bệnh án mẫu phía dưới -->
+    <div class="p-8 bg-slate-50/50 text-slate-900 font-sans space-y-4">
+      
+      <!-- Cảnh báo tương tác DDI nổi bật -->
+      <div class="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-950 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px] tracking-wider uppercase">
+            CẢNH BÁO DƯỢC LÝ CẤP 1
+          </span>
+          <span class="font-medium">
+            Phát hiện tương tác cạnh tranh enzym gan: <strong>Plavix (Clopidogrel) + Omeprazole</strong>. Đã tự động thay thế bằng <strong>Nexium (Esomeprazole)</strong> để bảo vệ Stent mạch vành.
+          </span>
+        </div>
+        <span class="text-[11px] font-mono text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200 flex-shrink-0 font-semibold">
+          Chốt 5 Guardrail
+        </span>
+      </div>
+
+      <!-- Khối SOAP Bệnh Án -->
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-4 text-xs leading-relaxed text-slate-800">
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1.5 flex items-center justify-between">
+            <span>S — SUBJECTIVE (LÝ DO KHÁM & BỆNH SỬ)</span>
+            <span class="text-[10px] text-slate-400 font-mono">Dẫn chứng đoạn thoại</span>
+          </h4>
+          <p class="mt-2 text-slate-700">
+            Bệnh nhân đi tái khám định kỳ sau can thiệp đặt stent động mạch vành LAD 6 tháng, kèm theo cảm giác tức nặng ngực trái âm ỉ xuất hiện 3 ngày nay khi leo cầu thang <span class="bg-sky-100 text-sky-900 font-mono font-bold px-1.5 py-0.5 rounded text-[11px] cursor-pointer hover:bg-sky-200">[T2]</span>.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1.5 flex items-center justify-between">
+            <span>TIỀN SỬ BỆNH & GIA ĐÌNH (ĐÃ PHÂN GIẢI ĐẠI TỪ)</span>
+            <span class="text-[10px] text-emerald-600 font-mono">Chốt K2 Xác thực</span>
+          </h4>
+          <p class="mt-2 text-slate-700">
+            • <strong>Bản thân:</strong> Tăng huyết áp 5 năm đang điều trị duy trì; Can thiệp đặt Stent LAD tháng 4/2026; Tiền sử viêm loét dạ dày tá tràng mạn tính <span class="bg-sky-100 text-sky-900 font-mono font-bold px-1.5 py-0.5 rounded text-[11px]">[T4]</span>.
+          </p>
+          <p class="mt-1 text-slate-700">
+            • <strong>Gia đình:</strong> Bố ruột mắc đái tháo đường type 2 <span class="bg-slate-100 text-slate-700 font-mono font-bold px-1.5 py-0.5 rounded text-[11px]">[T5]</span> (Chốt K2 xác nhận là tiền sử người nhà, không gán nhầm vào bệnh nhân).
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1.5 flex items-center justify-between">
+            <span>P — PLAN (KẾ HOẠCH ĐIỀU TRỊ NGOẠI TRÚ & ĐÍNH CHÍNH)</span>
+            <span class="text-[10px] text-emerald-600 font-mono">Chốt K4 Đính chính</span>
+          </h4>
+          <p class="mt-2 text-slate-700">
+            1. <strong>Plavix (Clopidogrel) 75mg:</strong> Uống 1 viên/ngày sau ăn sáng no <span class="bg-sky-100 text-sky-900 font-mono font-bold px-1.5 py-0.5 rounded text-[11px]">[T6]</span>.
+          </p>
+          <p class="mt-1 text-slate-700">
+            2. <strong>Coversyl (Perindopril) 5mg:</strong> Uống 1 viên/ngày vào buổi sáng (Chốt K4 đã tự động hủy bỏ lời nói nhầm "2 viên" của bệnh nhân và chốt đúng liều 1 viên) <span class="bg-emerald-100 text-emerald-900 font-mono font-bold px-1.5 py-0.5 rounded text-[11px]">[T7, T8]</span>.
+          </p>
+          <p class="mt-1 text-slate-700">
+            3. <strong>Nexium 40mg:</strong> Uống 1 viên trước ăn sáng 30 phút (thay thế Omeprazole để phòng ngừa tắc Stent).
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

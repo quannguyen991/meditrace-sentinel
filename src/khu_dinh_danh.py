@@ -66,16 +66,57 @@ class ClinicalDeidentifier:
         r"(?i)(?:sinh ngày|ngày sinh|ns|sinh)\s*(?:là|:)?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})\b"
     )
 
-    # Từ chỉ địa chỉ chi tiết (hỗ trợ cả các mệnh đề có dấu phẩy nối như số nhà, đường, quận/huyện, tỉnh/thành)
+    # Từ chỉ địa chỉ chi tiết (hỗ trợ cả các mệnh đề có dấu phẩy nối như số nhà, đường, phường/xã, quận/huyện, tỉnh/thành)
     RE_DIA_CHI = re.compile(
-        r"(?i)(?:địa chỉ(?:\s+cư\s+trú)?|nhà ở|trú tại|ngụ tại|thường trú tại|hộ khẩu tại)\s*(?:là|:)?\s*([^.\n;]+?(?:huyện|quận|thị xã|tỉnh|thành phố)[^.\n;]*)"
+        r"(?i)(?:địa chỉ(?:\s+cư\s+trú)?|nhà ở|trú tại|ngụ tại|thường trú tại|hộ khẩu tại)\s*(?:là|:)?\s*([^.\n;]+?(?:phường|xã|thị trấn|huyện|quận|thị xã|tỉnh|thành phố|tp\.?)[^.\n;]*)"
     )
+
+    # Bảng chuyển số đọc tiếng Việt (ASR) thành chữ số
+    SO_DOC_VIET: Dict[str, str] = {
+        "không": "0", "linh": "0", "lẻ": "0",
+        "một": "1", "mốt": "1",
+        "hai": "2",
+        "ba": "3",
+        "bốn": "4", "tư": "4",
+        "năm": "5", "lăm": "5", "nhăm": "5",
+        "sáu": "6",
+        "bảy": "7", "bẩy": "7",
+        "tám": "8",
+        "chín": "9",
+    }
+
+    @classmethod
+    def chuan_hoa_so_noi_tieng_viet(cls, van_ban: str) -> str:
+        """Đổi chuỗi số đọc bằng chữ tiếng Việt (>= 6 chữ số liên tiếp, cho phép ngắt phẩy/gạch) thành chữ số
+        để bắt SĐT/CCCD/BHYT từ đầu ra ASR mà không làm hỏng 'hai ngày', 'ba viên'."""
+        if not van_ban:
+            return van_ban
+        tu_so = "|".join(sorted(cls.SO_DOC_VIET.keys(), key=len, reverse=True))
+        # Khớp chuỗi gồm ít nhất 6 từ số liên tiếp (ngăn cách bởi khoảng trắng, dấu phẩy hoặc gạch nối)
+        pat = re.compile(
+            rf"(?i)\b((?:{tu_so})(?:(?:\s+|,\s*|\s*-\s*)(?:{tu_so})){{5,}})\b"
+        )
+
+        def _thay(m: re.Match) -> str:
+            cum = m.group(1)
+            cac_tu = re.split(r"[\s,-]+", cum.strip().lower())
+            digits = [cls.SO_DOC_VIET[t] for t in cac_tu if t in cls.SO_DOC_VIET]
+            return "".join(digits) if len(digits) >= 6 else cum
+
+        return pat.sub(_thay, van_ban)
 
     # Tiền tố tên người cụ thể (không dùng nhãn vai 'bệnh nhân:' để tránh bắt nhầm lời thoại)
     TIEN_TO_TEN = [
         "tôi tên là", "bệnh nhân tên là", "cháu tên là", "em tên là", "bác tên là",
         "họ và tên:", "họ tên:", "tên tôi là"
     ]
+
+    # Danh xưng + Họ người Việt phổ biến + Tên viết hoa (vd: "Chào bác Nguyễn Văn An", "Mời anh Trần Minh Tuấn")
+    RE_DANH_XUNG_HO_TEN = re.compile(
+        r"\b(?:[Bb]ác|[Aa]nh|[Cc]hị|[Cc]ô|[Cc]hú|[Ôô]ng|[Bb]à|[Ee]m|[Cc]háu|[Bb]é|[Bb]ệnh\s+nhân)\s+"
+        r"((?:Nguyễn|Trần|Lê|Phạm|Hoàng|Huỳnh|Phan|Vũ|Võ|Đặng|Bùi|Đỗ|Hồ|Ngô|Dương|Lý|Đinh|Đoàn|Lương|Trịnh|Đào|Mai|Tạ|Hà|Tăng|Quách|Chu|La|Tô|Châu|Tống|Thái|Nghiêm|Kiều|Lâm|Vương)"
+        r"(?:\s+[A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ][a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]+){1,3})\b"
+    )
 
     @classmethod
     def an_danh_van_ban(
@@ -91,6 +132,7 @@ class ClinicalDeidentifier:
         if not van_ban:
             return KetQuaKhuDinhDanh(van_ban_da_an_danh="", danh_sach_pii=[], bang_anh_xa_giai_ma={})
 
+        van_ban = cls.chuan_hoa_so_noi_tieng_viet(van_ban)
         vb_xu_ly = van_ban
         danh_sach_pii: List[ThucThePII] = []
         bang_anh_xa: Dict[str, str] = {}
@@ -172,6 +214,14 @@ class ClinicalDeidentifier:
                     token = _lay_token("HO_TEN")
                     bang_anh_xa[token] = val
                     danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
+
+        # 10. Tự động bắt tên riêng người Việt đi sau danh xưng (vd: "Chào bác Nguyễn Văn An")
+        for m in cls.RE_DANH_XUNG_HO_TEN.finditer(van_ban):
+            val = m.group(1).strip()
+            if not any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
+                token = _lay_token("HO_TEN")
+                bang_anh_xa[token] = val
+                danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
 
         # Thực hiện thay thế các thực thể trong văn bản
         for token, val_goc in bang_anh_xa.items():

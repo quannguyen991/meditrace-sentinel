@@ -126,7 +126,7 @@ DAN_THUONG = {
     # duoc dap an voi hoi thoai. Test `test_BAT_BIEN_2_dap_an_giu_THUAT_NGU_CHUAN`
     # bat duoc.
     "khó ngủ": ["nằm mãi không ngủ được", "trở mình cả đêm không ngủ"],
-    "hồi hộp": ["tim đập thình thịch", "trong người bồn chồn"],
+    "hồi hộp": ["tim đập loạn lên", "trong người bồn chồn"],
     "vã mồ hôi": ["mồ hôi ra đầm đìa", "ướt hết áo"],
     "sưng đau khớp ngón chân cái": ["ngón chân cái sưng đau",
                                     "ngón chân cái đau không đi được"],

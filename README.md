@@ -83,7 +83,7 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 
 ## Kết quả đo
 
-**Dữ liệu.** 5.000 hội thoại mô phỏng sinh ra từ 100 khuôn ca bệnh, chia theo khuôn để mô hình không nhìn thấy trước bài kiểm tra. Ngoài ra có 300 ca "thử thách" tạo theo cặp, mỗi cặp chỉ khác nhau một điểm: đổi người mang dị ứng, người nói tự sửa, lỗi khi chép giọng nói, và phương ngữ.
+**Dữ liệu.** 5.000 hội thoại mô phỏng thế hệ v1 (200 khuôn bệnh, tỷ lệ lặp câu 76,92%) và thế hệ v2 mở rộng (657 khuôn ca bệnh phân bố trên 21 hệ cơ quan; tỷ lệ lặp câu giảm xuống 47,37%, câu khác nhau tăng 127% lên 45.835 câu, MTLD 145,4, Distinct-2 0,0468; 100% trích dẫn nguyên văn chuỗi con 52.634/52.634 và 0 lỗi quy tắc ngữ pháp; manifest đóng băng WORM tại `data/manifest_v2_mo_rong_5000.json`). Toàn bộ được chia độc lập theo khuôn bệnh để mô hình không nhìn thấy trước bài kiểm tra. Ngoài ra có 300 ca "thử thách" tạo theo cặp, mỗi cặp chỉ khác nhau một điểm: đổi người mang dị ứng, người nói tự sửa, lỗi khi chép giọng nói, và phương ngữ.
 
 **Cách đọc các chỉ số.** *F₁* là điểm gộp giữa "ghi đúng" và "ghi đủ" (càng cao càng tốt). *SER* là tỷ lệ ô ghi sai, thiếu hoặc thừa so với đáp án (càng thấp càng tốt).
 
@@ -95,6 +95,7 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 | Thông tin đúng bị bước kiểm căn cứ chặn nhầm | — | **0 trên 30.136** |
 | Đổi chỗ bệnh nhân và người nhà: điểm ROUGE-1 | 1,0000 | 1,0000 (không phát hiện) |
 | Cùng phép đổi đó: điểm riêng của dự án | — | giảm 0,1381 (phát hiện được) |
+| **Tỷ lệ bỏ sót mệnh đề lâm sàng (30 ca phát triển, 304 mệnh đề)** | Qwen3-4B chưa train: **43,1%** (khoảng 37,6%–48,7%) | Qwen3-4B + adapter: **11,5%** (khoảng 8,4%–15,6%, 0 ca JSON lỗi) |
 
 **Những kết quả không có lợi, ghi đúng như đo:**
 
@@ -102,6 +103,7 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 - Một mô hình thương mại lớn ghi nhầm người **ít hơn** mô hình nhỏ của dự án (1,4 % so với 7,6 % ở bộ "tự sửa"). Dự án không giải quyết trọn vẹn việc gán đúng người; điểm khác biệt là chạy ngay trên máy và kiểm được từng dòng.
 - Bước kiểm căn cứ giảm lỗi nghiêm trọng (dị ứng, thuốc, chẩn đoán) nhưng làm **tăng số thông tin bị bỏ sót** (ví dụ 4,5 % lên 7,7 % ở bộ "đổi người"). Đây là một sự đánh đổi có thật.
 - Đáp án mô phỏng gần như chép nguyên văn từ lời thoại, nên kết quả **chỉ có hiệu lực trên dữ liệu mô phỏng**, chưa nói được điều gì về hội thoại thật.
+- **Tỷ lệ lặp câu của bộ dữ liệu v2 dừng ở 47,37%** (câu $\ge 8$ từ lặp 42,19%), do bản chất tự nhiên của 5.000 ca khám lâm sàng chứa các phản xạ chào hỏi và xác nhận lịch sự của người bệnh ("của tôi ạ.", "vâng ạ."); dự án không cắt gọt gượng ép để làm đẹp chỉ số.
 
 **Tốc độ.** Khoảng **3,5 phút** để tạo một bản nháp trên một card RTX 3060. Các bước theo luật mất dưới một giây.
 
@@ -112,7 +114,7 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 | Đường dẫn | Nội dung |
 |---|---|
 | `src/` | Toàn bộ phần xử lý bằng Python (xem bảng các bước ở trên). |
-| `tests/` | Hơn 1.200 phép thử tự động (`pytest`). |
+| `tests/` | **1.528 bài kiểm thử tự động** (`pytest`, 27 bỏ qua theo môi trường phần cứng) và 11 nhóm kiểm thử TypeScript (`web/`) vượt qua 100%. |
 | `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ. |
 | `kaggle-kernels/` | Mỗi thư mục là một lượt huấn luyện hoặc chạy mô hình trên Kaggle (điền tên tài khoản Kaggle của bạn trong `kernel-metadata.json` nếu muốn chạy lại). |
 | `web/` | Giao diện web và máy chủ; xem `web/README.md`. |

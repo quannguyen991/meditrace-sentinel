@@ -12,37 +12,143 @@ Tích hợp công thức Cockcroft-Gault / CKD-EPI và ma trận điều chỉnh
 from typing import Dict, List, Optional, Any
 import re
 
+from src.chuan_hoa_don_vi_xet_nghiem import chuan_hoa_creatinine, chuan_hoa_du_lieu_xet_nghiem
 
-def tinh_crcl(tuoi: int, can_nang_kg: float, creatinine_mg_dl: float, la_nu: bool = False) -> float:
+
+def tinh_crcl(
+    tuoi: Optional[int],
+    can_nang_kg: Optional[float],
+    creatinine_mg_dl: Optional[float],
+    la_nu: bool = False
+) -> float:
     """Tính độ thanh thải Creatinine ước tính theo công thức Cockcroft-Gault (mL/phút).
     
     CrCl = ((140 - Tuổi) * Cân nặng) / (72 * Creatinine mg/dL) * (0.85 nếu Nữ)
+    Bổ sung NoneType guards toàn diện để ngăn chặn ngoại lệ thời gian chạy khi thiếu dữ liệu.
     """
-    if creatinine_mg_dl <= 0 or can_nang_kg <= 0 or tuoi <= 0:
+    if creatinine_mg_dl is None or can_nang_kg is None or tuoi is None:
+        return 0.0
+    try:
+        creat_f = float(creatinine_mg_dl)
+        weight_f = float(can_nang_kg)
+        age_i = int(tuoi)
+    except (ValueError, TypeError):
+        return 0.0
+
+    if creat_f <= 0 or weight_f <= 0 or age_i <= 0:
         return 0.0
     
-    crcl = ((140 - tuoi) * can_nang_kg) / (72 * creatinine_mg_dl)
+    crcl = ((140 - age_i) * weight_f) / (72.0 * creat_f)
     if la_nu:
         crcl *= 0.85
     return round(crcl, 1)
 
 
-def chuyen_umol_sang_mg_dl(creatinine_umol_l: float) -> float:
+def tinh_egfr_ckd_epi_2021(
+    creatinine_mg_dl: Optional[float],
+    tuoi: Optional[int],
+    la_nu: bool = False
+) -> float:
+    """Tính mức lọc cầu thận ước tính (eGFR) theo công thức KDIGO CKD-EPI 2021 (Race-Free).
+    
+    Khuyến cáo chính thức của KDIGO 2021 / NKF-ASN task force loại bỏ biến chủng tộc:
+    eGFR = 142 * min(Scr/kappa, 1)^alpha * max(Scr/kappa, 1)^(-1.200) * 0.9938^tuoi * (1.012 nếu Nữ)
+    
+    Hệ số:
+    - Nữ: kappa = 0.7, alpha = -0.241, hệ số giới tính = 1.012
+    - Nam: kappa = 0.9, alpha = -0.302, hệ số giới tính = 1.000
+    - Scr: Serum Creatinine (mg/dL)
+    - tuoi: Tuổi bệnh nhân (năm)
+    
+    Ưu điểm lâm sàng: Hoàn toàn không cần Cân nặng, Chiều cao hay Chủng tộc;
+    cung cấp cơ chế fallback an toàn tuyệt đối khi hồ sơ ngoại trú thiếu cân nặng/chiều cao.
+    """
+    if creatinine_mg_dl is None:
+        return 0.0
+    try:
+        scr = float(creatinine_mg_dl)
+        age = int(tuoi) if tuoi is not None else 50
+    except (ValueError, TypeError):
+        return 0.0
+
+    if scr <= 0 or age <= 0:
+        return 0.0
+
+    if age < 18:
+        # Chốt chặn an toàn: KDIGO quy định CKD-EPI chỉ áp dụng cho người >= 18 tuổi
+        return 0.0
+
+    kappa = 0.7 if la_nu else 0.9
+    alpha = -0.241 if la_nu else -0.302
+    he_so_nu = 1.012 if la_nu else 1.0
+
+    ti_le = scr / kappa
+    min_val = min(ti_le, 1.0)
+    max_val = max(ti_le, 1.0)
+
+    egfr = 142.0 * (min_val ** alpha) * (max_val ** -1.200) * (0.9938 ** age) * he_so_nu
+    return round(egfr, 1)
+
+
+def tinh_egfr_bedside_schwartz_nhi_khoa(
+    creatinine_mg_dl: Optional[float],
+    chieu_cao_cm: Optional[float]
+) -> Optional[float]:
+    """Tính mức lọc cầu thận eGFR cho trẻ em (< 18 tuổi) theo công thức Bedside Schwartz (KDIGO 2012/2021).
+    
+    Công thức chuẩn quốc tế nhi khoa:
+    eGFR = (0.413 * chieu_cao_cm) / creatinine_mg_dl (mL/phút/1.73 m2)
+    
+    Quy tắc an toàn lâm sàng:
+    Tuyệt đối không áp dụng công thức CKD-EPI của người lớn cho bệnh nhân dưới 18 tuổi.
+    Nếu thiếu chiều cao ở trẻ em, bắt buộc trả về None kèm cảnh báo yêu cầu đo chiều cao.
+    """
+    if creatinine_mg_dl is None or chieu_cao_cm is None:
+        return None
+    try:
+        scr = float(creatinine_mg_dl)
+        height = float(chieu_cao_cm)
+    except (ValueError, TypeError):
+        return None
+
+    if scr <= 0 or height <= 0:
+        return None
+
+    egfr = (0.413 * height) / scr
+    return round(egfr, 1)
+
+
+def chuyen_umol_sang_mg_dl(creatinine_umol_l: Optional[float]) -> float:
     """Chuyển đơn vị Creatinine từ umol/L sang mg/dL."""
-    return round(creatinine_umol_l / 88.4, 2)
+    if creatinine_umol_l is None:
+        return 0.0
+    try:
+        val = float(creatinine_umol_l)
+        if val <= 0:
+            return 0.0
+        return round(val / 88.4, 2)
+    except (ValueError, TypeError):
+        return 0.0
 
 
-def phan_do_suy_than(crcl_hoac_egfr: float) -> Dict[str, str]:
+def phan_do_suy_than(crcl_hoac_egfr: Optional[float]) -> Dict[str, str]:
     """Phân độ suy thận theo hướng dẫn KDIGO."""
-    if crcl_hoac_egfr >= 90:
+    if crcl_hoac_egfr is None:
+        return {"giai_doan": "CHUA_XAC_DINH", "mo_ta": "Chưa có dữ liệu chức năng thận", "muc_do": "KHONG_RO"}
+    try:
+        val = float(crcl_hoac_egfr)
+    except (ValueError, TypeError):
+        return {"giai_doan": "CHUA_XAC_DINH", "mo_ta": "Dữ liệu chức năng thận không hợp lệ", "muc_do": "KHONG_RO"}
+
+    if val >= 90:
         return {"giai_doan": "G1", "mo_ta": "Chức năng thận bình thường hoặc tăng", "muc_do": "BINH_THUONG"}
-    elif crcl_hoac_egfr >= 60:
+    elif val >= 60:
         return {"giai_doan": "G2", "mo_ta": "Suy giảm chức năng thận nhẹ", "muc_do": "GIAM_NHE"}
-    elif crcl_hoac_egfr >= 45:
+    elif val >= 45:
         return {"giai_doan": "G3a", "mo_ta": "Suy giảm chức năng thận nhẹ đến trung bình", "muc_do": "GIAM_TRUNG_BINH"}
-    elif crcl_hoac_egfr >= 30:
+    elif val >= 30:
         return {"giai_doan": "G3b", "mo_ta": "Suy giảm chức năng thận trung bình đến nặng", "muc_do": "GIAM_VUA_NANG"}
-    elif crcl_hoac_egfr >= 15:
+    elif val >= 15:
         return {"giai_doan": "G4", "mo_ta": "Suy giảm chức năng thận nặng", "muc_do": "GIAM_NANG"}
     else:
         return {"giai_doan": "G5", "mo_ta": "Suy thận giai đoạn cuối (ESRD)", "muc_do": "NGUY_KICH"}
@@ -148,6 +254,51 @@ QUY_TAC_THAN = [
         "khuyen_cao": "CHỐNG CHỈ ĐỊNH hoặc THẬN TRỌNG TỐI ĐA",
         "lieu_de_xuat": "Tránh dùng nếu eGFR < 30 mL/phút hoặc Kali máu > 5.0 mmol/L.",
         "ly_do": "Nguy cơ tăng Kali máu ác tính gây block nhĩ thất và ngừng tim đột ngột."
+    },
+    {
+        "thuoc": "methotrexate",
+        "ten_chuan": "Methotrexate",
+        "dieu_kien": lambda cr: cr < 30,
+        "muc_do": "CRITICAL",
+        "khuyen_cao": "CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI khi CrCl/eGFR < 30 mL/phút",
+        "lieu_de_xuat": "Chống chỉ định. Chuyển sang liệu pháp an toàn cho thận.",
+        "ly_do": "Methotrexate bài xuất 80-90% qua thận; suy thận nặng gây tích lũy nồng độ cực độc dẫn tới suy tủy toàn bộ và tử vong."
+    },
+    {
+        "thuoc": "methotrexate",
+        "ten_chuan": "Methotrexate",
+        "dieu_kien": lambda cr: 30 <= cr < 50,
+        "muc_do": "WARNING",
+        "khuyen_cao": "Giảm 50% liều Methotrexate tuần",
+        "lieu_de_xuat": "Giảm 50% liều dùng mỗi tuần, bổ sung acid folic 5mg/tuần và theo dõi công thức máu mỗi 2 tuần.",
+        "ly_do": "Giảm độ lọc cầu thận làm chậm thanh thải Methotrexate, tăng độc tính tế bào máu và gan."
+    },
+    {
+        "thuoc": "colchicine",
+        "ten_chuan": "Colchicine",
+        "dieu_kien": lambda cr: cr < 30,
+        "muc_do": "CRITICAL",
+        "khuyen_cao": "CHỐNG CHỈ ĐỊNH khi dùng kèm thuốc ức chế CYP3A4/P-gp; giảm liều tối đa 0.5 mg/ngày",
+        "lieu_de_xuat": "Tối đa 0.5 mg/ngày cho đợt Gout cấp và không lặp lại liệu trình trong vòng 14 ngày.",
+        "ly_do": "Nguy cơ ngộ độc Colchicine cấp tính gây tiêu cơ vân, suy tủy và liệt thần kinh cơ đe dọa tính mạng."
+    },
+    {
+        "thuoc": "ethambutol",
+        "ten_chuan": "Ethambutol",
+        "dieu_kien": lambda cr: cr < 30,
+        "muc_do": "WARNING",
+        "khuyen_cao": "Giãn khoảng cách dùng 15-25 mg/kg 3 lần mỗi tuần (thay vì dùng hàng ngày)",
+        "lieu_de_xuat": "15-25 mg/kg uống 3 lần/tuần (thứ 2 - 4 - 6).",
+        "ly_do": "Ethambutol thải trừ chủ yếu qua thận; tích lũy kéo dài gây độc tính viêm dây thần kinh thị giác giảm thị lực không hồi phục."
+    },
+    {
+        "thuoc": "digoxin",
+        "ten_chuan": "Digoxin",
+        "dieu_kien": lambda cr: cr < 50,
+        "muc_do": "WARNING",
+        "khuyen_cao": "Giảm 50% liều hoặc dùng cách ngày (ví dụ 0.125 mg cách ngày)",
+        "lieu_de_xuat": "0.0625 - 0.125 mg mỗi ngày hoặc 0.125 mg cách ngày; theo dõi nồng độ thuốc máu định kỳ.",
+        "ly_do": "Độ thanh thải Digoxin tỷ lệ thuận với CrCl; suy thận làm giảm bài tiết dẫn tới ngộ độc Digoxin gây loạn nhịp tim nguy hiểm."
     }
 ]
 
@@ -156,7 +307,7 @@ QUY_TAC_GAN = [
     {
         "thuoc": "paracetamol",
         "ten_chuan": "Paracetamol (Acetaminophen)",
-        "dieu_kien": lambda ast, alt, bili: ast > 150 or alt > 150 or bili > 35,
+        "dieu_kien": lambda ast, alt, bili: ast > 120 or alt > 120 or bili > 35,
         "muc_do": "WARNING",
         "khuyen_cao": "Giảm liều tối đa không quá 2.000 mg/ngày (tối đa 500mg mỗi 6-8 giờ)",
         "lieu_de_xuat": "500 mg mỗi 8 giờ khi sốt cao, tổng liều không quá 2.000 mg/24 giờ.",
@@ -174,11 +325,20 @@ QUY_TAC_GAN = [
     {
         "thuoc": "atorvastatin",
         "ten_chuan": "Statin (Atorvastatin / Rosuvastatin)",
-        "dieu_kien": lambda ast, alt, bili: ast > 150 or alt > 150,
+        "dieu_kien": lambda ast, alt, bili: ast > 120 or alt > 120,
         "muc_do": "WARNING",
-        "khuyen_cao": "Tạm ngừng Statin hoặc giảm liều tối thiểu, theo dõi lại men gan sau 2-4 tuần",
+        "khuyen_cao": "Tạm ngừng Statin hoặc giảm liều tối thiểu, theo dõi lại men gan sau 2-4 tuần (AST/ALT > 3x ULN)",
         "lieu_de_xuat": "Tạm ngừng dùng statin cho đến khi ALT/AST hồi phục về mức < 3 lần giới hạn bình thường.",
         "ly_do": "Statin chuyển hóa chủ yếu qua gan, tổn thương tế bào gan đang tiến triển làm tăng nguy cơ hủy hoại cơ và độc tính gan."
+    },
+    {
+        "thuoc": "rosuvastatin",
+        "ten_chuan": "Rosuvastatin (Crestor)",
+        "dieu_kien": lambda ast, alt, bili: ast > 120 or alt > 120,
+        "muc_do": "WARNING",
+        "khuyen_cao": "Tạm ngừng Rosuvastatin hoặc giảm liều tối thiểu, theo dõi lại men gan sau 2-4 tuần (AST/ALT > 3x ULN)",
+        "lieu_de_xuat": "Tạm ngừng dùng statin cho đến khi ALT/AST hồi phục về mức < 3 lần giới hạn bình thường.",
+        "ly_do": "Statin làm tăng nguy cơ hủy hoại cơ và độc tính gan khi men gan vượt quá 3 lần giới hạn trên."
     }
 ]
 
@@ -230,42 +390,129 @@ TUONG_TAC_THUC_PHAM = [
 
 
 def kiem_tra_hieu_chinh_lieu(
-    danh_sach_thuoc: List[str],
+    danh_sach_thuoc: Optional[List[str]],
     ket_qua_xet_nghiem: Optional[Dict[str, Any]] = None,
     thong_tin_benh_nhan: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Phân tích và đưa ra khuyến cáo hiệu chỉnh liều theo chức năng Thận & Gan.
+    
+    Tích hợp cơ chế KDIGO CKD-EPI 2021 Race-Free fallback và bảo vệ NoneType toàn diện:
+    - Khi khuyết thiếu Cân nặng/Chiều cao/Chủng tộc: Tự động dùng công thức KDIGO CKD-EPI 2021
+      ước tính eGFR từ Creatinine, Tuổi và Giới tính.
+    - Khi có đầy đủ Cân nặng: Tính toán song song cả CrCl (Cockcroft-Gault) và eGFR (CKD-EPI 2021).
+    - Bảo vệ chống mọi lỗi NoneType / TypeError khi các trường xét nghiệm hoặc thông tin bệnh nhân bị None.
     
     Args:
         danh_sach_thuoc: Danh sách tên thuốc (chuỗi văn bản hoặc tên biệt dược)
         ket_qua_xet_nghiem: Dict chứa các chỉ số xét nghiệm (creatinine, egfr, ast, alt, bilirubin...)
         thong_tin_benh_nhan: Dict chứa tuổi, cân nặng, giới tính (nu: bool)
     """
-    ket_qua_xet_nghiem = ket_qua_xet_nghiem or {}
-    thong_tin_benh_nhan = thong_tin_benh_nhan or {}
+    ket_qua_xet_nghiem = chuan_hoa_du_lieu_xet_nghiem(ket_qua_xet_nghiem)
+    thong_tin_benh_nhan = thong_tin_benh_nhan if isinstance(thong_tin_benh_nhan, dict) else {}
     
     # 1. Đánh giá chức năng thận
     crcl_val: Optional[float] = None
-    egfr_val: Optional[float] = ket_qua_xet_nghiem.get("egfr")
+    egfr_lab_val = ket_qua_xet_nghiem.get("egfr")
     creat_val = ket_qua_xet_nghiem.get("creatinine")
     
-    tuoi = thong_tin_benh_nhan.get("tuoi", 50)
-    can_nang = thong_tin_benh_nhan.get("can_nang_kg", 60.0)
-    la_nu = thong_tin_benh_nhan.get("la_nu", False)
-    
-    if creat_val is not None and creat_val > 0:
-        # Nếu creat > 30 thường là umol/L, nếu < 10 là mg/dL
-        creat_mg_dl = creat_val if creat_val < 15.0 else chuyen_umol_sang_mg_dl(creat_val)
+    # Chuẩn hóa thông tin bệnh nhân an toàn trước NoneType
+    tuoi_raw = thong_tin_benh_nhan.get("tuoi")
+    try:
+        tuoi: int = int(tuoi_raw) if tuoi_raw is not None else 50
+    except (ValueError, TypeError):
+        tuoi = 50
+
+    can_nang_raw = thong_tin_benh_nhan.get("can_nang_kg")
+    can_nang: Optional[float] = None
+    if can_nang_raw is not None:
+        try:
+            can_nang_float = float(can_nang_raw)
+            if can_nang_float > 0:
+                can_nang = can_nang_float
+        except (ValueError, TypeError):
+            can_nang = None
+
+    la_nu_raw = thong_tin_benh_nhan.get("la_nu", False)
+    la_nu = False
+    if isinstance(la_nu_raw, bool):
+        la_nu = la_nu_raw
+    elif isinstance(la_nu_raw, str):
+        la_nu = any(x in la_nu_raw.lower() for x in ("nữ", "nu", "female", "f"))
+    elif la_nu_raw is not None:
+        la_nu = bool(la_nu_raw)
+
+    # Chuyển đổi Creatinine sang mg/dL nếu có
+    creat_mg_dl: Optional[float] = ket_qua_xet_nghiem.get("creatinine_mg_dl")
+    if creat_mg_dl is None and creat_val is not None:
+        c_norm = chuan_hoa_creatinine(creat_val, ket_qua_xet_nghiem.get("creatinine_unit"))
+        creat_mg_dl = c_norm["mg_dl"] if c_norm else None
+
+    # Chuẩn hóa Chiều cao cho nhi khoa nếu có
+    chieu_cao_raw = thong_tin_benh_nhan.get("chieu_cao_cm", thong_tin_benh_nhan.get("chieu_cao"))
+    chieu_cao: Optional[float] = None
+    if chieu_cao_raw is not None:
+        try:
+            chieu_cao_float = float(chieu_cao_raw)
+            if chieu_cao_float > 0:
+                chieu_cao = chieu_cao_float
+        except (ValueError, TypeError):
+            chieu_cao = None
+
+    # Tính Cockcroft-Gault CrCl nếu có cân nặng (chỉ áp dụng người lớn)
+    if creat_mg_dl is not None and can_nang is not None and tuoi >= 18:
         crcl_val = tinh_crcl(tuoi, can_nang, creat_mg_dl, la_nu)
-    
-    # Ưu tiên eGFR nếu có, hoặc dùng CrCl
+
+    # Đánh giá eGFR (KDIGO CKD-EPI 2021 race-free fallback cho người lớn, Bedside Schwartz cho nhi khoa)
+    egfr_val: Optional[float] = None
+    phuong_phap_uoc_tinh: str = "Chua_co_du_lieu"
+
+    if egfr_lab_val is not None:
+        try:
+            egfr_val = float(egfr_lab_val)
+            phuong_phap_uoc_tinh = "Ket_qua_phong_xet_nghiem"
+        except (ValueError, TypeError):
+            egfr_val = None
+
+    if egfr_val is None and creat_mg_dl is not None:
+        if tuoi < 18:
+            # Chốt chặn nhi khoa (< 18 tuổi): Bắt buộc dùng Bedside Schwartz, không dùng CKD-EPI người lớn
+            if chieu_cao is not None:
+                egfr_val = tinh_egfr_bedside_schwartz_nhi_khoa(creat_mg_dl, chieu_cao)
+                phuong_phap_uoc_tinh = "KDIGO_Bedside_Schwartz_Nhi_Khoa"
+            else:
+                egfr_val = None
+                phuong_phap_uoc_tinh = "Nhi_Khoa_Thieu_Chieu_Cao_Bedside_Schwartz"
+        else:
+            # Người lớn >= 18 tuổi: Áp dụng KDIGO CKD-EPI 2021 Race-Free
+            egfr_val = tinh_egfr_ckd_epi_2021(creat_mg_dl, tuoi, la_nu)
+            phuong_phap_uoc_tinh = "KDIGO_CKD_EPI_2021_Race_Free"
+
+    # Chỉ số thận chính: Ưu tiên eGFR (lab hoặc CKD-EPI 2021), kế đến CrCl
     chi_so_than_chinh = egfr_val if egfr_val is not None else crcl_val
     phan_do_than = phan_do_suy_than(chi_so_than_chinh) if chi_so_than_chinh is not None else None
     
-    # 2. Đánh giá chức năng gan
-    ast_val = ket_qua_xet_nghiem.get("ast", ket_qua_xet_nghiem.get("got", 25.0))
-    alt_val = ket_qua_xet_nghiem.get("alt", ket_qua_xet_nghiem.get("gpt", 25.0))
-    bili_val = ket_qua_xet_nghiem.get("bilirubin", 15.0)
+    # 2. Đánh giá chức năng gan (NoneType safe)
+    ast_raw = ket_qua_xet_nghiem.get("ast")
+    if ast_raw is None:
+        ast_raw = ket_qua_xet_nghiem.get("got")
+    try:
+        ast_val = float(ast_raw) if ast_raw is not None else 25.0
+    except (ValueError, TypeError):
+        ast_val = 25.0
+
+    alt_raw = ket_qua_xet_nghiem.get("alt")
+    if alt_raw is None:
+        alt_raw = ket_qua_xet_nghiem.get("gpt")
+    try:
+        alt_val = float(alt_raw) if alt_raw is not None else 25.0
+    except (ValueError, TypeError):
+        alt_val = 25.0
+
+    bili_raw = ket_qua_xet_nghiem.get("bilirubin")
+    try:
+        bili_val = float(bili_raw) if bili_raw is not None else 15.0
+    except (ValueError, TypeError):
+        bili_val = 15.0
     
     gan_bat_thuong = (ast_val > 100 or alt_val > 100 or bili_val > 30)
     
@@ -273,8 +520,9 @@ def kiem_tra_hieu_chinh_lieu(
     canh_bao_gan: List[Dict[str, Any]] = []
     canh_bao_thuc_pham: List[Dict[str, Any]] = []
     
-    # Chuẩn hóa tên các thuốc đang dùng
-    thuoc_lower = [t.lower().strip() for t in danh_sach_thuoc]
+    # Chuẩn hóa an toàn danh sách thuốc
+    danh_sach_thuoc_an_toan = danh_sach_thuoc if isinstance(danh_sach_thuoc, list) else []
+    thuoc_lower = [str(t).lower().strip() for t in danh_sach_thuoc_an_toan if t is not None and str(t).strip()]
     chuoi_thuoc_gop = " ".join(thuoc_lower)
     
     # Kiểm tra hiệu chỉnh thận
@@ -285,7 +533,7 @@ def kiem_tra_hieu_chinh_lieu(
                     canh_bao_than.append({
                         "thuoc": qt["ten_chuan"],
                         "muc_do": qt["muc_do"],
-                        "chi_so_danh_gia": f"CrCl/eGFR = {chi_so_than_chinh} mL/phút ({phan_do_than['giai_doan'] if phan_do_than else ''})",
+                        "chi_so_danh_gia": f"CrCl/eGFR = {round(chi_so_than_chinh, 1)} mL/phút ({phan_do_than['giai_doan'] if phan_do_than else ''})",
                         "khuyen_cao": qt["khuyen_cao"],
                         "lieu_de_xuat": qt["lieu_de_xuat"],
                         "ly_do_lam_sang": qt["ly_do"]
@@ -320,6 +568,7 @@ def kiem_tra_hieu_chinh_lieu(
         "chuc_nang_than": {
             "crcl_cockcroft_gault": crcl_val,
             "egfr_ckd_epi": egfr_val,
+            "phuong_phap_uoc_tinh": phuong_phap_uoc_tinh,
             "phan_do": phan_do_than
         },
         "chuc_nang_gan": {

@@ -75,6 +75,19 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   const lanCuoiCoTieng = useRef(Date.now());
   const [micError, setMicError] = useState<string | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [banGhiKhoiPhuc, setBanGhiKhoiPhuc] = useState<{ blob: Blob; url: string; count: number } | null>(null);
+
+  useEffect(() => {
+    let huy = false;
+    if (!session.isRecording) {
+      void realAudioService.recoverPersistedRecording().then((rec) => {
+        if (!huy && rec) setBanGhiKhoiPhuc(rec);
+      });
+    }
+    return () => {
+      huy = true;
+    };
+  }, []);
 
   useEffect(() => {
     setTitleInput(session.patientIdentifier);
@@ -217,8 +230,17 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
       if (!doan.length) throw new Error("PhoWhisper không nghe ra câu nào trong đoạn ghi âm.");
       const cu = session.transcript || "";
       const moi = dongTuDoan(doan, data.diarization, soNguoiNoiLonNhat(cu)).join("\n");
+      const segCu = session.transcriptSegments || [];
+      const offsetLuot = cu ? cu.split("\n").filter((l) => l.trim()).length : 0;
+      const segMoi = Array.isArray(data.transcriptSegments)
+        ? data.transcriptSegments.map((s: any, idx: number) => ({
+            ...s,
+            luot: offsetLuot + idx + 1,
+          }))
+        : [];
       onUpdateSession({
         transcript: cu ? `${cu.trimEnd()}\n${moi}` : moi,
+        ...(segMoi.length ? { transcriptSegments: [...segCu, ...segMoi] } : {}),
       });
       setMicError(
         `Đã chép ${doan.length} lượt bằng ${doan[0]?.asr_model || "PhoWhisper"} (${data.seconds ?? "?"}s). ` +
@@ -545,8 +567,8 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             }`}
             title={
               choPhepNgoai
-                ? "Mô hình ngoài đang BẬT: Đang cho phép gửi ca khám tới API mô hình ngoài để hỗ trợ hỏi đáp/sửa nhanh. Bấm để tắt."
-                : "Mô hình ngoài đang TẮT: Dữ liệu hoàn toàn xử lý nội bộ (Qwen3-4B & PhoWhisper). Bấm để bật."
+                ? "Mô hình ngoài đang BẬT: dữ liệu gửi đi được che một số mẫu định danh nhận diện được, không bảo đảm ẩn danh hoàn toàn. Bấm để tắt."
+                : "Mô hình ngoài đang TẮT: bản nháp xử lý tại chỗ; ghi âm/phiên âm phụ thuộc cấu hình dịch vụ. Bấm để bật gửi dữ liệu tới mô hình ngoài."
             }
           >
             <Cloud size={13} className={choPhepNgoai ? "text-[#DC2626]" : "text-[#94A3B8]"} />
@@ -578,6 +600,40 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
     {dangChep && (
       <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-4 py-2 text-xs text-[#0369A1] z-20">
         Đang chép đoạn ghi âm bằng PhoWhisper chạy tại chỗ… (lần đầu phải nạp mô hình, mất khoảng 10–30 giây)
+      </div>
+    )}
+
+    {banGhiKhoiPhuc && !isRecording && (
+      <div className="bg-[#EFF6FF] border-b border-[#BAE6FD] px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#0C4A6E] z-20">
+        <span>
+          Phát hiện bản ghi âm dang dở được lưu cục bộ trong IndexedDB ({banGhiKhoiPhuc.count} đoạn) trước khi tải lại trang.
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const rec = banGhiKhoiPhuc;
+              setBanGhiKhoiPhuc(null);
+              onUpdateSession({ audioUrl: rec.url });
+              void realAudioService.clearPersistedRecording();
+              void chepBangPhoWhisper(rec.blob);
+            }}
+            className="px-3 py-1 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold cursor-pointer"
+          >
+            Khôi phục &amp; Chép âm
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              URL.revokeObjectURL(banGhiKhoiPhuc.url);
+              setBanGhiKhoiPhuc(null);
+              void realAudioService.clearPersistedRecording();
+            }}
+            className="px-2.5 py-1 rounded-lg border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#475569] font-semibold cursor-pointer"
+          >
+            Bỏ qua
+          </button>
+        </div>
       </div>
     )}
 

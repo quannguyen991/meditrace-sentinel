@@ -9,6 +9,7 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "fs";
 import path from "path";
+import { taoKhoWorm } from "./worm";
 
 // Đổi chỗ đặt tệp bằng biến MEDITRACE_DB (dùng khi thử nghiệm, để không đụng dữ liệu thật).
 // Các tệp JSON cũ được tìm trong cùng thư mục với tệp dữ liệu.
@@ -159,3 +160,15 @@ export function chuyenJsonCu(uid: number): string[] {
   db.prepare("INSERT INTO cai_dat (khoa, gia_tri) VALUES ('da_chuyen_json', ?)").run(String(Date.now()));
   return ketQua;
 }
+
+const DUONG_DAN_WORM_JSONL = (() => {
+  if (process.env.MEDITRACE_WORM_JSONL) return process.env.MEDITRACE_WORM_JSONL;
+  if (process.env.MEDITRACE_DB) return path.join(THU_MUC, "worm_signoff_log.jsonl");
+  const dataDir = path.resolve(process.cwd(), "..", "data");
+  return fs.existsSync(dataDir)
+    ? path.join(dataDir, "worm_signoff_log.jsonl")
+    : path.join(THU_MUC, "worm_signoff_log.jsonl");
+})();
+
+export const khoWorm = taoKhoWorm(db, DUONG_DAN_WORM_JSONL);
+export { taoKhoWorm } from "./worm";

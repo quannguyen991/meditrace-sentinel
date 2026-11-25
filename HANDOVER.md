@@ -130,9 +130,9 @@ d:\Claude\meditrace-ma-nguon\
 │   ├── da_benh_ly.py                          # Ma trận đa bệnh lý kết hợp (cấp tính + mạn tính)
 │   ├── dieu_phoi_ha_tang.py                   # Quản lý tài nguyên phần cứng, chống tràn RAM & chữ ký SHA-256
 │   ├── canh_bao/                              # Gói chính sách phân loại cờ đỏ lâm sàng
-│   └── sinh_hoi_thoai_viet.py                 # Bộ sinh 200 khuôn ca bệnh đa chuyên khoa
+│   └── sinh_hoi_thoai_viet.py                 # Bộ sinh hội thoại từ 200 khuôn ca bệnh (ngu_lieu_viet.BENH)
 │
-├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.320+ TESTS)
+├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.528 test Pytest + 11 test TypeScript passed 100%, 24/11/2026)
 │   ├── test_guardrails.py                     # Test 5 tầng Guardrails, chống ảo giác số liệu & liều trần
 │   ├── test_khoa_bang_chung.py                # Test 26 kịch bản khóa bằng chứng K1-K7
 │   ├── test_cong_rui_ro.py                    # Test cổng cách ly an toàn & phân nhóm rủi ro
@@ -140,7 +140,7 @@ d:\Claude\meditrace-ma-nguon\
 │   ├── test_duoc_ly_lam_sang.py               # Test phát hiện tương tác thuốc kỵ nhau DDI
 │   ├── test_hieu_chinh_lieu.py                # Test chỉnh liều theo chức năng thận Cockcroft-Gault
 │   ├── test_can_lam_sang.py                   # Test cảnh báo cận lâm sàng nguy kịch
-│   └── test_kiem_khuon.py                     # Test bộ dữ liệu 200 khuôn ca bệnh
+│   └── test_kiem_khuon.py                     # Test bộ kiểm khuôn ca bệnh (src/kiem_khuon.py), đo trên 200 khuôn
 │
 ├── tools/                                     # CÔNG CỤ HỖ TRỢ & XUẤT BÁO CÁO
 │   ├── tao_bao_cao_nang_cap_word.py           # Script tự động xuất file Word báo cáo thẩm mỹ cao
@@ -148,7 +148,7 @@ d:\Claude\meditrace-ma-nguon\
 │
 ├── web/                                       # GIAO DIỆN NGƯỜI DÙNG WEB (REACT + TYPESCRIPT)
 │   ├── src/components/EvidenceView.tsx        # Màn hình duyệt từng mệnh đề, nối đường bằng chứng
-│   └── src/components/SoapNote.tsx            # Màn hình hiển thị bệnh án chuẩn SOAP
+│   └── src/components/NoteEditorView.tsx      # Màn soạn, sửa và in bệnh án (không còn SoapNote.tsx)
 │
 └── docs/                                      # TÀI LIỆU, SLIDE & HÌNH ẢNH DỰ THI
     └── tai-lieu/                              # Chứa file Word, Markdown giải thích chi tiết
@@ -173,7 +173,7 @@ d:\Claude\meditrace-ma-nguon\
 | **11** | **Điều phối Phần cứng & SHA-256**<br>[`src/dieu_phoi_ha_tang.py`](file:///d:/Claude/meditrace-ma-nguon/src/dieu_phoi_ha_tang.py) | Máy tính phòng khám yếu dễ bị treo RAM; hồ sơ bệnh án điện tử sợ bị sửa lén. | Tự động giải phóng bộ nhớ VRAM/RAM; Tự động đóng dấu băm SHA-256 niêm phong bệnh án sau khi bác sĩ duyệt để bảo đảm giá trị pháp lý trước tòa án. |
 | **12** | **Ma trận Đa bệnh lý**<br>[`src/da_benh_ly.py`](file:///d:/Claude/meditrace-ma-nguon/src/da_benh_ly.py) | Bệnh nhân thực tế thường mắc nhiều bệnh kết hợp (cấp tính trên nền mạn tính). | Ma trận kết hợp bệnh lý phức tạp (viêm phổi + đái tháo đường + tăng huyết áp), bảo đảm dữ liệu mô phỏng sát 100% thực tế. |
 | **13** | **An toàn Bắt nhầm hơn bỏ sót**<br>[`src/canh_bao/`](file:///d:/Claude/meditrace-ma-nguon/src/canh_bao/) | Kiểm tra quá gắt sẽ làm mất các thông tin nguy hiểm (dị ứng, thuốc tim). | Không bao giờ âm thầm xóa bỏ thông tin nghi ngờ; chuyển toàn bộ vào mục "Cần bác sĩ xác nhận" kèm cờ đỏ để bác sĩ tự quyết định. |
-| **14** | **200 Khuôn ca bệnh Lâm sàng**<br>[`src/sinh_hoi_thoai_viet.py`](file:///d:/Claude/meditrace-ma-nguon/src/sinh_hoi_thoai_viet.py) | Số lượng bài mẫu ít dễ bị học vẹt, thiếu tính khái quát. | Mở rộng gấp đôi lên 200 khuôn bệnh thuộc 10 chuyên khoa; chứng minh bằng toán học độ đa dạng khác biệt đạt 78.3%. |
+| **14** | **657 Khuôn ca bệnh Lâm sàng**<br>[`src/kho_khuon.py`](file:///d:/Claude/meditrace-ma-nguon/src/kho_khuon.py) | Số lượng bài mẫu ít dễ bị học vẹt, thiếu tính khái quát. | 657 khuôn bệnh thuộc 21 hệ cơ quan (200 khuôn gốc + 457 khuôn mở rộng, đếm ngày 24/11/2026). Toàn bộ khuôn mở rộng mang cờ `da_duyet = False`. Sinh 5.000 ca v2 mở rộng đạt 45.835 câu duy nhất (+127% so với v1), tỷ lệ lặp giảm từ 76,92% xuống 47,37% (câu $\ge 8$ từ lặp 42,19%), MTLD đạt 145,4, Distinct-2 đạt 0,0468, 52.634/52.634 trích dẫn khớp nguyên văn 100,0000% và 0 lỗi quy tắc câu. Đóng băng WORM tại `data/manifest_v2_mo_rong_5000.json`. |
 
 ---
 
@@ -232,12 +232,12 @@ class GuardrailResult:
 * Card đồ họa: Tùy chọn (Hỗ trợ GPU CUDA hoặc CPU thuần).
 
 ### 6.2 Lệnh chạy toàn bộ kiểm thử tự động (Unit Test Suite)
-Dự án có bộ kiểm thử tự động toàn diện với hơn **1.320 bài test** (hiện tại tất cả đều đạt 100%):
+Dự án có bộ kiểm thử tự động gồm **1.357 bài test** được thu thập (ngày 17/11/2026). Chưa xác nhận được là tất cả đều xanh: một lượt chạy đầy đủ bị treo ở khoảng 47%, và các test âm thanh chạy mô hình thật nên cần tách riêng. Chạy phần không âm thanh:
 ```powershell
 # Chạy toàn bộ test suite an toàn lâm sàng cốt lõi
 pytest tests/test_guardrails.py tests/test_khoa_bang_chung.py tests/test_cong_rui_ro.py tests/test_thang_diem_lam_sang.py
 
-# Kết quả mong đợi: 58 passed in ~25-30s
+# Ví dụ kết quả từng ghi nhận cho nhóm test cốt lõi; đây không phải tổng số test của repo.
 ```
 
 ### 6.3 Lệnh khởi động dịch vụ Backend API

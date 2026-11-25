@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>MediTrace Sentinel — Tờ Dặn Dò Người Bệnh Xuất Viện Chuẩn Quốc Tế</title>
+  <link rel="stylesheet" href="../web/dist/assets/index-DKIiyCUN.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal Container -->
+  <div style="width: 980px; max-width: 100%;" class="bg-white border border-slate-300 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.45)] overflow-hidden flex flex-col font-sans">
+    
+    <!-- Header Modal Bar (Giao diện bác sĩ) -->
+    <div class="px-6 py-3.5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-white tracking-wide">
+              Tờ Dặn Dò Xuất Viện & Hướng Dẫn Điều Trị Ngoại Trú
+            </h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              CHUẨN BỆNH VIỆN QUỐC TẾ
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Bản in A4 chuyển giao trực tiếp cho người bệnh và gia đình • Mã kiểm định: #BN-7718
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button class="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg shadow-sm transition-all cursor-pointer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>In Tờ Dặn Dò (A4)</span>
+        </button>
+        <button class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Nội dung Tờ Dặn Dò Chuẩn Bệnh Viện (Khổ A4 sạch sẽ) -->
+    <div class="p-8 sm:p-10 bg-white text-slate-900 max-h-[700px] overflow-y-auto">
+      
+      <!-- Header Bệnh Viện & Tiêu Đề Tài Liệu -->
+      <div class="border-b-2 border-slate-900 pb-4 mb-5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
+                MT
+              </div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900">
+                BỆNH VIỆN ĐA KHOA QUỐC TẾ MEDITRACE
+              </h4>
+            </div>
+            <p class="text-[11px] text-slate-600 font-medium mt-0.5">
+              Khoa Tim Mạch Can Thiệp & Nội Tổng Quát — Phòng Khám Ngoại Trú P.204
+            </p>
+            <p class="text-[10px] text-slate-400">
+              Địa chỉ: 18 Giải Phóng, Hà Nội • Hotline cấp cứu 24/7: 1900 6868
+            </p>
+          </div>
+
+          <div class="text-right text-[11px] text-slate-600 font-mono space-y-0.5">
+            <p class="font-bold text-slate-900">MẪU: 08/BV-TDD-2026</p>
+            <p>Số hồ sơ: <span class="font-bold text-slate-800">#HS-7718-V2</span></p>
+            <p>Ngày in: 27/10/2026</p>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wider">
+            HƯỚNG DẪN DẶN DÒ NGƯỜI BỆNH KHI VỀ NHÀ
+          </h2>
+          <p class="text-xs text-slate-500 mt-1 italic">
+            (Kèm theo Đơn thuốc ngoại trú số: DT-9042 • Xin vui lòng đọc kỹ và mang theo khi tái khám)
+          </p>
+        </div>
+
+        <!-- Thông tin hành chính bệnh nhân -->
+        <div class="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div>
+            <span class="text-slate-500">Họ và tên:</span>{" "}
+            <strong class="text-slate-900 uppercase">Bác Đặng Đình Phúc</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Tuổi / Giới:</span>{" "}
+            <strong class="text-slate-800">62 tuổi / Nam</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Mã BHYT:</span>{" "}
+            <strong class="text-slate-800 font-mono">GD-4-01-23-45678</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Bác sĩ phụ trách:</span>{" "}
+            <strong class="text-slate-800">ThS. BS. Nguyễn Minh Quân</strong>
+          </div>
+          <div class="col-span-2 sm:col-span-4 border-t border-slate-200 pt-2">
+            <span class="text-slate-500">Chẩn đoán xuất viện:</span>{" "}
+            <strong class="text-slate-900">
+              Theo dõi cơn đau thắt ngực ổn định / Hậu can thiệp Đặt Stent Động Mạch Vành LAD (tháng thứ 6) — Tăng huyết áp Độ II — Viêm dạ dày trào ngược (Đã xử lý tương tác dược lý DDI).
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phần 1: Bảng Ma Trận Lịch Uống Thuốc Chuẩn Y Khoa -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>1. Bảng Hướng Dẫn Chia Liều Uống Thuốc Hàng Ngày</span>
+          </h3>
+          <span class="text-[11px] text-slate-500 italic">
+            * Uống đúng giờ, không tự ý tăng giảm liều
+          </span>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-300 rounded-lg">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-800 border-b border-slate-300 font-semibold text-[11px]">
+                <th class="py-2.5 px-3 w-10 text-center border-r border-slate-200">STT</th>
+                <th class="py-2.5 px-3 min-w-[200px] border-r border-slate-200">Tên Thuốc & Hoạt Chất (Hàm lượng)</th>
+                <th class="py-2.5 px-2.5 w-16 text-center border-r border-slate-200 bg-amber-50/50">SÁNG</th>
+                <th class="py-2.5 px-2.5 w-16 text-center border-r border-slate-200 bg-sky-50/50">TRƯA</th>
+                <th class="py-2.5 px-2.5 w-16 text-center border-r border-slate-200 bg-orange-50/50">CHIỀU</th>
+                <th class="py-2.5 px-2.5 w-16 text-center border-r border-slate-200 bg-indigo-50/50">TỐI</th>
+                <th class="py-2.5 px-3 min-w-[240px]">Cách Dùng & Lời Dặn Của Bác Sĩ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <!-- Thuốc 1 -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-2.5 px-3 text-center font-mono text-slate-500 font-bold border-r border-slate-200">1</td>
+                <td class="py-2.5 px-3 border-r border-slate-200">
+                  <div class="font-bold text-slate-900">Plavix (Clopidogrel) 75mg</div>
+                  <div class="text-[10.5px] text-slate-500 mt-0.5">Thuốc chống kết tập tiểu cầu (bảo vệ Stent)</div>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded text-[9.5px] font-bold border bg-red-50 text-red-700 border-red-200">
+                    BẮT BUỘC UỐNG ĐỀU
+                  </span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center font-bold text-slate-900 border-r border-slate-200 bg-amber-50/20">
+                  <span class="px-1.5 py-0.5 bg-amber-100/80 rounded text-amber-900">1 viên</span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-sky-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-orange-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-indigo-50/20">—</td>
+                <td class="py-2.5 px-3 text-[11px] text-slate-700 leading-relaxed">
+                  Uống sau ăn sáng no 15 phút. Tuyệt đối KHÔNG tự ý ngừng thuốc vì có nguy cơ hình thành cục máu đông gây tắc Stent tử vong!
+                </td>
+              </tr>
+
+              <!-- Thuốc 2 -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-2.5 px-3 text-center font-mono text-slate-500 font-bold border-r border-slate-200">2</td>
+                <td class="py-2.5 px-3 border-r border-slate-200">
+                  <div class="font-bold text-slate-900">Coversyl (Perindopril) 5mg</div>
+                  <div class="text-[10.5px] text-slate-500 mt-0.5">Thuốc hạ huyết áp & bảo vệ tim</div>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded text-[9.5px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                    ĐÃ ĐÍNH CHÍNH LIỀU
+                  </span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center font-bold text-slate-900 border-r border-slate-200 bg-amber-50/20">
+                  <span class="px-1.5 py-0.5 bg-emerald-100/80 rounded text-emerald-900">1 viên</span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-sky-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-orange-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-indigo-50/20">—</td>
+                <td class="py-2.5 px-3 text-[11px] text-slate-700 leading-relaxed">
+                  Uống 1 viên vào buổi sáng cùng 1 cốc nước ấm đầy. (Chốt an toàn K4 đã loại trừ câu nói nhầm 2 viên của người bệnh).
+                </td>
+              </tr>
+
+              <!-- Thuốc 3 -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-2.5 px-3 text-center font-mono text-slate-500 font-bold border-r border-slate-200">3</td>
+                <td class="py-2.5 px-3 border-r border-slate-200">
+                  <div class="font-bold text-slate-900">Nexium (Esomeprazole) 40mg</div>
+                  <div class="text-[10.5px] text-slate-500 mt-0.5">Thuốc giảm tiết acid bảo vệ dạ dày</div>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded text-[9.5px] font-bold border bg-sky-50 text-sky-700 border-sky-200">
+                    AN TOÀN TƯƠNG TÁC DDI
+                  </span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center font-bold text-slate-900 border-r border-slate-200 bg-amber-50/20">
+                  <span class="px-1.5 py-0.5 bg-sky-100/80 rounded text-sky-900">1 viên</span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-sky-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-orange-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-indigo-50/20">—</td>
+                <td class="py-2.5 px-3 text-[11px] text-slate-700 leading-relaxed">
+                  Uống trước khi ăn sáng 30-60 phút. (Đã thay thế Omeprazole nhằm ngăn triệt để tương tác dược lý DDI làm mất tác dụng của Plavix).
+                </td>
+              </tr>
+
+              <!-- Thuốc 4 -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-2.5 px-3 text-center font-mono text-slate-500 font-bold border-r border-slate-200">4</td>
+                <td class="py-2.5 px-3 border-r border-slate-200">
+                  <div class="font-bold text-slate-900">Atorvastatin (Lipitor) 20mg</div>
+                  <div class="text-[10.5px] text-slate-500 mt-0.5">Thuốc hạ mỡ máu & ổn định mảng xơ vữa</div>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded text-[9.5px] font-bold border bg-indigo-50 text-indigo-700 border-indigo-200">
+                    DUY TRÌ MẠCH MÁU
+                  </span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-amber-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-sky-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center text-slate-300 border-r border-slate-200 bg-orange-50/20">—</td>
+                <td class="py-2.5 px-2.5 text-center font-bold text-slate-900 border-r border-slate-200 bg-indigo-50/20">
+                  <span class="px-1.5 py-0.5 bg-indigo-100/80 rounded text-indigo-900">1 viên</span>
+                </td>
+                <td class="py-2.5 px-3 text-[11px] text-slate-700 leading-relaxed">
+                  Uống buổi tối trước khi đi ngủ. Duy trì màng nội mạc mạch máu ổn định và chống tái hẹp lòng mạch.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Phần 2: Chế độ Ăn Uống, Theo Dõi Huyết Áp & Vận Động -->
+      <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="border border-slate-200 rounded-lg p-3.5 bg-slate-50/50">
+          <h4 class="font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5 mb-2 text-[11px]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span>Chế Độ Dinh Dưỡng & Sinh Hoạt Trái Tim</span>
+          </h4>
+          <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-[11px] leading-relaxed">
+            <li><strong>Ăn giảm muối:</strong> Lượng muối ăn dưới 5g/ngày (khoảng 1 thìa cà phê gạt ngang). Không chấm ngập mắm, không dùng cá khô, dưa muối, đồ hộp.</li>
+            <li><strong>Hạn chế mỡ động vật:</strong> Thay mỡ lợn bằng dầu thực vật, ưu tiên ăn cá, thịt nạc luộc, nhiều rau xanh và củ quả.</li>
+            <li><strong>Tuyệt đối không hút thuốc lá, không uống bia rượu:</strong> Khói thuốc làm co thắt mạch vành và kích hoạt phản ứng đông máu làm tắc Stent tức thì.</li>
+            <li><strong>Vận động:</strong> Đi bộ chậm rãi 20-30 phút/ngày, không mang vác vật nặng trên 5kg trong tháng này.</li>
+          </ul>
+        </div>
+
+        <div class="border border-slate-200 rounded-lg p-3.5 bg-slate-50/50">
+          <h4 class="font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5 mb-2 text-[11px]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Theo Dõi Huyết Áp & Đường Huyết Tại Nhà</span>
+          </h4>
+          <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-[11px] leading-relaxed">
+            <li><strong>Đo huyết áp hàng ngày:</strong> Đo vào 2 khung giờ cố định (7h sáng trước khi uống Coversyl và 19h tối). Ghi vào sổ nhật ký huyết áp.</li>
+            <li><strong>Mục tiêu huyết áp:</strong> Giữ huyết áp tâm thu dao động trong khoảng <strong>115 - 130 mmHg</strong>. Nếu HA dưới 90 hoặc trên 160 kèm chóng mặt, liên hệ bác sĩ ngay.</li>
+            <li><strong>Uống nước đủ:</strong> 1.5 - 2 lít nước ấm rải đều trong ngày, không uống quá nhiều nước ngay trước giờ ngủ.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phần 3: Khung Cảnh Báo Nguy Hiểm Đỏ (Red Flags Alert) -->
+      <div class="border-2 border-red-500 rounded-xl p-4 bg-red-50/60 mb-6">
+        <div class="flex items-center gap-2 font-bold text-red-900 text-xs uppercase mb-1.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>DẤU HIỆU CẢNH BÁO NGUY HIỂM — CẦN ĐẾN NGAY PHÒNG CẤP CỨU GẦN NHẤT</span>
+        </div>
+        <p class="text-[11px] text-red-800 mb-2">
+          Bác hoặc người nhà nếu nhận thấy <strong>bất kỳ biểu hiện nào</strong> dưới đây cần gọi xe cấp cứu 115 hoặc đưa người bệnh đến bệnh viện ngay:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-red-950 font-semibold">
+          <div class="flex items-start gap-1.5">
+            <span class="text-red-600 font-bold">•</span>
+            <span>Cơn đau thắt ngực dữ dội kéo dài trên 10 phút, cảm giác đè nặng như đá tảng, lan lên hàm hoặc cánh tay trái.</span>
+          </div>
+          <div class="flex items-start gap-1.5">
+            <span class="text-red-600 font-bold">•</span>
+            <span>Khó thở dồn dập, vã mồ hôi lạnh toàn thân, hoa mắt chóng mặt hoặc ngất xỉu đột ngột.</span>
+          </div>
+          <div class="flex items-start gap-1.5">
+            <span class="text-red-600 font-bold">•</span>
+            <span>Có dấu hiệu xuất huyết: Đi ngoài phân đen như hắc ín, nôn ra dịch nâu đỏ, ho ra máu, chảy máu răng khó cầm (nghi do thuốc chống đông).</span>
+          </div>
+          <div class="flex items-start gap-1.5">
+            <span class="text-red-600 font-bold">•</span>
+            <span>Huyết áp tâm thu đo nhiều lần liên tiếp vẫn vượt quá 170 mmHg hoặc tụt thấp dưới 85 mmHg kèm li bì.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phần 4: Lịch Tái Khám, Dấu Niêm Phong & Chữ Ký Bác Sĩ -->
+      <div class="pt-3 border-t-2 border-slate-900 grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
+        <!-- Cột 1: Lịch tái khám -->
+        <div class="space-y-1">
+          <div class="flex items-center gap-1.5 text-slate-900 font-bold uppercase text-[11px]">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>HẸN TÁI KHÁM ĐỊNH KỲ</span>
+          </div>
+          <p class="text-slate-700 text-[11px]">
+            Ngày tái khám: <strong class="text-emerald-800 text-xs font-bold">27/11/2026</strong> (Sau 30 ngày)
+          </p>
+          <p class="text-slate-600 text-[10.5px]">
+            Địa điểm: Phòng khám Tim Mạch Ngoại Trú (P.204)
+          </p>
+          <p class="text-slate-500 text-[10px] italic">
+            * Khi đi nhớ nhịn ăn sáng để làm xét nghiệm sinh hóa máu và mang theo đơn thuốc này.
+          </p>
+        </div>
+
+        <!-- Cột 2: Niêm phong điện tử MediTrace -->
+        <div class="text-center sm:text-left space-y-1 sm:border-l sm:border-slate-200 sm:pl-4">
+          <div class="flex items-center gap-1.5 text-slate-800 font-bold text-[11px]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>XÁC THỰC SỐ MEDITRACE</span>
+          </div>
+          <p class="text-[10px] text-slate-500 font-mono">
+            SHA-256 Ledger:
+            <br />
+            <span class="text-slate-700 font-semibold">e3b0c44298fc1c14...91b7852b855</span>
+          </p>
+          <span class="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9.5px] font-bold">
+            ✓ ĐÃ KIỂM SOÁT 8 CHỐT AN TOÀN
+          </span>
+        </div>
+
+        <!-- Cột 3: Chữ ký bác sĩ -->
+        <div class="text-center sm:text-right space-y-1 sm:border-l sm:border-slate-200 sm:pl-4">
+          <p class="text-[10.5px] text-slate-500">Hà Nội, ngày 27 tháng 10 năm 2026</p>
+          <p class="font-bold text-slate-900 uppercase text-[11px]">BÁC SĨ ĐIỀU TRỊ</p>
+          <div class="h-12 flex items-center justify-center sm:justify-end">
+            <span class="font-serif italic text-slate-400 text-xs">[Đã ký điện tử bảo mật]</span>
+          </div>
+          <p class="font-bold text-slate-900 text-xs">ThS. BS. Nguyễn Minh Quân</p>
+          <p class="text-[10px] text-slate-500">CCHN: 004128/BYT-CCHN</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Modal Bar -->
+    <div class="px-6 py-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs">
+      <span class="text-slate-600 text-[11px]">
+        Tài liệu y khoa được mã hóa toàn vẹn. Bác sĩ xác nhận thông tin trước khi in và trao tay người bệnh.
+      </span>
+      <button class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
+        Đóng cửa sổ
+      </button>
+    </div>
+  </div>
+</body>
+</html>

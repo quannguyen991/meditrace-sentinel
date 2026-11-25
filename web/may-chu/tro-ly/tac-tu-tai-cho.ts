@@ -1,0 +1,73 @@
+/**
+ * Hai tác tử luật tại chỗ: không gọi mô hình, không ra mạng, chỉ đọc mệnh đề đã trích.
+ *  - "Chủ đề cần bàn": mục hồ sơ nào chưa có mệnh đề nào.
+ *  - "Đối chiếu thuốc và dị ứng": thuốc trùng chất dị ứng, cùng thuốc khác liều, mục còn thiếu.
+ */
+import type { MenhDeVao } from "./an-danh";
+
+export const CHU_DE: ReadonlyArray<{ ma: string; ten: string; mucLienQuan: string[] }> = [
+  { ma: "ly_do", ten: "Lý do khám", mucLienQuan: ["LÝ DO KHÁM BỆNH"] },
+  { ma: "benh_su", ten: "Bệnh sử hiện tại", mucLienQuan: ["BỆNH SỬ HIỆN TẠI"] },
+  { ma: "tien_su", ten: "Tiền sử bệnh", mucLienQuan: ["TIỀN SỬ BỆNH"] },
+  { ma: "thuoc", ten: "Thuốc đang dùng", mucLienQuan: ["THUỐC ĐANG DÙNG"] },
+  { ma: "di_ung", ten: "Dị ứng", mucLienQuan: ["DỊ ỨNG"] },
+  { ma: "gia_dinh", ten: "Tiền sử gia đình và xã hội", mucLienQuan: ["TIỀN SỬ GIA ĐÌNH VÀ XÃ HỘI"] },
+  { ma: "kham", ten: "Khám lâm sàng", mucLienQuan: ["KHÁM LÂM SÀNG"] },
+];
+
+export function chuDeCanBan(menhDe: MenhDeVao[]): {
+  daBan: Array<{ ma: string; ten: string; soMenhDe: number }>;
+  chuaBan: Array<{ ma: string; ten: string }>;
+} {
+  const daBan: Array<{ ma: string; ten: string; soMenhDe: number }> = [];
+  const chuaBan: Array<{ ma: string; ten: string }> = [];
+  for (const c of CHU_DE) {
+    const so = (menhDe || []).filter((m) => c.mucLienQuan.includes(String(m?.section ?? ""))).length;
+    if (so > 0) daBan.push({ ma: c.ma, ten: c.ten, soMenhDe: so });
+    else chuaBan.push({ ma: c.ma, ten: c.ten });
+  }
+  return { daBan, chuaBan };
+}
+
+/** Tách "amoxicillin 500 mg" thành tên và liều; tên là phần chữ trước chữ số đầu tiên. */
+function tachThuoc(s: string): { ten: string; lieu: string } {
+  const g = s.trim().replace(/\s+/g, " ");
+  const m = g.match(/^(.*?)\s*(\d[\s\S]*)?$/u);
+  return { ten: (m?.[1] ?? g).trim().toLowerCase(), lieu: (m?.[2] ?? "").trim().toLowerCase() };
+}
+
+export function doiChieuThuocDiUng(menhDe: MenhDeVao[]): { thuoc: string[]; diUng: string[]; mauThuan: string[]; thieu: string[] } {
+  const ds = menhDe || [];
+  const thuoc = ds.map((m) => (m?.drug && m.negated !== true ? String(m.drug).trim() : "")).filter(Boolean);
+  const mucDiUng = ds.filter((m) => m?.section === "DỊ ỨNG");
+  const diUng = mucDiUng.filter((m) => m.negated !== true).map((m) => String(m.text ?? "").trim()).filter(Boolean);
+
+  const mauThuan: string[] = [];
+  const lieuTheoTen = new Map<string, Set<string>>();
+  for (const t of thuoc) {
+    const { ten, lieu } = tachThuoc(t);
+    if (!ten) continue;
+    if (!lieuTheoTen.has(ten)) lieuTheoTen.set(ten, new Set());
+    lieuTheoTen.get(ten)!.add(lieu);
+  }
+  for (const [ten, lieu] of lieuTheoTen) {
+    if (lieu.size > 1) mauThuan.push(`${ten}: có ${lieu.size} liều khác nhau (${[...lieu].join("; ")})`);
+  }
+  const diUngThap = diUng.map((d) => d.toLowerCase());
+  const daBao = new Set<string>();
+  for (const t of thuoc) {
+    const { ten } = tachThuoc(t);
+    if (ten.length < 3 || daBao.has(ten)) continue;
+    const dau = ten.split(" ")[0]; // "penicillin v" -> "penicillin"
+    const trung = diUngThap.find((d) => d.includes(ten) || (dau.length >= 4 && d.includes(dau)));
+    if (trung !== undefined) {
+      daBao.add(ten);
+      mauThuan.push(`${ten}: trùng mục dị ứng ("${diUng[diUngThap.indexOf(trung)]}")`);
+    }
+  }
+
+  const thieu: string[] = [];
+  if (mucDiUng.length === 0) thieu.push("chưa có mục dị ứng");
+  if (!ds.some((m) => m?.section === "THUỐC ĐANG DÙNG")) thieu.push("chưa có thuốc đang dùng");
+  return { thuoc, diUng, mauThuan, thieu };
+}

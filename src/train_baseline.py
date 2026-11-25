@@ -199,6 +199,13 @@ def main():
                     help="them vao ten thu muc adapter, vi du -viet5")
     ap.add_argument("--kiem-mat-na", action="store_true",
                     help="chi kiem mat na nhan roi thoat, khong train")
+    # Them 21/11/2026: tinh loss THEO DOAN de khong tao logits cho ca chuoi 4.096
+    # token (dinh bo nho ~10,5 GiB -> OOM tren RTX 3060). Loss bang loss goc (xem
+    # `src/loss_theo_doan.py`), nen checkpoint cu van chay tiep duoc. Mac dinh TAT:
+    # khong co co thi hanh vi y het truoc day.
+    ap.add_argument("--loss-theo-doan", action="store_true",
+                    help="tinh cross-entropy theo doan de giam dinh VRAM")
+    ap.add_argument("--kich-thuoc-doan", type=int, default=512)
     a = ap.parse_args()
 
     # Chi nap AutoTokenizer truoc. `Trainer` keo theo `datasets` -> `pandas`,
@@ -271,6 +278,10 @@ def main():
         bf16=CO_BF16, fp16=not CO_BF16,
         optim="paged_adamw_8bit", remove_unused_columns=False, report_to="none")
 
+    if a.loss_theo_doan:
+        from src.loss_theo_doan import tao_trainer_loss_theo_doan
+        Trainer = tao_trainer_loss_theo_doan(Trainer, a.kich_thuoc_doan)
+        print(f"[loss] theo doan, moi doan {a.kich_thuoc_doan} token", flush=True)
     trainer = Trainer(model=model, args=tham_so, train_dataset=tap_train,
                       eval_dataset=tap_val,
                       data_collator=lambda b: gom_lo(b, tok.pad_token_id))

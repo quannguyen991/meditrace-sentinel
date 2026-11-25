@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 /**
- * Thêm 3 ca hội thoại mẫu lâm sàng tiêu chuẩn cao vào tài khoản quannguyen.ulis207@gmail.com (ID: 2)
+ * Thêm 3 ca hội thoại mẫu lâm sàng tiêu chuẩn cao vào tài khoản bác sĩ kiểm thử (ID: 2)
  * để trình diễn cho Ban Giám Khảo.
  * 
  * 3 Ca bao gồm:
@@ -15,7 +15,7 @@ const path = require("path");
 const dbPath = path.join(__dirname, "..", "web", "data", "meditrace.db");
 const db = new DatabaseSync(dbPath);
 
-const UID = 2; // quannguyen.ulis207@gmail.com
+const UID = 2; // Tai khoan bac si kiem thu lâm sàng
 
 // ==============================================================================
 // CA 1: Bác Trần Văn An - 58 tuổi
@@ -391,8 +391,8 @@ Bác sĩ: Để tôi xem: Đường huyết đói Glucose 7.8 mmol/L, HbA1c 7.6%
 Bác sĩ: Bác đang dùng những thuốc gì ở nhà kể cho tôi nghe?
 Bệnh nhân: Tôi đang uống Metformin 1000mg ngày 2 viên sáng tối, Gliclazide MR 60mg sáng 1 viên, và Losartan 50mg ngày 1 viên.
 Bác sĩ: Bác Dũng lưu ý rất quan trọng: Kết quả xét nghiệm cho thấy chức năng thận của bác đã suy giảm ở mức độ 3b (eGFR 38 mL/phút). Ở mức thận này, liều Metformin 2000mg/ngày bác đang uống là QUÁ LIỀU NGUY HIỂM, có nguy cơ gây nhiễm toan acid lactic. Bác sĩ phải điều chỉnh ngay: Giảm liều Metformin xuống tối đa 500mg/ngày hoặc chuyển sang phối hợp thuốc ức chế DPP-4 an toàn cho thận như Linagliptin 5mg/ngày.
-Bác sĩ: Thêm vào đó, bác 66 tuổi, có Tăng huyết áp và Tiểu đường, nay xuất hiện Rung nhĩ. Tính theo thang điểm lâm sàng CHA2DS2-VASc bác được 4 điểm, thuộc nhóm nguy cơ cao đột quỵ do huyết khối. Bắt buộc phải dùng thuốc chống đông đường uống thế hệ mới như Rivaroxaban 15mg/ngày (đã hiệu chỉnh liều theo chức năng thận eGFR 38).
-Bác sĩ: Kế hoạch điều trị: 1. Linagliptin 5mg uống 1 viên sáng. 2. Losartan 50mg uống 1 viên sáng. 3. Rivaroxaban 15mg uống 1 viên tối sau ăn. Dừng Metformin 1000mg.
+Bác sĩ: Thêm vào đó, bác 66 tuổi, có Tăng huyết áp và Tiểu đường, nay xuất hiện Rung nhĩ. Theo các yếu tố hiện có, CHA2DS2-VASc là 3 điểm (tuổi 65–74: 1, tăng huyết áp: 1, đái tháo đường: 1; rung nhĩ không cộng điểm). Bác sĩ cần đánh giá chỉ định chống đông cùng nguy cơ chảy máu và các yếu tố lâm sàng khác.
+Bác sĩ: Kế hoạch điều trị mô phỏng: Linagliptin và Losartan theo chỉ định đã nêu; dừng phác đồ Metformin cũ theo đánh giá trong tình huống. Chưa chốt thuốc/liều chống đông trong dữ liệu mẫu; bác sĩ phải xác nhận theo chức năng thận phù hợp, nguy cơ chảy máu, tương tác và hướng dẫn hiện hành.
 Bác sĩ: Dặn dò: Theo dõi các dấu hiệu xuất huyết như bầm tím dưới da, chảy máu chân răng hoặc đi ngoài phân đen. Xét nghiệm lại chức năng thận và đường huyết sau 1 tháng.`;
 
 const soapContent3 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL
@@ -416,7 +416,7 @@ const soapContent3 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL
 ### A — ASSESSMENT & HỆ THỐNG CDSS TÍNH ĐIỂM
 - **Chẩn đoán:** Rung nhĩ (I48) — Đái tháo đường Type 2 (E11) — Tăng huyết áp (I10) — Bệnh thận mạn giai đoạn 3b (N18.3b).
 - **Hệ thống CDSS Thang điểm lâm sàng:**
-  - **Thang điểm CHA2DS2-VASc = 4 ĐIỂM** (Tuổi 66: 1đ, Tăng huyết áp: 1đ, Đái tháo đường: 1đ, Rung nhĩ: 1đ) -> **Nguy cơ đột quỵ rất cao**, CHỈ ĐỊNH BẮT BUỘC DÙNG THUỐC CHỐNG ĐÔNG (NOAC) [T9].
+  - **Thang điểm CHA2DS2-VASc = 3 ĐIỂM theo dữ liệu hiện có** (Tuổi 66: 1đ, Tăng huyết áp: 1đ, Đái tháo đường: 1đ; rung nhĩ là bối cảnh áp dụng thang điểm, không phải tiêu chí cộng điểm). Bác sĩ cân nhắc chỉ định chống đông theo hướng dẫn và toàn cảnh lâm sàng [T9].
 - **Cảnh báo an toàn Dược lý (CDSS K6):**
   - 🚨 **CẢNH BÁO QUÁ LIỀU METFORMIN:** eGFR 38 mL/phút chống chỉ định dùng liều > 1000mg/ngày (nguy cơ nhiễm toan acid lactic). Bệnh nhân đang dùng 2000mg/ngày -> YÊU CẦU NGƯNG HOẶC ĐỔI THUỐC [T8].
 
@@ -425,7 +425,7 @@ const soapContent3 = `# BỆNH ÁN LÂM SÀNG (SOAP) — MEDITRACE SENTINEL
    - **Ngưng Metformin 1000mg** [T8, T10].
    - **Linagliptin 5mg:** 1 viên uống sáng (Không cần chỉnh liều theo chức năng thận) [T10].
    - **Losartan 50mg:** 1 viên uống sáng [T10].
-   - **Rivaroxaban 15mg:** 1 viên uống tối sau ăn (**Đã hiệu chỉnh giảm liều từ 20mg xuống 15mg** do eGFR 38 mL/phút) [T9, T10].
+   - **Chống đông:** Chưa xác định thuốc/liều trong bản mẫu. Bác sĩ đánh giá chỉ định, độ thanh thải creatinine, nguy cơ chảy máu và tương tác trước khi kê [T9].
 2. **Theo dõi:** Dấu hiệu xuất huyết, xét nghiệm lại chức năng thận sau 1 tháng [T11].`;
 
 const leafletContent3 = `# HƯỚNG DẪN DÙNG THUỐC & THEO DÕI AN TOÀN
@@ -437,8 +437,8 @@ const leafletContent3 = `# HƯỚNG DẪN DÙNG THUỐC & THEO DÕI AN TOÀN
 - **BUỔI SÁNG (Sau ăn):**
   - **Linagliptin 5mg:** 1 viên (Thuốc tiểu đường mới - An toàn cho thận).
   - **Losartan 50mg:** 1 viên (Thuốc huyết áp bảo vệ thận).
-- **BUỔI TỐI (Sau ăn tối):**
-  - **Rivaroxaban 15mg:** 1 viên (Thuốc chống đông máu ngăn ngừa đột quỵ).
+- **BUỔI TỐI:**
+  - Chưa có thuốc chống đông trong bản dặn dò mô phỏng. Chỉ sử dụng thuốc sau khi bác sĩ xác nhận đơn và liều cụ thể.
 
 ### ⛔ ĐÃ DỪNG THUỐC:
 - **Ngưng hoàn toàn Metformin 1000mg** do chức năng thận đang giảm.
@@ -500,12 +500,12 @@ const noteMeta3 = {
     },
     {
       id: 6,
-      text: "THANG ĐIỂM LÂM SÀNG CDSS: Thang điểm CHA2DS2-VASc = 4 điểm (Tuổi 66, Tăng huyết áp, ĐTĐ, Rung nhĩ) -> Bắt buộc dùng Rivaroxaban 15mg/ngày (hiệu chỉnh liều theo eGFR 38).",
+      text: "CHA2DS2-VASc = 3 điểm theo dữ liệu hiện có (tuổi 65–74, tăng huyết áp, đái tháo đường; không cộng điểm cho rung nhĩ). Bác sĩ đánh giá chỉ định và lựa chọn thuốc theo toàn cảnh lâm sàng.",
       section: "ĐIỀU TRỊ",
       status: "than",
       certainty: "chắc chắn",
       evidenceTurns: [9],
-      quotes: ["Tính theo thang điểm lâm sàng CHA2DS2-VASc bác được 4 điểm, thuộc nhóm nguy cơ cao đột quỵ do huyết khối. Bắt buộc phải dùng thuốc chống đông đường uống thế hệ mới như Rivaroxaban 15mg/ngày"]
+      quotes: ["Theo các yếu tố hiện có, CHA2DS2-VASc là 3 điểm (tuổi 65–74: 1, tăng huyết áp: 1, đái tháo đường: 1; rung nhĩ không cộng điểm)."]
     }
   ]
 };
@@ -537,7 +537,7 @@ const session3 = {
     {
       id: "msg-3-2",
       role: "assistant",
-      content: "Hệ thống trích xuất thực thể: Bệnh nhân 66 tuổi (+1 điểm nhóm 65-74), Tăng huyết áp (+1 điểm), Đái tháo đường (+1 điểm), Rung nhĩ (+1 điểm) -> Tổng 4 điểm CHA2DS2-VASc (nguy cơ thuyên tắc mạch cao, khuyến cáo cấp I dùng NOAC). Đồng thời từ eGFR 38 mL/phút/1.73m2, CDSS tự động kích hoạt luật an toàn: cảnh báo độc tính Metformin và hiệu chỉnh giảm liều Rivaroxaban từ 20mg xuống 15mg/ngày.",
+      content: "Theo dữ liệu nêu trong ca, CHA2DS2-VASc gồm tuổi 65–74 (+1), tăng huyết áp (+1), đái tháo đường (+1); rung nhĩ không phải tiêu chí tính điểm, nên tổng là 3 điểm nếu không có yếu tố khác. Việc chống đông và lựa chọn liều cần bác sĩ đánh giá theo toàn cảnh lâm sàng; mô phỏng này không thay thế quyết định điều trị.",
       timestamp: "10:05"
     }
   ]
@@ -554,7 +554,9 @@ try {
   const now = Date.now();
 
   for (const u of [1, 2]) {
-    db.prepare("DELETE FROM ca_kham WHERE nguoi_dung_id = ?").run(u);
+    // Chỉ thay các ca mẫu của script này; tuyệt đối không xóa ca khám khác của người dùng.
+    db.prepare("DELETE FROM ca_kham WHERE nguoi_dung_id = ? AND id IN (?, ?, ?)")
+      .run(u, ...dsCa.map((s) => s.id));
 
     for (let idx = 0; idx < dsCa.length; idx++) {
       const s = dsCa[idx];
@@ -582,7 +584,7 @@ try {
   }
 
   db.exec("COMMIT");
-  console.log("✅ HOAN TAT: Da nap 3 ca mau lam sang tieu chuan cho ca 2 tai khoan!");
+  console.log("✅ HOAN TAT: Da thay 3 ca mau (chi cac ID cua bo mau) cho 2 tai khoan!");
 } catch (err) {
   db.exec("ROLLBACK");
   console.error("[-] Loi khi nap ca:", err);

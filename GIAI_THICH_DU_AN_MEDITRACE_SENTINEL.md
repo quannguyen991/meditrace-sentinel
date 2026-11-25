@@ -1,7 +1,7 @@
 # BẢN GIẢI THÍCH TOÀN DIỆN DỰ ÁN MEDITRACE SENTINEL
 
 > **Tóm tắt một câu:**  
-> **MediTrace Sentinel** là trợ lý trí tuệ nhân tạo chuyên dụng lắng nghe cuộc khám bệnh bằng tiếng Việt, tự động dựng bản nháp bệnh án chuẩn cấu trúc SOAP, trong đó **mọi dòng thông tin đều có căn cứ trỏ ngược về lời nói gốc**, bảo đảm **an toàn dược lý 100%** và **bảo mật tuyệt đối ngay tại phòng khám**.
+> **MediTrace Sentinel** là trợ lý trí tuệ nhân tạo chuyên dụng lắng nghe cuộc khám bệnh bằng tiếng Việt, tự động dựng bản nháp bệnh án chuẩn cấu trúc SOAP, trong đó **các mệnh đề có liên kết căn cứ khi dữ liệu cho phép**, đồng thời đưa cảnh báo hỗ trợ rà soát dược lý. Các bước này hỗ trợ bác sĩ, không bảo đảm loại bỏ mọi lỗi; khử định danh chỉ che các mẫu trực tiếp nhận diện được.
 
 ---
 
@@ -200,11 +200,11 @@ Toàn bộ các cải tiến trên không phải chỉ là lời nói lý thuy�
 
 | Chỉ số đo đạc | Phiên bản cũ trước đây | Phiên bản mới nâng cấp | Kết quả thực tế đạt được |
 | :--- | :--- | :--- | :--- |
-| **Kiểm thử tự động toàn diện (Test Cases)** | Chưa đầy đủ | **1.320 / 1.320 bài test vượt qua 100%** | Phần mềm hoạt động tuyệt đối ổn định, không có lỗi tiềm ẩn. |
+| **Kiểm thử tự động toàn diện (Test Cases)** | Chưa đầy đủ | **1.528 test Pytest + 11 test TypeScript passed 100%** | Kết quả đo đạc thực tế trên bản mã nguồn hiện tại, 0 lỗi. |
 | **Tỷ lệ giữ lại thông tin cũ khi bệnh nhân đính chính** | 11.48% (Cứ 100 ca có 11 ca bị nhớ sai) | **0.80% (Gần như triệt tiêu hoàn toàn)** | Giảm lỗi nhớ nhầm thông tin cũ hơn **14 lần** nhờ Cổng K7. |
 | **Tỷ lệ nhầm bệnh của người nhà thành của bệnh nhân** | 12.4% (Thường xuyên nhầm lẫn) | **2.1% (Tách biệt rành mạch)** | Giảm nhầm lẫn chủ thể gần **6 lần** nhờ Tầng 2. |
-| **Tỷ lệ thông tin đúng bị hệ thống chặn nhầm** | Chưa kiểm soát | **0.0% (0 / 30.136 dòng bị chặn oan)** | Đạt độ tin cậy tuyệt đối, không làm mất thông tin đúng của bác sĩ. |
-| **Độ phong phú và khác biệt giữa các ca bệnh** | Chưa đo đạc, dễ trùng lặp | **Đạt 78.3% độ khác biệt** | 200 ca bệnh phong phú, mô phỏng đúng đời thực. |
+| **Tỷ lệ thông tin đúng bị hệ thống chặn nhầm** | Chưa kiểm soát | **0.0% (0 / 30.136 dòng bị chặn oan)** | Kết quả này chỉ đúng với tập kiểm thử và phương pháp đánh giá đã nêu. |
+| **Độ phong phú và câu duy nhất (5.000 ca)** | v1: 20.190 câu duy nhất (lặp 76,92%) | **v2: 45.835 câu duy nhất (lặp 47,37%, $\ge 8$ từ: 42,19%)** | 657 khuôn thuộc 21 hệ cơ quan; MTLD 145,4 (+56,3%), 100% trích dẫn chuỗi con (52.634/52.634). [ĐÃ RÚT: con số 78,3% cũ không có phép đo tương ứng trong mã]. |
 
 ---
 

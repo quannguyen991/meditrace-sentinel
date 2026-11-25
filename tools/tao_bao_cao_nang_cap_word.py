@@ -212,7 +212,7 @@ def tao_bao_cao_nang_cap():
     tbl_metrics = doc.add_table(rows=2, cols=2)
     tbl_metrics.alignment = WD_TABLE_ALIGNMENT.CENTER
     metrics_data = [
-        ("KIỂM THỬ TỰ ĐỘNG", "100% VƯỢT QUA", "1.320 / 1.320 bài kiểm tra chạy trơn tru, không lỗi", "059669", "ECFDF5"),
+        ("KIỂM THỬ TỰ ĐỘNG", "100% VƯỢT QUA", "Đang cần tái kiểm tra bài kiểm tra chạy trơn tru, không lỗi", "059669", "ECFDF5"),
         ("DỮ LIỆU CA BỆNH", "200 LOẠI BỆNH", "Gấp đôi số lượng ca mẫu, mô phỏng đúng đời thực", "0D5C54", "F0FDFA"),
         ("AN TOÀN KÊ ĐƠN", "5 BƯỚC KIỂM TRA", "Tự động soi tương tác thuốc, chặn câu nói sai", "D97706", "FFFBEB"),
         ("KẾT NỐI BỆNH VIỆN", "CHUẨN QUỐC TẾ", "Xuất file chuẩn HL7 FHIR để cắm vào máy bệnh viện", "1E3A5F", "F1F5F9")
@@ -308,7 +308,7 @@ def tao_bao_cao_nang_cap():
     them_hop_chu_y(doc, "SỨ MỆNH CỐT LÕI CỦA MEDITRACE SENTINEL",
                    "Trả lại đôi mắt và đôi tay cho người thầy thuốc. Bác sĩ chỉ cần ngồi tập trung trò chuyện và thăm khám; "
                    "hệ thống như một người trợ lý vô hình ngồi bên cạnh, tự động lắng nghe và dựng bản nháp bệnh án chuẩn cấu trúc SOAP. "
-                   "Bác sĩ chỉ cần dành 15 đến 30 giây liếc mắt kiểm tra và bấm nút xác nhận.",
+                   "Thời gian duyệt cần được đo trong thử nghiệm lâm sàng; bác sĩ phải kiểm tra nội dung trước khi xác nhận.",
                    mau_vien=HEX_TEAL, mau_nen="F0FDFA")
 
     doc.add_page_break()
@@ -338,7 +338,7 @@ def tao_bao_cao_nang_cap():
     so_sanh_gpt = [
         ("1. Trách nhiệm pháp lý & Bảo mật dữ liệu",
          "Vi phạm pháp luật. Gửi dữ liệu bệnh tật, tên tuổi người bệnh lên máy chủ nước ngoài. Vi phạm Nghị định 13/2023/NĐ-CP.",
-         "Bảo mật tuyệt đối 100%. Chạy hoàn toàn nội bộ trên máy tính phòng khám. Tự động che tên thật, số điện thoại, CCCD. Không lọt dữ liệu ra ngoài."),
+         "Bản hiện tại là bản trình diễn. Có che một số mẫu định danh trực tiếp trước khi gọi mô hình; chưa bảo đảm ẩn danh hoàn toàn hay triển khai nội bộ. Cần đánh giá luồng dữ liệu, quyền truy cập và cấu hình triển khai trước khi dùng thực tế."),
         ("2. Độ tin cậy (Ảo giác AI bịa đặt)",
          "Rất hay bịa đặt thông tin. AI luôn có xu hướng viết văn trôi chảy, sẵn sàng tự điền huyết áp, tiền sử bệnh mà bệnh nhân không hề nói.",
          "Triệt tiêu hoàn toàn ảo giác (Zero Hallucination). Có 7 cổng khóa bằng chứng (K1–K7). Mẩu tin nào không có trong lời thoại gốc bị chặn ngay."),
@@ -401,7 +401,7 @@ def tao_bao_cao_nang_cap():
          "Nếu để AI tự do viết bệnh án giống như ChatGPT, AI có thể tự 'bịa' thêm triệu chứng mà bệnh nhân không hề nói (hiện tượng ảo giác).",
          "Nhóm không cho AI tự viết văn tự do nữa. AI chỉ được nhặt các từ có thật trong cuộc nói chuyện. "
          "Các khâu kiểm tra đúng sai, kiểm tra thuốc đều chạy bằng công thức toán và quy tắc logic cố định. "
-         "Bác sĩ là người xem lại và bấm nút duyệt cuối cùng trên màn hình trong 30 giây."),
+         "Giao diện minh họa luồng bác sĩ xem lại và xác nhận; thời gian thực tế cần được đo với người dùng lâm sàng."),
         ("2. 'Dữ liệu 5.000 mẫu lấy từ 100 khuôn bệnh dễ bị trùng lặp'",
          "Nếu chỉ có 100 bài mẫu rồi sinh ra 5.000 ca khám, các ca bệnh sẽ nói những câu giông giống nhau, không giống thực tế ngoài đời.",
          "Nhóm nâng gấp đôi lên 200 loại bệnh khác nhau. Đồng thời cho phép ghép 1 bệnh cấp tính (như viêm phổi) với bệnh mạn tính có sẵn (như tiểu đường, huyết áp). "
@@ -518,17 +518,17 @@ def tao_bao_cao_nang_cap():
          "src/khoa_bang_chung.py, src/cong_rui_ro.py",
          "Theo dõi cuộc nói chuyện từ đầu đến cuối để nhận ra lúc bệnh nhân đính chính lại lời mình. Ví dụ lúc đầu bệnh nhân bảo 'tôi sốt 1 tuần rồi', nhưng nói chuyện một lúc sau nhớ lại bảo 'à không, tôi mới sốt từ hôm qua thôi'. Máy sẽ tự động gạch bỏ tin cũ '1 tuần' và chỉ ghi nhận tin đúng là 'hôm qua'. Đồng thời, thông tin nào chưa chắc chắn thì máy giữ lại đưa cho bác sĩ xem riêng, tuyệt đối không tự ý xóa bỏ.",
          "AI thông thường hay bị 'lú', khi bệnh nhân sửa lời thì AI vẫn nhớ câu nói cũ, làm sai lệch thời gian mắc bệnh (tỷ lệ lỗi trước đây lên tới 11.5%).",
-         "Lỗi giữ thông tin cũ giảm từ 11.5% xuống chỉ còn 0.8%; thân bệnh án luôn chính xác tuyệt đối mà không sợ bị mất thông tin quan trọng."),
+         "Báo cáo nêu kết quả 11.5% xuống 0.8%; cần xác minh tập dữ liệu, phương pháp và khả năng tái lập. Không bảo đảm mọi hồ sơ chính xác tuyệt đối."),
 
         ("12. Đóng dấu chống sửa đổi hồ sơ bệnh án (Chữ ký SHA-256)",
          "src/dieu_phoi_ha_tang.py",
-         "Sau khi bác sĩ bấm duyệt xong bệnh án, máy sẽ tự động tạo một mã niêm phong kỹ thuật số (mã băm SHA-256) gắn vào hồ sơ. Nếu sau này có ai đó cố tình vào sửa chữa dù chỉ một dấu chấm dấu phẩy, mã niêm phong sẽ bị hỏng và máy báo động ngay lập tức.",
+         "Mã băm SHA-256 có thể giúp đối chiếu nội dung nếu được lưu và xác minh qua một quy trình tin cậy. Mã băm đơn lẻ không phải chữ ký số, không tự phát hiện sửa đổi nếu không có bản đối chiếu đáng tin cậy, và không tự tạo giá trị pháp lý.",
          "Hồ sơ bệnh án là giấy tờ pháp lý trước tòa án. Nếu phần mềm không có khóa niêm phong thì rất dễ bị nghi ngờ là có người vào sửa chữa hồ sơ để che giấu sai sót.",
          "Bảo đảm tính minh bạch và giá trị pháp lý 100% cho bệnh viện và bác sĩ."),
 
         ("13. Màn hình làm việc 30 giây cho bác sĩ (Doctor-in-the-loop)",
          "src/giao_dien_copilot.html",
-         "Một trang web làm việc thiết kế sẵn 3 cột rõ ràng: Cột 1 nghe lại băng ghi âm; Cột 2 xem máy tìm được bằng chứng gì và có gợi ý gì; Cột 3 là bệnh án đã được soạn sẵn đẹp đẽ. Bác sĩ chỉ cần liếc mắt 30 giây kiểm tra, thấy đúng bấm nút 'Duyệt' là xong.",
+         "Bản trình diễn có giao diện ba cột để xem nội dung ghi âm, căn cứ và bản nháp. Cần xác minh quy trình tích hợp, lưu trữ và duyệt trên môi trường triển khai trước khi sử dụng thực tế.",
          "Ban giám khảo lo thí sinh để cho AI tự tung tự tác làm hết mà không có bác sĩ kiểm tra.",
          "Khẳng định rõ ràng: AI chỉ là thư ký soạn nháp giúp việc, bác sĩ con người luôn là người có quyền kiểm tra và quyết định cuối cùng."),
 
@@ -578,11 +578,11 @@ def tao_bao_cao_nang_cap():
         r.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
 
     so_lieu_ss = [
-        ("Kiểm tra phần mềm tự động (Test Cases)", "Chưa làm đầy đủ", "1.320 bài kiểm tra chạy trơn tru", "Phần mềm chạy ổn định 100%, không bị lỗi"),
+        ("Kiểm tra phần mềm tự động (Test Cases)", "Chưa làm đầy đủ", "Số liệu cần tái kiểm tra trên revision hiện tại", "Kết quả test không chứng minh không còn lỗi ngoài phạm vi đã kiểm tra"),
         ("Lỗi nhớ thông tin cũ khi bệnh nhân đính chính", "11.5% (Cứ 100 ca thì 11 ca bị nhớ nhầm)", "0.8% (Gần như không còn bị nhầm)", "Giảm lỗi nhớ nhầm hơn 14 lần nhờ Cổng K7"),
         ("Lỗi nhầm bệnh của người nhà thành của bệnh nhân", "12.4% (Thường xuyên nhầm lời người nhà)", "2.1% (Tách biệt rành mạch)", "Giảm nhầm lẫn gần 6 lần nhờ Tầng 2"),
         ("Tỷ lệ thông tin đúng mà bị máy chặn nhầm", "Chưa kiểm soát được", "0.0% (0 / 30.136 dòng bị chặn oan)", "Không bao giờ chặn oan thông tin đúng"),
-        ("Độ phong phú và khác biệt giữa các ca khám", "Chưa đo đạc, dễ trùng lặp", "Khác biệt đạt 78.3%", "200 ca bệnh phong phú, không bị lặp bài")
+        ("Độ phong phú và câu duy nhất (5.000 ca)", "v1: 20.190 câu duy nhất (lặp 76.92%)", "v2: 45.835 câu duy nhất (lặp 47.37%)", "657 khuôn 21 hệ cơ quan, MTLD 145.4 (+56.3%), 100% trích dẫn chuỗi con [đã rút số 78.3%]")
     ]
 
     for i, hang in enumerate(so_lieu_ss, start=1):
@@ -618,7 +618,7 @@ def tao_bao_cao_nang_cap():
     them_doan_van(doc,
         "Tóm lại, toàn bộ các tính năng nâng cấp mới của MediTrace Sentinel tập trung vào 3 giá trị thực tế lớn nhất:\n\n"
         "1. Đối với Bác sĩ: Tiết kiệm từ 5 đến 7 phút gõ máy tính cho mỗi ca khám. Bác sĩ không phải tự cộng điểm nguy cơ, "
-        "không phải tự tra bảng thuốc kỵ nhau, không phải lo gõ nhầm thông tin. Chỉ cần liếc mắt 30 giây qua màn hình, thấy đúng bấm nút duyệt là xong.\n\n"
+        "có thể hỗ trợ rà soát thông tin, nhưng bác sĩ vẫn cần kiểm tra căn cứ và quyết định chuyên môn. Thời gian duyệt cần được đo trong thử nghiệm thực tế.\n\n"
         "2. Đối với Người bệnh: Được an toàn tuyệt đối. Đơn thuốc được máy soi kỵ nhau và soi quá liều; khi ra về có ngay một tờ giấy in dặn dò "
         "viết bằng tiếng Việt bình dân, dặn rõ giờ uống thuốc và khi nào nguy hiểm phải đi viện ngay.\n\n"
         "3. Đối với Bệnh viện: Bệnh án xuất ra theo đúng chuẩn quốc tế của Bộ Y tế, cắm thẳng vào máy tính bệnh viện mà không cần gõ lại; "

@@ -10,6 +10,24 @@ export interface KetQuaDuyet {
 
 export type ViewMode = "home" | "scribe" | "evidence" | "tasks" | "patients" | "templates" | "verification" | "library" | "settings";
 
+export interface TranscriptSegment {
+  luot: number;
+  start_s: number;
+  end_s: number;
+  lowConf?: boolean;
+}
+
+export interface SignOffRecord {
+  signedAt: string;
+  tongMenhDe: number;
+  soGiu: number;
+  soSua: number;
+  soBo: number;
+  tyLeCoNguon: number;
+  hash: string;
+  wormSeq?: number;
+}
+
 export interface Session {
   id: string;
   patientIdentifier: string;
@@ -20,6 +38,7 @@ export interface Session {
   durationSeconds: number;
   isRecording: boolean;
   transcript: string;
+  transcriptSegments?: TranscriptSegment[];
   tabs: DocumentTabItem[];
   activeTabId: string;
   contextNotes?: string;
@@ -30,6 +49,8 @@ export interface Session {
   evidenceChat?: ClinicalChatMessage[];
   /** Kết quả duyệt mệnh đề (giữ/sửa/bỏ) — lưu cùng ca để F5 không mất. */
   duyet?: KetQuaDuyet;
+  /** Dấu vết ký duyệt pháp lý WORM của bác sĩ cho bản nháp đã chốt. */
+  signOff?: SignOffRecord;
 }
 
 export interface DocumentTabItem {
@@ -90,6 +111,8 @@ export interface ClinicalChatMessage {
   cauTruc?: CauTrucTraLoi | null;
   /** Câu hỏi gốc — để "Tra nguồn khác" hỏi lại. */
   question?: string;
+  /** Trợ lý nhiều tác tử: các phần không phải câu trả lời có nguồn (chủ đề cần bàn, thuốc–dị ứng, đối chiếu...). */
+  troLy?: { phanKhac: Array<{ tacTu: string; ten: string; noiDung: string; canhBao?: string }> };
 }
 
 export interface TemplateItem {

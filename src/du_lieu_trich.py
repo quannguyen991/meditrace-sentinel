@@ -168,24 +168,29 @@ def main():
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--nguon", default="hoi_thoai_viet_3000.jsonl")
+    ap.add_argument("--nguon", default="hoi_thoai_viet_5000.jsonl")
     # Tap da duoc chia san boi `tach_tap_viet` (theo KHUON BENH). Dung no
     # thay vi tu chia lai, de khau trich va nhanh A hoc tren DUNG mot tap.
     ap.add_argument("--da-chia", action="store_true")
     ap.add_argument("--giu-khuon", type=int, default=4,
                     help="so KHUON BENH giu rieng — don vi doc lap la khuon, "
                          "khong phai dong")
+    ap.add_argument("--hau-to", default="",
+                    help="hau to cho ten tep ra, vi du _v2")
+    ap.add_argument("--hau-to-nguon", default=None,
+                    help="hau to cho ten tep nguon da chia (neu khac --hau-to)")
     a = ap.parse_args()
 
     d = duong_dan.THU_MUC_DU_LIEU
-    ca = [json.loads(x) for x in open(d / a.nguon, encoding="utf-8") if x.strip()]
 
+    ht_nguon = a.hau_to_nguon if a.hau_to_nguon is not None else a.hau_to
     if a.da_chia:
         train = [json.loads(x) for x in
-                 open(d / "viet_train.jsonl", encoding="utf-8") if x.strip()]
+                 open(d / f"viet_train{ht_nguon}.jsonl", encoding="utf-8") if x.strip()]
         giu = [json.loads(x) for x in
-               open(d / "viet_phat_trien.jsonl", encoding="utf-8") if x.strip()]
+               open(d / f"viet_phat_trien{ht_nguon}.jsonl", encoding="utf-8") if x.strip()]
     else:
+        ca = [json.loads(x) for x in open(d / a.nguon, encoding="utf-8") if x.strip()]
         # Tach theo KHUON BENH, khong theo dong: hai dong cung khuon gan nhu
         # la mot bai, cat theo dong thi tap kiem chi do "gap lai khuon da hoc".
         khuon = sorted({k["benh"] for k in ca})
@@ -197,7 +202,7 @@ def main():
         if not ds:
             continue
         mau = dung(ds)
-        dp = d / f"{ten}.jsonl"
+        dp = d / f"{ten}{a.hau_to}.jsonl"
         dp.write_text("\n".join(json.dumps(m, ensure_ascii=False) for m in mau),
                       encoding="utf-8")
         so_md = sum(len(json.loads(m["output"])["phat_bieu"]) for m in mau)

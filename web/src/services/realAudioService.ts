@@ -13,6 +13,113 @@ export interface RealAudioServiceCallbacks {
   onAudioReady?: (blob: Blob, url: string) => void;
 }
 
+const IDB_NAME = "meditrace_audio_db";
+const IDB_STORE = "audio_chunks";
+const IDB_VERSION = 1;
+
+export interface PersistedAudioChunk {
+  id?: number;
+  sessionKey: string;
+  mimeType: string;
+  chunk: Blob;
+  createdAt: number;
+}
+
+function moKhoAudioIDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === "undefined") {
+      reject(new Error("IndexedDB không khả dụng"));
+      return;
+    }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        const store = db.createObjectStore(IDB_STORE, { keyPath: "id", autoIncrement: true });
+        store.createIndex("sessionKey", "sessionKey", { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error("Không mở được IndexedDB"));
+  });
+}
+
+export async function luuChunkAudioIDB(sessionKey: string, chunk: Blob, mimeType: string): Promise<void> {
+  if (typeof indexedDB === "undefined" || !chunk || chunk.size === 0) return;
+  try {
+    const db = await moKhoAudioIDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).add({ sessionKey, mimeType, chunk, createdAt: Date.now() } as PersistedAudioChunk);
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    });
+  } catch (err) {
+    console.warn("Không lưu được chunk âm thanh vào IndexedDB:", err);
+  }
+}
+
+export async function khoiPhucAudioIDB(sessionKey = "active"): Promise<{ blob: Blob; mimeType: string; count: number } | null> {
+  if (typeof indexedDB === "undefined") return null;
+  try {
+    const db = await moKhoAudioIDB();
+    const items = await new Promise<PersistedAudioChunk[]>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readonly");
+      const idx = tx.objectStore(IDB_STORE).index("sessionKey");
+      const req = idx.getAll(IDB_STOP_KEY(sessionKey));
+      req.onsuccess = () => resolve((req.result as PersistedAudioChunk[]) || []);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    if (!items.length) return null;
+    items.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+    const mimeType = items[0].mimeType || "audio/webm";
+    return { blob: new Blob(items.map((i) => i.chunk), { type: mimeType }), mimeType, count: items.length };
+  } catch {
+    return null;
+  }
+}
+
+function IDB_STOP_KEY(sessionKey: string): string {
+  return sessionKey || "active";
+}
+
+export async function xoaAudioIDB(sessionKey = "active"): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  try {
+    const db = await moKhoAudioIDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      const store = tx.objectStore(IDB_STORE);
+      const idx = store.index("sessionKey");
+      const req = idx.openCursor(IDB_STOP_KEY(sessionKey));
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        }
+      };
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    });
+  } catch (err) {
+    console.warn("Không xóa được chunk âm thanh trong IndexedDB:", err);
+  }
+}
+
 export class RealAudioService {
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -26,6 +133,23 @@ export class RealAudioService {
   private isListening: boolean = false;
   private currentAudioUrl: string | null = null;
   private speakerRole: "Bác sĩ" | "Bệnh nhân" | "Tự động" = "Tự động";
+  private persistenceKey: string = "active";
+
+  public setPersistenceKey(key: string) {
+    this.persistenceKey = key || "active";
+  }
+
+  public async recoverPersistedRecording(): Promise<{ blob: Blob; url: string; count: number } | null> {
+    const recovered = await khoiPhucAudioIDB(this.persistenceKey);
+    if (!recovered) return null;
+    if (this.currentAudioUrl) URL.revokeObjectURL(this.currentAudioUrl);
+    this.currentAudioUrl = URL.createObjectURL(recovered.blob);
+    return { blob: recovered.blob, url: this.currentAudioUrl, count: recovered.count };
+  }
+
+  public async clearPersistedRecording(): Promise<void> {
+    await xoaAudioIDB(this.persistenceKey);
+  }
 
   constructor(callbacks: RealAudioServiceCallbacks = {}) {
     this.callbacks = callbacks;
@@ -141,9 +265,11 @@ export class RealAudioService {
           : "audio/mp4";
 
         this.mediaRecorder = new MediaRecorder(this.mediaStream, { mimeType });
+        await xoaAudioIDB(this.persistenceKey);
         this.mediaRecorder.ondataavailable = (event) => {
           if (event.data && event.data.size > 0) {
             this.audioChunks.push(event.data);
+            void luuChunkAudioIDB(this.persistenceKey, event.data, mimeType);
           }
         };
 
@@ -153,6 +279,7 @@ export class RealAudioService {
             URL.revokeObjectURL(this.currentAudioUrl);
           }
           this.currentAudioUrl = URL.createObjectURL(blob);
+          void xoaAudioIDB(this.persistenceKey);
           if (this.callbacks.onAudioReady) {
             this.callbacks.onAudioReady(blob, this.currentAudioUrl);
           }

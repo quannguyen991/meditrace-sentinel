@@ -150,7 +150,7 @@ export const BottomPromptBar: React.FC<BottomPromptBarProps> = ({
             title={
               allowExternal
                 ? "Đang cho phép gọi Mô hình ngoài (Cloud). Bấm để chuyển về chỉ dùng Qwen3-4B nội bộ."
-                : "Đang dùng Qwen3-4B chạy tại chỗ (Nội bộ, bảo mật tuyệt đối). Bấm để bật mô hình ngoài."
+                : "Mặc định dùng Qwen3-4B nội bộ. Bấm để cho phép gửi nội dung ca khám tới dịch vụ mô hình ngoài."
             }
           >
             <span

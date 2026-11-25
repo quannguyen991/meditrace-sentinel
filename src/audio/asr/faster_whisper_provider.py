@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .base import ASRProvider, read_wav_16k_mono
+from .contextual_trie_600 import ContextualPrefixTrie600, tao_trie_600_mac_dinh
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
 _CACHE: dict[tuple, Any] = {}
@@ -31,13 +32,21 @@ class FasterWhisperProvider(ASRProvider):
 
     def __init__(self, model: str = "small", device: Optional[str] = None,
                  compute_type: Optional[str] = None, word_timestamps: bool = True,
-                 vad_filter: bool = True, hotwords: Optional[str] = None):
+                 vad_filter: bool = True, hotwords: Optional[str] = None,
+                 trie_600: Optional[ContextualPrefixTrie600] = None,
+                 he_co_quan: Optional[str] = None):
         self.model = model
         self.device_req = device
         self.compute_type = compute_type
         self.word_timestamps = word_timestamps
         self.vad_filter = vad_filter
-        self.hotwords = hotwords
+        self.he_co_quan = he_co_quan
+        if hotwords is not None:
+            self.hotwords = hotwords
+        else:
+            trie = trie_600 or tao_trie_600_mac_dinh()
+            hw = trie.xuat_hotwords(he_co_quan=he_co_quan)
+            self.hotwords = hw or None
 
     def _model(self):
         try:

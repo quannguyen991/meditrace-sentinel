@@ -12,11 +12,12 @@ Ma loi cua `khoa_bang_chung` KHONG duoc tinh lai o day: `tu_khoa` chi anh xa
 chung sang phan loai moi. Bo phat hien moi chi lam viec khoa chua lam.
 """
 import re
+from collections import Counter
 import unicodedata
 from typing import Dict, List, Optional, Tuple
 
 from src import chuan_hoa
-from src.canh_bao import so_lieu
+from src.canh_bao import loi_noi, so_lieu
 from src.canh_bao.loai import (CAN_XEM, CAO, LOI_PHAT_HIEN, NGHI_RUI_RO, THAP, TRUNG,
                                CanhBao, muc_do)
 from src.khoa_bang_chung import DAU_DIEU_KIEN, DAU_NGHI
@@ -39,7 +40,11 @@ def _tu(s):
 
 
 def cac_cau(van: str) -> List[str]:
-    """Tach menh de: dau cau, cham phay, va "nhung" (hai y trai nhau)."""
+    """Tach menh de: dau cau, cham phay, va "nhung" (hai y trai nhau). Van KHONG co dau
+    cau (chep tu am thanh) thi tach bang `loi_noi.tach_y` (tu noi, <= 25 tu) — 25/11/2026."""
+    if not loi_noi.co_dau_cau(van):
+        v = _nfc(van)
+        return [v[a:b].strip(" ,") for a, b in loi_noi.tach_y(v) if v[a:b].strip(" ,")]
     ra = []
     for c in re.split(r"[.!?;…]+|,?\s+nhưng\s+", _nfc(van)):
         c = c.strip(" ,")
@@ -200,7 +205,7 @@ def con_so(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
     bo phat hien `dinh_chinh` lo phan do, o day khong bao."""
     ps = _so_phat_bieu(p)
     if not ps:
-        return []
+        return _so_tran(ctx, p, loai_tt)
     dan = ctx.dan(p)
     van = ctx.van_dan(p)
     ev = so_lieu.tach(van)
@@ -249,11 +254,103 @@ def con_so(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         elif dan:
             ra.append(tao(ctx, p, ma, dan, [],
                           f"“{s.chu}” không có ở đâu trong hội thoại.", LOI_PHAT_HIEN, THAP, "con_so", loai_tt))
+    return ra or _so_tran(ctx, p, loai_tt)
+
+
+_SO_TRAN = re.compile(r"(?<![\w.,])(\d+(?:[.,]\d+)?)(?!\w)")
+_SO_CHU_GIA_TRI = {"một": 1, "hai": 2, "ba": 3, "bốn": 4, "tư": 4, "năm": 5, "lăm": 5, "sáu": 6, "bảy": 7,
+                   "tám": 8, "chín": 9, "mười": 10}
+
+
+def _gia_tri_so(van: str) -> Counter:
+    t = _thuong(van)
+    ra = Counter(float(m.group(1).replace(",", ".")) for m in _SO_TRAN.finditer(t))
+    for w, v in _SO_CHU_GIA_TRI.items():
+        ra[float(v)] += len(re.findall(rf"(?<!\w){w}(?!\w)", t))
     return ra
 
 
+def _so_tran(ctx, p, loai_tt) -> List[CanhBao]:
+    """So KHONG don vi ("độ 2", "2 đến 4 răng", "Marsh 3") trong ban ghi phai co trong luot duoc dan
+    (bang so hoac bang chu). Vong 2 cay loi 25/11/2026: doi so khong don vi lot 46%."""
+    dan = ctx.dan(p)
+    if not dan:
+        return []
+    nd = _thuong(p.noi_dung)
+    # so co don vi `con_so` da xet; `chu` cua so_lieu da chuan hoa ("38,5" -> "38.5") nen bo theo GIA TRI
+    da_xet = {v for x in so_lieu.tach(nd) for v in (x.gia_tri, x.tren) if v is not None}
+    co = _gia_tri_so(ctx.van_dan(p))
+    thieu = []
+    for m in _SO_TRAN.finditer(nd):     # dem theo so lan: "4 đến 4" khong khop "2 đến 4"
+        v = float(m.group(1).replace(",", "."))
+        if any(abs(v - x) < 1e-9 for x in da_xet):
+            continue
+        if co[v] > 0:
+            co[v] -= 1
+        else:
+            thieu.append(m.group(1))
+    if not thieu:
+        return []
+    return [tao(ctx, p, "NUMERIC_MISMATCH", dan, [ctx.luot[s][1] for s in dan[:1]],
+                f"Bản ghi có số “{thieu[0]}” không thấy trong lượt được dẫn.", NGHI_RUI_RO, TRUNG,
+                "con_so", loai_tt)]
+
+
+# Tu trong cau goc cho thay y PHU DINH hay "da het" — co mot tu nay thi khong ket luan ban ghi phu dinh la sai.
+DAU_PHU_DINH_GOC = re.compile(r"(?<!\w)(không|chưa|chẳng|chả|ko|đâu có|chưa từng|không còn)(?!\w)")
+# Dau hieu "da het / binh thuong" — xet ca LUOT, khong chi menh de: "Sáng nay thì X, hôm qua thì đỡ hẳn
+# rồi" duoc dap an ghi la phu dinh (ra soat vong 3: 45/49 bao nham tren ban sach la mau nay).
+DAU_HET_GOC = re.compile(r"(?<!\w)(hết|khỏi|đỡ|êm|bình thường|âm tính|loại trừ|khỏe|ổn)(?!\w)")
+
+
+def _phu_dinh_hieu_luc(p) -> bool:
+    """Giong cham_he_thong._phu_dinh_that: co phu_dinh XOR tu phu dinh dau noi dung."""
+    return bool(getattr(p, "phu_dinh", False)) != bool(re.match(r"^\s*(không|chưa|chẳng|ko)(?!\w)", _thuong(p.noi_dung)))
+
+
+def phu_dinh_nguoc(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
+    """Ban ghi PHU DINH ma moi luot duoc dan (va cau tra loi ngay sau cau hoi duoc dan) deu khang
+    dinh, khong co tu phu dinh nao. Chieu nguoc lai da co POSSIBLE_NEGATION_ERROR. Vong 3 cay loi
+    25/11/2026: dao phu dinh lot 95%."""
+    if not _phu_dinh_hieu_luc(p) or not _thuc_te(p):
+        return []
+    dan = ctx.dan(p)
+    if not dan:
+        return []
+    xet = []
+    for s in dan:
+        t = ctx.luot[s][1]
+        if ctx.la_nv(s) and la_cau_hoi(_thuong(t), loi_noi.co_dau_cau(t)):
+            if s + 1 in ctx.luot and not ctx.la_nv(s + 1):
+                xet.append(s + 1)
+            continue
+        xet.append(s)
+    if not xet:
+        return []
+    tu_p = _tu(re.sub(r"(?<!\w)(không|chưa|chẳng|chả|ko)(?!\w)", " ", _thuong(p.noi_dung)))
+    # Xet theo MENH DE co chu noi dung cua ban ghi: "em bị cường giáp, còn vợ em chưa thấy gì" —
+    # "chưa" thuoc ve menh de khac.
+    lien = [y for s in xet for c in cac_cau(ctx.luot[s][1])
+            for y in re.split(r",|(?<!\w)còn(?!\w)", c) if tu_p & _tu(y)]
+    if not lien or any(DAU_PHU_DINH_GOC.search(_thuong(c)) for c in lien)             or any(DAU_HET_GOC.search(_thuong(ctx.luot[s][1])) for s in xet):
+        return []
+    return [tao(ctx, p, "NEGATION_FLIP", sorted(set(xet)), [ctx.luot[s][1] for s in sorted(set(xet))[:2]],
+                "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào.",
+                NGHI_RUI_RO, TRUNG, "phu_dinh_nguoc", loai_tt)]
+
 # ----------------------------------------------------------------- 3. hoi - dap
 LA_CAU_HOI = re.compile(r"\?|(?<!\w)(không|chưa|gì|nào|sao|à|hả|chứ)\s*(ạ|vậy|nhỉ|nhé)?\s*$")
+
+
+def la_cau_hoi(t: str, co_dau: Optional[bool] = None) -> bool:
+    """`LA_CAU_HOI` cho van co dau cau (hanh vi cu); `loi_noi.nhan_cau_hoi` cho van khong dau.
+    `co_dau` phai lay tu CA LUOT khi `t` la mot ve da bi `cac_cau` boc dau (ra soat 25/11:
+    hoi tren ve lam van co dau di nham sang nhanh khong dau va mat PLAN_AS_FACT)."""
+    if co_dau is None:
+        co_dau = loi_noi.co_dau_cau(t)
+    return bool(LA_CAU_HOI.search(t)) if co_dau else loi_noi.nhan_cau_hoi(t)
+
+
 TRA_LOI_KHONG = re.compile(r"^(dạ|vâng|thưa bác sĩ|ờ|à)?[ ,]*(không|chưa|chẳng|chả)(?!\s+(nhớ|rõ|biết|chắc))(\s|,|\.|$)")
 TRA_LOI_CO = re.compile(r"^(dạ|vâng|ờ)?[ ,]*(có|bị|đúng rồi|vâng có|dạ có)(\s|,|\.|$)")
 
@@ -269,7 +366,7 @@ def hoi_dap(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
     ra = []
     tu_p = _tu(p.noi_dung)
     for q in dan:
-        if not ctx.la_nv(q) or not LA_CAU_HOI.search(_thuong(ctx.luot[q][1])):
+        if not ctx.la_nv(q) or not la_cau_hoi(_thuong(ctx.luot[q][1])):
             continue
         a = q + 1
         if a not in ctx.luot or ctx.la_nv(a):
@@ -299,7 +396,7 @@ def hoi_dap(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         q = a - 1
         if ctx.la_nv(a) or q in dan or q not in ctx.luot or not ctx.la_nv(q):
             continue
-        if len(_tu(ctx.luot[a][1])) <= 2 and LA_CAU_HOI.search(_thuong(ctx.luot[q][1])):
+        if len(_tu(ctx.luot[a][1])) <= 2 and la_cau_hoi(_thuong(ctx.luot[q][1])):
             ra.append(tao(ctx, p, "EVIDENCE_CONTEXT_MISSING", [q, a], [ctx.luot[q][1], ctx.luot[a][1]],
                           f"Lượt {a} là câu trả lời ngắn; câu hỏi ở lượt {q} cần được dẫn cùng.",
                           CAN_XEM, THAP, "hoi_dap", loai_tt))
@@ -376,6 +473,9 @@ LOI_KHUYEN = re.compile(r"(?<!\w)(nên|hãy|nhớ|đừng|không nên|cần ph�
 TUONG_LAI = re.compile(r"(?<!\w)(sẽ|tuần sau|tháng sau|ngày mai|sáng mai|chiều mai|lát nữa|chiều nay|tối nay|"
                        r"hẹn|tái khám|để (tôi|em|bác sĩ|chị|anh) (cho|kê|làm|chỉ định|gửi)|cho (đi|làm)|"
                        r"(đi|về) (chụp|xét nghiệm|siêu âm|làm|đo)|chỉ định|làm thêm)(?!\w)")
+Y_LENH = re.compile(r"(?<!\w)(kê|cho (uống|dùng|thêm|thuốc)|ngừng|dừng|chuyển sang|đổi sang|tăng liều|giảm liều|"
+                    r"bắt đầu (uống|dùng|tiêm))(?!\w)")
+MENH_LENH = re.compile(r"(?<!\w)(nhé|nha|nhá|từ nay|từ hôm nay|hôm nay)(?!\w)")
 QUA_KHU_KE_HOACH = re.compile(r"(?<!\w)(đã|hôm trước|lần trước|tuần trước|hồi|trước đây)(?!\w)")
 XET_NGHIEM = re.compile(r"(?<!\w)(xét nghiệm|chụp|siêu âm|x[- ]?quang|nội soi|điện tim|ct|mri|đo đường|"
                         r"công thức máu|nước tiểu)(?!\w)")
@@ -398,7 +498,7 @@ def ke_hoach(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
     hanh_vi = getattr(p, "hanh_vi", "")
     tinh_huong = getattr(p, "tinh_huong", "thực tế")
     # Loi dan cua bac si ghi thanh viec benh nhan da lam
-    if all(ctx.la_nv(x) for x in dan) and LOI_KHUYEN.search(ct) and not LA_CAU_HOI.search(ct) \
+    if all(ctx.la_nv(x) for x in dan) and LOI_KHUYEN.search(ct) and not la_cau_hoi(ct, loi_noi.co_dau_cau(ctx.luot[s][1])) \
             and tinh_huong == "thực tế" and hanh_vi not in ("kế hoạch", "quan sát", "nhận định") and _la_bn(p):
         ra.append(tao(ctx, p, "RECOMMENDATION_AS_FACT", [s], [c],
                       f"Lượt {s} là lời dặn của bác sĩ: “{c}”.", LOI_PHAT_HIEN, TRUNG, "ke_hoach", loai_tt))
@@ -411,9 +511,17 @@ def ke_hoach(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
                       LOI_PHAT_HIEN, THAP, "ke_hoach", loai_tt))
     # Viec se lam ghi thanh su viec
     elif tinh_huong == "thực tế" and TUONG_LAI.search(ct) and not DAU_DIEU_KIEN.search(ct) \
-            and not QUA_KHU_KE_HOACH.search(ct) and ctx.la_nv(s) and not LA_CAU_HOI.search(ct):
+            and not QUA_KHU_KE_HOACH.search(ct) and ctx.la_nv(s) and not la_cau_hoi(ct, loi_noi.co_dau_cau(ctx.luot[s][1])):
         ra.append(tao(ctx, p, "PLAN_AS_FACT", [s], [c],
                       f"Lượt {s} nói việc sẽ làm: “{c}”; bản ghi ghi như đã xảy ra.",
+                      LOI_PHAT_HIEN, TRUNG, "ke_hoach", loai_tt))
+    # Y lenh cua bac si ("tôi kê … nhé", "từ nay ngừng … nha") ghi thanh su viec (vong 1 cay loi 25/11)
+    elif tinh_huong == "thực tế" and all(ctx.la_nv(x) for x in dan) and Y_LENH.search(ct) \
+            and MENH_LENH.search(ct) and not QUA_KHU_KE_HOACH.search(ct) \
+            and hanh_vi not in ("quan sát", "nhận định") \
+            and not la_cau_hoi(ct, loi_noi.co_dau_cau(ctx.luot[s][1])):
+        ra.append(tao(ctx, p, "PLAN_AS_FACT", [s], [c],
+                      f"Lượt {s} là y lệnh của bác sĩ: “{c}”; bản ghi ghi như đã xảy ra.",
                       LOI_PHAT_HIEN, TRUNG, "ke_hoach", loai_tt))
     # Ke hoach CO DIEU KIEN ghi thanh ke hoach chac chan
     if tinh_huong == "kế hoạch" and DIEU_KIEN_THEM.search(ct) and not DIEU_KIEN_THEM.search(nd):
@@ -699,7 +807,7 @@ def thu_nghiem(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
             ra.append(tao(ctx, p, "IMPORTANT_MODIFIER_DROPPED", [s], [c],
                           f"Câu gốc có “{', '.join(mat)}”, bản ghi không có.", CAN_XEM, CAO, "thu_nghiem", loai_tt))
     if getattr(p, "hanh_vi", "") in ("trả lời", "tự kể") and all(ctx.la_nv(x) for x in dan) \
-            and not any(LA_CAU_HOI.search(_thuong(ctx.luot[x][1])) for x in dan):
+            and not any(la_cau_hoi(_thuong(ctx.luot[x][1])) for x in dan):
         ra.append(tao(ctx, p, "DOCTOR_STATEMENT_AS_PATIENT_FACT", dan, [ctx.luot[dan[0]][1]],
                       "Bản ghi là lời kể của người bệnh nhưng chỉ dẫn lời bác sĩ.", NGHI_RUI_RO, CAO, "thu_nghiem",
                       loai_tt))
@@ -754,5 +862,5 @@ def cum_mo_ho(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
     return ra
 
 
-BO_PHAT_HIEN = (con_so, hoi_dap, khong_nho, pham_vi_phu_dinh, ke_hoach, thoi_diem, than_the, thuc_the, cau_mau,
+BO_PHAT_HIEN = (con_so, hoi_dap, khong_nho, pham_vi_phu_dinh, phu_dinh_nguoc, ke_hoach, thoi_diem, than_the, thuc_the, cau_mau,
                 thu_nghiem, cum_mo_ho)

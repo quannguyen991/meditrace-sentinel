@@ -691,8 +691,8 @@ def tao_tai_lieu_word():
     them_tieu_de_2(doc, "9.7 Hạ tầng Điều phối E2E Orchestrator, Chữ ký băm SHA-256 & Bàn làm việc Bác sĩ Copilot")
     them_doan_van(doc,
         "• Pipeline Orchestrator (src/dieu_phoi_ha_tang.py): Điều phối toàn bộ luồng xử lý từ audio gỡ băng, guardrails, khóa căn cứ, kiểm duyệt dược lý đến xuất bản FHIR.\n"
-        "• Tamper-evident Audit Trail: Tự động tính toán chữ ký số băm bảo mật SHA-256 cho toàn bộ hồ sơ bệnh án và lịch sử kiểm soát. "
-        "Bất kỳ sự can thiệp trái phép nào vào dữ liệu sau xuất bản đều bị phát hiện ngay lập tức.\n"
+        "• Tamper-evident Audit Trail: Tự động tính toán mã băm SHA-256 để đối chiếu nội dung cho toàn bộ hồ sơ bệnh án và lịch sử kiểm soát. "
+        "Việc phát hiện thay đổi cần có bản hash đã lưu ở nơi tin cậy và bước xác minh; hash đơn lẻ không ngăn sửa đổi.\n"
         "• Giao diện Web Bác sĩ Copilot Dashboard (src/giao_dien_copilot.html): Thiết kế 3 cột chuyên nghiệp: "
         "Cột 1 (Audio & Hội thoại có nút bật/tắt ẩn danh PII) | Cột 2 (Căn cứ & 5 Tầng Guardrails + Quick Chips gợi ý hỏi thêm) | "
         "Cột 3 (Bệnh án 3 phân vùng với 1-click Approve, in ấn và xuất HL7 FHIR).")
@@ -842,8 +842,8 @@ def tao_tai_lieu_word():
         "Toàn bộ pipeline chỉ có tỷ lệ chặn oan 0.4% trên tập thực nghiệm (và 0.0% trên tập kiểm chứng 30.136 dòng), "
         "đảm bảo không làm nghẽn quy trình làm việc của bác sĩ.\n\n"
         "5. Kết quả Kiểm thử Tự động Toàn diện (Continuous Integration & Test Suite):\n"
-        "Toàn bộ hệ sinh thái MediTrace Sentinel v2.5 được bảo vệ bởi bộ kiểm thử tự động gồm 1.320 bài test độc lập. "
-        "Kết quả kiểm thử chính thức ghi nhận: 1.320 passed / 1.320 tests (100% tỷ lệ pass tuyệt đối, 0 regression errors), "
+        "Toàn bộ hệ sinh thái MediTrace Sentinel v2.5 được bảo vệ bởi bộ kiểm thử tự động gồm số bài test cần được xác nhận lại trên revision hiện tại. "
+        "Kết quả kiểm thử chính thức ghi nhận: kết quả lịch sử chưa thống nhất và chưa được tái chạy trên revision hiện tại; "
         "chứng minh tính ổn định và sẵn sàng sản xuất của hệ thống.")
 
     them_hinh_anh(doc, "h11-du-lieu.png",
@@ -903,7 +903,7 @@ def tao_tai_lieu_word():
         "7. Xây dựng Cơ sở Tri thức Phương ngữ & Khẩu ngữ Dân gian Lâm sàng 3 Miền Toàn diện (120+ thuật ngữ), loại bỏ hoàn toàn các bẫy từ mơ hồ nguy hiểm.\n"
         "8. Tích hợp Động cơ Thang điểm Nguy cơ Lâm sàng CDSS (CURB-65, CHA2DS2-VASc, Wells, Glasgow-Blatchford) và Module Đối soát Cận lâm sàng phát hiện bất tương đồng & giá trị nguy kịch.\n"
         "9. Tích hợp Động cơ Hiệu chỉnh Liều Thuốc theo Thận/Gan (Cockcroft-Gault/KDIGO), Cảnh báo Tương tác Thực phẩm và Trình Tự động Sinh Bản Hướng dẫn & Dặn dò Người Bệnh Ngôn ngữ Đời thường.\n"
-        "10. Chứng minh thực nghiệm qua 1.320 bài kiểm thử tự động đạt tỷ lệ Pass tuyệt đối 100%, bảo vệ bằng chữ ký số băm SHA-256 Tamper-evident Audit Trail.")
+        "10. Số lượng và kết quả kiểm thử cần được xác nhận bằng lần chạy có lưu log. SHA-256 là mã băm để đối chiếu nội dung, không phải chữ ký số hay bảo đảm pháp lý.")
 
     them_doan_van(doc,
         "Hướng phát triển tiếp theo:\n"

@@ -110,7 +110,7 @@ def test_chay_tiep_bo_ban_ghi_lech_so_luot(tmp_path, capsys):
     ])
     goi = {}
 
-    def _gia(tok, model, prefix_fn, mau_list, max_token, vi_du, da_co, tep, kq):
+    def _gia(tok, model, prefix_fn, mau_list, max_token, vi_du, da_co, tep, kq, **_kw):
         goi["da_co"] = dict(da_co)
         return kq
 
@@ -133,7 +133,7 @@ def test_chay_tiep_giu_ban_ghi_khop(tmp_path):
     ])
     goi = {}
 
-    def _gia(tok, model, prefix_fn, mau_list, max_token, vi_du, da_co, tep, kq):
+    def _gia(tok, model, prefix_fn, mau_list, max_token, vi_du, da_co, tep, kq, **_kw):
         goi["da_co"] = dict(da_co)
         return kq
 

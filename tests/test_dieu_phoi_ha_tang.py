@@ -41,9 +41,10 @@ def test_dieu_phoi_luong_toan_dien_end_to_end():
     assert ket_qua.ma_ca == "test_e2e_001"
     assert ket_qua.audit_trail is not None
     assert ket_qua.audit_trail.chu_ky_bam_sha256
-    assert len(ket_qua.audit_trail.cac_chot_kiem_soat) == 6
+    assert len(ket_qua.audit_trail.cac_chot_kiem_soat) == 7
     assert ket_qua.hieu_chinh_lieu is not None
     assert ket_qua.ban_dan_do_benh_nhan is not None
+    assert ket_qua.tro_ly_lam_sang is not None
 
     # 2. Kiểm tra các chốt kiểm soát
     ten_chot = [c.ten_chot for c in ket_qua.audit_trail.cac_chot_kiem_soat]
@@ -53,6 +54,7 @@ def test_dieu_phoi_luong_toan_dien_end_to_end():
     assert any("Khóa căn cứ" in t for t in ten_chot)
     assert any("Guardrail 5" in t for t in ten_chot)
     assert any("Chốt 7" in t for t in ten_chot)
+    assert any("Chốt 8" in t or "SOCRATES" in t for t in ten_chot)
 
     # 3. Kiểm tra xuất bản HL7 FHIR
     assert ket_qua.fhir_bundle["resourceType"] == "Bundle"
@@ -96,7 +98,7 @@ def test_dieu_phoi_kem_can_lam_sang_va_thang_diem():
     assert len(ket_qua.doi_soat_can_lam_sang.chan_doan_duoc_xac_nhan) >= 1
     assert "CURB-65" in ket_qua.thang_diem_nguy_co
     assert ket_qua.thang_diem_nguy_co["CURB-65"]["diem_so"] >= 2
-    assert len(ket_qua.audit_trail.cac_chot_kiem_soat) == 7
+    assert len(ket_qua.audit_trail.cac_chot_kiem_soat) == 8
 
 
 def test_asr_goi_y_thuoc_phai_chuyen_sang_can_xac_nhan_va_boi_do():

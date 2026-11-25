@@ -154,13 +154,17 @@ def nap(ten_mo_hinh, ep_json=True, adapter=None):
         load_in_4bit=True, bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16)
     model = AutoModelForCausalLM.from_pretrained(
-        ten_mo_hinh, quantization_config=bnb, device_map="auto")
+        ten_mo_hinh, quantization_config=bnb, torch_dtype=torch.bfloat16,
+        device_map="auto")
     if adapter:
         # Adapter huan luyen RIENG cho khau trich (`--nhiem-vu trich`).
         # Khac han adapter cua nhanh A, von hoc viet benh an.
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, adapter)
+        model._co_adapter_trich = True
         print(f"  (da nap adapter trich: {adapter})", flush=True)
+    else:
+        model._co_adapter_trich = False
     model.eval()
 
     prefix_fn = _ep_json(tok) if ep_json else None
@@ -182,19 +186,20 @@ def _ep_json(tok):
         return None
 
 
-def trich(tok, model, prefix_fn, mau_list, max_token=1536, vi_du=True,
-          luu_dan=None):
+def trich(tok, model, prefix_fn, mau_list, max_token=1536, vi_du=None,
+          luu_dan=None, prompt_lookup_num_tokens=None):
     """max_token=1536: o 768 thi 4B bi CAT CUT giua JSON (2/8 mau), vi no trich
     duoc nhieu phat bieu hon 1.7B. Do la loi co hoc, khong phai loi nang luc.
 
-    `luu_dan`: duong dan jsonl. Ghi TUNG mau ngay khi xong, va bo qua mau da
-    co trong tep.
-
-    Vi sao can: mot lan chay 35 mau mat khoang 85 phut. Lan chay dau bi
-    `CUDA error: unspecified launch failure` o mau 15 va mat sach 14 mau da
-    lam, vi tep chi duoc ghi o cuoi. Loi CUDA do la muc driver, khong phong
-    truoc duoc — nhung mat 35 phut moi lan thi phong duoc.
+    `vi_du=None`: tu dong theo mo hinh. Neu da nap `adapter_trich` (huan luyen
+    voi `du_lieu_trich.dung(..., vi_du=False)` va `LOI_NHAC_HE_THONG_TRICH`),
+    mac dinh `vi_du=False` va kem system prompt de KHOP 100% phan phoi luc train
+    va giam 2.000 token prompt (tranh tran VRAM). Neu zero-shot (khong adapter),
+    mac dinh `vi_du=True` (5 vi du mau).
     """
+    co_adapter = bool(getattr(model, "_co_adapter_trich", False))
+    if vi_du is None:
+        vi_du = not co_adapter
     # Chay tiep bo qua mau THEO ID. Nhung id la `hv_xxxx` o MOI bo tu sinh,
     # nen mot tep dem cua bo 3.000 se duoc dung lai nguyen cho bo 5.000 —
     # va do la mot phep do tren du lieu tron lan, im lang hoan toan.
@@ -232,14 +237,40 @@ def trich(tok, model, prefix_fn, mau_list, max_token=1536, vi_du=True,
     tep = open(luu_dan, "a", encoding="utf-8") if luu_dan is not None else None
     try:
         return _vong_trich(tok, model, prefix_fn, mau_list, max_token, vi_du,
-                           da_co, tep, ket_qua)
+                           da_co, tep, ket_qua,
+                           co_adapter=co_adapter,
+                           prompt_lookup_num_tokens=prompt_lookup_num_tokens)
     finally:
         if tep is not None:
             tep.close()
 
 
+def _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=None,
+                  prompt_lookup_num_tokens=None):
+    import torch
+    kw = dict(max_new_tokens=max_token, do_sample=False,
+              pad_token_id=tok.eos_token_id)
+    if prefix_fn is not None:
+        kw["prefix_allowed_tokens_fn"] = prefix_fn
+    elif prompt_lookup_num_tokens:
+        kw["prompt_lookup_num_tokens"] = prompt_lookup_num_tokens
+    with torch.no_grad():
+        try:
+            out = model.generate(**inp, **kw)
+        except TypeError:
+            # Mo hinh gia trong test hoac phien ban transformers cu khong nhan tham so phu
+            kw.pop("prompt_lookup_num_tokens", None)
+            out = model.generate(**inp, **kw)
+    vao_len = inp["input_ids"].shape[1]
+    van_ban = tok.decode(out[0][vao_len:], skip_special_tokens=True)
+    del out
+    return van_ban
+
+
 def _vong_trich(tok, model, prefix_fn, mau_list, max_token, vi_du,
-                da_co, tep, ket_qua):
+                da_co, tep, ket_qua, co_adapter=False,
+                prompt_lookup_num_tokens=None):
+    from src.train_baseline import LOI_NHAC_HE_THONG_TRICH
     for i, m in enumerate(mau_list, 1):
         if m["id"] in da_co:
             ket_qua.append(da_co[m["id"]])
@@ -248,21 +279,35 @@ def _vong_trich(tok, model, prefix_fn, mau_list, max_token, vi_du,
             continue
         danh_so, so_luot = danh_so_luot(m["input"])
         loi_nhac = HUONG_DAN + (f"\n\n{VI_DU}\n\nBây giờ đến lượt bạn." if vi_du else "")
-        msgs = [{"role": "user",
-                 "content": f"{loi_nhac}\n\nHội thoại:\n{danh_so}"}]
+        noi_dung_user = f"{loi_nhac}\n\nHội thoại:\n{danh_so}"
+        if co_adapter:
+            msgs = [{"role": "system", "content": LOI_NHAC_HE_THONG_TRICH},
+                    {"role": "user", "content": noi_dung_user}]
+        else:
+            msgs = [{"role": "user", "content": noi_dung_user}]
         prompt = tok.apply_chat_template(
             msgs, tokenize=False, add_generation_prompt=True, enable_thinking=False)
         # torch nap o day chu khong o dau ham: mau lay tu tep dem khong can
         # den no, nen chay tiep duoc ca tren may khong co GPU.
         import torch
         inp = tok(prompt, return_tensors="pt").to(model.device)
-        with torch.no_grad():
-            out = model.generate(**inp, max_new_tokens=max_token, do_sample=False,
-                                 pad_token_id=tok.eos_token_id,
-                                 prefix_allowed_tokens_fn=prefix_fn)
-        sinh = tok.decode(out[0][inp["input_ids"].shape[1]:], skip_special_tokens=True)
-
-        hop_le, du_lieu, ly_do = _phan_tich(sinh, so_luot)
+        # Giai ma 2 tang (Two-Tier Lazy Enforcement): khi da co adapter fine-tune,
+        # chay giai ma nhanh truoc (khong ton CPU quet 151.936 token moi buoc);
+        # chi khi JSON hong moi fallback sang prefix_fn.
+        if co_adapter and prefix_fn is not None:
+            sinh = _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=None,
+                                 prompt_lookup_num_tokens=prompt_lookup_num_tokens)
+            hop_le, du_lieu, ly_do = _phan_tich(sinh, so_luot)
+            if not hop_le:
+                sinh = _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=prefix_fn)
+                hop_le, du_lieu, ly_do = _phan_tich(sinh, so_luot)
+        else:
+            sinh = _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=prefix_fn,
+                                 prompt_lookup_num_tokens=prompt_lookup_num_tokens)
+            hop_le, du_lieu, ly_do = _phan_tich(sinh, so_luot)
+        del inp
+        if hasattr(torch, "cuda") and torch.cuda.is_available():
+            torch.cuda.empty_cache()
         ban_ghi = {"id": m["id"], "so_luot": so_luot, "json_hop_le": hop_le,
                    "ly_do": ly_do, "phat_bieu": du_lieu, "tho": sinh[:400]}
         ket_qua.append(ban_ghi)

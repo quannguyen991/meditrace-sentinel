@@ -46,6 +46,8 @@
 <a name="bang-2"></a>
 ## BẢNG 2: THÍ NGHIỆM ĐỐI ĐẦU ĐA MÔ HÌNH (HEAD-TO-HEAD BENCHMARK)
 
+> **CHƯA CÓ BẰNG CHỨNG.** Không có tệp nào trong repo chạy GPT-4o, Gemini, Claude hay Llama trên bộ dữ liệu này. Số liệu dưới đây là giá trị ghi trong tài liệu, không phải kết quả đo. Không trình bày như kết quả thực nghiệm cho đến khi có lần chạy được ghi lại.
+
 ### 2.1. Mục đích nghiên cứu
 Trả lời câu hỏi phản biện của Giám khảo: *"Tại sao không đưa hội thoại cho ChatGPT, Gemini hay Claude xử lý luôn cho nhanh mà phải dựng hệ thống MediTrace Sentinel?"*
 
@@ -94,7 +96,7 @@ Chứng minh khả năng thích ứng của hệ thống khi ghi âm trong môi 
 ## BẢNG 4: THÍ NGHIỆM KHÁI QUÁT HÓA NGOÀI KHUÔN (TEMPLATE-DISJOINT)
 
 ### 4.1. Mục đích nghiên cứu
-Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 mẫu từ 100 khuôn có bị trùng lặp, học vẹt không?"*. Chứng minh rằng hệ thống khái quát hóa cực tốt trên các khuôn bệnh án hoàn toàn mới (Unseen Clinical Templates).
+Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 mẫu từ 200 khuôn có bị trùng lặp, học vẹt không?" (Trả lời: không trùng hội thoại nguyên văn, nhưng câu thoại lặp nhiều; xem docs/do-lap-lai-bo-du-lieu.md)*. Chứng minh rằng hệ thống khái quát hóa cực tốt trên các khuôn bệnh án hoàn toàn mới (Unseen Clinical Templates).
 
 ### 4.2. Bảng số liệu thực nghiệm
 | Nhóm Ca bệnh Đánh giá | Số lượng Ca kiểm thử | Độ đa dạng Từ vựng (Vocabulary Richness) | Extraction F1-Score (%) | Subject Attribution Accuracy (%) | Tỷ lệ trích xuất đúng Dị ứng & Bệnh nền (%) | Mức độ suy giảm hiệu năng (Drop Rate) |
@@ -110,6 +112,32 @@ Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 m�
 ### 4.3. Phân tích cốt lõi cho Giám khảo:
 * Hiệu năng trích xuất khi gặp khuôn bệnh hoàn toàn mới chỉ giảm **1.6%** (từ 72.4% xuống 70.8%), chứng minh mô hình học được **quy luật cấu trúc lâm sàng** chứ không hề học vẹt văn bản.
 * Độ biến thiên thực thể tổ hợp (Dynamic Entity Perturbation) và bao phủ phương ngữ 3 miền bảo đảm tính khái quát hóa bền vững trên thực tế lâm sàng cả nước.
+
+### 4.4. Bảng tiến hóa độ lặp câu và độ đa dạng từ vựng (Bộ cũ v1 vs. Bộ Mở rộng v2 — 5.000 ca)
+Đo lường bằng công cụ toán học xác định `src/do_lap_cau.py` trên toàn bộ 5.000 ca:
+
+| Chỉ số đo lường thực nghiệm | Bộ cũ v1 (`mo_rong=False`) | Bộ mở rộng v2 (657 khuôn, seed 2611) | Mức độ cải thiện thực tế |
+| :--- | :---: | :---: | :---: |
+| **Số khuôn ca bệnh** | 200 khuôn | **657 khuôn (21 hệ cơ quan)** | +457 khuôn mới (+228,5%) |
+| **Tổng số lượt thoại** | 87.473 lượt | **87.097 lượt** | Chuẩn hóa cấu trúc lâm sàng |
+| **Số câu duy nhất (khác nhau)** | 20.190 câu | **45.835 câu** | **+25.645 câu (+127,0%)** |
+| **Tỷ lệ lặp mọi câu** | 76,92% | **47,37%** | **Giảm 29,55 điểm %** |
+| **Tỷ lệ lặp câu $\ge 8$ từ** | 69,60% | **42,19%** | **Giảm 27,41 điểm %** |
+| **Độ phong phú từ vựng MTLD** | 93,0 | **145,4** | **+56,3%** |
+| **Độ đa dạng Bigram Distinct-2** | 0,0188 | **0,0468** | **+148,9%** |
+| **Trích dẫn chuỗi con nguyên văn (Axis 2)** | Không đo tự động | **100,0000% (52.634 / 52.634)** | Triệt tiêu 100% ảo giác trích dẫn |
+| **Lỗi ngữ pháp/hạt thừa (6 quy tắc)** | Chưa kiểm soát | **0 lỗi / 87.097 lượt (0,000%)** | Triệt tiêu 100% lỗi ghép câu |
+
+*Ghi chú về giới hạn dừng:* Tỷ lệ lặp câu mọi câu dừng ở mức 47,37% (câu $\ge 8$ từ lặp 42,19%) do đặc thù tự nhiên của 5.000 ca khám chứa các lượt đáp ngắn lịch sự của bệnh nhân ("của tôi ạ.", "vâng ạ."); toàn bộ câu hỏi bác sĩ đã được ngữ cảnh hóa và không còn câu nào trong top 20 lặp nhiều nhất.
+
+### 4.5. Thí nghiệm đo Tỷ lệ Bỏ sót Mệnh đề Lâm sàng (Omission Evaluation — 30 ca phát triển)
+Đo bằng `tools/do_bo_sot_tren_tap.py` trên 30 ca đầu tập phát triển (304 mệnh đề đáp án, khoảng tin cậy Wilson 95%):
+
+| Mô hình kiểm nghiệm | Số mệnh đề đáp án | Bị bỏ sót | Tỷ lệ bỏ sót (%) | Khoảng tin cậy 95% | Số ca JSON lỗi |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Qwen3-4B chưa huấn luyện (Zero-shot)** | 304 | 131 | **43,1%** | 37,6% – 48,7% | 0 / 30 |
+| **Qwen3-4B + adapter (best_checkpoint)** | 304 | 35 | **11,5%** | **8,4% – 15,6%** | 0 / 30 |
+| **Mức độ giảm thiểu bỏ sót** | — | **-96 mệnh đề** | **Giảm 31,6 điểm %** | P-value < 0.001 | 0 lỗi cú pháp |
 
 ---
 
@@ -139,6 +167,8 @@ Kiểm chứng khả năng phòng vệ chủ động của hệ thống trước
 
 <a name="bang-6"></a>
 ## BẢNG 6: THÍ NGHIỆM ĐÁNH GIÁ LÂM SÀNG BỞI BÁC SĨ (USER STUDY)
+
+> **ĐỀ XUẤT, KHÔNG PHẢI KẾT QUẢ.** Trong dự án không có dữ liệu hay tệp nào của 10 bác sĩ. Bảng dưới đây chỉ mô tả thiết kế thử nghiệm dự kiến.
 
 ### 6.1. Mục đích nghiên cứu
 Đo lường sự cải thiện về mặt thời gian, mức độ hài lòng và giảm tải kiệt sức (Burnout Reduction) trên bác sĩ lâm sàng thực tế khi đưa MediTrace Sentinel vào quy trình khám bệnh.

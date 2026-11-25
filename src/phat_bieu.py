@@ -101,6 +101,8 @@ class PhatBieu:
     ten_chu_the: str = ""          # chuoi goc mo hinh viet, de tra vai nguoi noi
     hanh_vi: str = ""              # xem HANH_VI; "" = khong ro (dau ra cu)
     thuoc: Optional[dict] = None   # xem THUOC_KHOA; None = khong phai thong tin thuoc
+    # Vết âm thanh căn cứ hai chiều (Bidirectional Audio Citation Spans)
+    audio_spans: List[dict] = field(default_factory=list)  # [{ start_ms, end_ms, speaker_id, exact_quote }]
 
     def __post_init__(self):
         if self.thuoc is not None:

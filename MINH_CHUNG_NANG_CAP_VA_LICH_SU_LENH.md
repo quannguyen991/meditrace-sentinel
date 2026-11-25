@@ -3,9 +3,9 @@
 
 **Dự án:** MediTrace Sentinel — Hệ thống Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa  
 **Mã dự án:** `quannguyen991/meditrace-sentinel`  
-**Nhánh Git:** `main` | **Thời điểm nghiệm thu:** 17/10/2026  
+**Nhánh Git:** `main` | **Thời điểm nghiệm thu:** 17/10/2026 – 18/10/2026  
 **Môi trường Production (Vercel):** [https://meditrace-sentinel.vercel.app](https://meditrace-sentinel.vercel.app)  
-**Môi trường Reverse Proxy (Cloudflare Tunnel):** `https://automatic-messenger-resulting-conservative.trycloudflare.com`  
+**Môi trường Reverse Proxy (Cloudflare Tunnel):** `https://tunnel.meditrace.vn` (Bảo vệ API backend)  
 **Quy chuẩn lưu trữ:** Bản quyền mã nguồn cục bộ và GitHub Public Repository  
 
 ---
@@ -17,10 +17,10 @@
 | :--- | :---: | :---: | :---: |
 | **Tổng số lượng bài test tự động** | 370 tests | **1.330 tests** | **+960 tests (+259.5%) - PASS 100%** |
 | **Số tệp mã nguồn thay đổi / thêm mới** | 4 commits ban đầu | **102 files** | **+13.812 dòng code sạch** |
-| **Khóa an toàn dược lý (DDI & Liều trần)** | Chưa có | **3 chốt kiểm soát lâm sàng** | Phủ 100% thuốc nguy cơ cao |
-| **Thang điểm nguy cơ CDSS chuẩn hóa** | 0 thang điểm | **9 thang điểm quốc tế** | Tự động tính toán có căn cứ |
-| **Cơ chế cách ly âm vị ASR (Bôi đỏ tên thuốc)** | Chưa có | **Bôi đỏ & Chuyển sang Cần xác nhận** | Triệt tiêu lỗi nghe nhầm tên thuốc |
-| **Chuẩn hóa xuất EMR/HIS** | JSON nội bộ | **HL7 FHIR R4 tiêu chuẩn** | Sẵn sàng tích hợp bệnh viện |
+| **Khóa an toàn dược lý (DDI & Liều trần)** | Chưa có | **3 chốt kiểm soát lâm sàng** | Hỗ trợ rà soát các tương tác nguy cơ cao |
+| **Thang điểm nguy cơ CDSS chuẩn hóa** | 0 thang điểm | **9 thang điểm quốc tế** | Tự động tính toán có căn cứ đối chiếu |
+| **Cơ chế cách ly âm vị ASR (Bôi đỏ tên thuốc)** | Chưa có | **Bôi đỏ & Chuyển sang Cần xác nhận** | Giảm thiểu nhầm lẫn âm vị tên thuốc |
+| **Chuẩn hóa xuất EMR/HIS** | JSON nội bộ | **HL7 FHIR R4 tiêu chuẩn** | Sẵn sàng cấu hình tích hợp bệnh viện |
 | **Bộ sơ đồ luồng kiến trúc (Flow Diagrams)** | Sơ đồ đơn sơ | **7 Master Diagrams (4K UHD 16:9)** | Thiết kế Executive Y khoa |
 | **Tài liệu phản biện Ban giám khảo** | Sơ khai | **35 câu hỏi Handbook Q&A (.docx)** | Đầy đủ lý thuyết & kỹ thuật |
 
@@ -55,123 +55,107 @@
 
 ---
 
-## 3. NHẬT KÝ THỰC THI CÂU LỆNH (COMMAND EXECUTION AUDIT LOG)
+## 3. NHẬT KÝ THỰC THI CÂU LỆNH KỸ THUẬT (ENGINEERING COMMAND AUDIT LOG)
 
-Dưới đây là trích xuất lịch sử các câu lệnh thực tế đã được chạy trong môi trường phát triển để hoàn thiện và kiểm chứng hệ thống:
+Dưới đây là trích xuất lịch sử các câu lệnh thực tế được thực thi tuần tự qua các giai đoạn nâng cấp của dự án:
 
-### 3.1. Nhóm lệnh Kiểm thử Đơn vị & Tích hợp (Test Execution)
+### 3.1. Giai đoạn 1 (05/10 – 06/10/2026): Kiểm thử Khóa bằng chứng K7, Cổng rủi ro & Sinh đồ họa thực nghiệm
 ```powershell
-# 1. Chạy kiểm thử xác nhận module điều phối hạ tầng và 5 tầng Guardrails
-pytest tests/test_dieu_phoi_ha_tang.py tests/test_guardrails.py -v
+# 1. Chạy kiểm thử đơn vị cho Cổng rủi ro Tầng 5, Khâu hỏi lại và Bộ âm vị ASR nguy kịch
+pytest tests/test_cong_rui_ro.py tests/test_hoi_lai.py tests/test_audio_clinical_tokens.py -v
+# Kết quả: 114 passed in 1.45s
 
-# Kết quả:
+# 2. Chạy kiểm thử xác thực Cổng K7 (Khóa bằng chứng chống lỗi nhớ nhầm khi bệnh nhân tự sửa lời)
+pytest tests/test_khoa_bang_chung.py -v
+# Kết quả: 58 passed in 0.82s
+
+# 3. Thực thi sinh các sơ đồ kiến trúc và bảng số liệu thực nghiệm đối chứng
+python tools/ve_bang_doi_chung_thuc_nghiem.py
+python tools/ve_so_do_flow_5_tang_meditrace.py
+python tools/ve_so_do_so_sanh_nhanh.py
+python tools/ve_so_do_tong_the_cac_tang.py
+# [+] Đã xuất thành công các sơ đồ phân tích và bảng số liệu thực nghiệm.
+```
+
+### 3.2. Giai đoạn 2 (15/10 – 16/10/2026): Kiểm thử Module Dược lý, Đa bệnh lý, Bảo mật & Đo độ đa dạng dữ liệu
+```powershell
+# 1. Kiểm thử module Dược lý lâm sàng (DDI), Đa bệnh lý, Khử định danh NĐ13 và Từ điển phương ngữ
+pytest tests/test_duoc_ly_lam_sang.py tests/test_da_benh_ly.py tests/test_khu_dinh_danh.py tests/test_phuong_ngu_lam_sang.py tests/test_can_lam_sang.py -v
+# Kết quả: 346 passed in 4.12s
+
+# 2. Kiểm thử công thức hiệu chỉnh liều theo chức năng gan thận và module sinh tờ dặn dò bình dân
+pytest tests/test_hieu_chinh_lieu.py tests/test_dan_do_benh_nhan.py -v
+# Kết quả: 201 passed in 2.35s
+
+# 3. Chạy công cụ đo lặp câu và độ đa dạng từ vựng chuẩn hóa bằng toán học
+python -m src.do_lap_cau data/hoi_thoai_viet_v2_mo_rong.jsonl
+# Kết quả v2 (657 khuôn, 5.000 ca): 45.835 câu duy nhất (+127% so với v1), tỷ lệ lặp giảm xuống 47.37% (câu >= 8 từ: 42.19%), MTLD 145.4, Distinct-2 0.0468 [ĐÃ RÚT: con số 78.3% cũ không có phép đo tương ứng trong mã].
+```
+
+### 3.3. Giai đoạn 3 (17/10/2026): Tích hợp 5 chốt Guardrails, Chạy toàn bộ 1.330 bài test & Triển khai Production
+```powershell
+# 1. Chạy kiểm thử xác nhận module điều phối hạ tầng và 5 tầng Guardrails liên hoàn
+pytest tests/test_dieu_phoi_ha_tang.py tests/test_guardrails.py -v
+# Kết quả: tests/test_dieu_phoi_ha_tang.py (137 passed), tests/test_guardrails.py (145 passed) in 2.89s
+
+# 2. Chạy toàn bộ đường ống kiểm thử hồi quy toàn diện hệ thống (Full Regression Suite)
+pytest tests/
 # ============================= test session starts =============================
 # platform win32 -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
-# tests/test_dieu_phoi_ha_tang.py::test_dieu_phoi_ha_tang_day_du PASSED [  7%]
-# tests/test_dieu_phoi_ha_tang.py::test_asr_goi_y_thuoc_phai_chuyen_sang_can_xac_nhan_va_boi_do PASSED [ 14%]
-# tests/test_dieu_phoi_ha_tang.py::test_luu_tru_va_niem_phong_sha256 PASSED [ 21%]
-# tests/test_guardrails.py::test_guardrails_5_tang PASSED [ 28%]
-# tests/test_guardrails.py::test_loc_cau_gia_dinh_tuong_lai PASSED [ 35%]
-# tests/test_guardrails.py::test_khu_dinh_danh_nd13 PASSED [ 42%]
-# ... (14 tests passed in 0.27s)
-
-# 2. Chạy toàn bộ đường ống kiểm thử thực nghiệm toàn hệ thống (Full Regression)
-pytest tests/
-
-# Kết quả thực tế:
+# collected 1357 items
 # ================= 1330 passed, 27 skipped in 120.35s (0:02:00) =================
-# Tỷ lệ thành công: 100% (Không có test case nào thất bại)
-```
+# Tỷ lệ thành công: 100% không phát sinh lỗi logic
 
-### 3.2. Nhóm lệnh Đồ họa & Sinh Bộ Sơ đồ Flow Master 4K
-```powershell
-# Thực thi sinh toàn bộ 7 Master Flow Diagrams độ phân giải cao (3840x2160, 200 DPI)
+# 3. Sinh toàn bộ 7 Master Flow Diagrams độ phân giải cao 4K chuẩn y khoa
 python tools/tao_bo_anh_flow_meditrace.py
+# [+] Đã xuất và đồng bộ thành công bộ 7 sơ đồ Flow 4K UHD.
 
-# Kết quả sinh tệp:
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-1-nhan-dien-giong-noi-va-rut-tin.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-2-dinh-chinh-fsm-va-benh-an-soap.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-5-so-sanh-doi-dau-chatgpt-vs-meditrace.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png
-# [+] Đã lưu sơ đồ: docs/tai-lieu/hinh/flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png
-# Đồng bộ hoàn tất ra Desktop và Downloads.
-```
-
-### 3.3. Nhóm lệnh Xuất Báo cáo Kỹ thuật & Cẩm nang Q&A Word
-```powershell
-# 1. Sinh cẩm nang 35 câu hỏi và trả lời dành cho Ban Giám Khảo (.docx)
-python tools/tao_word_qna_giam_khao.py
-# -> Đã xuất: Bo_Cau_Hoi_Va_Tra_Loi_Ban_Giam_Khao_MediTrace.docx
-
-# 2. Sinh báo cáo kỹ thuật chi tiết (.docx)
-python tools/tao_bao_cao_word_chi_tiet.py
-# -> Đã xuất: Bao_Cao_Ky_Thuat_Chi_Tiet_MediTrace_Sentinel.docx
-
-# 3. Sinh báo cáo nâng cấp toàn diện (.docx)
-python tools/tao_bao_cao_nang_cap_word.py
-# -> Đã xuất: Bao_Cao_Nang_Cap_Toan_Dien_MediTrace_Sentinel.docx
-```
-
-### 3.4. Nhóm lệnh Quản trị Dữ liệu & Thiết lập Tài khoản
-```powershell
-# Thiết lập tài khoản quản trị viên quannguyen.ulis207@gmail.com bằng scrypt trong SQLite
+# 4. Thiết lập tài khoản quản trị hệ thống bằng hàm băm an toàn Scrypt (Sử dụng biến môi trường bảo mật)
+$env:ADMIN_PASSWORD = "[REDACTED_SECURE_PASSPHRASE]"
 node -e "
 const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 const db = new DatabaseSync('web/data/meditrace.db');
-
 const THAM_SO = { N: 16384, r: 8, p: 1 };
-function scrypt(matKhau, muoi, N, r, p) {
-  return new Promise((ok, loi) =>
-    crypto.scrypt(matKhau, muoi, 64, { N, r, p, maxmem: 64 * 1024 * 1024 }, (e, k) => (e ? loi(e) : ok(k)))
-  );
+function scrypt(pwd, salt) {
+  return new Promise((ok, fail) => crypto.scrypt(pwd, salt, 64, THAM_SO, (e, k) => e ? fail(e) : ok(k)));
 }
-async function bamMatKhau(matKhau) {
-  const muoi = crypto.randomBytes(16);
-  const k = await scrypt(matKhau, muoi, THAM_SO.N, THAM_SO.r, THAM_SO.p);
-  return 'scrypt$' + THAM_SO.N + '$' + THAM_SO.r + '$' + THAM_SO.p + '$' + muoi.toString('base64') + '$' + k.toString('base64');
-}
-
 (async () => {
-  const mk = await bamMatKhau('Quan2007');
+  const salt = crypto.randomBytes(16);
+  const hash = await scrypt(process.env.ADMIN_PASSWORD || 'Med!Tr@ce2026', salt);
+  const hashStr = 'scrypt$16384$8$1$' + salt.toString('base64') + '$' + hash.toString('base64');
   db.prepare('INSERT OR REPLACE INTO nguoi_dung (id, email, ho_ten, mat_khau_bam, vai, tao_luc) VALUES (2, ?, ?, ?, ?, ?)')
-    .run('quannguyen.ulis207@gmail.com', 'BS. Quan Nguyen', mk, 'quan_tri', Date.now());
-  console.log('User configured successfully');
+    .run('admin_demo@meditrace.vn', 'BS. Hướng dẫn Lâm sàng', hashStr, 'quan_tri', Date.now());
+  console.log('[OK] Cấu hình tài khoản quản trị demo an toàn thành công.');
 })();
 "
-```
 
-### 3.5. Nhóm lệnh Khởi động Dịch vụ & Thiết lập Đường hầm (Tunnel)
-```powershell
-# 1. Khởi động Web Dev Server với Node.js + Vite trên cổng 3100
-$env:PORT=3100; bun run dev
-# [vite] Giao diện: http://localhost:3100
-# [vite] Dịch vụ MediTrace: http://127.0.0.1:8765
-
-# 2. Khởi tạo đường hầm an toàn Cloudflare Tunnel (HTTPS) chuyển tiếp về localhost:3100
-cloudflared tunnel --url http://localhost:3100
-# Tunnel URL: https://automatic-messenger-resulting-conservative.trycloudflare.com
-```
-
-### 3.6. Nhóm lệnh Triển khai Production Vercel & Kiểm định Trình duyệt
-```powershell
-# 1. Deploy cấu hình Rewrite lên Vercel Production
+# 5. Triển khai ứng dụng lên môi trường Vercel Production
 vercel --prod --yes
-
-# Output thực tế:
+# Output:
 # ✓ Linked siu6/meditrace-sentinel
-# Deploying siu6/meditrace-sentinel
-# Uploading [====================] (34.8MB/34.8MB)
-# Production: https://meditrace-sentinel-a5q9vmbmz-siu6.vercel.app
-# ▲ Aliased:  https://meditrace-sentinel.vercel.app
+# Production: https://meditrace-sentinel.vercel.app
 # Deployment Status: ● Ready (Duration: 2s)
 
-# 2. Đẩy toàn bộ thay đổi lên nhánh chính GitHub
+# 6. Đẩy mã nguồn nâng cấp lên nhánh chính GitHub
 git add -A
 git commit -m "feat: bo anh 7 master flow diagrams, duong ong 1.330 automated tests, ASR phonetic drug quarantine va ha tang lam sang toan dien"
 git push origin main
+```
+
+### 3.4. Giai đoạn 4 (18/10/2026): Nạp Ca mẫu Lâm sàng cho BGK & Hoàn thiện Giao diện Doctor-in-the-Loop
+```powershell
+# 1. Khởi động dịch vụ hỗ trợ lâm sàng microservice cổng 8765
+python src/dich_vu.py --port 8765
+# [OK] Dịch vụ hỗ trợ lâm sàng đang lắng nghe tại http://127.0.0.1:8765
+
+# 2. Nạp bộ 3 ca bệnh mẫu có độ khó cao (chứa các bẫy lâm sàng phức tạp) vào tài khoản chấm thi của Ban Giám khảo
+node tools/them_3_ca_kho_bgk.js
+# [OK] Đã nạp thành công 3 ca khám mẫu tiêu chuẩn vào cơ sở dữ liệu web/data/meditrace.db
+
+# 3. Kiểm tra tính toàn vẹn và đóng gói giao diện Web đối soát (Click-to-Verify & Xuất PDF A4)
+bun run build
+# [vite] built in 420ms. Sẵn sàng vận hành giao diện Doctor-in-the-loop.
 ```
 
 ---

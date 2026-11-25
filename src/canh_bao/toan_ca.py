@@ -26,7 +26,14 @@ BO_SOT = (
 )
 
 
-def bo_sot(ctx: NguCanh, doan_chua_ghi: List[dict]) -> List[CanhBao]:
+def bo_sot(ctx: NguCanh, doan_chua_ghi: List[dict], ps=(), cap=()) -> List[CanhBao]:
+    """Tu 25/11/2026 goi sang `canh_bao.bo_sot.quet` — mot bo duy nhat cho ca he thong.
+    Ham cu (mot ma moi doan, khong biet ban ghi da co gi) giu o `bo_sot_cu` de doi chieu."""
+    from src.canh_bao import bo_sot as _bs
+    return _bs.quet(ctx, ps, doan_chua_ghi, cap)
+
+
+def bo_sot_cu(ctx: NguCanh, doan_chua_ghi: List[dict]) -> List[CanhBao]:
     ra = []
     for d in doan_chua_ghi:
         doan, so = d["doan"], d["luot"]

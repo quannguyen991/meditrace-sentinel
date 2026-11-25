@@ -101,3 +101,34 @@ CREATE TABLE IF NOT EXISTS cai_dat (
   khoa     TEXT PRIMARY KEY,
   gia_tri  TEXT
 );
+
+-- Sổ kiểm toán ký duyệt bất biến WORM (Thông tư 46/2018/TT-BYT): lưu chuỗi băm SHA-256
+-- song song với worm_signoff_log.jsonl; trigger cấm UPDATE/DELETE tuyệt đối.
+CREATE TABLE IF NOT EXISTS worm_signoff (
+  seq             INTEGER PRIMARY KEY,
+  timestamp       TEXT    NOT NULL,
+  nguoi_dung_id   INTEGER REFERENCES nguoi_dung(id) ON DELETE RESTRICT,
+  event           TEXT    NOT NULL DEFAULT 'doctor_forensic_signoff',
+  session_id      TEXT    NOT NULL,
+  tong_menh_de    INTEGER NOT NULL,
+  so_giu          INTEGER NOT NULL,
+  so_sua          INTEGER NOT NULL,
+  so_bo           INTEGER NOT NULL,
+  ty_le_co_nguon  REAL    NOT NULL,
+  content_hash    TEXT    NOT NULL,
+  prev_hash       TEXT    NOT NULL,
+  curr_hash       TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS worm_signoff_theo_phien ON worm_signoff(session_id, seq);
+
+CREATE TRIGGER IF NOT EXISTS trg_worm_signoff_no_update
+BEFORE UPDATE ON worm_signoff
+BEGIN
+  SELECT RAISE(FAIL, 'WORM Violation: Khong duoc sua ban ghi ky duyet da khoa');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_worm_signoff_no_delete
+BEFORE DELETE ON worm_signoff
+BEGIN
+  SELECT RAISE(FAIL, 'WORM Violation: Khong duoc xoa ban ghi ky duyet da khoa');
+END;
