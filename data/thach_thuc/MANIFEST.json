@@ -1,0 +1,18 @@
+{
+ "nguon": "D:\\Claude\\khkt-benh-an\\kaggle-ra\\the-he-8-chinh-sach-C",
+ "ngay_chep": "2026-11-25",
+ "tep": {
+  "ra_C_khoa_thach_thuc_dinh_chinh_phat_trien.jsonl": "432dfe3303da995a0c68e3629caff0097cac0d014232c8c58a6a720d0b5d33ca",
+  "ra_C_khoa_thach_thuc_doi_chu_the_phat_trien.jsonl": "6675c25253a0397f60eec696c19f1408422f95dd0e014ea07000ee33e9277213",
+  "ra_C_khoa_thach_thuc_nhieu_asr_phat_trien.jsonl": "32dd089c5447dd5011f9077e40d4b6c4554d0b54a200310dcad0e1af4d1e1018",
+  "ra_C_khoa_thach_thuc_phuong_ngu_phat_trien.jsonl": "66ed8e9bbc67cde982315196622716e84f0edcb828a2830e43bf402e207a57d2",
+  "thach_thuc_dinh_chinh_phat_trien.jsonl": "eb746ffc37623d8ccd5b4df8c3e847a20966bcc454437e26ab74bc9c8104d707",
+  "thach_thuc_dinh_chinh_phat_trien.van_tay.json": "251a7f796a32b6096a8f8223661e9cf36043ec27119211ea265d1cff177e784f",
+  "thach_thuc_doi_chu_the_phat_trien.jsonl": "959aad06f4fad4050acaa16ddff3508b8e4cfcd621b731a20c0997d0ab8750b9",
+  "thach_thuc_doi_chu_the_phat_trien.van_tay.json": "275746a485a1d458725adea5e86fe344aa96c23e56860133154713d88e854d86",
+  "thach_thuc_nhieu_asr_phat_trien.jsonl": "967e27c86d797ea27723bbe561ebc2d96277c06538cc6b7284b3c2d092382b54",
+  "thach_thuc_nhieu_asr_phat_trien.van_tay.json": "099c27d94400a98058297731ab395fbbb028d86083f4b6d67c4fad6bbf5c989e",
+  "thach_thuc_phuong_ngu_phat_trien.jsonl": "c6dafaa5a5fc5781a4b2d22904e3788c0a2f61657f3b0c6d1f779109e6ad470e",
+  "thach_thuc_phuong_ngu_phat_trien.van_tay.json": "b6446dc388183cad8535a8a1bc0a7a029c9f817303caa7d3dcea118331394d40"
+ }
+}

@@ -29,3 +29,12 @@ desktop.ini
 ~$*.docx
 tmp/
 .vercel
+
+# 26/11/2026: so lam viec cua agent, CSDL chay that, du lieu ngoai tai ve (1,3 GB), ban sao luu
+.superpowers/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/audit_log_worm.anchor.json
+data/ngoai/
+*.jsonl.bak

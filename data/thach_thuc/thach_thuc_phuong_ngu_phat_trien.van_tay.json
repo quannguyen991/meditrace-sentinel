@@ -1,0 +1,31 @@
+{
+  "the_he": "8b",
+  "hat": 42,
+  "commit": "28754f5",
+  "so_ca": 80,
+  "so_menh_de": 818,
+  "bam_noi_dung": "e3d95c1e2e9136be",
+  "phan_bo": {
+    "quan_he": {
+      "None": 760,
+      "diễn biến": 20,
+      "mâu thuẫn": 14,
+      "đính chính": 14,
+      "bổ sung": 10
+    },
+    "trang_thai": {
+      "còn hiệu lực": 776,
+      "chưa giải quyết": 28,
+      "bị thay thế": 14
+    },
+    "tinh_huong": {
+      "thực tế": 704,
+      "kế hoạch": 106,
+      "giả định": 8
+    },
+    "so_benh": 9,
+    "so_boi_canh": 5
+  },
+  "ghi_chu": "thach thuc phuong_ngu, khuon cua tap phat_trien",
+  "sua_dap_an": "2026-09-24: noi_dung 'sốt' -> 'nóng hầm hập' khi trich dan chi co cum do (phuong_ngu.GIU_NGUYEN); input khong doi. Xem docs/dang-ky-truoc.md, muc Thay doi sau dang ky."
+}

@@ -1,0 +1,30 @@
+{
+  "the_he": "v2-luat-2026-11-25",
+  "hat": 42,
+  "commit": "8e77a0d-ban-nhap",
+  "so_ca": 40,
+  "so_menh_de": 438,
+  "bam_noi_dung": "7066404ad23855fa",
+  "phan_bo": {
+    "quan_he": {
+      "None": 408,
+      "mâu thuẫn": 12,
+      "đính chính": 10,
+      "bổ sung": 6,
+      "diễn biến": 2
+    },
+    "trang_thai": {
+      "còn hiệu lực": 404,
+      "chưa giải quyết": 24,
+      "bị thay thế": 10
+    },
+    "tinh_huong": {
+      "thực tế": 378,
+      "kế hoạch": 56,
+      "giả định": 4
+    },
+    "so_benh": 17,
+    "so_boi_canh": 5
+  },
+  "ghi_chu": "thach thuc v2 doi_chu_the, khuon moi cua tap phat_trien"
+}

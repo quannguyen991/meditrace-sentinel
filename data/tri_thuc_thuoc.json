@@ -1,0 +1,2654 @@
+{
+ "phien_ban": "2026-11-25",
+ "ghi_chu": "Chuyen tri thuc thuoc rai rac vao data/tri_thuc_thuoc.json — CHAY MOT LAN (25/11/2026).",
+ "muc": [
+  {
+   "hoat_chat": "acenocoumarol",
+   "ten_khac": [],
+   "biet_duoc": [
+    "sintrom"
+   ],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "acyclovir",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "adalimumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "albendazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "allopurinol",
+   "ten_khac": [],
+   "biet_duoc": [
+    "zyloric",
+    "milurit"
+   ],
+   "ma_atc": "M04AA01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 800.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "alprazolam",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "alteplase",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "aminophylline",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "amiodarone",
+   "ten_khac": [],
+   "biet_duoc": [
+    "cordarone"
+   ],
+   "ma_atc": "C01BD01",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 800.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "amlodipin",
+   "ten_khac": [
+    "amlodipine"
+   ],
+   "biet_duoc": [
+    "amlor",
+    "norvasc"
+   ],
+   "ma_atc": "C08CA01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 10.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "amoxicillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": {
+     "gia_tri": 90.0,
+     "moi_lan": 45.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Amoxicillin trẻ em: 40–90 mg/kg/ngày chia 2–3 lần."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ampicillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "apixaban",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "aripiprazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "aspirin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 3000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "atorvastatin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "lipitor",
+    "atorvastad"
+   ],
+   "ma_atc": "C10AA05",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 80.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "azathioprine",
+   "ten_khac": [],
+   "biet_duoc": [
+    "imuran"
+   ],
+   "ma_atc": "L04AX01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 200.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "azithromycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": {
+     "gia_tri": 10.0,
+     "moi_lan": 10.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Azithromycin trẻ em: 10 mg/kg/ngày uống 1 lần."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "baclofen",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "benzylpenicillin",
+   "ten_khac": [
+    "penicillin g"
+   ],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: . CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "betamethasone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "bisoprolol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "bleomycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "caplacizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "captopril",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "carbamazepine",
+   "ten_khac": [],
+   "biet_duoc": [
+    "tegretol",
+    "carbatrol"
+   ],
+   "ma_atc": "N03AF01",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 1600.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefadroxil",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefazolin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefdinir",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefepime",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefixim",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": {
+     "gia_tri": 8.0,
+     "moi_lan": 8.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Cefixim trẻ em: 8 mg/kg/ngày chia 1–2 lần."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefotaxime",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ceftazidime",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ceftriaxone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cefuroxime",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "celecoxib",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cephalexin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cilostazol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ciprofloxacin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "ciprobay",
+    "citeran",
+    "cipro"
+   ],
+   "ma_atc": "J01MA02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 1500.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "clarithromycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "clindamycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "clonazepam",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "clopidogrel",
+   "ten_khac": [],
+   "biet_duoc": [
+    "plavix",
+    "clopistad",
+    "agrelan"
+   ],
+   "ma_atc": "B01AC04",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 300.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [
+    "Bảng cũ ghi 300 mg/ngày là liều TỐI ĐA; 300 mg là liều nạp, liều duy trì 75 mg/ngày. Cần tra."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "clotrimazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cloxacillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "co-amoxiclav",
+   "ten_khac": [],
+   "biet_duoc": [
+    "augmentin",
+    "klamentin",
+    "amoxicillin-clavulanate",
+    "amoxicillin-acid clavulanic"
+   ],
+   "ma_atc": "J01CR02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 3000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": {
+     "gia_tri": 90.0,
+     "moi_lan": 45.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Augmentin trẻ em (tính theo Amoxicillin): 40–90 mg/kg/ngày."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [
+    "Liều 3000 mg/ngày trong bảng cũ không rõ tính theo amoxicillin hay cả hai thành phần."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "co-trimoxazole",
+   "ten_khac": [
+    "cotrimoxazole",
+    "trimethoprim-sulfamethoxazole",
+    "sulfamethoxazole-trimethoprim"
+   ],
+   "biet_duoc": [
+    "bactrim",
+    "biseptol",
+    "sulfamethoxazole-trimethoprim"
+   ],
+   "ma_atc": "J01EE01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 1920.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "colchicine",
+   "ten_khac": [],
+   "biet_duoc": [
+    "colcrys"
+   ],
+   "ma_atc": "M04AC01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 3.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "cyclosporine",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "danazol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "dapagliflozin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "dapsone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "denosumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "dexamethasone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "diazepam",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "diclofenac",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "digoxin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "lanoxin"
+   ],
+   "ma_atc": "C01AA05",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 0.25,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [
+    "0,25 mg/ngày là liều duy trì thường dùng, không phải trần tuyệt đối. Cần tra."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "dornase",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "doxycycline",
+   "ten_khac": [],
+   "biet_duoc": [
+    "vibramycin"
+   ],
+   "ma_atc": "J01AA02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 200.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "dupilumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "enalapril",
+   "ten_khac": [],
+   "biet_duoc": [
+    "renitec",
+    "ednyt",
+    "vasotec"
+   ],
+   "ma_atc": "C09AA02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 40.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "enoxaparin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "eperisone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "erythromycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "esomeprazol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ethambutol",
+   "ten_khac": [],
+   "biet_duoc": [
+    "myambutol",
+    "emb"
+   ],
+   "ma_atc": "J04AK02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 1600.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "etoricoxib",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "fidaxomicin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "fluconazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "fludrocortisone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "fluticasone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "fosfomycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "furosemide",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ganciclovir",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "gentamicin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "heparin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "hydrocortisone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ibuprofen",
+   "ten_khac": [],
+   "biet_duoc": [
+    "advil",
+    "brufen",
+    "alaxan",
+    "motrin"
+   ],
+   "ma_atc": "M01AE01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 2400.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": {
+     "gia_tri": 40.0,
+     "moi_lan": 10.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Ibuprofen trẻ em: 5–10 mg/kg/lần, tối đa 40 mg/kg/ngày."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn); src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "imatinib",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "infliximab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "insulin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "isoniazid",
+   "ten_khac": [],
+   "biet_duoc": [
+    "inh",
+    "rimifon"
+   ],
+   "ma_atc": "J04AC01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 300.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "itraconazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ixekizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ketoconazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ketoprofen",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "lanadelumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "levofloxacin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "lithium",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "lorazepam",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "losartan",
+   "ten_khac": [],
+   "biet_duoc": [
+    "cozaar",
+    "losartan-kali"
+   ],
+   "ma_atc": "C09CA01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 100.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "mepolizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "mesalazine",
+   "ten_khac": [],
+   "biet_duoc": [
+    "pentasa",
+    "asacol",
+    "salofalk"
+   ],
+   "ma_atc": "A07EC02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 4000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "metformin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "glucophage",
+    "panfor",
+    "diaformin"
+   ],
+   "ma_atc": "A10BA02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 2550.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "methotrexate",
+   "ten_khac": [],
+   "biet_duoc": [
+    "trexall"
+   ],
+   "ma_atc": "L01BA01",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 25.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "methyldopa",
+   "ten_khac": [],
+   "biet_duoc": [
+    "aldomet",
+    "dopagyte"
+   ],
+   "ma_atc": "C02AB01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 2000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "methylprednisolone",
+   "ten_khac": [],
+   "biet_duoc": [
+    "medrol"
+   ],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: . CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "metoprolol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "metronidazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "miconazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "midazolam",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "minocycline",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "mometasone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "montelukast",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "moxifloxacin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "nadolol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "natalizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "natamycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "nicardipine",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "nifedipine",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "nystatin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ocrelizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ofloxacin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "omalizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "omeprazole",
+   "ten_khac": [],
+   "biet_duoc": [
+    "losec",
+    "omepral",
+    "lomac"
+   ],
+   "ma_atc": "A02BC01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 40.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [
+    "liều tối đa người lớn: 80.0 (bảng aho_corasick) vs 40.0 (src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn))"
+   ],
+   "can_tra": [
+    "Hai bảng cũ trái nhau: 40 mg/ngày (duoc_ly_lam_sang, guardrails) và 80 mg/ngày (aho_corasick). Đã lấy 40 (thận trọng hơn). Liều điều trị Zollinger-Ellison có thể cao hơn nhiều."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ondansetron",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "oxacillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "paracetamol",
+   "ten_khac": [
+    "acetaminophen"
+   ],
+   "biet_duoc": [
+    "panadol",
+    "efferalgan",
+    "hapacol",
+    "tylenol",
+    "paracold",
+    "acetaminophen",
+    "tiffy",
+    "decolgen",
+    "pamidol",
+    "ultracet"
+   ],
+   "ma_atc": "N02BE01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 4000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": {
+     "gia_tri": 60.0,
+     "moi_lan": 15.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Efferalgan (Paracetamol) trẻ em: 10–15 mg/kg/lần, tối đa 60 mg/kg/ngày."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn); src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "paromomycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "penicillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "phenytoin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "dilantin",
+    "epanutin"
+   ],
+   "ma_atc": "N03AB02",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 500.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "piperacillin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "prednisolon",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": {
+     "gia_tri": 2.0,
+     "moi_lan": 2.0,
+     "don_vi": "mg/kg/ngày",
+     "ghi_chu": "Liều Prednisolon trẻ em: 1–2 mg/kg/ngày (tối đa 60mg/ngày)."
+    }
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "prednisone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "propranolol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "prostacyclin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "pyrazinamide",
+   "ten_khac": [],
+   "biet_duoc": [
+    "pza"
+   ],
+   "ma_atc": "J04AK01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 2000.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "pyridostigmine",
+   "ten_khac": [],
+   "biet_duoc": [
+    "mestinon"
+   ],
+   "ma_atc": "N07AA02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 720.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "rabeprazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "ranibizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "rifampicin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "rifadin",
+    "rimactan"
+   ],
+   "ma_atc": "J04AB02",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 600.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "rituximab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "rivaroxaban",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "rosuvastatin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "salbutamol",
+   "ten_khac": [],
+   "biet_duoc": [
+    "ventolin"
+   ],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 16.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "secukinumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "somatostatin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "spiramycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "spironolactone",
+   "ten_khac": [],
+   "biet_duoc": [
+    "aldactone",
+    "verospiron"
+   ],
+   "ma_atc": "C03DA01",
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 100.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "sumatriptan",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tacrolimus",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tetracyclin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "theophylline",
+   "ten_khac": [],
+   "biet_duoc": [
+    "theostat"
+   ],
+   "ma_atc": "R03DA04",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 900.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [
+    "Bảng cũ ghi aminophylline là biệt dược của theophylline — đã tách thành hoạt chất riêng."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "thiabendazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "timolol",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tinidazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tobramycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tocilizumab",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "tolperisone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "triamcinolone",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "triclabendazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "valacyclovir",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "valganciclovir",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "valproat",
+   "ten_khac": [
+    "valproate",
+    "valproic acid",
+    "natri valproat"
+   ],
+   "biet_duoc": [
+    "depakine",
+    "valproic acid",
+    "natri valproat"
+   ],
+   "ma_atc": "N03AG01",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 2500.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "valsartan",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "vancomycin",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "voriconazole",
+   "ten_khac": [],
+   "biet_duoc": [],
+   "ma_atc": null,
+   "nti": false,
+   "lieu_toi_da": {
+    "nguoi_lon": null,
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [],
+   "nguon": "Chép từ: tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng. CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  },
+  {
+   "hoat_chat": "warfarin",
+   "ten_khac": [],
+   "biet_duoc": [
+    "coumadin",
+    "marevan"
+   ],
+   "ma_atc": "B01AA03",
+   "nti": true,
+   "lieu_toi_da": {
+    "nguoi_lon": {
+     "gia_tri": 10.0,
+     "don_vi": "mg/ngày"
+    },
+    "tre_em": null
+   },
+   "mau_thuan": [],
+   "can_tra": [
+    "Bảng cũ ghi 10 mg/ngày là liều tối đa; warfarin chỉnh theo INR, không có trần cố định. Bảng cũ còn ghi sintrom là biệt dược của warfarin — sai (sintrom là acenocoumarol), đã tách."
+   ],
+   "nguon": "Chép từ: src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang); src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn). CHƯA tra lại tài liệu gốc.",
+   "da_duyet": false
+  }
+ ]
+}

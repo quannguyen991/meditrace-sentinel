@@ -1,0 +1,30 @@
+{
+  "the_he": "v2",
+  "hat": 42,
+  "commit": "8e77a0d-ban-nhap",
+  "so_ca": 524,
+  "so_menh_de": 4953,
+  "bam_noi_dung": "c5c5873d67913856",
+  "phan_bo": {
+    "quan_he": {
+      "None": 4669,
+      "đính chính": 77,
+      "mâu thuẫn": 77,
+      "diễn biến": 66,
+      "bổ sung": 64
+    },
+    "trang_thai": {
+      "còn hiệu lực": 4722,
+      "chưa giải quyết": 154,
+      "bị thay thế": 77
+    },
+    "tinh_huong": {
+      "thực tế": 4201,
+      "kế hoạch": 676,
+      "giả định": 76
+    },
+    "so_benh": 70,
+    "so_boi_canh": 5
+  },
+  "ghi_chu": "chia tu hoi_thoai_viet_v2_mo_rong.jsonl, tach theo khuon benh"
+}
