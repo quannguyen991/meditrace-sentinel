@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import type { TranscriptSegment } from "../types";
 import { khoangPhatLaiLuot } from "../lib/asrHighlight";
+import { canXacNhan, tachLuot } from "../lib/compileEffectiveNote";
+import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
+
+export { canXacNhan, tachLuot };
 
 export interface Proposition {
   id: number;
@@ -107,19 +111,6 @@ function tachMuc(van: string) {
   return ra;
 }
 
-type Luot = { so: number; vai: string; chu: string };
-
-/** Lời thoại → từng lượt (đánh số từ 1, như máy dẫn), tách vai ở đầu dòng. */
-export function tachLuot(transcript?: string): Luot[] {
-  return (transcript || "")
-    .split("\n")
-    .filter((x) => x.trim())
-    .map((d, i) => {
-      const m = d.trim().match(/^([^:]{2,20}):\s*(.*)$/);
-      return { so: i + 1, vai: m ? m[1].trim() : "", chu: m ? m[2] : d.trim() };
-    });
-}
-
 const MAU_VAI = (vai: string) => {
   const v = vai.toLowerCase();
   if (v.startsWith("bác sĩ")) return { nen: "bg-[#F1F5F9]", vien: "border-[#E2E8F0]", chu: "text-[#475569]" };
@@ -149,11 +140,6 @@ const ICON_NHOM: Record<string, React.ElementType> = {
   RELATION_CAUSALITY: Link2,
   ASR_UPSTREAM: Mic,
 };
-
-/** Trang thai hien thi: theo chinh sach D neu co, khong thi theo muc cua ban nhap (C). */
-export function canXacNhan(p: Proposition) {
-  return p.stateD ? p.stateD === "cần xác nhận" : p.status === "can_xac_nhan";
-}
 
 interface Props {
   note: NoteMeta | null;
@@ -209,49 +195,7 @@ export const VerificationView: React.FC<Props> = ({
   const setQuyet = setQuyetChung ?? setQuyetRieng;
   const [suaId, setSuaId] = useState<number | null>(null);
   const [chuSua, setChuSua] = useState("");
-  const [dangPhatLuot, setDangPhatLuot] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const ketThucPhatRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [audioUrl]);
-
-  const phatDoanLuot = (so: number) => {
-    if (!audioUrl) return;
-    if (dangPhatLuot === so && audioRef.current) {
-      audioRef.current.pause();
-      setDangPhatLuot(null);
-      return;
-    }
-    const khoang = khoangPhatLaiLuot(so, segments);
-    if (!khoang) return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(audioUrl);
-    } else if (audioRef.current.src !== audioUrl) {
-      audioRef.current.src = audioUrl;
-    }
-    const au = audioRef.current;
-    ketThucPhatRef.current = khoang.end_s;
-    au.ontimeupdate = () => {
-      if (ketThucPhatRef.current !== null && au.currentTime >= ketThucPhatRef.current) {
-        au.pause();
-        setDangPhatLuot(null);
-      }
-    };
-    au.onended = () => setDangPhatLuot(null);
-    const batDauPhat = () => {
-      au.currentTime = khoang.start_s;
-      au.play().then(() => setDangPhatLuot(so)).catch(() => setDangPhatLuot(null));
-    };
-    if (au.readyState >= 1) batDauPhat();
-    else au.onloadedmetadata = batDauPhat;
-  };
+  const { dangPhatLuot, phatDoanLuot } = useTurnAudioPlayer(audioUrl, segments);
   const [banSuaRieng, setBanSuaRieng] = useState<Record<number, string>>({});
   const banSua = banSuaChung ?? banSuaRieng;
   const setBanSua = setBanSuaChung ?? setBanSuaRieng;

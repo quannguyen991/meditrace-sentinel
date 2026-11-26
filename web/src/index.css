@@ -177,10 +177,13 @@ body {
   /* Reset toàn bộ layout flexbox/overflow full-height của app để trình duyệt tự động ngắt trang đa trang */
   html,
   body,
-  #root {
+  #root,
+  #meditrace-app-root {
+    display: block !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     overflow: visible !important;
     background: #ffffff !important;
     color: #0f172a !important;
@@ -203,20 +206,33 @@ body {
   nav,
   footer,
   button:not(.printable),
-  [role="tooltip"],
-  .shadow-tactile-box,
-  .shadow-tactile-doctor,
-  .shadow-tactile-doctor-card,
-  .shadow-tactile-doctor-pill {
+  [role="tooltip"] {
     display: none !important;
     box-shadow: none !important;
   }
 
-  /* Mở rộng các container cha không bị cuộn hay gò bó chiều cao */
+  /* Gỡ bóng đổ nổi khối khi in A4 nhưng KHÔNG ẩn thẻ bệnh án */
+  .shadow-tactile-box,
+  .shadow-tactile-doctor,
+  .shadow-tactile-doctor-card,
+  .shadow-tactile-doctor-pill,
+  .shadow-tactile-card,
+  .shadow-tactile-inset {
+    box-shadow: none !important;
+  }
+
+  /* Gỡ CSS containment của Tailwind @container để trình duyệt phân trang A4 đa trang không bị cắt */
+  .\@container {
+    container-type: normal !important;
+    contain: none !important;
+  }
+
+  /* Mở rộng các container cha không bị cuộn hay gò bó chiều cao (không đè lên .flex-1 bên trong thẻ in) */
   main,
   main > div,
-  .flex-1,
-  #note-editor-view {
+  .print-unclip,
+  #note-editor-view,
+  #note-editor-view > div:not(.no-print) {
     display: block !important;
     height: auto !important;
     min-height: 0 !important;
@@ -227,18 +243,44 @@ body {
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
+    container-type: normal !important;
+    contain: none !important;
   }
 
   /* Khổ giấy in bệnh án sạch sẽ, đúng tỷ lệ trang A4 */
   .printable-clinical-note {
+    display: block !important;
     max-width: 100% !important;
     width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
     border-radius: 0 !important;
+  }
+
+  /* Cho phép cửa sổ Tờ dặn dò A4 mở bung đa trang khi in */
+  .printable-modal-root,
+  .printable-modal-root > div,
+  .printable-modal-body {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
   }
 
   /* Tránh ngắt trang xấu ở giữa các đề mục y khoa */

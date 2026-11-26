@@ -32,6 +32,9 @@ export interface TraLoiHoiDap {
   meta?: string;
   cauTruc?: ClinicalChatMessage["cauTruc"];
   question?: string;
+  /** Cờ báo câu hỏi bị chặn tại chỗ do còn dấu hiệu danh tính (`cau_hoi_co_danh_tinh`). */
+  blockedIdentity?: boolean;
+  errorMessage?: string;
 }
 
 interface Props {
@@ -79,6 +82,7 @@ export const EvidenceView: React.FC<Props> = ({
   const [daChep, setDaChep] = useState<string | null>(null);
   const [ghi, setGhi] = useState<"tat" | "dang_ghi" | "dang_chep">("tat");
   const [loiMic, setLoiMic] = useState<string | null>(null);
+  const [loiHoiDap, setLoiHoiDap] = useState<string | null>(null);
   const rec = useRef<{ r: MediaRecorder; s: MediaStream; c: Blob[] } | null>(null);
   const oNhap = useRef<HTMLTextAreaElement>(null);
 
@@ -106,7 +110,9 @@ export const EvidenceView: React.FC<Props> = ({
     const text = cau.trim();
     if (!text || isLoading || (che !== "tra_cuu" && !allowExternal)) return;
     setMan("hoi");
+    setLoiHoiDap(null);
     let id = dangMo;
+    const laHoiThoaiMoi = !id;
     const tinHoi: ClinicalChatMessage = {
       id: `u-${Date.now()}`, role: "user", content: text, timestamp: gio(),
       mode: che === "tra_cuu" ? "tra_cuu" : "ca_kham",
@@ -121,6 +127,21 @@ export const EvidenceView: React.FC<Props> = ({
     setIsLoading(true);
     try {
       const d = await hoi(che, text, { kemNguCanh, nguon: nguonGhiDe || nguon });
+      if (d?.blockedIdentity) {
+        // Thống nhất với ClinicalEvidenceDrawer: câu bị chặn vì còn danh tính thì gỡ khỏi lịch sử hỏi đáp
+        const idHt = id;
+        setLichSu((ds) =>
+          ds
+            .map((h) => (h.id === idHt ? { ...h, tinNhan: h.tinNhan.filter((m) => m.id !== tinHoi.id) } : h))
+            .filter((h) => !(laHoiThoaiMoi && h.id === idHt && h.tinNhan.length === 0)),
+        );
+        if (laHoiThoaiMoi) setDangMo(null);
+        setLoiHoiDap(
+          d.errorMessage ||
+            "Câu hỏi còn dấu hiệu danh tính (tên, ngày, địa chỉ hay số liên lạc). Hãy bỏ chi tiết định danh rồi hỏi lại.",
+        );
+        return;
+      }
       if (d)
         ghiTin(id, {
           id: `a-${Date.now()}`, role: "assistant", content: d.content, sources: d.sources || [], warning: d.warning,
@@ -331,6 +352,17 @@ export const EvidenceView: React.FC<Props> = ({
         </div>
       </div>
       {loiMic && <p className="text-[11px] text-[#8C1D26] mt-1">{loiMic}</p>}
+      {loiHoiDap && (
+        <div
+          role="alert"
+          className="mt-2 flex items-start justify-between gap-2 rounded-xl border border-[#F5C2C2] bg-[#FFF5F5] px-3 py-2 text-[11.5px] text-[#991B1B]"
+        >
+          <span>{loiHoiDap}</span>
+          <button type="button" onClick={() => setLoiHoiDap(null)} className="font-bold flex-shrink-0">
+            đóng
+          </button>
+        </div>
+      )}
     </form>
   );
 

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { Suspense, useState, useEffect, useMemo, useRef } from "react";
 import { ViewMode, Session, DocumentTabItem, ClinicalChatMessage, TemplateItem, Patient } from "./types";
 import { chuyenKetQuaThanhTin, gonMenhDeGui, hoiTroLy } from "./lib/troLy";
-import { initialSessions, initialEvidenceChat } from "./data/mockData";
-import { RefreshCw, Sparkles, Bell, CheckCircle2 } from "lucide-react";
+import { RefreshCw, Sparkles, Bell, CheckCircle2, Loader2 } from "lucide-react";
 import { NavigationRail } from "./components/NavigationRail";
 import { MenuTaiKhoan } from "./components/MenuTaiKhoan";
 import { HomeDashboard } from "./components/HomeDashboard";
@@ -11,24 +10,52 @@ import { ScribeHeader } from "./components/ScribeHeader";
 import { DocumentTabs } from "./components/DocumentTabs";
 import { TranscriptView } from "./components/TranscriptView";
 import { NoteEditorView } from "./components/NoteEditorView";
+import type { HoSoDD } from "./components/ToDanDoBenhNhanModal";
 import { ContextView } from "./components/ContextView";
 import { BottomPromptBar } from "./components/BottomPromptBar";
 import { ClinicalEvidenceDrawer, CheDoHoi, NguonBat } from "./components/ClinicalEvidenceDrawer";
 import { TaoVanBanModal } from "./components/TaoVanBanModal";
-import { lyDoKham, type MauVanBan } from "./lib/mauVanBan";
-import { EvidenceView, CheDoHoiDap, NguonTraCuu, TraLoiHoiDap } from "./components/EvidenceView";
-import { PatientsView } from "./components/PatientsView";
-import { TasksView } from "./components/TasksView";
-import { TemplatesView } from "./components/TemplatesView";
-import { ThuVienYKhoa } from "./components/ThuVienYKhoa";
-import { VerificationView, NoteMeta, Quyet } from "./components/VerificationView";
+import type { MauVanBan } from "./lib/mauVanBan";
+import type { CheDoHoiDap, NguonTraCuu, TraLoiHoiDap } from "./components/EvidenceView";
+import type { NoteMeta, Quyet } from "./components/VerificationView";
 import { DuyetBenCanh, trangThaiMD } from "./components/DuyetBenCanh";
 import { TinhTrangHeThong } from "./components/TinhTrangHeThong";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import type { NguoiDung } from "./lib/taiKhoan";
 import { cacNguoiNoiChuaGan } from "./lib/nguoiNoi";
-import { trichNguCanhChoTroLy } from "./lib/nguCanhTroLy";
+import { trichNguCanhChoTroLy, xayNguCanhChoTaoHoSo } from "./lib/nguCanhTroLy";
 import { phatHienMauThuanXuyenLanKham } from "./lib/doiChieuLanKham";
+import { computeNoteSignOffHash, layNoiDungBenhAnDeBam } from "./lib/compileEffectiveNote";
 import { bamChuoi, useSessionsStore } from "./hooks/useSessionsStore";
+
+const VerificationView = React.lazy(() =>
+  import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
+);
+const EvidenceView = React.lazy(() =>
+  import("./components/EvidenceView").then((m) => ({ default: m.EvidenceView })),
+);
+const PatientsView = React.lazy(() =>
+  import("./components/PatientsView").then((m) => ({ default: m.PatientsView })),
+);
+const TasksView = React.lazy(() =>
+  import("./components/TasksView").then((m) => ({ default: m.TasksView })),
+);
+const TemplatesView = React.lazy(() =>
+  import("./components/TemplatesView").then((m) => ({ default: m.TemplatesView })),
+);
+const ThuVienYKhoa = React.lazy(() =>
+  import("./components/ThuVienYKhoa").then((m) => ({ default: m.ThuVienYKhoa })),
+);
+
+const KhungDangTaiManHinh: React.FC = () => (
+  <div
+    className="flex-1 flex items-center justify-center bg-[#F8FBFC] text-[#0369A1] gap-2 text-xs font-semibold"
+    aria-label="Đang tải màn hình"
+  >
+    <Loader2 size={16} className="animate-spin text-[#0284C7]" />
+    <span>Đang mở phân hệ lâm sàng…</span>
+  </div>
+);
 
 type AppProps = { nguoiDung: NguoiDung; onDangXuat: () => Promise<void> };
 
@@ -48,7 +75,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       localStorage.setItem("meditrace_taskbar_position", taskbarPosition);
     } catch {}
   }, [taskbarPosition]);
-  const { sessions, setSessions, activeSessionId, setActiveSessionId, khoServer } = useSessionsStore();
+  const { sessions, setSessions, activeSessionId, setActiveSessionId } = useSessionsStore();
 
   // Quản lý thu gọn thanh bên thông minh theo kích thước màn hình Tablet
   const [isSessionsSidebarCollapsed, setIsSessionsSidebarCollapsed] = useState(() => {
@@ -81,7 +108,6 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const handleToggleSessionsSidebar = () => {
     const willExpand = isSessionsSidebarCollapsed;
     setIsSessionsSidebarCollapsed(!isSessionsSidebarCollapsed);
-    // Nếu trên tablet mở sidebar thì tự đóng drawer để ưu tiên không gian
     if (willExpand && typeof window !== "undefined" && window.innerWidth < 1100 && isRightDrawerOpen) {
       setIsRightDrawerOpen(false);
     }
@@ -90,7 +116,6 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const handleToggleRightDrawer = () => {
     const willOpen = !isRightDrawerOpen;
     setIsRightDrawerOpen(willOpen);
-    // Nếu trên tablet mở drawer thì tự thu gọn sidebar
     if (willOpen && typeof window !== "undefined" && window.innerWidth < 1200 && !isSessionsSidebarCollapsed) {
       setIsSessionsSidebarCollapsed(true);
     }
@@ -99,11 +124,14 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [moTinhTrang, setMoTinhTrang] = useState(false);
   const [promptTraCuuTrangChu, setPromptTraCuuTrangChu] = useState("");
+  /** Lưu tờ dặn dò theo `sessionId` ở tầng App để đổi tab (Lời thoại/Ngữ cảnh/SOAP) hoặc chuyển ca không mất bản sửa, vẫn xoá sạch khi đổi người dùng (`<App key={nguoiDung.id}>`). */
+  const [hoSoDanDoTheoCa, setHoSoDanDoTheoCa] = useState<Record<string, HoSoDD>>({});
 
   const [isEvidenceLoading, setIsEvidenceLoading] = useState(false);
   /** Kế hoạch + bước của việc trợ lý đang chạy, để ngăn phải vẽ thẻ tiến độ thật. */
   const [tienDoTroLy, setTienDoTroLy] = useState<any | null>(null);
-  const [isGeneratingNote, setIsGeneratingNote] = useState(false);
+  /** Gắn theo mã ca đang tạo AI: Ca A đang chạy không khoá trắng Ca B khi bác sĩ chuyển ca! */
+  const [generatingSessionId, setGeneratingSessionId] = useState<string | null>(null);
   /** Việc tạo bản nháp đang chạy nền trên máy chủ: lúc bắt đầu, số việc xếp trước. */
   const [tienDoNhap, setTienDoNhap] = useState<{ batDau: number; truoc: number } | null>(null);
   const [, setNhip] = useState(0);
@@ -134,6 +162,35 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     } catch {}
   }, [choPhepNgoai]);
 
+  // Ca khám đang hoạt động
+  const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
+  const isCurrentSessionGenerating = Boolean(currentSession && generatingSessionId === currentSession.id);
+  const isOtherSessionGenerating = Boolean(generatingSessionId && generatingSessionId !== currentSession?.id);
+
+  // Tab tài liệu đang xem trong ca khám
+  const currentTab =
+    currentSession?.tabs.find((t) => t.id === currentSession.activeTabId) || currentSession?.tabs[0];
+
+  /** Cập nhật ca khám theo `targetId` bằng updater hàm để chống triệt để stale closure sau `await`. */
+  const capNhatCaTheoId = (
+    targetId: string,
+    capNhat: Partial<Session> | ((ca: Session) => Partial<Session>),
+  ) => {
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== targetId) return s;
+        const thayDoi = typeof capNhat === "function" ? capNhat(s) : capNhat;
+        return { ...s, ...thayDoi };
+      }),
+    );
+  };
+
+  // Cập nhật thông tin ca khám (mặc định là ca đang mở, hoặc ca chỉ định rõ `targetSessionId`)
+  const handleUpdateSession = (updatedFields: Partial<Session>, targetSessionId?: string) => {
+    const id = targetSessionId || currentSession.id;
+    capNhatCaTheoId(id, updatedFields);
+  };
+
   /** Gọi một đường cần mô hình ngoài; tự gắn cờ cho phép và báo lỗi lên giao diện. */
   const goiNgoai = async (duong: string, than: Record<string, unknown>) => {
     if (!choPhepNgoai) {
@@ -156,17 +213,18 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
   /**
    * Gọi dịch vụ MediTrace chạy tại chỗ để dựng bản nháp.
-   * `than`: {transcript} | {sessionId} | {sampleCaseId}.
+   * Chụp `targetId` và dữ liệu Ngữ cảnh (`ContextView` + `patientSubtitle`) TRƯỚC `await`
+   * để dù chờ 3–4 phút bác sĩ đã chuyển ca khác thì kết quả vẫn vào đúng ca gốc!
    */
-  const taoHoSo = async (than: Record<string, unknown>): Promise<NoteMeta | null> => {
-    // Mô hình tách mệnh đề cần biết AI nói từng lượt. Hệ thống không đoán vai từ giọng nói,
-    // nên còn lượt "Chưa rõ vai" thì dừng lại và báo, thay vì để mô hình tự gán.
+  const taoHoSo = async (than: Record<string, unknown>, targetSessionId?: string): Promise<NoteMeta | null> => {
+    const targetId = targetSessionId || currentSession.id;
+    const caMucTieu = sessions.find((s) => s.id === targetId) || currentSession;
+
     const loiThoai = typeof than.transcript === "string" ? than.transcript : "";
     if (loiThoai) {
       const dong = loiThoai.split("\n").filter((l) => l.trim());
       const chuaRo = dong.filter((l) => !/^\s*(bác sĩ|bệnh nhân|người nhà)\s*:/i.test(l)).length;
       if (chuaRo) {
-        // "Người nói N" là máy tách theo giọng, chưa phải vai: vẫn chặn như "Chưa rõ vai".
         const soNguoiNoi = cacNguoiNoiChuaGan(loiThoai).length;
         setApiError(
           `Còn ${chuaRo} lượt chưa gán vai. ` +
@@ -174,22 +232,31 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               ? `Ở tab Lời thoại, ô “Gán vai theo người nói” còn ${soNguoiNoi} người nói chưa chọn vai; ` +
                 "lượt lẻ thì bấm nhãn tròn bên trái lượt đó, rồi tạo bản nháp."
               : "Ở tab Lời thoại, bấm vào nhãn tròn bên trái mỗi lượt để chọn " +
-                "Bác sĩ / Bệnh nhân / Người nhà, rồi tạo bản nháp.")
+                "Bác sĩ / Bệnh nhân / Người nhà, rồi tạo bản nháp."),
         );
         return null;
       }
     }
-    setIsGeneratingNote(true);
+
+    const nguCanhPayload = than.sampleCaseId
+      ? {}
+      : xayNguCanhChoTaoHoSo({
+          sessionId: caMucTieu.id,
+          patientIdentifier: caMucTieu.patientIdentifier,
+          patientSubtitle: caMucTieu.patientSubtitle,
+          tabs: caMucTieu.tabs,
+          contextNotes: caMucTieu.contextNotes,
+        });
+
+    setGeneratingSessionId(targetId);
     setApiError(null);
     try {
       let res = await fetch("/api/generate-note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ branch: "C_khoa_hoi", ...than }),
+        body: JSON.stringify({ branch: "C_khoa_hoi", ...nguCanhPayload, ...than }),
       });
       let data = await res.json();
-      // Bản nháp mới mất vài phút: máy chủ trả 202 + mã việc, hỏi lại tới khi xong
-      // (không giữ một yêu cầu mở vài phút — đường hầm ra ngoài cắt ở khoảng 100 giây).
       while (res.status === 202 && data?.jobId) {
         setTienDoNhap({ batDau: data.startedAt || Date.now(), truoc: data.queued || 0 });
         await new Promise((r) => setTimeout(r, 4000));
@@ -198,55 +265,32 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       }
       if (!res.ok) throw new Error(data?.error || `Dịch vụ trả mã ${res.status}`);
       const meta: NoteMeta = data;
-      setNoteMeta(meta);
+      capNhatCaTheoId(targetId, { note: meta });
       return meta;
     } catch (err: any) {
       setApiError(err?.message || "Không gọi được dịch vụ MediTrace");
       return null;
     } finally {
-      setIsGeneratingNote(false);
+      setGeneratingSessionId((cur) => (cur === targetId ? null : cur));
       setTienDoNhap(null);
     }
   };
 
-  // Cấu hình tra cứu nguồn web & y văn
-
-  // Ca khám đang hoạt động
-  const currentSession =
-    sessions.find((s) => s.id === activeSessionId) || sessions[0];
-
-  // Tab tài liệu đang xem trong ca khám
-  const currentTab =
-    currentSession?.tabs.find((t) => t.id === currentSession.activeTabId) ||
-    currentSession?.tabs[0];
-
-  // Cập nhật thông tin ca khám
-  const handleUpdateSession = (updatedFields: Partial<Session>) => {
-    setSessions((prev) =>
-      prev.map((s) => (s.id === currentSession.id ? { ...s, ...updatedFields } : s))
-    );
-  };
-
-  // Bản nháp và hỏi đáp gắn với TỪNG CA (trước đây là biến chung: F5 là mất, đổi ca vẫn thấy
-  // bản nháp của ca trước). Hàm ghi chốt mã ca lúc gọi, nên lời gọi chậm vẫn ghi đúng ca.
+  // Bản nháp và hỏi đáp gắn với TỪNG CA
   const noteMeta: NoteMeta | null = currentSession?.note
     ? {
         ...currentSession.note,
         transcript: currentSession.note.transcript || currentSession.transcript,
       }
     : null;
-  const setNoteMeta = (m: NoteMeta | null) => handleUpdateSession({ note: m });
   const evidenceChat: ClinicalChatMessage[] = currentSession?.evidenceChat || [];
 
-  // Duyệt mệnh đề: giữ/sửa/bỏ dùng chung giữa ngăn cạnh bản nháp và màn duyệt đầy đủ, LƯU CÙNG CA
-  // (session.duyet -> kho ca-kham trên máy chủ) nên F5 không mất. Khoá theo nội dung bản nháp:
-  // tạo lại bản nháp thì kết quả cũ không còn khớp và bị bỏ qua.
+  // Duyệt mệnh đề: lưu cùng ca theo khoá nội dung bản nháp
   const khoaDuyet = noteMeta ? `${noteMeta.caseId || ""}#${noteMeta.content.length}#${bamChuoi(noteMeta.content)}` : "";
   const duyetLuu = currentSession?.duyet?.khoa === khoaDuyet ? currentSession.duyet : undefined;
   const quyetDuyet: Record<number, Quyet> = duyetLuu?.quyet || {};
   const banSuaDuyet: Record<number, string> = duyetLuu?.banSua || {};
-  /** Cập nhật một phần kết quả duyệt; dùng bản MỚI NHẤT của ca trong setSessions (tránh ghi đè
-   *  khi hai lần bấm liên tiếp), và chốt mã ca lúc gọi. */
+
   const capNhatDuyet = (phan: "quyet" | "banSua", u: React.SetStateAction<Record<number, any>>) => {
     const idCa = currentSession.id;
     const khoa = khoaDuyet;
@@ -256,60 +300,43 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         const cu = s.duyet?.khoa === khoa ? s.duyet : { khoa, quyet: {}, banSua: {} };
         const moi = typeof u === "function" ? (u as (x: Record<number, any>) => Record<number, any>)(cu[phan]) : u;
         return { ...s, duyet: { ...cu, [phan]: moi } };
-      })
+      }),
     );
   };
   const setQuyetDuyet: React.Dispatch<React.SetStateAction<Record<number, Quyet>>> = (u) => capNhatDuyet("quyet", u);
   const setBanSuaDuyet: React.Dispatch<React.SetStateAction<Record<number, string>>> = (u) => capNhatDuyet("banSua", u);
-  const [moDuyetBen, setMoDuyetBen] = useState(false);
+  const [, setMoDuyetBen] = useState(false);
   const [chonMD, setChonMD] = useState<number | null>(null);
   const [moDuyetBenCanh, setMoDuyetBenCanh] = useState(true);
   const [luotKiemChung, setLuotKiemChung] = useState<number | null>(null);
   const chonBanDau = useMemo(
-    () => chonMD
-      ? { loai: "p" as const, id: chonMD }
-      : luotKiemChung
-      ? { loai: "t" as const, so: luotKiemChung }
-      : undefined,
-    [chonMD, luotKiemChung]
+    () =>
+      chonMD
+        ? { loai: "p" as const, id: chonMD }
+        : luotKiemChung
+        ? { loai: "t" as const, so: luotKiemChung }
+        : undefined,
+    [chonMD, luotKiemChung],
   );
 
   const handleKiemChungLuot = (soLuot: number) => {
     setLuotKiemChung(soLuot);
     handleSelectNavigationItem("proof");
   };
-  // Màn hẹp (< 896px vùng giữa): không đủ chỗ cho hai bên -> chuyển qua lại "Bản nháp | Duyệt".
-  const [xemHep, setXemHep] = useState<"nhap" | "duyet">("duyet");
   const vungGiuaRef = useRef<HTMLDivElement>(null);
-  const laHep = () => (vungGiuaRef.current?.clientWidth ?? 9999) < 896;
-  /** Chọn mệnh đề từ ngăn duyệt: màn hẹp thì chuyển sang bản nháp để thấy câu đó. */
-  const chonTuNgan = (id: number | null) => {
-    setChonMD(id);
-    if (id !== null && laHep()) setXemHep("nhap");
-  };
-  /** Chọn câu trong bản nháp: màn hẹp thì chuyển sang ngăn duyệt để thấy mệnh đề. */
-  const chonTuBanNhap = (id: number | null) => {
-    setChonMD(id);
-    if (id !== null && laHep()) setXemHep("duyet");
-  };
+
   useEffect(() => {
     setChonMD(null);
   }, [currentSession?.id, noteMeta?.content]);
-  /** Mở ngăn duyệt cạnh bản nháp; đang ở tab khác thì chuyển sang tab bản nháp. */
-  const moNganDuyet = () => {
-    const tabNhap = [...(currentSession?.tabs || [])].reverse().find((t) => t.title === "Bản nháp hồ sơ" || t.content === noteMeta?.content);
-    if (tabNhap && currentSession.activeTabId !== tabNhap.id) handleUpdateSession({ activeTabId: tabNhap.id });
-    setMoDuyetBen(true);
-    setXemHep("duyet");
-  };
-  const setEvidenceChat = (
-    u: ClinicalChatMessage[] | ((truoc: ClinicalChatMessage[]) => ClinicalChatMessage[])
+
+  const capNhatEvidenceChatChoCa = (
+    targetId: string,
+    u: ClinicalChatMessage[] | ((truoc: ClinicalChatMessage[]) => ClinicalChatMessage[]),
   ) => {
-    const id = currentSession.id;
     setSessions((prev) =>
       prev.map((s) =>
-        s.id === id ? { ...s, evidenceChat: typeof u === "function" ? u(s.evidenceChat || []) : u } : s
-      )
+        s.id === targetId ? { ...s, evidenceChat: typeof u === "function" ? u(s.evidenceChat || []) : u } : s,
+      ),
     );
   };
 
@@ -353,7 +380,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       ],
     };
 
-    setSessions([newSession, ...sessions]);
+    setSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newId);
     setActiveView("scribe");
     setActiveNavigationItem("sessions");
@@ -366,16 +393,24 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       alert("Cần giữ lại ít nhất một ca khám trong không gian làm việc.");
       return;
     }
-    const remaining = sessions.filter((s) => s.id !== targetId);
-    setSessions(remaining);
-    if (activeSessionId === targetId) {
-      setActiveSessionId(remaining[0].id);
-    }
+    setHoSoDanDoTheoCa((cu) => {
+      if (!(targetId in cu)) return cu;
+      const { [targetId]: _bo, ...conLai } = cu;
+      return conLai;
+    });
+    setSessions((prev) => {
+      if (prev.length <= 1) return prev;
+      const remaining = prev.filter((s) => s.id !== targetId);
+      if (activeSessionId === targetId && remaining[0]) {
+        setActiveSessionId(remaining[0].id);
+      }
+      return remaining;
+    });
   };
 
   // Chuyển tab trong ca khám
   const handleSelectTab = (tabId: string) => {
-    handleUpdateSession({ activeTabId: tabId });
+    capNhatCaTheoId(currentSession.id, { activeTabId: tabId });
   };
 
   const handleSelectView = (view: ViewMode) => {
@@ -413,7 +448,6 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         [...currentSession.tabs].reverse().find((t) => noteMeta && t.content === noteMeta.content) ||
         [...currentSession.tabs].reverse().find((t) => t.title === "Bản nháp hồ sơ") ||
         currentSession.tabs.find((t) => t.type === "soap");
-      // Ca chưa có bản nháp: đưa người dùng về tab lời thoại, nơi có nút tạo bản nháp.
       const chonTab = tab || currentSession.tabs.find((t) => t.type === "transcript");
       if (chonTab) handleSelectTab(chonTab.id);
     } else if (item === "proof") {
@@ -435,32 +469,73 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
 
   // Đóng một tab
   const handleCloseTab = (tabId: string) => {
-    const updatedTabs = currentSession.tabs.filter((t) => t.id !== tabId);
-    const nextActive =
-      currentSession.activeTabId === tabId
-        ? updatedTabs[0]?.id || "tab-transcript"
-        : currentSession.activeTabId;
-
-    handleUpdateSession({ tabs: updatedTabs, activeTabId: nextActive });
+    const targetId = currentSession.id;
+    capNhatCaTheoId(targetId, (ca) => {
+      const updatedTabs = ca.tabs.filter((t) => t.id !== tabId);
+      const nextActive = ca.activeTabId === tabId ? updatedTabs[0]?.id || "tab-transcript" : ca.activeTabId;
+      return { tabs: updatedTabs, activeTabId: nextActive };
+    });
   };
 
-  // Cập nhật nội dung tab
+  // Cập nhật nội dung tab (đồng bộ luôn `contextNotes` nếu đang sửa tab Ngữ cảnh)
   const handleUpdateTabContent = (newContent: string) => {
-    const updatedTabs = currentSession.tabs.map((t) =>
-      t.id === currentTab.id ? { ...t, content: newContent } : t
-    );
-    handleUpdateSession({ tabs: updatedTabs });
+    const targetId = currentSession.id;
+    const targetTabId = currentTab.id;
+    const laTabNguCanh = currentTab.type === "context";
+    capNhatCaTheoId(targetId, (ca) => ({
+      ...(laTabNguCanh ? { contextNotes: newContent } : {}),
+      tabs: ca.tabs.map((t) => (t.id === targetTabId ? { ...t, content: newContent } : t)),
+    }));
+  };
+
+  // In bệnh án A4 từ bất kỳ tab nào (nếu đang đứng ở Lời thoại / Ngữ cảnh thì tự chuyển sang tab Bệnh án trước khi in)
+  const handlePrintClinicalNote = () => {
+    if (
+      currentTab &&
+      (currentTab.type === "soap" || currentTab.type === "custom" || currentTab.type === "leaflet")
+    ) {
+      window.print();
+      return;
+    }
+    const targetId = currentSession.id;
+    const tabBenhAn =
+      [...currentSession.tabs].reverse().find((t) => noteMeta && t.content === noteMeta.content) ||
+      [...currentSession.tabs].reverse().find((t) => t.title === "Bản nháp hồ sơ") ||
+      currentSession.tabs.find((t) => t.type === "soap");
+    if (tabBenhAn) {
+      capNhatCaTheoId(targetId, { activeTabId: tabBenhAn.id });
+    } else {
+      const soapId = "tab-soap";
+      capNhatCaTheoId(targetId, (ca) => ({
+        tabs: [
+          ...ca.tabs,
+          {
+            id: soapId,
+            title: "Bệnh án SOAP",
+            type: "soap",
+            templateStyle: "Goldilocks",
+            content:
+              noteMeta?.content ||
+              "Lý do vào viện (Chủ quan):\n\nTiền sử bệnh lý & Dị ứng:\n\nKhám lâm sàng (Khách quan):\n\nĐánh giá & Chẩn đoán sơ bộ:\n\nKế hoạch điều trị & Đơn thuốc:",
+            isClosable: false,
+          },
+        ],
+        activeTabId: soapId,
+      }));
+    }
+    setTimeout(() => window.print(), 60);
   };
 
   // Cập nhật lời thoại
   const handleUpdateTranscript = (newTranscript: string) => {
-    const updatedTabs = currentSession.tabs.map((t) =>
-      t.type === "transcript" ? { ...t, content: newTranscript } : t
-    );
-    handleUpdateSession({ transcript: newTranscript, tabs: updatedTabs });
+    const targetId = currentSession.id;
+    capNhatCaTheoId(targetId, (ca) => ({
+      transcript: newTranscript,
+      tabs: ca.tabs.map((t) => (t.type === "transcript" ? { ...t, content: newTranscript } : t)),
+    }));
   };
 
-  // Màn "Mẫu bệnh án" → soạn theo mẫu đó (cùng đường với nút "Tạo"; cần mô hình ngoài).
+  // Màn "Mẫu bệnh án" → soạn theo mẫu đó
   const handleSelectTemplate = async (template: TemplateItem, _customPrompt?: string) => {
     await taoVanBan({
       id: template.id,
@@ -470,48 +545,56 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     });
   };
 
-  // Dựng lại bản nháp từ lời thoại hiện tại (không có "phong cách": xem ghi chú ở trên)
+  // Dựng lại bản nháp từ lời thoại hiện tại (chống stale closure)
   const handleRegenerateNoteStyle = async (_newStyle: string) => {
-    const meta = await taoHoSo({ transcript: currentSession.transcript });
+    const targetId = currentSession.id;
+    const targetTabId = currentTab.id;
+    const transcriptSnapshot = currentSession.transcript;
+    const meta = await taoHoSo({ transcript: transcriptSnapshot }, targetId);
     if (!meta) return;
-    const updatedTabs = currentSession.tabs.map((t) =>
-      t.id === currentTab.id ? { ...t, content: meta.content } : t
-    );
-    handleUpdateSession({ tabs: updatedTabs });
+    capNhatCaTheoId(targetId, (ca) => ({
+      tabs: ca.tabs.map((t) => (t.id === targetTabId ? { ...t, content: meta.content } : t)),
+    }));
   };
 
   /**
-   * Thanh lệnh dưới cùng. Bản này KHÔNG sửa hồ sơ bằng mô hình ngôn ngữ: sửa tay trong ô
-   * soạn thảo, hoặc dùng màn Duyệt. Ở tab lời thoại thì lệnh có nghĩa là "dựng bản nháp".
+   * Thanh lệnh dưới cùng (chụp `targetId` & `targetTabId` trước `await`).
    */
   const handleBottomPrompt = async (promptText: string) => {
-    if (currentTab.type === "soap" || currentTab.type === "leaflet" || currentTab.type === "custom") {
-      // Sửa theo lời nhắc chỉ có khi bật mô hình ngoài. Không bật: sửa tay hoặc dùng màn Duyệt.
+    const targetId = currentSession.id;
+    const targetTabId = currentTab.id;
+    const targetTabType = currentTab.type;
+    const currentContentSnapshot = currentTab.content;
+    const transcriptSnapshot = currentSession.transcript;
+
+    if (targetTabType === "soap" || targetTabType === "leaflet" || targetTabType === "custom") {
       if (!choPhepNgoai) {
         setApiError(
           "Sửa theo lời nhắc cần mô hình ngoài (bật công tắc “Mô hình ngoài”). Không bật thì sửa " +
-            "trực tiếp trong ô soạn thảo, hoặc mở màn Duyệt để giữ, sửa, bỏ từng mệnh đề."
+            "trực tiếp trong ô soạn thảo, hoặc mở màn Duyệt để giữ, sửa, bỏ từng mệnh đề.",
         );
         return;
       }
-      setIsGeneratingNote(true);
+      setGeneratingSessionId(targetId);
       try {
         const d = await goiNgoai("/api/edit-note", {
-          currentContent: currentTab.content,
+          currentContent: currentContentSnapshot,
           instruction: promptText,
-          transcript: currentSession.transcript,
+          transcript: transcriptSnapshot,
         });
         if (d?.updatedContent) {
-          handleUpdateTabContent(
-            `${d.updatedContent}\n\n[Đã sửa bằng mô hình ngoài · ${d.model} · chưa qua kiểm căn cứ · theo lời nhắc: ${promptText}]`
-          );
+          const noiDungMoi = `${d.updatedContent}\n\n[Đã sửa bằng mô hình ngoài · ${d.model} · chưa qua kiểm căn cứ · theo lời nhắc: ${promptText}]`;
+          capNhatCaTheoId(targetId, (ca) => ({
+            tabs: ca.tabs.map((t) => (t.id === targetTabId ? { ...t, content: noiDungMoi } : t)),
+          }));
         }
       } finally {
-        setIsGeneratingNote(false);
+        setGeneratingSessionId((cur) => (cur === targetId ? null : cur));
       }
       return;
     }
-    const meta = await taoHoSo({ transcript: currentSession.transcript });
+
+    const meta = await taoHoSo({ transcript: transcriptSnapshot }, targetId);
     if (!meta) return;
     const newTabId = `tab-doc-${Date.now()}`;
     const newTab: DocumentTabItem = {
@@ -521,15 +604,17 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       content: meta.content,
       isClosable: true,
     };
-    handleUpdateSession({ tabs: [...currentSession.tabs, newTab], activeTabId: newTabId });
+    capNhatCaTheoId(targetId, (ca) => ({
+      tabs: [...ca.tabs, newTab],
+      activeTabId: newTabId,
+    }));
   };
 
-  // Gửi câu hỏi lâm sàng & bằng chứng y văn
   /**
-   * Nap mot ca DA CHAY TRUOC tu dich vu tai cho. Dung khi GPU dang ban: ban ghi co san
-   * duoc danh nhan `chay_truoc`, khong gia vo la may vua chay.
+   * Nạp một ca ĐÃ CHẠY TRƯỚC từ dịch vụ tại chỗ (chụp `targetId` trước `await`).
    */
   const handleLoadSample = async () => {
+    const targetId = currentSession.id;
     setApiError(null);
     try {
       const res = await fetch("/api/sample-cases");
@@ -538,72 +623,84 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       const ds = data.ca || [];
       if (!ds.length) throw new Error("Dich vu khong co ca nao da chay truoc");
       const ca = ds[Math.floor(Math.random() * ds.length)];
-      const meta = await taoHoSo({ sampleCaseId: ca.id });
+      const meta = await taoHoSo({ sampleCaseId: ca.id }, targetId);
       if (!meta) return;
       const tabId = `tab-doc-${Date.now()}`;
-      handleUpdateSession({
+      capNhatCaTheoId(targetId, (phien) => ({
         patientIdentifier: `Ca ${ca.id}`,
         patientSubtitle: `Dữ liệu tổng hợp của dự án · bộ ${ca.bo}`,
         transcript: meta.transcript || "",
         tabs: [
-          ...currentSession.tabs.map((t) =>
-            t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t
-          ),
+          ...phien.tabs.map((t) => (t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t)),
           { id: tabId, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true },
         ],
         activeTabId: tabId,
-      });
+      }));
     } catch (err: any) {
       setApiError(err?.message || "Khong nap duoc ca mau");
     }
   };
 
-  /** Nội dung tab Ngữ cảnh của ca đang mở (bác sĩ gõ hoặc thêm câu hỏi từ ngăn phải). */
-  const nguCanh = () => currentSession.tabs.find((t) => t.type === "context")?.content || "";
+  /** Nội dung tab Ngữ cảnh của ca đang mở. */
+  const nguCanh = (ca: Session = currentSession) => ca.tabs.find((t) => t.type === "context")?.content || "";
 
-  /** Chép một câu hỏi vào cuối tab Ngữ cảnh. */
+  /** Chép một câu hỏi vào cuối tab Ngữ cảnh (dùng updater hàm). */
   const themVaoNguCanh = (cau: string) => {
-    const cu = nguCanh().trimEnd();
-    const moi = cu ? `${cu}\n- ${cau}` : `Câu hỏi cần hỏi thêm:\n- ${cau}`;
-    handleUpdateSession({
-      tabs: currentSession.tabs.map((t) => (t.type === "context" ? { ...t, content: moi } : t)),
+    const targetId = currentSession.id;
+    capNhatCaTheoId(targetId, (ca) => {
+      const cu = nguCanh(ca).trimEnd();
+      const moi = cu ? `${cu}\n- ${cau}` : `Câu hỏi cần hỏi thêm:\n- ${cau}`;
+      return {
+        contextNotes: moi,
+        tabs: ca.tabs.map((t) => (t.type === "context" ? { ...t, content: moi } : t)),
+      };
     });
   };
 
   /** Phương án 1: mô hình ngoài đọc ngữ cảnh + lời thoại + mệnh đề đã tách, đề xuất câu hỏi. */
   const deXuatCauHoi = async () => {
+    const contextSnapshot = nguCanh();
+    const transcriptSnapshot = noteMeta?.transcript || currentSession.transcript;
+    const propsSnapshot = noteMeta?.propositions || [];
     const d = await goiNgoai("/api/questions-external", {
-      context: nguCanh(),
-      transcript: noteMeta?.transcript || currentSession.transcript,
-      propositions: noteMeta?.propositions || [],
+      context: contextSnapshot,
+      transcript: transcriptSnapshot,
+      propositions: propsSnapshot,
     });
     return d ? { questions: d.questions || [], model: d.model, seconds: d.seconds } : null;
   };
 
   /**
-   * Nút "Tạo". Bản nháp hồ sơ: Qwen3-4B tại chỗ (phần được đo). Mọi mẫu khác và yêu cầu tự do:
-   * mô hình ngoài soạn từ lời thoại + bản nháp + tab Ngữ cảnh, mở thành tab mới có nhãn nguồn.
+   * Nút "Tạo". Chụp `targetId` và toàn bộ ngữ cảnh ca khám trước `await`.
    */
   const taoVanBan = async (mau: MauVanBan, yeuCau?: string) => {
+    const targetId = currentSession.id;
+    const transcriptSnapshot = noteMeta?.transcript || currentSession.transcript;
+    const draftSnapshot = noteMeta?.content || "";
+    const contextSnapshot = nguCanh();
+
     if (mau.taiCho) {
-      const meta = await taoHoSo({ transcript: currentSession.transcript });
+      const meta = await taoHoSo({ transcript: currentSession.transcript }, targetId);
       if (!meta) return;
       const id = `tab-doc-${Date.now()}`;
-      handleUpdateSession({
-        tabs: [...currentSession.tabs, { id, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true }],
+      capNhatCaTheoId(targetId, (ca) => ({
+        tabs: [
+          ...ca.tabs,
+          { id, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true },
+        ],
         activeTabId: id,
-      });
+      }));
       return;
     }
-    const idCa = currentSession.id;
-    setIsGeneratingNote(true);
+
+    setGeneratingSessionId(targetId);
     try {
       const d = await goiNgoai("/api/generate-document", {
         title: yeuCau ? "" : mau.ten,
         instruction: yeuCau || mau.chiDan,
-        transcript: noteMeta?.transcript || currentSession.transcript,
-        draft: noteMeta?.content || "",
-        context: nguCanh(),
+        transcript: transcriptSnapshot,
+        draft: draftSnapshot,
+        context: contextSnapshot,
       });
       if (!d?.content) return;
       const id = `tab-doc-${Date.now()}`;
@@ -611,50 +708,62 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         `\n\n---\n[Soạn bằng mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · từ lời thoại, bản nháp và tab Ngữ cảnh` +
         `${d.missingCount ? ` · còn ${d.missingCount} chỗ [cần bổ sung]` : ""}. Bác sĩ đọc lại trước khi dùng.]`;
       const tab: DocumentTabItem = {
-        id, title: (yeuCau || mau.ten).slice(0, 60), type: "custom", content: `${d.content}${nhan}`, isClosable: true,
+        id,
+        title: (yeuCau || mau.ten).slice(0, 60),
+        type: "custom",
+        content: `${d.content}${nhan}`,
+        isClosable: true,
       };
-      setSessions((prev) =>
-        prev.map((c) => (c.id === idCa ? { ...c, tabs: [...c.tabs, tab], activeTabId: id } : c))
-      );
+      capNhatCaTheoId(targetId, (ca) => ({
+        tabs: [...ca.tabs, tab],
+        activeTabId: id,
+      }));
     } finally {
-      setIsGeneratingNote(false);
+      setGeneratingSessionId((cur) => (cur === targetId ? null : cur));
     }
   };
 
-  /** Màn "Hỏi về ca khám": ba kiểu hỏi, đều cần mô hình ngoài. */
+  /** Màn "Hỏi về ca khám": đồng nhất xử lý chặn `cau_hoi_co_danh_tinh` và truyền `tienTrinh` kiểm căn cứ thật. */
   const hoiDap = async (
     cheDo: CheDoHoiDap,
     cauHoi: string,
-    tuyChon: { kemNguCanh: boolean; nguon: NguonTraCuu }
+    tuyChon: { kemNguCanh: boolean; nguon: NguonTraCuu },
   ): Promise<TraLoiHoiDap | null> => {
+    const subtitleSnapshot = currentSession.patientSubtitle;
+    const contextSnapshot = nguCanh();
+    const transcriptSnapshot = currentSession.transcript;
+    const draftSnapshot = noteMeta?.content || "";
+    const propsSnapshot = noteMeta?.propositions;
+
     if (cheDo === "de_xuat") {
       const d = await deXuatCauHoi();
       if (!d) return null;
       return {
         content: d.questions.length
           ? d.questions
-              .map((q: any, i: number) =>
-                `${i + 1}. **${q.hoi}**${q.goi_y ? ` — ${q.goi_y}` : ""}${q.vi_sao ? `\n   _${q.vi_sao}_` : ""}` +
-                `${q.luot?.length ? ` (lượt ${q.luot.join(", ")})` : ""}`)
+              .map(
+                (q: any, i: number) =>
+                  `${i + 1}. **${q.hoi}**${q.goi_y ? ` — ${q.goi_y}` : ""}${q.vi_sao ? `\n   _${q.vi_sao}_` : ""}` +
+                  `${q.luot?.length ? ` (lượt ${q.luot.join(", ")})` : ""}`,
+              )
               .join("\n")
           : "Mô hình không đề xuất câu nào.",
         meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · từ ngữ cảnh, lời thoại và mệnh đề đã tách`,
       };
     }
     if (cheDo === "tra_cuu") {
-      // Thống nhất dùng `hoiTroLy` (luồng ẩn danh của TroLyTacTu) — chỉ gửi dữ liệu đã ẩn danh, không gửi lời thoại thô.
       const cauHoiGoc = cauHoi.replace(/\s*\(tra nguồn khác\)$/, "");
       const nguCanhThat = tuyChon.kemNguCanh
         ? trichNguCanhChoTroLy({
-            patientSubtitle: currentSession.patientSubtitle,
-            contextNotes: nguCanh(),
-            propositions: noteMeta?.propositions,
+            patientSubtitle: subtitleSnapshot,
+            contextNotes: contextSnapshot,
+            propositions: propsSnapshot,
           })
-        : { tuoi: null, gioi: null, coThai: null };
+        : { tuoi: undefined, gioi: undefined, coThai: undefined };
       const kq = await hoiTroLy(
         {
           cauHoi: cauHoiGoc,
-          menhDe: tuyChon.kemNguCanh ? gonMenhDeGui(noteMeta?.propositions) : [],
+          menhDe: tuyChon.kemNguCanh ? gonMenhDeGui(propsSnapshot) : [],
           nguCanh: nguCanhThat,
           nguon: tuyChon.nguon,
         },
@@ -663,9 +772,16 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       setTienDoTroLy(null);
       if ("loi" in kq) {
         setApiError(kq.loi);
+        if (kq.code === "cau_hoi_co_danh_tinh") {
+          return { content: "", blockedIdentity: true, errorMessage: kq.loi };
+        }
         return null;
       }
-      const tin = chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, { source: kq.source, model: kq.model });
+      const tin = chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, {
+        source: kq.source,
+        model: kq.model,
+        tienTrinh: kq.tienTrinh,
+      });
       return {
         content: tin.content || "",
         sources: tin.sources || [],
@@ -678,64 +794,81 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     }
     const d = await goiNgoai("/api/clinical-qa", {
       question: cauHoi,
-      transcript: currentSession.transcript,
-      draft: noteMeta?.content || "",
+      transcript: transcriptSnapshot,
+      draft: draftSnapshot,
     });
     if (!d) return null;
-    return { content: d.answer, meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ dựa trên hội thoại của ca này` };
+    return {
+      content: d.answer,
+      meta: `Mô hình ngoài · ${d.model} · ${d.seconds}s · chưa qua kiểm căn cứ · chỉ dựa trên hội thoại của ca này`,
+    };
   };
 
-  /** Phương án 2 và hỏi về ca khám: cả hai cần mô hình ngoài; ngăn phải khoá ô nhập khi công tắc tắt. */
+  /** Hỏi đáp ở ngăn phải (chụp `targetId` trước `await`). */
   const handleSendEvidenceMessage = async (query: string, mode: CheDoHoi, nguon?: NguonBat) => {
+    const targetId = currentSession.id;
+    const subtitleSnapshot = currentSession.patientSubtitle;
+    const contextSnapshot = nguCanh();
+    const transcriptSnapshot = currentSession.transcript;
+    const draftSnapshot = noteMeta?.content || currentTab?.content || "";
+    const propsSnapshot = noteMeta?.propositions;
+
     const gio = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    setEvidenceChat((prev) => [
+    const userMsgId = `user-${Date.now()}`;
+    capNhatEvidenceChatChoCa(targetId, (prev) => [
       ...prev,
-      { id: `user-${Date.now()}`, role: "user", content: query, mode, timestamp: gio() },
+      { id: userMsgId, role: "user", content: query, mode, timestamp: gio() },
     ]);
     setIsEvidenceLoading(true);
     try {
       if (mode === "tra_cuu") {
-        // Trợ lý nhiều tác tử (23/11/2026): điều phối giao việc cho các tác tử; chỉ dữ liệu đã ẩn danh đi ra ngoài,
-        // nên không cần công tắc "Mô hình ngoài". Chữ trong hội thoại và trích dẫn không bao giờ được gửi.
         const cauHoiGoc = query.replace(/\s*\(tra nguồn khác\)$/, "");
         setApiError(null);
         setTienDoTroLy({ keHoach: [], keHoachTuMoHinh: false, buoc: [], xemTruoc: null });
         const nguCanhThat = trichNguCanhChoTroLy({
-          patientSubtitle: currentSession.patientSubtitle,
-          contextNotes: nguCanh(),
-          propositions: noteMeta?.propositions,
+          patientSubtitle: subtitleSnapshot,
+          contextNotes: contextSnapshot,
+          propositions: propsSnapshot,
         });
         const kq = await hoiTroLy(
-          { cauHoi: cauHoiGoc, menhDe: gonMenhDeGui(noteMeta?.propositions), nguCanh: nguCanhThat, ...(nguon ? { nguon } : {}) },
+          {
+            cauHoi: cauHoiGoc,
+            menhDe: gonMenhDeGui(propsSnapshot),
+            nguCanh: nguCanhThat,
+            ...(nguon ? { nguon } : {}),
+          },
           (tt) => setTienDoTroLy(tt),
         );
         if ("loi" in kq) {
           if (kq.code === "cau_hoi_co_danh_tinh") {
-            // Câu bị chặn: bỏ tin của người dùng khỏi hội thoại, báo viết lại, không có tin trợ lý.
-            setEvidenceChat((prev) => prev.filter((m, i) => !(i === prev.length - 1 && m.role === "user" && m.content === query)));
+            capNhatEvidenceChatChoCa(targetId, (prev) => prev.filter((m) => m.id !== userMsgId));
           }
           setApiError(kq.loi);
           return;
         }
-        setEvidenceChat((prev) => [
+        capNhatEvidenceChatChoCa(targetId, (prev) => [
           ...prev,
           {
             id: `asst-${Date.now()}`,
             role: "assistant",
             mode,
             timestamp: gio(),
-            ...chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, { source: kq.source, model: kq.model }),
+            ...chuyenKetQuaThanhTin(kq.ketQua, cauHoiGoc, {
+              source: kq.source,
+              model: kq.model,
+              tienTrinh: kq.tienTrinh,
+            }),
           } as ClinicalChatMessage,
         ]);
         return;
       }
       const d = await goiNgoai("/api/clinical-qa", {
         question: query,
-        transcript: currentSession.transcript,
-        draft: noteMeta?.content || currentTab?.content || "",
+        transcript: transcriptSnapshot,
+        draft: draftSnapshot,
       });
       if (d) {
-        setEvidenceChat((prev) => [
+        capNhatEvidenceChatChoCa(targetId, (prev) => [
           ...prev,
           {
             id: `asst-${Date.now()}`,
@@ -753,21 +886,22 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     }
   };
 
-  /** Bản so sánh: mô hình ngoài viết từ cùng lời thoại. Không có mệnh đề, không có căn cứ. */
+  /** Bản so sánh: mô hình ngoài viết từ cùng lời thoại (chụp `targetId` trước `await`). */
   const taoBanSoSanhNgoai = async () => {
+    const targetId = currentSession.id;
     const loiThoai = noteMeta?.transcript || currentSession.transcript;
     if (!loiThoai) {
       setApiError("Chưa có lời thoại để làm bản so sánh.");
       return;
     }
-    setIsGeneratingNote(true);
+    setGeneratingSessionId(targetId);
     try {
       const d = await goiNgoai("/api/generate-note-external", { transcript: loiThoai });
       if (!d?.content) return;
       const tabId = `tab-doc-${Date.now()}`;
-      handleUpdateSession({
+      capNhatCaTheoId(targetId, (ca) => ({
         tabs: [
-          ...currentSession.tabs,
+          ...ca.tabs,
           {
             id: tabId,
             title: `So sánh · ${d.model}`,
@@ -780,32 +914,52 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
           },
         ],
         activeTabId: tabId,
-      });
+      }));
     } finally {
-      setIsGeneratingNote(false);
+      setGeneratingSessionId((cur) => (cur === targetId ? null : cur));
     }
   };
 
-  // Khởi tạo ca khám từ danh sách bệnh nhân
+  // Khởi tạo ca khám từ danh sách bệnh nhân: đủ 3 tab (transcript, context, soap), KHÔNG chèn dòng thoại thiếu vai!
   const handleStartSessionWithPatient = (patient: Patient) => {
     const newId = `session-${Date.now()}`;
+    const lyDo = patient.chiefComplaint || "Khám sức khỏe tổng quát";
+    const dongNguCanh = [
+      `Lý do khám ban đầu: ${lyDo}`,
+      patient.dob && patient.dob !== "Chưa xác định" ? `Ngày sinh: ${patient.dob}` : "",
+      patient.gender ? `Giới tính: ${patient.gender}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const phuDe = [patient.gender, patient.dob !== "Chưa xác định" ? patient.dob : "", patient.identifier]
+      .filter(Boolean)
+      .join(" · ");
+
     const newSession: Session = {
       id: newId,
       patientIdentifier: patient.name,
-      patientSubtitle: patient.identifier,
+      patientSubtitle: phuDe || patient.identifier || lyDo,
       date: `Hôm nay ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
       time: `${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
       language: "Tiếng Việt",
       durationSeconds: 0,
       isRecording: false,
-      transcript: `Ca khám bệnh nhân ${patient.name}. Lý do khám: ${patient.chiefComplaint || "Khám sức khỏe tổng quát"}.`,
-      activeTabId: "tab-soap",
+      transcript: "",
+      contextNotes: dongNguCanh,
+      activeTabId: "tab-transcript",
       tabs: [
         {
           id: "tab-transcript",
           title: "Lời thoại",
           type: "transcript",
-          content: `Ca khám bệnh nhân ${patient.name}. Lý do khám: ${patient.chiefComplaint || "Khám sức khỏe tổng quát"}.`,
+          content: "",
+          isClosable: false,
+        },
+        {
+          id: "tab-context",
+          title: "Ngữ cảnh",
+          type: "context",
+          content: dongNguCanh,
           isClosable: false,
         },
         {
@@ -813,17 +967,22 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
           title: "Bệnh án SOAP",
           type: "soap",
           templateStyle: "Goldilocks",
-          content: `Chủ quan (S):\n- Lý do vào viện: ${patient.chiefComplaint}\n\nTiền sử bệnh (PMHx):\n- Chưa ghi nhận bất thường đặc biệt\n\nKhách quan (O):\n- Thể trạng bình thường\n\nĐánh giá (A):\n- Theo dõi lâm sàng\n\nKế hoạch (P):\n- Kê đơn và hướng dẫn theo dõi`,
+          content: `Chủ quan (S):\n- Lý do vào viện: ${lyDo}\n\nTiền sử bệnh (PMHx):\n\nKhách quan (O):\n\nĐánh giá (A):\n\nKế hoạch (P):`,
           isClosable: false,
         },
       ],
     };
 
-    setSessions([newSession, ...sessions]);
+    setSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newId);
     setActiveView("scribe");
     setActiveNavigationItem("sessions");
   };
+
+  const soapRawContentForSignOff = useMemo(
+    () => layNoiDungBenhAnDeBam(currentSession?.tabs, currentSession?.activeTabId, noteMeta?.content),
+    [currentSession?.tabs, currentSession?.activeTabId, noteMeta?.content],
+  );
 
   const pageTitle: Record<string, string> = {
     home: "Trang chủ",
@@ -846,7 +1005,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         taskbarPosition === "top" ? "flex-col" : "flex-row"
       }`}
     >
-      {/* 1. Thanh điều hướng Taskbar (Phía trên với góc bo tròn mềm mại hoặc dạng thanh bên trái) */}
+      {/* 1. Thanh điều hướng Taskbar */}
       <NavigationRail
         activeView={activeView}
         activeNavigationItem={activeNavigationItem}
@@ -854,16 +1013,14 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         onSelectView={handleSelectView}
         onCreateNewSession={handleCreateNewSession}
         position={taskbarPosition}
-        onTogglePosition={() =>
-          setTaskbarPosition((prev) => (prev === "top" ? "left" : "top"))
-        }
+        onTogglePosition={() => setTaskbarPosition((prev) => (prev === "top" ? "left" : "top"))}
         onOpenHelp={() => setMoTinhTrang(true)}
         nguoiDung={nguoiDung}
         onDangXuat={onDangXuat}
       />
       {moTinhTrang && <TinhTrangHeThong onClose={() => setMoTinhTrang(false)} />}
 
-      {/* 2. Khung nhìn chính với bo góc tinh tế và đổ bóng nổi khối */}
+      {/* 2. Khung nhìn chính */}
       <main
         className={`flex-1 flex flex-col overflow-hidden min-h-0 min-w-0 ${
           taskbarPosition === "top"
@@ -898,418 +1055,497 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             </div>
           </header>
         )}
+
         <div className="flex-1 min-h-0 min-w-0 flex overflow-hidden">
-        {activeView === "home" && (
-          <HomeDashboard
-            choPhepNgoai={choPhepNgoai}
-            onNapCaMau={() => {
-              handleSelectNavigationItem("transcript");
-              void handleLoadSample();
-            }}
-            doctorName={nguoiDung.hoTen}
-            sessions={sessions}
-            onCreateSession={handleCreateNewSession}
-            onOpenTranscript={() => handleSelectNavigationItem("transcript")}
-            onOpenDraft={() => handleSelectNavigationItem("draft")}
-            onOpenEvidence={() => handleSelectNavigationItem("proof")}
-            onOpenTemplates={() => handleSelectNavigationItem("templates")}
-            onOpenSession={(id) => {
-              setActiveSessionId(id);
-              handleSelectNavigationItem("sessions");
-            }}
-            onViewAllSessions={() => handleSelectNavigationItem("sessions")}
-          />
-        )}
-
-        {activeView === "scribe" && (
-          <div className="flex-1 flex overflow-hidden">
-            {/* Sidebar danh sách ca khám */}
-            <div className="no-print">
-              <SessionsSidebar
-                sessions={sessions}
-                activeSessionId={activeSessionId}
-                onSelectSession={(id) => {
-                  setActiveSessionId(id);
-                  // Màn hẹp: danh sách ca đè lên vùng soạn, chọn xong thì thu lại.
-                  if (window.innerWidth < 768) setIsSessionsSidebarCollapsed(true);
+          <ErrorBoundary
+            title="Khung làm việc chính gặp sự cố hiển thị"
+            description="Dữ liệu các ca khám vẫn được giữ an toàn. Bấm Thử lại hoặc Bỏ qua phần lỗi để quay về màn soạn bệnh án."
+            resetKeys={[activeView, currentSession?.id]}
+            onDismiss={() => handleSelectView("scribe")}
+          >
+            {activeView === "home" && (
+              <HomeDashboard
+                choPhepNgoai={choPhepNgoai}
+                onNapCaMau={() => {
+                  handleSelectNavigationItem("transcript");
+                  void handleLoadSample();
                 }}
+                doctorName={nguoiDung.hoTen}
+                sessions={sessions}
                 onCreateSession={handleCreateNewSession}
-                onDeleteSession={handleDeleteSession}
-                isCollapsed={isSessionsSidebarCollapsed}
-                onToggleCollapse={handleToggleSessionsSidebar}
+                onOpenTranscript={() => handleSelectNavigationItem("transcript")}
+                onOpenDraft={() => handleSelectNavigationItem("draft")}
+                onOpenEvidence={() => handleSelectNavigationItem("proof")}
+                onOpenTemplates={() => handleSelectNavigationItem("templates")}
+                onOpenSession={(id) => {
+                  setActiveSessionId(id);
+                  handleSelectNavigationItem("sessions");
+                }}
+                onViewAllSessions={() => handleSelectNavigationItem("sessions")}
               />
-            </div>
+            )}
 
-            {/* Khu vực soạn thảo & ghi âm trung tâm */}
-            <div className="@container flex-1 flex flex-col min-w-0 bg-[#F0F7FA] h-full overflow-hidden">
-              <div className="no-print">
-                <ScribeHeader
-                  session={currentSession}
-                  onUpdateSession={handleUpdateSession}
-                  onDeleteSession={() => handleDeleteSession()}
-                  onCreateNewDocument={() => setIsTemplateModalOpen(true)}
-                  isRightDrawerOpen={isRightDrawerOpen}
-                  onToggleRightDrawer={handleToggleRightDrawer}
-                  choPhepNgoai={choPhepNgoai}
-                  onToggleChoPhepNgoai={setChoPhepNgoai}
-                />
+            {activeView === "scribe" && (
+              <div className="print-unclip flex-1 flex overflow-hidden">
+                {/* Sidebar danh sách ca khám */}
+                <div className="no-print">
+                  <SessionsSidebar
+                    sessions={sessions}
+                    activeSessionId={activeSessionId}
+                    onSelectSession={(id) => {
+                      setActiveSessionId(id);
+                      if (window.innerWidth < 768) setIsSessionsSidebarCollapsed(true);
+                    }}
+                    onCreateSession={handleCreateNewSession}
+                    onDeleteSession={handleDeleteSession}
+                    isCollapsed={isSessionsSidebarCollapsed}
+                    onToggleCollapse={handleToggleSessionsSidebar}
+                  />
+                </div>
 
-                {/* Thanh các Tab tài liệu */}
-                <DocumentTabs
-                  tabs={currentSession.tabs}
-                  activeTabId={currentSession.activeTabId}
-                  onSelectTab={handleSelectTab}
-                  onCloseTab={handleCloseTab}
-                  onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
-                />
-              </div>
+                {/* Khu vực soạn thảo & ghi âm trung tâm */}
+                <div className="print-unclip @container flex-1 flex flex-col min-w-0 bg-[#F0F7FA] h-full overflow-hidden">
+                  <div className="no-print">
+                    <ScribeHeader
+                      session={currentSession}
+                      onUpdateSession={handleUpdateSession}
+                      onDeleteSession={() => handleDeleteSession()}
+                      onCreateNewDocument={() => setIsTemplateModalOpen(true)}
+                      onPrintNote={handlePrintClinicalNote}
+                      isRightDrawerOpen={isRightDrawerOpen}
+                      onToggleRightDrawer={handleToggleRightDrawer}
+                      choPhepNgoai={choPhepNgoai}
+                      onToggleChoPhepNgoai={setChoPhepNgoai}
+                    />
 
-              {/* Banner trạng thái đang phân tích & sinh văn bản AI (Ảnh 1 & 2) */}
-              {isGeneratingNote && (
-                <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-[#0369A1] animate-in fade-in duration-200 no-print">
-                  <div className="flex items-center gap-2">
-                    <RefreshCw size={13} className="animate-spin text-[#0284C7]" />
-                    <span className="font-medium">
-                      {tienDoNhap
-                        ? tienDoNhap.truoc > 0
-                          ? `Đang chờ ${tienDoNhap.truoc} bản nháp khác tạo xong (máy chủ chỉ có một GPU)…`
-                          : `Đang tạo bản nháp · ${Math.floor((Date.now() - tienDoNhap.batDau) / 60000)} phút ${Math.floor(
-                              ((Date.now() - tienDoNhap.batDau) % 60000) / 1000,
-                            )} giây (thường mất 3–4 phút). Có thể chuyển sang ca khác, bản nháp vẫn vào đúng ca này.`
-                        : "Đang xử lý tạo hồ sơ... Bác sĩ có thể chuyển sang ca khám khác hoặc bắt đầu ca khám mới."}
-                    </span>
+                    {/* Thanh các Tab tài liệu */}
+                    <DocumentTabs
+                      tabs={currentSession.tabs}
+                      activeTabId={currentSession.activeTabId}
+                      onSelectTab={handleSelectTab}
+                      onCloseTab={handleCloseTab}
+                      onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
+                    />
                   </div>
-                  <span className="text-[11px] text-[#0284C7] font-mono">Qwen3-4B · chạy tại chỗ · không gửi dữ liệu ra ngoài</span>
-                </div>
-              )}
 
-              {/* Lỗi của dịch vụ: hiện thẳng, không nuốt vào console */}
-              {apiError && (
-                <div className="bg-[#FDE8E8] border-b border-[#F5C2C2] px-4 py-2 flex items-start justify-between gap-3 text-xs text-[#8C1D26] no-print">
-                  <span className="font-medium">{apiError}</span>
-                  <button onClick={() => setApiError(null)} className="font-bold shrink-0">đóng</button>
-                </div>
-              )}
+                  {/* Banner trạng thái tạo bản nháp: chỉ hiện tiến độ trên ca đang chạy, không khoá trắng các ca khác */}
+                  {(isCurrentSessionGenerating || isOtherSessionGenerating) && (
+                    <div className="bg-[#F0F9FF] border-b border-[#BAE6FD] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-[#0369A1] animate-in fade-in duration-200 no-print">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw size={13} className="animate-spin text-[#0284C7]" />
+                        <span className="font-medium">
+                          {isOtherSessionGenerating
+                            ? "Đang tạo bản nháp nền cho một ca khám khác — bác sĩ vẫn soạn thảo và ghi âm ca hiện tại bình thường."
+                            : tienDoNhap
+                            ? tienDoNhap.truoc > 0
+                              ? `Đang chờ ${tienDoNhap.truoc} bản nháp khác tạo xong (máy chủ chỉ có một GPU)…`
+                              : `Đang tạo bản nháp · ${Math.floor((Date.now() - tienDoNhap.batDau) / 60000)} phút ${Math.floor(
+                                  ((Date.now() - tienDoNhap.batDau) % 60000) / 1000,
+                                )} giây (thường mất 3–4 phút). Có thể chuyển sang ca khác, bản nháp vẫn vào đúng ca này.`
+                            : "Đang xử lý tạo hồ sơ... Bác sĩ có thể chuyển sang ca khám khác hoặc bắt đầu ca khám mới."}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[#0284C7] font-mono">
+                        Qwen3-4B · chạy tại chỗ · không gửi dữ liệu ra ngoài
+                      </span>
+                    </div>
+                  )}
 
-              {/* Có bản nháp thì mời sang màn Duyệt — đó mới là bước bác sĩ phải làm */}
-              {noteMeta && (
-                <div className="bg-[#E6F4F1] border-b border-[#BCE3DB] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-[#0D5F57] no-print">
-                  <span>
-                    Bản nháp có <strong>{noteMeta.propositions.length}</strong> mệnh đề
-                    {noteMeta.needsConfirmCount > 0 && <>, trong đó <strong>{noteMeta.needsConfirmCount}</strong> máy đưa sang mục cần bác sĩ xác nhận</>}.
-                    {noteMeta.source === "chay_truoc" && " Đây là bản ghi đã chạy từ trước."}
-                    {noteMeta.source === "bo_dem" && " Khâu trích lấy từ bộ đệm đã chạy trước."}
-                    {noteMeta.source !== "chay_truoc" && noteMeta.source !== "bo_dem" && " Qwen3-4B vừa chạy tại chỗ."}
-                    <span className="ml-1 font-semibold">Chưa có bác sĩ duyệt.</span>
-                  </span>
-                  <div className="flex flex-wrap items-center gap-2 ml-auto">
-                    {choPhepNgoai && (
-                      <button
-                        onClick={taoBanSoSanhNgoai}
-                        className="px-2.5 py-1 rounded-lg border border-[#F5C2C2] bg-white text-[#8C1D26] font-semibold"
-                        title="Mô hình ngoài viết một bản từ cùng lời thoại, để so với bản nháp của dự án"
-                      >
-                        Bản so sánh (mô hình ngoài)
+                  {/* Lỗi của dịch vụ */}
+                  {apiError && (
+                    <div className="bg-[#FDE8E8] border-b border-[#F5C2C2] px-4 py-2 flex items-start justify-between gap-3 text-xs text-[#8C1D26] no-print">
+                      <span className="font-medium">{apiError}</span>
+                      <button onClick={() => setApiError(null)} className="font-bold shrink-0">
+                        đóng
                       </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        setChonMD(null);
-                        setLuotKiemChung(null);
-                        handleSelectNavigationItem("proof");
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold bg-[#0D9488] hover:bg-[#0B7A6F] text-white shadow-tactile-doctor transition-all cursor-pointer text-xs"
-                      title="Chuyển sang trang đối chiếu toàn màn hình: Hội thoại, mệnh đề và đường nối căn cứ"
-                    >
-                      <CheckCircle2 size={13} />
-                      <span>Duyệt từng mệnh đề</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Nội dung tab đang hiển thị (Bản nháp chiếm trọn chiều rộng rộng rãi) */}
-              <div ref={vungGiuaRef} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative">
-                  {currentTab?.type === "transcript" && (
-                    <TranscriptView
-                      transcript={currentSession.transcript}
-                      gioiTinh={currentSession.patientSubtitle}
-                      onUpdateTranscript={handleUpdateTranscript}
-                      onUpdateSegments={(segs) =>
-                        handleUpdateSession({
-                          transcriptSegments: [...(currentSession.transcriptSegments || []), ...segs],
-                        })
-                      }
-                      isRecording={currentSession.isRecording}
-                      audioUrl={currentSession.audioUrl}
-                      onStartRecording={() => handleUpdateSession({ isRecording: true })}
-                      onOpenTemplates={() => setIsTemplateModalOpen(true)}
-                      onLoadSample={handleLoadSample}
-                    />
+                    </div>
                   )}
 
-                  {currentTab?.type === "context" && (
-                    <ContextView
-                      tab={currentTab}
-                      onUpdateContent={handleUpdateTabContent}
-                      patientSubtitle={currentSession.patientSubtitle}
-                    />
-                  )}
-
-                  {(currentTab?.type === "soap" ||
-                    currentTab?.type === "leaflet" ||
-                    currentTab?.type === "custom") && (
-                    <div className="flex-1 flex flex-col @4xl:flex-row min-h-0 overflow-hidden @container">
-                      <div className="flex-1 min-w-0 min-h-0 flex flex-col relative">
-                        {noteMeta && (noteMeta.propositions?.length || 0) > 0 && !moDuyetBenCanh && (
+                  {/* Có bản nháp thì mời sang màn Duyệt */}
+                  {noteMeta && (
+                    <div className="bg-[#E6F4F1] border-b border-[#BCE3DB] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-[#0D5F57] no-print">
+                      <span>
+                        Bản nháp có <strong>{noteMeta.propositions.length}</strong> mệnh đề
+                        {noteMeta.needsConfirmCount > 0 && (
+                          <>
+                            , trong đó <strong>{noteMeta.needsConfirmCount}</strong> máy đưa sang mục cần bác sĩ xác nhận
+                          </>
+                        )}
+                        .
+                        {noteMeta.source === "chay_truoc" && " Đây là bản ghi đã chạy từ trước."}
+                        {noteMeta.source === "bo_dem" && " Khâu trích lấy từ bộ đệm đã chạy trước."}
+                        {noteMeta.source !== "chay_truoc" && noteMeta.source !== "bo_dem" && " Qwen3-4B vừa chạy tại chỗ."}
+                        <span className="ml-1 font-semibold">Chưa có bác sĩ duyệt.</span>
+                      </span>
+                      <div className="flex flex-wrap items-center gap-2 ml-auto">
+                        {choPhepNgoai && (
                           <button
-                            type="button"
-                            onClick={() => setMoDuyetBenCanh(true)}
-                            className="no-print absolute top-3 right-3 z-20 px-3 py-1.5 rounded-xl bg-white border border-[#BAE6FD] text-xs font-semibold text-[#0369A1] shadow-tactile-doctor-pill hover:bg-[#F0F9FF] cursor-pointer"
+                            onClick={taoBanSoSanhNgoai}
+                            className="px-2.5 py-1 rounded-lg border border-[#F5C2C2] bg-white text-[#8C1D26] font-semibold"
+                            title="Mô hình ngoài viết một bản từ cùng lời thoại, để so với bản nháp của dự án"
                           >
-                            Mở ngăn duyệt ({noteMeta.propositions.length})
+                            Bản so sánh (mô hình ngoài)
                           </button>
                         )}
-                        <NoteEditorView
+                        <button
+                          onClick={() => {
+                            setChonMD(null);
+                            setLuotKiemChung(null);
+                            handleSelectNavigationItem("proof");
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold bg-[#0D9488] hover:bg-[#0B7A6F] text-white shadow-tactile-doctor transition-all cursor-pointer text-xs"
+                          title="Chuyển sang trang đối chiếu toàn màn hình: Hội thoại, mệnh đề và đường nối căn cứ"
+                        >
+                          <CheckCircle2 size={13} />
+                          <span>Duyệt từng mệnh đề</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nội dung tab đang hiển thị — gắn key={currentSession.id} chống nhiễm bẩn PHI chéo bệnh nhân */}
+                  <div ref={vungGiuaRef} className="print-unclip flex-1 flex flex-col min-h-0 overflow-hidden">
+                    <div className="print-unclip flex-1 flex flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative">
+                      {currentTab?.type === "transcript" && (
+                        <TranscriptView
+                          key={currentSession.id}
+                          transcript={currentSession.transcript}
+                          gioiTinh={currentSession.patientSubtitle}
+                          onUpdateTranscript={handleUpdateTranscript}
+                          onUpdateSegments={(segs) => {
+                            const targetId = currentSession.id;
+                            capNhatCaTheoId(targetId, (ca) => ({
+                              transcriptSegments: [...(ca.transcriptSegments || []), ...segs],
+                            }));
+                          }}
+                          isRecording={currentSession.isRecording}
+                          audioUrl={currentSession.audioUrl}
+                          onStartRecording={() => handleUpdateSession({ isRecording: true })}
+                          onOpenTemplates={() => setIsTemplateModalOpen(true)}
+                          onLoadSample={handleLoadSample}
+                        />
+                      )}
+
+                      {currentTab?.type === "context" && (
+                        <ContextView
+                          key={currentSession.id}
                           tab={currentTab}
                           onUpdateContent={handleUpdateTabContent}
-                          onRegenerateNote={handleRegenerateNoteStyle}
-                          isGenerating={isGeneratingNote}
-                          danhDau={
-                            noteMeta?.propositions
-                              ? noteMeta.propositions.map((pp) => ({
-                                  id: pp.id,
-                                  text: pp.text,
-                                  textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
-                                  trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
-                                }))
-                              : undefined
-                          }
-                          chonId={chonMD}
-                          onChonMenhDe={(id) => {
-                            setChonMD(id);
-                            if (id !== null) {
-                              setMoDuyetBenCanh(true);
-                            }
-                          }}
-                          transcript={noteMeta?.transcript || currentSession.transcript}
-                          onKiemChungLuot={handleKiemChungLuot}
-                          noteMeta={noteMeta}
-                          patientIdentifier={currentSession.patientIdentifier}
-                          quyetDuyet={quyetDuyet}
-                          banSuaDuyet={banSuaDuyet}
-                          signOff={currentSession.signOff}
-                          crossVisitAlerts={phatHienMauThuanXuyenLanKham(currentSession, sessions)}
-                          onSignOff={async () => {
-                            const ds = noteMeta?.propositions || [];
-                            const soGiu = ds.filter((p) => quyetDuyet[p.id] === "giu").length;
-                            const soSua = ds.filter((p) => quyetDuyet[p.id] === "sua").length;
-                            const soBo = ds.filter((p) => quyetDuyet[p.id] === "bo").length;
-                            const coNguon = ds.filter((p) => p.evidenceTurns.length > 0).length;
-                            const tyLeCoNguon = ds.length ? Math.round((coNguon / ds.length) * 100) : 100;
-                            const res = await fetch(`/api/sessions/${encodeURIComponent(currentSession.id)}/sign-off`, {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                tongMenhDe: ds.length,
-                                soGiu,
-                                soSua,
-                                soBo,
-                                tyLeCoNguon,
-                                contentHash: bamChuoi(currentTab.content),
-                              }),
-                            });
-                            if (res.ok) {
-                              const data = await res.json();
-                              handleUpdateSession({
-                                signOff: {
-                                  signedAt: data.signedAt,
-                                  tongMenhDe: data.tongMenhDe,
-                                  soGiu: data.soGiu,
-                                  soSua: data.soSua,
-                                  soBo: data.soBo,
-                                  tyLeCoNguon: data.tyLeCoNguon,
-                                  hash: data.hash,
-                                  wormSeq: data.wormSeq,
-                                },
-                              });
-                            }
-                          }}
+                          patientSubtitle={currentSession.patientSubtitle}
                         />
-                      </div>
-                      {noteMeta && (noteMeta.propositions?.length || 0) > 0 && moDuyetBenCanh && (
-                        <div className="w-full @4xl:w-80 xl:w-96 flex-shrink-0 min-h-0 max-h-[45vh] @4xl:max-h-none no-print">
-                          <DuyetBenCanh
-                            note={noteMeta}
-                            quyet={quyetDuyet}
-                            setQuyet={setQuyetDuyet}
-                            banSua={banSuaDuyet}
-                            setBanSua={setBanSuaDuyet}
-                            chonId={chonMD}
-                            onChon={setChonMD}
-                            onMoToanMan={() => handleSelectNavigationItem("proof")}
-                            onDong={() => setMoDuyetBenCanh(false)}
-                            audioUrl={currentSession.audioUrl}
-                            segments={currentSession.transcriptSegments}
-                          />
+                      )}
+
+                      {(currentTab?.type === "soap" ||
+                        currentTab?.type === "leaflet" ||
+                        currentTab?.type === "custom") && (
+                        <div className="print-unclip flex-1 flex flex-col @4xl:flex-row min-h-0 overflow-hidden @container">
+                          <div className="print-unclip flex-1 min-w-0 min-h-0 flex flex-col relative">
+                            {noteMeta && (noteMeta.propositions?.length || 0) > 0 && !moDuyetBenCanh && (
+                              <button
+                                type="button"
+                                onClick={() => setMoDuyetBenCanh(true)}
+                                className="no-print absolute top-3 right-3 z-20 px-3 py-1.5 rounded-xl bg-white border border-[#BAE6FD] text-xs font-semibold text-[#0369A1] shadow-tactile-doctor-pill hover:bg-[#F0F9FF] cursor-pointer"
+                              >
+                                Mở ngăn duyệt ({noteMeta.propositions.length})
+                              </button>
+                            )}
+                            <NoteEditorView
+                              key={currentSession.id}
+                              sessionId={currentSession.id}
+                              tab={currentTab}
+                              soapRawContent={soapRawContentForSignOff}
+                              onUpdateContent={handleUpdateTabContent}
+                              onRegenerateNote={handleRegenerateNoteStyle}
+                              isGenerating={isCurrentSessionGenerating}
+                              danhDau={
+                                noteMeta?.propositions
+                                  ? noteMeta.propositions.map((pp) => ({
+                                      id: pp.id,
+                                      text: pp.text,
+                                      textKhac: banSuaDuyet[pp.id] ? [banSuaDuyet[pp.id]] : undefined,
+                                      trangThai: trangThaiMD(pp, quyetDuyet[pp.id]),
+                                    }))
+                                  : undefined
+                              }
+                              chonId={chonMD}
+                              onChonMenhDe={(id) => {
+                                setChonMD(id);
+                                if (id !== null) {
+                                  setMoDuyetBenCanh(true);
+                                }
+                              }}
+                              transcript={noteMeta?.transcript || currentSession.transcript}
+                              onKiemChungLuot={handleKiemChungLuot}
+                              noteMeta={noteMeta}
+                              patientIdentifier={currentSession.patientIdentifier}
+                              quyetDuyet={quyetDuyet}
+                              banSuaDuyet={banSuaDuyet}
+                              signOff={currentSession.signOff}
+                              crossVisitAlerts={phatHienMauThuanXuyenLanKham(currentSession, sessions)}
+                              savedLeaflet={hoSoDanDoTheoCa[currentSession.id]}
+                              onSaveLeaflet={(hoSo) =>
+                                setHoSoDanDoTheoCa((cu) => ({ ...cu, [currentSession.id]: hoSo }))
+                              }
+                              onSignOff={async () => {
+                                const targetId = currentSession.id;
+                                const ds = noteMeta?.propositions || [];
+                                const qSnap = { ...quyetDuyet };
+                                const bSnap = { ...banSuaDuyet };
+                                const soapRaw = layNoiDungBenhAnDeBam(
+                                  currentSession.tabs,
+                                  currentSession.activeTabId,
+                                  noteMeta?.content,
+                                );
+                                const soGiu = ds.filter((p) => qSnap[p.id] === "giu").length;
+                                const soSua = ds.filter((p) => qSnap[p.id] === "sua").length;
+                                const soBo = ds.filter((p) => qSnap[p.id] === "bo").length;
+                                const coNguon = ds.filter((p) => p.evidenceTurns.length > 0).length;
+                                const tyLeCoNguon = ds.length ? Math.round((coNguon / ds.length) * 100) : 100;
+                                const contentHash = await computeNoteSignOffHash(soapRaw, qSnap, bSnap);
+
+                                const res = await fetch(`/api/sessions/${encodeURIComponent(targetId)}/sign-off`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    tongMenhDe: ds.length,
+                                    soGiu,
+                                    soSua,
+                                    soBo,
+                                    tyLeCoNguon,
+                                    contentHash,
+                                  }),
+                                });
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  capNhatCaTheoId(targetId, {
+                                    signOff: {
+                                      signedAt: data.signedAt,
+                                      tongMenhDe: data.tongMenhDe,
+                                      soGiu: data.soGiu,
+                                      soSua: data.soSua,
+                                      soBo: data.soBo,
+                                      tyLeCoNguon: data.tyLeCoNguon,
+                                      hash: data.hash,
+                                      contentHash,
+                                      wormSeq: data.wormSeq,
+                                    },
+                                  });
+                                } else {
+                                  const d = await res.json().catch(() => ({}));
+                                  setApiError(d?.error || `Không ký duyệt được (mã ${res.status})`);
+                                }
+                              }}
+                            />
+                          </div>
+                          {noteMeta && (noteMeta.propositions?.length || 0) > 0 && moDuyetBenCanh && (
+                            <div className="w-full @4xl:w-80 xl:w-96 flex-shrink-0 min-h-0 max-h-[45vh] @4xl:max-h-none no-print">
+                              <DuyetBenCanh
+                                note={noteMeta}
+                                quyet={quyetDuyet}
+                                setQuyet={setQuyetDuyet}
+                                banSua={banSuaDuyet}
+                                setBanSua={setBanSuaDuyet}
+                                chonId={chonMD}
+                                onChon={setChonMD}
+                                onMoToanMan={() => handleSelectNavigationItem("proof")}
+                                onDong={() => setMoDuyetBenCanh(false)}
+                                audioUrl={currentSession.audioUrl}
+                                segments={currentSession.transcriptSegments}
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Thanh nhập lệnh AI dưới đáy */}
-              <div className="no-print">
-                <BottomPromptBar
-                  onSubmitPrompt={handleBottomPrompt}
-                  isLoading={isGeneratingNote}
-                  allowExternal={choPhepNgoai}
-                  onToggleAllowExternal={setChoPhepNgoai}
-                />
-              </div>
-            </div>
-
-            {/* 3. Bảng phụ trợ bên phải: "Câu hỏi cho Người bệnh & Chứng cứ" */}
-            <div className="no-print">
-              <ClinicalEvidenceDrawer
-                key={currentSession.id}
-                isOpen={isRightDrawerOpen}
-                onClose={() => setIsRightDrawerOpen(false)}
-                chatHistory={evidenceChat}
-                onSendMessage={handleSendEvidenceMessage}
-                onNewChat={() => setEvidenceChat([])}
-                isLoading={isEvidenceLoading}
-                patientContext={currentSession.patientSubtitle}
-                ruleQuestions={noteMeta?.questions || []}
-                hasDraft={!!noteMeta}
-                allowExternal={choPhepNgoai}
-                hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
-                onSuggestQuestions={deXuatCauHoi}
-                onAddToContext={themVaoNguCanh}
-                tienDoTroLy={tienDoTroLy}
-                laQuanTri={nguoiDung.vai === "quan_tri"}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Câu hỏi làm rõ — sinh từ chính hội thoại, KHÔNG tra cứu y văn ngoài */}
-        {activeView === "evidence" && (
-          <EvidenceView
-            caTen={currentSession.patientIdentifier}
-            coLoiThoai={!!currentSession.transcript.trim()}
-            allowExternal={choPhepNgoai}
-            onToggleExternal={setChoPhepNgoai}
-            hoi={hoiDap}
-            onNavigate={handleSelectView}
-            onOpenCreate={() => {
-              handleSelectNavigationItem("sessions");
-              setIsTemplateModalOpen(true);
-            }}
-            onSaveToContext={themVaoNguCanh}
-            initialPrompt={promptTraCuuTrangChu}
-            onInitialPromptUsed={() => setPromptTraCuuTrangChu("")}
-          />
-        )}
-
-        {/* Duyệt từng mệnh đề — dữ liệu thật từ dịch vụ tại chỗ */}
-        {activeView === "verification" && (
-          <VerificationView
-            note={noteMeta}
-            transcript={currentSession.transcript}
-            onBack={() => handleSelectNavigationItem("draft")}
-            patientIdentifier={currentSession.patientIdentifier}
-            allowExternal={choPhepNgoai}
-            onAskExternalQuestions={deXuatCauHoi}
-            quyetChung={quyetDuyet}
-            setQuyetChung={setQuyetDuyet}
-            banSuaChung={banSuaDuyet}
-            setBanSuaChung={setBanSuaDuyet}
-            chonBanDau={chonBanDau}
-            audioUrl={currentSession.audioUrl}
-            segments={currentSession.transcriptSegments}
-          />
-        )}
-
-        {/* Quản lý Bệnh nhân */}
-        {activeView === "patients" && (
-          <PatientsView onStartSessionWithPatient={handleStartSessionWithPatient} />
-        )}
-
-        {/* Nhiệm vụ Lâm sàng */}
-        {activeView === "tasks" && <TasksView />}
-
-        {/* Mẫu Bệnh án */}
-        {activeView === "templates" && (
-          <TemplatesView
-            onUseTemplate={(tpl) => {
-              handleSelectTemplate(tpl);
-              setActiveView("scribe");
-              setActiveNavigationItem("draft");
-            }}
-          />
-        )}
-
-        {activeView === "library" && (
-          <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
-            <ThuVienYKhoa />
-          </section>
-        )}
-
-        {activeView === "settings" && (
-          <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto flex max-w-3xl flex-col gap-4">
-              <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
-                <div>
-                  <h2 className="text-[14px] font-semibold text-[#174F70]">Vị trí thanh điều hướng</h2>
-                </div>
-                <div className="mt-4 inline-flex rounded-xl bg-[#EFF7FB] p-1">
-                  {(["left", "top"] as const).map((position) => (
-                    <button
-                      key={position}
-                      onClick={() => setTaskbarPosition(position)}
-                      aria-pressed={taskbarPosition === position}
-                      className={`rounded-lg px-3.5 py-2 text-[12px] font-semibold transition ${
-                        taskbarPosition === position ? "bg-white text-[#0874B9] shadow-sm" : "text-[#607C8E] hover:text-[#174F70]"
-                      }`}
-                    >
-                      {position === "left" ? "Bên trái" : "Trên đầu"}
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="max-w-xl">
-                    <h2 className="text-[14px] font-semibold text-[#174F70]">Mô hình ngoài (Dịch vụ đám mây / API thương mại)</h2>
-                    <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">
-                      Khi bật, nội dung gửi ra được che một số mẫu định danh trực tiếp mà hệ thống nhận diện được. Đây chỉ là giảm thiểu rủi ro, không bảo đảm ẩn danh hoàn toàn; hãy chỉ gửi dữ liệu phù hợp với chính sách cơ sở. Bản nháp chính vẫn do Qwen3–4B xử lý tại chỗ.
-                    </p>
                   </div>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3.5 py-2 text-[12px] font-semibold text-[#345F79] hover:bg-[#EAF4FA] transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={choPhepNgoai}
-                      onChange={(event) => setChoPhepNgoai(event.target.checked)}
-                      className="accent-[#087FC1]"
+
+                  {/* Thanh nhập lệnh AI dưới đáy */}
+                  <div className="no-print">
+                    <BottomPromptBar
+                      onSubmitPrompt={handleBottomPrompt}
+                      isLoading={isCurrentSessionGenerating}
+                      allowExternal={choPhepNgoai}
+                      onToggleAllowExternal={setChoPhepNgoai}
                     />
-                    Cho phép mô hình ngoài
-                  </label>
+                  </div>
+                </div>
+
+                {/* 3. Bảng phụ trợ bên phải bọc ErrorBoundary độc lập */}
+                <div className="no-print">
+                  <ErrorBoundary
+                    compact
+                    title="Ngăn Trợ lý & Chứng cứ gặp sự cố"
+                    description="Không ảnh hưởng tới bệnh án đang soạn bên trái. Bấm Thử lại hoặc đóng ngăn này."
+                    resetKeys={[currentSession.id, isRightDrawerOpen]}
+                    onDismiss={() => setIsRightDrawerOpen(false)}
+                  >
+                    <ClinicalEvidenceDrawer
+                      key={currentSession.id}
+                      isOpen={isRightDrawerOpen}
+                      onClose={() => setIsRightDrawerOpen(false)}
+                      chatHistory={evidenceChat}
+                      onSendMessage={handleSendEvidenceMessage}
+                      onNewChat={() => capNhatEvidenceChatChoCa(currentSession.id, [])}
+                      isLoading={isEvidenceLoading}
+                      patientContext={currentSession.patientSubtitle}
+                      ruleQuestions={noteMeta?.questions || []}
+                      hasDraft={!!noteMeta}
+                      allowExternal={choPhepNgoai}
+                      hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
+                      onSuggestQuestions={deXuatCauHoi}
+                      onAddToContext={themVaoNguCanh}
+                      tienDoTroLy={tienDoTroLy}
+                      laQuanTri={nguoiDung.vai === "quan_tri"}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </div>
+            )}
+
+            {/* Hỏi về ca khám & Tra cứu chứng cứ — bọc ErrorBoundary riêng + Suspense */}
+            {activeView === "evidence" && (
+              <ErrorBoundary
+                title="Màn Hỏi đáp & Tra cứu gặp sự cố"
+                description="Bấm Thử lại để mở lại khung hỏi đáp, hoặc Bỏ qua phần lỗi để quay về Ca khám."
+                resetKeys={[currentSession.id]}
+                onDismiss={() => handleSelectView("scribe")}
+              >
+                <Suspense fallback={<KhungDangTaiManHinh />}>
+                  <EvidenceView
+                    caTen={currentSession.patientIdentifier}
+                    coLoiThoai={!!currentSession.transcript.trim()}
+                    allowExternal={choPhepNgoai}
+                    onToggleExternal={setChoPhepNgoai}
+                    hoi={hoiDap}
+                    onNavigate={handleSelectView}
+                    onOpenCreate={() => {
+                      handleSelectNavigationItem("sessions");
+                      setIsTemplateModalOpen(true);
+                    }}
+                    onSaveToContext={themVaoNguCanh}
+                    initialPrompt={promptTraCuuTrangChu}
+                    onInitialPromptUsed={() => setPromptTraCuuTrangChu("")}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+
+            {/* Duyệt từng mệnh đề */}
+            {activeView === "verification" && (
+              <Suspense fallback={<KhungDangTaiManHinh />}>
+                <VerificationView
+                  note={noteMeta}
+                  transcript={currentSession.transcript}
+                  onBack={() => handleSelectNavigationItem("draft")}
+                  patientIdentifier={currentSession.patientIdentifier}
+                  allowExternal={choPhepNgoai}
+                  onAskExternalQuestions={deXuatCauHoi}
+                  quyetChung={quyetDuyet}
+                  setQuyetChung={setQuyetDuyet}
+                  banSuaChung={banSuaDuyet}
+                  setBanSuaChung={setBanSuaDuyet}
+                  chonBanDau={chonBanDau}
+                  audioUrl={currentSession.audioUrl}
+                  segments={currentSession.transcriptSegments}
+                />
+              </Suspense>
+            )}
+
+            {/* Quản lý Bệnh nhân (nhận trực tiếp `sessions` từ store chính, xoá xung đột 2 store) */}
+            {activeView === "patients" && (
+              <Suspense fallback={<KhungDangTaiManHinh />}>
+                <PatientsView
+                  sessions={sessions}
+                  onStartSessionWithPatient={handleStartSessionWithPatient}
+                />
+              </Suspense>
+            )}
+
+            {/* Nhiệm vụ Lâm sàng */}
+            {activeView === "tasks" && (
+              <Suspense fallback={<KhungDangTaiManHinh />}>
+                <TasksView />
+              </Suspense>
+            )}
+
+            {/* Mẫu Bệnh án */}
+            {activeView === "templates" && (
+              <Suspense fallback={<KhungDangTaiManHinh />}>
+                <TemplatesView
+                  onUseTemplate={(tpl) => {
+                    void handleSelectTemplate(tpl);
+                    setActiveView("scribe");
+                    setActiveNavigationItem("draft");
+                  }}
+                />
+              </Suspense>
+            )}
+
+            {activeView === "library" && (
+              <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
+                <Suspense fallback={<KhungDangTaiManHinh />}>
+                  <ThuVienYKhoa />
+                </Suspense>
+              </section>
+            )}
+
+            {activeView === "settings" && (
+              <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC] px-5 py-6 lg:px-8 lg:py-8">
+                <div className="mx-auto flex max-w-3xl flex-col gap-4">
+                  <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
+                    <div>
+                      <h2 className="text-[14px] font-semibold text-[#174F70]">Vị trí thanh điều hướng</h2>
+                    </div>
+                    <div className="mt-4 inline-flex rounded-xl bg-[#EFF7FB] p-1">
+                      {(["left", "top"] as const).map((position) => (
+                        <button
+                          key={position}
+                          onClick={() => setTaskbarPosition(position)}
+                          aria-pressed={taskbarPosition === position}
+                          className={`rounded-lg px-3.5 py-2 text-[12px] font-semibold transition ${
+                            taskbarPosition === position
+                              ? "bg-white text-[#0874B9] shadow-sm"
+                              : "text-[#607C8E] hover:text-[#174F70]"
+                          }`}
+                        >
+                          {position === "left" ? "Bên trái" : "Trên đầu"}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="rounded-2xl border border-[#D8EAF4] bg-white p-4 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="max-w-xl">
+                        <h2 className="text-[14px] font-semibold text-[#174F70]">
+                          Mô hình ngoài (Dịch vụ đám mây / API thương mại)
+                        </h2>
+                        <p className="mt-1 text-[12px] leading-relaxed text-[#6C8494]">
+                          Khi bật, nội dung gửi ra được che một số mẫu định danh trực tiếp mà hệ thống nhận diện được. Đây chỉ là giảm thiểu rủi ro, không bảo đảm ẩn danh hoàn toàn; hãy chỉ gửi dữ liệu phù hợp với chính sách cơ sở. Bản nháp chính vẫn do Qwen3–4B xử lý tại chỗ.
+                        </p>
+                      </div>
+                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#F3F8FB] px-3.5 py-2 text-[12px] font-semibold text-[#345F79] hover:bg-[#EAF4FA] transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={choPhepNgoai}
+                          onChange={(event) => setChoPhepNgoai(event.target.checked)}
+                          className="accent-[#087FC1]"
+                        />
+                        Cho phép mô hình ngoài
+                      </label>
+                    </div>
+                  </section>
+
+                  <button
+                    onClick={() => setMoTinhTrang(true)}
+                    className="self-start rounded-xl border border-[#CFE4F0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-[#17628B] transition hover:bg-[#EDF7FC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+                  >
+                    Xem tình trạng hệ thống
+                  </button>
                 </div>
               </section>
-
-              <button
-                onClick={() => setMoTinhTrang(true)}
-                className="self-start rounded-xl border border-[#CFE4F0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-[#17628B] transition hover:bg-[#EDF7FC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
-              >
-                Xem tình trạng hệ thống
-              </button>
-            </div>
-          </section>
-        )}
+            )}
+          </ErrorBoundary>
         </div>
       </main>
 

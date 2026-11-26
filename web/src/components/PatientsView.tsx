@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import { BangDuLieuMinhHoa } from "./BangDuLieuMinhHoa";
 import { Patient, Session } from "../types";
 import { samplePatients } from "../data/mockData";
-import { useKho } from "../lib/useKho";
 import {
   Activity,
   TrendingUp,
@@ -77,14 +76,15 @@ function taoChuoiToaDoSVG(values: Array<number | undefined>, width: number, heig
 }
 
 interface PatientsViewProps {
+  sessions?: Session[];
   onStartSessionWithPatient?: (patient: Patient) => void;
 }
 
 export const PatientsView: React.FC<PatientsViewProps> = ({
+  sessions = [],
   onStartSessionWithPatient,
 }) => {
   const [patients, setPatients] = useState<Patient[]>(samplePatients);
-  const [sessions] = useKho<Session>("ca-kham");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(samplePatients[0] || null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);

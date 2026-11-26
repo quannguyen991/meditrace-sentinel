@@ -31,9 +31,10 @@ import { dongTuDoan, moTaTach, soNguoiNoiLonNhat } from "../lib/nguoiNoi";
 
 interface ScribeHeaderProps {
   session: Session;
-  onUpdateSession: (updated: Partial<Session>) => void;
+  onUpdateSession: (updated: Partial<Session>, targetSessionId?: string) => void;
   onDeleteSession: () => void;
   onCreateNewDocument: () => void;
+  onPrintNote?: () => void;
   isRightDrawerOpen: boolean;
   onToggleRightDrawer: () => void;
   choPhepNgoai?: boolean;
@@ -45,6 +46,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   onUpdateSession,
   onDeleteSession,
   onCreateNewDocument,
+  onPrintNote,
   isRightDrawerOpen,
   onToggleRightDrawer,
   choPhepNgoai = false,
@@ -76,9 +78,23 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   const [micError, setMicError] = useState<string | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [banGhiKhoiPhuc, setBanGhiKhoiPhuc] = useState<{ blob: Blob; url: string; count: number } | null>(null);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const prevSessionIdRef = useRef(session.id);
 
   useEffect(() => {
     let huy = false;
+    const prevId = prevSessionIdRef.current;
+    if (prevId !== session.id) {
+      if (realAudioService.isCurrentlyRecording()) {
+        realAudioService.stop();
+        onUpdateSession({ isRecording: false }, prevId);
+        setAudioFreqs(khong());
+      }
+      prevSessionIdRef.current = session.id;
+    }
+    realAudioService.setPersistenceKey(session.id);
+    setBanGhiKhoiPhuc(null);
     if (!session.isRecording) {
       void realAudioService.recoverPersistedRecording().then((rec) => {
         if (!huy && rec) setBanGhiKhoiPhuc(rec);
@@ -87,7 +103,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
     return () => {
       huy = true;
     };
-  }, []);
+  }, [session.id]);
 
   useEffect(() => {
     setTitleInput(session.patientIdentifier);
@@ -99,10 +115,11 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isRecording) {
+      const recordingTargetId = sessionRef.current.id;
       timer = setInterval(() => {
         setDuration((prev) => {
           const next = prev + 1;
-          onUpdateSession({ durationSeconds: next });
+          onUpdateSession({ durationSeconds: next }, recordingTargetId);
           return next;
         });
       }, 1000);
@@ -139,43 +156,49 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
   }, []);
 
   const toggleRecording = async () => {
+    const targetId = sessionRef.current.id;
     if (!isRecording) {
       setMicError(null);
-      realAudioService.setLanguage(session.language === "English" ? "en-US" : "vi-VN");
+      realAudioService.setPersistenceKey(targetId);
+      realAudioService.setLanguage(sessionRef.current.language === "English" ? "en-US" : "vi-VN");
 
       realAudioService.setCallbacks({
         onTranscriptChunk: (chunk: string, isFinal: boolean) => {
           if (isFinal) {
-            onUpdateSession({
-              transcript: session.transcript ? `${session.transcript.trimEnd()}\n${chunk.trim()}` : chunk.trim(),
-            });
+            const cur = sessionRef.current;
+            onUpdateSession(
+              {
+                transcript: cur.transcript ? `${cur.transcript.trimEnd()}\n${chunk.trim()}` : chunk.trim(),
+              },
+              targetId,
+            );
           }
         },
         onError: (err: string) => {
           setMicError(err);
           setIsRecording(false);
-          onUpdateSession({ isRecording: false });
+          onUpdateSession({ isRecording: false }, targetId);
         },
         onAudioReady: (blob: Blob, url: string) => {
-          onUpdateSession({ audioUrl: url });
-          chepBangPhoWhisper(blob);
+          onUpdateSession({ audioUrl: url }, targetId);
+          void chepBangPhoWhisper(blob, targetId);
         },
       });
 
       const started = await realAudioService.start();
       if (started) {
         setIsRecording(true);
-        onUpdateSession({ isRecording: true });
+        onUpdateSession({ isRecording: true }, targetId);
       } else {
         // Không mở được micrô: bỏ cờ "đang ghi" mà nút bắt đầu ở giữa màn hình vừa bật.
-        onUpdateSession({ isRecording: false });
+        onUpdateSession({ isRecording: false }, targetId);
       }
     } else {
       // Dừng ghi: MediaRecorder trả tệp qua onAudioReady, tệp đó được gửi sang PhoWhisper.
       // Không mở ngay hộp chọn mẫu: bản chép chưa có thì chưa dựng được bản nháp.
       realAudioService.stop();
       setIsRecording(false);
-      onUpdateSession({ isRecording: false });
+      onUpdateSession({ isRecording: false }, targetId);
       setAudioFreqs(khong());
     }
   };
@@ -205,7 +228,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
    * hệ thống KHÔNG đoán vai từ giọng nói.
    */
   const [dangChep, setDangChep] = useState(false);
-  const chepBangPhoWhisper = async (blob: Blob) => {
+  const chepBangPhoWhisper = async (blob: Blob, targetSessionId = sessionRef.current.id) => {
     if (!blob || blob.size === 0) {
       setMicError("Không ghi được âm thanh nào. Kiểm tra micrô rồi thử lại.");
       return;
@@ -228,9 +251,10 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
       if (!res.ok) throw new Error(data?.error || `Dịch vụ trả mã ${res.status}`);
       const doan: any[] = data.segments || [];
       if (!doan.length) throw new Error("PhoWhisper không nghe ra câu nào trong đoạn ghi âm.");
-      const cu = session.transcript || "";
+      const cur = sessionRef.current;
+      const cu = cur.id === targetSessionId ? cur.transcript || "" : "";
       const moi = dongTuDoan(doan, data.diarization, soNguoiNoiLonNhat(cu)).join("\n");
-      const segCu = session.transcriptSegments || [];
+      const segCu = cur.id === targetSessionId ? cur.transcriptSegments || [] : [];
       const offsetLuot = cu ? cu.split("\n").filter((l) => l.trim()).length : 0;
       const segMoi = Array.isArray(data.transcriptSegments)
         ? data.transcriptSegments.map((s: any, idx: number) => ({
@@ -238,10 +262,13 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             luot: offsetLuot + idx + 1,
           }))
         : [];
-      onUpdateSession({
-        transcript: cu ? `${cu.trimEnd()}\n${moi}` : moi,
-        ...(segMoi.length ? { transcriptSegments: [...segCu, ...segMoi] } : {}),
-      });
+      onUpdateSession(
+        {
+          transcript: cu ? `${cu.trimEnd()}\n${moi}` : moi,
+          ...(segMoi.length ? { transcriptSegments: [...segCu, ...segMoi] } : {}),
+        },
+        targetSessionId,
+      );
       setMicError(
         `Đã chép ${doan.length} lượt bằng ${doan[0]?.asr_model || "PhoWhisper"} (${data.seconds ?? "?"}s). ` +
           moTaTach(data.diarization)
@@ -409,7 +436,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
       <div className="flex flex-wrap items-center justify-end gap-1.5 @md:gap-2 ml-auto">
         {/* Nút In / Xuất PDF */}
         <button
-          onClick={() => window.print()}
+          onClick={() => (onPrintNote ? onPrintNote() : window.print())}
           className="flex items-center gap-1 px-2.5 py-1.5 text-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#A7F3D0] rounded-xl transition-all text-xs font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer active:scale-95"
           title="In hồ sơ bệnh án hoặc Lưu tệp PDF chuẩn y khoa (Ctrl+P)"
         >
@@ -613,10 +640,11 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             type="button"
             onClick={() => {
               const rec = banGhiKhoiPhuc;
+              const targetId = session.id;
               setBanGhiKhoiPhuc(null);
-              onUpdateSession({ audioUrl: rec.url });
+              onUpdateSession({ audioUrl: rec.url }, targetId);
               void realAudioService.clearPersistedRecording();
-              void chepBangPhoWhisper(rec.blob);
+              void chepBangPhoWhisper(rec.blob, targetId);
             }}
             className="px-3 py-1 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold cursor-pointer"
           >

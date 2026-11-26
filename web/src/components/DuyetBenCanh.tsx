@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check, CheckCircle2, Info, Maximize2, MessageSquare, Pencil, Play, Square, Trash2, Undo2, X, AlertTriangle,
 } from "lucide-react";
-import { NoteMeta, Proposition, Quyet, canXacNhan, tachLuot } from "./VerificationView";
+import type { NoteMeta, Proposition, Quyet } from "./VerificationView";
 import type { TranscriptSegment } from "../types";
+import { canXacNhan, tachLuot } from "../lib/compileEffectiveNote";
 import { khoangPhatLaiLuot, phanTichVungMoAsr } from "../lib/asrHighlight";
+import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
 
 /**
  * NGĂN DUYỆT CẠNH BẢN NHÁP (24/09). Bác sĩ vừa đọc bản nháp vừa duyệt từng mệnh đề, không phải
@@ -57,53 +59,8 @@ export const DuyetBenCanh: React.FC<Props> = ({
   const [suaId, setSuaId] = useState<number | null>(null);
   const [chuSua, setChuSua] = useState("");
   const [moLuot, setMoLuot] = useState<Record<number, boolean>>({});
-  const [dangPhatLuot, setDangPhatLuot] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const ketThucPhatRef = useRef<number | null>(null);
+  const { dangPhatLuot, phatDoanLuot } = useTurnAudioPlayer(audioUrl, segments);
   const theRef = useRef(new Map<number, HTMLDivElement>());
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [audioUrl]);
-
-  const phatDoanLuot = (so: number) => {
-    if (!audioUrl) return;
-    if (dangPhatLuot === so && audioRef.current) {
-      audioRef.current.pause();
-      setDangPhatLuot(null);
-      return;
-    }
-    const khoang = khoangPhatLaiLuot(so, segments);
-    if (!khoang) return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(audioUrl);
-    } else if (audioRef.current.src !== audioUrl) {
-      audioRef.current.src = audioUrl;
-    }
-    const au = audioRef.current;
-    ketThucPhatRef.current = khoang.end_s;
-    au.ontimeupdate = () => {
-      if (ketThucPhatRef.current !== null && au.currentTime >= ketThucPhatRef.current) {
-        au.pause();
-        setDangPhatLuot(null);
-      }
-    };
-    au.onended = () => setDangPhatLuot(null);
-    const batDauPhat = () => {
-      au.currentTime = khoang.start_s;
-      au.play().then(() => setDangPhatLuot(so)).catch(() => setDangPhatLuot(null));
-    };
-    if (au.readyState >= 1) {
-      batDauPhat();
-    } else {
-      au.onloadedmetadata = batDauPhat;
-    }
-  };
 
   const luot = useMemo(() => tachLuot(note.transcript), [note.transcript]);
   // Thứ tự như trong bản nháp: mệnh đề cần xác nhận lên trước để bác sĩ xử lý trước.

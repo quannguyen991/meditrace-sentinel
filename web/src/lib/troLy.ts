@@ -91,11 +91,43 @@ export async function hoiTroLy(
 
 const TAC_TU_CAN_CANH_BAO_LEN_DAU = new Set(["tim_kiem", "tra_loi", "doi_chieu"]);
 
+/** Kiểm tra thật xem tác tử `doi_chieu` có thực sự chạy xong trong kết quả/tiến trình hay không. */
+export function kiemTraDoiChieuDaChay(
+  ketQua: any,
+  tienTrinh?: any,
+): { daQuaDoiChieu: boolean; coLuuYCanCu: boolean } {
+  const phan: any[] = Array.isArray(ketQua?.phan) ? ketQua.phan : [];
+  const phanDoiChieu = phan.find((p) => p && p.tacTu === "doi_chieu");
+
+  const buocDoiChieu = Array.isArray(tienTrinh?.buoc)
+    ? tienTrinh.buoc.filter((b: any) => b && b.tacTu === "doi_chieu")
+    : [];
+  const buocXong = buocDoiChieu.length > 0 && buocDoiChieu.every((b: any) => b.trangThai === "xong");
+  const phanXong = Boolean(
+    phanDoiChieu &&
+      (phanDoiChieu.traLoi ||
+        (typeof phanDoiChieu.noiDung === "string" && phanDoiChieu.noiDung.trim().length > 0)),
+  );
+
+  const daQuaDoiChieu = phanXong || buocXong;
+  if (!daQuaDoiChieu) {
+    return { daQuaDoiChieu: false, coLuuYCanCu: false };
+  }
+
+  const tl = phanDoiChieu?.traLoi;
+  const coLuuYCanCu = Boolean(
+    (Array.isArray(tl?.conThieu) && tl.conThieu.length > 0) ||
+      (Array.isArray(tl?.lech) && tl.lech.length > 0) ||
+      (typeof phanDoiChieu?.canhBao === "string" && phanDoiChieu.canhBao.trim().length > 0),
+  );
+  return { daQuaDoiChieu: true, coLuuYCanCu };
+}
+
 /** Đổi kết quả của máy chủ thành một tin trợ lý; phần Trả lời đi vào ô câu trả lời có nguồn, phần khác thành khối thêm. */
 export function chuyenKetQuaThanhTin(
   ketQua: any,
   cauHoi: string,
-  nhan: { source?: string; model?: string } = {},
+  nhan: { source?: string; model?: string; tienTrinh?: any } = {},
 ): Partial<ClinicalChatMessage> {
   const phan: any[] = Array.isArray(ketQua?.phan) ? ketQua.phan : [];
   const traLoi = phan.find((p) => p.tacTu === "tra_loi" && p.traLoi && typeof p.traLoi === "object" && (p.traLoi as any).answer);
@@ -123,8 +155,14 @@ export function chuyenKetQuaThanhTin(
 
   const tk = ketQua?.thongKe || {};
   const ngoai = nhan.source === "mo_hinh_ngoai";
+  const { daQuaDoiChieu, coLuuYCanCu } = kiemTraDoiChieuDaChay(ketQua, nhan.tienTrinh);
+  const nhanCanCu = daQuaDoiChieu
+    ? coLuuYCanCu
+      ? "đã qua tác tử đối chiếu (có lưu ý căn cứ)"
+      : "đã qua tác tử đối chiếu căn cứ"
+    : "chưa qua kiểm căn cứ";
   const meta = ngoai
-    ? `Mô hình ngoài · ${nhan.model || "qwen3.8-flash"} · ${tk.giay ?? 0}s · ${tk.token ?? 0} token · dữ liệu đã ẩn danh · chưa qua kiểm căn cứ · tham khảo, bác sĩ quyết định`
+    ? `Mô hình ngoài · ${nhan.model || "qwen3.8-flash"} · ${tk.giay ?? 0}s · ${tk.token ?? 0} token · dữ liệu đã ẩn danh · ${nhanCanCu} · tham khảo, bác sĩ quyết định`
     : `Tại chỗ · hai tác tử luật · không gửi gì ra ngoài · tham khảo, bác sĩ quyết định`;
 
   return {

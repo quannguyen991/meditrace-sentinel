@@ -1,6 +1,6 @@
 import React from "react";
 import { DocumentTabItem } from "../types";
-import { FileText, Save, Check, ScanText, AlertTriangle, Plus, ImagePlus, X } from "lucide-react";
+import { FileText, Save, Check, ScanText, AlertTriangle, Plus, ImagePlus, X, UserCheck } from "lucide-react";
 import { trichNguCanhChoTroLy } from "../lib/nguCanhTroLy";
 
 interface ContextViewProps {
@@ -14,14 +14,54 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
   const [ocrInput, setOcrInput] = React.useState("");
   const [dangQuet, setDangQuet] = React.useState(false);
   const [anhPhieuCu, setAnhPhieuCu] = React.useState<{ url: string; ten: string } | null>(null);
+  const anhUrlRef = React.useRef<string | null>(null);
   const [thongBaoAnh, setThongBaoAnh] = React.useState<string | null>(null);
+  const [loiOcr, setLoiOcr] = React.useState<string | null>(null);
   const oChonAnh = React.useRef<HTMLInputElement>(null);
+
+  // Tự trích sẵn Tuổi & Giới tính nếu có trong patientSubtitle hoặc contextNotes; KHÔNG gán ngầm 50 tuổi hay Nam!
+  const khoiTaoNc = React.useMemo(
+    () => trichNguCanhChoTroLy({ patientSubtitle, contextNotes: tab.content }),
+    [patientSubtitle, tab.content],
+  );
+  const [tuoiEgfr, setTuoiEgfr] = React.useState<string>(() =>
+    khoiTaoNc.tuoi !== undefined ? String(khoiTaoNc.tuoi) : "",
+  );
+  const [gioiEgfr, setGioiEgfr] = React.useState<"" | "nam" | "nữ">(() => khoiTaoNc.gioi ?? "");
+  const daChonTuoiTayRef = React.useRef(false);
+  const daChonGioiTayRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!daChonTuoiTayRef.current && !tuoiEgfr && khoiTaoNc.tuoi !== undefined) {
+      setTuoiEgfr(String(khoiTaoNc.tuoi));
+    }
+    if (!daChonGioiTayRef.current && !gioiEgfr && khoiTaoNc.gioi) {
+      setGioiEgfr(khoiTaoNc.gioi);
+    }
+  }, [khoiTaoNc.tuoi, khoiTaoNc.gioi, tuoiEgfr, gioiEgfr]);
+
+  // Thu hồi URL.createObjectURL khi unmount để chống rò rỉ bộ nhớ & PHI ảnh phiếu cũ
+  React.useEffect(() => {
+    anhUrlRef.current = anhPhieuCu?.url || null;
+  }, [anhPhieuCu]);
+
+  React.useEffect(() => {
+    return () => {
+      if (anhUrlRef.current) {
+        try {
+          URL.revokeObjectURL(anhUrlRef.current);
+        } catch {}
+        anhUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const xuLyChonAnh = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (anhPhieuCu?.url) URL.revokeObjectURL(anhPhieuCu.url);
     const url = URL.createObjectURL(file);
+    anhUrlRef.current = url;
     setAnhPhieuCu({ url, ten: file.name });
     setThongBaoAnh(null);
 
@@ -38,13 +78,16 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
           return;
         }
       }
-      setThongBaoAnh("Đã tải ảnh phiếu lên trình duyệt (cục bộ). Trình duyệt chưa hỗ trợ OCR ảnh tự động — vui lòng gõ hoặc dán chỉ số bên dưới để phân tích.");
+      setThongBaoAnh(
+        "Đã tải ảnh phiếu lên trình duyệt (cục bộ). Trình duyệt chưa hỗ trợ OCR ảnh tự động — vui lòng gõ hoặc dán chỉ số bên dưới để phân tích.",
+      );
     } catch {
       setThongBaoAnh("Đã đính kèm ảnh phiếu cục bộ. Nhập nhanh chỉ số thấy trên ảnh vào ô bên dưới để hệ thống tính eGFR.");
     } finally {
       e.target.value = "";
     }
   };
+
   const [ketQuaOcr, setKetQuaOcr] = React.useState<{
     chi_so?: Record<string, number>;
     thuoc_nhan_dien?: string[];
@@ -60,23 +103,43 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const tuoiHopLe = React.useMemo(() => {
+    const raw = tuoiEgfr.trim();
+    if (!raw || !/^\d{1,3}$/.test(raw)) return null;
+    const n = Number(raw);
+    return Number.isInteger(n) && n >= 1 && n <= 120 ? n : null;
+  }, [tuoiEgfr]);
+
+  const duDieuKienEgfr = tuoiHopLe !== null && (gioiEgfr === "nam" || gioiEgfr === "nữ");
+
   const quetPhieuCu = async () => {
     if (!ocrInput.trim()) return;
+    if (tuoiHopLe === null || (gioiEgfr !== "nam" && gioiEgfr !== "nữ")) {
+      setLoiOcr(
+        "Cần nhập đúng Tuổi (1–120) và chọn Giới tính (Nữ / Nam) trước khi tính mức lọc cầu thận eGFR (CKD-EPI) & hiệu chỉnh liều thuốc.",
+      );
+      return;
+    }
+    setLoiOcr(null);
     setDangQuet(true);
     try {
-      const nc = trichNguCanhChoTroLy({ patientSubtitle, contextNotes: tab.content });
       const r = await fetch("/api/ocr/phieu-cu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: ocrInput,
-          tuoi: nc.tuoi ?? 50,
-          laNu: nc.gioi === "nữ",
+          tuoi: tuoiHopLe,
+          laNu: gioiEgfr === "nữ",
         }),
       });
       if (r.ok) {
         setKetQuaOcr(await r.json());
+      } else {
+        const d = await r.json().catch(() => ({}));
+        setLoiOcr(d?.error || `Không phân tích được phiếu cũ (mã ${r.status}).`);
       }
+    } catch (err: any) {
+      setLoiOcr(err?.message || "Không gọi được dịch vụ phân tích chỉ số xét nghiệm.");
     } finally {
       setDangQuet(false);
     }
@@ -89,7 +152,12 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
       .map(([k, v]) => `${k}: ${v}`)
       .join(", ");
     const phanThuoc = (ketQuaOcr.thuoc_nhan_dien || []).join(", ");
+    const phanCoDia =
+      tuoiHopLe !== null && gioiEgfr
+        ? `[Cơ địa tính eGFR] ${gioiEgfr === "nữ" ? "Nữ" : "Nam"}, ${tuoiHopLe} tuổi`
+        : "";
     const dongMoi = [
+      phanCoDia,
       phanChiSo && `[Xét nghiệm cũ] ${phanChiSo}`,
       phanThuoc && `[Đơn thuốc cũ] ${phanThuoc}`,
     ]
@@ -106,7 +174,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#CCE3F0]">
           <div className="flex items-center gap-2">
             <FileText size={16} className="text-[#0284C7]" />
-            <h3 className="text-sm font-bold text-[#0F172A]">Ngữ cảnh Lâm sàng & Thông tin Bệnh nhân</h3>
+            <h3 className="text-sm font-bold text-[#0F172A]">Ngữ cảnh Lâm sàng &amp; Thông tin Bệnh nhân</h3>
           </div>
           <button
             onClick={handleSave}
@@ -134,7 +202,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
             <div className="flex items-center gap-2">
               <ScanText size={16} className="text-[#0284C7]" />
               <span className="text-sm font-bold text-[#0F172A]">
-                Bóc tách Phiếu Xét nghiệm / Đơn thuốc cũ (eGFR & Hiệu chỉnh liều)
+                Bóc tách Phiếu Xét nghiệm / Đơn thuốc cũ (eGFR &amp; Hiệu chỉnh liều)
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -164,6 +232,79 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
               </button>
             </div>
           </div>
+
+          {/* Hai ô chọn bắt buộc cho công thức CKD-EPI eGFR: Tuổi & Giới tính (không gán ngầm 50 tuổi hay Nam) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#BAE6FD] bg-[#F0F7FA]/75 px-3.5 py-2.5 text-xs">
+            <div className="flex items-center gap-1.5 text-[#0C4A6E] font-semibold">
+              <UserCheck size={14} className="text-[#0284C7] flex-shrink-0" />
+              <span>Thông số bắt buộc tính eGFR (CKD-EPI):</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <label className="inline-flex items-center gap-1.5 text-[#0F172A] font-medium">
+                <span>Tuổi</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={120}
+                  inputMode="numeric"
+                  value={tuoiEgfr}
+                  onChange={(e) => {
+                    daChonTuoiTayRef.current = true;
+                    setTuoiEgfr(e.target.value);
+                    if (loiOcr) setLoiOcr(null);
+                  }}
+                  placeholder="VD: 65"
+                  aria-label="Tuổi người bệnh để tính eGFR"
+                  className="w-20 px-2.5 py-1 rounded-lg border border-[#BAE6FD] bg-white text-xs font-semibold text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#0284C7] focus:ring-2 focus:ring-[#BAE6FD]/50 shadow-tactile-inset"
+                />
+              </label>
+
+              <div className="inline-flex items-center gap-1 rounded-xl bg-white border border-[#BAE6FD] p-0.5 shadow-tactile-doctor-pill" role="group" aria-label="Giới tính sinh học để tính eGFR">
+                {([
+                  ["nữ", "Nữ"],
+                  ["nam", "Nam"],
+                ] as const).map(([ma, nhan]) => {
+                  const chon = gioiEgfr === ma;
+                  return (
+                    <button
+                      key={ma}
+                      type="button"
+                      aria-pressed={chon}
+                      onClick={() => {
+                        daChonGioiTayRef.current = true;
+                        setGioiEgfr(ma);
+                        if (loiOcr) setLoiOcr(null);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        chon
+                          ? "bg-[#0284C7] text-white shadow-sm"
+                          : "text-[#475569] hover:text-[#0369A1] hover:bg-[#F0F9FF]"
+                      }`}
+                    >
+                      {nhan}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {!duDieuKienEgfr && (
+                <span className="text-[11px] font-medium text-[#92400E] bg-[#FEF9E7] border border-[#F5E6B8] px-2 py-0.5 rounded-md">
+                  Chọn đủ Tuổi &amp; Giới tính trước khi phân tích
+                </span>
+              )}
+            </div>
+          </div>
+
+          {loiOcr && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-xl border border-[#F5C2C2] bg-[#FFF5F5] px-3.5 py-2.5 text-xs text-[#B4232C]"
+            >
+              <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
+              <span>{loiOcr}</span>
+            </div>
+          )}
+
           {anhPhieuCu && (
             <div className="flex items-start gap-3 p-3 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF]/60">
               <img
@@ -179,6 +320,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
                 type="button"
                 onClick={() => {
                   URL.revokeObjectURL(anhPhieuCu.url);
+                  anhUrlRef.current = null;
                   setAnhPhieuCu(null);
                   setThongBaoAnh(null);
                 }}

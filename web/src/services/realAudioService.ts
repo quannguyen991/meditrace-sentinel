@@ -44,13 +44,31 @@ function moKhoAudioIDB(): Promise<IDBDatabase> {
   });
 }
 
+let currentUserScope = "anon";
+
+/** Phân vùng khóa lưu trữ IndexedDB theo người dùng đăng nhập để chống rò rỉ âm thanh trên máy dùng chung. */
+export function setUserScope(userId: number | string | null | undefined): void {
+  const s = userId === null || userId === undefined ? "" : String(userId).trim();
+  currentUserScope = s || "anon";
+}
+
+export function getUserScope(): string {
+  return currentUserScope;
+}
+
+export function buildScopedAudioKey(sessionKey = "active"): string {
+  const base = sessionKey || "active";
+  return base.startsWith("u:") ? base : `u:${currentUserScope}:${base}`;
+}
+
 export async function luuChunkAudioIDB(sessionKey: string, chunk: Blob, mimeType: string): Promise<void> {
   if (typeof indexedDB === "undefined" || !chunk || chunk.size === 0) return;
   try {
     const db = await moKhoAudioIDB();
+    const scopedKey = buildScopedAudioKey(sessionKey);
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(IDB_STORE, "readwrite");
-      tx.objectStore(IDB_STORE).add({ sessionKey, mimeType, chunk, createdAt: Date.now() } as PersistedAudioChunk);
+      tx.objectStore(IDB_STORE).add({ sessionKey: scopedKey, mimeType, chunk, createdAt: Date.now() } as PersistedAudioChunk);
       tx.oncomplete = () => {
         db.close();
         resolve();
@@ -87,7 +105,7 @@ export async function khoiPhucAudioIDB(sessionKey = "active"): Promise<{ blob: B
 }
 
 function IDB_STOP_KEY(sessionKey: string): string {
-  return sessionKey || "active";
+  return buildScopedAudioKey(sessionKey);
 }
 
 export async function xoaAudioIDB(sessionKey = "active"): Promise<void> {
@@ -120,6 +138,29 @@ export async function xoaAudioIDB(sessionKey = "active"): Promise<void> {
   }
 }
 
+/** Xóa sạch toàn bộ dữ liệu âm thanh lưu tạm trong bộ nhớ và IndexedDB (gọi khi đăng xuất, đổi bác sĩ hoặc hết phiên 401). */
+export async function clearAllPersistedAudio(): Promise<void> {
+  realAudioService.resetMemoryAudio();
+  if (typeof indexedDB === "undefined") return;
+  try {
+    const db = await moKhoAudioIDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).clear();
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    });
+  } catch (err) {
+    console.warn("Không dọn sạch được kho âm thanh IndexedDB:", err);
+  }
+}
+
 export class RealAudioService {
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -134,9 +175,43 @@ export class RealAudioService {
   private currentAudioUrl: string | null = null;
   private speakerRole: "Bác sĩ" | "Bệnh nhân" | "Tự động" = "Tự động";
   private persistenceKey: string = "active";
+  private recordingGen: number = 0;
+  private abortedUpToGen: number = 0;
+
+  public isCurrentlyRecording(): boolean {
+    return this.isListening;
+  }
+
+  public setUserScope(userId: number | string | null | undefined) {
+    setUserScope(userId);
+  }
 
   public setPersistenceKey(key: string) {
     this.persistenceKey = key || "active";
+  }
+
+  public resetMemoryAudio() {
+    // Huỷ ngay mọi sự kiện trễ (ondataavailable/onstop) của MediaRecorder trước khi stop()
+    // để ngăn chunk mồ côi ghi ngược vào IndexedDB hoặc kích hoạt /api/transcribe sau 401/đăng xuất.
+    this.abortedUpToGen = this.recordingGen;
+    if (this.mediaRecorder) {
+      this.mediaRecorder.ondataavailable = null;
+      this.mediaRecorder.onstop = null;
+      this.mediaRecorder.onerror = null;
+    }
+    this.stop();
+    this.mediaRecorder = null;
+    this.audioChunks = [];
+    if (this.currentAudioUrl) {
+      try {
+        URL.revokeObjectURL(this.currentAudioUrl);
+      } catch {}
+      this.currentAudioUrl = null;
+    }
+  }
+
+  public async clearAllPersistedAudio(): Promise<void> {
+    await clearAllPersistedAudio();
   }
 
   public async recoverPersistedRecording(): Promise<{ blob: Blob; url: string; count: number } | null> {
@@ -240,23 +315,28 @@ export class RealAudioService {
 
       // 2. Khởi tạo AudioContext và Analyser để đo cường độ âm thanh thực tế
       try {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioCtx = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
         if (AudioCtx) {
-          this.audioContext = new AudioCtx();
-          const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-          this.analyser = this.audioContext.createAnalyser();
-          this.analyser.fftSize = 512;
-          this.analyser.smoothingTimeConstant = 0.55;
-          source.connect(this.analyser);
+          const ctx: AudioContext = new AudioCtx();
+          this.audioContext = ctx;
+          const source = ctx.createMediaStreamSource(this.mediaStream);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 512;
+          analyser.smoothingTimeConstant = 0.55;
+          source.connect(analyser);
+          this.analyser = analyser;
           // Trình duyệt có thể để AudioContext ở trạng thái "suspended" nếu chưa có thao tác người dùng.
-          void this.audioContext.resume().catch(() => {});
+          void ctx.resume().catch(() => {});
         }
       } catch (e) {
         console.warn("Không khởi tạo được AudioContext:", e);
       }
 
-      // 3. Khởi tạo MediaRecorder để ghi file âm thanh thực
+      // 3. Khởi tạo MediaRecorder để ghi file âm thanh thực (chụp cố định scopedKey & gen chống rò rỉ chéo ca/401)
       this.audioChunks = [];
+      const gen = ++this.recordingGen;
+      const scopedKeyAtStart = buildScopedAudioKey(this.persistenceKey);
+      const chunksForRun = this.audioChunks;
       try {
         const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
           ? "audio/webm;codecs=opus"
@@ -265,21 +345,27 @@ export class RealAudioService {
           : "audio/mp4";
 
         this.mediaRecorder = new MediaRecorder(this.mediaStream, { mimeType });
-        await xoaAudioIDB(this.persistenceKey);
+        await xoaAudioIDB(scopedKeyAtStart);
+        if (this.abortedUpToGen >= gen) {
+          this.stop();
+          return false;
+        }
         this.mediaRecorder.ondataavailable = (event) => {
+          if (this.abortedUpToGen >= gen) return;
           if (event.data && event.data.size > 0) {
-            this.audioChunks.push(event.data);
-            void luuChunkAudioIDB(this.persistenceKey, event.data, mimeType);
+            chunksForRun.push(event.data);
+            void luuChunkAudioIDB(scopedKeyAtStart, event.data, mimeType);
           }
         };
 
         this.mediaRecorder.onstop = () => {
-          const blob = new Blob(this.audioChunks, { type: mimeType });
+          if (this.abortedUpToGen >= gen) return;
+          const blob = new Blob(chunksForRun, { type: mimeType });
           if (this.currentAudioUrl) {
             URL.revokeObjectURL(this.currentAudioUrl);
           }
           this.currentAudioUrl = URL.createObjectURL(blob);
-          void xoaAudioIDB(this.persistenceKey);
+          void xoaAudioIDB(scopedKeyAtStart);
           if (this.callbacks.onAudioReady) {
             this.callbacks.onAudioReady(blob, this.currentAudioUrl);
           }

@@ -37,7 +37,7 @@ export function doGiong(a: string, b: string): number {
  *  giải thích sau " — "). */
 export function tachCau(dong: string): Array<{ bd: number; kt: number; laHoi: boolean }> {
   const ra: Array<{ bd: number; kt: number; laHoi: boolean }> = [];
-  const re = /[^.?!]+[.?!]*/g;
+  const re = /(?:[^.?!]|(?<=\d)\.(?=\d))+[.?!]*/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(dong))) {
     let bd = m.index, kt = m.index + m[0].length;
@@ -71,7 +71,7 @@ export function ghepMenhDe(noiDung: string, ds: MenhDeCanGhep[], laTieuDe: (dong
       while (vt >= 0) {
         const kt = vt + t.length;
         const sau = dong[i].slice(kt).trimStart();
-        if ((sau === "" || /^[.—–,;:)]/.test(sau)) && !trung(i, vt, kt)) {
+        if ((sau === "" || /^(?:[.—–,;:)]|\[T\d)/.test(sau)) && !trung(i, vt, kt)) {
           them(i, { bd: vt, kt, id: md.id, ganDung: false, doGiong: 1 });
           daGhep.add(md.id);
           break;

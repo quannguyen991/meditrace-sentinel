@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { sha256HexSync } from "../lib/compileEffectiveNote";
 import {
   AlertTriangle,
   Calendar,
@@ -304,6 +305,14 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [sua, setSua] = useState(false);
   const [dangDoc, setDangDoc] = useState(false);
+  const laHoSoMau = hoSo === HO_SO_MAU;
+
+  const maKiemChungNgan = useMemo(() => {
+    const chuoi = `${patientName}|${hoSo.chanDoan}|${hoSo.thuoc
+      .map((t) => `${t.ten}:${t.sang}-${t.trua}-${t.chieu}-${t.toi}`)
+      .join(";")}`;
+    return sha256HexSync(chuoi).slice(0, 12).toUpperCase();
+  }, [patientName, hoSo.chanDoan, hoSo.thuoc]);
 
   useEffect(() => {
     if (!isOpen && typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -378,10 +387,10 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl border border-[#BAE6FD] shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-left">
+    <div className="printable-modal-root fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
+      <div className="bg-white rounded-2xl border border-[#BAE6FD] shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-left print:border-none print:shadow-none print:max-w-none print:max-h-none">
         {/* Đầu cửa sổ (không in) */}
-        <div className="px-4 sm:px-5 py-3 bg-white border-b border-slate-100 flex items-center justify-between gap-3 flex-shrink-0 print:hidden">
+        <div className="px-4 sm:px-5 py-3 bg-white border-b border-slate-100 flex items-center justify-between gap-3 flex-shrink-0 no-print print:hidden">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center flex-shrink-0">
               <FileHeart size={16} />
@@ -389,10 +398,16 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-serif text-[17px] font-semibold text-[#0F172A]">
-                  Tờ dặn dò xuất viện & hướng dẫn điều trị ngoại trú
+                  Tờ dặn dò xuất viện &amp; hướng dẫn điều trị ngoại trú
                 </h3>
-                <span className="px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                  Minh hoạ
+                <span
+                  className={`px-2 py-0.5 rounded-md text-[10.5px] font-semibold border ${
+                    laHoSoMau
+                      ? "bg-amber-100 text-amber-800 border-amber-200"
+                      : "bg-sky-100 text-sky-800 border-sky-200"
+                  }`}
+                >
+                  {laHoSoMau ? "Minh hoạ" : "Bản nháp từ ca khám"}
                 </span>
               </div>
               <p className="text-[11.5px] text-slate-500">
@@ -445,14 +460,22 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
         </div>
 
         {/* Nội dung tờ dặn dò (khổ A4) */}
-        <div ref={printRef} className="flex-1 overflow-y-auto bg-white text-slate-900 print:p-0">
-          <div className="p-5 sm:p-8 space-y-6">
-            {/* Ghi chú minh hoạ: giữ cả khi in */}
-            <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-900">
+        <div ref={printRef} className="printable-modal-body flex-1 overflow-y-auto bg-white text-slate-900 print:p-0">
+          <div className="p-5 sm:p-8 space-y-6 print:p-0">
+            {/* Ghi chú kiểm duyệt trước khi in */}
+            <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-900 no-print print:hidden">
               <Info size={14} className="flex-shrink-0 mt-0.5 text-amber-600" />
               <span>
-                <strong>Dữ liệu minh hoạ, không phải hồ sơ thật.</strong> Phần trong ngoặc vuông là chỗ điền.
-                Bấm <strong>Sửa nội dung</strong> để thay bằng thông tin của ca, rồi bác sĩ xác nhận trước khi in.
+                {laHoSoMau ? (
+                  <>
+                    <strong>Dữ liệu minh hoạ, không phải hồ sơ thật.</strong> Phần trong ngoặc vuông là chỗ điền.
+                    Bấm <strong>Sửa nội dung</strong> để thay bằng thông tin của ca, rồi bác sĩ xác nhận trước khi in.
+                  </>
+                ) : (
+                  <>
+                    <strong>Bản nháp tổng hợp từ mệnh đề ca khám.</strong> Các mục chưa có thông tin được để chỗ điền trong ngoặc vuông — không tự chép dặn dò từ ca mẫu. Bác sĩ bấm <strong>Sửa nội dung</strong> để hoàn thiện trước khi in.
+                  </>
+                )}
               </span>
             </div>
 
@@ -606,7 +629,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
                       />
                     </div>
                   ) : (
-                    <div key={t.id} className="rounded-2xl border border-[#E0F2FE] overflow-hidden">
+                    <div key={t.id} className="rounded-2xl border border-[#E0F2FE] overflow-hidden break-inside-avoid page-break-inside-avoid">
                       <div className="flex items-start gap-3 px-4 py-3 bg-[#F8FBFC]">
                         <span className="w-6 h-6 rounded-lg bg-[#0284C7] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
                           {hoSo.thuoc.indexOf(t) + 1}
@@ -684,7 +707,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
               <div className="rounded-2xl border border-[#E0F2FE] bg-[#F8FBFC] p-4">
                 <h4 className="flex items-center gap-2 font-serif text-[15px] font-semibold text-[#0F172A] mb-2.5">
                   <Clock size={15} className="text-[#0284C7]" />
-                  <span>Theo dõi huyết áp tại nhà</span>
+                  <span>{laHoSoMau ? "Theo dõi huyết áp tại nhà" : "Theo dõi tại nhà"}</span>
                 </h4>
                 <DanhSachMuc
                   ds={hoSo.theoDoi}
@@ -697,7 +720,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
             </section>
 
             {/* Mục 3: Dấu hiệu cảnh báo nguy hiểm */}
-            <section className="rounded-2xl border border-red-200 bg-red-50/70 p-4">
+            <section className="rounded-2xl border border-red-200 bg-red-50/70 p-4 break-inside-avoid page-break-inside-avoid">
               <div className="flex items-center gap-2 text-[12.5px] font-bold text-red-900 uppercase tracking-wide mb-1.5">
                 <AlertTriangle size={16} className="text-red-600 flex-shrink-0" />
                 <span>Dấu hiệu nguy hiểm — đến ngay phòng cấp cứu gần nhất</span>
@@ -716,7 +739,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
             </section>
 
             {/* Mục 4: Tái khám, xác thực và ký tên */}
-            <section className="pt-5 border-t-2 border-slate-900 grid grid-cols-1 sm:grid-cols-3 gap-5 text-[12px]">
+            <section className="pt-5 border-t-2 border-slate-900 grid grid-cols-1 sm:grid-cols-3 gap-5 text-[12px] break-inside-avoid page-break-inside-avoid">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5 text-slate-900 font-bold text-[12px]">
                   <Calendar size={14} className="text-[#0284C7]" />
@@ -736,13 +759,13 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
               <div className="space-y-1.5 sm:border-l sm:border-[#E0F2FE] sm:pl-5">
                 <div className="flex items-center gap-1.5 text-slate-900 font-bold text-[12px]">
                   <ShieldCheck size={14} className="text-[#0D9488]" />
-                  <span>Mã QR & Xác thực MediTrace</span>
+                  <span>Mã đối chiếu SHA-256 (Minh hoạ)</span>
                 </div>
                 <div className="flex items-start gap-2.5 pt-0.5">
                   <svg
                     viewBox="0 0 21 21"
                     className="w-16 h-16 border border-slate-200 rounded-lg p-1 bg-white flex-shrink-0"
-                    aria-label="Mã QR tóm tắt lịch uống thuốc"
+                    aria-label="Biểu trưng ma trận đối chiếu trực quan (minh hoạ bố cục, không phải mã QR quét camera)"
                   >
                     {Array.from({ length: 21 * 21 }, (_, idx) => {
                       const r = Math.floor(idx / 21);
@@ -757,7 +780,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
                           lr === 0 || lr === 6 || lc === 0 || lc === 6 ||
                           (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4);
                       } else {
-                        const seedStr = `${hoSo.chanDoan}|${hoSo.thuoc.map((t) => `${t.ten}:${t.sang}-${t.trua}-${t.chieu}-${t.toi}`).join(";")}`;
+                        const seedStr = maKiemChungNgan;
                         let h = (r * 31 + c * 17) ^ seedStr.length;
                         for (let i = 0; i < seedStr.length; i++) {
                           h = (h * 33 + seedStr.charCodeAt(i) + idx) & 0xffff;
@@ -768,14 +791,17 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
                     })}
                   </svg>
                   <div className="space-y-1 min-w-0">
-                    <p className="text-slate-500 text-[11px] leading-snug">
-                      Quét QR lưu lịch uống thuốc 4 buổi & dấu hiệu đỏ cấp cứu.
+                    <div className="font-mono text-[10.5px] font-bold text-[#0C4A6E] bg-[#F0F9FF] border border-[#BAE6FD] rounded px-1.5 py-0.5 inline-block">
+                      MT-{maKiemChungNgan}
+                    </div>
+                    <p className="text-slate-500 text-[10.5px] leading-snug">
+                      Ô minh hoạ vị trí mã định danh nội bộ (chưa gắn cổng QR trực tuyến). Dùng nút bên dưới để chép tóm tắt gửi người bệnh.
                     </p>
                     <button
                       type="button"
                       onClick={() => {
                         const tomTat = [
-                          `📋 TỜ DẶN DÒ NGƯỜI BỆNH — ${hoSo.chanDoan}`,
+                          `📋 TỜ DẶN DÒ NGƯỜI BỆNH — ${patientName} (${hoSo.chanDoan})`,
                           ...hoSo.thuoc.map(
                             (t, i) =>
                               `${i + 1}. ${t.ten}: Sáng ${t.sang} | Trưa ${t.trua} | Chiều ${t.chieu} | Tối ${t.toi} (${t.loiDan})`
@@ -784,7 +810,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
                         ].join("\n");
                         void navigator.clipboard?.writeText(tomTat);
                       }}
-                      className="print:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-[#0369A1] border border-sky-200 text-[10.5px] font-semibold cursor-pointer"
+                      className="no-print print:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-[#0369A1] border border-sky-200 text-[10.5px] font-semibold cursor-pointer"
                     >
                       Sao chép gửi Zalo
                     </button>
@@ -812,7 +838,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
         </div>
 
         {/* Chân cửa sổ (không in) */}
-        <div className="px-4 sm:px-5 py-3 bg-[#F8FBFC] border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 flex-shrink-0 print:hidden">
+        <div className="px-4 sm:px-5 py-3 bg-[#F8FBFC] border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 flex-shrink-0 no-print print:hidden">
           <span className="text-slate-600 text-[11.5px]">
             {sua
               ? "Đang sửa. Bấm Xong sửa trước khi in. Nội dung sửa được giữ cho đến khi tải lại trang."

@@ -25,6 +25,8 @@ export interface SignOffRecord {
   soBo: number;
   tyLeCoNguon: number;
   hash: string;
+  /** Băm SHA-256 của nội dung bệnh án SOAP gốc + trạng thái duyệt mệnh đề tại thời điểm ký. */
+  contentHash?: string;
   wormSeq?: number;
 }
 

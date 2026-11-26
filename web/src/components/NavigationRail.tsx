@@ -186,18 +186,33 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             })}
           </nav>
 
-          {/* Cụm Phải: Tiện ích lâm sàng và Tài khoản bác sĩ (Tối ưu gọn gàng trên tablet) */}
+          {/* Cụm Phải: Tiện ích lâm sàng, Cài đặt (luôn truy cập được cả trên màn nhỏ) và Tài khoản bác sĩ */}
           <div className="flex items-center gap-1 sm:gap-1.5 text-[#475569] flex-shrink-0">
             {onTogglePosition && (
               <button
                 onClick={onTogglePosition}
-                className="hidden 2xl:flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-[#E0F2FE] hover:text-[#0369A1] text-[11px] text-[#475569] transition-colors border border-transparent hover:border-[#BAE6FD] whitespace-nowrap shadow-2xs"
+                className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-[#E0F2FE] hover:text-[#0369A1] text-[11px] text-[#475569] transition-colors border border-transparent hover:border-[#BAE6FD] whitespace-nowrap shadow-2xs"
                 title="Gắn thanh công cụ sang bên trái"
               >
                 <PanelLeft size={14} />
-                <span>Gắn thanh bên</span>
+                <span className="hidden 2xl:inline">Gắn thanh bên</span>
               </button>
             )}
+
+            <button
+              id="btn-nav-settings"
+              onClick={() => onSelectNavigationItem("settings")}
+              aria-current={activeView === "settings" ? "page" : undefined}
+              className={`p-1.5 rounded-lg transition-colors relative ${
+                activeView === "settings"
+                  ? "bg-[#E0F2FE] text-[#0284C7] border border-[#BAE6FD]"
+                  : "hover:bg-[#E0F2FE] hover:text-[#0369A1]"
+              }`}
+              title="Cài đặt (vị trí thanh điều hướng & mô hình ngoài)"
+              aria-label="Cài đặt"
+            >
+              <Settings size={15} />
+            </button>
 
             <button
               id="btn-nav-notifications"

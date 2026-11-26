@@ -38,15 +38,15 @@ const HuyHieu: React.FC<{ nhom?: string }> = ({ nhom }) => {
 
 /** Nhãn đỏ khi số trong ý không có trong văn bản gốc được trích. */
 const SoLech: React.FC<{ lech?: string[] }> = ({ lech }) =>
-  lech && lech.length ? (
+  Array.isArray(lech) && lech.length ? (
     <span className="block mt-0.5 text-[10.5px] font-semibold text-[#B91C1C]">
       ⚠ Số chưa thấy trong văn bản gốc: {lech.join(", ")} — mở nguồn kiểm lại
     </span>
   ) : null;
 
-const TheNguon: React.FC<{ so: number[]; nguon: ClinicalSource[] }> = ({ so, nguon }) => (
+const TheNguon: React.FC<{ so?: number[]; nguon: ClinicalSource[] }> = ({ so, nguon }) => (
   <>
-    {so.map((n) => {
+    {(Array.isArray(so) ? so : []).map((n) => {
       const s = nguon.find((x) => x.so === n);
       if (!s) return null;
       return (
@@ -74,8 +74,8 @@ interface Props {
 }
 
 export const TraLoiCoNguon: React.FC<Props> = ({ msg, onAsk, onCheckOther, onAddToContext }) => {
-  const ct = msg.cauTruc!;
-  const nguon = msg.sources || [];
+  const ct = msg.cauTruc;
+  const nguon = Array.isArray(msg.sources) ? msg.sources.filter(Boolean) : [];
   const daTrich = nguon.filter((s) => s.cited);
   const [moNguon, setMoNguon] = useState(false);
   const [moThamKhao, setMoThamKhao] = useState(false);
@@ -83,23 +83,36 @@ export const TraLoiCoNguon: React.FC<Props> = ({ msg, onAsk, onCheckOther, onAdd
   const [daChep, setDaChep] = useState(false);
   const [daThem, setDaThem] = useState(false);
 
+  const phuongAn = Array.isArray(ct?.phuong_an) ? ct.phuong_an.filter(Boolean) : [];
+  const luuYCa = Array.isArray(ct?.luu_y_ca) ? ct.luu_y_ca.filter((x): x is string => typeof x === "string") : [];
+  const anToan = Array.isArray(ct?.an_toan) ? ct.an_toan.filter(Boolean) : [];
+  const hoiTiep = Array.isArray(ct?.hoi_tiep) ? ct.hoi_tiep.filter((x): x is string => typeof x === "string") : [];
+
+  if (!ct || typeof ct !== "object") {
+    return <p className="text-[12.5px] text-[#1E293B] leading-relaxed select-text">{msg.content || ""}</p>;
+  }
+
   // Văn bản thuần để chép / thêm vào ngữ cảnh: thay số tài liệu bằng tên nhãn nguồn.
-  const tenNguon = (so: number[]) =>
-    so.map((n) => nguon.find((x) => x.so === n)?.nhan).filter(Boolean).map((x) => `[${x}]`).join(" ");
+  const tenNguon = (so?: number[]) =>
+    (Array.isArray(so) ? so : [])
+      .map((n) => nguon.find((x) => x.so === n)?.nhan)
+      .filter(Boolean)
+      .map((x) => `[${x}]`)
+      .join(" ");
   const vanThuan = [
     ct.ca_kham && `Trong ca khám: ${ct.ca_kham}`,
     ct.tom_tat,
-    ...ct.phuong_an.map((p) => `- ${p.ten}: ${p.noi_dung} ${tenNguon(p.nguon)}`.trim()),
-    ...ct.luu_y_ca.map((x) => `! ${x}`),
-    ...ct.an_toan.map((x) => `! ${x.noi_dung} ${tenNguon(x.nguon)}`.trim()),
+    ...phuongAn.map((p) => `- ${p?.ten ?? ""}: ${p?.noi_dung ?? ""} ${tenNguon(p?.nguon)}`.trim()),
+    ...luuYCa.map((x) => `! ${x}`),
+    ...anToan.map((x) => `! ${x?.noi_dung ?? ""} ${tenNguon(x?.nguon)}`.trim()),
     ct.khac_nhau && `Trong nước / nước ngoài khác nhau: ${ct.khac_nhau}`,
     "(Tra cứu tham khảo — bác sĩ đối chiếu văn bản gốc.)",
   ].filter(Boolean).join("\n");
 
-  const coLuuY = ct.luu_y_ca.length > 0 || ct.an_toan.length > 0;
+  const coLuuY = luuYCa.length > 0 || anToan.length > 0;
   // Mô hình đôi khi vẫn viết "[2]" trong đoạn văn — đổi thành tên nguồn cho bác sĩ đọc được.
-  const doiSo = (van: string) =>
-    van.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, (m, ds: string) => {
+  const doiSo = (van: unknown) =>
+    String(van ?? "").replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, (m, ds: string) => {
       const ten = ds.split(",").map((n) => nguon.find((x) => x.so === Number(n.trim()))?.nhan).filter(Boolean);
       return ten.length ? `(${ten.join(", ")})` : m;
     }).replace(/\)\s*\(/g, "; ");
@@ -146,18 +159,18 @@ export const TraLoiCoNguon: React.FC<Props> = ({ msg, onAsk, onCheckOther, onAdd
 
         {ct.tom_tat && <p className="px-0.5 text-[13px] text-[#0F172A]">{doiSo(ct.tom_tat)}</p>}
 
-        {ct.phuong_an.length > 0 && (
+        {phuongAn.length > 0 && (
           <div className="rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] p-3 pr-2.5">
             <div className="flex items-center gap-1.5 text-[13px] font-bold text-[#0C4A6E] mb-1.5">
               <Lightbulb size={13} className="text-[#0284C7]" /> Điểm chính theo tài liệu
             </div>
             <ul className="list-disc pl-4 space-y-2.5 marker:text-[#93C5FD]">
-              {ct.phuong_an.map((p, i) => (
+              {phuongAn.map((p, i) => (
                 <li key={i}>
-                  <span className="font-semibold text-[#0F172A]">{p.ten}</span>
-                  {p.noi_dung && <> — {p.noi_dung}</>}
-                  <TheNguon so={p.nguon} nguon={nguon} />
-                  <SoLech lech={p.lech} />
+                  <span className="font-semibold text-[#0F172A]">{p?.ten}</span>
+                  {p?.noi_dung && <> — {p.noi_dung}</>}
+                  <TheNguon so={p?.nguon} nguon={nguon} />
+                  <SoLech lech={p?.lech} />
                 </li>
               ))}
             </ul>
@@ -170,11 +183,11 @@ export const TraLoiCoNguon: React.FC<Props> = ({ msg, onAsk, onCheckOther, onAdd
               <ShieldAlert size={13} className="text-[#EA580C]" /> Lưu ý an toàn
             </div>
             <ul className="list-disc pl-4 space-y-1.5 text-[#431407]">
-              {ct.luu_y_ca.map((x, i) => (
+              {luuYCa.map((x, i) => (
                 <li key={`ca${i}`}><span className="text-[10px] font-semibold text-[#C2410C] mr-1">TỪ CA KHÁM</span>{doiSo(x)}</li>
               ))}
-              {ct.an_toan.map((x, i) => (
-                <li key={`tl${i}`}>{x.noi_dung}<TheNguon so={x.nguon} nguon={nguon} /><SoLech lech={x.lech} /></li>
+              {anToan.map((x, i) => (
+                <li key={`tl${i}`}>{x?.noi_dung}<TheNguon so={x?.nguon} nguon={nguon} /><SoLech lech={x?.lech} /></li>
               ))}
             </ul>
           </div>
@@ -249,10 +262,10 @@ export const TraLoiCoNguon: React.FC<Props> = ({ msg, onAsk, onCheckOther, onAdd
         {msg.meta && <div className="text-[10px] text-[#94A3B8] leading-snug">{msg.meta}</div>}
       </div>
 
-      {ct.hoi_tiep.length > 0 && (
+      {hoiTiep.length > 0 && (
         <div className="px-1">
           <div className="text-[12px] font-semibold text-[#0C4A6E] mb-1">Hỏi tiếp</div>
-          {ct.hoi_tiep.map((q, i) => (
+          {hoiTiep.map((q, i) => (
             <button key={i} onClick={() => onAsk(q)}
               className="w-full flex items-start gap-1.5 text-left text-[11.5px] text-[#475569] py-1 hover:text-[#0369A1]">
               <CornerDownRight size={12} className="flex-shrink-0 mt-0.5 text-[#94A3B8]" /> {q}

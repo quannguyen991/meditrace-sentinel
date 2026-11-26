@@ -1,4 +1,5 @@
 /** Phía giao diện của đăng ký/đăng nhập. Máy chủ: may-chu/tai-khoan.ts. */
+import { clearAllPersistedAudio, setUserScope } from "../services/realAudioService";
 
 export type NguoiDung = { id: number; email: string; hoTen: string; vai: "quan_tri" | "bac_si" };
 export type TinhTrangToi = { nguoiDung: NguoiDung | null; canMaMoi: boolean; taoQuanTriDuocTuDay: boolean };
@@ -31,25 +32,59 @@ const KHO_DONG_BO: [string, string, string][] = [
   ["/api/kho/mau-van-ban", "meditrace_kho_mau-van-ban", "meditrace_kho_mau-van-ban_luc"],
 ];
 
+const KHO_PHI_BAT_BUOC_XOA = [
+  "meditrace_sessions",
+  "meditrace_sessions_luc",
+  "meditrace_kho_ca-kham",
+  "meditrace_kho_ca-kham_luc",
+  "meditrace_ca_dang_mo",
+  "meditrace_kho_tra-cuu",
+  "meditrace_kho_tra-cuu_luc",
+  "meditrace_kho_mau-van-ban",
+  "meditrace_kho_mau-van-ban_luc",
+];
+
 function xoaBanSaoMay() {
   try {
-    for (const k of Object.keys(localStorage)) if (k.startsWith("meditrace_")) localStorage.removeItem(k);
-  } catch {}
-}
-
-/** Gọi TRƯỚC khi dựng App cho người `id`: bản sao trên máy là của người khác thì xoá. */
-export function nhanMayChoNguoi(id: number) {
-  try {
-    if (localStorage.getItem(CHU) !== String(id)) {
-      xoaBanSaoMay();
-      localStorage.setItem(CHU, String(id));
+    if (typeof localStorage !== "undefined") {
+      for (const k of KHO_PHI_BAT_BUOC_XOA) localStorage.removeItem(k);
+      for (const k of Object.keys(localStorage)) {
+        if (k.startsWith("meditrace_")) localStorage.removeItem(k);
+      }
+    }
+    if (typeof sessionStorage !== "undefined") {
+      for (const k of Object.keys(sessionStorage)) {
+        if (k.startsWith("meditrace_")) sessionStorage.removeItem(k);
+      }
     }
   } catch {}
 }
 
+/** Dọn sạch PHI trong localStorage/sessionStorage lẫn kho âm thanh IndexedDB khi hết hạn phiên (401) hoặc chưa đăng nhập. */
+export async function donSachKhiHetPhien(): Promise<void> {
+  xoaBanSaoMay();
+  setUserScope(null);
+  await clearAllPersistedAudio();
+}
+
+/** Gọi TRƯỚC khi dựng App cho người `id`: bản sao trên máy là của người khác thì xoá sạch PHI + âm thanh. */
+export function nhanMayChoNguoi(id: number) {
+  try {
+    const chuCu = typeof localStorage !== "undefined" ? localStorage.getItem(CHU) : null;
+    if (chuCu !== String(id)) {
+      xoaBanSaoMay();
+      void clearAllPersistedAudio();
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(CHU, String(id));
+      }
+    }
+  } catch {}
+  setUserScope(id);
+}
+
 /**
  * Đăng xuất: đẩy nốt thay đổi chưa kịp lưu (giao diện chờ 0,8 giây mới ghi lên máy chủ),
- * rồi mới xoá bản sao trên máy. Chỉ đẩy kho nào bản trên máy mới hơn bản trên máy chủ.
+ * rồi mới xoá bản sao trên máy và toàn bộ chunk âm thanh IndexedDB.
  */
 export async function dangXuat() {
   await Promise.all(
@@ -71,5 +106,5 @@ export async function dangXuat() {
     }),
   );
   await fetch("/api/dang-xuat", { method: "POST" }).catch(() => {});
-  xoaBanSaoMay();
+  await donSachKhiHetPhien();
 }
