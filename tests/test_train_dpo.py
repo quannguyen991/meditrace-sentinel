@@ -94,6 +94,19 @@ def test_ha_nguong_sau_khi_tran_chi_giam_khong_tang():
     assert g["nguong"] == 3099
 
 
+def test_bam_mau_doi_khi_token_doi():
+    a, b = _m(3, 4), _m(3, 4)
+    assert td.bam_mau(a) == td.bam_mau(b)
+    b["xau"] = ([1, 0, 0, 0], [0] * 4)
+    assert td.bam_mau(a) != td.bam_mau(b)
+
+
+def test_gan_bang_chap_nhan_sai_so_bf16_nhung_khong_qua_lon():
+    assert td.gan_bang(-23.769, -23.680)
+    assert td.gan_bang(-0.051, -0.050)
+    assert not td.gan_bang(-30.0, -23.0)
+
+
 def _L(lt, lx, rt, rx, beta, alpha, n):
     z = beta * ((lt - rt) - (lx - rx))
     return -math.log(1 / (1 + math.exp(-z))) + alpha * (-lt / n)

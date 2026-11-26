@@ -38,6 +38,20 @@ TEP_NHAC_TRAIN = "trich_train_v2.jsonl"
 TEP_NHAC_VAL = "trich_giu_lai_v2.jsonl"
 
 
+def gan_bang(a: float, b: float) -> bool:
+    """Sai so bf16 giua lo va lan luot: do 26/11 thay chenh 0,4% (-23,77 vs -23,68)."""
+    return abs(a - b) <= max(0.5, 0.02 * abs(b))
+
+
+def bam_mau(m: dict) -> str:
+    """Bam token id cua ca hai chuoi — ref luu kem de biet cap co bi sinh lai khong."""
+    import hashlib
+    h = hashlib.sha256()
+    for ids, _ in (m["tot"], m["xau"]):
+        h.update((",".join(map(str, ids)) + ";").encode())
+    return h.hexdigest()[:16]
+
+
 def loai_cap(cap: dict) -> str:
     """Loai loi chinh cua cap (loi dau tien)."""
     return cap["loi"][0]["loai"]
@@ -225,6 +239,13 @@ def _nap_mo_hinh(model_goc, adapter, huan_luyen):
     if huan_luyen:
         m.gradient_checkpointing_enable()
         m.enable_input_require_grads()
+        # Tat dropout (LoRA dropout 0,05 cua adapter v3): ref tinh o che do eval, va
+        # luot `lx0` (tinh z) voi luot `lx` (lan truyen nguoc) phai la CUNG mot ham —
+        # de dropout thi z luc dau khac 0 va he so lech nhe (review 26/11).
+        import torch.nn as nn
+        for mod in m.modules():
+            if isinstance(mod, nn.Dropout):
+                mod.p = 0.0
     else:
         m.eval()
     return m
@@ -258,8 +279,10 @@ def pha_ref(a, tok, mau):
                 sx, _ = logp_chuoi(model, *m["xau"])
                 print(f"[kiem ghep lo] tot {lt.item():.3f} vs {st.item():.3f}, "
                       f"xau {lx.item():.3f} vs {sx.item():.3f}", flush=True)
+                if not (gan_bang(lt.item(), st.item()) and gan_bang(lx.item(), sx.item())):
+                    raise SystemExit("Ghep lo cho log-prob khac chay lan luot — dung, chay lai voi --khong-ghep-lo.")
             f.write(json.dumps({"khoa": m["khoa"], "tot": lt.item(), "xau": lx.item(),
-                                "n_tot": nt}) + "\n")
+                                "n_tot": nt, "bam": bam_mau(m)}) + "\n")
             f.flush()
             if i % 25 == 0:
                 print(f"[ref] {i}/{len(can)}", flush=True)
@@ -271,6 +294,10 @@ def pha_train(a, tok, mau):
     thieu = [m["khoa"] for m in mau if m["khoa"] not in ref]
     if thieu:
         raise SystemExit(f"Thieu ref cho {len(thieu)} cap — chay --pha ref truoc.")
+    lech = [m["khoa"] for m in mau if ref[m["khoa"]].get("bam", bam_mau(m)) != bam_mau(m)]
+    if lech:
+        raise SystemExit(f"Ref cua {len(lech)} cap tinh tren token KHAC (cap da sinh lai?) — "
+                         f"xoa ref_logp.jsonl va chay lai --pha ref. Vi du: {lech[:3]}")
     model = _nap_mo_hinh(a.model, a.adapter_goc, huan_luyen=True)
     model.print_trainable_parameters()
     import bitsandbytes as bnb
