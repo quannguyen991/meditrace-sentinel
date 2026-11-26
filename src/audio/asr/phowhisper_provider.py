@@ -46,7 +46,11 @@ from typing import Any, Optional
 import numpy as np
 
 from .base import ASRProvider, read_wav_16k_mono
-from .contextual_trie_600 import ContextualPrefixTrie600, tao_trie_600_mac_dinh
+from .contextual_trie_600 import (
+    ContextualPrefixTrie600,
+    tao_trie_600_mac_dinh,
+    tao_trie_logits_processor,
+)
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
 # Ma commit tren Hugging Face, doc ngay 22/09/2026 — ghim du an lap thi nghiem.
@@ -179,6 +183,14 @@ class PhoWhisperProvider(ASRProvider):
         kw = dict(language="vi", task="transcribe", num_beams=1, do_sample=False,
                   return_timestamps=False, max_new_tokens=min(TOKEN_TRAN, int(TOKEN_MOI_GIAY * dur) + 16),
                   return_dict_in_generate=True, output_scores=True)
+        if self.trie_600 is not None:
+            try:
+                from transformers import LogitsProcessorList
+                lp = tao_trie_logits_processor(self.trie_600, proc.tokenizer, he_co_quan=self.he_co_quan)
+                if lp is not None:
+                    kw["logits_processor"] = LogitsProcessorList([lp])
+            except Exception:
+                pass
         dtw = self.word_timestamps
         with _INFER_LOCK, torch.no_grad():
             try:

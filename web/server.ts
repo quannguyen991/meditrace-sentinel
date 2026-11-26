@@ -25,6 +25,8 @@ import { dangKyTroLyRoutes } from "./may-chu/routes/tro-ly";
 import { dangKyBhytOcrRoutes } from "./may-chu/routes/bhyt-ocr";
 import { dangKyBoostLamSangRoutes } from "./may-chu/routes/boost-lam-sang";
 import { dangKySignOffRoutes } from "./may-chu/routes/sign-off";
+import { taoRouterQuanTriBv } from "./may-chu/routes/quan-tri-bv";
+import { taoRouterBenhNhanPortal } from "./may-chu/routes/benh-nhan-portal";
 
 export function taoUngDung() {
   const ungDung = express();
@@ -40,6 +42,12 @@ export function taoUngDung() {
     return jsonToanCuc(req, res, next);
   });
 
+  const benhNhanPortalRouter = taoRouterBenhNhanPortal();
+  // Công khai cho bệnh nhân quét QR (trước lapTaiKhoan): chỉ GET /:token và POST /:token/bao-cao;
+  // riêng POST /tao-ma đi qua lapTaiKhoan để xác thực req.nguoiDung.
+  ungDung.get("/api/benh-nhan-portal/:token", benhNhanPortalRouter);
+  ungDung.post("/api/benh-nhan-portal/:token/bao-cao", benhNhanPortalRouter);
+
   // Sau dòng lapTaiKhoan(ungDung) mọi /api/* đều yêu cầu đăng nhập.
   lapTaiKhoan(ungDung);
 
@@ -54,6 +62,8 @@ export function taoUngDung() {
   dangKyBhytOcrRoutes(ungDung);
   dangKyBoostLamSangRoutes(ungDung);
   dangKySignOffRoutes(ungDung);
+  ungDung.use(benhNhanPortalRouter);
+  ungDung.use(taoRouterQuanTriBv());
 
   // Catch-all 404 JSON chuẩn cho mọi đường dẫn /api/* không khớp
   ungDung.use("/api", (_req, res) => {

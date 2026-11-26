@@ -210,8 +210,9 @@ export function dangKyAsrRoutes(app: express.Express) {
 
   app.post("/api/transcribe", async (req, res) => {
     try {
-      const { audioBase64, fileName, diarize } = req.body || {};
+      const { audioBase64, fileName, diarize, doctorVoiceprint, doctor_voiceprint } = req.body || {};
       if (!audioBase64) return res.status(400).json({ error: "Thiếu dữ liệu âm thanh" });
+      const voiceprint = doctorVoiceprint ?? doctor_voiceprint;
       const d = await goiDichVu("/api/chep-am", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -219,6 +220,7 @@ export function dangKyAsrRoutes(app: express.Express) {
           am_thanh_base64: audioBase64,
           ten_tep: fileName || "ghi-am.webm",
           tach_nguoi_noi: diarize !== false,
+          ...(voiceprint ? { doctor_voiceprint: voiceprint } : {}),
         }),
       });
       if (typeof d.phien === "string" && d.phien) ganPhienAsr(req.nguoiDung!.id, d.phien);

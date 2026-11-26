@@ -695,3 +695,60 @@ def tao_trie_600_mac_dinh() -> ContextualPrefixTrie600:
             pass
         _TRIE_MAC_DINH_CACHE = trie
         return trie
+
+
+def tao_trie_logits_processor(
+    trie: Optional[ContextualPrefixTrie600],
+    tokenizer: Any,
+    he_co_quan: Optional[str] = None,
+    boost_val: float = 2.0,
+):
+    """Tạo LogitsProcessor định hướng Trie (Prefix-Trie Biasing) cho Hugging Face generate().
+    Hoàn toàn an toàn: nếu tokenizer hoặc torch không khả dụng, trả về None.
+    """
+    if trie is None or tokenizer is None:
+        return None
+    try:
+        import torch
+        from transformers import LogitsProcessor
+    except ImportError:
+        return None
+
+    try:
+        hotwords_str = trie.xuat_hotwords(he_co_quan=he_co_quan, max_terms=80)
+        if not hotwords_str:
+            return None
+
+        terms = [w.strip() for w in hotwords_str.split(",") if w.strip()]
+        target_token_ids = set()
+        for term in terms:
+            for piece in (term, " " + term):
+                try:
+                    toks = tokenizer.encode(piece, add_special_tokens=False)
+                    for t in toks:
+                        target_token_ids.add(t)
+                except Exception:
+                    pass
+
+        if not target_token_ids:
+            return None
+
+        target_indices = torch.tensor(list(target_token_ids), dtype=torch.long)
+
+        class TrieBiasingLogitsProcessor(LogitsProcessor):
+            def __init__(self, indices: torch.Tensor, bias: float):
+                super().__init__()
+                self.indices = indices
+                self.bias = float(bias)
+
+            def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+                try:
+                    idx = self.indices.to(scores.device)
+                    scores[:, idx] += self.bias
+                except Exception:
+                    pass
+                return scores
+
+        return TrieBiasingLogitsProcessor(target_indices, boost_val)
+    except Exception:
+        return None

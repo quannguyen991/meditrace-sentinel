@@ -20,6 +20,7 @@ import {
   Library,
   Settings,
   ChevronDown,
+  Building2,
 } from "lucide-react";
 
 interface NavigationRailProps {
@@ -55,6 +56,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   const navItems = [
     { id: "evidence" as ViewMode, label: "Hỏi về ca khám", icon: Glasses },
     { id: "scribe" as ViewMode, label: "Ghi chép Lâm sàng", icon: Mic },
+    { id: "command_center" as ViewMode, label: "KHTH / BHYT", icon: Building2 },
     { id: "tasks" as ViewMode, label: "Nhiệm vụ", icon: CheckSquare },
     { id: "patients" as ViewMode, label: "Bệnh nhân", icon: Users },
     { id: "templates" as ViewMode, label: "Mẫu bệnh án", icon: Layers },
@@ -74,8 +76,9 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       ],
     },
     {
-      label: "Quản lý",
+      label: "Quản lý & KHTH",
       items: [
+        { id: "command_center", view: "command_center" as ViewMode, label: "KHTH & Giám định BHYT", icon: Building2 },
         { id: "templates", view: "templates" as ViewMode, label: "Mẫu bệnh án", icon: Layers },
         { id: "tasks", view: "tasks" as ViewMode, label: "Nhiệm vụ", icon: CheckSquare },
         { id: "patients", view: "patients" as ViewMode, label: "Bệnh nhân", icon: Users },

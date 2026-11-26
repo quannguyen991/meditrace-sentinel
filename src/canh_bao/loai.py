@@ -206,6 +206,9 @@ LOAI: Dict[str, Loai] = {
                            "Hai thuốc người bệnh đang dùng hoặc được kê nằm trong bảng tương tác.", CAO, 12, THU_NGHIEM),
     "CONTRAINDICATION": _l("CLINICAL_KNOWLEDGE", "Kê thuốc người bệnh đang dị ứng",
                            "Thuốc được kê hoặc đang dùng chứa chất mà bản ghi nói người bệnh dị ứng.", CAO, 12, THU_NGHIEM),
+    "CROSS_ALLERGY": _l("CLINICAL_KNOWLEDGE", "Nguy cơ dị ứng chéo thuốc",
+                        "Thuốc đang dùng hoặc được kê có nguy cơ dị ứng chéo với chất người bệnh dị ứng.",
+                        CAO, 12, THU_NGHIEM),
     # Them 25/11/2026: cap "Bác sĩ hỏi — người bệnh đáp ngắn" ma khong dong nao dan toi cau dap.
     # `doan_chua_ghi` khong thay cap nay (bo cau hoi; cau dap khong co tu noi dung).
     "OMITTED_ANSWER": _l("OMISSION", "Có thể bỏ sót một câu trả lời",

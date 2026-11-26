@@ -113,20 +113,52 @@ def quet(ctx: NguCanh, ps) -> List[CanhBao]:
                           "Bảng tương tác chưa được duyệt nguồn.", CAN_XEM, trich=[p1.noi_dung, p2.noi_dung]))
     # 3. ke / dung dung chat nguoi benh dang di ung (khang dinh)
     di_ung = []
+    di_ung_tho = []
     for p in ps:
         if _con(p) and _la_di_ung(p) and not getattr(p, "phu_dinh", False) and getattr(p, "chu_the_id", 0) == 0:
             # Chi ve ngay sau "dị ứng": "dị ứng penicillin, đang dùng augmentin" -> penicillin.
             sau = re.sub(r".*?dị ứng\s*(với\s*)?", "", _thuong(p.noi_dung), count=1)
-            hc = tri_thuc_thuoc.hoat_chat(re.split(r"[,;.]|(?<!\w)(đang|nhưng|còn|và)(?!\w)", sau)[0])
+            ve_dau = re.split(r"[,;.]|(?<!\w)(đang|nhưng|còn|và)(?!\w)", sau)[0].strip()
+            hc = tri_thuc_thuoc.hoat_chat(ve_dau)
             if hc:
                 di_ung.append((hc, p))
+            if ve_dau:
+                di_ung_tho.append((ve_dau, p))
+    cap_da_bao_truc_tiep = set()
     for hc_du, p_du in di_ung:
         for hc, p in dang_dung:
             if hc == hc_du or any(hc_du in t for t in tri_thuc_thuoc.ten_cua(hc)):
                 # Anh xa biet duoc -> hoat chat cung la tri thuc chua duyet: CAN_XEM cho toi khi ca
                 # hai muc da_duyet (ra soat 25/11).
                 duyet = all((tri_thuc_thuoc._theo_hoat_chat().get(x) or {}).get("da_duyet") for x in (hc, hc_du))
+                cap_da_bao_truc_tiep.add((p.id, p_du.id))
                 ra.append(_cb("CONTRAINDICATION", p, ctx,
                               f"“{p.noi_dung}” chứa {hc_du}, nhưng dòng #{p_du.id} ghi người bệnh dị ứng {hc_du}.",
                               NGHI_RUI_RO if duyet else CAN_XEM, loai_tt="di_ung", trich=[p.noi_dung, p_du.noi_dung]))
+
+    # 4. di ung cheo theo nhom ATC / chuoi nhanh hoa hoc (CROSS_ALLERGY, khong phat CONTRAINDICATION)
+    if di_ung_tho:
+        from src.di_ung_cheo import CHONG_CHI_DINH as _DU_CAM, kiem_tra_di_ung_cheo
+        thuoc_theo_pb = []
+        for p in ps:
+            if not _con(p) or getattr(p, "phu_dinh", False) or _la_di_ung(p) or getattr(p, "chu_the_id", 0) != 0:
+                continue
+            ten_t = ((getattr(p, "thuoc", None) or {}).get("ten") or "").strip() or _hoat_chat(p) or ""
+            if ten_t:
+                thuoc_theo_pb.append((ten_t, p))
+        for chat_du, p_du in di_ung_tho:
+            for ten_t, p in thuoc_theo_pb:
+                if (p.id, p_du.id) in cap_da_bao_truc_tiep:
+                    continue
+                ket_qua_cheo = kiem_tra_di_ung_cheo([chat_du], [ten_t])
+                if not ket_qua_cheo:
+                    continue
+                muc_cao_nhat = ket_qua_cheo[0]
+                kl = NGHI_RUI_RO if muc_cao_nhat["muc_do"] == _DU_CAM else CAN_XEM
+                ra.append(_cb(
+                    "CROSS_ALLERGY", p, ctx,
+                    f"“{p.noi_dung}” ({muc_cao_nhat['thuoc']}) có nguy cơ dị ứng chéo [{muc_cao_nhat['nhom_cheo']}] "
+                    f"với tiền sử dị ứng {muc_cao_nhat['di_ung_goc']} ở dòng #{p_du.id}. {muc_cao_nhat['khuyen_cao_thay_the']}",
+                    kl, loai_tt="di_ung", trich=[p.noi_dung, p_du.noi_dung],
+                ))
     return ra

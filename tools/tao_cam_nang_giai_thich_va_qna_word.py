@@ -343,7 +343,8 @@ def them_bang(doc, tieu_de_cot: list[str], cac_hang: list[list[str]], do_rong: l
 
 
 def them_the_qna(doc, so_cau: int, muc_do: str, nhom: str, cau_hoi: str,
-                 tra_loi_ngan: str, co_che_va_code: str, so_lieu_minh_chung: str):
+                 tra_loi_ngan: str, co_che_va_code: str, so_lieu_minh_chung: str,
+                 minh_chung_giai_quyet: str = ""):
     mau_vien = HEX_SAFE if muc_do == "CƠ BẢN" else HEX_BLUE if muc_do == "TRỌNG TÂM" else HEX_PURPLE if muc_do == "CHUYÊN SÂU" else HEX_DANGER
     mau_nen = HEX_BG_TEAL if muc_do == "CƠ BẢN" else HEX_BG_BLUE if muc_do == "TRỌNG TÂM" else "F5F3FF" if muc_do == "CHUYÊN SÂU" else HEX_BG_ROSE
     mau_chu_badge = C_SAFE if muc_do == "CƠ BẢN" else C_BLUE if muc_do == "TRỌNG TÂM" else C_PURPLE if muc_do == "CHUYÊN SÂU" else C_DANGER
@@ -370,20 +371,27 @@ def them_the_qna(doc, so_cau: int, muc_do: str, nhom: str, cau_hoi: str,
 
     ghi_chuoi_co_dinh_dang(p_q, cau_hoi, co_chu=10.5, mau=C_NAVY, mac_dinh_dam=True)
 
-    for nhan, noi_dung in [
+    cac_muc = [
         ("1. Trả lời trực diện:", tra_loi_ngan),
         ("2. Cơ chế & vị trí code:", co_che_va_code),
         ("3. Số liệu & minh chứng thật:", so_lieu_minh_chung),
-    ]:
+    ]
+    if minh_chung_giai_quyet:
+        cac_muc.append(("4. Minh chứng thực tế (MediTrace giải quyết thế nào?):", minh_chung_giai_quyet))
+
+    for nhan, noi_dung in cac_muc:
         pa = c.add_paragraph()
-        pa.paragraph_format.space_before = Pt(2)
+        pa.paragraph_format.space_before = Pt(2.5 if "Minh chứng" in nhan else 2)
         pa.paragraph_format.space_after = Pt(2.5)
         pa.paragraph_format.line_spacing = 1.15
         rn = pa.add_run(nhan + " ")
         rn.bold = True
         rn.font.name = "Segoe UI"
         rn.font.size = Pt(9.4)
-        rn.font.color.rgb = C_TEAL if "Cơ chế" in nhan else (C_AMBER if "Số liệu" in nhan else C_NAVY)
+        rn.font.color.rgb = (
+            C_BLUE if "Minh chứng" in nhan
+            else (C_TEAL if "Cơ chế" in nhan else (C_AMBER if "Số liệu" in nhan else C_NAVY))
+        )
         ghi_chuoi_co_dinh_dang(pa, noi_dung, co_chu=9.4, mau=C_DARK)
 
     # Đệm nền nhẹ cho câu stress-test để dễ nhận biết khi ôn tập
@@ -733,9 +741,85 @@ BO_22_CAU_HOI_BGK = [
         "Nhóm đã sử dụng các công cụ AI hỗ trợ lập trình (Claude Code, Antigravity, Codex) như thế nào và làm sao đảm bảo mã nguồn do AI hỗ trợ không có lỗ hổng an toàn y khoa?",
         "Nhóm khai báo minh bạch trong `README.md`: phần lớn mã nguồn được viết với sự hỗ trợ của trợ lý lập trình AI **dưới sự chỉ đạo kiến trúc, đặt bất biến an toàn và kiểm tra chéo nghiêm ngặt của tác giả**.",
         "Quy trình kiểm soát gồm 3 vòng: (1) Mọi quy tắc lâm sàng đều phải có phép thử đơn vị trượt trước – qua sau (`pytest` và `tsx --test`); (2) Thực hiện các đợt **rà soát độc lập chéo** (như đợt rà soát 25/11 tìm và vá 9 lỗi che dị ứng/phủ định trong `tests/test_ra_soat_cuoi.py`, và đợt kiểm toán kiến trúc toàn diện sửa các lỗi khử định danh, FHIR, BHYT, đơn vị liều `kiem-dinh-so.ts`, khóa WORM `.anchor.json`); (3) Đối chiếu lại toàn bộ con số trong tài liệu với tệp JSON đầu ra thực tế (`docs/doi-chieu-so-lieu-bao-cao.md`).",
-        "Toàn bộ kho mã hiện vượt qua **1.779 bài kiểm thử `pytest`** (`0` lỗi) và **43 bài kiểm thử TypeScript** (`0` lỗi kiểu `tsc --noEmit`), mọi thí nghiệm đều có lệnh chạy tái lập rõ ràng.",
+        "Toàn bộ kho mã hiện vượt qua **1.925+ bài kiểm thử `pytest`** (`0` lỗi) và **84 bài kiểm thử TypeScript** (`0` lỗi kiểu `tsc --noEmit`), mọi thí nghiệm đều có lệnh chạy tái lập rõ ràng.",
+    ),
+
+    # --- NHÓM F: MEDITRACE BOOST — CHỐNG BURNOUT BÁC SĨ & BỆNH VIỆN VN (CÂU 23 - 28) ---
+    (
+        23, "TRỌNG TÂM", "Chống Burnout & Tối ưu tốc độ phòng khám 50–80 ca/ngày",
+        "Ngoài việc nghe – chép bệnh án, các bác sĩ phòng khám đông còn mất rất nhiều thời gian cho việc gán vai người nói thủ công, chờ GPU, gõ khám thực thể khi đeo găng và duyệt từng dòng. MediTrace Boost giải quyết thế nào?",
+        "MediTrace Boost giải phóng 4 nút thắt thao tác ngay tại bàn khám: **(1) Gán vai 1 chạm + Mẫu giọng Bác sĩ 5s** (`suggested_role` + phím `1/2/3`), **(2) Tăng tốc Qwen3-4B** bằng khóa VRAM GPU 0 + `prompt_lookup_num_tokens=5`, **(3) Đọc khám thực thể rảnh tay phím `F2`** bằng `PhoWhisper` nội bộ, và **(4) Triage bàn phím `J/K/Enter/E/Space`** kèm nút *Giữ nhanh N mệnh đề xanh*.",
+        "Triển khai tại `src/audio/pipeline.py` (`goi_y_vai_nguoi_noi`, `trich_dac_trung_giong_nhe`), `src/bakeoff.py` (`device_map={'': 0}`, `prompt_lookup_num_tokens`), `web/src/components/TranscriptView.tsx`, `DuyetBenCanh.tsx` và `NoteEditorView.tsx`.",
+        "Nút *Giữ nhanh* vẫn **khóa cứng không cho duyệt hàng loạt** các mục `Cần xác nhận`, `Dị ứng` và `Thuốc`; đồng thời `taiBienDichHieuLuc.ts` tái biên dịch sạch mọi quyết định `Giữ / Sửa / Bỏ` sang HL7 FHIR R4 và BHYT XML1–XML5.",
+    ),
+    (
+        24, "XOÁY SÂU / BẮT BẺ", "Lá chắn BHYT XML3/XML4 ↔ XML5 & Liều Nhi khoa TT 26/2025",
+        "Ở bệnh viện Việt Nam, bác sĩ rất sợ bị BHXH xuất toán các chỉ định cận lâm sàng đắt tiền (MRI, CT, Nội soi, Troponin) vì thiếu câu biện luận trong diễn biến, hoặc kê đơn trẻ em thiếu cân nặng. Hệ thống xử lý ra sao?",
+        "Hệ thống mở rộng từ kiểm tra `Thuốc ↔ ICD-10` sang **Lá chắn Biện luận Chỉ định CLS (`XML3/XML4 ↔ XML5`)** gồm 13 quy tắc đối chiếu chỉ định cận lâm sàng với triệu chứng còn hiệu lực của bệnh nhân, tự dựng câu biện luận có nguồn `[T_i]` hoặc cảnh báo đỏ nguy cơ xuất toán trước khi ký.",
+        "Mã nguồn tại `src/kiem_duyet_bhyt_va_bo_sot.py` (`QUY_TAC_CHI_DINH_CLS_BHYT`, `bien_luan_chi_dinh_cls`, kiểm tra cân nặng bắt buộc trẻ `< 72 tháng` theo **TT 26/2025/TT-BYT**), chuyển tiếp `thong_tin_benh_nhan` qua `web/may-chu/routes/bhyt-ocr.ts` và tải trọn bộ `.xml` tại `BhytPrecheckModal.tsx`.",
+        "Giữ nguyên nguyên tắc không tự bịa triệu chứng: nếu thiếu căn cứ triệu chứng trong hội thoại, hệ thống báo đỏ và gợi ý bác sĩ bổ sung hoặc hỏi lại thay vì tự viết câu biện luận giả.",
+    ),
+    (
+        25, "TRỌNG TÂM", "Đối soát đa đơn thuốc người cao tuổi & Đơn thuốc Quốc gia TT 26/2025",
+        "Bệnh nhân cao tuổi thường mang túi thuốc từ 2–3 phòng khám khác nhau gây trùng hoạt chất khác biệt dược (như Panadol + Hapacol). MediTrace xử lý thế nào và có hỗ trợ chuẩn Đơn thuốc Điện tử Quốc gia không?",
+        "MediTrace tách rạch ròi **Bảng 1 — Thuốc đang dùng ở nhà** (tự động bật sáng tương tác DDI, trùng nhóm ATC, trùng hoạt chất và gánh nặng kháng cholinergic ACB với 3 nút *Tiếp tục / Đổi liều / Tạm ngưng*) và **Bảng 2 — Nháp Đơn thuốc Mới chuẩn TT 26/2025/TT-BYT**.",
+        "Logic tại `src/kiem_duyet_bhyt_va_bo_sot.py` (`doi_soat_da_don_va_don_quoc_gia`), giao diện 2 bảng tại `web/src/components/BangDoiSoatThuocVaDonQuocGiaModal.tsx` và dải cảnh báo `BangDongCoLamSangThucTinh.tsx`.",
+        "Số ngày dùng, tổng số lượng chỉ tự tính khi liều và số ngày đều tường minh trong hội thoại; mọi ô thiếu giữ nguyên `[cần bổ sung]` tô vàng nét đứt để bác sĩ tự điền.",
+    ),
+    (
+        26, "TRỌNG TÂM", "8 biểu mẫu pháp lý chạy 100% Offline & Chuỗi dán HIS liên hoàn",
+        "Khi bệnh viện tắt công tắc mô hình ngoài (100% offline), bác sĩ vẫn phải làm Giấy chuyển cơ sở KCB (TT 01/2025), Giấy nghỉ BHXH (TT 25/2025), Tóm tắt HSBA & Hội chẩn (TT 32/2023). Phần mềm có bị khóa sạch các mẫu đó không?",
+        "**Không còn bị khóa!** Nhờ **Bộ biên dịch biểu mẫu pháp lý xác định 100% tại chỗ**, bác sĩ có thể tạo ngay **8 biểu mẫu pháp lý & bệnh án chuyên khoa (Nhi / Sản / Cấp cứu)** trong `< 10 ms` ngay cả khi tắt hoàn toàn internet và mô hình ngoài.",
+        "Triển khai tại `web/src/lib/bieuMauPhapLyOffline.ts` (`bienDichBieuMauPhapLyTaiCho`), `mauVanBan.ts`, `TaoVanBanModal.tsx`, kèm **Chuỗi dán HIS liên hoàn (`Alt+N`)** trong `HisSmartCopyPopover.tsx` giúp dán tuần tự sang VNPT-HIS / Viettel HIS.",
+        "Biểu mẫu tự động kiểm tra trần 30 ngày nghỉ BHXH ngoại trú (TT 25/2025), phân cấp 3 tuyến kỹ thuật (TT 01/2025), tách biệt tiền sử gia đình và giữ nguyên mỏ neo `[T_i]` + chỗ trống `[cần bổ sung]`.",
+    ),
+    (
+        27, "CƠ BẢN", "Cam đoan Thủ thuật WORM (Luật KCB 2023) & Đi buồng Nội trú",
+        "MediTrace có giúp bác sĩ tránh rủi ro pháp lý khi tư vấn thủ thuật xâm lấn, và có dùng được cho khoa điều trị nội trú đi buồng 20 giường mỗi sáng không?",
+        "Có hai phân hệ chuyên biệt: **(1) Kiểm chứng 6 trụ cột Cam đoan Thủ thuật** theo Điều 10 & 63 Luật KCB 2023 (kèm mỏ neo âm thanh + băm SHA-256 WORM, chặn bác sĩ tự nói đồng ý thay người bệnh) và **(2) Chế độ Đi buồng Nội trú** tự so sánh diễn biến hôm nay với hôm qua dựng *Tờ điều trị TT 32/2023* + *Sổ bàn giao trực SBAR*.",
+        "Backend Python tại `src/cam_doan_thu_thuat.py` và `src/di_buong_noi_tru.py`; BFF tại `web/may-chu/routes/boost-lam-sang.ts`; giao diện tại `CamDoanThuThuatModal.tsx` và `DiBuongNoiTruModal.tsx`.",
+        "Mọi mục giải thích thiếu (như quên nói nguy cơ phản vệ hoặc phương án thay thế) đều bật cảnh báo vàng trước khi bác sĩ in *Phiếu cam đoan PTTT*.",
+    ),
+    (
+        28, "TRỌNG TÂM", "Khép kín vòng lặp hậu khám SQLite & Từ điển thuốc viện cho PhoWhisper",
+        "Dữ liệu bệnh nhân và đầu việc hẹn đọc lại xét nghiệm có lưu thật vào cơ sở dữ liệu không? Và bệnh viện có thể nạp danh mục thuốc trúng thầu BHYT riêng vào bộ nhận dạng giọng nói không?",
+        "**Có.** Danh mục `benh-nhan` và `nhiem-vu` đã được migrate bảng `muc_kho` trong SQLite để lưu bền vững và tự trích đầu việc từ các ca khám; đồng thời cây `ContextualPrefixTrie600` đã gắn vào `PhoWhisperProvider` và cho phép nạp file `.csv` thuốc trúng thầu của từng bệnh viện.",
+        "SQLite migration `damBaoKhoMoRong` tại `web/may-chu/csdl.ts` & `schema.sql`; tự gom bệnh nhân/nhiệm vụ tại `PatientsView.tsx` & `TasksView.tsx`; nạp CSV tại `src/audio/asr/contextual_trie_600.py` (`nap_danh_muc_trung_thau_csv`, `quet_goi_y_sua_am_vi`) và `phowhisper_provider.py`.",
+        "Gợi ý âm vị thuốc trên `PhoWhisper` chỉ đính kèm thẻ gợi ý để bác sĩ đối chiếu chứ **tuyệt đối không tự sửa đè văn bản gỡ băng gốc**.",
     ),
 ]
+
+
+MINH_CHUNG_GIAI_QUYET = {
+    1: "Ví dụ thực tế: khi người nhà nói *'Hình như hồi nhỏ cháu có nổi mẩn khi uống Penicillin nhưng em không chắc'* → K4/Cổng rủi ro bắt thông tin có độ bất định cao + nhóm `di_ung` (trọng số `1.0`), KHÔNG xoá bỏ mà giữ nguyên sang mục **`CẦN XÁC NHẬN`** kèm lý do. Bác sĩ mở ngăn `DuyetBenCanh.tsx` bấm `Space` nghe lại đoạn ghi âm gốc để quyết định `Xác nhận` hay `Bỏ`.",
+    2: "Thử ngay trên giao diện hoặc qua `pytest`/`tsx`: nếu Ca có 1 mục đỏ `Cần xác nhận` chưa bấm `Giữ/Sửa/Bỏ`, nút `Ký duyệt` hiện màu vàng `Cần xác nhận (1)`. Bấm vào sẽ chặn ký, mở ngăn duyệt và cuộn đúng tới thẻ đó; nếu gửi request giả trực tiếp lên `POST /api/sessions/:id/sign-off`, máy chủ trả `HTTP 400` (`worm.ts:233`).",
+    3: "Mở **Ca mẫu 1 (`demo_bs_nguoi_nha_nhi`)**: người mẹ nói *'bản thân tôi bị dị ứng Penicillin'* (lượt 4) và *'bé bị sốt 39 độ'* (lượt 2) → MediTrace tách rõ `Sốt 39°C` vào thân bệnh án của bé (`chu_the_id=0`), còn `Dị ứng Penicillin` của mẹ sang `TIỀN SỬ GIA ĐÌNH` / `CẦN XÁC NHẬN` (`chu_the_id=1`). Mở **Ca mẫu 2 (`demo_hai_benh_nhan`)**: câu *'ông bị tăng huyết áp'* và *'tôi bị loét dạ dày'* được tách rạch ròi 2 chủ thể.",
+    4: "Ví dụ Ca đối chứng tự sửa: lượt 2 bệnh nhân nói *'tôi ho khoảng 4 ngày nay'*, lượt 5 tự sửa *'à không, tính ra mới từ chiều hôm qua thôi'* → `cap_nhat.ap_luat()` giữ mệnh đề *'ho từ chiều hôm qua [T5]'* ở thân bệnh án, đồng thời chuyển mệnh đề cũ *'ho 4 ngày [T2]'* sang trạng thái `bị thay thế` ở `CẦN XÁC NHẬN` (vết kiểm toán nguyên vẹn).",
+    5: "Chạy lệnh `python -m src.kiem_nghiem_ngoai_khuon` và đọc `data/manifest_v2_mo_rong_5000.json`: toàn bộ 515 tên khuôn Train, 72 tên khuôn Dev và 70 tên khuôn Test được liệt kê tường minh, giao tập = `∅`. Kiểm thử `tests/test_chia_khuon_mo_rong_khong_doi.py` bảo đảm không rò rỉ giữa Train và Test.",
+    6: "Chạy `python -m src.kiem_nghiem_ngoai_khuon` trên 10 kịch bản bệnh hiếm ngoài kho (`OOT_01..OOT_10` như *Hội chứng Guillain-Barré, Sốc phản vệ, Sốt xuất huyết Dengue nặng*) → đúng chủ thể `52/52`. Lỗi biến câu hỏi người bệnh thành sự thật phát hiện từ `200` mẫu `ViMQ` đã được khóa bằng luật `QUESTION_AS_FACT` (`src/canh_bao/`).",
+    7: "Trong `NoteEditorView.tsx`, bấm vào bất kỳ câu nào trên bản nháp hoặc thẻ `[T3]` → khung thoại gốc sáng lên đúng câu nói của bệnh nhân và nút `Nghe lại` phát đúng giây ghi âm gốc. Ngược lại, một bản văn xuôi do LLM viết thẳng không thể làm được dây nối 2 chiều từng mệnh đề như vậy.",
+    8: "Chạy thực tế `python -m src.dich_vu --khong-mo-hinh` trên laptop không GPU hoặc chạy `Qwen3-4B` QLoRA 4-bit trên 1 card RTX 3060 12GB (chỉ tốn `~3,6 GB` VRAM). Kết hợp `prompt_lookup_num_tokens=5` (`bakeoff.py`) giúp sinh chuỗi JSON trích xuất nhanh gấp 2–3× mà không đổi phân phối mô hình.",
+    9: "Ví dụ thực tế: câu *'Bệnh nhân đau hố chậu phải [T3]'* nhưng AI Tầng 1 gõ nhầm thành *'đau hố chậu trái [T3]'*. Cổng `khoa_bang_chung` thấy lượt 3 có nói 'đau hố chậu' nên cho qua, nhưng `canh_bao/than_the.py` (`LATERALITY_CHANGED`) bắt ngay sự đảo chiều `phải ↔ trái` và bôi vàng cảnh báo cho bác sĩ.",
+    10: "Chạy `python -m src.do_bo_chan_doan` hoặc `tests/test_do_quy_gan.py`: hoán đổi 2 từ `'bệnh nhân'` ↔ `'người nhà'` trên 400 hồ sơ → `ROUGE-1 = 1.0000`, trong khi `Attribution F1` của dự án tụt `0.1381`, chứng minh thước đo mới bắt được lỗi lâm sàng mà ROUGE bỏ lọt.",
+    11: "Chạy `cd web && npx tsx --test may-chu/worm.test.ts`: kịch bản kiểm thử tự động thực hiện `DROP TRIGGER` rồi sửa/xoá lén bản ghi SQLite → hàm `xacMinhChuoi()` đối chiếu với `.anchor.json` phát hiện ngay `HTTP 409 WORM Violation` và từ chối ký tiếp.",
+    12: "Mở ngăn **Trợ lý & Chứng cứ** bên phải trên giao diện, nhập câu hỏi có kèm tên/SĐT (VD: *'Bệnh nhân Nguyễn Văn A, 0912345678 uống thuốc gì?'*) → hệ thống chặn ngay từ phía máy chủ (`cau_hoi_co_danh_tinh`) và chỉ gửi đi các thông số ẩn danh (`tuổi, giới, mệnh đề đã lọc`), kiểm chứng qua `web/may-chu/tro-ly/an-danh.test.ts`.",
+    13: "Mở **Ca mẫu 2 (`demo_hai_benh_nhan`)**: ở lượt 6 khi người vợ và người chồng cùng có triệu chứng trước đó, câu lược chủ ngữ *'đêm qua còn nôn hai lần nữa'* được `SPEAKER_SUBJECT_MISMATCH` / `SUBJECT_AMBIGUOUS` giữ ở `CẦN XÁC NHẬN` thay vì tự gán bừa cho chồng hoặc vợ.",
+    14: "Mở **Ca mẫu 3 (`demo_lao_khoa_con_gai`)**: người nhà nói *'tự ra hiệu thuốc mua vỉ a móc uống'* (lượt 6). Khoá K6 phát hiện mệnh đề ghi `amoxicillin` không khớp nguyên văn chữ `'a móc'` trong thoại gốc → chặn không cho vào `THUỐC ĐANG DÙNG`, bôi đỏ ở `CẦN XÁC NHẬN` và khóa nút Ký duyệt cho tới khi bác sĩ xác nhận.",
+    15: "Trong `ContextView.tsx`, dán phiếu cũ `Creatinine 180 umol/L, Kali 5.8 mmol/L`, nhập `72 tuổi, Nữ` → `ocr_lam_sang.py` tự quy đổi `180 umol/L -> 2.04 mg/dL`, tính `eGFR (CKD-EPI 2021)`, cảnh báo giảm liều `Metformin/Allopurinol` theo KDIGO và bật cảnh báo đỏ `Tăng Kali máu` nếu phối hợp `Spironolacton`.",
+    16: "Trong `DuyetBenCanh.tsx` hoặc `VerificationView.tsx`, bấm nút `Nghe lại` trên thẻ mệnh đề có mỏ neo `[T4]` (hoặc nhấn phím `Space`) → `useTurnAudioPlayer` tua đúng tới `[start_s - 0.5s, end_s + 0.5s]` của đoạn âm thanh trong IndexedDB và tự dừng cuối câu.",
+    17: "Chứng minh trực tiếp trong `App.tsx`: bấm `Tạo bản nháp` cho Ca A (trả về `202 Accepted` từ `hang-doi.ts`), chuyển ngay sang Ca B để thu âm và gõ tiếp — tiến độ Ca A chỉ chạy nền ở banner nhỏ; đồng thời ở `bakeoff.py` đã bật `device_map={'': 0}` + `prompt_lookup_num_tokens=5` để giảm tối đa độ trễ GPU.",
+    18: "Trong `NoteEditorView.tsx`, bấm nút **`Chép HIS`** → `HisSmartCopyPopover.tsx` hiện 5 ô chuẩn HIS kèm nút **`[Chép & Chuyển ô kế →]`** (`Alt+N`) để dán liên hoàn sang VNPT-HIS/Viettel HIS; đồng thời bấm **`Tải HL7 FHIR & BHYT (.json)`** hoặc **`BHYT / ICD-10`** để tải gói chuẩn `HL7 FHIR R4` & `XML1–XML5` đã lọc bỏ mệnh đề `Bỏ`.",
+    19: "Thử ngay kịch bản kiểm chứng trong `NoteEditorView.tsx`: ký duyệt WORM xong (hiện `Đã ký #1`), sau đó vào sửa 1 chữ trong bệnh án hoặc đổi 1 quyết định `Giữ -> Bỏ` → `isSignOffStale()` đổi nút ngay thành **`Đã sửa · Ký lại`** vì mã băm `SHA-256` đã lệch so với bản đã ký.",
+    20: "Toàn bộ hệ thống chạy cục bộ qua `python -m src.dich_vu --nghi-sau-phut 10 --tran-ram-gb 10` (tự giải phóng VRAM khi nghỉ) kết hợp `node dist/server.cjs` (`< 150 MB` RAM). Không cần thuê bao GPU đám mây hay gọi API trả phí theo ca cho luồng bệnh án chính.",
+    21: "Đọc trực tiếp mục *Giới hạn & Thành thật khoa học* trong `README.md` và `docs/ket-qua/canh-bao-moc-0.md`: dự án công khai cả tỷ lệ sót (`11,5%` ở bước trích) và độ phủ từ khóa thô (`12,5%`) thay vì giấu lỗi, đồng thời bổ sung Tầng 4.5 (`ActiveOmissionRecoveryEngine`) để bác sĩ khôi phục 1 chạm ngay trên ngăn duyệt.",
+    22: "Chạy trực tiếp 2 lệnh kiểm chứng độc lập trên toàn kho mã: `$env:PYTHONUTF8='1'; pytest tests/ -q` (**1.925+ passed**) và `cd web; npm run lint; npm test; npm run build` (**84/84 passed, 0 lỗi TypeScript**).",
+    23: "Chứng minh ở `TranscriptView.tsx` & `DuyetBenCanh.tsx`: tải băng 15 lượt không `pyannote` → bấm **`Áp dụng vai gợi ý`** 1 lần thay vì 15 lần bấm tay; nhấn `F2` đọc *'Bụng mềm, ấn đau nhẹ hố chậu phải'* → `PhoWhisper` nội bộ chép thẳng vào `KHÁM LÂM SÀNG`; nhấn `Giữ nhanh` + `J/K/Enter` duyệt xong cả ca trong 20 giây.",
+    24: "Ví dụ thực tế: bác sĩ chỉ định *'Chụp MRI sọ não'* nhưng trong thoại chưa ghi triệu chứng thần kinh khu trú hay đau đầu → bấm **`BHYT / ICD-10`** (`BhytPrecheckModal.tsx`), hệ thống bật cảnh báo đỏ `[CẢNH BÁO XUẤT TOÁN CLS - XML3/XML5]` trước khi ký; nếu có triệu chứng `[T3]`, hệ thống tự dựng sẵn câu biện luận gắn `[T3]` để đưa vào XML5.",
+    25: "Ví dụ bệnh nhân cao tuổi mang 2 vỏ thuốc `Panadol 500mg` và `Hapacol 500mg` cùng toa mới `Clopidogrel + Omeprazol`: mở **`Đơn thuốc TT26 / DDI`** → Bảng 1 báo đỏ trùng hoạt chất `Paracetamol` + tương tác `Clopidogrel ↔ Omeprazol` + điểm gánh nặng `ACB`; Bảng 2 tách riêng đơn mới chuẩn TT 26/2025 và chừa vàng `[cần bổ sung]` cho ô thiếu.",
+    26: "Tắt hoàn toàn công tắc *'Mô hình ngoài'* rồi bấm nút **Tạo** (`TaoVanBanModal.tsx`) → cả 8 mẫu (*Phiếu chuyển cơ sở KCB TT 01/2025, Giấy nghỉ BHXH TT 25/2025, Tóm tắt HSBA TT 32/2023, Nhi/Sản/Cấp cứu*) đều mở sáng nhãn **`100% tại chỗ · Luật BYT`** và sinh văn bản trong `< 10 ms` (kiểm chứng tại `meditraceBoostLib.test.ts`).",
+    27: "Mở **`Cam đoan PTTT`** trên ca có từ khoá thủ thuật: hệ thống quét băng ghi âm qua `src/cam_doan_thu_thuat.py`, tô xanh 4 mục đã giải thích kèm `[T_i]` và báo vàng 2 mục bác sĩ quên nói (*Nguy cơ phản vệ, Phương án thay thế*), chỉ cho đóng dấu WORM `consentHash` sau khi kiểm đủ. Ở **`Đi buồng / Trực`**, `di_buong_noi_tru.py` tự đối chiếu triệu chứng hôm nay với hôm qua dựng *Tờ điều trị TT 32/2023*.",
+    28: "Kiểm chứng ở `boost-lam-sang.test.ts` và `test_meditrace_boost_python.py`: (1) Bảng `muc_kho` cũ được tự động migrate an toàn sang `benh-nhan` và `nhiem-vu` trong SQLite; (2) Nạp CSV danh mục thuốc trúng thầu viện qua `POST /api/formulary/upload-csv` vào `ContextualPrefixTrie600` gắn trên `PhoWhisperProvider` giúp gợi ý đúng tên thuốc viện mà không sửa đè chữ gốc.",
+}
 
 
 # ==============================================================================
@@ -807,14 +891,14 @@ def xuat_word():
 
     p_sub = them_doan(
         doc,
-        "Giải thích rõ từng tầng xử lý · Chỉ tận nơi tệp code & hàm thực thi · Phân tích khả thi triển khai phòng khám Việt Nam · 22 câu hỏi & trả lời bảo vệ trước Hội đồng Giám khảo",
+        "Giải thích rõ từng tầng xử lý · Chỉ tận nơi tệp code & hàm thực thi · Phân tích khả thi triển khai phòng khám Việt Nam · 28 câu hỏi & trả lời bảo vệ trước Hội đồng Giám khảo (kèm 12 tính năng MediTrace Boost)",
         co_chu=10.2, mau=C_MUTED, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_tren=0, cach_duoi=14,
     )
     p_sub.runs[0].italic = True
 
     # Lưới 6 ô chỉ số thực nghiệm cốt lõi (3x2)
     kpis = [
-        ("KIỂM THỬ TỰ ĐỘNG", "1.779 + 43 PASS", "1.779 bài pytest Python + 43 bài test TypeScript vượt qua 100% (0 lỗi)", HEX_SAFE, HEX_BG_TEAL),
+        ("KIỂM THỬ TỰ ĐỘNG", "1.925+ & 84 PASS", "1.925+ bài pytest Python + 84 bài test TypeScript & BFF vượt qua 100% (0 lỗi)", HEX_SAFE, HEX_BG_TEAL),
         ("GIẢM TỶ LỆ BỎ SÓT", "43,1% → 11,5%", "Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề, 0 ca lỗi JSON)", HEX_BLUE, HEX_BG_BLUE),
         ("BỘ DỮ LIỆU ĐỘC LẬP V2", "657 KHUÔN BỆNH", "21 hệ cơ quan · 515 Train / 72 Dev / 70 Test · 0 khuôn giao nhau (Jaccard 5,87%)", HEX_TEAL, HEX_BG_TEAL),
         ("LỚP CẢNH BÁO LỖI", "13 NHÓM · 56 MÃ", "Độ nhạy cấy lỗi cơ bản giữ nguyên 0,871 trên 240 ca giữ kín; lỗi khó 0,889", HEX_AMBER, HEX_BG_AMBER),
@@ -858,7 +942,7 @@ def xuat_word():
             ["Liên kết 1 · Mã nguồn", "`https://github.com/quannguyen991/meditrace-sentinel`"],
             ["Liên kết 2 · Chạy thử", "`https://meditrace-sentinel.vercel.app` *(Bấm nút 'Xem thử với ca mẫu' để mở ngay 3 ca đa người nói không cần GPU)*"],
             ["Liên kết 3 · Báo cáo cải tiến", "`https://github.com/quannguyen991/meditrace-sentinel/blob/main/BAO_CAO_CAI_TIEN_CHANG_1.md`"],
-            ["Cấu trúc tài liệu này", "**Phần 1:** Giải thích kiến trúc & luồng chạy · **Phần 2:** Bản đồ code nằm ở đâu · **Phần 3:** Tính khả thi thực tế · **Phần 4:** 22 câu hỏi & trả lời BGK."],
+            ["Cấu trúc tài liệu này", "**Phần 1:** Giải thích kiến trúc & luồng chạy · **Phần 2:** Bản đồ code nằm ở đâu · **Phần 3:** Tính khả thi thực tế · **Phần 4:** 28 câu hỏi & trả lời BGK (gồm MediTrace Boost)."],
         ],
         [1.85, 4.90],
     )
@@ -933,7 +1017,7 @@ def xuat_word():
         "Tra cứu nhanh tệp nguồn, hàm/lớp xử lý và cơ chế bên trong khi Ban Giám khảo hỏi sâu vào code",
     )
 
-    them_muc_con(doc, "2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.779 bài kiểm thử pytest)")
+    them_muc_con(doc, "2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.925+ bài kiểm thử pytest)")
     them_bang(
         doc,
         ["Phân hệ chức năng", "Đường dẫn tệp mã nguồn", "Lớp / Hàm cốt lõi", "Giải thích cơ chế hoạt động trong code"],
@@ -942,7 +1026,7 @@ def xuat_word():
         mau_header=HEX_TEAL,
     )
 
-    them_muc_con(doc, "2.2. Tầng Máy chủ Node/Express BFF & Giao diện React (`web/` — 43 bài kiểm thử TS)")
+    them_muc_con(doc, "2.2. Tầng Máy chủ Node/Express BFF & Giao diện React (`web/` — 84 bài kiểm thử TS)")
     them_bang(
         doc,
         ["Phân hệ Web / BFF", "Đường dẫn tệp mã nguồn", "Hàm / Component chính", "Giải thích cơ chế hoạt động trong code"],
@@ -979,6 +1063,41 @@ def xuat_word():
         [1.65, 5.10],
     )
 
+    them_muc_con(doc, "3.1. Số liệu thực tế toàn cầu đối chứng (AMA · JAMA Network Open · WHO)")
+    them_bang(
+        doc,
+        ["Chỉ số / Vấn đề toàn cầu", "Số liệu thực nghiệm & Tỷ lệ", "Nguồn trích dẫn & Ý nghĩa cho MediTrace"],
+        [
+            [
+                "Tỷ lệ kiệt sức bác sĩ (Physician Burnout)",
+                "**48,2%** (2023) → **43,2%** (2024) → **41,9%** (2025); Cấp cứu **49,8%**",
+                "**AMA Organizational Biopsy:** Cứ 5 bác sĩ có hơn 2 người kiệt sức; áp lực giấy tờ/EHR là nguyên nhân hàng đầu.",
+            ],
+            [
+                "Gánh nặng nhập liệu EHR & \"Pajama Time\"",
+                "**~50%** ngày làm việc cho EHR (tỷ lệ **1:1–2 giờ** giấy tờ / 1 giờ khám); **21–22,5%** bác sĩ làm EHR **> 8 giờ/tuần** ngoài giờ tại nhà; nội trú **> 32%** làm ≥ 3 giờ/đêm (**OR 1,61**)",
+                "**AMA Time-Motion (Sinsky et al., *Annals of Internal Medicine*) & ABFM:** Trực tiếp lý giải nhu cầu gán vai 1 chạm, `F2` đọc rảnh tay và 8 biểu mẫu Offline.",
+            ],
+            [
+                "Hiệu quả Ambient AI Scribe thực tế",
+                "Burnout giảm từ **51,9% → 38,8%** sau 30 ngày (**-13,1 điểm %**, giảm **74%** tỷ suất burnout); tiết kiệm **10–16 phút/8h** (nhóm dùng ≥ 50% ca tiết kiệm **27 phút/ca trực**)",
+                "**JAMA Network Open đa trung tâm & JAMIA (Stanford / Kaiser Permanente):** Chứng minh mô hình Ambient AI Scribe giảm tải nhận thức rõ rệt khi chạy thật.",
+            ],
+            [
+                "Chi phí & Tỷ lệ sai sót thuốc toàn cầu",
+                "**42 tỷ USD/năm** (~**1%** chi tiêu y tế toàn cầu); xảy ra ở **~5%** ca nhập viện; **~50%** tổn hại y khoa liên quan thuốc có thể phòng ngừa",
+                "**WHO (*Medication Without Harm*):** Khẳng định giá trị của Khóa K6, Dược lý Aho-Corasick DDI và Bảng TT 26/2025.",
+            ],
+            [
+                "Đa thuốc ở người cao tuổi & Nước đang phát triển",
+                "Sai sót/biến cố phòng ngừa được ở lão khoa lên tới **17%**; gánh nặng tàn tật (**DALYs**) ở nước thu nhập thấp/trung bình **cao gấp 2×** nước giàu",
+                "**WHO Polypharmacy Technical Report:** Chứng minh tầm quan trọng của Bảng đối soát thuốc tại nhà (`duoc_ly_ddi` + ACB) khi chuyển tuyến/tái khám.",
+            ],
+        ],
+        [1.55, 2.35, 2.85],
+        mau_header=HEX_TEAL,
+    )
+
     them_hop_diem_nhan(
         doc,
         "TÓM TẮT KỊCH BẢN VẬN HÀNH 'KHÔNG ĐỨNG CHỜ GPU' TẠI PHÒNG KHÁM NGOẠI TRÚ",
@@ -993,11 +1112,11 @@ def xuat_word():
 
     doc.add_page_break()
 
-    # ---------------- PHẦN 4: 22 CÂU HỎI PHẢN BIỆN BGK & KỊCH BẢN TRẢ LỜI ----------------
+    # ---------------- PHẦN 4: 28 CÂU HỎI PHẢN BIỆN BGK & KỊCH BẢN TRẢ LỜI ----------------
     them_phan_lon(
         doc,
         "PHẦN 4",
-        "Bộ 22 câu hỏi Ban Giám khảo sẽ hỏi & Kịch bản trả lời chuẩn xác",
+        "Bộ 28 câu hỏi Ban Giám khảo sẽ hỏi & Kịch bản trả lời chuẩn xác",
         "Mỗi câu đều theo cấu trúc 3 nhịp: (1) Trả lời trực diện -> (2) Cơ chế & vị trí code -> (3) Số liệu thật đối chứng",
     )
 
@@ -1008,13 +1127,14 @@ def xuat_word():
         13: "NHÓM C · CÂU HỎI VỀ NGÔN NGỮ TIẾNG VIỆT, ÂM THANH ASR, DƯỢC LÝ & BHYT (CÂU 13 – 16)",
         17: "NHÓM D · CÂU HỎI VỀ TÍNH KHẢ THI, ĐỘ TRỄ, TÍCH HỢP HIS & PHÁP LÝ (CÂU 17 – 20)",
         21: "NHÓM E · CÂU HỎI KIỂM TRA ĐỘ TRUNG THỰC KHOA HỌC & SỬ DỤNG AI (CÂU 21 – 22)",
+        23: "NHÓM F · MEDITRACE BOOST — CHỐNG BURNOUT BÁC SĨ & TRIỂN KHAI BỆNH VIỆN VN (CÂU 23 – 28)",
     }
 
     for so, muc_do, nhom, q, a1, a2, a3 in BO_22_CAU_HOI_BGK:
         if so in tieu_de_nhom_map and tieu_de_nhom_map[so] != nhom_hien_tai:
             nhom_hien_tai = tieu_de_nhom_map[so]
             them_muc_con(doc, nhom_hien_tai)
-        them_the_qna(doc, so, muc_do, nhom, q, a1, a2, a3)
+        them_the_qna(doc, so, muc_do, nhom, q, a1, a2, a3, MINH_CHUNG_GIAI_QUYET.get(so, ""))
 
     # Lưu ra cả 3 vị trí tiện dụng
     FILE_DOCX_DOCS.parent.mkdir(parents=True, exist_ok=True)
@@ -1062,7 +1182,7 @@ def xuat_markdown():
         "",
         "## PHẦN 2: BẢN ĐỒ MÃ NGUỒN CHI TIẾT (\"CHỨC NĂNG NÀY ĐỂ CODE Ở ĐÂU?\")",
         "",
-        "### 2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.779 bài kiểm thử `pytest`)",
+        "### 2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.925+ bài kiểm thử `pytest`)",
         "",
         "| Phân hệ chức năng | Đường dẫn tệp mã nguồn | Lớp / Hàm cốt lõi | Giải thích cơ chế hoạt động trong code |",
         "| :--- | :--- | :--- | :--- |",
@@ -1073,7 +1193,7 @@ def xuat_markdown():
 
     lines.extend([
         "",
-        "### 2.2. Tầng Máy chủ Node/Express BFF & Giao diện React (`web/` — 43 bài kiểm thử TypeScript)",
+        "### 2.2. Tầng Máy chủ Node/Express BFF & Giao diện React (`web/` — 84 bài kiểm thử TypeScript)",
         "",
         "| Phân hệ Web / BFF | Đường dẫn tệp mã nguồn | Hàm / Component chính | Giải thích cơ chế hoạt động trong code |",
         "| :--- | :--- | :--- | :--- |",
@@ -1097,17 +1217,29 @@ def xuat_markdown():
 
     lines.extend([
         "",
+        "### 3.1. Số liệu thực tế toàn cầu đối chứng (AMA · JAMA Network Open · WHO)",
+        "",
+        "| Chỉ số / Vấn đề toàn cầu | Số liệu thực nghiệm & Tỷ lệ | Nguồn trích dẫn |",
+        "| :--- | :--- | :--- |",
+        "| Tỷ lệ kiệt sức bác sĩ (Burnout) | **48,2%** (2023) → **43,2%** (2024) → **41,9%** (2025); Cấp cứu **49,8%** | AMA Organizational Biopsy |",
+        "| Gánh nặng EHR & Pajama Time | **~50%** ngày làm việc cho EHR (**1–2h** giấy tờ / 1h khám); **21–22,5%** làm **> 8h/tuần** tại nhà; nội trú **> 32%** (OR **1,61**) | AMA Time-Motion (Sinsky et al.) & ABFM |",
+        "| Hiệu quả Ambient AI Scribe | Burnout giảm **51,9% → 38,8%** sau 30 ngày (**-13,1 điểm %**); tiết kiệm **10–16 phút/8h** (dùng ≥ 50% ca tiết kiệm **27 phút/ca trực**) | *JAMA Network Open* & *JAMIA* (Stanford / Kaiser Permanente) |",
+        "| Sai sót thuốc toàn cầu | **42 tỷ USD/năm** (~**1%** chi y tế toàn cầu); **~5%** ca nhập viện; **~50%** tổn hại có thể phòng ngừa | WHO *Medication Without Harm* |",
+        "| Đa thuốc lão khoa & LMIC | Sai sót lão khoa tới **17%**; gánh nặng **DALYs** tại LMIC **cao gấp 2×** nước giàu | WHO Polypharmacy Report |",
+        "",
         "---",
         "",
-        "## PHẦN 4: BỘ 22 CÂU HỎI PHẢN BIỆN BAN GIÁM KHẢO & KỊCH BẢN TRẢ LỜI",
+        "## PHẦN 4: BỘ 28 CÂU HỎI PHẢN BIỆN BAN GIÁM KHẢO & KỊCH BẢN TRẢ LỜI",
         "",
     ])
     for so, muc_do, nhom, q, a1, a2, a3 in BO_22_CAU_HOI_BGK:
+        mc4 = MINH_CHUNG_GIAI_QUYET.get(so, "")
         lines.extend([
             f"### Câu {so:02d} [{muc_do} · {nhom}]: {q}",
             f"- **1. Trả lời trực diện:** {a1}",
             f"- **2. Cơ chế & vị trí code:** {a2}",
             f"- **3. Số liệu & minh chứng thật:** {a3}",
+            *( [f"- **4. Minh chứng thực tế (MediTrace giải quyết thế nào?):** {mc4}"] if mc4 else [] ),
             "",
         ])
 

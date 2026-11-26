@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 import uuid
 
 from src.chuan_hoa_don_vi_xet_nghiem import chuan_hoa_du_lieu_xet_nghiem
+from src.kiem_duyet_bhyt_va_bo_sot import DANH_MUC_ICD10_BYT
 
 
 class FHIRExporter:
@@ -159,6 +160,28 @@ class FHIRExporter:
             "url": cls.URI_CITATION_EXTENSION,
             "extension": sub_exts
         }
+
+    @classmethod
+    def _trich_xuat_ma_icd10(cls, text: str) -> str:
+        """Trích xuất mã ICD-10 từ chuỗi chẩn đoán/tiền sử; fallback 'R69' nếu chưa nhận diện được."""
+        chuoi = str(text or "").strip()
+        if not chuoi:
+            return "R69"
+
+        m_icd = re.search(r"ICD-?10\s*[:：]?\s*([A-Z]\d{2}(?:\.\d{1,2})?)", chuoi, re.IGNORECASE)
+        if m_icd:
+            return m_icd.group(1).upper()
+
+        m_ngoac = re.search(r"[\[(]\s*([A-Z]\d{2}(?:\.\d{1,2})?)\s*[\])]", chuoi)
+        if m_ngoac:
+            return m_ngoac.group(1).upper()
+
+        chuoi_thuong = chuoi.lower()
+        for ma_icd, _ten_byt, _khoa, tu_khoa_tuple in DANH_MUC_ICD10_BYT:
+            if any(kw in chuoi_thuong for kw in tu_khoa_tuple):
+                return ma_icd
+
+        return "R69"
 
     @classmethod
     def xuat_fhir_bundle(
@@ -316,6 +339,7 @@ class FHIRExporter:
                     "text": str(chan_doan_text).strip(),
                     "coding": [{
                         "system": "http://hl7.org/fhir/sid/icd-10",
+                        "code": cls._trich_xuat_ma_icd10(str(chan_doan_text)),
                         "display": str(chan_doan_text).strip()
                     }]
                 },
@@ -350,7 +374,14 @@ class FHIRExporter:
                         "display": "Problem List Item"
                     }]
                 }],
-                "code": {"text": str(tien_su).strip()},
+                "code": {
+                    "text": str(tien_su).strip(),
+                    "coding": [{
+                        "system": "http://hl7.org/fhir/sid/icd-10",
+                        "code": cls._trich_xuat_ma_icd10(str(tien_su)),
+                        "display": str(tien_su).strip()
+                    }]
+                },
                 "subject": {"reference": f"urn:uuid:{patient_id}"},
                 "encounter": {"reference": f"urn:uuid:{encounter_id}"}
             }

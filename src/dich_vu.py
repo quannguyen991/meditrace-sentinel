@@ -416,9 +416,11 @@ class AmThanh:
                 self._pipe = AudioPipeline(SessionStore(THU_MUC_PHIEN))
         return self._pipe
 
-    def chep(self, du_lieu: bytes, ten_tep: str, tach_nguoi_noi: bool = True):
+    def chep(self, du_lieu: bytes, ten_tep: str, tach_nguoi_noi: bool = True, doctor_voiceprint: Optional[list] = None):
         pipe = self.pipeline()
         phien = pipe.store.create()["session_id"]
+        if doctor_voiceprint and isinstance(doctor_voiceprint, list):
+            pipe.store.update(phien, doctor_voiceprint=doctor_voiceprint)
         pipe.upload(phien, du_lieu, ten_tep)
         with self._khoa_suy_luan:
             pipe.process(phien, tach_nguoi_noi=tach_nguoi_noi)
@@ -749,9 +751,17 @@ class May(BaseHTTPRequestHandler):
                 return self._tra(kq)
             if duong == "/api/duoc-thu/nap-csv":
                 from src.audio.asr.contextual_trie_600 import tao_trie_600_mac_dinh
-                csv_txt = str(than.get("noi_dung_csv") or than.get("csv") or than.get("text") or "").strip()
+                csv_txt = str(
+                    than.get("noi_dung_csv")
+                    or than.get("csvContent")
+                    or than.get("csv_content")
+                    or than.get("csv")
+                    or than.get("csvText")
+                    or than.get("text")
+                    or ""
+                ).strip()
                 if not csv_txt:
-                    raise LoiDichVu("thieu_noi_dung_csv", "Cần nội dung CSV danh mục thuốc (`noi_dung_csv` hoặc `csv`)", 400)
+                    raise LoiDichVu("thieu_noi_dung_csv", "Cần nội dung CSV danh mục thuốc (`noi_dung_csv` hoặc `csvContent`)", 400)
                 trie = tao_trie_600_mac_dinh()
                 so_da_nap = trie.nap_danh_muc_trung_thau_csv(csv_txt)
                 return self._tra({
@@ -760,6 +770,37 @@ class May(BaseHTTPRequestHandler):
                     "tong_so_thuc_the_trie": trie.so_thuc_the,
                     "tong_so_thuoc": len(trie._tat_ca_thuoc),
                 })
+            if duong == "/api/lam-sang/tai-kiem-tra":
+                from src.dieu_phoi_ha_tang import tai_kiem_tra_nhanh
+                pb = than.get("propositions") or than.get("phat_bieu") or []
+                ht = str(than.get("transcript") or than.get("hoi_thoai") or "")
+                bn = than.get("thong_tin_benh_nhan") or than.get("patientInfo")
+                xn = than.get("du_lieu_xet_nghiem") or than.get("labResults")
+                ls = than.get("lich_su_lan_kham") or than.get("visitHistory")
+                kq = tai_kiem_tra_nhanh(
+                    propositions=pb if isinstance(pb, list) else [],
+                    transcript=ht,
+                    thong_tin_benh_nhan=bn if isinstance(bn, dict) else None,
+                    du_lieu_xet_nghiem=xn if isinstance(xn, dict) else None,
+                    lich_su_lan_kham=ls if isinstance(ls, list) else None,
+                )
+                return self._tra(kq)
+            if duong == "/api/bhyt/kiem-toan-xml":
+                from src.kiem_toan_xml_bhyt import kiem_toan_goi_xml_bhyt
+                payload_xml = than.get("xml_payload") or than.get("xml") or than
+                kq = kiem_toan_goi_xml_bhyt(payload_xml if isinstance(payload_xml, dict) else than)
+                return self._tra(kq)
+            if duong == "/api/bhyt/recompile":
+                from src.bien_dich_bieu_mau_bhyt import bien_dich_bieu_mau_bhyt
+                pb = than.get("propositions") or than.get("phat_bieu") or []
+                bn = than.get("thong_tin_benh_nhan") or than.get("patientInfo") or {}
+                kq = bien_dich_bieu_mau_bhyt(pb if isinstance(pb, list) else [], bn if isinstance(bn, dict) else {})
+                return self._tra(kq)
+            if duong == "/api/lis/parse":
+                from src.lis_hl7_oru import phan_tich_lis_dau_vao
+                raw_text = than.get("text") or than.get("noi_dung") or than.get("hl7") or ""
+                kq = phan_tich_lis_dau_vao(str(raw_text))
+                return self._tra(kq)
             raise LoiDichVu("khong_co_duong", f"không có đường {duong}", 404)
         except Exception as exc:
             self._bao_loi(exc)
@@ -779,7 +820,13 @@ class May(BaseHTTPRequestHandler):
         ten = than.get("ten_tep") or "ghi-am.webm"
         t0 = time.time()
         # `tach_nguoi_noi: false`: nguoi goi biet chi mot nguoi noi (cau hoi ghi bang micro).
-        phien, doan = self.am.chep(du, ten, tach_nguoi_noi=than.get("tach_nguoi_noi") is not False)
+        dvp = than.get("doctor_voiceprint") or than.get("doctorVoiceprint")
+        phien, doan = self.am.chep(
+            du,
+            ten,
+            tach_nguoi_noi=than.get("tach_nguoi_noi") is not False,
+            doctor_voiceprint=dvp if isinstance(dvp, list) else None,
+        )
         tach = self.am.pipeline().store.load(phien).get("tach_nguoi_noi") or {}
         return {"phien": phien, "doan": [_doan_ra_json(t) for t in doan],
                 "giay_xu_ly": round(time.time() - t0, 2),

@@ -43,6 +43,7 @@ class KetQuaKiemDuyetDuocLy:
     giai_trinh_duoc_ly: List[str] = field(default_factory=list)
     trung_nhom_atc: List[str] = field(default_factory=list)
     ganh_nang_da_thuoc: Dict[str, Any] = field(default_factory=dict)
+    canh_bao_di_ung_cheo: List[Dict[str, Any]] = field(default_factory=list)
 
 
 # Nhóm ATC có nguy cơ trùng lặp điều trị (Therapeutic / ATC Duplication)
@@ -288,6 +289,41 @@ def _trich_danh_sach_benh_nen(co_dia: Optional[Dict[str, Any]]) -> List[str]:
     return ket_qua
 
 
+def _trich_danh_sach_di_ung(co_dia: Optional[Dict[str, Any]]) -> List[str]:
+    """Trích xuất danh sách dị ứng từ các khóa `di_ung`, `danh_sach_di_ung`, `tien_su_di_ung`."""
+    if not isinstance(co_dia, dict):
+        return []
+    ket_qua: List[str] = []
+    da_co: Set[str] = set()
+    for khoa in ("di_ung", "danh_sach_di_ung", "tien_su_di_ung"):
+        raw = co_dia.get(khoa)
+        if not raw:
+            continue
+        muc: List[str] = []
+        if isinstance(raw, str):
+            muc = [x.strip() for x in re.split(r"[,;\n]+", raw) if x.strip()]
+        elif isinstance(raw, dict):
+            ten = raw.get("ten") or raw.get("hoat_chat") or raw.get("chat_di_ung") or raw.get("noi_dung") or ""
+            if str(ten).strip():
+                muc = [str(ten).strip()]
+        elif isinstance(raw, (list, tuple, set)):
+            for x in raw:
+                if x is None:
+                    continue
+                if isinstance(x, dict):
+                    ten = x.get("ten") or x.get("hoat_chat") or x.get("chat_di_ung") or x.get("noi_dung") or ""
+                    if str(ten).strip():
+                        muc.append(str(ten).strip())
+                elif str(x).strip():
+                    muc.append(str(x).strip())
+        for item in muc:
+            low = item.lower()
+            if low not in da_co:
+                da_co.add(low)
+                ket_qua.append(item)
+    return ket_qua
+
+
 class ClinicalPharmacovigilanceEngine:
     """Động cơ Dược lý Lâm sàng kiểm soát an toàn dùng thuốc toàn diện."""
 
@@ -426,8 +462,12 @@ class ClinicalPharmacovigilanceEngine:
                 if m_neph:
                     canh_bao.append(f"CẢNH BÁO CAO: Kháng sinh độc thận '{_nhan_thuoc(t_norm, m_neph)}' cần giảm liều triệt để và định lượng nồng độ đáy")
 
-        # 2. Phụ nữ mang thai (Thai kỳ Category X/D)
-        mang_thai = co_dia.get("mang_thai") or co_dia.get("thai_ky")
+        # 2. Phụ nữ mang thai (Thai kỳ Category X/D — hỗ trợ cả `mang_thai`, `thai_ky`, `co_thai`)
+        from src.ep_kieu_dau_vao import ep_bool_an_toan
+        mang_thai = any(
+            ep_bool_an_toan(co_dia.get(k)) is True
+            for k in ("mang_thai", "thai_ky", "co_thai")
+        )
         if mang_thai:
             for t_norm, gocs in muc_thuoc:
                 m_raa = _khop_nhom(gocs, t_norm, ("captopril", "enalapril", "lisinopril", "perindopril", "ramipril", "losartan", "valsartan", "telmisartan", "irbesartan", "candesartan"))
@@ -550,11 +590,29 @@ class ClinicalPharmacovigilanceEngine:
         ganh_nang = cls.kiem_tra_da_thuoc_va_trung_nhom_atc(danh_sach_thuoc)
         trung_nhom_atc = ganh_nang.get("canh_bao_atc_va_cong_don", [])
 
+        ds_di_ung = _trich_danh_sach_di_ung(co_dia)
+        canh_bao_di_ung_cheo: List[Dict[str, Any]] = []
+        if ds_di_ung and danh_sach_thuoc:
+            from src.di_ung_cheo import CHONG_CHI_DINH as _DU_CHEO_CAM, kiem_tra_di_ung_cheo
+            canh_bao_di_ung_cheo = kiem_tra_di_ung_cheo(ds_di_ung, danh_sach_thuoc)
+            for item in canh_bao_di_ung_cheo:
+                if item["muc_do"] == _DU_CHEO_CAM:
+                    chong_chi_dinh.append(
+                        f"DỊ ỨNG CHÉO ({item['nhom_cheo']}): Thuốc '{item['thuoc']}' chống chỉ định do tiền sử dị ứng "
+                        f"'{item['di_ung_goc']}' ({item['co_che']}). Khuyến cáo: {item['khuyen_cao_thay_the']}"
+                    )
+
         giai_trinh = []
         for ddi in canh_bao_ddi:
             giai_trinh.append(f"[{ddi.muc_do.upper()}] Tương tác giữa {ddi.thuoc_1} và {ddi.thuoc_2}: {ddi.hau_qua}. Khuyến cáo: {ddi.khuyen_cao}")
         for cd in chong_chi_dinh:
             giai_trinh.append(f"[CHỐNG CHỈ ĐỊNH] {cd}")
+        for item in canh_bao_di_ung_cheo:
+            if item["muc_do"] != "CHONG_CHI_DINH":
+                giai_trinh.append(
+                    f"[THẬN TRỌNG DỊ ỨNG CHÉO] Thuốc '{item['thuoc']}' có nguy cơ chéo [{item['nhom_cheo']}] với dị ứng "
+                    f"'{item['di_ung_goc']}': {item['khuyen_cao_thay_the']}"
+                )
         for can_bao_lieu in vuot_lieu:
             giai_trinh.append(f"[QUÁ LIỀU] {can_bao_lieu}")
         for cb_atc in trung_nhom_atc:
@@ -565,11 +623,13 @@ class ClinicalPharmacovigilanceEngine:
             or len(ganh_nang.get("thuoc_tang_kali", [])) >= 2
             or len(ganh_nang.get("thuoc_keo_dai_qt", [])) >= 2
         )
+        co_di_ung_cheo_cam = any(item["muc_do"] == "CHONG_CHI_DINH" for item in canh_bao_di_ung_cheo)
         hop_le = (
             len(canh_bao_ddi) == 0
             and len(chong_chi_dinh) == 0
             and len(vuot_lieu) == 0
             and not co_trung_hoac_cong_don_nguy_hiem
+            and not co_di_ung_cheo_cam
         )
 
         return KetQuaKiemDuyetDuocLy(
@@ -580,4 +640,5 @@ class ClinicalPharmacovigilanceEngine:
             giai_trinh_duoc_ly=giai_trinh,
             trung_nhom_atc=trung_nhom_atc,
             ganh_nang_da_thuoc=ganh_nang,
+            canh_bao_di_ung_cheo=canh_bao_di_ung_cheo,
         )

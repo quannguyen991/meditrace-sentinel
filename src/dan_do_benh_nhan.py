@@ -24,13 +24,41 @@ GIAI_THICH_BENH_LY: Dict[str, str] = {
     "trào ngược": "Axit từ dạ dày bị trào ngược lên thực quản gây ợ chua, nóng rát cổ họng. Bác cần tránh nằm ngay sau khi ăn no.",
     "gout": "Lượng axit uric lắng đọng tạo thành các tinh thể gây sưng đau buốt tại khớp. Bác cần kiêng tuyệt đối rượu bia và các loại thịt đỏ.",
     "nhiễm khuẩn đường tiết niệu": "Đường tiết niệu đang bị vi khuẩn xâm nhập gây tiểu buốt, tiểu rắt. Bác cần uống nhiều nước lọc (2-2.5 lít/ngày) để bài xuất vi khuẩn ra ngoài.",
-    "suy thận": "Khả năng lọc chất thải của thận đang bị suy giảm. Bác cần tuân thủ nghiêm ngặt đơn thuốc chỉnh liều, hạn chế ăn mặn và kiêng các thuốc giảm đau tự ý mua ngoài tiệm."
+    "nhiễm trùng tiết niệu": "Đường tiết niệu đang bị vi khuẩn xâm nhập gây tiểu buốt, tiểu rắt. Bác cần uống nhiều nước lọc (2-2.5 lít/ngày) và uống hết đợt kháng sinh theo đơn để tránh tái phát.",
+    "suy thận": "Khả năng lọc chất thải của thận đang bị suy giảm. Bác cần tuân thủ nghiêm ngặt đơn thuốc chỉnh liều, hạn chế ăn mặn và kiêng các thuốc giảm đau tự ý mua ngoài tiệm.",
+    "bệnh thận mạn": "Chức năng lọc của thận đang giảm dần theo thời gian. Bác cần kiểm soát tốt huyết áp, đường huyết, ăn nhạt và không tự ý dùng thuốc giảm đau hay thảo dược không rõ nguồn gốc.",
+    "hen phế quản": "Đường thở của bác đang nhạy cảm và dễ co thắt gây khò khè, khó thở. Bác cần dùng thuốc xịt dự phòng đều đặn, luôn mang theo thuốc cắt cơn và tránh khói bụi, phấn hoa, không khí lạnh.",
+    "copd": "Bệnh phổi tắc nghẽn mạn tính làm đường thở hẹp lại và tiết đờm. Bác cần tuyệt đối bỏ thuốc lá, dùng bình xịt đúng kỹ thuật và tập thở chúm môi mỗi ngày.",
+    "suy tim": "Tim đang bơm máu yếu hơn bình thường nên dễ gây mệt và phù chân. Bác cần uống thuốc đều đặn, ăn nhạt, theo dõi cân nặng mỗi sáng và báo bác sĩ nếu tăng cân nhanh hoặc khó thở tăng.",
+    "rối loạn mỡ máu": "Lượng mỡ (cholesterol hoặc triglyceride) trong máu đang cao, dễ lắng đọng gây xơ vữa mạch máu. Bác cần hạn chế mỡ động vật, tăng cường rau xanh và vận động nhẹ nhàng 30 phút mỗi ngày.",
+    "đau nửa đầu": "Cơn đau nửa đầu thường liên quan đến co giãn mạch máu não và nhạy cảm ánh sáng, tiếng ồn. Bác nên nghỉ nơi yên tĩnh tối, ngủ đủ giấc và tránh bỏ bữa hoặc căng thẳng kéo dài.",
+    "thiếu máu": "Lượng hồng cầu hoặc huyết sắc tố đang thấp hơn bình thường, khiến cơ thể dễ mệt, chóng mặt. Bác cần uống bổ sung sắt/acid folic theo đơn (nếu có) và ăn thêm thực phẩm giàu sắt."
 }
 
 CHE_DO_AN_UONG_BENH: Dict[str, Dict[str, List[str]]] = {
+    "tong_quat": {
+        "nen_an": [
+            "Ăn đủ 3 bữa điều độ, cân bằng đạm (cá, thịt nạc, trứng, đậu phụ) và rau xanh, trái cây tươi",
+            "Uống đủ 1.5 - 2 lít nước lọc mỗi ngày (trừ khi bác sĩ có chỉ định hạn chế nước)",
+            "Chọn thực phẩm tươi, chế biến hấp/luộc dễ tiêu hóa"
+        ],
+        "kieng_cu": [
+            "Hạn chế rượu bia, thuốc lá, cà phê đặc và nước ngọt có ga",
+            "Tránh thức ăn quá mặn, quá nhiều dầu mỡ chiên rán hoặc đồ ăn nhanh chế biến sẵn",
+            "Không tự ý dùng thêm thực phẩm chức năng hay thuốc ngoài đơn khi chưa hỏi bác sĩ"
+        ]
+    },
     "tăng huyết áp": {
         "nen_an": ["Rau củ quả tươi giàu kali (chuối tiêu, cam, rau bina)", "Cá béo (cá hồi, cá thu) giàu Omega-3", "Ngũ cốc nguyên hạt, đậu đỗ"],
         "kieng_cu": ["Ăn mặn, mắm tôm, cà muối, dưa muối, đồ hộp đóng sẵn", "Thức uống có cồn (rượu, bia), cà phê đặc, thuốc lá", "Mỡ động vật, phủ tạng động vật"]
+    },
+    "tim mạch": {
+        "nen_an": ["Rau xanh, trái cây tươi, ngũ cốc nguyên hạt và cá béo giàu Omega-3", "Chia nhỏ bữa ăn trong ngày để giảm gánh nặng cho tim", "Theo dõi lượng nước uống theo hướng dẫn của bác sĩ nếu có phù"],
+        "kieng_cu": ["Ăn mặn (dưới 2g muối/ngày), dưa cà muối, đồ hộp, mì gói", "Rượu bia, thuốc lá, cà phê đặc và nước tăng lực", "Mỡ động vật, đồ chiên rán, phủ tạng động vật"]
+    },
+    "suy tim": {
+        "nen_an": ["Thức ăn nhạt, mềm, dễ tiêu; tăng rau xanh và cá nạc", "Chia nhỏ 4-5 bữa nhẹ/ngày thay vì ăn quá no", "Cân nặng mỗi sáng và giữ lượng nước theo đúng lời dặn bác sĩ"],
+        "kieng_cu": ["Tuyệt đối tránh ăn mặn, nước mắm chấm đậm, đồ hộp, thức ăn nhanh", "Uống quá nhiều nước một lúc gây quá tải tuần hoàn", "Rượu bia, thuốc lá, chất kích thích"]
     },
     "đái tháo đường": {
         "nen_an": ["Ăn rau xanh trước khi ăn cơm để làm chậm hấp thu đường", "Gạo lứt, yến mạch, các loại đậu hạt", "Thịt nạc, cá, đậu phụ"],
@@ -43,6 +71,14 @@ CHE_DO_AN_UONG_BENH: Dict[str, Dict[str, List[str]]] = {
     "gout": {
         "nen_an": ["Uống nhiều nước lọc (tối thiểu 2 - 2.5 lít mỗi ngày)", "Sữa ít béo, sữa chua, trứng gà", "Rau xanh, trái cây giàu vitamin C (cam, dâu tây)"],
         "kieng_cu": ["Tuyệt đối kiêng rượu, bia (kể cả bia không cồn)", "Thịt đỏ (thịt bò, thịt dê, thịt chó), nội tạng (gan, lòng, cật)", "Hải sản đậm đà đạm (cua, ghẹ, tôm biển, cá trích)"]
+    },
+    "suy thận": {
+        "nen_an": ["Ăn nhạt, giảm muối và kiểm soát lượng đạm vừa phải theo hướng dẫn bác sĩ", "Chọn rau củ ít kali (bầu, bí, cải bắp) nếu bác sĩ dặn hạn chế kali", "Uống lượng nước phù hợp với lượng nước tiểu hàng ngày"],
+        "kieng_cu": ["Thức ăn mặn, đồ muối chua, đồ hộp, mì ăn liền", "Thực phẩm quá giàu kali/phospho (chuối, cam, nước dừa, nội tạng, nước ngọt có ga) khi chưa có chỉ định", "Tuyệt đối kiêng thuốc giảm đau NSAID, thuốc nam/lá cây không rõ nguồn gốc"]
+    },
+    "nhiễm khuẩn tiết niệu": {
+        "nen_an": ["Uống nhiều nước lọc (2 - 2.5 lít/ngày) để tăng thải vi khuẩn qua đường tiểu", "Trái cây giàu vitamin C (cam, bưởi, dâu tây) nếu không có chống chỉ định dạ dày", "Rau xanh, thức ăn thanh đạm dễ tiêu"],
+        "kieng_cu": ["Nhịn tiểu hoặc uống ít nước trong ngày", "Rượu bia, cà phê đặc, nước ngọt có ga và đồ ăn quá cay nóng gây kích thích bàng quang", "Vệ sinh kém hoặc tự ý ngưng kháng sinh giữa chừng"]
     },
     "hô hấp": {
         "nen_an": ["Uống nhiều nước ấm (2 - 2.5 lít/ngày) để làm loãng đờm", "Nước cam, chanh ấm mật ong", "Súp gà, cháo thịt băm tía tô gừng ấm"],
@@ -61,16 +97,23 @@ DAU_HIEU_DO_CAP_CUU: List[str] = [
 
 
 def phan_loai_lich_uong_thuoc(danh_sach_thuoc: List[str]) -> Dict[str, List[Dict[str, str]]]:
-    """Phân tách danh sách thuốc vào các buổi uống trong ngày: Sáng, Trưa, Chiều/Tối, Trước ngủ."""
+    """Phân tách danh sách thuốc vào các buổi uống trong ngày: Sáng, Trưa, Chiều/Tối, Trước ngủ.
+
+    Thuốc không có từ khóa thời điểm hoặc tần suất rõ ràng sẽ được đưa vào ``chua_ro_gio``
+    để bác sĩ/dược sĩ xác nhận, tuyệt đối không tự động gán vào buổi sáng.
+    """
     lich: Dict[str, List[Dict[str, str]]] = {
         "sang": [],
         "trua": [],
         "toi": [],
-        "truoc_ngu": []
+        "truoc_ngu": [],
+        "chua_ro_gio": []
     }
     
     for thuoc_raw in danh_sach_thuoc:
         thuoc_str = thuoc_raw.strip()
+        if not thuoc_str:
+            continue
         t_low = thuoc_str.lower()
         
         # Nhận diện thời điểm trước / sau ăn
@@ -96,21 +139,27 @@ def phan_loai_lich_uong_thuoc(danh_sach_thuoc: List[str]) -> Dict[str, List[Dict
             lich["truoc_ngu"].append({"ten_thuoc": thuoc_str, "cach_dung": "Uống trước khi đi ngủ 30 phút"})
             da_gan = True
             
-        # Nếu không có từ khóa buổi cụ thể, phân tích theo tần suất
+        # Nếu không có từ khóa buổi cụ thể, phân tích theo tần suất hoặc nhóm thuốc có giờ uống chuẩn
         if not da_gan:
-            if "ngày 2 lần" in t_low or "ngày 2 viên" in t_low or "2 lần/ngày" in t_low:
+            if "ngày 2 lần" in t_low or "ngày 2 viên" in t_low or "2 lần/ngày" in t_low or "2 lần / ngày" in t_low:
                 lich["sang"].append({"ten_thuoc": thuoc_str, "cach_dung": f"{ghi_chu_an} (Liều 1)"})
                 lich["toi"].append({"ten_thuoc": thuoc_str, "cach_dung": f"{ghi_chu_an} (Liều 2)"})
-            elif "ngày 3 lần" in t_low or "3 lần/ngày" in t_low:
+            elif "ngày 3 lần" in t_low or "3 lần/ngày" in t_low or "3 lần / ngày" in t_low:
                 lich["sang"].append({"ten_thuoc": thuoc_str, "cach_dung": f"{ghi_chu_an} (Liều 1)"})
                 lich["trua"].append({"ten_thuoc": thuoc_str, "cach_dung": f"{ghi_chu_an} (Liều 2)"})
                 lich["toi"].append({"ten_thuoc": thuoc_str, "cach_dung": f"{ghi_chu_an} (Liều 3)"})
-            elif "statin" in t_low or "atorvastatin" in t_low or "rosuvastatin" in t_low:
+            elif any(s in t_low for s in ["statin", "atorvastatin", "rosuvastatin", "simvastatin", "pravastatin"]):
                 # Statin uống buổi tối
                 lich["toi"].append({"ten_thuoc": thuoc_str, "cach_dung": "Uống vào buổi tối sau ăn"})
+            elif any(p in t_low for p in ["nexium", "omeprazol", "esomeprazol", "pantoprazol", "rabeprazol", "lansoprazol"]):
+                # PPI uống buổi sáng trước ăn 30 phút
+                lich["sang"].append({"ten_thuoc": thuoc_str, "cach_dung": ghi_chu_an if "TRƯỚC" in ghi_chu_an else "Uống TRƯỚC khi ăn sáng 30 phút"})
             else:
-                # Mặc định uống buổi sáng
-                lich["sang"].append({"ten_thuoc": thuoc_str, "cach_dung": ghi_chu_an})
+                # Không đoán mò buổi sáng — gắn cờ để bác sĩ/dược sĩ xác nhận
+                lich["chua_ro_gio"].append({
+                    "ten_thuoc": thuoc_str,
+                    "cach_dung": "Cần bác sĩ/dược sĩ xác nhận giờ uống cụ thể"
+                })
                 
     return lich
 
@@ -133,10 +182,17 @@ def sinh_ban_dan_do_benh_nhan(
             loi_giai_thich = gt
             break
             
-    # 2. Tìm chế độ ăn uống phù hợp
-    che_do_an = CHE_DO_AN_UONG_BENH["hô hấp"]  # mặc định
+    # 2. Tìm chế độ ăn uống phù hợp (mặc định trung tính tong_quat, không fallback sang hô hấp)
+    che_do_an = CHE_DO_AN_UONG_BENH["tong_quat"]
     for nhom, cd in CHE_DO_AN_UONG_BENH.items():
-        if nhom in cd_low or (nhom == "hô hấp" and any(h in cd_low for h in ["phế quản", "phổi", "họng", "cảm"])):
+        if nhom == "tong_quat":
+            continue
+        if (
+            nhom in cd_low
+            or (nhom == "hô hấp" and any(h in cd_low for h in ["phế quản", "phổi", "họng", "cảm", "hen", "copd"]))
+            or (nhom == "suy thận" and "bệnh thận mạn" in cd_low)
+            or (nhom == "nhiễm khuẩn tiết niệu" and "tiết niệu" in cd_low)
+        ):
             che_do_an = cd
             break
             
@@ -184,7 +240,8 @@ def dinh_dang_van_ban_dan_do(ban_dan_do: Dict[str, Any]) -> str:
         ("sang", "☀️ BUỔI SÁNG (7h00 - 8h00):"),
         ("trua", "🌤️ BUỔI TRƯA (11h30 - 12h30):"),
         ("toi", "🌙 BUỔI CHIỀU / TỐI (18h00 - 19h00):"),
-        ("truoc_ngu", "🛏️ TRƯỚC KHI ĐI NGỦ (21h00 - 21h30):")
+        ("truoc_ngu", "🛏️ TRƯỚC KHI ĐI NGỦ (21h00 - 21h30):"),
+        ("chua_ro_gio", "⏳ CHƯA RÕ GIỜ UỐNG (Cần hỏi lại bác sĩ/dược sĩ):")
     ]
     
     co_thuoc = False

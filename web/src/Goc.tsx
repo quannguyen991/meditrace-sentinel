@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import App from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ManDangNhap } from "./components/ManDangNhap";
+import { PatientPortalView } from "./components/PatientPortalView";
 import {
   dangXuat,
   donSachKhiHetPhien,
@@ -19,6 +20,20 @@ import {
  * rồi quay về màn đăng nhập.
  */
 export default function Goc() {
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const portalToken = params?.get("portal") || params?.get("token");
+  if (portalToken) {
+    return (
+      <ErrorBoundary
+        title="Cổng thông tin bệnh nhân gặp sự cố"
+        description="Vui lòng thử quét lại mã QR trên đơn thuốc hoặc tải lại trang."
+        allowDismissInline={false}
+      >
+        <PatientPortalView token={portalToken} />
+      </ErrorBoundary>
+    );
+  }
+
   const [tinhTrang, setTinhTrang] = useState<TinhTrangToi | null>(null);
   const [loi, setLoi] = useState<string | null>(null);
 

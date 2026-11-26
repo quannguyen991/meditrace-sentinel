@@ -49,6 +49,9 @@ const TemplatesView = React.lazy(() =>
 const ThuVienYKhoa = React.lazy(() =>
   import("./components/ThuVienYKhoa").then((m) => ({ default: m.ThuVienYKhoa })),
 );
+const HospitalCommandCenterView = React.lazy(() =>
+  import("./components/HospitalCommandCenterView").then((m) => ({ default: m.HospitalCommandCenterView })),
+);
 
 const KhungDangTaiManHinh: React.FC = () => (
   <div
@@ -427,6 +430,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       verification: "proof",
       library: "library",
       settings: "settings",
+      command_center: "command_center",
     };
     setActiveView(view);
     setActiveNavigationItem(mucTheoView[view]);
@@ -436,6 +440,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     setActiveNavigationItem(item);
     if (item === "home") {
       setActiveView("home");
+    } else if (item === "command_center") {
+      setActiveView("command_center");
     } else if (item === "sessions") {
       setActiveView("scribe");
       setMoDuyetBen(false);
@@ -1636,6 +1642,14 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   }}
                 />
               </Suspense>
+            )}
+
+            {activeView === "command_center" && (
+              <section className="flex-1 min-w-0 overflow-y-auto bg-[#F8FBFC]">
+                <Suspense fallback={<KhungDangTaiManHinh />}>
+                  <HospitalCommandCenterView />
+                </Suspense>
+              </section>
             )}
 
             {activeView === "library" && (

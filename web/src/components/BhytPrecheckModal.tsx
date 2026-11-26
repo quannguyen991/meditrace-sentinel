@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Check,
@@ -6,10 +6,13 @@ import {
   Copy,
   Download,
   FileCode,
+  FileSearch,
   Plus,
   ShieldAlert,
+  Upload,
 } from "lucide-react";
 import type { PyBhytPrecheckResponse } from "../types/api-contract";
+import type { KetQuaKiemToanXml } from "./HospitalCommandCenterView";
 
 export interface MucBienLuanCls {
   dich_vu?: string;
@@ -50,6 +53,7 @@ interface BhytPrecheckModalProps {
   result: BhytPrecheckResult | null;
   onClose: () => void;
   onInsertJustification?: (cauBienLuan: string) => void;
+  clinicalEvidence?: { propositions?: unknown[]; transcript?: string };
 }
 
 /**
@@ -109,11 +113,80 @@ export const BhytPrecheckModal: React.FC<BhytPrecheckModalProps> = ({
   result,
   onClose,
   onInsertJustification,
+  clinicalEvidence,
 }) => {
   const [daChepIdx, setDaChepIdx] = useState<number | null>(null);
   const [daChenIdx, setDaChenIdx] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"ca_kham" | "kiem_toan_xml">("ca_kham");
+  const [xmlAuditTab, setXmlAuditTab] = useState<"XML1" | "XML2" | "XML3" | "XML5" | "GIAMDINHHS">("XML1");
+  const [xmlDraft, setXmlDraft] = useState<Record<string, string>>({
+    XML1: "",
+    XML2: "",
+    XML3: "",
+    XML5: "",
+    GIAMDINHHS: "",
+  });
+  const [auditingXml, setAuditingXml] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<KetQuaKiemToanXml | null>(null);
+
+  useEffect(() => {
+    const goi = result?.goi_xml_1_5;
+    if (!goi) return;
+    setXmlDraft((prev) => ({
+      ...prev,
+      XML1: typeof goi.XML1 === "string" ? goi.XML1 : prev.XML1,
+      XML2: typeof goi.XML2 === "string" ? goi.XML2 : prev.XML2,
+      XML3: typeof goi.XML3 === "string" ? goi.XML3 : prev.XML3,
+      XML5: typeof goi.XML5 === "string" ? goi.XML5 : prev.XML5,
+    }));
+  }, [result?.goi_xml_1_5]);
 
   if (!open) return null;
+
+  const chayKiemToanXml = async () => {
+    setAuditingXml(true);
+    setAuditError(null);
+    try {
+      const xml_files: Record<string, string> = {};
+      for (const [k, v] of Object.entries(xmlDraft)) {
+        if (v.trim()) xml_files[k] = v.trim();
+      }
+      const res = await fetch("/api/quan-tri-bv/kiem-toan-xml", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          xml_files,
+          ...(clinicalEvidence ? { bang_chung_kham: clinicalEvidence } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || `Lỗi ${res.status}`);
+      setAuditResult(data as KetQuaKiemToanXml);
+    } catch (err: any) {
+      setAuditError(err?.message || "Không thể kiểm toán gói XML1–XML5.");
+    } finally {
+      setAuditingXml(false);
+    }
+  };
+
+  const docTepXml = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      if (text.includes("<GIAMDINHHS") || text.includes("<FILEHOSO")) {
+        setXmlAuditTab("GIAMDINHHS");
+        setXmlDraft((prev) => ({ ...prev, GIAMDINHHS: text }));
+      } else {
+        setXmlDraft((prev) => ({ ...prev, [xmlAuditTab]: text }));
+      }
+    };
+    reader.readAsText(file, "utf-8");
+    e.target.value = "";
+  };
 
   const dsIcd = result?.icd10_chi_tiet || [];
   const dsXuatToan =
@@ -176,8 +249,137 @@ export const BhytPrecheckModal: React.FC<BhytPrecheckModalProps> = ({
           </button>
         </div>
 
+        {/* Bộ chuyển 2 Tab */}
+        <div className="px-5 py-2 border-b border-slate-100 bg-[#F8FBFC] flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab("ca_kham")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+              activeTab === "ca_kham"
+                ? "bg-[#0284C7] text-white shadow-2xs"
+                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            Tab 1 — Tiền kiểm Ca khám
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("kiem_toan_xml")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+              activeTab === "kiem_toan_xml"
+                ? "bg-[#0284C7] text-white shadow-2xs"
+                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            <FileSearch size={13} />
+            <span>Tab 2 — Kiểm toán gói XML1–XML5 (TT 20/2022 & QĐ 130)</span>
+          </button>
+        </div>
+
         {/* Thân modal */}
         <div className="p-5 overflow-y-auto space-y-3.5 text-xs bg-[#F8FBFC] flex-1">
+          {activeTab === "kiem_toan_xml" ? (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-[#BAE6FD] bg-white p-3.5 space-y-2.5 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-bold text-[#0369A1]">
+                    Kiểm toán gói XML1–XML5 đầu vào (QĐ 130/4210 & TT 20/2022)
+                  </span>
+                  <label className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                    <Upload size={12} />
+                    <span>Nạp tệp .xml</span>
+                    <input type="file" accept=".xml,text/xml,application/xml" onChange={docTepXml} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {(["XML1", "XML2", "XML3", "XML5", "GIAMDINHHS"] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setXmlAuditTab(t)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer ${
+                        xmlAuditTab === t
+                          ? "bg-[#0284C7] text-white"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      {t}
+                      {xmlDraft[t]?.trim() ? " •" : ""}
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={xmlDraft[xmlAuditTab] || ""}
+                  onChange={(e) => setXmlDraft((prev) => ({ ...prev, [xmlAuditTab]: e.target.value }))}
+                  rows={6}
+                  placeholder={`Dán hoặc chỉnh sửa nội dung ${xmlAuditTab} (tự động nạp từ ca khám nếu có)...`}
+                  className="w-full rounded-xl border border-slate-200 bg-[#F8FBFC] p-2.5 font-mono text-[11px] text-slate-800 focus:outline-none focus:border-[#0284C7]"
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    disabled={auditingXml}
+                    onClick={() => void chayKiemToanXml()}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] disabled:opacity-50 text-white text-xs font-semibold cursor-pointer"
+                  >
+                    <FileSearch size={13} />
+                    <span>{auditingXml ? "Đang kiểm toán..." : "Chạy kiểm toán XML1–XML5"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {auditError && (
+                <div className="rounded-xl border border-[#F5C2C2] bg-[#FFF5F5] p-3 text-[#B4232C]">
+                  {auditError}
+                </div>
+              )}
+
+              {auditResult && (
+                <div className="rounded-xl border border-[#BAE6FD] bg-white p-3.5 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className={`font-bold flex items-center gap-1.5 ${auditResult.hop_le ? "text-[#0D6B50]" : "text-[#B4232C]"}`}>
+                      {auditResult.hop_le ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+                      {auditResult.hop_le ? "Hợp lệ — Sẵn sàng gửi BHXH" : "Phát hiện nguy cơ xuất toán / lỗi cấu trúc"}
+                    </span>
+                    <span className="font-mono text-[#B4232C] font-semibold">
+                      Nguy cơ xuất toán: {new Intl.NumberFormat("vi-VN").format(Math.round(auditResult.tong_nguy_co_xuat_toan || 0))} đ
+                    </span>
+                  </div>
+
+                  {auditResult.loi_cau_truc.length > 0 && (
+                    <div className="rounded-lg bg-[#FFF5F5] border border-[#F5C2C2] p-2.5 space-y-1 text-[#7F1D1D]">
+                      <div className="font-bold text-[#B4232C]">Lỗi cấu trúc QĐ 130/4210:</div>
+                      {auditResult.loi_cau_truc.map((l, i) => (
+                        <div key={i}>• [{l.loai}/{l.truong}] {l.ly_do}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  {auditResult.vi_pham_tt20.length > 0 && (
+                    <div className="rounded-lg bg-[#FEF9E7] border border-[#F5E6B8] p-2.5 space-y-1 text-[#92400E]">
+                      <div className="font-bold text-[#7A4B00]">Vi phạm quy tắc TT 20/2022:</div>
+                      {auditResult.vi_pham_tt20.map((v, i) => (
+                        <div key={i}>• [{v.loai}] {v.ly_do}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  {auditResult.thieu_bang_chung_k1_k7.length > 0 && (
+                    <div className="rounded-lg bg-[#F0F9FF] border border-[#BAE6FD] p-2.5 space-y-1 text-[#0C4A6E]">
+                      <div className="font-bold text-[#0369A1]">Thiếu chứng cứ K1–K7:</div>
+                      {auditResult.thieu_bang_chung_k1_k7.map((t, i) => (
+                        <div key={i}>• [{t.loai}] {t.ly_do}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
           {loading && <p className="text-[#64748B] py-6 text-center">Đang chạy BHYTXmlPreChecker tại chỗ...</p>}
 
           {!loading && result && (
@@ -398,6 +600,8 @@ export const BhytPrecheckModal: React.FC<BhytPrecheckModalProps> = ({
                   </div>
                 )}
               </div>
+            </>
+          )}
             </>
           )}
         </div>

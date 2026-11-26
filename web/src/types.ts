@@ -8,7 +8,7 @@ export interface KetQuaDuyet {
   banSua: Record<number, string>;
 }
 
-export type ViewMode = "home" | "scribe" | "evidence" | "tasks" | "patients" | "templates" | "verification" | "library" | "settings";
+export type ViewMode = "home" | "scribe" | "evidence" | "tasks" | "patients" | "templates" | "verification" | "library" | "settings" | "command_center";
 
 export interface TranscriptSegment {
   luot: number;

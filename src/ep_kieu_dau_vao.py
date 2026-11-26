@@ -42,6 +42,31 @@ def _ep_nguyen(v: float) -> Any:
     return int(v) if float(v).is_integer() else v
 
 
+_CHUOI_DUNG = {"true", "1", "có", "co", "yes", "y", "đúng", "dung", "mang thai", "có thai", "co thai"}
+_CHUOI_SAI = {"false", "0", "không", "khong", "no", "n", "sai", "không có", "khong co", "chưa", "chua"}
+
+
+def ep_bool_an_toan(x: Any) -> Optional[bool]:
+    """Chuyển bool / số 0-1 / chuỗi tiếng Việt-Anh thành bool hoặc None nếu không rõ."""
+    if x is None:
+        return None
+    if isinstance(x, bool):
+        return x
+    if isinstance(x, (int, float)):
+        if x == 1:
+            return True
+        if x == 0:
+            return False
+        return None
+    if isinstance(x, str):
+        s = x.strip().lower()
+        if s in _CHUOI_DUNG:
+            return True
+        if s in _CHUOI_SAI:
+            return False
+    return None
+
+
 def chuan_hoa_thong_tin_benh_nhan(tt: Any) -> Optional[Dict[str, Any]]:
     """Ban sao dict thong tin benh nhan voi cac truong so da ep kieu; khoa so khong doc duoc bi bo."""
     if not isinstance(tt, dict):
@@ -55,6 +80,22 @@ def chuan_hoa_thong_tin_benh_nhan(tt: Any) -> Optional[Dict[str, Any]]:
             ra.pop(k)
         else:
             ra[k] = _ep_nguyen(v) if k in KHOA_SO_NGUYEN_BN else v
+
+    # Chuẩn hóa đồng bộ cờ thai kỳ (`co_thai`, `thai_ky`, `mang_thai`)
+    cac_co_thai = {k: ep_bool_an_toan(ra.get(k)) for k in ("co_thai", "thai_ky", "mang_thai") if k in ra}
+    if any(v is True for v in cac_co_thai.values()):
+        ra["thai_ky"] = True
+        ra["mang_thai"] = True
+        if "co_thai" in ra:
+            ra["co_thai"] = True
+    elif any(v is False for v in cac_co_thai.values()):
+        for k, v in cac_co_thai.items():
+            if v is not None:
+                ra[k] = v
+        if cac_co_thai.get("co_thai") is False:
+            ra.setdefault("thai_ky", False)
+            ra.setdefault("mang_thai", False)
+
     xn = ra.get("xet_nghiem")
     if isinstance(xn, dict):
         ra["xet_nghiem"] = chuan_hoa_du_lieu_xet_nghiem_dau_vao(xn)

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import type express from "express";
-import { caKhamThuocNguoiKhac, ghiNhatKy } from "../csdl";
+import { caKhamThuocNguoiKhac, ghiNhatKy, khoWorm } from "../csdl";
 import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 
 const TOI_DA_CSV_DUOC_THU_BYTES = 500 * 1024; // 500 KB
@@ -79,10 +79,22 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
           )
           .digest("hex");
 
+        const wormRes = khoWorm.ghiSignOff({
+          sessionId: cleanSessionId,
+          userId: uid,
+          tongMenhDe: Math.max(1, propositions.length),
+          soGiu: Math.max(1, propositions.length),
+          soSua: 0,
+          soBo: 0,
+          tyLeCoNguon: 100,
+          contentHash: consentHash,
+          soChuaXacNhan: 0,
+        });
+
         ghiNhatKy(
           uid,
           "cam_doan_thu_thuat_worm",
-          `session=${cleanSessionId} procedure=${String(procedureName || "-").slice(0, 120)} hash=${consentHash}`,
+          `session=${cleanSessionId} procedure=${String(procedureName || "-").slice(0, 120)} seq=${wormRes.wormSeq} hash=${consentHash}`,
         );
 
         return res.json({
@@ -90,6 +102,8 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
           consentHash,
           checkedAt,
           sessionId: cleanSessionId,
+          wormSeq: wormRes.wormSeq,
+          wormHash: wormRes.hash,
         });
       }
 
@@ -166,7 +180,13 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
       const uid = req.nguoiDung?.id;
       if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
 
-      const rawCsv = req.body?.csvContent ?? req.body?.csv_content;
+      const rawCsv =
+        req.body?.csvContent ??
+        req.body?.csv_content ??
+        req.body?.csv ??
+        req.body?.csv_text ??
+        req.body?.csvText ??
+        req.body?.text;
       if (typeof rawCsv !== "string" || !rawCsv.trim()) {
         return res.status(400).json({ error: "Vui lòng cung cấp nội dung CSV danh mục thuốc (csvContent)." });
       }
@@ -182,11 +202,85 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
       const kqHttp = await goiDichVu("/api/duoc-thu/nap-csv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csvContent: rawCsv, csv_content: rawCsv }),
+        body: JSON.stringify({ noi_dung_csv: rawCsv, csvContent: rawCsv }),
       });
 
       ghiNhatKy(uid, "nap_duoc_thu_csv", `bytes=${byteLen} vai=${req.nguoiDung?.vai || "bac_si"}`);
       res.json(kqHttp);
+    } catch (err) {
+      traLoi(res, err);
+    }
+  });
+
+  /**
+   * M4 — Tái kiểm tra lâm sàng vòng lặp kín (<50ms deterministic re-verification):
+   * Chạy lại bộ kiểm duyệt an toàn DDI/dị ứng/thang điểm nguy cơ khi bác sĩ bổ sung mệnh đề (F2/SOCRATES/CLS).
+   */
+  app.post("/api/lam-sang/tai-kiem-tra", async (req, res) => {
+    try {
+      const uid = req.nguoiDung?.id;
+      if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
+
+      const body = req.body && typeof req.body === "object" ? req.body : {};
+      const propositions = body.propositions;
+      if (!Array.isArray(propositions)) {
+        return res.status(400).json({ error: "propositions phải là mảng" });
+      }
+
+      const payload = {
+        propositions,
+        transcript: String(body.transcript ?? ""),
+        thong_tin_benh_nhan: body.thong_tin_benh_nhan ?? body.patientInfo ?? null,
+        du_lieu_xet_nghiem: body.du_lieu_xet_nghiem ?? body.labResults ?? null,
+        lich_su_lan_kham: body.lich_su_lan_kham ?? body.visitHistory ?? null,
+      };
+
+      let kq: any;
+      try {
+        kq = await goiDichVu("/api/lam-sang/tai-kiem-tra", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (err: any) {
+        if (err?.code !== "dich_vu_tat" && err?.status !== 404 && err?.code !== "khong_co_duong") throw err;
+        kq = await chayPythonJson("src.dieu_phoi_ha_tang", ["--tai-kiem-tra"], payload);
+      }
+
+      res.json(kq);
+    } catch (err) {
+      traLoi(res, err);
+    }
+  });
+
+  /**
+   * M4 — Phân tích thông điệp HL7 v2 ORU^R01 / LIS (Lab Information System):
+   * Chuyển kết quả xét nghiệm chuẩn HL7 sang chỉ số lâm sàng + cảnh báo giá trị nguy kịch (Panic Values).
+   */
+  app.post("/api/lis/parse", async (req, res) => {
+    try {
+      const uid = req.nguoiDung?.id;
+      if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
+
+      const text = String(req.body?.text ?? "");
+      if (!text.trim()) {
+        return res.status(400).json({ error: "Vui lòng cung cấp nội dung thông điệp HL7 ORU^R01 (text)." });
+      }
+
+      const payload = { text };
+      let kq: any;
+      try {
+        kq = await goiDichVu("/api/lis/parse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (err: any) {
+        if (err?.code !== "dich_vu_tat" && err?.status !== 404 && err?.code !== "khong_co_duong") throw err;
+        kq = await chayPythonJson("src.lis_hl7_oru", ["--parse"], payload);
+      }
+
+      res.json(kq);
     } catch (err) {
       traLoi(res, err);
     }

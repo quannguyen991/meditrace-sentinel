@@ -13,6 +13,7 @@ import {
   Upload,
   Pill,
   ShieldAlert,
+  FileSpreadsheet,
 } from "lucide-react";
 import { trichNguCanhChoTroLy } from "../lib/nguCanhTroLy";
 
@@ -41,6 +42,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
   const [thongBaoAnh, setThongBaoAnh] = React.useState<string | null>(null);
   const [loiOcr, setLoiOcr] = React.useState<string | null>(null);
   const oChonAnh = React.useRef<HTMLInputElement>(null);
+  const oChonHl7 = React.useRef<HTMLInputElement>(null);
 
   // Boost 12: Công cụ nạp Danh mục Thuốc Bệnh viện (.csv) tại chỗ
   const oChonCsv = React.useRef<HTMLInputElement>(null);
@@ -117,6 +119,42 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
       setThongBaoAnh("Đã đính kèm ảnh phiếu cục bộ. Nhập nhanh chỉ số thấy trên ảnh vào ô bên dưới để hệ thống tính eGFR.");
     } finally {
       e.target.value = "";
+    }
+  };
+
+  const xuLyChonHl7 = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tep = e.target.files?.[0];
+    if (!tep) return;
+    try {
+      const text = await tep.text();
+      setDangQuet(true);
+      setLoiOcr(null);
+      const res = await fetch("/api/lis/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Lỗi khi nạp dữ liệu LIS/HL7");
+      if (data.chi_so) {
+        setKetQuaOcr((prev) => ({
+          ...prev,
+          chi_so: data.chi_so,
+          doi_soat_can_lam_sang: data.doi_soat_can_lam_sang,
+        }));
+        const cs = Object.entries(data.chi_so)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ");
+        if (cs) {
+          const capNhat = tab.content ? `${tab.content}\n[Xét nghiệm LIS/HL7]: ${cs}` : `[Xét nghiệm LIS/HL7]: ${cs}`;
+          onUpdateContent(capNhat);
+        }
+      }
+    } catch (err: any) {
+      setLoiOcr(err?.message || "Không thể phân tích tệp LIS/HL7.");
+    } finally {
+      setDangQuet(false);
+      if (oChonHl7.current) oChonHl7.current.value = "";
     }
   };
 
@@ -314,6 +352,23 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
                 className="hidden"
                 aria-label="Tải ảnh phiếu xét nghiệm hoặc đơn thuốc cũ"
               />
+              <input
+                ref={oChonHl7}
+                type="file"
+                accept=".hl7,.txt,.csv,.json"
+                onChange={xuLyChonHl7}
+                className="hidden"
+                aria-label="Tải tệp kết quả LIS / HL7 ORU^R01"
+              />
+              <button
+                type="button"
+                onClick={() => oChonHl7.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] text-xs font-semibold transition-all shadow-tactile-doctor-pill cursor-pointer"
+                title="Nhập kết quả xét nghiệm định dạng HL7 v2 ORU^R01, CSV, hoặc JSON"
+              >
+                <FileSpreadsheet size={14} className="text-[#0284C7]" />
+                <span>Nhập LIS / HL7 / CSV</span>
+              </button>
               <button
                 type="button"
                 onClick={() => oChonAnh.current?.click()}

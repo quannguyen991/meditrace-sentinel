@@ -9,14 +9,13 @@ from src.worm_audit_log import WormAuditLogger, GENESIS_HASH
 
 
 @pytest.fixture
-def temp_logger():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        db_path = Path(tmpdir) / "test_worm.db"
-        logger = WormAuditLogger(db_path)
-        try:
-            yield logger
-        finally:
-            logger.close()
+def temp_logger(tmp_path):
+    db_path = tmp_path / "test_worm.db"
+    logger = WormAuditLogger(db_path)
+    try:
+        yield logger
+    finally:
+        logger.close()
 
 
 def test_genesis_hash_khoi_tao(temp_logger):

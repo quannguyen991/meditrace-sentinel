@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { sha256HexSync } from "../lib/compileEffectiveNote";
+import { QrCodeSvg } from "../lib/qrEncoder";
 import {
   AlertTriangle,
   Calendar,
@@ -305,6 +306,10 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [sua, setSua] = useState(false);
   const [dangDoc, setDangDoc] = useState(false);
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
+  const [portalToken, setPortalToken] = useState<string | null>(null);
+  const [dangTaoPortal, setDangTaoPortal] = useState(false);
+  const [daChepLink, setDaChepLink] = useState(false);
   const laHoSoMau = hoSo === HO_SO_MAU;
 
   const maKiemChungNgan = useMemo(() => {
@@ -313,6 +318,45 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
       .join(";")}`;
     return sha256HexSync(chuoi).slice(0, 12).toUpperCase();
   }, [patientName, hoSo.chanDoan, hoSo.thuoc]);
+
+  const originUrl = typeof window !== "undefined" ? window.location.origin : "https://meditrace.vn";
+  const qrValue = portalUrl || `${originUrl}/?portal=MT-${maKiemChungNgan}`;
+
+  const taoCongTheoDoi = async () => {
+    if (dangTaoPortal) return;
+    setDangTaoPortal(true);
+    try {
+      const res = await fetch("/api/benh-nhan-portal/tao-ma", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenBenhNhan: patientName,
+          chanDoan: hoSo.chanDoan,
+          thuoc: hoSo.thuoc,
+          anUong: hoSo.anUong,
+          dauHieu: hoSo.dauHieu,
+          ngayTaiKham: hoSo.ngayTaiKham,
+          diaDiemTaiKham: hoSo.diaDiemTaiKham,
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { token?: string; url?: string };
+        if (data.token && data.url) {
+          setPortalToken(data.token);
+          setPortalUrl(`${originUrl}/${data.url.replace(/^\//, "")}`);
+          return;
+        }
+      }
+      // Fallback sang URL ký ngoại tuyến nếu chưa kết nối máy chủ
+      setPortalToken(`MT-${maKiemChungNgan}`);
+      setPortalUrl(`${originUrl}/?portal=MT-${maKiemChungNgan}`);
+    } catch {
+      setPortalToken(`MT-${maKiemChungNgan}`);
+      setPortalUrl(`${originUrl}/?portal=MT-${maKiemChungNgan}`);
+    } finally {
+      setDangTaoPortal(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen && typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -759,61 +803,61 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
               <div className="space-y-1.5 sm:border-l sm:border-[#E0F2FE] sm:pl-5">
                 <div className="flex items-center gap-1.5 text-slate-900 font-bold text-[12px]">
                   <ShieldCheck size={14} className="text-[#0D9488]" />
-                  <span>Mã đối chiếu SHA-256 (Minh hoạ)</span>
+                  <span>Mã QR Cổng theo dõi 48h/7d</span>
                 </div>
                 <div className="flex items-start gap-2.5 pt-0.5">
-                  <svg
-                    viewBox="0 0 21 21"
-                    className="w-16 h-16 border border-slate-200 rounded-lg p-1 bg-white flex-shrink-0"
-                    aria-label="Biểu trưng ma trận đối chiếu trực quan (minh hoạ bố cục, không phải mã QR quét camera)"
-                  >
-                    {Array.from({ length: 21 * 21 }, (_, idx) => {
-                      const r = Math.floor(idx / 21);
-                      const c = idx % 21;
-                      const inFinder =
-                        (r < 7 && c < 7) || (r < 7 && c >= 14) || (r >= 14 && c < 7);
-                      let on = false;
-                      if (inFinder) {
-                        const lr = r >= 14 ? r - 14 : r;
-                        const lc = c >= 14 ? c - 14 : c;
-                        on =
-                          lr === 0 || lr === 6 || lc === 0 || lc === 6 ||
-                          (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4);
-                      } else {
-                        const seedStr = maKiemChungNgan;
-                        let h = (r * 31 + c * 17) ^ seedStr.length;
-                        for (let i = 0; i < seedStr.length; i++) {
-                          h = (h * 33 + seedStr.charCodeAt(i) + idx) & 0xffff;
-                        }
-                        on = h % 2 === 0;
-                      }
-                      return on ? <rect key={idx} x={c} y={r} width={1} height={1} fill="#0F172A" /> : null;
-                    })}
-                  </svg>
-                  <div className="space-y-1 min-w-0">
+                  <QrCodeSvg
+                    value={qrValue}
+                    size={76}
+                    className="w-[76px] h-[76px] border border-slate-200 rounded-lg bg-white flex-shrink-0"
+                    title="Mã QR chuẩn ISO-18004 Cổng theo dõi người bệnh"
+                  />
+                  <div className="space-y-1.5 min-w-0">
                     <div className="font-mono text-[10.5px] font-bold text-[#0C4A6E] bg-[#F0F9FF] border border-[#BAE6FD] rounded px-1.5 py-0.5 inline-block">
-                      MT-{maKiemChungNgan}
+                      {portalToken || `MT-${maKiemChungNgan}`}
                     </div>
-                    <p className="text-slate-500 text-[10.5px] leading-snug">
-                      Ô minh hoạ vị trí mã định danh nội bộ (chưa gắn cổng QR trực tuyến). Dùng nút bên dưới để chép tóm tắt gửi người bệnh.
+                    <p className="text-slate-600 text-[10.5px] leading-snug">
+                      Người bệnh quét mã QR bằng camera để xem lịch uống thuốc và gửi báo cáo theo dõi 48h/7 ngày.
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const tomTat = [
-                          `📋 TỜ DẶN DÒ NGƯỜI BỆNH — ${patientName} (${hoSo.chanDoan})`,
-                          ...hoSo.thuoc.map(
-                            (t, i) =>
-                              `${i + 1}. ${t.ten}: Sáng ${t.sang} | Trưa ${t.trua} | Chiều ${t.chieu} | Tối ${t.toi} (${t.loiDan})`
-                          ),
-                          `⚠️ Cấp cứu ngay nếu: ${hoSo.dauHieu.map((d) => d.noiDung).join("; ")}`,
-                        ].join("\n");
-                        void navigator.clipboard?.writeText(tomTat);
-                      }}
-                      className="no-print print:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-[#0369A1] border border-sky-200 text-[10.5px] font-semibold cursor-pointer"
-                    >
-                      Sao chép gửi Zalo
-                    </button>
+                    <div className="flex flex-wrap gap-1.5 no-print print:hidden">
+                      <button
+                        type="button"
+                        onClick={taoCongTheoDoi}
+                        disabled={dangTaoPortal}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0284C7] hover:bg-[#0369A1] disabled:opacity-60 text-white text-[10.5px] font-semibold cursor-pointer"
+                      >
+                        {dangTaoPortal ? "Đang tạo..." : "Tạo mã QR Cổng theo dõi 48h/7d"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void navigator.clipboard?.writeText(qrValue);
+                          setDaChepLink(true);
+                          setTimeout(() => setDaChepLink(false), 2000);
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10.5px] font-semibold cursor-pointer"
+                      >
+                        {daChepLink ? "Đã chép liên kết" : "Chép liên kết QR"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const tomTat = [
+                            `📋 TỜ DẶN DÒ NGƯỜI BỆNH — ${patientName} (${hoSo.chanDoan})`,
+                            ...hoSo.thuoc.map(
+                              (t, i) =>
+                                `${i + 1}. ${t.ten}: Sáng ${t.sang} | Trưa ${t.trua} | Chiều ${t.chieu} | Tối ${t.toi} (${t.loiDan})`
+                            ),
+                            `🔗 Cổng theo dõi 48h/7d: ${qrValue}`,
+                            `⚠️ Cấp cứu ngay nếu: ${hoSo.dauHieu.map((d) => d.noiDung).join("; ")}`,
+                          ].join("\n");
+                          void navigator.clipboard?.writeText(tomTat);
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-[#0369A1] border border-sky-200 text-[10.5px] font-semibold cursor-pointer"
+                      >
+                        Sao chép gửi Zalo
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
