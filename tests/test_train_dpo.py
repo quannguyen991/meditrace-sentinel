@@ -63,6 +63,18 @@ def test_nap_cap_bo_cap_khong_co_nhac_va_cap_qua_dai(tmp_path):
     assert bo == 1
 
 
+def test_ghep_lo_dem_phai_nhan_dem_bi_bo_qua():
+    ids, nhan, mat = td.ghep_lo([([1, 2, 3], [-100, 2, 3]), ([4, 5], [-100, 5])], ma_dem=0)
+    assert ids == [[1, 2, 3], [4, 5, 0]]
+    assert nhan == [[-100, 2, 3], [-100, 5, -100]]
+    assert mat == [[1, 1, 1], [1, 1, 0]]
+
+
+def test_ghep_lo_cung_do_dai_mat_na_toan_mot():
+    _ids, _nhan, mat = td.ghep_lo([([1, 2], [-100, 2]), ([3, 4], [-100, 4])], ma_dem=0)
+    assert all(all(x == 1 for x in r) for r in mat)
+
+
 def test_loss_dpo_bang_cong_thuc():
     torch = pytest.importorskip("torch")
     lt, lx, rt, rx, nll = map(torch.tensor, (-10.0, -12.0, -11.0, -11.0, 0.5))

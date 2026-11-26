@@ -123,6 +123,63 @@ def logp_chuoi(model, ids, nhan, kich_thuoc_doan=512):
     return -ce * n, n
 
 
+def ghep_lo(cac_mau, ma_dem):
+    """[(ids, nhan), ...] -> (ids [B,T], nhan [B,T], mat_na [B,T]) dem PHAI; nhan dem = -100.
+    Thuan Python (danh sach), de test khong can torch."""
+    T = max(len(i) for i, _ in cac_mau)
+    ids = [list(i) + [ma_dem] * (T - len(i)) for i, _ in cac_mau]
+    nhan = [list(n) + [-100] * (T - len(n)) for _, n in cac_mau]
+    mat = [[1] * len(i) + [0] * (T - len(i)) for i, _ in cac_mau]
+    return ids, nhan, mat
+
+
+def _logp_doan(h, lm_head, y):
+    import torch.nn.functional as F
+    logits = lm_head(h).float()
+    ce = F.cross_entropy(logits.reshape(-1, logits.size(-1)), y.reshape(-1),
+                         ignore_index=-100, reduction="none").view(y.shape)
+    return -ce.sum(dim=1)
+
+
+def logp_lo(model, cac_mau, ma_dem, kich_thuoc_doan=512):
+    """MOT luot qua mo hinh cho ca lo (ban dung + ban sai) -> (logp [B], so token [B]).
+    Nhanh hon hai luot rieng vi GPU chay day hon; ket qua bang `logp_chuoi` tung chuoi."""
+    import torch
+    from torch.utils.checkpoint import checkpoint
+    from src.loss_theo_doan import bo_mat_na_day_du
+    dev = next(model.parameters()).device
+    ids, nhan, mat = (torch.tensor(x, device=dev) for x in ghep_lo(cac_mau, ma_dem))
+    goc = model.base_model.model
+    hidden = goc.model(input_ids=ids, attention_mask=bo_mat_na_day_du(mat)).last_hidden_state
+    h, y = hidden[:, :-1], nhan[:, 1:]
+    tong = hidden.new_zeros(ids.size(0), dtype=torch.float32)
+    for i in range(0, h.size(1), kich_thuoc_doan):
+        yy = y[:, i:i + kich_thuoc_doan]
+        if not bool((yy != -100).any()):
+            continue
+        hh = h[:, i:i + kich_thuoc_doan]
+        if hh.requires_grad:
+            tong = tong + checkpoint(_logp_doan, hh, goc.lm_head, yy, use_reentrant=False)
+        else:
+            tong = tong + _logp_doan(hh, goc.lm_head, yy)
+    return tong, (y != -100).sum(dim=1)
+
+
+def _logp_cap(model, m, ma_dem, ghep):
+    """-> (lp_tot, lp_xau, n_tot). Ghep lo neu duoc; tran bo nho thi chay lan luot."""
+    import torch
+    if ghep:
+        try:
+            lp, n = logp_lo(model, [m["tot"], m["xau"]], ma_dem)
+            return lp[0], lp[1], int(n[0].item())
+        except torch.cuda.OutOfMemoryError:
+            torch.cuda.empty_cache()
+            print(f"[tran bo nho] {m['khoa']} — chay lan luot", flush=True)
+    lt, nt = logp_chuoi(model, *m["tot"])
+    lx, _ = logp_chuoi(model, *m["xau"])
+    return lt, lx, nt
+
+
 def _nap_mo_hinh(model_goc, adapter, huan_luyen):
     import torch
     from peft import PeftModel, prepare_model_for_kbit_training
@@ -162,10 +219,15 @@ def pha_ref(a, tok, mau):
     model = _nap_mo_hinh(a.model, a.adapter_goc, huan_luyen=False)
     with open(a.tep_ref, "a", encoding="utf-8") as f, torch.no_grad():
         for i, m in enumerate(can, 1):
-            lt, nt = logp_chuoi(model, *m["tot"])
-            lx, nx = logp_chuoi(model, *m["xau"])
+            lt, lx, nt = _logp_cap(model, m, tok.pad_token_id, a.ghep_lo)
+            if i == 1 and a.ghep_lo:
+                # tu kiem: lo 2 chuoi phai cho cung log-prob voi chay lan luot
+                st, _ = logp_chuoi(model, *m["tot"])
+                sx, _ = logp_chuoi(model, *m["xau"])
+                print(f"[kiem ghep lo] tot {lt.item():.3f} vs {st.item():.3f}, "
+                      f"xau {lx.item():.3f} vs {sx.item():.3f}", flush=True)
             f.write(json.dumps({"khoa": m["khoa"], "tot": lt.item(), "xau": lx.item(),
-                                "n_tot": nt, "n_xau": nx}) + "\n")
+                                "n_tot": nt}) + "\n")
             f.flush()
             if i % 25 == 0:
                 print(f"[ref] {i}/{len(can)}", flush=True)
@@ -192,14 +254,27 @@ def pha_train(a, tok, mau):
     nk = open(a.thu_muc_ra / "nhat_ky.jsonl", "a", encoding="utf-8")
     model.train()
     buoc, tong = 0, defaultdict(float)
-    for i, m in enumerate(mau):
+    import time
+    t0 = time.time()
+
+    def mot_cap(m, ghep):
         r = ref[m["khoa"]]
-        lt, nt = logp_chuoi(model, *m["tot"])
-        lx, _nx = logp_chuoi(model, *m["xau"])
+        lt, lx, nt = _logp_cap(model, m, tok.pad_token_id, ghep)
         loss, le = loss_dpo(lt, lx, torch.tensor(r["tot"], device=lt.device),
                             torch.tensor(r["xau"], device=lt.device), -lt / max(nt, 1),
                             a.beta, a.alpha)
         (loss / a.tich_luy).backward()
+        return loss, le
+
+    for i, m in enumerate(mau):
+        try:
+            loss, le = mot_cap(m, a.ghep_lo)
+        except torch.cuda.OutOfMemoryError:
+            # tran bo nho luc lan truyen nguoc: tat ghep lo cho phan con lai
+            torch.cuda.empty_cache()
+            a.ghep_lo = False
+            print(f"[tran bo nho khi lan truyen nguoc] {m['khoa']} - tat ghep lo", flush=True)
+            loss, le = mot_cap(m, False)
         tong["loss"] += loss.item()
         tong["le"] += le.item()
         tong["dung"] += float(le.item() > 0)
@@ -214,7 +289,8 @@ def pha_train(a, tok, mau):
             if buoc % 5 == 0 or i + 1 == len(mau):
                 n = tong["n"]
                 dong = {"buoc": buoc, "tren": so_buoc, "cap": i + 1, "loss": tong["loss"] / n,
-                        "le_tb": tong["le"] / n, "ti_le_dung": tong["dung"] / n, "lr": lr_tai(buoc - 1)}
+                        "le_tb": tong["le"] / n, "ti_le_dung": tong["dung"] / n, "lr": lr_tai(buoc - 1),
+                        "giay_moi_cap": round((time.time() - t0) / (i + 1), 1)}
                 print(json.dumps(dong), flush=True)
                 nk.write(json.dumps(dong) + "\n")
                 nk.flush()
@@ -234,8 +310,7 @@ def pha_danh_gia(a, tok, mau):
     theo = defaultdict(lambda: [0, 0])
     with torch.no_grad():
         for i, m in enumerate(mau, 1):
-            lt, _ = logp_chuoi(model, *m["tot"])
-            lx, _ = logp_chuoi(model, *m["xau"])
+            lt, lx, _ = _logp_cap(model, m, tok.pad_token_id, a.ghep_lo)
             theo[m["loai"]][0] += int(lt.item() > lx.item())
             theo[m["loai"]][1] += 1
             if i % 25 == 0:
@@ -268,6 +343,8 @@ def main(argv=None):
     ap.add_argument("--luu-moi", type=int, default=50)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--tep-ket-qua", type=Path, default=None)
+    ap.add_argument("--khong-ghep-lo", dest="ghep_lo", action="store_false",
+                    help="chay ban dung va ban sai lan luot thay vi mot lo 2 chuoi")
     a = ap.parse_args(argv)
     a.tep_ref = a.thu_muc_ra / "ref_logp.jsonl"
 
