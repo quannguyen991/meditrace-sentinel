@@ -85,4 +85,60 @@ assert.deepEqual(
   assert.deepEqual(r.mauThuan, []);
 }
 
+// 10. Vá P0: mệnh đề DỊ ỨNG có gắn trường drug KHÔNG tự mâu thuẫn với chính nó
+{
+  const r = doiChieuThuocDiUng([
+    { text: "sốc phản vệ độ 3 với penicillin", section: "DỊ ỨNG", drug: "penicillin" },
+    { text: "đang uống amlodipin 5 mg", section: "THUỐC ĐANG DÙNG", drug: "amlodipin 5 mg" },
+  ]);
+  assert.deepEqual(r.thuoc, ["amlodipin 5 mg"]);
+  assert.deepEqual(r.diUng, ["sốc phản vệ độ 3 với penicillin"]);
+  assert.deepEqual(r.mauThuan, [], "mục DỊ ỨNG có trường drug không được tính vào danh sách thuốc đang dùng");
+  assert.deepEqual(r.thieu, []);
+}
+
+// 11. Vá P0: thuốc trong KẾ HOẠCH ĐIỀU TRỊ trùng chất ở mục DỊ ỨNG (kể cả khi text chỉ ghi phản ứng) vẫn phát hiện đúng
+{
+  const r = doiChieuThuocDiUng([
+    { text: "sốc phản vệ nặng", section: "DỊ ỨNG", drug: "ceftriaxone" },
+    { text: "kê ceftriaxone 1 g tiêm tĩnh mạch", section: "KẾ HOẠCH ĐIỀU TRỊ", drug: "ceftriaxone 1 g" },
+    { text: "năm ngoái từng dùng ibuprofen", section: "TIỀN SỬ BỆNH", drug: "ibuprofen 400 mg" },
+  ]);
+  assert.deepEqual(r.thuoc, ["ceftriaxone 1 g"], "chỉ gom thuốc từ mục thuốc/điều trị, không gom TIỀN SỬ BỆNH");
+  assert.deepEqual(r.diUng, ["sốc phản vệ nặng (ceftriaxone)"]);
+  assert.equal(r.mauThuan.length, 1);
+  assert.ok(r.mauThuan[0].includes("ceftriaxone"));
+}
+
+// 12. Tương thích định dạng thực tế của menhDeChoGiaoDien ("ten ..., lieu ..., trang_thai_dung ..."):
+// bắt đúng dị ứng + khác liều và loại trừ thuốc đã ngừng (trang_thai_dung đã ngừng)
+{
+  const r = doiChieuThuocDiUng([
+    { text: "dị ứng penicillin", section: "DỊ ỨNG", drug: "ten penicillin" },
+    {
+      text: "đang uống Penicillin V",
+      section: "THUỐC ĐANG DÙNG",
+      drug: "ten Penicillin V, lieu 500 mg, so_lan 2 lần/ngày, trang_thai_dung đang dùng",
+    },
+    {
+      text: "từng uống amoxicillin nhưng đã ngừng",
+      section: "THUỐC ĐANG DÙNG",
+      drug: "ten amoxicillin, lieu 500 mg, trang_thai_dung đã ngừng",
+    },
+    {
+      text: "amlodipin sáng",
+      section: "THUỐC ĐANG DÙNG",
+      drug: "ten amlodipin, lieu 5 mg, trang_thai_dung đang dùng",
+    },
+    {
+      text: "amlodipin tối",
+      section: "KẾ HOẠCH ĐIỀU TRỊ",
+      drug: "ten amlodipin, lieu 10 mg, trang_thai_dung được kê, chưa dùng",
+    },
+  ]);
+  assert.equal(r.thuoc.length, 3, "thuốc đã ngừng không đưa vào danh sách thuốc đang dùng");
+  assert.ok(r.mauThuan.some((m) => m.includes("penicillin v") && m.includes("dị ứng")));
+  assert.ok(r.mauThuan.some((m) => m.includes("amlodipin") && m.includes("2 liều khác nhau")));
+}
+
 console.log("tac-tu-tai-cho.test.ts: tất cả đều qua");

@@ -21,6 +21,7 @@ export async function xuLyViecTroLy(phu: Phu, kho: KhoViec, viec: ViecNhan, ghiN
     }
   };
   try {
+    if (kho.daHuy?.(viec.id)) return;
     const { yeuCau } = viec;
     const kiem = kiemCauHoi(yeuCau.cauHoi);
     const ca = xayCaAnDanh(yeuCau.menhDe, yeuCau.nguCanh);
@@ -33,10 +34,14 @@ export async function xuLyViecTroLy(phu: Phu, kho: KhoViec, viec: ViecNhan, ghiN
       const r = await lapKePhach(phu, yeuCau, ca, cauHoi);
       tt.keHoach = r.keHoach;
       tt.keHoachTuMoHinh = r.tuMoHinh;
-      tt.dieuPhoi = { token: r.token, giay: r.giay };
+      if (r.tuMoHinh || r.token > 0 || r.giay > 0) {
+        tt.dieuPhoi = { token: r.token, giay: r.giay };
+      }
       kho.ghiTienTrinh(viec.id, tt); // ghi ngay: khởi động lại thì không lập (và trả tiền) lại
     }
+    if (kho.daHuy?.(viec.id)) return;
     const kq = await chayKePhach(phu, yeuCau, tt.keHoach, tt, (t) => kho.ghiTienTrinh(viec.id, t));
+    if (kho.daHuy?.(viec.id)) return;
     kq.thongKe.token += tt.dieuPhoi?.token ?? 0;
     kq.thongKe.giay = Math.round((kq.thongKe.giay + (tt.dieuPhoi?.giay ?? 0)) * 10) / 10;
     kho.xong(viec.id, kq);
@@ -47,6 +52,7 @@ export async function xuLyViecTroLy(phu: Phu, kho: KhoViec, viec: ViecNhan, ghiN
         `loi_goi=${kq.thongKe.loiGoi};token=${kq.thongKe.token};ms=${Date.now() - t0}`,
     );
   } catch (e) {
+    if (kho.daHuy?.(viec.id)) return;
     try {
       kho.loi(viec.id, "loi_noi_bo");
     } catch {

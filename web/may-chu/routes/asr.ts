@@ -1,9 +1,7 @@
 import crypto from "crypto";
 import type express from "express";
 import type {
-  ApiAssignRolesResponse,
   ApiNoteResponse,
-  ApiTranscribeResponse,
   ApiUiProposition,
   ApiUiWarning,
   PyGhiChu,
@@ -16,8 +14,20 @@ import { goiDichVu, traLoi, TUOI_VIEC_TOI_DA_MS } from "./dung-chung";
 
 const MUC_PHU = ["CẦN XÁC NHẬN", "CÂU HỎI LÀM RÕ"];
 const CHO_TRUC_TIEP_MS = Number(process.env.MEDITRACE_CHO_NHAP_MS) || 20_000;
+const CHU_KY_DON_VIEC_MS = 5 * 60_000;
 
-/** Mot canh bao -> dang giao dien. Khong gui ma ky thuat len lam tieu de. */
+export type MenhDeGiaoDienMoRong = ApiUiProposition & {
+  chu_the_id: number | null;
+  wormSeq?: number | null;
+  wormHash?: string | null;
+};
+
+export type PhanHoiBanNhapMoRong = ApiNoteResponse & {
+  wormSeq?: number | null;
+  wormHash?: string | null;
+};
+
+/** Một cảnh báo -> dạng giao diện. Không gửi mã kỹ thuật lên làm tiêu đề. */
 export function canhBaoGiaoDien(c: any): ApiUiWarning | null {
   if (!c) return null;
   return {
@@ -40,18 +50,22 @@ export function canhBaoGiaoDien(c: any): ApiUiWarning | null {
   };
 }
 
-/** Mệnh đề để giao diện duyệt: mỗi dòng bản nháp kèm chủ thể và lượt thoại làm căn cứ. */
-export function menhDeChoGiaoDien(r: PyNoteResponse | any): ApiUiProposition[] {
-  const cb = r.canh_bao;
-  const theoId = new Map<number, PyPhatBieu>((r.phat_bieu || []).map((p: PyPhatBieu) => [p.id, p]));
-  return (r.ghi_chu || [])
+/** Mệnh đề để giao diện duyệt: mỗi dòng bản nháp kèm chủ thể (`chu_the_id`), lượt thoại căn cứ và `wormSeq`/`wormHash` nếu có. */
+export function menhDeChoGiaoDien(r: PyNoteResponse | any): MenhDeGiaoDienMoRong[] {
+  const cb = r?.canh_bao;
+  const wormSeqCa = r?.worm_seq ?? r?.wormSeq;
+  const wormHashCa = r?.worm_hash ?? r?.wormHash;
+  const theoId = new Map<number, PyPhatBieu>((r?.phat_bieu || []).map((p: PyPhatBieu) => [p.id, p]));
+  return (r?.ghi_chu || [])
     .filter((g: PyGhiChu) => g.id !== undefined && theoId.has(g.id!))
     .map((g: PyGhiChu) => {
-      const p = theoId.get(g.id!)!;
+      const p = theoId.get(g.id!)! as PyPhatBieu & { worm_seq?: number | null; worm_hash?: string | null };
       const lyDo = g.ly_do || null;
       let van = (g.van || "").trim();
       if (lyDo && van.endsWith(` — ${lyDo}`)) van = van.slice(0, -` — ${lyDo}`.length).trim();
       const thuoc = p.thuoc || null;
+      const wormSeq = p.worm_seq !== undefined ? p.worm_seq : wormSeqCa;
+      const wormHash = p.worm_hash !== undefined ? p.worm_hash : wormHashCa;
       return {
         id: p.id,
         text: van,
@@ -59,11 +73,17 @@ export function menhDeChoGiaoDien(r: PyNoteResponse | any): ApiUiProposition[] {
         status: MUC_PHU.includes(g.muc || "") ? "can_xac_nhan" : "than",
         gateReason: lyDo,
         subject: p.ten_chu_the || (p.chu_the_id === 0 ? "bệnh nhân" : null),
+        chu_the_id: typeof p.chu_the_id === "number" ? p.chu_the_id : null,
         negated: !!p.phu_dinh,
         certainty: p.do_chac_chan || null,
         situation: p.tinh_huong || null,
         time: p.moc_thoi_gian || null,
-        drug: thuoc ? Object.entries(thuoc).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(", ") : null,
+        drug: thuoc
+          ? Object.entries(thuoc)
+              .filter(([, v]) => v)
+              .map(([k, v]) => `${k} ${v}`)
+              .join(", ")
+          : null,
         evidenceTurns: p.bang_chung || [],
         quotes: p.trich_dan || [],
         warning: canhBaoGiaoDien(cb?.theo_phat_bieu?.[String(p.id)]?.chinh),
@@ -71,6 +91,8 @@ export function menhDeChoGiaoDien(r: PyNoteResponse | any): ApiUiProposition[] {
         warningTags: cb?.theo_phat_bieu?.[String(p.id)]?.phu || [],
         stateD: cb?.trang_thai_D?.[String(p.id)]?.trang_thai || null,
         stateDReason: cb?.trang_thai_D?.[String(p.id)]?.ly_do || null,
+        ...(wormSeq !== undefined && wormSeq !== null ? { wormSeq } : {}),
+        ...(wormHash !== undefined && wormHash !== null ? { wormHash } : {}),
       };
     });
 }
@@ -83,7 +105,7 @@ async function taoBanNhap({
   thong_tin_benh_nhan,
   du_lieu_xet_nghiem,
   user_id,
-}: Record<string, any>): Promise<ApiNoteResponse> {
+}: Record<string, any>): Promise<PhanHoiBanNhapMoRong> {
   const d = await goiDichVu("/api/ho-so", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -97,6 +119,8 @@ async function taoBanNhap({
       ...(user_id ? { user_id } : {}),
     }),
   });
+  const wormSeq = d.worm_seq ?? d.wormSeq;
+  const wormHash = d.worm_hash ?? d.wormHash;
   return {
     content: d.du_doan,
     contentWithoutExtras: d.du_doan_khong_muc_phu,
@@ -113,12 +137,22 @@ async function taoBanNhap({
     warningPolicy: d.canh_bao?.chinh_sach || null,
     warningVersion: d.canh_bao?.phien_ban || null,
     clinicalSafety: d.lam_sang_nang_cao || null,
+    ...(wormSeq !== undefined && wormSeq !== null ? { wormSeq } : {}),
+    ...(wormHash !== undefined && wormHash !== null ? { wormHash } : {}),
   };
 }
 
 export function dangKyAsrRoutes(app: express.Express) {
   const hangDoiViec = taoHangDoi(db);
   let dangChayNen = false;
+
+  // Dọn nhẹ định kỳ các việc đã hoàn tất quá 30 phút (unref để không giữ tiến trình khi đóng server/test)
+  const boDonDinhKy = setInterval(() => {
+    try {
+      if (db.isOpen) hangDoiViec.donViecCu(TUOI_VIEC_TOI_DA_MS);
+    } catch {}
+  }, CHU_KY_DON_VIEC_MS);
+  boDonDinhKy.unref?.();
 
   async function chayViecNen() {
     if (dangChayNen) return;
@@ -139,8 +173,11 @@ export function dangKyAsrRoutes(app: express.Express) {
     }
   }
 
-  function giaoKetQuaViec(res: express.Response, id: number, nguoiDungId: number, t: TrangThaiViecTra) {
-    hangDoiViec.xoa(id, nguoiDungId);
+  /**
+   * Giao kết quả việc: KHÔNG xoá ngay lần đọc đầu tiên (tránh Read-Once Delete Race khi F5, rớt mạng,
+   * hoặc 2 tab cùng `khoaTrung` cùng đọc `jobId`). Việc cũ > 30 phút được dọn bởi `donViecCu`.
+   */
+  function giaoKetQuaViec(res: express.Response, t: TrangThaiViecTra) {
     if (t.trangThai === "xong") return res.json(JSON.parse(t.ketQua || "null"));
     let loi: { status: number; error: string; code?: string };
     try {
@@ -157,9 +194,9 @@ export function dangKyAsrRoutes(app: express.Express) {
   }
 
   app.post("/api/transcribe", async (req, res) => {
-    const { audioBase64, fileName, diarize } = req.body || {};
-    if (!audioBase64) return res.status(400).json({ error: "Thiếu dữ liệu âm thanh" });
     try {
+      const { audioBase64, fileName, diarize } = req.body || {};
+      if (!audioBase64) return res.status(400).json({ error: "Thiếu dữ liệu âm thanh" });
       const d = await goiDichVu("/api/chep-am", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,9 +207,7 @@ export function dangKyAsrRoutes(app: express.Express) {
         }),
       });
       const doan = d.doan || [];
-      const transcript = doan
-        .map((s: any) => `${s.speaker_id || "Người nói"}: ${s.text_original}`)
-        .join("\n");
+      const transcript = doan.map((s: any) => `${s.speaker_id || "Người nói"}: ${s.text_original}`).join("\n");
       const transcriptSegments = doan.map((s: any, idx: number) => ({
         luot: idx + 1,
         start_s: typeof s.start_time === "number" ? s.start_time : typeof s.start_s === "number" ? s.start_s : 0,
@@ -195,9 +230,9 @@ export function dangKyAsrRoutes(app: express.Express) {
   });
 
   app.post("/api/assign-roles", async (req, res) => {
-    const { sessionId, roles } = req.body || {};
-    if (!sessionId || !roles) return res.status(400).json({ error: "Thiếu sessionId hoặc roles" });
     try {
+      const { sessionId, roles } = req.body || {};
+      if (!sessionId || !roles) return res.status(400).json({ error: "Thiếu sessionId hoặc roles" });
       const d = await goiDichVu("/api/gan-vai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -210,41 +245,52 @@ export function dangKyAsrRoutes(app: express.Express) {
   });
 
   app.post("/api/generate-note", async (req, res) => {
-    const { transcript, sessionId, sampleCaseId, branch, patientInfo, thong_tin_benh_nhan, labResults, du_lieu_xet_nghiem } = req.body || {};
-    if (!transcript && !sessionId && !sampleCaseId) {
-      return res.status(400).json({ error: "Cần transcript, sessionId hoặc sampleCaseId" });
-    }
-    hangDoiViec.donViecCu(TUOI_VIEC_TOI_DA_MS);
-    const uid = req.nguoiDung!.id;
-    const tai = JSON.stringify({
-      transcript,
-      sessionId,
-      sampleCaseId,
-      branch,
-      thong_tin_benh_nhan: thong_tin_benh_nhan || patientInfo || null,
-      du_lieu_xet_nghiem: du_lieu_xet_nghiem || labResults || null,
-      user_id: String(uid),
-    });
-    const id = hangDoiViec.them(uid, crypto.createHash("sha256").update(tai).digest("hex"), tai);
-    void chayViecNen();
-    const han = Date.now() + CHO_TRUC_TIEP_MS;
-    for (;;) {
+    try {
+      const { transcript, sessionId, sampleCaseId, branch, patientInfo, thong_tin_benh_nhan, labResults, du_lieu_xet_nghiem } =
+        req.body || {};
+      if (!transcript && !sessionId && !sampleCaseId) {
+        return res.status(400).json({ error: "Cần transcript, sessionId hoặc sampleCaseId" });
+      }
+      hangDoiViec.donViecCu(TUOI_VIEC_TOI_DA_MS);
+      const uid = req.nguoiDung!.id;
+      const tai = JSON.stringify({
+        transcript,
+        sessionId,
+        sampleCaseId,
+        branch,
+        thong_tin_benh_nhan: thong_tin_benh_nhan || patientInfo || null,
+        du_lieu_xet_nghiem: du_lieu_xet_nghiem || labResults || null,
+        user_id: String(uid),
+      });
+      const id = hangDoiViec.them(uid, crypto.createHash("sha256").update(tai).digest("hex"), tai);
+      void chayViecNen();
+      const han = Date.now() + CHO_TRUC_TIEP_MS;
+      for (;;) {
+        const t = hangDoiViec.trangThai(id, uid);
+        if (t && (t.trangThai === "xong" || t.trangThai === "that_bai")) return giaoKetQuaViec(res, t);
+        if (Date.now() >= han) break;
+        await new Promise((r) => setTimeout(r, 100));
+      }
       const t = hangDoiViec.trangThai(id, uid);
-      if (t && (t.trangThai === "xong" || t.trangThai === "that_bai")) return giaoKetQuaViec(res, id, uid, t);
-      if (Date.now() >= han) break;
-      await new Promise((r) => setTimeout(r, 100));
+      res.status(202).json({ jobId: String(id), queued: hangDoiViec.soViecTruoc(id), startedAt: t?.taoLuc ?? Date.now() });
+    } catch (err) {
+      traLoi(res, err);
     }
-    const t = hangDoiViec.trangThai(id, uid);
-    res.status(202).json({ jobId: String(id), queued: hangDoiViec.soViecTruoc(id), startedAt: t?.taoLuc ?? Date.now() });
   });
 
   app.get("/api/generate-note/:ma", (req, res) => {
-    const id = Number(req.params.ma);
-    const uid = req.nguoiDung!.id;
-    const t = Number.isInteger(id) ? hangDoiViec.trangThai(id, uid) : null;
-    if (!t) return res.status(404).json({ error: "Không thấy việc tạo bản nháp này (có thể đã giao kết quả hoặc quá hạn). Bấm tạo lại." });
-    if (t.trangThai === "xong" || t.trangThai === "that_bai") return giaoKetQuaViec(res, id, uid, t);
-    return res.status(202).json({ jobId: req.params.ma, queued: hangDoiViec.soViecTruoc(id), startedAt: t.taoLuc });
+    try {
+      const id = Number(req.params.ma);
+      const uid = req.nguoiDung!.id;
+      const t = Number.isInteger(id) ? hangDoiViec.trangThai(id, uid) : null;
+      if (!t) {
+        return res.status(404).json({ error: "Không thấy việc tạo bản nháp này (có thể đã quá hạn 30 phút). Bấm tạo lại." });
+      }
+      if (t.trangThai === "xong" || t.trangThai === "that_bai") return giaoKetQuaViec(res, t);
+      return res.status(202).json({ jobId: req.params.ma, queued: hangDoiViec.soViecTruoc(id), startedAt: t.taoLuc });
+    } catch (err) {
+      traLoi(res, err);
+    }
   });
 
   app.post("/api/error-attribution", async (req, res) => {

@@ -1,31 +1,44 @@
 import type express from "express";
-import { ghiNhatKy, khoWorm } from "../csdl";
+import { caKhamThuocNguoiKhac, ghiNhatKy, khoWorm } from "../csdl";
 import { traLoi } from "./dung-chung";
 
 export function dangKySignOffRoutes(app: express.Express) {
   /**
    * Ký duyệt pháp lý bản nháp (Human-in-the-Loop Forensic Sign-off):
-   * Ghi nhận kết quả thẩm định từng mệnh đề của bác sĩ vào sổ kiểm toán bất biến WORM
-   * trên SQLite (`worm_signoff`) song song với `worm_signoff_log.jsonl`.
+   * Chặn IDOR theo chủ sở hữu ca khám và kiểm định chặt số nguyên / tổng mệnh đề / tỷ lệ nguồn / contentHash.
    */
   app.post("/api/sessions/:id/sign-off", (req, res) => {
     try {
       const sessionId = String(req.params.id || "").trim();
       if (!sessionId) return res.status(400).json({ error: "Thiếu mã phiên khám" });
-      const { tongMenhDe = 0, soGiu = 0, soSua = 0, soBo = 0, tyLeCoNguon = 100, contentHash = "" } = req.body || {};
+
+      const uid = req.nguoiDung?.id ?? null;
+      if (uid !== null && caKhamThuocNguoiKhac(uid, sessionId)) {
+        return res.status(403).json({ error: "Không được ký duyệt ca khám của bác sĩ khác", code: "idor_forbidden" });
+      }
+
+      const body = req.body && typeof req.body === "object" ? req.body : {};
+      const {
+        tongMenhDe,
+        soGiu = 0,
+        soSua = 0,
+        soBo = 0,
+        tyLeCoNguon = 100,
+        contentHash,
+      } = body;
 
       const kq = khoWorm.ghiSignOff({
         sessionId,
-        userId: req.nguoiDung?.id ?? null,
-        tongMenhDe: Number(tongMenhDe),
-        soGiu: Number(soGiu),
-        soSua: Number(soSua),
-        soBo: Number(soBo),
-        tyLeCoNguon: Number(tyLeCoNguon),
-        contentHash: String(contentHash),
+        userId: uid,
+        tongMenhDe,
+        soGiu,
+        soSua,
+        soBo,
+        tyLeCoNguon,
+        contentHash,
       });
 
-      ghiNhatKy(req.nguoiDung?.id ?? null, "ky_duyet_worm", `session=${sessionId} seq=${kq.wormSeq}`);
+      ghiNhatKy(uid, "ky_duyet_worm", `session=${sessionId} seq=${kq.wormSeq}`);
       res.json(kq);
     } catch (err) {
       traLoi(res, err);
@@ -36,7 +49,17 @@ export function dangKySignOffRoutes(app: express.Express) {
     try {
       const sessionId = String(req.params.id || "").trim();
       if (!sessionId) return res.status(400).json({ error: "Thiếu mã phiên khám" });
-      res.json({ entries: khoWorm.docLichSuSignOff(sessionId) });
+
+      const uid = req.nguoiDung?.id ?? null;
+      const laQuanTri = req.nguoiDung?.vai === "quan_tri";
+      if (!laQuanTri && uid !== null && caKhamThuocNguoiKhac(uid, sessionId)) {
+        return res.status(403).json({ error: "Không có quyền xem lịch sử ký duyệt của bác sĩ khác", code: "idor_forbidden" });
+      }
+
+      const entries = laQuanTri || uid === null
+        ? khoWorm.docLichSuSignOff(sessionId)
+        : khoWorm.docLichSuSignOff(sessionId, { userId: uid });
+      res.json({ entries });
     } catch (err) {
       traLoi(res, err);
     }

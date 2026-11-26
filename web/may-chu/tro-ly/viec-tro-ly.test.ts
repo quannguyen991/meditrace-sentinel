@@ -135,4 +135,34 @@ const kq: KetQuaTroLy = { phan: [{ tacTu: "chu_de_can_ban", ten: "Chủ đề c�
   d2.close();
 }
 
+// 8. Boolean(tt?.dieuPhoi) được tính là tonTien khi khôi phục + hủy việc chống ghi đè muộn
+{
+  const k = moi();
+  const idDp = k.them(1, "dp", yc("đã gọi điều phối"));
+  k.layViecTiepTheo(5);
+  k.ghiTienTrinh(idDp, {
+    keHoach: [{ tacTu: "tim_kiem", nhiemVu: "tìm", phuThuoc: [] }],
+    keHoachTuMoHinh: true,
+    buoc: [],
+    xemTruoc: "x",
+    dieuPhoi: { token: 42, giay: 0.4 },
+  });
+  // Lần sập 1 -> cho chạy lại 1 lần (ngưỡng ngoài = 1)
+  assert.deepEqual(k.khoiPhuc(), { chayLai: 1, thatBai: 0 });
+  k.layViecTiepTheo(5);
+  // Lần sập 2 -> dừng ngay, KHÔNG cho chạy lại lần 2 như việc tại chỗ!
+  assert.deepEqual(k.khoiPhuc(), { chayLai: 0, thatBai: 1 });
+  assert.equal(k.trangThai(idDp, 1)?.ma, "crash_recovery_exhausted");
+
+  // Hủy việc: sai chủ -> false; đúng chủ -> da_huy và chặn ghi đè xong/lỗi muộn
+  const idHuy = k.them(1, "huy", yc("hủy giữa chừng"));
+  k.layViecTiepTheo(5);
+  assert.equal(k.huy(idHuy, 2), false, "người khác không hủy được");
+  assert.equal(k.huy(idHuy, 1), true);
+  assert.equal(k.daHuy(idHuy), true);
+  k.xong(idHuy, kq);
+  k.loi(idHuy, "muon");
+  assert.equal(k.trangThai(idHuy, 1)?.trangThai, "da_huy", "việc đã hủy không bị xong/lỗi muộn ghi đè");
+}
+
 console.log("viec-tro-ly.test.ts: tất cả đều qua");

@@ -36,8 +36,14 @@ export function chanNeuChuaChoPhep(req: express.Request) {
   }
 }
 
-/** Một lượt gọi chat completions; giới hạn token để không tiêu tiền ngoài ý muốn. */
-export async function goiNgoai(heThong: string, nguoiDung: string, maxToken = 1200, them: Record<string, unknown> = {}) {
+/** Một lượt gọi chat completions; giới hạn token để không tiêu tiền ngoài ý muốn (hỗ trợ AbortSignal khi hủy việc). */
+export async function goiNgoai(
+  heThong: string,
+  nguoiDung: string,
+  maxToken = 1200,
+  them: Record<string, unknown> = {},
+  signal?: AbortSignal,
+) {
   const t0 = Date.now();
   const bangPII = new Map<string, string>();
   const heThongDaAnDanh = anDanhVanBanNgoai(heThong, bangPII) as string;
@@ -47,6 +53,7 @@ export async function goiNgoai(heThong: string, nguoiDung: string, maxToken = 12
   try {
     res = await fetch(`${NGOAI.base}/chat/completions`, {
       method: "POST",
+      ...(signal ? { signal } : {}),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${NGOAI.key}`,
@@ -65,6 +72,12 @@ export async function goiNgoai(heThong: string, nguoiDung: string, maxToken = 12
       }),
     });
   } catch (err: any) {
+    if (signal?.aborted || err?.name === "AbortError") {
+      const abortErr: any = new Error("Đã hủy gọi mô hình ngoài theo yêu cầu người dùng");
+      abortErr.status = 499;
+      abortErr.code = "da_huy";
+      throw abortErr;
+    }
     const e: any = new Error(`Không kết nối được cổng mô hình ngoài: ${err?.message || err}`);
     e.status = 502;
     throw e;

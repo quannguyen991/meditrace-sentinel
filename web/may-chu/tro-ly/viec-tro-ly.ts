@@ -22,6 +22,8 @@ export type KhoViec = {
   ghiTienTrinh(id: number, tt: TienTrinh): void;
   xong(id: number, kq: KetQuaTroLy): void;
   loi(id: number, ma: string): void;
+  huy(id: number, nguoiDungId: number): boolean;
+  daHuy(id: number): boolean;
   khoiPhuc(toiDaLanThuNgoai?: number, toiDaLanThuTaiCho?: number): { chayLai: number; thatBai: number };
   trangThai(id: number, nguoiDungId: number): TrangThaiViec | null;
   xoa(id: number, nguoiDungId: number): void;
@@ -53,10 +55,15 @@ export function taoKhoViec(db: DatabaseSync): KhoViec {
       so_lan_thu INTEGER NOT NULL DEFAULT 0,
       ma_loi TEXT,
       tao_luc INTEGER NOT NULL,
-      bat_dau_luc INTEGER
+      bat_dau_luc INTEGER,
+      hoan_tat_luc INTEGER
     );
     CREATE INDEX IF NOT EXISTS idx_viec_tro_ly_tt ON viec_tro_ly(trang_thai, id);
   `);
+  const cols = db.prepare("PRAGMA table_info(viec_tro_ly)").all() as Array<{ name: string }>;
+  if (!cols.some((c) => c.name === "hoan_tat_luc")) {
+    db.exec("ALTER TABLE viec_tro_ly ADD COLUMN hoan_tat_luc INTEGER;");
+  }
 
   const giaoDich = <T>(f: () => T): T => {
     db.exec("BEGIN IMMEDIATE");
@@ -97,7 +104,10 @@ export function taoKhoViec(db: DatabaseSync): KhoViec {
         db.prepare("UPDATE viec_tro_ly SET trang_thai = 'dang_chay', bat_dau_luc = ? WHERE id = ?").run(Date.now(), h.id);
         const yeuCau = doc<YeuCauTroLy>(h.yeu_cau);
         if (!yeuCau) {
-          db.prepare("UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = 'yeu_cau_hong' WHERE id = ?").run(h.id);
+          db.prepare("UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = 'yeu_cau_hong', hoan_tat_luc = ? WHERE id = ?").run(
+            Date.now(),
+            h.id,
+          );
           return null;
         }
         return { id: Number(h.id), nguoiDungId: Number(h.nguoi_dung_id), yeuCau, tienTrinh: doc<TienTrinh>(h.tien_trinh) };
@@ -105,15 +115,43 @@ export function taoKhoViec(db: DatabaseSync): KhoViec {
     },
 
     ghiTienTrinh(id, tt) {
-      db.prepare("UPDATE viec_tro_ly SET tien_trinh = ? WHERE id = ?").run(JSON.stringify(tt), id);
+      db.prepare("UPDATE viec_tro_ly SET tien_trinh = ? WHERE id = ? AND trang_thai != 'da_huy'").run(JSON.stringify(tt), id);
     },
 
     xong(id, kq) {
-      db.prepare("UPDATE viec_tro_ly SET trang_thai = 'xong', ket_qua = ? WHERE id = ?").run(JSON.stringify(kq), id);
+      db.prepare("UPDATE viec_tro_ly SET trang_thai = 'xong', ket_qua = ?, hoan_tat_luc = ? WHERE id = ? AND trang_thai != 'da_huy'").run(
+        JSON.stringify(kq),
+        Date.now(),
+        id,
+      );
     },
 
     loi(id, ma) {
-      db.prepare("UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = ? WHERE id = ?").run(ma, id);
+      db.prepare("UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = ?, hoan_tat_luc = ? WHERE id = ? AND trang_thai != 'da_huy'").run(
+        ma,
+        Date.now(),
+        id,
+      );
+    },
+
+    huy(id, nguoiDungId) {
+      return giaoDich(() => {
+        const co = db
+          .prepare("SELECT trang_thai FROM viec_tro_ly WHERE id = ? AND nguoi_dung_id = ?")
+          .get(id, nguoiDungId) as { trang_thai: string } | undefined;
+        if (!co) return false;
+        db.prepare("UPDATE viec_tro_ly SET trang_thai = 'da_huy', ma_loi = 'da_huy', hoan_tat_luc = ? WHERE id = ? AND nguoi_dung_id = ?").run(
+          Date.now(),
+          id,
+          nguoiDungId,
+        );
+        return true;
+      });
+    },
+
+    daHuy(id) {
+      const r = db.prepare("SELECT trang_thai FROM viec_tro_ly WHERE id = ?").get(id) as { trang_thai: string } | undefined;
+      return r?.trang_thai === "da_huy";
     },
 
     khoiPhuc(toiDaLanThuNgoai = 1, toiDaLanThuTaiCho = 2) {
@@ -125,10 +163,15 @@ export function taoKhoViec(db: DatabaseSync): KhoViec {
         let thatBai = 0;
         for (const r of rows) {
           const tt = doc<TienTrinh>(r.tien_trinh);
-          const tonTien = !!tt?.buoc?.some((b) => TAC_TU_TON_TIEN.has(b.tacTu) && (b.trangThai === "xong" || b.trangThai === "dang"));
+          // Tính cả Boolean(tt?.dieuPhoi) vào cờ tonTien để việc đã gọi điều phối ngoài không vượt ngưỡng retry trả phí
+          const tonTien =
+            Boolean(tt?.dieuPhoi) ||
+            !!tt?.buoc?.some((b) => TAC_TU_TON_TIEN.has(b.tacTu) && (b.trangThai === "xong" || b.trangThai === "dang"));
           const nguong = tonTien ? toiDaLanThuNgoai : toiDaLanThuTaiCho;
           if (Number(r.so_lan_thu) >= nguong) {
-            db.prepare("UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = 'crash_recovery_exhausted' WHERE id = ?").run(r.id);
+            db.prepare(
+              "UPDATE viec_tro_ly SET trang_thai = 'that_bai', ma_loi = 'crash_recovery_exhausted', hoan_tat_luc = ? WHERE id = ?",
+            ).run(Date.now(), r.id);
             thatBai++;
           } else {
             db.prepare("UPDATE viec_tro_ly SET trang_thai = 'cho_chay', so_lan_thu = so_lan_thu + 1 WHERE id = ?").run(r.id);
@@ -162,7 +205,7 @@ export function taoKhoViec(db: DatabaseSync): KhoViec {
 
     donViecCu(tuoiToiDaMs) {
       const r = db
-        .prepare("DELETE FROM viec_tro_ly WHERE trang_thai IN ('xong','that_bai') AND tao_luc < ?")
+        .prepare("DELETE FROM viec_tro_ly WHERE trang_thai IN ('xong','that_bai','da_huy') AND COALESCE(hoan_tat_luc, tao_luc) < ?")
         .run(Date.now() - tuoiToiDaMs);
       return Number(r.changes);
     },

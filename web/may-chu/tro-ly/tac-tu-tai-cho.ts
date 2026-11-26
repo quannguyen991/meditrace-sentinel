@@ -15,6 +15,14 @@ export const CHU_DE: ReadonlyArray<{ ma: string; ten: string; mucLienQuan: strin
   { ma: "kham", ten: "Khám lâm sàng", mucLienQuan: ["KHÁM LÂM SÀNG"] },
 ];
 
+/** Các mục hồ sơ biểu diễn thuốc đang dùng hoặc thuốc trong kế hoạch điều trị (loại trừ tuyệt đối DỊ ỨNG). */
+const MUC_THUOC_DIEU_TRI: ReadonlySet<string> = new Set([
+  "THUỐC ĐANG DÙNG",
+  "KẾ HOẠCH ĐIỀU TRỊ",
+  "THUỐC",
+  "ĐIỀU TRỊ",
+]);
+
 export function chuDeCanBan(menhDe: MenhDeVao[]): {
   daBan: Array<{ ma: string; ten: string; soMenhDe: number }>;
   chuaBan: Array<{ ma: string; ten: string }>;
@@ -29,18 +37,58 @@ export function chuDeCanBan(menhDe: MenhDeVao[]): {
   return { daBan, chuaBan };
 }
 
-/** Tách "amoxicillin 500 mg" thành tên và liều; tên là phần chữ trước chữ số đầu tiên. */
+/**
+ * Tách thông tin thuốc thành tên và liều:
+ * Hỗ trợ cả định dạng chuỗi tự do ("amoxicillin 500 mg") LẪN định dạng có khoá của `menhDeChoGiaoDien`
+ * ("ten Penicillin V, lieu 500 mg, so_lan 2 lần/ngày, trang_thai_dung đang dùng").
+ */
 function tachThuoc(s: string): { ten: string; lieu: string } {
   const g = s.trim().replace(/\s+/g, " ");
+  const mTenKhoa = g.match(/(?:^|,\s*)ten\s+([^,]+)/iu);
+  if (mTenKhoa) {
+    const mLieuKhoa = g.match(/(?:^|,\s*)lieu\s+([^,]+)/iu);
+    const tachTen = mTenKhoa[1].trim().match(/^(.*?)\s*(\d[\s\S]*)?$/u);
+    const ten = (tachTen?.[1] ?? mTenKhoa[1]).trim().toLowerCase();
+    const lieu = (mLieuKhoa?.[1] ?? tachTen?.[2] ?? "").trim().toLowerCase();
+    return { ten, lieu };
+  }
   const m = g.match(/^(.*?)\s*(\d[\s\S]*)?$/u);
   return { ten: (m?.[1] ?? g).trim().toLowerCase(), lieu: (m?.[2] ?? "").trim().toLowerCase() };
 }
 
+function laThuocDaNgung(rawDrug: string): boolean {
+  return /(?:^|,\s*)trang_thai_dung\s+đã\s+ngừng(?=$|,)/iu.test(rawDrug);
+}
+
+function rutTenChatDiUng(rawDrug: string): string {
+  const g = rawDrug.trim().replace(/\s+/g, " ");
+  const mTenKhoa = g.match(/(?:^|,\s*)ten\s+([^,]+)/iu);
+  return (mTenKhoa ? mTenKhoa[1] : g).trim();
+}
+
 export function doiChieuThuocDiUng(menhDe: MenhDeVao[]): { thuoc: string[]; diUng: string[]; mauThuan: string[]; thieu: string[] } {
   const ds = menhDe || [];
-  const thuoc = ds.map((m) => (m?.drug && m.negated !== true ? String(m.drug).trim() : "")).filter(Boolean);
-  const mucDiUng = ds.filter((m) => m?.section === "DỊ ỨNG");
-  const diUng = mucDiUng.filter((m) => m.negated !== true).map((m) => String(m.text ?? "").trim()).filter(Boolean);
+  // Chỉ gom thuốc đang dùng/điều trị từ các mục thuốc/điều trị; loại trừ hoàn toàn mục DỊ ỨNG, mệnh đề phủ định và thuốc đã ngừng.
+  const thuoc = ds
+    .map((m) => {
+      const muc = String(m?.section ?? "").trim().toUpperCase();
+      if (!m?.drug || m.negated === true || muc === "DỊ ỨNG" || !MUC_THUOC_DIEU_TRI.has(muc)) return "";
+      const rawDrug = String(m.drug).trim();
+      if (!rawDrug || laThuocDaNgung(rawDrug)) return "";
+      return rawDrug;
+    })
+    .filter(Boolean);
+
+  const mucDiUng = ds.filter((m) => String(m?.section ?? "").trim().toUpperCase() === "DỊ ỨNG");
+  const diUng = mucDiUng
+    .filter((m) => m.negated !== true)
+    .map((m) => {
+      const van = String(m.text ?? "").trim();
+      const chat = rutTenChatDiUng(String(m.drug ?? ""));
+      if (van && chat && !van.toLowerCase().includes(chat.toLowerCase())) return `${van} (${chat})`;
+      return van || chat;
+    })
+    .filter(Boolean);
 
   const mauThuan: string[] = [];
   const lieuTheoTen = new Map<string, Set<string>>();
@@ -68,6 +116,8 @@ export function doiChieuThuocDiUng(menhDe: MenhDeVao[]): { thuoc: string[]; diUn
 
   const thieu: string[] = [];
   if (mucDiUng.length === 0) thieu.push("chưa có mục dị ứng");
-  if (!ds.some((m) => m?.section === "THUỐC ĐANG DÙNG")) thieu.push("chưa có thuốc đang dùng");
+  if (!ds.some((m) => MUC_THUOC_DIEU_TRI.has(String(m?.section ?? "").trim().toUpperCase()))) {
+    thieu.push("chưa có thuốc đang dùng");
+  }
   return { thuoc, diUng, mauThuan, thieu };
 }
