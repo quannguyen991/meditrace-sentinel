@@ -69,36 +69,24 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
           </div>
         </div>
 
-        <div className="relative space-y-7">
-          <h1 className="font-serif text-[40px] leading-[1.1] text-white [text-wrap:balance]">
-            Mỗi dòng trong bản nháp đều chỉ ra câu nói làm căn cứ.
+        <div className="relative space-y-8">
+          <h1 className="font-serif text-[44px] leading-[1.08] text-white [text-wrap:balance]">
+            Mỗi dòng hồ sơ đều có câu nói làm căn cứ.
           </h1>
-          <p className="text-[15px] leading-relaxed text-[#BAE6FD] max-w-[46ch]">
-            Từ hội thoại khám bệnh tiếng Việt, công cụ dựng bản nháp hồ sơ lâm sàng có cấu trúc, rồi đánh dấu
-            dòng nào có thể sai người, sai trạng thái hoặc thiếu căn cứ để bác sĩ duyệt.
-          </p>
 
-          <figure className="rounded-2xl bg-white text-[#0F172A] p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] max-w-[480px]">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B] mb-2">
-              Tiền sử gia đình · ví dụ
-            </div>
-            <p className="text-[15px] leading-snug">
+          <figure className="rounded-2xl bg-white text-[#0F172A] p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] max-w-[440px]">
+            <p className="text-[16px] leading-snug">
               <mark className="bg-[#FEF3C7] text-[#78350F] rounded px-1 py-0.5">Mẹ bệnh nhân</mark> đái tháo đường
-              típ 2, khoảng 5 năm.
+              típ 2.
             </p>
-            <figcaption className="mt-3 border-t border-[#E2E8F0] pt-3 text-[13px] text-[#475569]">
-              <span className="font-mono text-[12px] text-[#0369A1]">Lượt 14 · người nhà</span>
-              <span className="block mt-0.5 italic">“Mẹ cháu thì tiểu đường cũng năm năm nay rồi bác ạ.”</span>
-              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#FEF3C7] px-2 py-0.5 text-[12px] font-medium text-[#92400E]">
-                Kiểm lại người: người nói là con bệnh nhân, nên “mẹ cháu” có thể chính là bệnh nhân
-              </span>
+            <figcaption className="mt-3 border-t border-[#E2E8F0] pt-3 text-[14px] text-[#475569]">
+              <span className="font-mono text-[13px] text-[#0369A1]">Lượt 14</span>
+              <span className="ml-2 italic">“Mẹ cháu thì tiểu đường năm năm nay rồi ạ.”</span>
             </figcaption>
           </figure>
         </div>
 
-        <p className="relative text-[12px] text-[#7DD3FC]">
-          Không chẩn đoán, không tư vấn điều trị. Bản nháp chỉ dùng sau khi bác sĩ duyệt.
-        </p>
+        <p className="relative text-[13px] text-[#7DD3FC]">Chỉ là bản nháp. Bác sĩ duyệt trước khi dùng.</p>
       </section>
 
       {/* Cột phải: biểu mẫu */}
@@ -112,13 +100,11 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
           <h2 className="font-serif text-[30px] leading-tight text-[#0C4A6E]">
             {the === "vao" ? "Đăng nhập" : chuaCoAi ? "Tạo tài khoản quản trị" : "Tạo tài khoản"}
           </h2>
-          <p className="mt-1.5 text-[14px] text-[#475569]">
-            {the === "vao"
-              ? "Ca khám, bản nháp và kết quả duyệt của bạn nằm trong tài khoản này."
-              : chuaCoAi
-                ? "Máy chủ chưa có tài khoản nào. Tài khoản đầu tiên là quản trị: tạo mã mời cho người khác."
-                : "Cần mã mời từ quản trị của nhóm."}
-          </p>
+          {the === "tao" && (
+            <p className="mt-1.5 text-[14px] text-[#475569]">
+              {chuaCoAi ? "Tài khoản đầu tiên là quản trị." : "Cần mã mời từ quản trị."}
+            </p>
+          )}
 
           {!chuaCoAi && (
             <div role="tablist" className="mt-6 grid grid-cols-2 rounded-xl bg-[#E0EEF6] p-1 text-[14px] font-semibold">
@@ -213,14 +199,12 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
                   spellCheck={false}
                   required
                 />
-                <p className="mt-1.5 text-[12.5px] text-[#64748B]">Mỗi mã dùng một lần, hết hạn sau 7 ngày.</p>
               </div>
             )}
 
             {khongTaoDuoc && (
               <p className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-3.5 py-3 text-[13.5px] text-[#92400E]">
-                Tài khoản quản trị đầu tiên chỉ tạo được trên chính máy chạy máy chủ (mở http://localhost). Sau đó
-                quản trị tạo mã mời cho người khác.
+                Tài khoản quản trị đầu tiên chỉ tạo được trên chính máy chủ (http://localhost).
               </p>
             )}
             {loi && (
@@ -240,25 +224,11 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
             </button>
           </form>
 
-          {/* Hướng dẫn tiếng Anh cho người đánh giá ở nước ngoài; giao diện bên trong là tiếng Việt. */}
-          <aside lang="en" className="mt-8 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] p-4 text-[13px] leading-relaxed text-[#0C4A6E]">
-            <p className="font-semibold">For reviewers</p>
-            <p className="mt-1">
-              MediTrace Sentinel turns a Vietnamese doctor–patient conversation into a clinical note draft in which every
-              line links back to the turn it came from. Sign in with the demo account from the submission notes. The
-              interface is in Vietnamese.
+          {the === "vao" && (
+            <p className="mt-6 text-center text-[13.5px] text-[#64748B]">
+              Ban giám khảo dùng tài khoản demo trong hồ sơ.
             </p>
-            <ol className="mt-2 list-decimal space-y-0.5 pl-5">
-              <li>On the Home page, click <b>“Xem thử với ca mẫu”</b> (try a sample case). It loads a pre-computed synthetic case instantly.</li>
-              <li>Open <b>“Duyệt từng mệnh đề”</b> (review each statement) to see who each line is about and the source turn.</li>
-              <li>Generating a new draft with the live model takes about 3.5 minutes. All data is synthetic.</li>
-            </ol>
-          </aside>
-
-          <p className="mt-8 text-[12.5px] leading-relaxed text-[#64748B]">
-            Mật khẩu được băm (scrypt) trước khi lưu; máy chủ không giữ mật khẩu gốc. Phiên đăng nhập hết hạn sau 14
-            ngày. Đăng xuất trên máy dùng chung để xoá bản sao ca khám trong trình duyệt.
-          </p>
+          )}
         </div>
       </main>
     </div>
