@@ -1260,7 +1260,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       className="flex-1 flex flex-col bg-[#F8FBFC] overflow-hidden select-none"
     >
       {/* Subheader Toolbar */}
-      <div className="flex items-center justify-between px-2.5 sm:px-5 py-2 border-b border-[#CCE3F0] bg-[#F8FBFC] shadow-[0_1px_4px_rgba(2,132,199,0.04)] gap-2 overflow-x-auto no-scrollbar no-print">
+      <div className="flex items-center justify-between px-2.5 sm:px-5 py-2 border-b border-[#CCE3F0] bg-[#F8FBFC] shadow-[0_1px_4px_rgba(2,132,199,0.04)] gap-x-2 gap-y-1.5 flex-wrap no-print">
         {/* Trái: Nhãn tài liệu & Chọn định dạng phong cách */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-[#E0F2FE] border border-[#BAE6FD] shadow-tactile-doctor-pill text-xs font-semibold text-[#0369A1] whitespace-nowrap flex-shrink-0">
@@ -1337,7 +1337,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
         </div>
 
         {/* Phải: Đọc chính tả PhoWhisper (F2), Hoàn tác, Làm lại, Các công cụ lâm sàng & Xuất */}
-        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-1.5 min-w-0 flex-1">
           {/* Nút Đọc khám thực thể rảnh tay bằng PhoWhisper cục bộ (F2) */}
           <button
             type="button"
