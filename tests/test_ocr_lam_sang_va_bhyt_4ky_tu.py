@@ -18,7 +18,9 @@ class TestOcrLamSangVaBhyt4KyTu(unittest.TestCase):
     def test_creatinine_thieu_don_vi_va_tuoi_none(self):
         kq_mg = boc_tach_phieu_cu("Creatinin: 1.8", tuoi=None)
         self.assertAlmostEqual(kq_mg["chi_so"]["creatinine"], 1.8)
-        self.assertGreater(kq_mg["chi_so"]["egfr"], 20.0)
+        # Thieu tuoi: khong con mac dinh 50 tuoi -> khong uoc tinh eGFR, danh dau thieu_tuoi
+        self.assertNotIn("egfr", kq_mg["chi_so"])
+        self.assertEqual(kq_mg["hieu_chinh_lieu"]["chuc_nang_than"]["phuong_phap_uoc_tinh"], "thieu_tuoi")
 
         kq_umol = boc_tach_phieu_cu("Creatinin: 180", tuoi=None)
         self.assertAlmostEqual(kq_umol["chi_so"]["creatinine"], round(180 / 88.4, 2), places=2)

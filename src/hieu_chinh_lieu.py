@@ -67,7 +67,10 @@ def tinh_egfr_ckd_epi_2021(
         return 0.0
     try:
         scr = float(creatinine_mg_dl)
-        age = int(tuoi) if tuoi is not None else 50
+        # thieu tuoi -> khong uoc tinh (truoc day mac dinh 50 tuoi)
+        if tuoi is None:
+            return 0.0
+        age = int(tuoi)
     except (ValueError, TypeError):
         return 0.0
 
@@ -158,6 +161,7 @@ def phan_do_suy_than(crcl_hoac_egfr: Optional[float]) -> Dict[str, str]:
 QUY_TAC_THAN = [
     {
         "thuoc": "metformin",
+        "chi_so": "egfr",
         "ten_chuan": "Metformin",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -167,6 +171,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "metformin",
+        "chi_so": "egfr",
         "ten_chuan": "Metformin",
         "dieu_kien": lambda cr: 30 <= cr < 45,
         "muc_do": "WARNING",
@@ -176,6 +181,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "ciprofloxacin",
+        "chi_so": "crcl",
         "ten_chuan": "Ciprofloxacin",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "WARNING",
@@ -185,6 +191,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "levofloxacin",
+        "chi_so": "crcl",
         "ten_chuan": "Levofloxacin",
         "dieu_kien": lambda cr: 20 <= cr < 50,
         "muc_do": "WARNING",
@@ -194,6 +201,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "levofloxacin",
+        "chi_so": "crcl",
         "ten_chuan": "Levofloxacin",
         "dieu_kien": lambda cr: cr < 20,
         "muc_do": "CRITICAL",
@@ -203,6 +211,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "enoxaparin",
+        "chi_so": "crcl",
         "ten_chuan": "Enoxaparin (Lovenox)",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -212,6 +221,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "allopurinol",
+        "chi_so": "crcl",
         "ten_chuan": "Allopurinol",
         "dieu_kien": lambda cr: 10 <= cr < 30,
         "muc_do": "WARNING",
@@ -221,6 +231,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "allopurinol",
+        "chi_so": "crcl",
         "ten_chuan": "Allopurinol",
         "dieu_kien": lambda cr: cr < 10,
         "muc_do": "CRITICAL",
@@ -230,6 +241,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "dabigatran",
+        "chi_so": "crcl",
         "ten_chuan": "Dabigatran (Pradaxa)",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -239,6 +251,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "rivaroxaban",
+        "chi_so": "crcl",
         "ten_chuan": "Rivaroxaban (Xarelto)",
         "dieu_kien": lambda cr: 15 <= cr < 50,
         "muc_do": "WARNING",
@@ -248,6 +261,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "spironolactone",
+        "chi_so": "egfr",
         "ten_chuan": "Spironolactone",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -257,6 +271,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "methotrexate",
+        "chi_so": "crcl",
         "ten_chuan": "Methotrexate",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -266,6 +281,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "methotrexate",
+        "chi_so": "crcl",
         "ten_chuan": "Methotrexate",
         "dieu_kien": lambda cr: 30 <= cr < 50,
         "muc_do": "WARNING",
@@ -275,6 +291,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "colchicine",
+        "chi_so": "crcl",
         "ten_chuan": "Colchicine",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "CRITICAL",
@@ -284,6 +301,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "ethambutol",
+        "chi_so": "crcl",
         "ten_chuan": "Ethambutol",
         "dieu_kien": lambda cr: cr < 30,
         "muc_do": "WARNING",
@@ -293,6 +311,7 @@ QUY_TAC_THAN = [
     },
     {
         "thuoc": "digoxin",
+        "chi_so": "crcl",
         "ten_chuan": "Digoxin",
         "dieu_kien": lambda cr: cr < 50,
         "muc_do": "WARNING",
@@ -353,10 +372,18 @@ TUONG_TAC_THUC_PHAM = [
     },
     {
         "thuoc": "tetracycline",
-        "ten_chuan": "Tetracycline / Doxycycline",
+        "ten_chuan": "Tetracycline",
         "thuc_pham": "Sữa, viên uống Sắt/Canxi",
         "khuyen_cao": "Tránh uống cùng sữa hoặc thuốc bổ máu chứa sắt. Cách nhau tối thiểu 2-3 giờ.",
         "ly_do": "Tạo phức chelate không hấp thu qua niêm mạc ruột non."
+    },
+    {
+        # doxycycline tach rieng khoi tetracycline (chi tuong tac hap thu, khong hieu chinh than)
+        "thuoc": "doxycycline",
+        "ten_chuan": "Doxycycline",
+        "thuc_pham": "Viên uống Sắt/Canxi/Magie, thuốc kháng acid",
+        "khuyen_cao": "Uống cách xa chế phẩm sắt, canxi, thuốc kháng acid tối thiểu 2-3 giờ.",
+        "ly_do": "Ion đa hóa trị tạo phức chelate làm giảm hấp thu doxycycline."
     },
     {
         "thuoc": "warfarin",
@@ -429,9 +456,9 @@ _BIET_DUOC_HIEU_CHINH: Dict[str, str] = {
     "xarelto": "rivaroxaban",
     "lovenox": "enoxaparin",
     "flagyl": "metronidazole",
-    "vibramycin": "tetracycline",
-    "doxycycline": "tetracycline",
-    "doxycyclin": "tetracycline",
+    # Doxycycline KHONG quy ve tetracycline: doxycycline thai chu yeu qua mat/ruot,
+    # khong can hieu chinh theo than, khong duoc ke thua canh bao cua tetracycline.
+    "vibramycin": "doxycycline",
 }
 
 
@@ -454,13 +481,9 @@ def _tap_goc_thuoc_tu_danh_sach(danh_sach_thuoc: List[str]) -> set:
         hc_direct = _ttt.hoat_chat(s)
         if hc_direct:
             tap_goc.add(_goc_thuoc(hc_direct))
-            if _goc_thuoc(hc_direct) == "doxycyclin":
-                tap_goc.add(_goc_thuoc("tetracycline"))
         for m_rx in _ttt.regex_ten_thuoc().finditer(s):
             hc_m = _ttt.hoat_chat(m_rx.group(1)) or m_rx.group(1).lower()
             tap_goc.add(_goc_thuoc(hc_m))
-            if _goc_thuoc(hc_m) == "doxycyclin":
-                tap_goc.add(_goc_thuoc("tetracycline"))
         for tok in re.findall(r"[a-zA-Z][\w\-]{2,}", s):
             tap_goc.add(_goc_thuoc(tok))
     return tap_goc
@@ -477,6 +500,52 @@ def _lay_benh_nen_bn(thong_tin_bn: Dict[str, Any]) -> List[str]:
         elif isinstance(raw, (list, tuple, set)):
             ra.extend([str(x).strip().lower() for x in raw if x is not None and str(x).strip()])
     return ra
+
+
+_TU_NU = {"nữ", "nu", "female", "f", "woman", "nữ giới", "nu gioi", "gái", "gai"}
+_TU_NAM = {"nam", "male", "m", "man", "nam giới", "nam gioi", "trai"}
+
+
+def _doc_la_nu(gia_tri: Any) -> bool:
+    """Doc gioi tinh nu theo TU NGUYEN VEN (khong dung chuoi con: "false" khong phai nu)."""
+    if isinstance(gia_tri, bool):
+        return gia_tri
+    if gia_tri is None:
+        return False
+    if isinstance(gia_tri, (int, float)):
+        return bool(gia_tri)
+    s = re.sub(r"\s+", " ", str(gia_tri).strip().lower())
+    if s in _TU_NU:
+        return True
+    if s in _TU_NAM or s in {"false", "0", "true", "1", "không rõ", "khong ro", ""}:
+        # "true"/"1" o khoa gioi_tinh khong noi len gioi nao -> khong suy dien la nu
+        return False
+    tu = re.findall(r"\w+", s)
+    return bool(tu) and tu[0] in {"nữ", "nu", "female", "f"}
+
+
+_MAU_BENH_GAN = re.compile(r"(suy gan|xơ gan|bệnh gan)")
+_MAU_PHU_DINH_GAN = re.compile(
+    r"(?<!\w)(không|chưa|ko|k|phủ nhận|loại trừ|chưa từng|không có|không bị)(?!\w)[^,;.]*$")
+
+
+def _co_benh_gan_nen(benh_nen_list: List[str]) -> bool:
+    """Co bao cao benh gan nen (suy gan/xo gan/benh gan) va KHONG bi phu dinh trong cung menh de."""
+    for b in benh_nen_list:
+        for m in _MAU_BENH_GAN.finditer(b):
+            if not _MAU_PHU_DINH_GAN.search(b[:m.start()]):
+                return True
+    return False
+
+
+def _so_hoac_none(x: Any) -> Optional[float]:
+    if x is None or isinstance(x, bool):
+        return None
+    try:
+        v = float(str(x).strip().replace(",", ".")) if isinstance(x, str) else float(x)
+    except (ValueError, TypeError):
+        return None
+    return v if v == v else None  # loai NaN
 
 
 def kiem_tra_hieu_chinh_lieu(
@@ -506,11 +575,9 @@ def kiem_tra_hieu_chinh_lieu(
     creat_val = ket_qua_xet_nghiem.get("creatinine")
     
     # Chuẩn hóa thông tin bệnh nhân an toàn trước NoneType
-    tuoi_raw = thong_tin_benh_nhan.get("tuoi")
-    try:
-        tuoi: int = int(tuoi_raw) if tuoi_raw is not None else 50
-    except (ValueError, TypeError):
-        tuoi = 50
+    # Thieu tuoi -> KHONG mac dinh 50: khong uoc tinh CrCl/eGFR (danh dau "thieu_tuoi")
+    _tuoi_f = _so_hoac_none(thong_tin_benh_nhan.get("tuoi"))
+    tuoi: Optional[int] = int(_tuoi_f) if _tuoi_f is not None and _tuoi_f > 0 else None
 
     # Hỗ trợ đồng thời cả `can_nang_kg` lẫn `can_nang`
     can_nang_raw = (
@@ -530,13 +597,7 @@ def kiem_tra_hieu_chinh_lieu(
     la_nu_raw = thong_tin_benh_nhan.get("la_nu")
     if la_nu_raw is None:
         la_nu_raw = thong_tin_benh_nhan.get("gioi_tinh", False)
-    la_nu = False
-    if isinstance(la_nu_raw, bool):
-        la_nu = la_nu_raw
-    elif isinstance(la_nu_raw, str):
-        la_nu = any(x in la_nu_raw.lower() for x in ("nữ", "nu", "female", "f"))
-    elif la_nu_raw is not None:
-        la_nu = bool(la_nu_raw)
+    la_nu = _doc_la_nu(la_nu_raw)
 
     # Chuyển đổi Creatinine sang mg/dL nếu có
     creat_mg_dl: Optional[float] = ket_qua_xet_nghiem.get("creatinine_mg_dl")
@@ -556,21 +617,26 @@ def kiem_tra_hieu_chinh_lieu(
             chieu_cao = None
 
     # Tính Cockcroft-Gault CrCl nếu có cân nặng (chỉ áp dụng người lớn)
-    if creat_mg_dl is not None and can_nang is not None and tuoi >= 18:
-        crcl_val = tinh_crcl(tuoi, can_nang, creat_mg_dl, la_nu)
+    creat_mg_dl = _so_hoac_none(creat_mg_dl)
+    if creat_mg_dl is not None and creat_mg_dl <= 0:
+        creat_mg_dl = None
+    if creat_mg_dl is not None and can_nang is not None and tuoi is not None and tuoi >= 18:
+        crcl_val = tinh_crcl(tuoi, can_nang, creat_mg_dl, la_nu) or None
 
     # Đánh giá eGFR (KDIGO CKD-EPI 2021 race-free fallback cho người lớn, Bedside Schwartz cho nhi khoa)
     egfr_val: Optional[float] = None
     phuong_phap_uoc_tinh: str = "Chua_co_du_lieu"
+    canh_bao_uoc_tinh: Optional[str] = None
 
-    if egfr_lab_val is not None:
-        try:
-            egfr_val = float(egfr_lab_val)
-            phuong_phap_uoc_tinh = "Ket_qua_phong_xet_nghiem"
-        except (ValueError, TypeError):
-            egfr_val = None
+    egfr_val = _so_hoac_none(egfr_lab_val)
+    if egfr_val is not None:
+        phuong_phap_uoc_tinh = "Ket_qua_phong_xet_nghiem"
 
-    if egfr_val is None and creat_mg_dl is not None:
+    if egfr_val is None and creat_mg_dl is not None and tuoi is None:
+        phuong_phap_uoc_tinh = "thieu_tuoi"
+        canh_bao_uoc_tinh = ("Thiếu tuổi bệnh nhân: không ước tính được CrCl/eGFR từ creatinine; "
+                             "cần bổ sung tuổi trước khi đánh giá hiệu chỉnh liều theo thận.")
+    elif egfr_val is None and creat_mg_dl is not None:
         if tuoi < 18:
             # Chốt chặn nhi khoa (< 18 tuổi): Bắt buộc dùng Bedside Schwartz, không dùng CKD-EPI người lớn
             if chieu_cao is not None:
@@ -589,31 +655,28 @@ def kiem_tra_hieu_chinh_lieu(
     phan_do_than = phan_do_suy_than(chi_so_than_chinh) if chi_so_than_chinh is not None else None
     
     # 2. Đánh giá chức năng gan (NoneType safe)
+    # Chi so chua do -> None (khong bia gia tri "binh thuong" hay "bat thuong")
     ast_raw = ket_qua_xet_nghiem.get("ast")
     if ast_raw is None:
         ast_raw = ket_qua_xet_nghiem.get("got")
-    try:
-        ast_val = float(ast_raw) if ast_raw is not None else 25.0
-    except (ValueError, TypeError):
-        ast_val = 25.0
+    ast_val = _so_hoac_none(ast_raw)
 
     alt_raw = ket_qua_xet_nghiem.get("alt")
     if alt_raw is None:
         alt_raw = ket_qua_xet_nghiem.get("gpt")
-    try:
-        alt_val = float(alt_raw) if alt_raw is not None else 25.0
-    except (ValueError, TypeError):
-        alt_val = 25.0
+    alt_val = _so_hoac_none(alt_raw)
 
-    bili_raw = ket_qua_xet_nghiem.get("bilirubin")
-    try:
-        bili_val = float(bili_raw) if bili_raw is not None else 15.0
-    except (ValueError, TypeError):
-        bili_val = 15.0
-    
+    bili_val = _so_hoac_none(ket_qua_xet_nghiem.get("bilirubin"))
+
+    # Gia tri de so sanh nguong (chi so thieu = khong vuot nguong)
+    ast_ss = ast_val if ast_val is not None else 0.0
+    alt_ss = alt_val if alt_val is not None else 0.0
+    bili_ss = bili_val if bili_val is not None else 0.0
+
     benh_nen_list = _lay_benh_nen_bn(thong_tin_benh_nhan)
-    co_benh_gan_nen = any("suy gan" in b or "xơ gan" in b for b in benh_nen_list)
-    gan_bat_thuong = (ast_val > 100 or alt_val > 100 or bili_val > 30 or co_benh_gan_nen)
+    # Co ro rang: benh gan nen DUOC BAO CAO (co xu ly phu dinh "không suy gan")
+    co_benh_gan_nen = _co_benh_gan_nen(benh_nen_list)
+    gan_bat_thuong = (ast_ss > 100 or alt_ss > 100 or bili_ss > 30 or co_benh_gan_nen)
 
     canh_bao_than: List[Dict[str, Any]] = []
     canh_bao_gan: List[Dict[str, Any]] = []
@@ -624,19 +687,37 @@ def kiem_tra_hieu_chinh_lieu(
     thuoc_lower = [str(t).lower().strip() for t in danh_sach_thuoc_an_toan if t is not None and str(t).strip()]
     tap_goc_thuoc = _tap_goc_thuoc_tu_danh_sach(thuoc_lower)
 
-    # Kiểm tra hiệu chỉnh thận
-    if chi_so_than_chinh is not None:
-        for qt in QUY_TAC_THAN:
-            if _goc_thuoc(qt["thuoc"]) in tap_goc_thuoc:
-                if qt["dieu_kien"](chi_so_than_chinh):
-                    canh_bao_than.append({
-                        "thuoc": qt["ten_chuan"],
-                        "muc_do": qt["muc_do"],
-                        "chi_so_danh_gia": f"CrCl/eGFR = {round(chi_so_than_chinh, 1)} mL/phút ({phan_do_than['giai_doan'] if phan_do_than else ''})",
-                        "khuyen_cao": qt["khuyen_cao"],
-                        "lieu_de_xuat": qt["lieu_de_xuat"],
-                        "ly_do_lam_sang": qt["ly_do"]
-                    })
+    # Kiểm tra hiệu chỉnh thận: moi quy tac dung DUNG chi so no duoc dinh nghia
+    # (CrCl Cockcroft-Gault cho dabigatran/enoxaparin/...; eGFR cho metformin/spironolactone).
+    # Thieu chi so dung -> dung chi so con lai (lay min neu co nhieu) va gan co chi_so_thay_the.
+    co_san = {"crcl": crcl_val or None, "egfr": egfr_val or None}
+    for qt in QUY_TAC_THAN:
+        if _goc_thuoc(qt["thuoc"]) not in tap_goc_thuoc:
+            continue
+        loai = qt.get("chi_so", "crcl")
+        gia_tri = co_san.get(loai)
+        thay_the = False
+        if gia_tri is None:
+            con_lai = [v for v in co_san.values() if v is not None]
+            if not con_lai:
+                continue
+            gia_tri = min(con_lai)
+            thay_the = True
+        if qt["dieu_kien"](gia_tri):
+            ten_cs = "CrCl" if loai == "crcl" else "eGFR"
+            if thay_the:
+                ten_cs = f"{'eGFR' if loai == 'crcl' else 'CrCl'} (thay cho {ten_cs} - chưa tính được)"
+            pd = phan_do_suy_than(gia_tri)
+            canh_bao_than.append({
+                "thuoc": qt["ten_chuan"],
+                "muc_do": qt["muc_do"],
+                "chi_so_danh_gia": f"{ten_cs} = {round(gia_tri, 1)} mL/phút ({pd['giai_doan']})",
+                "chi_so_dung": loai,
+                "chi_so_thay_the": thay_the,
+                "khuyen_cao": qt["khuyen_cao"],
+                "lieu_de_xuat": qt["lieu_de_xuat"],
+                "ly_do_lam_sang": qt["ly_do"]
+            })
 
     # Kiểm tra thêm Spironolacton/Spironolactone khi Kali máu > 5.0 mmol/L
     kali_raw = ket_qua_xet_nghiem.get("kali") if ket_qua_xet_nghiem.get("kali") is not None else ket_qua_xet_nghiem.get("k")
@@ -655,17 +736,21 @@ def kiem_tra_hieu_chinh_lieu(
         except (ValueError, TypeError):
             pass
 
-    # Kiểm tra hiệu chỉnh gan (tính cả bệnh nền suy gan / xơ gan khi AST/ALT chưa làm)
-    ast_danh_gia = max(ast_val, 210.0) if co_benh_gan_nen else ast_val
-    alt_danh_gia = max(alt_val, 210.0) if co_benh_gan_nen else alt_val
+    # Kiểm tra hiệu chỉnh gan: kich hoat khi men gan THAT vuot nguong HOAC co co
+    # benh gan nen duoc bao cao (khong con bia AST/ALT = 210)
+    def _hien(v, dv):
+        return f"{v} {dv}" if v is not None else "chưa có"
+
     for qt in QUY_TAC_GAN:
         if _goc_thuoc(qt["thuoc"]) in tap_goc_thuoc:
-            if qt["dieu_kien"](ast_danh_gia, alt_danh_gia, bili_val):
+            vuot_nguong = qt["dieu_kien"](ast_ss, alt_ss, bili_ss)
+            if vuot_nguong or co_benh_gan_nen:
                 chi_so_gan_str = (
-                    f"Bệnh nền suy gan/xơ gan (AST={ast_val} U/L, ALT={alt_val} U/L)"
-                    if co_benh_gan_nen and ast_val <= 100 and alt_val <= 100
-                    else f"AST={ast_val} U/L, ALT={alt_val} U/L, Bilirubin={bili_val} µmol/L"
+                    f"AST={_hien(ast_val, 'U/L')}, ALT={_hien(alt_val, 'U/L')}, "
+                    f"Bilirubin={_hien(bili_val, 'µmol/L')}"
                 )
+                if co_benh_gan_nen and not vuot_nguong:
+                    chi_so_gan_str = f"Bệnh nền suy gan/xơ gan được báo cáo ({chi_so_gan_str})"
                 canh_bao_gan.append({
                     "thuoc": qt["ten_chuan"],
                     "muc_do": qt["muc_do"],
@@ -692,12 +777,14 @@ def kiem_tra_hieu_chinh_lieu(
             "crcl_cockcroft_gault": crcl_val,
             "egfr_ckd_epi": egfr_val,
             "phuong_phap_uoc_tinh": phuong_phap_uoc_tinh,
+            "canh_bao_uoc_tinh": canh_bao_uoc_tinh,
             "phan_do": phan_do_than
         },
         "chuc_nang_gan": {
             "ast": ast_val,
             "alt": alt_val,
             "bilirubin": bili_val,
+            "benh_gan_nen": co_benh_gan_nen,
             "bat_thuong": gan_bat_thuong
         },
         "tong_so_canh_bao": len(canh_bao_than) + len(canh_bao_gan) + len(canh_bao_thuc_pham),
