@@ -182,6 +182,9 @@ def _lien_ket_nguoi(luot):
         for m in QH_SO_HUU.finditer(van):
             cum = m.group(0)
             cum_thap = cum.lower()
+            # Bác sĩ nói "...của chị tôi mới ghi" -> "chị" là người bệnh, "tôi" là bác sĩ, không phải quan hệ "chị tôi"
+            if vai in ("bác sĩ", "điều dưỡng"):
+                continue
             if vai == "người nhà" and gop_ve_benh_nhan and cum_thap not in cum_la_gia_dinh:
                 benh_nhan.them(cum_thap, so)
             else:

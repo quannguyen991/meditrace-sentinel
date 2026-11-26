@@ -745,6 +745,18 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
             ra.append(tao(ctx, p, ma_bia, dan, [],
                           f"{nhan} “{ten}” không xuất hiện ở lượt nào trong hội thoại.",
                           LOI_PHAT_HIEN, THAP, "thuc_the", loai_tt))
+
+    # Nếu người nhà nói bằng ngôi thứ nhất ("tôi thì...", "em thì...") nhưng bản ghi lại
+    # gán sang ten_chu_the khác (vd "mẹ", "bố") không xuất hiện trong trích dẫn -> WRONG_SUBJECT
+    if getattr(p, "chu_the_id", 0) != 0 and _thuong(getattr(p, "nguoi_noi", "")) == "người nhà":
+        ten_ct = _thuong(getattr(p, "ten_chu_the", "") or "")
+        trich_list = [str(x) for x in (getattr(p, "trich_dan", None) or []) if x]
+        trich_low = " ".join(_thuong(x) for x in trich_list)
+        if ten_ct and ten_ct not in ("người nhà", "người khác", "không rõ") and ten_ct not in trich_low:
+            if re.search(r"(?:^|\b)(tôi|em|mình|cháu)\s+(?:thì|bị|dị ứng|đang|có|uống)\b", trich_low):
+                ra.append(tao(ctx, p, "WRONG_SUBJECT", dan, trich_list[:2],
+                              f"Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc '{ten_ct}'.",
+                              LOI_PHAT_HIEN, THAP, "thuc_the:ngoi_nhat", loai_tt))
     return ra
 
 
