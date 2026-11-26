@@ -10,7 +10,7 @@ import type { Phu } from "../tro-ly/dieu-phoi";
 import type { TacTuMa, YeuCauTroLy } from "../tro-ly/kieu";
 import { type KhoViec, taoKhoViec } from "../tro-ly/viec-tro-ly";
 import { traLoi, TUOI_VIEC_TOI_DA_MS } from "./dung-chung";
-import { goiNgoai, NGOAI } from "./llm-ngoai";
+import { chayVoiNguoiDung, goiNgoai, NGOAI } from "./llm-ngoai";
 
 const TRO_LY_TOI_DA_DONG_THOI = 2;
 const TRO_LY_CHO_TRUC_TIEP_MS = Number(process.env.MEDITRACE_TRO_LY_CHO_MS) || 1500;
@@ -113,7 +113,12 @@ export function dangKyTroLyRoutes(app: express.Express) {
       const ctl = new AbortController();
       boHuyTheoViec.set(viec.id, ctl);
       phatSuKien(viec.id);
-      void xuLyViecTroLy(taoPhuChoViec(viec.id, ctl.signal), khoTroLy, viec, (hanhDong, chiTiet) => ghiNhatKy(viec.nguoiDungId, hanhDong, chiTiet))
+      // Lời gọi mô hình ngoài trong việc nền tính hạn mức theo người tạo việc.
+      void chayVoiNguoiDung(viec.nguoiDungId, () =>
+        xuLyViecTroLy(taoPhuChoViec(viec.id, ctl.signal), khoTroLy, viec, (hanhDong, chiTiet) =>
+          ghiNhatKy(viec.nguoiDungId, hanhDong, chiTiet),
+        ),
+      )
         .catch((e) => console.error("[tro-ly] lỗi không bắt được:", e))
         .finally(() => {
           boHuyTheoViec.delete(viec.id);

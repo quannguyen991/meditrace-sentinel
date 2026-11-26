@@ -311,8 +311,29 @@ const R_DIA_CHI_THUONG = [
 
 const R_GIAY_TO = /(?<![\p{L}])(?:CCCD|CMND)(?![\p{L}])|(?<![\p{L}])BHYT\s*(?:số|:)?\s*[A-Z]{0,2}\s*\d/iu;
 
+/**
+ * Các mẫu danh tính dùng trong `lyDoDanhTinh`, dạng dùng được để CHE trên văn bản gốc
+ * (chuỗi số dài viết liền hoặc cách bằng khoảng trắng/chấm/gạch/ngoặc tương đương R_SO_DAI sau khi ghép số).
+ * Dùng cho đường gửi văn bản tự do ra mô hình ngoài (an-danh-ngoai.ts).
+ */
+export const MAU_DANH_TINH_DE_CHE: ReadonlyArray<RegExp> = [
+  R_EMAIL,
+  /\d(?:[\s().-]*\d){8,}/u,
+  ...R_NGAY,
+  R_TEN_LA,
+  R_TEN_HOA,
+  R_XUNG_HO_TEN,
+  R_BN_TEN,
+  R_HO,
+  R_HO_THUONG_SAU_TU_KHOA,
+  R_HO_TEN_BA_TIENG_THUONG,
+  R_NOI_HOA,
+  ...R_DIA_CHI_THUONG,
+  R_GIAY_TO,
+];
+
 /** Trả lý do nếu `s` còn dấu hiệu danh tính; `null` nếu không thấy. */
-function lyDoDanhTinh(raw: string): string | null {
+export function lyDoDanhTinh(raw: string): string | null {
   const s = raw.normalize("NFC");
   const so = s.replace(/[()]/g, " ").replace(SAT_GIUA_SO, "");
   if (R_EMAIL.test(s)) return "email";
