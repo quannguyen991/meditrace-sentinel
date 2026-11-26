@@ -16,24 +16,48 @@ export const TUOI_VIEC_TOI_DA_MS = 30 * 60_000;
  */
 const choLau = new Agent({ headersTimeout: 30 * 60_000, bodyTimeout: 30 * 60_000 });
 
-/** Gọi dịch vụ tại chỗ; lỗi mạng trả về thông điệp nói rõ phải bật dịch vụ nào. */
+/** Tên header mang khoá nội bộ; dịch vụ Python (src/dich_vu.py) đòi header này ở mọi /api. */
+export const HEADER_TOKEN_NOI_BO = "X-MediTrace-Internal-Token";
+
+/** Lỗi có thông điệp được phép đưa nguyên văn cho người dùng kể cả khi mã >= 500. */
+export function loiCongKhai(thongDiep: string, status: number, code?: string): Error {
+  return Object.assign(new Error(thongDiep), { status, congKhai: true, ...(code ? { code } : {}) });
+}
+
+/** Gọi dịch vụ tại chỗ; luôn kèm khoá nội bộ từ env MEDITRACE_INTERNAL_TOKEN, thiếu khoá thì dừng ngay. */
 export async function goiDichVu(duong: string, tuyChon?: RequestInit) {
-  let res: Response;
   const internalToken = (process.env.MEDITRACE_INTERNAL_TOKEN || "").trim();
-  const baseHeaders = (tuyChon?.headers || {}) as Record<string, string>;
-  const headers = internalToken ? { ...baseHeaders, "X-MediTrace-Internal-Token": internalToken } : baseHeaders;
+  if (!internalToken) {
+    console.error("[dich-vu] Thiếu biến môi trường MEDITRACE_INTERNAL_TOKEN — không gọi dịch vụ MediTrace.");
+    throw loiCongKhai(
+      "Máy chủ web chưa cấu hình MEDITRACE_INTERNAL_TOKEN (khoá nội bộ dùng chung với dịch vụ MediTrace). " +
+        "Đặt cùng một giá trị cho cả máy chủ web và dịch vụ Python rồi khởi động lại.",
+      503,
+      "thieu_token_noi_bo",
+    );
+  }
+  const baseHeaders: Record<string, string> = {};
+  for (const [k, v] of Object.entries((tuyChon?.headers || {}) as Record<string, string>)) {
+    if (k.toLowerCase() !== HEADER_TOKEN_NOI_BO.toLowerCase()) baseHeaders[k] = v;
+  }
+  const headers = { ...baseHeaders, [HEADER_TOKEN_NOI_BO]: internalToken };
+  let res: Response;
   try {
     res = await fetch(`${API}${duong}`, { ...(tuyChon || {}), headers, dispatcher: choLau } as any);
   } catch (err: any) {
-    const e: any = new Error(
-      `Không kết nối được dịch vụ MediTrace ở ${API}. Chạy: python -m src.dich_vu --cong 8765 ` +
-        `trong thư mục D:\\Claude\\meditrace-core (${err?.message || err}).`,
-    );
-    e.status = 503;
-    throw e;
+    console.error(`[dich-vu] Không kết nối được ${API}${duong}:`, err?.message || err);
+    throw loiCongKhai("Không kết nối được dịch vụ MediTrace chạy tại chỗ. Hãy bật dịch vụ rồi thử lại.", 503, "dich_vu_tat");
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      console.error(`[dich-vu] Dịch vụ từ chối khoá nội bộ (${res.status}) tại ${duong}`);
+      throw loiCongKhai(
+        "Dịch vụ MediTrace từ chối khoá nội bộ — kiểm tra MEDITRACE_INTERNAL_TOKEN hai bên trùng nhau.",
+        502,
+        "token_noi_bo_sai",
+      );
+    }
     const e: any = new Error(data?.thong_diep || `Dịch vụ trả mã ${res.status}`);
     e.status = res.status;
     e.code = data?.loi;
@@ -42,10 +66,19 @@ export async function goiDichVu(duong: string, tuyChon?: RequestInit) {
   return data;
 }
 
+/** Trả lỗi JSON. Mã >= 500 chỉ trả thông điệp chung (chi tiết ghi log máy chủ), trừ lỗi đánh dấu `congKhai`. */
 export function traLoi(res: express.Response, err: any) {
   if (res.headersSent) return;
   const raw = Number(err?.status || err?.statusCode || err?.ma);
   const status = Number.isInteger(raw) && raw >= 100 && raw <= 599 ? raw : 500;
+  if (status >= 500 && !err?.congKhai) {
+    console.error(`[loi ${status}]`, err?.stack || err?.message || err);
+    res.status(status).json({
+      error: "Lỗi máy chủ nội bộ. Chi tiết đã ghi vào nhật ký máy chủ.",
+      ...(err?.code ? { code: err.code } : {}),
+    });
+    return;
+  }
   res.status(status).json({ error: err?.message || "Lỗi không rõ", ...(err?.code ? { code: err.code } : {}) });
 }
 
@@ -137,11 +170,16 @@ export async function chayPythonJson(moduleName: string, args: string[], inputOb
       child.stderr.on("data", (d) => (err += d.toString("utf8")));
       child.on("close", (code) => {
         hoanTat(() => {
-          if (code !== 0) return reject(new Error(err || `Python exited with ${code}`));
+          if (code !== 0) {
+            // stderr của Python có thể chứa đường dẫn máy và traceback: chỉ ghi log, không trả cho người dùng.
+            console.error(`[python ${moduleName}] thoát mã ${code}:`, err.slice(-2000));
+            return reject(new Error(`Tác vụ Python ${moduleName} thất bại (mã ${code})`));
+          }
           try {
             resolve(JSON.parse(out.trim()));
           } catch {
-            reject(new Error(`JSON không hợp lệ từ ${moduleName}: ${out.slice(0, 200)}`));
+            console.error(`[python ${moduleName}] JSON không hợp lệ:`, out.slice(0, 200));
+            reject(new Error(`JSON không hợp lệ từ ${moduleName}`));
           }
         });
       });
