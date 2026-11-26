@@ -27,6 +27,8 @@ export interface SignOffRecord {
   hash: string;
   /** Băm SHA-256 của nội dung bệnh án SOAP gốc + trạng thái duyệt mệnh đề tại thời điểm ký. */
   contentHash?: string;
+  /** Tab bệnh án đã được băm khi ký; kiểm tra "đã sửa sau khi ký" luôn băm lại đúng tab này. */
+  tabId?: string | null;
   wormSeq?: number;
 }
 

@@ -25,12 +25,9 @@ import type { NguoiDung } from "./lib/taiKhoan";
 import { cacNguoiNoiChuaGan } from "./lib/nguoiNoi";
 import { trichNguCanhChoTroLy, xayNguCanhChoTaoHoSo } from "./lib/nguCanhTroLy";
 import { phatHienMauThuanXuyenLanKham } from "./lib/doiChieuLanKham";
-import {
-  computeNoteSignOffHash,
-  kiemTraDieuKienKyDuyet,
-  layNoiDungBenhAnDeBam,
-} from "./lib/compileEffectiveNote";
-import { bamChuoi, useSessionsStore } from "./hooks/useSessionsStore";
+import { computeNoteSignOffHash, kiemTraDieuKienKyDuyet } from "./lib/compileEffectiveNote";
+import { chonTabBenhAnDeBam, khoaDuyetCuaNote } from "./lib/kyDuyet";
+import { useSessionsStore } from "./hooks/useSessionsStore";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -79,7 +76,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       localStorage.setItem("meditrace_taskbar_position", taskbarPosition);
     } catch {}
   }, [taskbarPosition]);
-  const { sessions, setSessions, activeSessionId, setActiveSessionId } = useSessionsStore();
+  const { sessions, setSessions, activeSessionId, setActiveSessionId, luuMotCaNgay } = useSessionsStore();
 
   // Quản lý thu gọn thanh bên thông minh theo kích thước màn hình Tablet
   const [isSessionsSidebarCollapsed, setIsSessionsSidebarCollapsed] = useState(() => {
@@ -290,7 +287,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const evidenceChat: ClinicalChatMessage[] = currentSession?.evidenceChat || [];
 
   // Duyệt mệnh đề: lưu cùng ca theo khoá nội dung bản nháp
-  const khoaDuyet = noteMeta ? `${noteMeta.caseId || ""}#${noteMeta.content.length}#${bamChuoi(noteMeta.content)}` : "";
+  const khoaDuyet = noteMeta ? khoaDuyetCuaNote(noteMeta) : "";
   const duyetLuu = currentSession?.duyet?.khoa === khoaDuyet ? currentSession.duyet : undefined;
   const quyetDuyet: Record<number, Quyet> = duyetLuu?.quyet || {};
   const banSuaDuyet: Record<number, string> = duyetLuu?.banSua || {};
@@ -991,9 +988,11 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     setActiveNavigationItem("sessions");
   };
 
+  // Đã ký: luôn băm lại ĐÚNG tab đã ký (không theo tab đang mở). Chưa ký: tab bệnh án đang mở, nếu không thì tab mặc định.
+  const tabIdKyDuyet = currentSession?.signOff ? currentSession.signOff.tabId ?? null : currentSession?.activeTabId ?? null;
   const soapRawContentForSignOff = useMemo(
-    () => layNoiDungBenhAnDeBam(currentSession?.tabs, currentSession?.activeTabId, noteMeta?.content),
-    [currentSession?.tabs, currentSession?.activeTabId, noteMeta?.content],
+    () => chonTabBenhAnDeBam(currentSession?.tabs, noteMeta?.content, tabIdKyDuyet).noiDung,
+    [currentSession?.tabs, tabIdKyDuyet, noteMeta?.content],
   );
 
   const pageTitle: Record<string, string> = {
@@ -1317,35 +1316,24 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                   }
                                   return;
                                 }
-                                const soapRaw = layNoiDungBenhAnDeBam(
+                                // Máy chủ tính số liệu + băm từ ca ĐÃ LƯU: đẩy bản mới nhất lên trước khi ký.
+                                const daLuu = await luuMotCaNgay(currentSession);
+                                if (!daLuu) {
+                                  setApiError("Chưa lưu được ca khám lên máy chủ — không thể ký duyệt. Thử lại sau giây lát.");
+                                  return;
+                                }
+                                const { tabId, noiDung: soapRaw } = chonTabBenhAnDeBam(
                                   currentSession.tabs,
-                                  currentSession.activeTabId,
                                   noteMeta?.content,
+                                  currentSession.activeTabId,
                                 );
-                                const soGiu = ds.filter((p) => qSnap[p.id] === "giu").length;
-                                const soSua = ds.filter((p) => qSnap[p.id] === "sua").length;
-                                const soBo = ds.filter((p) => qSnap[p.id] === "bo").length;
-                                const conHieuLuc = ds.filter((p) => qSnap[p.id] !== "bo");
-                                const coNguon = conHieuLuc.filter(
-                                  (p) => p.evidenceTurns.length > 0 || (qSnap[p.id] === "sua" && Boolean(bSnap[p.id]?.trim())),
-                                ).length;
-                                const tyLeCoNguon = conHieuLuc.length
-                                  ? Math.round((coNguon / conHieuLuc.length) * 100)
-                                  : 0;
-                                const contentHash = await computeNoteSignOffHash(soapRaw, qSnap, bSnap);
+                                // Băm phía trình duyệt chỉ để máy chủ đối chiếu (lệch -> 409), không được dùng làm bằng chứng.
+                                const contentHashTrinhDuyet = await computeNoteSignOffHash(soapRaw, qSnap, bSnap);
 
                                 const res = await fetch(`/api/sessions/${encodeURIComponent(targetId)}/sign-off`, {
                                   method: "POST",
                                   headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    tongMenhDe: ds.length,
-                                    soGiu,
-                                    soSua,
-                                    soBo,
-                                    tyLeCoNguon,
-                                    contentHash,
-                                    soChuaXacNhan: kiemTra.soCanXacNhanChuaDuyet,
-                                  }),
+                                  body: JSON.stringify({ tabId, contentHash: contentHashTrinhDuyet }),
                                 });
                                 if (res.ok) {
                                   const data = await res.json();
@@ -1358,7 +1346,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                       soBo: data.soBo,
                                       tyLeCoNguon: data.tyLeCoNguon,
                                       hash: data.hash,
-                                      contentHash,
+                                      contentHash: data.contentHash,
+                                      tabId: data.tabId ?? tabId,
                                       wormSeq: data.wormSeq,
                                     },
                                   });

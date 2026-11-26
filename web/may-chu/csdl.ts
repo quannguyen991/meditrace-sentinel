@@ -55,13 +55,33 @@ function mocLuu(uid: number, kho: TenKho): number {
   return r?.luu_luc || 0;
 }
 
-/** Đọc một kho của một người, cùng dạng { sessions, savedAt } mà giao diện đang dùng. */
-export function docKho(uid: number, kho: TenKho): { sessions: unknown[]; savedAt: number } {
-  const dong =
-    kho === "ca-kham"
-      ? db.prepare("SELECT du_lieu FROM ca_kham WHERE nguoi_dung_id = ? ORDER BY thu_tu").all(uid)
-      : db.prepare("SELECT du_lieu FROM muc_kho WHERE nguoi_dung_id = ? AND kho = ? ORDER BY thu_tu").all(uid, kho);
+/**
+ * Đọc một kho của một người, cùng dạng { sessions, savedAt } mà giao diện đang dùng.
+ * Kho ca khám kèm `updatedAt` (id -> cap_nhat_luc) để giao diện gửi lại làm khoá lạc quan.
+ */
+export function docKho(
+  uid: number,
+  kho: TenKho,
+): { sessions: unknown[]; savedAt: number; updatedAt?: Record<string, number> } {
+  if (kho === "ca-kham") {
+    const dong = db
+      .prepare("SELECT id, du_lieu, cap_nhat_luc FROM ca_kham WHERE nguoi_dung_id = ? ORDER BY thu_tu")
+      .all(uid) as Array<{ id: string; du_lieu: string; cap_nhat_luc: number }>;
+    return {
+      sessions: dong.map((d) => JSON.parse(d.du_lieu)),
+      savedAt: mocLuu(uid, kho),
+      updatedAt: Object.fromEntries(dong.map((d) => [d.id, d.cap_nhat_luc])),
+    };
+  }
+  const dong = db.prepare("SELECT du_lieu FROM muc_kho WHERE nguoi_dung_id = ? AND kho = ? ORDER BY thu_tu").all(uid, kho);
   return { sessions: (dong as { du_lieu: string }[]).map((d) => JSON.parse(d.du_lieu)), savedAt: mocLuu(uid, kho) };
+}
+
+export interface TuyChonGhiKho {
+  /** id -> cap_nhat_luc mà giao diện đã thấy lần cuối (khoá lạc quan). Có trường này là giao thức mới. */
+  baseUpdatedAt?: Record<string, number> | null;
+  /** Ca bị xoá CÓ CHỦ ĐÍCH ở giao diện. Ca vắng mặt khỏi danh sách nhưng không có ở đây thì giữ nguyên. */
+  deletedIds?: string[] | null;
 }
 
 const chuoi = (v: unknown, dai = 200) => (typeof v === "string" ? v.slice(0, dai) : null);
@@ -89,12 +109,21 @@ function luuBanSaoNeuToiHan(uid: number, kho: TenKho, bay: number): void {
 }
 
 /**
- * Ghi đè cả kho của một người bằng danh sách mới (tương thích ngược 100% với giao diện hiện có).
+ * Ghi cả kho của một người bằng danh sách mới.
+ * Với kho ca khám: KHÔNG xoá ca vắng mặt trong danh sách (máy khác có thể vừa tạo), chỉ xoá ca trong
+ * `deletedIds`; nếu có `baseUpdatedAt` thì ca nào trên máy chủ đã mới hơn bản giao diện thấy -> 409, không ghi gì.
  */
-export function ghiKho(uid: number, kho: TenKho, ds: unknown[], savedAt?: number) {
+export function ghiKho(
+  uid: number,
+  kho: TenKho,
+  ds: unknown[],
+  savedAt?: number,
+  tuyChon?: TuyChonGhiKho,
+): { updatedAt?: Record<string, number> } {
   const bay = Date.now();
-  giaoDich(() => {
+  return giaoDich(() => {
     luuBanSaoNeuToiHan(uid, kho, bay);
+    let updatedAt: Record<string, number> | undefined;
 
     if (kho === "ca-kham") {
       const coSan = new Map(
@@ -116,20 +145,64 @@ export function ghiKho(uid: number, kho: TenKho, ds: unknown[], savedAt?: number
          WHERE nguoi_dung_id = ? AND id = ?`,
       );
       const doiThuTu = db.prepare("UPDATE ca_kham SET thu_tu = ? WHERE nguoi_dung_id = ? AND id = ?");
-      ds.forEach((ca: any, i) => {
+      const base =
+        tuyChon?.baseUpdatedAt && typeof tuyChon.baseUpdatedAt === "object" && !Array.isArray(tuyChon.baseUpdatedAt)
+          ? tuyChon.baseUpdatedAt
+          : null;
+      const moiHonBase = (id: string, capNhatLuc: number) => {
+        if (!base) return false; // giao diện cũ: không khoá (nhưng cũng không còn xoá ngầm)
+        const b = Number(base[id]);
+        return !Number.isFinite(b) || b < capNhatLuc;
+      };
+
+      // Bước 1: kiểm tra toàn bộ trước khi ghi để 409 không để lại nửa chừng.
+      const xungDot: string[] = [];
+      const daThay = new Set<string>();
+      for (const ca of ds as any[]) {
         const id = chuoi(ca?.id, 100);
-        if (!id || conLai.has(id)) throw Object.assign(new Error("Ca khám thiếu id hoặc trùng id"), { ma: 400 });
+        if (!id || daThay.has(id)) throw Object.assign(new Error("Ca khám thiếu id hoặc trùng id"), { ma: 400 });
+        daThay.add(id);
+        const cu = coSan.get(id);
+        if (cu && cu.du_lieu !== JSON.stringify(ca) && moiHonBase(id, cu.cap_nhat_luc)) xungDot.push(id);
+      }
+      const canXoa = (Array.isArray(tuyChon?.deletedIds) ? tuyChon!.deletedIds! : [])
+        .map((x) => chuoi(x, 100))
+        .filter((x): x is string => Boolean(x) && !daThay.has(x as string) && coSan.has(x as string));
+      for (const id of canXoa) {
+        // Xoá ca mà máy khác vừa sửa sau lần giao diện này thấy -> xung đột, không xoá.
+        const b = Number(base?.[id]);
+        if (!Number.isFinite(b) || b < coSan.get(id)!.cap_nhat_luc) xungDot.push(id);
+      }
+      if (xungDot.length) {
+        throw Object.assign(new Error("Ca khám trên máy chủ đã được cập nhật mới hơn (xung đột phiên bản)."), {
+          ma: 409,
+          status: 409,
+          code: "conflict_stale_version",
+          conflicts: xungDot,
+          updatedAt: Object.fromEntries([...coSan.values()].map((d) => [d.id, d.cap_nhat_luc])),
+        });
+      }
+
+      // Bước 2: ghi.
+      updatedAt = {};
+      ds.forEach((ca: any, i) => {
+        const id = chuoi(ca?.id, 100)!;
         conLai.add(id);
         const json = JSON.stringify(ca);
         const ten = chuoi(ca.patientIdentifier);
         const ngay = chuoi(ca.date, 40);
         const cu = coSan.get(id);
+        let luc = cu?.cap_nhat_luc ?? bay;
         if (!cu) them.run(uid, id, i, ten, ngay, json, bay, bay);
-        else if (cu.du_lieu !== json) sua.run(i, ten, ngay, json, Math.max(bay, cu.cap_nhat_luc + 1), uid, id);
-        else doiThuTu.run(i, uid, id);
+        else if (cu.du_lieu !== json) {
+          luc = Math.max(bay, cu.cap_nhat_luc + 1);
+          sua.run(i, ten, ngay, json, luc, uid, id);
+        } else doiThuTu.run(i, uid, id);
+        updatedAt![id] = luc;
       });
       const xoa = db.prepare("DELETE FROM ca_kham WHERE nguoi_dung_id = ? AND id = ?");
-      for (const id of coSan.keys()) if (!conLai.has(id)) xoa.run(uid, id);
+      for (const id of canXoa) xoa.run(uid, id);
+      for (const d of coSan.values()) if (!conLai.has(d.id) && !canXoa.includes(d.id)) updatedAt[d.id] = d.cap_nhat_luc;
     } else {
       db.prepare("DELETE FROM muc_kho WHERE nguoi_dung_id = ? AND kho = ?").run(uid, kho);
       const them = db.prepare("INSERT INTO muc_kho (nguoi_dung_id, kho, thu_tu, du_lieu) VALUES (?, ?, ?, ?)");
@@ -140,6 +213,7 @@ export function ghiKho(uid: number, kho: TenKho, ds: unknown[], savedAt?: number
       `INSERT INTO moc_luu (nguoi_dung_id, kho, luu_luc) VALUES (?, ?, ?)
        ON CONFLICT (nguoi_dung_id, kho) DO UPDATE SET luu_luc = excluded.luu_luc`,
     ).run(uid, kho, Number(savedAt) || bay);
+    return updatedAt ? { updatedAt } : {};
   });
 }
 
@@ -233,6 +307,19 @@ export function xoaMotCaKham(uid: number, rawId: string): { ok: true; id: string
     }
     return { ok: true, id, deleted: daXoa };
   });
+}
+
+/** Đọc MỘT ca khám đã lưu của đúng người dùng `uid` (khoá chính (nguoi_dung_id, id)); không có thì `null`. */
+export function docMotCaKham(uid: number, id: string): { duLieu: unknown; capNhatLuc: number } | null {
+  const r = db.prepare("SELECT du_lieu, cap_nhat_luc FROM ca_kham WHERE nguoi_dung_id = ? AND id = ?").get(uid, id) as
+    | { du_lieu: string; cap_nhat_luc: number }
+    | undefined;
+  if (!r) return null;
+  try {
+    return { duLieu: JSON.parse(r.du_lieu), capNhatLuc: r.cap_nhat_luc };
+  } catch {
+    return { duLieu: null, capNhatLuc: r.cap_nhat_luc };
+  }
 }
 
 /**
