@@ -10,7 +10,7 @@
 
 > **Báo cáo cải tiến Chặng 1 (AI 2026):** Xem đối chiếu chi tiết từng yêu cầu cải tiến (giảm bỏ sót & chốt chặn không hoàn tất hồ sơ khi thiếu căn cứ; kiểm soát lỗi giữa các bước AI & demo đa người nói; kiểm tra tính độc lập bộ dữ liệu 657 khuôn & kịch bản ngoài khuôn) tại **[`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)**.
 
-1. Mở **https://meditrace-sentinel.vercel.app** và đăng nhập bằng tài khoản dùng thử ghi trong hồ sơ dự thi. (Phần mềm yêu cầu tài khoản để bảo vệ dữ liệu của người dùng.)
+1. Mở **https://meditrace-sentinel.meditrace.workers.dev** và đăng nhập bằng tài khoản dùng thử ghi trong hồ sơ dự thi. (Phần mềm yêu cầu tài khoản để bảo vệ dữ liệu của người dùng.)
 2. Ở **Trang chủ**, bấm nút **"Xem thử với ca mẫu"**. Mỗi lần bấm, phần mềm xoay vòng qua **3 ca khám đa người nói dựng sẵn** (*Bác sĩ – Mẹ – Bệnh nhi*, *Hai người bệnh cùng phòng trao đổi*, *Bác sĩ – Cụ ông 74 tuổi – Con gái*), có sẵn bản nháp và mục `Cần xác nhận`, không cần GPU và không phải chờ.
 3. Vào **"Bằng chứng hội thoại"** (màn **"Duyệt từng mệnh đề"**) hoặc ngăn duyệt ngay cạnh bản nháp. Bên trái là lời thoại, bên phải là từng thông tin được rút ra kèm chủ thể và đường nối căn cứ. Những thông tin chưa chắc nằm trong mục **Cần xác nhận** kèm lý do — hệ thống **khóa cứng không cho ký duyệt hoàn tất hồ sơ** cho tới khi bác sĩ xác nhận, sửa hoặc bỏ hết các mục này.
 4. Thử **ghi âm**: bấm "Bắt đầu ghi âm" và nói vài câu. Dải trên cùng có các vạch nhảy theo giọng để cho biết micrô đang thu.
@@ -191,6 +191,8 @@ Biến môi trường cần đặt từ 26/11/2026 (đủ danh sách ở `web/.e
 | `HOST`, `MEDITRACE_ALLOWED_HOSTS` | Chế độ dev chỉ nghe `127.0.0.1`; muốn mở qua đường hầm thì liệt kê tên miền. |
 | `MEDITRACE_NGOAI_TOI_DA_PHUT`, `MEDITRACE_NGOAI_TOI_DA_NGAY` | Giới hạn số lần gọi mô hình ngoài mỗi người dùng (mặc định 10/phút, 200/ngày). |
 
+Bản chạy thử công khai (từ 26/11/2026, thay Vercel): máy chủ web và dịch vụ Python chạy trên một máy có GPU, ra ngoài qua đường hầm Cloudflare; một Cloudflare Worker (`trien-khai/cloudflare/`) giữ địa chỉ cố định https://meditrace-sentinel.meditrace.workers.dev và chuyển tiếp tới đường hầm hiện tại (đọc từ kho KV, đổi bằng một lệnh `wrangler kv key put`).
+
 ## Quyền riêng tư và an toàn
 
 - Chép lời và viết bản nháp đều chạy ngay trên máy, không gửi nội dung buổi khám ra ngoài.
@@ -220,4 +222,4 @@ Phần lớn mã nguồn do trợ lý lập trình AI (Claude Code của Anthrop
 
 ### English summary
 
-MediTrace Sentinel turns a Vietnamese doctor–patient conversation into a **draft** clinical note in which every line links back to the exact turn it came from. Only the first step uses an AI model (Qwen3-4B, fine-tuned, running locally); linking people, tracking corrections, evidence checks and routing are readable rules. All data is synthetic; the software does not diagnose or prescribe. Try it at https://meditrace-sentinel.vercel.app (demo account in the submission notes; click "Xem thử với ca mẫu" for an instant sample case).
+MediTrace Sentinel turns a Vietnamese doctor–patient conversation into a **draft** clinical note in which every line links back to the exact turn it came from. Only the first step uses an AI model (Qwen3-4B, fine-tuned, running locally); linking people, tracking corrections, evidence checks and routing are readable rules. All data is synthetic; the software does not diagnose or prescribe. Try it at https://meditrace-sentinel.meditrace.workers.dev (demo account in the submission notes; click "Xem thử với ca mẫu" for an instant sample case).

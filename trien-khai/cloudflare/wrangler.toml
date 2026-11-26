@@ -1,0 +1,8 @@
+name = "meditrace-sentinel"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "CAU_HINH"
+id = "d4a5576f38bd4c578530d8ae26973173"

@@ -4,7 +4,7 @@
 **Dự án:** MediTrace Sentinel — Hệ thống Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa  
 **Mã dự án:** `quannguyen991/meditrace-sentinel`  
 **Nhánh Git:** `main` | **Thời điểm nghiệm thu cập nhật:** 17/10/2026 – 26/11/2026  
-**Môi trường Production (Vercel):** [https://meditrace-sentinel.vercel.app](https://meditrace-sentinel.vercel.app)  
+**Môi trường chạy thử (Cloudflare Workers, từ 26/11/2026):** [https://meditrace-sentinel.meditrace.workers.dev](https://meditrace-sentinel.meditrace.workers.dev)  
 **Báo cáo cải tiến Chặng 1 (AI 2026):** [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)  
 **Quy chuẩn lưu trữ:** Bản quyền mã nguồn cục bộ và GitHub Public Repository  
 
@@ -265,4 +265,4 @@ if (input.soChuaXacNhan !== undefined && input.soChuaXacNhan !== 0) {
 
 1. **Tính trung thực & Khả năng tái lập (Reproducibility):** Mọi con số (1.779 bài test `pytest`, 43 bài test TypeScript, độ nhạy lớp cảnh báo 0,871 trên tập giữ kín, tỷ lệ bỏ sót 43,1% → 11,5%, thống kê lặp câu 47,37%) đều do mã nguồn trong kho in ra và tái lập được bằng lệnh thực thi.
 2. **An toàn dữ liệu Y khoa:** Hệ thống vận hành theo kiến trúc Neuro-Symbolic chạy tại chỗ (On-premise/Edge), không tự hoàn tất hồ sơ khi thiếu căn cứ, tuân thủ Nghị định 13/2023/NĐ-CP và Luật Khám bệnh, chữa bệnh 2023.
-3. **Tính sẵn sàng Production:** Ứng dụng chạy thử tại `https://meditrace-sentinel.vercel.app` (có sẵn 3 ca mẫu đa người nói mở ngay không cần GPU).
+3. **Tính sẵn sàng Production:** Ứng dụng chạy thử tại `https://meditrace-sentinel.meditrace.workers.dev` (có sẵn 3 ca mẫu đa người nói mở ngay không cần GPU).

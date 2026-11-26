@@ -2,7 +2,7 @@
 
 **Dự án:** MediTrace Sentinel — Phần mềm dựng bản nháp hồ sơ khám bệnh từ lời nói buổi khám tiếng Việt có truy vết căn cứ hai chiều  
 **Kho mã nguồn (HTTPS):** https://github.com/quannguyen991/meditrace-sentinel  
-**Sản phẩm chạy thử (HTTPS):** https://meditrace-sentinel.vercel.app  
+**Sản phẩm chạy thử (HTTPS):** https://meditrace-sentinel.meditrace.workers.dev  
 **Ngày cập nhật:** 26/11/2026  
 
 > **Nguyên tắc liêm chính khoa học của báo cáo này:**  
