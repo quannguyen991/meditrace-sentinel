@@ -86,17 +86,14 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   // Quản lý thu gọn thanh bên thông minh theo kích thước màn hình Tablet
   const [isSessionsSidebarCollapsed, setIsSessionsSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
-      return window.innerWidth < 1200;
+      // Mở ca là thấy ngay bản nháp: danh sách ca thu gọn sẵn, bấm « để mở lại.
+      return true;
     }
     return false;
   });
 
-  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth >= 1536;
-    }
-    return false;
-  });
+  // Khung "Câu hỏi & tra cứu" đóng sẵn, bác sĩ cần thì bấm nút mở.
+  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1141,7 +1138,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     activeSessionId={activeSessionId}
                     onSelectSession={(id) => {
                       setActiveSessionId(id);
-                      if (window.innerWidth < 768) setIsSessionsSidebarCollapsed(true);
+                      setIsSessionsSidebarCollapsed(true);
                     }}
                     onCreateSession={handleCreateNewSession}
                     onDeleteSession={handleDeleteSession}

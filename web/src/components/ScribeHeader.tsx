@@ -501,11 +501,11 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
           </div>
         </div>
 
-        {/* Đồng hồ bấm giờ ca khám */}
-        <div className="flex items-center gap-1 text-[11px] sm:text-xs font-mono text-[#4A423D] px-2 py-1 bg-white border border-[#DDD7CE] rounded-xl shadow-[0_2px_6px_rgba(0,0,0,0.04)] flex-shrink-0">
+        {/* Đồng hồ bấm giờ ca khám: chỉ hiện khi đã ghi âm */}
+        {(isRecording || duration > 0) && <div className="flex items-center gap-1 text-[11px] sm:text-xs font-mono text-[#4A423D] px-2 py-1 bg-white border border-[#DDD7CE] rounded-xl shadow-[0_2px_6px_rgba(0,0,0,0.04)] flex-shrink-0">
           <Clock size={12} className="text-[#8C837C]" />
           <span>{formatTimer(duration)}</span>
-        </div>
+        </div>}
 
         {/* Micrô & Thước đo tín hiệu âm thanh — cột hẹp thì ẩn, ghi âm dùng micrô mặc định */}
         <div className="relative flex-shrink-0 hidden @xl:block">
@@ -599,9 +599,9 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
             }
           >
             <Cloud size={13} className={choPhepNgoai ? "text-[#DC2626]" : "text-[#94A3B8]"} />
-            <span className="text-[11px] font-semibold whitespace-nowrap">
-              {choPhepNgoai ? "Mô hình ngoài: Bật" : "Mô hình ngoài: Tắt"}
-            </span>
+            {choPhepNgoai && (
+              <span className="text-[11px] font-semibold whitespace-nowrap">Mô hình ngoài: Bật</span>
+            )}
           </button>
         )}
 

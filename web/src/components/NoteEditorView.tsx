@@ -290,7 +290,7 @@ export function taoGoiFhirBhytHieuLuc(
 const MAU_TO: Record<DanhDauMD["trangThai"], string> = {
   canh: "bg-[#FDE2E2] decoration-[#E86A6A]",
   luuy: "bg-[#FEF3C7] decoration-[#D9A441]",
-  ok: "bg-transparent decoration-[#9ED9C0]",
+  ok: "bg-transparent decoration-transparent hover:decoration-[#9ED9C0]",
   giu: "bg-[#E3F6EE] decoration-[#34B889]",
   sua: "bg-[#FEF3C7] decoration-[#D9A441]",
   bo: "bg-[#F1F5F9] line-through text-[#94A3B8] decoration-[#94A3B8]",
