@@ -19,6 +19,26 @@ const TEP_SCHEMA = fs.existsSync(path.join(process.cwd(), "db", "schema.sql"))
 db.exec(fs.readFileSync(TEP_SCHEMA, "utf-8"));
 // Đảm bảo migration bảng + trigger `worm_signoff` cho cả các tệp DB cũ đã tồn tại từ trước
 damBaoBangWorm(db);
+// Phiên chép âm (ASR) của dịch vụ Python gắn với người tạo: chặn dùng mã phiên của bác sĩ khác.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS phien_asr (
+    phien          TEXT    PRIMARY KEY,
+    nguoi_dung_id  INTEGER NOT NULL REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    tao_luc        INTEGER NOT NULL
+  );
+`);
+
+export function ganPhienAsr(uid: number, phien: string): void {
+  db.prepare(
+    `INSERT INTO phien_asr (phien, nguoi_dung_id, tao_luc) VALUES (?, ?, ?)
+     ON CONFLICT (phien) DO NOTHING`,
+  ).run(phien, uid, Date.now());
+}
+
+/** `true` chỉ khi phiên tồn tại và do chính `uid` tạo (phiên lạ hoặc của người khác đều `false`). */
+export function phienAsrCuaNguoiDung(uid: number, phien: string): boolean {
+  return Boolean(db.prepare("SELECT 1 FROM phien_asr WHERE phien = ? AND nguoi_dung_id = ?").get(phien, uid));
+}
 
 /** Chạy một khối lệnh trong giao dịch: lỗi giữa chừng thì không ghi gì. */
 export function giaoDich<T>(viec: () => T): T {
