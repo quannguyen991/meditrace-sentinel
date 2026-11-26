@@ -93,14 +93,18 @@ def loai_thong_tin(p) -> str:
     if muc == "DỊ ỨNG":
         return "di_ung"
 
-    # Kiem tra thuoc khoang dieu tri hep
-    if muc == "THUỐC ĐANG DÙNG" or "thuốc" in noi_dung:
+    # Kiem tra thuoc khoang dieu tri hep (ke ca khi chu_the_id != 0 nhung co truong `thuoc`)
+    if muc == "THUỐC ĐANG DÙNG" or d.get("thuoc") or "thuốc" in noi_dung:
+        ten_thuoc = str((d.get("thuoc") or {}).get("ten", "") if isinstance(d.get("thuoc"), dict) else "").lower()
         for t in THUOC_KHOANG_DIEU_TRI_HEP:
-            if t in noi_dung:
+            if t in noi_dung or (ten_thuoc and t in ten_thuoc):
                 return "thuoc_nti"
         return "thuoc"
 
-    if muc == "CHẨN ĐOÁN":
+    from src import phat_bieu as _pb
+    if muc == "CHẨN ĐOÁN" or (
+        d.get("hanh_vi") == "nhận định" and _pb.la_vai_nhan_vien(str(d.get("nguoi_noi") or ""))
+    ):
         return "chan_doan"
 
     if d.get("moc_thoi_gian") or d.get("quan_he") in ("đính chính", "diễn biến", "mâu thuẫn"):

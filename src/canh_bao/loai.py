@@ -123,7 +123,7 @@ LOAI: Dict[str, Loai] = {
     "FREQUENCY_MISMATCH": _l("ENTITY_VALUE", "Số lần dùng không khớp",
                              "Số lần trong bản ghi khác số lần trong hội thoại.", CAO, 6),
     "ROUTE_MISMATCH": _l("ENTITY_VALUE", "Đường dùng thuốc không khớp",
-                         "Đường dùng (uống, xịt, bôi…) không có ở lượt được dẫn.", TRUNG, 6),
+                         "Đường dùng (uống, xịt, bôi…) không có ở lượt được dẫn.", CAO, 6),
     "UNIT_MISMATCH": _l("ENTITY_VALUE", "Sai đơn vị", "Cùng con số nhưng đơn vị khác với hội thoại.", CAO, 6),
     "DECIMAL_MISMATCH": _l("ENTITY_VALUE", "Lệch dấu thập phân", "Con số lệch gấp 10 lần so với hội thoại.", CAO, 6),
     "DURATION_MISMATCH": _l("ENTITY_VALUE", "Khoảng thời gian không khớp",
@@ -263,7 +263,7 @@ CHUA_PHAT_HIEN = {
 
 # ----------------------------------------------------------------- muc do
 # Loai thong tin — MOT dinh nghia voi `cong_rui_ro.loai_thong_tin`.
-LOAI_NANG = ("di_ung", "thuoc")
+LOAI_NANG = ("di_ung", "thuoc", "chan_doan")
 # Ma ma sai o BAT KY loai thong tin nao cung nguy hiem — khong ha xuong.
 LUON_CAO = {"NEGATION_FLIP", "NEGATION_SCOPE_ERROR", "UNKNOWN_AS_NEGATIVE", "FABRICATED_MEDICATION", "FABRICATED_ALLERGY",
             "DOSE_MISMATCH", "DECIMAL_MISMATCH", "UNIT_MISMATCH", "DISCONTINUED_AS_CURRENT",
