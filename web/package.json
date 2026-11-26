@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/lib/*.test.ts src/types/*.test.ts"
+    "test": "tsx --test src/lib/*.test.ts src/types/*.test.ts src/hooks/*.test.ts may-chu/*.test.ts may-chu/routes/*.test.ts may-chu/tra-cuu/*.test.ts may-chu/tro-ly/*.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
