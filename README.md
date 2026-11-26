@@ -152,7 +152,7 @@ Chi tiết: `docs/ket-qua/cay-loi.md`.
 | Đường dẫn | Nội dung |
 |---|---|
 | `src/` | Toàn bộ phần xử lý bằng Python (xem bảng các bước ở trên). |
-| `tests/` | **1.779 bài kiểm thử `pytest` qua**, 25 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 43 bài kiểm thử TypeScript (frontend + backend), đều qua. |
+| `tests/` | **1.900 bài kiểm thử `pytest` qua**, 27 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 76 bài kiểm thử TypeScript (giao diện + máy chủ, chạy bằng `npm test`), đều qua. |
 | `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ, công cụ cấy lỗi (`cay_loi.py`, `cay_loi_kho.py`). |
 | `data/` | Chỉ có bảng tri thức thuốc, vân tay (mã băm) của các tập dữ liệu và manifest. Bản thân dữ liệu không nằm trong kho. |
 | `kaggle-kernels/` | Mỗi thư mục là một lượt huấn luyện hoặc chạy mô hình trên Kaggle (điền tên tài khoản Kaggle của bạn trong `kernel-metadata.json` nếu muốn chạy lại). |
@@ -182,12 +182,25 @@ cd web && npm install && npm run dev
 
 Các khoá bí mật (khoá Hugging Face, khoá và địa chỉ của dịch vụ mô hình ngoài) được đọc lúc chạy từ tệp hoặc biến môi trường. Không có khoá nào nằm trong kho mã.
 
+Biến môi trường cần đặt từ 26/11/2026 (đủ danh sách ở `web/.env.example`):
+
+| Biến | Dùng để |
+|---|---|
+| `MEDITRACE_INTERNAL_TOKEN` | Khoá giữa máy chủ web và dịch vụ Python; đặt **cùng giá trị** ở hai bên. Dịch vụ Python tự sinh tệp `data/.meditrace_internal_token` nếu chưa đặt. Thiếu khoá thì mọi `/api` (trừ `/api/suc-khoe`) bị từ chối. |
+| `MEDITRACE_WORM_KEY` | Khoá HMAC của nhật ký ký duyệt. Không đặt thì tự sinh vào `~/.meditrace/worm.key`; phải sao lưu cùng cơ sở dữ liệu. |
+| `HOST`, `MEDITRACE_ALLOWED_HOSTS` | Chế độ dev chỉ nghe `127.0.0.1`; muốn mở qua đường hầm thì liệt kê tên miền. |
+| `MEDITRACE_NGOAI_TOI_DA_PHUT`, `MEDITRACE_NGOAI_TOI_DA_NGAY` | Giới hạn số lần gọi mô hình ngoài mỗi người dùng (mặc định 10/phút, 200/ngày). |
+
 ## Quyền riêng tư và an toàn
 
 - Chép lời và viết bản nháp đều chạy ngay trên máy, không gửi nội dung buổi khám ra ngoài.
 - Công tắc "Mô hình ngoài" mặc định **tắt**; khi bật có cảnh báo rõ, mỗi lần dùng đều được ghi lại.
 - Mật khẩu người dùng được băm trước khi lưu; người mới chỉ đăng ký được bằng mã mời dùng một lần.
 - Mọi kết quả của mô hình ngoài đều gắn nhãn "chưa qua kiểm căn cứ"; bản nháp luôn ghi "chưa có bác sĩ duyệt".
+- Mọi lời gọi mô hình ngoài đi qua **một cổng duy nhất**: kiểm công tắc quản trị ở máy chủ, giới hạn số lần, che tên, số điện thoại, ngày sinh, địa chỉ, mã bệnh nhân; còn sót dấu hiệu danh tính thì **từ chối gửi**. Đường gửi sang máy GPU từ xa cũng chặn như vậy.
+- Ký duyệt: máy chủ tự tính mã băm và số liệu từ ca đã lưu, không tin số trình duyệt gửi lên; ca phải tồn tại và thuộc đúng bác sĩ.
+
+Rà soát độc lập ngày 26/11/2026 (hai lượt, Python và web) tìm ra 9 lỗi nghiêm trọng, đã sửa cùng ngày, mỗi lỗi có phép thử hồi quy. Đáng kể nhất: khoá kiểm liều coi "5 mg" khớp "2.5 mg"; hiệu chỉnh liều dabigatran/enoxaparin dùng eGFR thay vì CrCl; thiếu tuổi thì ngầm lấy 50; chế độ dev cho tải cả tệp cơ sở dữ liệu không cần đăng nhập. Sau khi sửa, các số đo của lớp cảnh báo ở trên **không đổi** (chạy lại cùng ngày).
 
 ## Giới hạn đã biết
 
