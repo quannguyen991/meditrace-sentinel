@@ -11,10 +11,35 @@
 
 const KHONG_CHUYEN = ["host", "cf-connecting-ip", "cf-ipcountry", "cf-ray", "cf-visitor", "x-forwarded-proto", "x-real-ip"];
 
+const DUONG_CAP_NHAT = "/__meditrace/cap-nhat-dich";
+const MAU_DICH = /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/;
+
+function bangNhau(a, b) {
+  // so sanh thoi gian khong doi de khong lo do dai/tien to mat ma
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+// HoaiDuc goi duong nay khi duong ham doi link (xem cap-nhat-kv.ps1). Chi nhan link
+// *.trycloudflare.com va chi khi kem dung mat ma chung (secret KHOA_CAP_NHAT cua Worker).
+async function capNhatDich(req, env) {
+  if (req.method !== "POST" || !env.KHOA_CAP_NHAT) return new Response("not found", { status: 404 });
+  if (!bangNhau(req.headers.get("x-meditrace-khoa") || "", env.KHOA_CAP_NHAT)) {
+    return new Response("forbidden", { status: 403 });
+  }
+  const dich = (await req.text()).trim();
+  if (!MAU_DICH.test(dich)) return new Response("link khong hop le", { status: 400 });
+  await env.CAU_HINH.put("dich", dich);
+  return new Response("ok", { status: 200 });
+}
+
 export default {
   async fetch(req, env) {
+    if (new URL(req.url).pathname === DUONG_CAP_NHAT) return capNhatDich(req, env);
     const dich = (await env.CAU_HINH.get("dich")) || "";
-    if (!/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(dich)) {
+    if (!MAU_DICH.test(dich)) {
       return new Response("MediTrace đang bảo trì, vui lòng thử lại sau ít phút.", {
         status: 503,
         headers: { "content-type": "text/plain; charset=utf-8", "retry-after": "60" },
