@@ -263,7 +263,8 @@ function bocAsync(fn: (req: express.Request, res: express.Response, next: expres
       if (res.headersSent) return next(err);
       const raw = Number(err?.ma || err?.status || err?.statusCode);
       const status = Number.isInteger(raw) && raw >= 100 && raw <= 599 ? raw : 500;
-      res.status(status).json({ error: err?.message || "Lỗi xử lý tài khoản" });
+      if (status >= 500) console.error("[tai-khoan]", err?.stack || err?.message || err);
+      res.status(status).json({ error: status >= 500 ? "Lỗi xử lý tài khoản" : err?.message || "Lỗi xử lý tài khoản" });
     });
   };
 }
@@ -318,7 +319,8 @@ export function lapTaiKhoan(app: express.Express) {
         taoQuanTriDuocTuDay: !coNguoi && tuChinhMayNay(req),
       });
     } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Không kiểm tra được phiên" });
+      console.error("[tai-khoan] kiểm tra phiên:", err?.message || err);
+      res.status(500).json({ error: "Không kiểm tra được phiên" });
     }
   });
 
@@ -417,7 +419,8 @@ export function lapTaiKhoan(app: express.Express) {
       datCookie(req, res, "", 0);
       res.json({ ok: true });
     } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Không đăng xuất được" });
+      console.error("[tai-khoan] đăng xuất:", err?.message || err);
+      res.status(500).json({ error: "Không đăng xuất được" });
     }
   });
 
@@ -454,7 +457,8 @@ export function lapTaiKhoan(app: express.Express) {
       ghiNhatKy(req.nguoiDung!.id, "tao_ma_moi", `…${ma.slice(-2)}`, diaChi(req));
       res.json({ ma: `${ma.slice(0, 4)}-${ma.slice(4)}`, hetHan: bay + HAN_MA_MOI });
     } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Không tạo được mã mời" });
+      console.error("[tai-khoan] tạo mã mời:", err?.message || err);
+      res.status(500).json({ error: "Không tạo được mã mời" });
     }
   });
 
@@ -469,7 +473,8 @@ export function lapTaiKhoan(app: express.Express) {
       const nguoi = db.prepare("SELECT id, email, ho_ten, vai, tao_luc, dang_nhap_cuoi FROM nguoi_dung ORDER BY id").all();
       res.json({ maMoi: ds, nguoiDung: nguoi });
     } catch (err: any) {
-      res.status(500).json({ error: err?.message || "Không đọc được danh sách mã mời" });
+      console.error("[tai-khoan] danh sách mã mời:", err?.message || err);
+      res.status(500).json({ error: "Không đọc được danh sách mã mời" });
     }
   });
 }

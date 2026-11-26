@@ -13,6 +13,8 @@ process.env.MEDITRACE_KHONG_LISTEN = "1";
 process.env.MEDITRACE_CHO_NHAP_MS = "80";
 process.env.MEDITRACE_TRO_LY_CHO_MS = "50";
 process.env.MEDITRACE_TRO_LY_NGOAI = "tat";
+process.env.MEDITRACE_INTERNAL_TOKEN = "test-token-noi-bo";
+process.env.MEDITRACE_WORM_KEY = "khoa-worm-kiem-thu-routes-0123456789abcdef";
 
 // Mock dịch vụ Python cục bộ để kiểm thử tích hợp thực tế cho /api/generate-note và /api/transcribe
 let mockPyPort = 0;
@@ -241,6 +243,30 @@ test("Express HTTP routes: ca-kham (batch + granular + 409 lock), sign-off/WORM 
   assert.equal(badKhoRes.status, 404);
 
   // 2. /api/sessions/:id/sign-off + IDOR + kiểm định chặt + /api/worm/verify
+  // Ký duyệt tính số liệu từ ca đã lưu: ca chưa có bản nháp thì bị chặn 400
+  const signChuaCoNhap = await fetch(`${baseUrl}/api/sessions/ca_http_1/sign-off`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h" }),
+  });
+  assert.equal(signChuaCoNhap.status, 400);
+  const nhapHttp = { caseId: "py_http", content: "LÝ DO KHÁM BỆNH\nđau ngực [T1]", propositions: [{ id: 1, text: "đau ngực", status: "than", evidenceTurns: [1] }] };
+  const { khoaDuyetCuaNote } = await import("../../src/lib/kyDuyet");
+  const caCoNhap = await fetch(`${baseUrl}/api/ca-kham/ca_http_1`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      session: {
+        id: "ca_http_1",
+        patientIdentifier: "BN Test v3",
+        date: "2026-11-25",
+        tabs: [{ id: "tab-doc", title: "Bản nháp hồ sơ", type: "custom", content: nhapHttp.content }],
+        note: nhapHttp,
+        duyet: { khoa: khoaDuyetCuaNote(nhapHttp), quyet: { 1: "giu" }, banSua: {} },
+      },
+    }),
+  });
+  assert.equal(caCoNhap.status, 200);
   const signRes = await fetch(`${baseUrl}/api/sessions/ca_http_1/sign-off`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -250,7 +276,6 @@ test("Express HTTP routes: ca-kham (batch + granular + 409 lock), sign-off/WORM 
       soSua: 1,
       soBo: 0,
       tyLeCoNguon: 100,
-      contentHash: "sha_demo",
     }),
   });
   assert.equal(signRes.status, 200);
@@ -288,26 +313,15 @@ test("Express HTTP routes: ca-kham (batch + granular + 409 lock), sign-off/WORM 
   const adminHist: any = await adminGet.json();
   assert.equal(adminHist.entries.length, 1);
 
-  // Các dữ liệu sai ràng buộc số nguyên, tổng mệnh đề, tỷ lệ nguồn, contentHash rỗng -> đều bị chặn 400
-  const invalidPayloads = [
-    { tongMenhDe: "khong-phai-so", contentHash: "h" },
-    { tongMenhDe: 0, soGiu: 0, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h" },
-    { tongMenhDe: 2.5, soGiu: 2, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h" },
-    { tongMenhDe: 3, soGiu: 0, soSua: 0, soBo: 3, tyLeCoNguon: 100, contentHash: "h" },
-    { tongMenhDe: 3, soGiu: 2, soSua: 1, soBo: 1, tyLeCoNguon: 100, contentHash: "h" },
-    { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 0, contentHash: "h" },
-    { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 150, contentHash: "h" },
-    { tongMenhDe: 3, soGiu: 2, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h", soChuaXacNhan: 1 },
-    { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "   " },
-  ];
-  for (const p of invalidPayloads) {
-    const badRes = await fetch(`${baseUrl}/api/sessions/ca_http_1/sign-off`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(p),
-    });
-    assert.equal(badRes.status, 400, `phải trả 400 cho payload: ${JSON.stringify(p)}`);
-  }
+  // Số liệu client gửi bị bỏ qua: máy chủ tính từ ca đã lưu (1 mệnh đề, giữ 1)
+  assert.deepEqual([signData.tongMenhDe, signData.soGiu, signData.soSua, signData.soBo], [1, 1, 0, 0]);
+  // Băm client gửi lệch với nội dung đã lưu -> 409, không ghi WORM
+  const lechRes = await fetch(`${baseUrl}/api/sessions/ca_http_1/sign-off`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contentHash: "sha_khong_khop" }),
+  });
+  assert.equal(lechRes.status, 409);
 
   const histRes = await fetch(`${baseUrl}/api/sessions/ca_http_1/sign-off`);
   assert.equal(histRes.status, 200);

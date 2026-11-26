@@ -8,7 +8,15 @@ import type {
   PyNoteResponse,
   PyPhatBieu,
 } from "../../src/types/api-contract";
-import { db } from "../csdl";
+import { db, ganPhienAsr, phienAsrCuaNguoiDung } from "../csdl";
+
+/** Mã phiên ASR không phải do người đang đăng nhập tạo (hoặc không tồn tại): từ chối, không chuyển sang dịch vụ. */
+function chanPhienLa(res: express.Response) {
+  return res.status(403).json({
+    error: "Phiên ghi âm này không thuộc tài khoản của bạn hoặc đã hết hạn. Hãy chép âm lại.",
+    code: "phien_asr_khong_thuoc_ban",
+  });
+}
 import { taoHangDoi, type TrangThaiViecTra } from "../hang-doi";
 import { goiDichVu, traLoi, TUOI_VIEC_TOI_DA_MS } from "./dung-chung";
 
@@ -162,9 +170,16 @@ export function dangKyAsrRoutes(app: express.Express) {
         try {
           hangDoiViec.xong(v.id, JSON.stringify(await taoBanNhap(JSON.parse(v.taiTrong))));
         } catch (err: any) {
+          const status = Number(err?.status) || 500;
+          const anChiTiet = status >= 500 && !err?.congKhai;
+          if (anChiTiet) console.error(`[ban-nhap ${v.id}]`, err?.stack || err?.message || err);
           hangDoiViec.loi(
             v.id,
-            JSON.stringify({ status: err?.status || 500, error: err?.message || "Lỗi không rõ", code: err?.code }),
+            JSON.stringify({
+              status,
+              error: anChiTiet ? "Lỗi máy chủ khi tạo bản nháp. Chi tiết đã ghi vào nhật ký máy chủ." : err?.message || "Lỗi không rõ",
+              code: err?.code,
+            }),
           );
         }
       }
@@ -206,8 +221,9 @@ export function dangKyAsrRoutes(app: express.Express) {
           tach_nguoi_noi: diarize !== false,
         }),
       });
+      if (typeof d.phien === "string" && d.phien) ganPhienAsr(req.nguoiDung!.id, d.phien);
       const doan = d.doan || [];
-      const transcript = doan.map((s: any) => `${s.speaker_id || "Người nói"}: ${s.text_original}`).join("\n");
+      const transcript =doan.map((s: any) => `${s.speaker_id || "Người nói"}: ${s.text_original}`).join("\n");
       const transcriptSegments = doan.map((s: any, idx: number) => ({
         luot: idx + 1,
         start_s: typeof s.start_time === "number" ? s.start_time : typeof s.start_s === "number" ? s.start_s : 0,
@@ -233,6 +249,7 @@ export function dangKyAsrRoutes(app: express.Express) {
     try {
       const { sessionId, roles } = req.body || {};
       if (!sessionId || !roles) return res.status(400).json({ error: "Thiếu sessionId hoặc roles" });
+      if (!phienAsrCuaNguoiDung(req.nguoiDung!.id, String(sessionId))) return chanPhienLa(res);
       const d = await goiDichVu("/api/gan-vai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -251,8 +268,9 @@ export function dangKyAsrRoutes(app: express.Express) {
       if (!transcript && !sessionId && !sampleCaseId) {
         return res.status(400).json({ error: "Cần transcript, sessionId hoặc sampleCaseId" });
       }
-      hangDoiViec.donViecCu(TUOI_VIEC_TOI_DA_MS);
       const uid = req.nguoiDung!.id;
+      if (sessionId && !phienAsrCuaNguoiDung(uid, String(sessionId))) return chanPhienLa(res);
+      hangDoiViec.donViecCu(TUOI_VIEC_TOI_DA_MS);
       const tai = JSON.stringify({
         transcript,
         sessionId,

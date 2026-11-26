@@ -10,20 +10,30 @@ export function dangKyCaKhamRoutes(app: express.Express) {
     try {
       res.set("Cache-Control", "no-store").json(docKho(req.nguoiDung!.id, ten));
     } catch (err: any) {
-      res.status(500).json({ error: `Không đọc được kho ${ten}: ${err?.message || err}` });
+      console.error(`[kho ${ten}] đọc lỗi:`, err);
+      res.status(500).json({ error: `Không đọc được kho ${ten}` });
     }
   });
 
+  // Ghi cả danh sách: chỉ xoá ca trong `deletedIds`; có `baseUpdatedAt` thì ca nào đã mới hơn -> 409.
   app.put(["/api/ca-kham", "/api/kho/:ten"], (req, res) => {
     const ten = req.params.ten || "ca-kham";
     if (!laTenKho(ten)) return res.status(404).json({ error: `Không có kho ${ten}` });
-    const { sessions, savedAt } = req.body || {};
+    const { sessions, savedAt, baseUpdatedAt, deletedIds } = req.body || {};
     if (!Array.isArray(sessions)) return res.status(400).json({ error: "Thiếu danh sách" });
+    if (deletedIds !== undefined && !Array.isArray(deletedIds)) return res.status(400).json({ error: "deletedIds phải là mảng" });
     try {
-      ghiKho(req.nguoiDung!.id, ten, sessions, savedAt);
-      res.json({ ok: true, count: sessions.length });
+      const kq = ghiKho(req.nguoiDung!.id, ten, sessions, savedAt, { baseUpdatedAt, deletedIds });
+      res.json({ ok: true, count: sessions.length, ...kq });
     } catch (err: any) {
-      res.status(err?.ma || 500).json({ error: `Không ghi được kho ${ten}: ${err?.message || err}` });
+      const status = Number(err?.status || err?.ma) || 500;
+      if (status >= 500) console.error(`[kho ${ten}] ghi lỗi:`, err);
+      res.status(status).json({
+        error: status >= 500 ? `Không ghi được kho ${ten}` : `Không ghi được kho ${ten}: ${err?.message || err}`,
+        ...(err?.code ? { code: err.code } : {}),
+        ...(Array.isArray(err?.conflicts) ? { conflicts: err.conflicts } : {}),
+        ...(err?.updatedAt ? { updatedAt: err.updatedAt } : {}),
+      });
     }
   });
 
@@ -48,7 +58,8 @@ export function dangKyCaKhamRoutes(app: express.Express) {
       const kq = ghiMotCaKham(req.nguoiDung!.id, id, ca, { expectedUpdatedAt, savedAt });
       res.json(kq);
     } catch (err: any) {
-      const status = err?.status || err?.ma || 500;
+      const status = Number(err?.status || err?.ma) || 500;
+      if (status >= 500) return traLoi(res, err);
       res.status(status).json({
         error: err?.message || String(err),
         ...(err?.code ? { code: err.code } : {}),
@@ -63,7 +74,7 @@ export function dangKyCaKhamRoutes(app: express.Express) {
       if (!id) return res.status(400).json({ error: "Thiếu mã ca khám" });
       res.json(xoaMotCaKham(req.nguoiDung!.id, id));
     } catch (err: any) {
-      res.status(err?.status || err?.ma || 500).json({ error: err?.message || String(err) });
+      traLoi(res, { ...err, message: err?.message, status: err?.status || err?.ma });
     }
   });
 

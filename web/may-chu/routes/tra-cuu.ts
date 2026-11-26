@@ -18,7 +18,7 @@ import {
   timTaiLieuTheoTuKhoa,
 } from "../tra-cuu/dich-vu-tra-cuu";
 import { traLoi } from "./dung-chung";
-import { chanNeuChuaChoPhep, goiNgoai } from "./llm-ngoai";
+import { chanNeuChuaChoPhep, chayVoiNguoiDung, goiNgoai } from "./llm-ngoai";
 
 export { type TaiLieu, chuanSo, soLech, datTuKhoaTraCuu, timTaiLieuTheoTuKhoa, soanTraLoiCoNguon };
 
@@ -40,7 +40,8 @@ export function dangKyTraCuuRoutes(app: express.Express) {
         })),
       });
     } catch (err: any) {
-      res.status(502).json({ error: `Không tìm được trên PubMed: ${err?.message || err}` });
+      console.error("[pubmed]", err?.message || err);
+      res.status(502).json({ error: "Không tìm được trên PubMed. Thử lại sau." });
     }
   });
 
@@ -48,9 +49,10 @@ export function dangKyTraCuuRoutes(app: express.Express) {
     res.json({ van_ban: mucLucPhacDo() });
   });
 
-  app.post("/api/lookup-official", async (req, res) => {
+  // Mọi lời gọi ngoài trong route (kể cả trong datTuKhoaTraCuu/soanTraLoiCoNguon) tính hạn mức cho đúng người dùng.
+  app.post("/api/lookup-official", (req, res) => chayVoiNguoiDung(req.nguoiDung?.id, async () => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { question, context, nguon, transcript, draft } = req.body || {};
       const soLuotCa = String(transcript || "")
         .split("\n")
@@ -154,5 +156,5 @@ export function dangKyTraCuuRoutes(app: express.Express) {
     } catch (err) {
       traLoi(res, err);
     }
-  });
+  }));
 }

@@ -1,7 +1,9 @@
 import type express from "express";
 import fs from "fs";
-import { anDanhVanBanNgoai } from "../an-danh-ngoai";
-import { traLoi } from "./dung-chung";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { anDanhVanBanNgoai, khoiPhucPII } from "../an-danh-ngoai";
+import { ngoaiBat } from "../tro-ly/cai-dat-tro-ly";
+import { loiCongKhai, traLoi } from "./dung-chung";
 
 function docTep(duong: string) {
   try {
@@ -16,39 +18,110 @@ export const NGOAI = {
     .replace(/\/$/, ""),
   key: process.env.AIBOX_KEY || docTep(process.env.AIBOX_KEY_FILE || "D:/Claude/.secrets/aibox-home.key"),
   model: process.env.AIBOX_MODEL || "qwen3.8-flash",
-  ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140 Safari/537.36",
+  // Tự giới thiệu đúng là máy chủ MediTrace, không giả trình duyệt.
+  ua: "MediTrace-may-chu/1",
 };
 
-export function chanNeuChuaChoPhep(req: express.Request) {
+/* ------------------------------------------------------------------ cổng kiểm soát chung cho MỌI lời gọi ngoài */
+
+/** Người dùng của lời gọi hiện tại (cho việc nền như trợ lý, nơi không có `req`). */
+const nguCanhNguoiDung = new AsyncLocalStorage<{ uid: number | null }>();
+export function chayVoiNguoiDung<T>(uid: number | null | undefined, viec: () => T): T {
+  return nguCanhNguoiDung.run({ uid: typeof uid === "number" ? uid : null }, viec);
+}
+
+/** Công tắc quản trị `tro_ly_ngoai` (hoặc env MEDITRACE_TRO_LY_NGOAI=tat) áp cho mọi đường ra mô hình ngoài. */
+async function ngoaiDangBat(): Promise<boolean> {
+  const { db } = await import("../csdl");
+  return ngoaiBat(db, process.env);
+}
+
+function loiNgoaiBiTat(): Error {
+  return loiCongKhai(
+    "Quản trị viên đã tắt đường gửi ra mô hình ngoài cho toàn hệ thống. Dùng chức năng chạy tại chỗ.",
+    403,
+    "ngoai_bi_tat",
+  );
+}
+
+const demNgoai = new Map<string, { moc: number[]; ngay: string; soNgay: number }>();
+const soDuong = (v: string | undefined, macDinh: number) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : macDinh;
+};
+
+/** Giới hạn mỗi người dùng: MEDITRACE_NGOAI_TOI_DA_PHUT lượt/phút (mặc định 10), MEDITRACE_NGOAI_TOI_DA_NGAY lượt/ngày (mặc định 200). */
+export function kiemHanMucNgoai(uid: number | null, bay = Date.now()): void {
+  const khoa = uid === null ? "khong_ro" : String(uid);
+  const ngay = new Date(bay).toISOString().slice(0, 10);
+  const toiDaPhut = soDuong(process.env.MEDITRACE_NGOAI_TOI_DA_PHUT, 10);
+  const toiDaNgay = soDuong(process.env.MEDITRACE_NGOAI_TOI_DA_NGAY, 200);
+  const dem = demNgoai.get(khoa) ?? { moc: [], ngay, soNgay: 0 };
+  if (dem.ngay !== ngay) {
+    dem.ngay = ngay;
+    dem.soNgay = 0;
+  }
+  dem.moc = dem.moc.filter((t) => bay - t < 60_000);
+  if (dem.moc.length >= toiDaPhut || dem.soNgay >= toiDaNgay) {
+    demNgoai.set(khoa, dem);
+    throw loiCongKhai(
+      dem.soNgay >= toiDaNgay
+        ? `Đã dùng hết ${toiDaNgay} lượt gọi mô hình ngoài hôm nay. Thử lại vào ngày mai hoặc dùng chức năng tại chỗ.`
+        : `Gọi mô hình ngoài quá ${toiDaPhut} lượt/phút. Chờ một phút rồi thử lại.`,
+      429,
+      "qua_gioi_han_ngoai",
+    );
+  }
+  dem.moc.push(bay);
+  dem.soNgay++;
+  demNgoai.set(khoa, dem);
+}
+
+export function datLaiHanMucNgoai(): void {
+  demNgoai.clear();
+}
+
+/** Chặn sớm ở đầu route: bác sĩ phải bật công tắc ở giao diện VÀ quản trị chưa tắt đường ngoài. */
+export async function chanNeuChuaChoPhep(req: express.Request) {
+  if (!(await ngoaiDangBat())) throw loiNgoaiBiTat();
   if (req.body?.allowExternal !== true) {
     const e: any = new Error(
       "Việc này cần mô hình ngoài (mô hình thương mại). Bật công tắc “Cho phép gửi ra mô hình ngoài” trước — " +
-        "nội dung ca khám sẽ được gửi ra máy chủ của dịch vụ mô hình ngoài.",
+        "nội dung ca khám (đã che tên, ngày sinh, địa chỉ, số điện thoại, mã hồ sơ) sẽ được gửi ra dịch vụ mô hình ngoài.",
     );
     e.status = 403;
     e.code = "chua_cho_phep_ngoai";
     throw e;
   }
   if (!NGOAI.key || !NGOAI.base) {
-    const e: any = new Error("Chưa cấu hình cổng mô hình ngoài (AIBOX_BASE/AIBOX_BASE_FILE và AIBOX_KEY/AIBOX_KEY_FILE).");
-    e.status = 503;
-    throw e;
+    throw loiCongKhai("Chưa cấu hình cổng mô hình ngoài. Liên hệ quản trị viên.", 503, "chua_cau_hinh_ngoai");
   }
 }
 
-/** Một lượt gọi chat completions; giới hạn token để không tiêu tiền ngoài ý muốn (hỗ trợ AbortSignal khi hủy việc). */
+/**
+ * Một lượt gọi chat completions — lối ra DUY NHẤT tới mô hình ngoài. Trước khi gửi luôn:
+ * (a) kiểm công tắc quản trị, (b) giới hạn lượt theo người dùng, (c) che định danh và kiểm lại phần còn sót —
+ * còn định danh thì từ chối (422 `con_danh_tinh`). Giới hạn token để không tiêu tiền ngoài ý muốn; hỗ trợ AbortSignal.
+ */
 export async function goiNgoai(
   heThong: string,
   nguoiDung: string,
   maxToken = 1200,
   them: Record<string, unknown> = {},
   signal?: AbortSignal,
+  tuyChon: { nguoiDungId?: number | null } = {},
 ) {
   const t0 = Date.now();
+  if (!(await ngoaiDangBat())) throw loiNgoaiBiTat();
+  if (!NGOAI.key || !NGOAI.base) {
+    throw loiCongKhai("Chưa cấu hình cổng mô hình ngoài. Liên hệ quản trị viên.", 503, "chua_cau_hinh_ngoai");
+  }
+  const uid = tuyChon.nguoiDungId !== undefined ? tuyChon.nguoiDungId : nguCanhNguoiDung.getStore()?.uid ?? null;
   const bangPII = new Map<string, string>();
   const heThongDaAnDanh = anDanhVanBanNgoai(heThong, bangPII) as string;
   const nguoiDungDaAnDanh = anDanhVanBanNgoai(nguoiDung, bangPII) as string;
   const themDaAnDanh = anDanhVanBanNgoai(them, bangPII) as Record<string, unknown>;
+  kiemHanMucNgoai(uid);
   let res: Response;
   try {
     res = await fetch(`${NGOAI.base}/chat/completions`, {
@@ -78,19 +151,16 @@ export async function goiNgoai(
       abortErr.code = "da_huy";
       throw abortErr;
     }
-    const e: any = new Error(`Không kết nối được cổng mô hình ngoài: ${err?.message || err}`);
-    e.status = 502;
-    throw e;
+    console.error("[mo-hinh-ngoai] không kết nối được:", err?.message || err);
+    throw loiCongKhai("Không kết nối được cổng mô hình ngoài. Thử lại sau.", 502, "ngoai_khong_ket_noi");
   }
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const e: any = new Error(`Cổng mô hình ngoài trả mã ${res.status}: ${data?.error?.message || data?.message || ""}`);
-    e.status = 502;
-    throw e;
+    console.error(`[mo-hinh-ngoai] trả mã ${res.status}:`, data?.error?.message || data?.message || "");
+    throw loiCongKhai(`Cổng mô hình ngoài trả mã ${res.status}.`, 502, "ngoai_loi");
   }
   const noiDung = data?.choices?.[0]?.message?.content || "";
-  let sach = noiDung.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-  for (const [token, original] of bangPII) sach = sach.split(token).join(original);
+  const sach = khoiPhucPII(noiDung.replace(/<think>[\s\S]*?<\/think>/g, "").trim(), bangPII);
   return {
     text: sach,
     source: "mo_hinh_ngoai",
@@ -104,8 +174,11 @@ const NHOM_CAU_HOI = ["Triệu chứng", "Tiền sử", "Thuốc", "Dị ứng",
 
 export function dangKyLlmNgoaiRoutes(app: express.Express) {
   /** Tình trạng cổng ngoài — gọi /models (không tốn tiền), không gửi nội dung ca khám. */
-  app.get("/api/external/status", async (_req, res) => {
-    if (!NGOAI.key) return res.json({ configured: false, model: NGOAI.model });
+  app.get("/api/external/status", async (req, res) => {
+    const enabled = await ngoaiDangBat().catch(() => false);
+    if (!NGOAI.key) return res.json({ configured: false, enabled, model: NGOAI.model });
+    // Địa chỉ cổng chỉ cho quản trị xem.
+    const laQuanTri = req.nguoiDung?.vai === "quan_tri";
     try {
       const r = await fetch(`${NGOAI.base}/models`, {
         headers: { Authorization: `Bearer ${NGOAI.key}`, "User-Agent": NGOAI.ua },
@@ -114,20 +187,22 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
       const ids: string[] = (d?.data || []).map((m: any) => m.id);
       res.json({
         configured: true,
+        enabled,
         reachable: r.ok,
         model: NGOAI.model,
         modelAvailable: ids.includes(NGOAI.model),
-        base: NGOAI.base,
+        ...(laQuanTri ? { base: NGOAI.base } : {}),
       });
     } catch (err: any) {
-      res.json({ configured: true, reachable: false, model: NGOAI.model, error: err?.message });
+      console.error("[mo-hinh-ngoai] /models lỗi:", err?.message || err);
+      res.json({ configured: true, enabled, reachable: false, model: NGOAI.model });
     }
   });
 
   /** Sửa bản nháp theo lời nhắc — chỉ khi đã cho phép mô hình ngoài. */
   app.post("/api/edit-note", async (req, res) => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { currentContent, instruction, transcript } = req.body || {};
       if (!currentContent || !instruction) return res.status(400).json({ error: "Thiếu nội dung hoặc lời nhắc" });
       const r = await goiNgoai(
@@ -138,6 +213,9 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
         `Lời nhắc của bác sĩ: ${instruction}\n\nHội thoại gốc (để đối chiếu):\n${transcript || "(không có)"}\n\n` +
           `Bản nháp hiện tại:\n${currentContent}`,
         1500,
+        {},
+        undefined,
+        { nguoiDungId: req.nguoiDung?.id ?? null },
       );
       res.json({ updatedContent: r.text, source: r.source, model: r.model, usage: r.usage, seconds: r.seconds });
     } catch (err) {
@@ -147,7 +225,7 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
 
   app.post("/api/clinical-qa", async (req, res) => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { question, transcript, draft } = req.body || {};
       if (!question) return res.status(400).json({ error: "Thiếu câu hỏi" });
       const soLuot = (transcript || "")
@@ -162,6 +240,9 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
           "KHÔNG chẩn đoán, KHÔNG đề xuất thuốc hay điều trị. Trả lời ngắn, tiếng Việt.",
         `Hội thoại:\n${soLuot || "(không có)"}\n\nBản nháp:\n${draft || "(chưa có)"}\n\nCâu hỏi: ${question}`,
         700,
+        {},
+        undefined,
+        { nguoiDungId: req.nguoiDung?.id ?? null },
       );
       res.json({ answer: r.text, sources: [], source: r.source, model: r.model, usage: r.usage, seconds: r.seconds });
     } catch (err) {
@@ -171,7 +252,7 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
 
   app.post("/api/questions-external", async (req, res) => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { transcript, propositions, context } = req.body || {};
       if (!transcript && !context) return res.status(400).json({ error: "Cần lời thoại hoặc ngữ cảnh" });
       const soLuot = String(transcript || "")
@@ -198,6 +279,9 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
         `Ngữ cảnh bác sĩ nhập:\n${context || "(không có)"}\n\nHội thoại:\n${soLuot || "(chưa có)"}\n\n` +
           `Mệnh đề máy đã ghi:\n${menhDe || "(chưa có)"}`,
         900,
+        {},
+        undefined,
+        { nguoiDungId: req.nguoiDung?.id ?? null },
       );
       let ds: any[] = [];
       try {
@@ -215,7 +299,7 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
 
   app.post("/api/generate-document", async (req, res) => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { title, instruction, transcript, draft, context } = req.body || {};
       if (!instruction && !title) return res.status(400).json({ error: "Thiếu yêu cầu văn bản" });
       if (!transcript && !draft && !context) {
@@ -236,6 +320,9 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
           `Ngữ cảnh bác sĩ nhập:\n${context || "(không có)"}\n\nLời thoại:\n${soLuot || "(không có)"}\n\n` +
           `Bản nháp hồ sơ:\n${draft || "(chưa có)"}`,
         1200,
+        {},
+        undefined,
+        { nguoiDungId: req.nguoiDung?.id ?? null },
       );
       const thieu = (r.text.match(/\[cần bổ sung\]/g) || []).length;
       res.json({ content: r.text, missingCount: thieu, source: r.source, model: r.model, usage: r.usage, seconds: r.seconds });
@@ -246,7 +333,7 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
 
   app.post("/api/generate-note-external", async (req, res) => {
     try {
-      chanNeuChuaChoPhep(req);
+      await chanNeuChuaChoPhep(req);
       const { transcript } = req.body || {};
       if (!transcript) return res.status(400).json({ error: "Thiếu lời thoại" });
       const r = await goiNgoai(
@@ -255,6 +342,9 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
           "CHẨN ĐOÁN, KẾ HOẠCH ĐIỀU TRỊ. Chỉ ghi điều hội thoại nói. Không thêm gì.",
         transcript,
         1500,
+        {},
+        undefined,
+        { nguoiDungId: req.nguoiDung?.id ?? null },
       );
       res.json({ content: r.text, source: r.source, model: r.model, usage: r.usage, seconds: r.seconds });
     } catch (err) {

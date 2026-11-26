@@ -14,7 +14,8 @@ import "./may-chu/env";
 import express from "express";
 import path from "path";
 import { lapTaiKhoan } from "./may-chu/tai-khoan";
-import { API, GOC } from "./may-chu/routes/dung-chung";
+import { API, GOC, traLoi } from "./may-chu/routes/dung-chung";
+import { cauHinhViteDev, chanTepNhayCam, diaChiLangNghe } from "./may-chu/chan-tep-dev";
 import { dangKyCaKhamRoutes } from "./may-chu/routes/ca-kham";
 import { dangKyAsrRoutes } from "./may-chu/routes/asr";
 import { dangKyLlmNgoaiRoutes } from "./may-chu/routes/llm-ngoai";
@@ -65,12 +66,8 @@ export function taoUngDung() {
     if (err?.type === "entity.parse.failed" || (err instanceof SyntaxError && (err as any).status === 400)) {
       return res.status(400).json({ error: "JSON gửi lên không hợp lệ", code: "invalid_json" });
     }
-    const raw = Number(err?.status || err?.statusCode || err?.ma);
-    const status = Number.isInteger(raw) && raw >= 100 && raw <= 599 ? raw : 500;
-    return res.status(status).json({
-      error: err?.message || "Lỗi máy chủ nội bộ",
-      ...(err?.code ? { code: err.code } : {}),
-    });
+    // Lỗi 5xx chỉ trả thông điệp chung, chi tiết ghi log (không lộ đường dẫn máy / stack).
+    return traLoi(res, err);
   });
 
   return { app: ungDung, khoiDongHangDoiBanNhap };
@@ -81,19 +78,25 @@ const { app, khoiDongHangDoiBanNhap } = taoUngDung();
 export { app };
 
 async function khoiDong() {
-  if (process.env.NODE_ENV === "production") {
+  const laProduction = process.env.NODE_ENV === "production";
+  // Đặt TRƯỚC Vite / express.static: không bao giờ phục vụ data/, db/, may-chu/, server.*, .env*, *.db*.
+  app.use(chanTepNhayCam(GOC));
+  if (laProduction) {
     app.use(express.static(path.join(GOC, "dist")));
     app.get("*", (_req, res) => res.sendFile(path.join(GOC, "dist", "index.html")));
   } else {
     const { createServer } = await import("vite");
-    const vite = await createServer({ server: { middlewareMode: true, allowedHosts: true }, appType: "spa" });
+    const vite = await createServer({ server: cauHinhViteDev(GOC, process.env), appType: "spa" });
     app.use(vite.middlewares);
   }
   khoiDongHangDoiBanNhap();
-  app.listen(PORT, () => {
-    console.log(`Giao diện: http://localhost:${PORT}`);
+  const host = diaChiLangNghe(process.env, laProduction);
+  const daNghe = () => {
+    console.log(`Giao diện: http://${host && host !== "0.0.0.0" ? host : "localhost"}:${PORT}${host ? ` (chỉ nghe ${host})` : ""}`);
     console.log(`Dịch vụ MediTrace: ${API} (đổi bằng biến môi trường MEDITRACE_API)`);
-  });
+  };
+  if (host) app.listen(PORT, host, daNghe);
+  else app.listen(PORT, daNghe);
 }
 
 if (process.env.MEDITRACE_KHONG_LISTEN !== "1") {

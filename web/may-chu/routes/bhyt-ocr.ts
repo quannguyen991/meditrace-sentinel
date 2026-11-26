@@ -21,7 +21,8 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
         });
         return res.json(kqHttp);
       } catch (err: any) {
-        if (err?.status !== 503) throw err;
+        // Chỉ chạy Python tại chỗ khi dịch vụ đang tắt; thiếu/sai khoá nội bộ thì báo lỗi rõ.
+        if (err?.code !== "dich_vu_tat") throw err;
       }
       const kq = await chayPythonJson("src.ocr_lam_sang", ["--parse"], payload);
       res.json(kq);
@@ -46,7 +47,7 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
         });
         return res.json(kqHttp);
       } catch (err: any) {
-        if (err?.status !== 503) throw err;
+        if (err?.code !== "dich_vu_tat") throw err;
       }
       const kq = await chayPythonJson("src.kiem_duyet_bhyt_va_bo_sot", ["--precheck"], payload);
       res.json(kq);
