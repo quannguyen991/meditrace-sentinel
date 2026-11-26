@@ -158,6 +158,8 @@ interface Props {
   chonBanDau?: Chon;
   audioUrl?: string;
   segments?: TranscriptSegment[];
+  /** Thêm một mục bỏ sót (Tầng 4.5) vào bản nháp thành mệnh đề mới để bác sĩ duyệt. */
+  onKhoiPhucBoSot?: (muc: any) => void;
 }
 
 type Chon = { loai: "p"; id: number } | { loai: "t"; so: number } | null;
@@ -187,7 +189,9 @@ export const VerificationView: React.FC<Props> = ({
   chonBanDau,
   audioUrl,
   segments,
+  onKhoiPhucBoSot,
 }) => {
+  const [daKhoiPhuc, setDaKhoiPhuc] = useState<Record<string, boolean>>({});
   const [cauHoiNgoai, setCauHoiNgoai] = useState<{ questions: CauHoiNgoai[]; model: string } | null>(null);
   const [dangHoi, setDangHoi] = useState(false);
   const [quyetRieng, setQuyetRieng] = useState<Record<number, Quyet>>({});
@@ -946,11 +950,37 @@ export const VerificationView: React.FC<Props> = ({
             </h2>
             {note.clinicalSafety.khoi_phuc_bo_sot_tang_45?.length > 0 ? (
               <ul className="text-[11.5px] text-[#334155] space-y-1.5">
-                {note.clinicalSafety.khoi_phuc_bo_sot_tang_45.slice(0, 3).map((item: any, idx: number) => (
-                  <li key={idx} className="p-1.5 rounded-lg bg-[#FEF6E0] border border-[#F2DFA8]">
-                    <span className="font-semibold text-[#9A5B00]">Lượt {item.luot}:</span> {item.noi_dung_goi_y}
-                  </li>
-                ))}
+                {note.clinicalSafety.khoi_phuc_bo_sot_tang_45.map((item: any, idx: number) => {
+                  const khoa = `${note.caseId || "ca"}_${idx}_${item.luot ?? 0}_${item.noi_dung_goi_y || ""}`;
+                  const daThem = Boolean(daKhoiPhuc[khoa]);
+                  return (
+                    <li key={khoa} className="p-2 rounded-lg bg-[#FEF6E0] border border-[#F2DFA8] space-y-1.5">
+                      <div>
+                        <span className="font-semibold text-[#9A5B00]">Lượt {item.luot}:</span> {item.noi_dung_goi_y}
+                      </div>
+                      {item.trich_dan_nguyen_van && (
+                        <div className="italic text-[#475569]">“{item.trich_dan_nguyen_van}”</div>
+                      )}
+                      {onKhoiPhucBoSot && (
+                        <button
+                          type="button"
+                          disabled={daThem}
+                          onClick={() => {
+                            setDaKhoiPhuc((cu) => ({ ...cu, [khoa]: true }));
+                            onKhoiPhucBoSot(item);
+                          }}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                            daThem
+                              ? "bg-[#E6F7F0] border-[#A7E3C9] text-[#0D6B50] cursor-default"
+                              : "bg-[#0284C7] hover:bg-[#0369A1] border-[#0284C7] text-white cursor-pointer"
+                          }`}
+                        >
+                          {daThem ? "Đã thêm vào bản nháp" : "Thêm vào bản nháp"}
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-[12px] text-[#0D6B50]">

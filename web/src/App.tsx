@@ -1524,6 +1524,54 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   banSuaChung={banSuaDuyet}
                   setBanSuaChung={setBanSuaDuyet}
                   chonBanDau={chonBanDau}
+                  onKhoiPhucBoSot={(muc) => {
+                    const targetId = currentSession.id;
+                    const noiDungKhoiPhuc = (muc?.noi_dung_goi_y || muc?.trich_dan_nguyen_van || "").trim();
+                    if (!noiDungKhoiPhuc) return;
+                    const luot = Number(muc?.luot) || 1;
+                    const loai = String(muc?.loai_thong_tin || "");
+                    const section =
+                      loai === "di_ung"
+                        ? "DỊ ỨNG"
+                        : loai === "thuoc" || loai === "thuoc_dong_y_ngam"
+                        ? "THUỐC ĐANG DÙNG"
+                        : loai === "sinh_hieu"
+                        ? "SINH HIỆU"
+                        : "BỆNH SỬ HIỆN TẠI";
+                    const newPropId =
+                      Math.max(0, ...(noteMeta?.propositions || []).map((p) => p.id)) + 1;
+                    const dongMoi = `- ${noiDungKhoiPhuc} [T${luot}] (Khôi phục Tầng 4.5 — Bác sĩ xác nhận)`;
+                    capNhatCaTheoId(targetId, (ca) => {
+                      const updatedTabs = ca.tabs.map((t) =>
+                        t.id === ca.activeTabId || t.type === "soap"
+                          ? {
+                              ...t,
+                              content: t.content
+                                ? `${t.content.trimEnd()}\n${dongMoi}`
+                                : dongMoi,
+                            }
+                          : t,
+                      );
+                      const updatedNote = ca.note
+                        ? {
+                            ...ca.note,
+                            propositions: [
+                              ...(ca.note.propositions || []),
+                              {
+                                id: newPropId,
+                                text: noiDungKhoiPhuc,
+                                section,
+                                status: "than" as const,
+                                subject: "bệnh nhân",
+                                evidenceTurns: [luot],
+                                quotes: muc?.trich_dan_nguyen_van ? [muc.trich_dan_nguyen_van] : [],
+                              },
+                            ],
+                          }
+                        : ca.note;
+                      return { tabs: updatedTabs, note: updatedNote };
+                    });
+                  }}
                   audioUrl={currentSession.audioUrl}
                   segments={currentSession.transcriptSegments}
                 />
