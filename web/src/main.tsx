@@ -15,3 +15,14 @@ createRoot(document.getElementById("root")!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+
+// Sau khi máy chủ đổi bản build, trang đang mở có thể đòi tệp cũ không còn nữa: tải lại một lần.
+window.addEventListener("vite:preloadError", (e) => {
+  try {
+    const da = sessionStorage.getItem("mt-tai-lai-ban-moi");
+    if (da && Date.now() - Number(da) < 30_000) return;
+    sessionStorage.setItem("mt-tai-lai-ban-moi", String(Date.now()));
+  } catch {}
+  e.preventDefault();
+  window.location.reload();
+});

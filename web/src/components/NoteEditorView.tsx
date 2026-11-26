@@ -23,6 +23,7 @@ import {
   Undo,
   Redo,
   Copy,
+  Wrench,
   Check,
   ChevronDown,
   ThumbsUp,
@@ -446,6 +447,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   const [liked, setLiked] = useState<boolean | null>(null);
   const [isStyleMenuOpen, setIsStyleMenuOpen] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [moCongCu, setMoCongCu] = useState(false);
   const [personalisationOn, setPersonalisationOn] = useState(true);
 
   // Dictation state (Boost 3: Đọc khám thực thể rảnh tay F2 bằng PhoWhisper cục bộ — 0 byte gửi Google)
@@ -1409,6 +1411,28 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden sm:inline">{dangSua ? "Xem định dạng" : "Sửa văn bản"}</span>
           </button>
 
+          {/* Công cụ lâm sàng gộp vào một menu để thanh nút gọn */}
+          <div className="relative flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setMoCongCu((v) => !v)}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap font-semibold ${
+                moCongCu ? "border-[#0284C7] bg-[#E0F2FE] text-[#0369A1]" : "border-[#BAE6FD] bg-white text-[#0C4A6E] hover:bg-[#F0F9FF]"
+              }`}
+              aria-expanded={moCongCu}
+              title="Tiến trình AI, BHYT/ICD-10, đơn thuốc, cam đoan, đi buồng, SBAR, chép HIS, tờ dặn dò"
+            >
+              <Wrench size={12} className="text-[#0284C7]" />
+              <span className="text-[11px]">Công cụ</span>
+              <ChevronDown size={11} className={moCongCu ? "rotate-180 transition-transform" : "transition-transform"} />
+            </button>
+            {moCongCu && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setMoCongCu(false)} />
+                <div
+                  className="absolute right-0 top-full mt-1.5 z-40 w-64 bg-white rounded-xl border border-[#BAE6FD] shadow-[0_8px_24px_rgba(2,132,199,0.16)] p-1.5 flex flex-col gap-1 [&>button]:w-full [&>button]:justify-start [&>button]:border-transparent [&>button]:shadow-none [&>button]:py-2 [&_span]:!inline"
+                  onClickCapture={() => setTimeout(() => setMoCongCu(false), 0)}
+                >
           {/* Nút mở nhật ký tiến trình AI và 8 chốt */}
           <button
             type="button"
@@ -1513,6 +1537,21 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden md:inline">Chép HIS</span>
           </button>
 
+          {/* Nút mở tờ dặn dò người bệnh */}
+          <button
+            type="button"
+            onClick={() => setMoModalDanDo(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
+            title="Xem và in tờ dặn dò trao tay người bệnh"
+          >
+            <FileHeart size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden sm:inline">Tờ dặn dò</span>
+          </button>
+                </div>
+              </>
+            )}
+          </div>
+
           {/* Nút Ký duyệt pháp lý WORM (Chốt cứng: không hoàn tất hồ sơ khi thiếu căn cứ / còn mục Cần xác nhận) */}
           {onSignOff && tab.type !== "leaflet" && (
             <button
@@ -1562,16 +1601,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             </button>
           )}
 
-          {/* Nút mở tờ dặn dò người bệnh */}
-          <button
-            type="button"
-            onClick={() => setMoModalDanDo(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
-            title="Xem và in tờ dặn dò trao tay người bệnh"
-          >
-            <FileHeart size={12} className="text-[#0284C7]" />
-            <span className="text-[11px] hidden sm:inline">Tờ dặn dò</span>
-          </button>
 
           {/* Nút In / Xuất PDF trực tiếp */}
           <button

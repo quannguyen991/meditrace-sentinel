@@ -95,8 +95,20 @@ async function khoiDong() {
   // Đặt TRƯỚC Vite / express.static: không bao giờ phục vụ data/, db/, may-chu/, server.*, .env*, *.db*.
   app.use(chanTepNhayCam(GOC));
   if (laProduction) {
-    app.use(express.static(path.join(GOC, "dist")));
-    app.get("*", (_req, res) => res.sendFile(path.join(GOC, "dist", "index.html")));
+    // index.html không được giữ trong bộ nhớ trình duyệt (đổi bản build là thấy ngay);
+    // tệp trong assets/ có tên băm nên giữ lâu được.
+    app.use(
+      express.static(path.join(GOC, "dist"), {
+        setHeaders: (res, tep) => {
+          if (tep.endsWith(".html")) res.setHeader("Cache-Control", "no-cache");
+          else if (tep.includes(`${path.sep}assets${path.sep}`)) res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        },
+      }),
+    );
+    app.get("*", (_req, res) => {
+      res.setHeader("Cache-Control", "no-cache");
+      res.sendFile(path.join(GOC, "dist", "index.html"));
+    });
   } else {
     const { createServer } = await import("vite");
     const vite = await createServer({ server: cauHinhViteDev(GOC, process.env), appType: "spa" });
