@@ -104,6 +104,21 @@ Các tính năng này nằm quanh bản nháp. **Không tính năng nào thay đ
 
 Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa được dược sĩ hay bác sĩ duyệt** (`data/tri_thuc_thuoc.json`, mọi mục `da_duyet = false`). Chúng chỉ là gợi ý để đối chiếu.
 
+### Nhật ký nâng cấp 15–26/11/2026
+
+| Thời gian | Nâng cấp | Chi tiết / minh chứng |
+|---|---|---|
+| 17–21/11 | Kế hoạch nâng cấp toàn diện, rà lại số liệu | `KE_HOACH_NANG_CAP_TOAN_DIEN_MEDITRACE.md`; đếm lại 200 khuôn bộ v1; rút bỏ con số chưa có phép đo; quyết định về các mô hình Qwen (`docs/BAN-GIAO-CONG-VIEC-DANG-DO.md`). |
+| 20–24/11 | **Bộ dữ liệu v2** | 657 khuôn bệnh thuộc 21 hệ cơ quan, 5.000 ca; tỷ lệ lặp câu giảm từ 76,92% xuống 47,37%; 100% trích dẫn khớp nguyên văn; chia train/phát triển/kiểm tra cuối không trùng khuôn (`docs/BAN-GIAO-SINH-DU-LIEU-V2.md`, `data/manifest_v2_mo_rong_5000.json`). |
+| 22–24/11 | Huấn luyện tiết kiệm bộ nhớ, adapter v3 | `src/loss_theo_doan.py` hạ đỉnh VRAM xuống 6,4 GiB trên RTX 3060; adapter v3 train trên bộ v2 (kết quả bỏ sót ở mục "Kết quả đo"). Hàng đợi việc nền bền vững bằng SQLite (`web/may-chu/hang-doi.ts`). |
+| 24–25/11 | 8 tính năng hỗ trợ bác sĩ | Bảng ở trên: nghe lại đúng đoạn, ký duyệt có chuỗi băm, SBAR/HIS, câu hỏi cờ đỏ, tờ dặn dò, tiền kiểm BHYT, đọc phiếu cũ, đối chiếu lần khám trước. |
+| 25–26/11 | **Lớp cảnh báo** vòng 6 và đo bằng cấy lỗi | `src/canh_bao/`; tiêu chí đăng ký trước (`docs/dang-ky-truoc-bo-luat.md`); kết quả ở mục "Kết quả đo". |
+| 26/11 | Thử DPO trên cặp lỗi khó | `src/train_dpo.py`; chưa dùng trong hệ thống ([`docs/ket-qua/dpo-v3.md`](docs/ket-qua/dpo-v3.md)). |
+| 26/11 | Rà soát độc lập, sửa 9 lỗi nghiêm trọng | Mục "Quyền riêng tư và an toàn". |
+| 26/11 | **Công cụ lâm sàng mở rộng (Boost, M1–M4)** | Menu "Công cụ": tiền kiểm BHYT/ICD-10, đối soát đơn thuốc TT 26 và tương tác thuốc, cam đoan thủ thuật, đi buồng nội trú và bàn giao ca trực. Đọc khám rảnh tay (F2, PhoWhisper tại chỗ); gợi ý vai người nói một chạm; báo động giá trị xét nghiệm nguy kịch, nạp kết quả LIS/HL7 và danh mục thuốc bệnh viện (.csv) ở tab "Ngữ cảnh"; khôi phục mục bỏ sót một chạm; xuất gói HL7 FHIR R4 / BHYT XML 130. Màn "KHTH & Giám định BHYT" (kiểm toán XML 1–5) và cổng QR cho người bệnh. Bảng tri thức đi kèm **chưa được chuyên gia duyệt**. |
+| 26/11 | Giao diện gọn cho bác sĩ | Mở ca là thấy bản nháp (danh sách ca và khung tra cứu thu gọn sẵn); công cụ gom vào một menu; bấm một dòng mở ngăn duyệt bên cạnh; nút "Nghe lại" ghi âm gốc trên từng mệnh đề, nút "Nghe" đọc to từng lượt cho ca chỉ có chữ. |
+| 26/11 | Triển khai mới | Chuyển từ Vercel sang Cloudflare Worker, đường hầm tự cập nhật (mục "Chạy thử trên máy của bạn"). |
+
 ---
 
 ## Kết quả đo
