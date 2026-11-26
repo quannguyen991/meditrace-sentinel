@@ -38,3 +38,12 @@ data/*.db-wal
 data/audit_log_worm.anchor.json
 data/ngoai/
 *.jsonl.bak
+
+# 26/11/2026: tai lieu Word/PDF/Office khong dua len kho ma (giu o may)
+*.docx
+*.doc
+*.pdf
+*.pptx
+*.ppt
+*.xlsx
+*.xls
