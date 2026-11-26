@@ -134,6 +134,57 @@ def mau_thuan(ctx: NguCanh, ps, loai_theo_id) -> List[CanhBao]:
     return ra
 
 
+def _gia_tri_rieng(a, b) -> List[str]:
+    """Moc thoi gian / truong thuoc cua `a` khac voi `b`."""
+    ra = []
+    if getattr(a, "moc_thoi_gian", None) and getattr(a, "moc_thoi_gian", None) != getattr(b, "moc_thoi_gian", None):
+        ra.append(a.moc_thoi_gian)
+    ta, tb = getattr(a, "thuoc", None) or {}, getattr(b, "thuoc", None) or {}
+    ra += [str(v) for k, v in ta.items() if v and v != tb.get(k)]
+    return [_thuong(v) for v in ra if str(v).strip()]
+
+
+def _da_bi_sua(gia_tri: List[str], van: str) -> bool:
+    for v in gia_tri:
+        e = re.escape(v)
+        if re.search(rf"(?<!\w)không phải\s+(là\s+)?{e}(?!\w)", van):
+            return True
+        m = DAU_SUA.search(van)
+        if m and m.group(0) != "không phải" and re.search(rf"(?<!\w){e}(?!\w)", van[:m.start()]) \
+                and not re.search(rf"(?<!\w){e}(?!\w)", van[m.end():]):
+            return True
+    return False
+
+
+def dinh_chinh_nguoc(ctx: NguCanh, ps, loai_theo_id) -> List[CanhBao]:
+    """Vong 6 (26/11/2026): hai dong cung noi dung, `x` 'bi thay the', `y` 'con hieu luc'.
+    Chieu thay the nguoc khi (a) chinh `x` khai la dinh chinh cua `y`, hoac (b) gia tri
+    rieng cua `y` (moc thoi gian, lieu...) la gia tri DA BI SUA trong luot dan ('... chu
+    khong phai <y>', '<y>, a nham, ...') con gia tri cua `x` thi khong.
+    Ban cu va ban moi thuong dan CUNG luot, nen khong dung thu tu luot."""
+    ra = []
+    for x in ps:
+        if _con(x) or not ctx.dan(x):
+            continue
+        for y in ps:
+            if not _con(y) or getattr(y, "chu_the_id", 0) != getattr(x, "chu_the_id", 0) \
+                    or _thuong(y.noi_dung) != _thuong(x.noi_dung):
+                continue
+            khai = getattr(x, "quan_he", None) == "đính chính" and getattr(x, "quan_he_voi", None) == y.id
+            van = _thuong(" ".join(ctx.luot[s][1] for s in sorted(set(ctx.dan(x)) | set(ctx.dan(y)))))
+            if not khai and not (_da_bi_sua(_gia_tri_rieng(y, x), van) and not _da_bi_sua(_gia_tri_rieng(x, y), van)):
+                continue
+            luot = sorted(set(ctx.dan(x)) | set(ctx.dan(y)))
+            for a, b in ((y, x), (x, y)):
+                ra.append(CanhBao(ma="CORRECTION_NOT_APPLIED", phat_bieu_id=a.id, luot=luot, trich=[a.noi_dung],
+                                  ly_do=f"Dòng #{y.id} còn hiệu lực nhưng giữ giá trị đã bị sửa; dòng #{x.id} "
+                                        f"(bản đã đính chính) lại bị đánh dấu thay thế.",
+                                  ket_luan=NGHI_RUI_RO, bat_dinh=TRUNG, bo_phat_hien="toan_ca:dinh_chinh_nguoc",
+                                  muc_do=muc_do("CORRECTION_NOT_APPLIED", loai_theo_id.get(a.id, "khac")),
+                                  loai_tt=loai_theo_id.get(a.id, "khac")))
+    return ra
+
+
 def ghi_lap(ctx: NguCanh, ps, loai_theo_id) -> List[CanhBao]:
     ra, da = [], {}
     for p in ps:

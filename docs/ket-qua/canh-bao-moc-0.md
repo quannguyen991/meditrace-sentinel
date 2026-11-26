@@ -86,6 +86,7 @@ Bộ chấm chỉ có 9 mã lỗi nên bảng có 9 dòng, không đủ 10.
 | Sau 3.1 (lượt không dấu đi qua `loi_noi`; mặc định `nguong_phu = None`) | 844 | 12,0% | 2,8% | không đổi | không đổi |
 | Sau rà soát độc lập (9 lỗi nặng đã sửa, xem dưới) | 890 | 12,0% | 2,7% | 45,2% / 43,3% | 8,0% / 6,1% |
 | Sau 5 vòng cấy lỗi (xem `cay-loi.md`) | 845 | 12,0% | 2,8% | 45,2% / 43,3% | 8,0% / 6,1% |
+| Sau vòng 6 (4 điểm mù lỗi khó, 26/11) | — | — | — | 45,2% / 43,1% (C 98, D 93) | 8,0% / 6,1% |
 
 Sau 2.1 gần như không đổi. Lý do: bộ phân loại chỉ chạy trên các đoạn mà `doan_chua_ghi` coi là chưa ghi,
 và các đoạn đó chỉ chạm lượt của 25/200 mệnh đề bị sót. Nút thắt nằm ở khâu tìm đoạn (2.2, 2.3), không ở khâu

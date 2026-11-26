@@ -156,3 +156,33 @@ Bốn loại đầu là **điểm mù thật của bộ luật**. Cần làm lu�
 - Không có ca nào từ tập giữ kín hay tập kiểm tra cuối.
 - Giới hạn: lỗi sinh bằng luật nên vẫn có mẫu lặp. Số loại không đều: `phu_dinh_trong_chuoi` hiếm vì dữ liệu sinh ít
   có câu kiểu "không X, nhưng Y".
+
+## Vòng 6 (26/11/2026): vá 4 điểm mù lỗi khó
+
+Đo trên tập điều chỉnh (400 ca, hạt 42). **Không chạy lại tập giữ kín**: tập đó đã dùng một lần, và các luật vòng 6
+được chọn ngưỡng trên tập điều chỉnh. Con số dưới đây vì vậy là số **lạc quan**.
+
+| Loại lỗi khó | Trước | Sau | Wilson 95% (sau) | Luật thêm |
+|---|---:|---:|---|---|
+| `doi_ben` | 0,250 | **0,950** | [0,916; 0,971] | `than_the`: từ chỉ bên (trái/phải/trên/dưới) trong bản ghi không có ở lượt dẫn, từ ngược lại có |
+| `doi_muc_do` | 0,500 | **0,970** | [0,945; 0,983] | `than_the`: cặp trái nghĩa (âm ỉ/dữ dội, nhẹ/nặng, tăng/giảm, ít/nhiều, hơi/rất) so với cả lượt dẫn |
+| `qua_khu_hien_tai` | 0,012 | **0,730** | [0,680; 0,775] | `thoi_diem._thoi_khong_khop`: đối chiếu `thoi_gian_su_kien` với câu hỏi bác sĩ ngay trước ("trước giờ", "bệnh nền", "tiền sử"…) và mốc thời gian |
+| `dinh_chinh_nguoc` | 0,000 | **1,000** | [0,896; 1,000] | `toan_ca.dinh_chinh_nguoc`: dòng còn hiệu lực giữ giá trị nằm sau "không phải"/trước "à nhầm", hoặc dòng bị thay thế tự khai là đính chính |
+| **Trung bình 14 loại** | 0,682 | **0,889** | | |
+
+Rào chắn (đều đạt):
+
+- Báo nhầm trên bản sạch: 7,110 → 7,112 mỗi ca (ngưỡng +0,02).
+- Bộ lỗi cơ bản: độ nhạy trung bình giữ 0,871.
+- Lọt nguy hiểm trên `data/thach_thuc`: C 98 → 98, D 94 → 93.
+- Chặn thừa giữ nguyên. Jaccard 0,885. Bộ phép thử 1.729 qua, 27 bỏ qua.
+
+Giới hạn:
+
+- `qua_khu_hien_tai` chỉ đổi một trường siêu dữ liệu, nội dung giữ nguyên. Luật chỉ đoán được qua câu hỏi của bác sĩ
+  và mốc thời gian. `PAST_CURRENT_CONFUSION` vẫn báo trên 0,185 dòng mỗi ca sạch (chủ yếu là luật cũ).
+- `CORRECTION_NOT_APPLIED` báo trên **cả hai** dòng của cặp, nên precision theo dòng là 0,49 dù cặp nào cũng đúng.
+- Bản đầu của luật quá khứ/hiện tại báo nhầm 17 dòng trên bản sạch ("từng đợt", "tiêu chảy mạn tính", "bệnh nền").
+  Đã siết còn 1 trước khi đo lần cuối.
+
+Kết quả chi tiết: `cay-loi-kho-vong6.json` (lỗi khó), `cay-loi-vong6.json` (lỗi cơ bản).

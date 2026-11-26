@@ -581,7 +581,48 @@ def thoi_diem(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         ra.append(tao(ctx, p, "PAST_CURRENT_CONFUSION", [s], [c],
                       f"Lượt {s}: “{c}” — vẫn đang diễn ra; bản ghi ghi như đã qua.",
                       NGHI_RUI_RO, TRUNG, "thoi_diem", loai_tt))
+    if not ra:
+        ra += _thoi_khong_khop(ctx, p, thoi, loai_tt)
     return ra
+
+
+# Vong 6 (26/11/2026): truong thoi_gian_su_kien bi dao ma noi dung giu nguyen. Doi chieu
+# voi CAU HOI cua bac si ngay truoc luot dan ('truoc gio co benh gi khong?') va voi
+# moc thoi gian. Do tren 400 ca tap dieu chinh truoc khi chon nguong.
+_TUNG = r"từng(?!\s+(đợt|ngày|cơn|lúc|lần|bước|người|cái|chút|giai đoạn|vùng|bên|bữa|đêm|tuần|tháng))"
+HOI_TIEN_SU = re.compile(r"(?<!\w)(trước (giờ|nay|đây|đợt|đó|kia)|từ nhỏ|tiền sử|bệnh mạn tính|bệnh nền|hồi trước|lần trước|"
+                         r"đã " + _TUNG + "|" + _TUNG + r"|phẫu thuật|mổ|sức khỏe (bình thường|tốt)|"
+                         r"bình thường sức khỏe|khỏe mạnh|bệnh (gì|lý)|đơn cũ|thuốc kéo dài|dài ngày)(?!\w)")
+ND_QUA_KHU = re.compile(r"(?<!\w)(đã ngừng|từng dùng|hồi nhỏ)(?!\w)")
+
+
+def _cau_hoi_truoc(ctx, dan) -> str:
+    hoi = []
+    for s in dan:
+        for s2 in range(s - 1, max(0, s - 3), -1):
+            if s2 in ctx.luot and ctx.la_nv(s2):
+                hoi.append(_thuong(ctx.luot[s2][1]))
+                break
+    return " ".join(hoi)
+
+
+def _thoi_khong_khop(ctx, p, thoi, loai_tt) -> List[CanhBao]:
+    dan = ctx.dan(p)
+    if not dan or thoi not in ("quá khứ", "hiện tại"):
+        return []
+    nd, van, hoi = _thuong(p.noi_dung), _thuong(ctx.van_dan(p)), _cau_hoi_truoc(ctx, dan)
+    co_qua_khu = bool(ND_QUA_KHU.search(nd)) or (bool(HOI_TIEN_SU.search(hoi)) and not HIEN_TAI.search(van))
+    co_hien_tai = bool(getattr(p, "moc_thoi_gian", None)) or "đang" in nd.split()
+    if thoi == "hiện tại" and co_qua_khu and not co_hien_tai and not _dang_dung(p) \
+            and not all(ctx.la_nv(s) for s in dan):
+        ly = "câu hỏi/câu gốc nói chuyện trước đây; bản ghi ghi như hiện tại."
+    elif thoi == "quá khứ" and not co_qua_khu and not QUA_KHU.search(van) \
+            and (co_hien_tai or not HIEN_TAI.search(van)):
+        ly = "không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    else:
+        return []
+    return [tao(ctx, p, "PAST_CURRENT_CONFUSION", dan, [ctx.van_dan(p)], f"Lượt {dan}: {ly}",
+                NGHI_RUI_RO, TRUNG, "thoi_diem", loai_tt)]
 
 
 # ----------------------------------------------------------------- 7. ben, muc do, tan suat
@@ -592,6 +633,12 @@ NANG = re.compile(r"(?<!\w)(dữ dội|rất (đau|nhiều|nặng)|nặng lắm|
                   r"đau nhiều|sốt cao|nặng)(?!\w)")
 IT_KHI = re.compile(r"(?<!\w)(thỉnh thoảng|đôi khi|lâu lâu|ít khi|hiếm khi|đôi lúc)(?!\w)")
 HAY_BI = re.compile(r"(?<!\w)(thường xuyên|liên tục|suốt ngày|lúc nào cũng|ngày nào cũng|luôn luôn|triền miên)(?!\w)")
+
+
+_TU_BEN = re.compile(r"(?<!\w)(trái|phải|trên|dưới)(?!\w)")
+DOI_BEN = {"trái": "phải", "phải": "trái", "trên": "dưới", "dưới": "trên"}
+CAP_MUC_DO = tuple((a, b) for x, y in (("âm ỉ", "dữ dội"), ("nhẹ", "nặng"), ("tăng", "giảm"), ("ít", "nhiều"),
+                                       ("hơi", "rất")) for a, b in ((x, y), (y, x)))
 
 
 def _ben(van):
@@ -611,6 +658,16 @@ def than_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
             ra.append(tao(ctx, p, "LATERALITY_CHANGED", dan, [f"{bo_phan} {b}" for b in cung_bo],
                           f"Bản ghi “{bo_phan} {ben}”, câu gốc “{bo_phan} {'/'.join(cung_bo)}”.",
                           LOI_PHAT_HIEN, THAP, "than_the", loai_tt))
+    # Vong 6 (26/11/2026): ben khong di kem bo phan trong BEN ('bung duoi' -> 'bung tren',
+    # 'ben phai' -> 'ben trai'): tu chi ben trong ban ghi khong co o luot dan, tu nguoc lai co.
+    if not ra:
+        tu_van = set(_TU_BEN.findall(_thuong(van)))
+        for x in sorted(set(_TU_BEN.findall(_thuong(p.noi_dung)))):
+            if x not in tu_van and DOI_BEN[x] in tu_van:
+                ra.append(tao(ctx, p, "LATERALITY_CHANGED", dan, [van],
+                              f"Bản ghi “{x}”, câu gốc chỉ có “{DOI_BEN[x]}”.", LOI_PHAT_HIEN, TRUNG,
+                              "than_the", loai_tt))
+                break
     # muc do va tan suat: so voi MENH DE gan nhat, khong voi ca luot
     s, c = ctx.cau_gan_nhat(p)
     ct, nd = _thuong(c), _thuong(p.noi_dung)
@@ -621,6 +678,14 @@ def than_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         if s is not None and a.search(nd) and b.search(ct) and not a.search(ct):
             ra.append(tao(ctx, p, ma, [s], [c],
                           f"Bản ghi ghi mức “{a.search(nd).group(0)}”, câu gốc “{b.search(ct).group(0)}”.",
+                          LOI_PHAT_HIEN, TRUNG, "than_the", loai_tt))
+            return ra
+    # Vong 6 (26/11/2026): cap muc do trai nghia so voi CA LUOT dan ('ho it' -> 'ho nhieu')
+    vt = _thuong(van)
+    for a, b in CAP_MUC_DO:
+        if re.search(rf"(?<!\w){a}(?!\w)", nd) and re.search(rf"(?<!\w){b}(?!\w)", vt) \
+                and not re.search(rf"(?<!\w){a}(?!\w)", vt):
+            ra.append(tao(ctx, p, "SEVERITY_CHANGED", dan, [van], f"Bản ghi “{a}”, câu gốc “{b}”.",
                           LOI_PHAT_HIEN, TRUNG, "than_the", loai_tt))
             break
     return ra

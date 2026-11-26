@@ -171,3 +171,90 @@ def test_di_ung_da_ghi_va_phu_dinh_chung_khong_bao():
     ps = [_p(0, "anh trai dị ứng trứng", [2], ["Anh trai thì dị ứng trứng"], nguoi_noi="người nhà", chu_the_id=1),
           _p(1, "dị ứng", [2], ["còn bé không dị ứng gì cả"], nguoi_noi="người nhà", phu_dinh=True)]
     assert not any("dị ứng" in d for d in _chua_ghi(ps, hoi))
+
+
+# ---- Vong 6 (26/11/2026): 4 diem mu lo ra tu loi KHO (tools/cay_loi_kho.py)
+HOI_V6 = "\n".join([
+    "Bác sĩ: Chị khó chịu ở đâu?",                                                  # 1
+    "Bệnh nhân: Tôi đau âm ỉ bụng dưới bên phải 3 ngày nay, ho ít.",                 # 2
+    "Bác sĩ: Trước giờ chị có bệnh gì không?",                                       # 3
+    "Bệnh nhân: Dạ tôi có tăng huyết áp.",                                           # 4
+    "Bệnh nhân: À không, 4 ngày chứ không phải 3 ngày.",                             # 5
+])
+
+
+def test_doi_ben_tren_duoi_va_trai_phai_bi_bat():
+    for nd in ("đau âm ỉ bụng trên bên phải", "đau âm ỉ bụng dưới bên trái"):
+        ps = [_p(0, nd, [2], ["Tôi đau âm ỉ bụng dưới bên phải 3 ngày nay"], nguoi_noi="bệnh nhân")]
+        assert "LATERALITY_CHANGED" in _ma(ps, HOI_V6, 0), nd
+
+
+def test_ben_dung_khong_bao():
+    ps = [_p(0, "đau âm ỉ bụng dưới bên phải", [2], ["Tôi đau âm ỉ bụng dưới bên phải"], nguoi_noi="bệnh nhân")]
+    assert "LATERALITY_CHANGED" not in _ma(ps, HOI_V6, 0)
+
+
+def test_doi_muc_do_bi_bat():
+    for nd in ("đau dữ dội bụng dưới bên phải", "ho nhiều"):
+        ps = [_p(0, nd, [2], ["Tôi đau âm ỉ bụng dưới bên phải 3 ngày nay, ho ít"], nguoi_noi="bệnh nhân")]
+        assert "SEVERITY_CHANGED" in _ma(ps, HOI_V6, 0), nd
+
+
+def test_muc_do_dung_khong_bao():
+    ps = [_p(0, "ho ít", [2], ["ho ít"], nguoi_noi="bệnh nhân")]
+    assert "SEVERITY_CHANGED" not in _ma(ps, HOI_V6, 0)
+
+
+def test_tien_su_ghi_thanh_hien_tai_va_nguoc_lai_bi_bat():
+    ps = [_p(0, "tăng huyết áp", [4], ["Dạ tôi có tăng huyết áp"], nguoi_noi="bệnh nhân",
+             thoi_gian_su_kien="hiện tại"),
+          _p(1, "đau âm ỉ bụng dưới bên phải", [2], ["Tôi đau âm ỉ bụng dưới bên phải 3 ngày nay"],
+             nguoi_noi="bệnh nhân", thoi_gian_su_kien="quá khứ", moc_thoi_gian="3 ngày nay")]
+    assert "PAST_CURRENT_CONFUSION" in _ma(ps, HOI_V6, 0)
+    assert "PAST_CURRENT_CONFUSION" in _ma(ps, HOI_V6, 1)
+
+
+def test_thoi_gian_dung_khong_bao():
+    ps = [_p(0, "tăng huyết áp", [4], ["Dạ tôi có tăng huyết áp"], nguoi_noi="bệnh nhân",
+             thoi_gian_su_kien="quá khứ"),
+          _p(1, "đau âm ỉ bụng dưới bên phải", [2], ["Tôi đau âm ỉ bụng dưới bên phải 3 ngày nay"],
+             nguoi_noi="bệnh nhân", thoi_gian_su_kien="hiện tại", moc_thoi_gian="3 ngày nay"),
+          _p(2, "sốt tăng từng ngày", [2], ["x"], nguoi_noi="bệnh nhân", thoi_gian_su_kien="hiện tại")]
+    for i in range(3):
+        assert "PAST_CURRENT_CONFUSION" not in _ma(ps, HOI_V6, i), i
+
+
+def _dinh_chinh(nguoc):
+    moi = _p(0, "đau bụng", [2, 5], ["3 ngày nay", "4 ngày chứ không phải 3 ngày"], nguoi_noi="bệnh nhân",
+             moc_thoi_gian="4 ngày", trang_thai="bị thay thế" if nguoc else "còn hiệu lực")
+    cu = _p(1, "đau bụng", [2], ["3 ngày nay"], nguoi_noi="bệnh nhân", moc_thoi_gian="3 ngày",
+            trang_thai="còn hiệu lực" if nguoc else "bị thay thế")
+    return [moi, cu]
+
+
+def test_dinh_chinh_nguoc_bi_bat_tren_ca_hai_dong():
+    ps = _dinh_chinh(True)
+    assert "CORRECTION_NOT_APPLIED" in _ma(ps, HOI_V6, 0)
+    assert "CORRECTION_NOT_APPLIED" in _ma(ps, HOI_V6, 1)
+
+
+def test_dinh_chinh_dung_chieu_khong_bao():
+    ps = _dinh_chinh(False)
+    assert "CORRECTION_NOT_APPLIED" not in _ma(ps, HOI_V6, 0) | _ma(ps, HOI_V6, 1)
+
+
+def test_dinh_chinh_nguoc_cung_luot_lieu_thuoc():
+    """v2mr_0135: '5 ml, a nham, 7 ml' trong CUNG mot luot; ban cu va moi dan cung luot."""
+    hoi = "Bác sĩ: Cháu uống thuốc gì?\nNgười nhà: Cháu uống amoxicillin 5 ml, à nhầm, 7 ml mới đúng, ngày hai lần."
+    t = dict(ten="amoxicillin", so_lan="ngày hai lần", trang_thai_dung="đang dùng")
+    moi = _p(0, "amoxicillin", [2], ["7 ml"], nguoi_noi="người nhà", thuoc=dict(t, lieu="7 ml"),
+             trang_thai="bị thay thế")
+    cu = _p(1, "amoxicillin", [2], ["5 ml"], nguoi_noi="người nhà", thuoc=dict(t, lieu="5 ml"))
+    assert "CORRECTION_NOT_APPLIED" in _ma([moi, cu], hoi, 0)
+
+
+def test_dinh_chinh_nguoc_theo_quan_he_khai():
+    moi = _p(0, "đau bụng", [2], ["x"], nguoi_noi="bệnh nhân", trang_thai="bị thay thế",
+             quan_he="đính chính", quan_he_voi=1)
+    cu = _p(1, "đau bụng", [2], ["x"], nguoi_noi="bệnh nhân")
+    assert "CORRECTION_NOT_APPLIED" in _ma([moi, cu], HOI_V6, 0)

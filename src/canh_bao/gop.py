@@ -114,6 +114,7 @@ def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict]
         tho += phat_hien.dinh_chinh(ctx, p, loai[p.id], cac_sua)
     tho += toan_ca.mau_thuan(ctx, ps, loai)
     tho += toan_ca.ghi_lap(ctx, ps, loai)
+    tho += toan_ca.dinh_chinh_nguoc(ctx, ps, loai)
     tho += lam_sang.quet(ctx, ps)
     if meta_asr:
         tho += asr.canh_bao(ctx, ps, meta_asr, loai)
