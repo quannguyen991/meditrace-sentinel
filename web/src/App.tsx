@@ -18,7 +18,7 @@ import { TaoVanBanModal } from "./components/TaoVanBanModal";
 import type { MauVanBan } from "./lib/mauVanBan";
 import type { CheDoHoiDap, NguonTraCuu, TraLoiHoiDap } from "./components/EvidenceView";
 import type { NoteMeta, Quyet } from "./components/VerificationView";
-import { trangThaiMD } from "./components/DuyetBenCanh";
+import { DuyetBenCanh, trangThaiMD } from "./components/DuyetBenCanh";
 import { TinhTrangHeThong } from "./components/TinhTrangHeThong";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import type { NguoiDung } from "./lib/taiKhoan";
@@ -310,6 +310,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const setBanSuaDuyet: React.Dispatch<React.SetStateAction<Record<number, string>>> = (u) => capNhatDuyet("banSua", u);
   const [, setMoDuyetBen] = useState(false);
   const [chonMD, setChonMD] = useState<number | null>(null);
+  // Ngăn duyệt cạnh bản nháp: đóng sẵn, mở khi bác sĩ bấm vào một dòng trong bản nháp.
+  const [moDuyetBenCanh, setMoDuyetBenCanh] = useState(false);
   const [luotKiemChung, setLuotKiemChung] = useState<number | null>(null);
   const chonBanDau = useMemo(
     () =>
@@ -1335,8 +1337,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                               onChonMenhDe={(id) => {
                                 setChonMD(id);
                                 if (id !== null) {
-                                  setLuotKiemChung(null);
-                                  handleSelectNavigationItem("proof");
+                                  setMoDuyetBenCanh(true);
                                 }
                               }}
                               transcript={noteMeta?.transcript || currentSession.transcript}
@@ -1385,9 +1386,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                       "Chưa đủ căn cứ hoặc còn mục cần xác nhận chưa xử lý — không thể ký duyệt.",
                                   );
                                   if (ds.length > 0) {
-                                    setLuotKiemChung(null);
+                                    setMoDuyetBenCanh(true);
                                     setChonMD(kiemTra.chuaXacNhanIds[0] ?? null);
-                                    handleSelectNavigationItem("proof");
                                   }
                                   return;
                                 }
@@ -1433,6 +1433,71 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                               }}
                             />
                           </div>
+                          {noteMeta && (noteMeta.propositions?.length || 0) > 0 && moDuyetBenCanh && (
+                            <div className="w-full @4xl:w-80 xl:w-96 flex-shrink-0 min-h-0 max-h-[45vh] @4xl:max-h-none no-print">
+                              <DuyetBenCanh
+                                note={noteMeta}
+                                quyet={quyetDuyet}
+                                setQuyet={setQuyetDuyet}
+                                banSua={banSuaDuyet}
+                                setBanSua={setBanSuaDuyet}
+                                chonId={chonMD}
+                                onChon={setChonMD}
+                                onMoToanMan={() => handleSelectNavigationItem("proof")}
+                                onDong={() => setMoDuyetBenCanh(false)}
+                                audioUrl={currentSession.audioUrl}
+                                segments={currentSession.transcriptSegments}
+                                onKhoiPhucBoSot={(muc) => {
+                                  const targetId = currentSession.id;
+                                  const noiDungKhoiPhuc = (muc?.noi_dung_goi_y || muc?.trich_dan_nguyen_van || "").trim();
+                                  if (!noiDungKhoiPhuc) return;
+                                  const luot = Number(muc?.luot) || 1;
+                                  const loai = String(muc?.loai_thong_tin || "");
+                                  const section =
+                                    loai === "di_ung"
+                                      ? "DỊ ỨNG"
+                                      : loai === "thuoc" || loai === "thuoc_dong_y_ngam"
+                                      ? "THUỐC ĐANG DÙNG"
+                                      : loai === "sinh_hieu"
+                                      ? "SINH HIỆU"
+                                      : "BỆNH SỬ HIỆN TẠI";
+                                  const newPropId =
+                                    Math.max(0, ...(noteMeta?.propositions || []).map((p) => p.id)) + 1;
+                                  const dongMoi = `- ${noiDungKhoiPhuc} [T${luot}] (Khôi phục Tầng 4.5 — Bác sĩ xác nhận)`;
+                                  capNhatCaTheoId(targetId, (ca) => {
+                                    const updatedTabs = ca.tabs.map((t) =>
+                                      t.id === ca.activeTabId || t.type === "soap"
+                                        ? {
+                                            ...t,
+                                            content: t.content
+                                              ? `${t.content.trimEnd()}\n${dongMoi}`
+                                              : dongMoi,
+                                          }
+                                        : t,
+                                    );
+                                    const updatedNote = ca.note
+                                      ? {
+                                          ...ca.note,
+                                          propositions: [
+                                            ...(ca.note.propositions || []),
+                                            {
+                                              id: newPropId,
+                                              text: noiDungKhoiPhuc,
+                                              section,
+                                              status: "than" as const,
+                                              subject: "bệnh nhân",
+                                              evidenceTurns: [luot],
+                                              quotes: muc?.trich_dan_nguyen_van ? [muc.trich_dan_nguyen_van] : [],
+                                            },
+                                          ],
+                                        }
+                                      : ca.note;
+                                    return { tabs: updatedTabs, note: updatedNote };
+                                  });
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
