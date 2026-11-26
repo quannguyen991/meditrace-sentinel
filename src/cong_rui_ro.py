@@ -115,8 +115,11 @@ def phan_tich_co_dia_benh_nhan(bn: Optional[Dict[str, Any]]) -> ChiTietRuiRoBenh
     Neu benh nhan dong thoi co nhieu yeu to rui ro, he so khong cong don tuyen tinh
     ma tich luy theo cong thuc phi tuyen: H = 1.0 + Sum(h_i) * giam_tru_bien_thien.
     """
-    if not bn:
+    if not bn or not isinstance(bn, dict):
         return ChiTietRuiRoBenhNhan(1.0, [], [])
+    # Gia tri JSON co the la chuoi ("25") hoac rac: ep kieu an toan, rac = thieu (khong TypeError)
+    from src.ep_kieu_dau_vao import chuan_hoa_thong_tin_benh_nhan
+    bn = chuan_hoa_thong_tin_benh_nhan(bn) or {}
 
     yeu_to = []
     canh_bao_duoc_ly = []
@@ -183,7 +186,7 @@ def phan_tich_co_dia_benh_nhan(bn: Optional[Dict[str, Any]]) -> ChiTietRuiRoBenh
         canh_bao_duoc_ly.append("Giảm độ thanh thải chuyển hóa qua gan pha 1 và enzym CYP450")
 
     # 5. Da thuoc (Polypharmacy: dung tu 5 thuoc tro len)
-    so_thuoc = bn.get("so_thuoc_dang_dung", 0)
+    so_thuoc = bn.get("so_thuoc_dang_dung") or 0
     if so_thuoc >= 5:
         delta_he_so.append(0.2)
         yeu_to.append(f"Hội chứng đa thuốc ({so_thuoc} thuốc đồng thời)")

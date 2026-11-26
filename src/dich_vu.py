@@ -590,7 +590,7 @@ class May(BaseHTTPRequestHandler):
                 from src.ocr_lam_sang import boc_tach_phieu_cu
                 kq = boc_tach_phieu_cu(
                     van_ban=txt,
-                    tuoi=than.get("tuoi", 50),
+                    tuoi=than.get("tuoi"),          # thieu tuoi -> khong mac dinh 50
                     la_nu=bool(than.get("laNu", False)),
                     can_nang_kg=than.get("canNangKg"),
                 )
@@ -631,12 +631,17 @@ class May(BaseHTTPRequestHandler):
                 "ghi_chu": ghi_chu_tach(tach)}
 
     def _ho_so(self, than):
-        thong_tin_bn = than.get("thong_tin_benh_nhan")
-        du_lieu_xn = than.get("du_lieu_xet_nghiem")
+        # Bien vao: ep kieu an toan ("25" -> 25.0, rac -> thieu) truoc khi toi bat ky cong nao
+        from src.ep_kieu_dau_vao import (chuan_hoa_du_lieu_xet_nghiem_dau_vao,
+                                         chuan_hoa_thong_tin_benh_nhan)
+        than = dict(than)
+        thong_tin_bn = than["thong_tin_benh_nhan"] = chuan_hoa_thong_tin_benh_nhan(than.get("thong_tin_benh_nhan"))
+        du_lieu_xn = than["du_lieu_xet_nghiem"] = chuan_hoa_du_lieu_xet_nghiem_dau_vao(
+            than.get("du_lieu_xet_nghiem"))
         kq = _them_canh_bao(
             self._ho_so_tho(than),
-            thong_tin_benh_nhan=thong_tin_bn if isinstance(thong_tin_bn, dict) else None,
-            du_lieu_xet_nghiem=du_lieu_xn if isinstance(du_lieu_xn, dict) else None,
+            thong_tin_benh_nhan=thong_tin_bn,
+            du_lieu_xet_nghiem=du_lieu_xn,
         )
         try:
             user_id = str(than.get("user_id") or "system_dich_vu")
