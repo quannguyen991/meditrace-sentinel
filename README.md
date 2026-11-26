@@ -212,7 +212,7 @@ Rà soát độc lập ngày 26/11/2026 (hai lượt, Python và web) tìm ra 9 
 - Bước gom người còn một lỗi đã biết: khi mô hình ghi người được nhắc tới là "bố em", cụm này có thể bị gộp nhầm vào người bệnh.
 - Nhận dạng tiếng nói sai tên thuốc ở gần như mọi câu trong thử nghiệm; tách giọng người nói chưa được chạy thử với mô hình thật.
 - Các tính năng bổ sung 11/2026 (BHYT, chỉnh liều, đối chiếu lần khám, cờ đỏ) mới qua kiểm thử tự động, chưa được bác sĩ dùng thử. Bảng thuốc và mã bệnh chưa qua chuyên gia duyệt.
-- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đang thử huấn luyện thêm v3 bằng DPO trên cặp lỗi khó (`src/train_dpo.py`); chưa có kết quả.
+- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đã thử huấn luyện thêm v3 bằng DPO trên 407 cặp lỗi khó (`src/train_dpo.py`). Trên 140 cặp kiểm tra, độ chênh log-prob giữa câu đúng và câu sai tăng từ 20,5 lên 45,1 (tăng ở cả 13 loại lỗi), nhưng log-prob của câu đúng giảm từ −1,38 xuống −4,90 và chưa đo bỏ sót trên ca đầy đủ, nên **chưa** dùng bản DPO trong hệ thống. Chi tiết: [docs/ket-qua/dpo-v3.md](docs/ket-qua/dpo-v3.md).
 
 ## Công cụ AI đã dùng để làm dự án
 
