@@ -246,22 +246,34 @@ _SO_CHU_VIET = [
 
 def _chuan_so_lieu_thuoc(s: str) -> str:
     t = _chuan_trich(s)
+    # dau phay thap phan kieu Viet ("2,5") -> dau cham
+    t = re.sub(r"(?<=\d),(?=\d)", ".", t)
     for pat, rep in _SO_CHU_VIET:
         t = re.sub(pat, rep, t)
     return re.sub(r"\s+", " ", t).strip()
 
 
+def _mau_ranh_gioi(ct_chuan: str) -> str:
+    """Mau regex khop ct_chuan voi ranh gioi o hai dau.
+
+    Dau la so: khong duoc dung sau chu so, '.' hay ',' (tranh "5" trong
+    "25", "2.5"). Cuoi la so: khong duoc theo sau boi chu so hay phan
+    thap phan (tranh "5" trong "5.5"). Dau/cuoi la chu: ranh gioi tu.
+    """
+    mau = re.escape(ct_chuan)
+    dau = r"(?<![\d.,])" if ct_chuan[0].isdigit() else r"(?<!\w)"
+    cuoi = r"(?!\d|[.,]\d)" if ct_chuan[-1].isdigit() else r"(?!\w)"
+    return dau + mau + cuoi
+
+
 def _khop_chi_tiet_thuoc(chi_tiet: str, van_dan: str) -> bool:
-    ct_tho = _chuan_trich(chi_tiet)
-    if ct_tho in van_dan:
-        return True
     ct_chuan = _chuan_so_lieu_thuoc(chi_tiet)
     vd_chuan = _chuan_so_lieu_thuoc(van_dan)
     if not ct_chuan:
         return True
-    # Dùng ranh giới số để "50 mg" không bao giờ khớp nhầm vào "500 mg"
-    pat = rf"(?<!\d){re.escape(ct_chuan)}(?!\d)"
-    return bool(re.search(pat, vd_chuan))
+    # Chi khop theo ranh gioi so/tu: "5 mg" khong bao gio khop vao
+    # "25 mg" / "2.5 mg", "1 viên" khong khop vao "11 viên"
+    return bool(re.search(_mau_ranh_gioi(ct_chuan), vd_chuan))
 
 
 def tim_trich(trich, van) -> Optional[Tuple[int, int]]:
