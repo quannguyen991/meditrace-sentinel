@@ -34,7 +34,158 @@ class KetQuaKhuDinhDanh:
     danh_sach_pii: List[ThucThePII] = field(default_factory=list)
     bang_anh_xa_giai_ma: Dict[str, str] = field(default_factory=dict)
     tong_so_thuc_the: int = 0
-    ti_le_an_toan_bao_mat: float = 1.0
+    # Bo `ti_le_an_toan_bao_mat` (tra 1.0/0.95 co dinh, khong do gi ca). Thay bang ket qua
+    # kiem tra con sot THAT tren van ban da che: rong = khong con dau vet PII nao bo do bat duoc.
+    con_sot: List[Dict[str, object]] = field(default_factory=list)
+
+
+# Ho nguoi Viet pho bien (viet thuong) - dung de nhan ten viet thuong tu ASR
+HO_VIET = (
+    "nguyễn", "trần", "lê", "phạm", "hoàng", "huỳnh", "phan", "vũ", "võ", "đặng", "bùi", "đỗ",
+    "hồ", "ngô", "dương", "lý", "đinh", "đoàn", "lương", "trịnh", "đào", "mai", "tạ", "hà",
+    "tăng", "quách", "chu", "la", "tô", "châu", "tống", "thái", "nghiêm", "kiều", "lâm", "vương",
+    "cao", "lưu", "trương", "từ", "khúc", "âu", "giang", "triệu", "doãn", "phùng", "văn", "tôn",
+)
+
+# Tu thuong dung / dau cau / trieu chung: gap la DUNG bat ten (tranh "Trần Thị Mai Sau đó")
+TU_DUNG_TEN = frozenset((
+    "sau", "đó", "rồi", "hôm", "nay", "qua", "năm", "tuổi", "tháng", "ngày", "tuần",
+    "ạ", "dạ", "vâng", "nhé", "nha", "à", "ơi", "ạh", "đây", "đấy", "kia", "này", "nè",
+    "và", "với", "thì", "mà", "là", "có", "không", "chưa", "đã", "đang", "sẽ", "vừa", "mới",
+    "cũng", "còn", "nữa", "được", "bị", "cho", "vì", "nên", "nhưng", "hay", "hoặc", "ở", "tại",
+    "đến", "tới", "từ", "khám", "đi", "về", "làm", "sinh", "quê", "nhà", "hiện", "giờ", "lúc",
+    "tôi", "em", "cháu", "con", "bác", "anh", "chị", "cô", "chú", "ông", "bà", "mẹ", "bố", "vợ",
+    "chồng", "sĩ", "bệnh", "nhân", "người", "thuốc", "đau", "sốt", "ho", "mệt", "khó", "thở",
+    "chóng", "mặt", "buồn", "nôn", "tiêu", "chảy", "ngứa", "sưng", "uống", "tiêm", "xin", "muốn",
+    "thấy", "cảm", "biết", "nói", "hỏi", "khi", "trước", "nghề", "giáo", "viên", "học", "sinh",
+    "hôm", "tối", "sáng", "chiều", "trưa", "đêm", "vào", "ra", "lên", "xuống", "ạ.",
+))
+
+# Tien to dan ten (khong phan biet hoa-thuong). "tôi là" yeu cau ten bat dau bang ho/chu hoa.
+TIEN_TO_TEN_MANH = (
+    "tên của tôi là", "tôi tên là", "tên tôi là", "bệnh nhân tên là", "cháu tên là", "em tên là",
+    "bác tên là", "con tên là", "anh tên là", "chị tên là", "tên là", "cháu tên", "em tên",
+    "con tên", "họ và tên", "họ tên",
+)
+TIEN_TO_TEN_YEU = ("tôi là", "em là", "cháu là")
+
+_RE_TU = re.compile(r"[^\W\d_]+")
+_RE_CHUOI_SO = re.compile(r"(?<![\w+])(\+\s?)?\d+(?:[ .\-]\d+)*(?!\w)")
+
+
+def _la_hoa(tu: str) -> bool:
+    return tu[:1].isupper()
+
+
+def _bat_ten_sau_tien_to(van_ban: str, vi_tri: int, yeu: bool) -> Optional[Tuple[int, int]]:
+    """Bat cum ten ngay sau vi_tri (cuoi tien to). -> (dau, cuoi) hoac None.
+
+    Chu hoa dau: lay cac tu viet hoa lien tiep (toi da 5), dung o tu dung.
+    Viet thuong (ASR): tu dau la ho -> toi da 4 tu; khong phai ho -> toi da 2 tu; dung o tu dung.
+    Tien to yeu ("tôi là"): chi nhan khi tu dau la ho hoac viet hoa.
+    """
+    m0 = re.match(r"\s*:?\s*", van_ban[vi_tri:])
+    k = vi_tri + m0.end()
+    tu_list: List[Tuple[int, int, str]] = []
+    while k < len(van_ban):
+        m = _RE_TU.match(van_ban, k)
+        if not m:
+            break
+        tu_list.append((m.start(), m.end(), m.group(0)))
+        if len(tu_list) >= 6:
+            break
+        nxt = m.end()
+        if nxt < len(van_ban) and van_ban[nxt] == " " and nxt + 1 < len(van_ban) and _RE_TU.match(van_ban, nxt + 1):
+            k = nxt + 1
+        else:
+            break
+    if not tu_list:
+        return None
+    dau = tu_list[0][2]
+    if dau.lower() in TU_DUNG_TEN and not (dau.lower() in HO_VIET):
+        return None
+    hoa = _la_hoa(dau)
+    la_ho = dau.lower() in HO_VIET
+    if yeu and not (hoa or la_ho):
+        return None
+    if hoa:
+        toi_da = 5
+    else:
+        toi_da = 4 if la_ho else 2
+    lay: List[Tuple[int, int, str]] = []
+    for i, (a, b, w) in enumerate(tu_list):
+        if len(lay) >= toi_da:
+            break
+        if i > 0 and w.lower() in TU_DUNG_TEN:
+            break
+        if hoa and not _la_hoa(w):
+            break
+        lay.append((a, b, w))
+    if not lay:
+        return None
+    return lay[0][0], lay[-1][1]
+
+
+def tim_ten_theo_tien_to(van_ban: str) -> List[Tuple[int, int]]:
+    """Moi cum ten dung sau tien to dan ten (khong phan biet hoa-thuong) -> danh sach (dau, cuoi)."""
+    ra: List[Tuple[int, int]] = []
+    if not van_ban:
+        return ra
+    for ds, yeu in ((TIEN_TO_TEN_MANH, False), (TIEN_TO_TEN_YEU, True)):
+        for tt in sorted(ds, key=len, reverse=True):
+            for m in re.finditer(rf"(?<!\w){re.escape(tt)}(?!\w)", van_ban, re.IGNORECASE):
+                kq = _bat_ten_sau_tien_to(van_ban, m.end(), yeu)
+                if kq and not any(a < kq[1] and kq[0] < b for a, b in ra):
+                    ra.append(kq)
+    return sorted(ra)
+
+
+def tim_so_dai(van_ban: str) -> List[Tuple[int, int, str]]:
+    """Tim chuoi so giong so dien thoai / so dinh danh (9-15 chu so) ke ca khi bi tach nhom.
+
+    -> [(dau, cuoi, loai)], loai "SDT" (bat dau 0 / 84 / +84) hoac "SO_DINH_DANH".
+    Nhom so cach nhau dung mot dau cach/cham/gach: "0912 345 678", "0912.345.678",
+    "+84 912345678", "0 9 1 2 3 4 5 6 7 8". Chuoi nhieu nhom KHONG bat dau bang 0/84 (vd huyet
+    ap "140 90, 135 85") khong bi coi la so dien thoai, tru khi moi nhom chi mot chu so.
+    """
+    ra: List[Tuple[int, int, str]] = []
+    if not van_ban:
+        return ra
+    for m in _RE_CHUOI_SO.finditer(van_ban):
+        cong = bool(m.group(1))
+        nhom = [(g.start(), g.end()) for g in re.finditer(r"\d+", van_ban[m.start():m.end()])]
+        nhom = [(m.start() + a, m.start() + b) for a, b in nhom]
+        i = 0
+        while i < len(nhom):
+            chu_i = van_ban[nhom[i][0]:nhom[i][1]]
+            dau_span = m.start() if (i == 0 and cong) else nhom[i][0]
+            loai = "SDT" if (chu_i.startswith("0") or chu_i.startswith("84") or (i == 0 and cong)) else "SO_DINH_DANH"
+            # (a) mot nhom lien 9-15 chu so
+            if 9 <= len(chu_i) <= 15:
+                ra.append((dau_span, nhom[i][1], loai))
+                i += 1
+                continue
+            # (b) nhieu nhom bat dau 0 / 84 / +84: lay so nhom it nhat dat >= 10 chu so
+            if loai == "SDT":
+                d, j = len(chu_i), i
+                while d < 10 and j + 1 < len(nhom):
+                    j += 1
+                    d += nhom[j][1] - nhom[j][0]
+                if j > i and 9 <= d <= 15 and d >= 10:
+                    ra.append((dau_span, nhom[j][1], "SDT"))
+                    i = j + 1
+                    continue
+            # (c) doc tung chu so: "1 2 3 4 5 6 7 8 9"
+            if len(chu_i) == 1:
+                j = i
+                while j + 1 < len(nhom) and nhom[j + 1][1] - nhom[j + 1][0] == 1:
+                    j += 1
+                if 9 <= j - i + 1 <= 15:
+                    ra.append((dau_span, nhom[j][1], loai))
+                    i = j + 1
+                    continue
+            i += 1
+    return ra
 
 
 class ClinicalDeidentifier:
@@ -207,15 +358,19 @@ class ClinicalDeidentifier:
             bang_anh_xa[token] = val
             danh_sach_pii.append(ThucThePII("CCCD", val, token, match.start(1), match.end(1)))
 
-        # 4. Ẩn danh Số điện thoại
-        for match in cls.RE_SDT.finditer(van_ban):
-            val = match.group(0).strip()
-            # Bỏ qua nếu là một phần của CCCD hoặc BHYT đã bắt
-            if any(val in p.gia_tri_goc for p in danh_sach_pii):
-                continue
-            token = _lay_token("SDT")
+        def _chong(a: int, b: int) -> bool:
+            return any(p.vi_tri_dau < b and a < p.vi_tri_cuoi for p in danh_sach_pii)
+
+        # 4. Ẩn danh Số điện thoại / chuỗi số định danh 9-15 chữ số (kể cả tách nhóm "0912 345 678",
+        #    "0912.345.678", "+84 912345678", đọc từng số "0 9 1 2 ...")
+        for a, b, loai_so in tim_so_dai(van_ban):
+            if _chong(a, b):
+                continue  # đã nằm trong CCCD / BHYT
+            val = van_ban[a:b]
+            token = _lay_token("SDT" if loai_so == "SDT" else "SO_DINH_DANH")
             bang_anh_xa[token] = val
-            danh_sach_pii.append(ThucThePII("SO_DIEN_THOAI", val, token, match.start(), match.end()))
+            danh_sach_pii.append(ThucThePII(
+                "SO_DIEN_THOAI" if loai_so == "SDT" else "SO_DINH_DANH", val, token, a, b))
 
         # 5. Ẩn danh Ngày sinh
         for match in cls.RE_NGAY_SINH.finditer(van_ban):
@@ -231,57 +386,69 @@ class ClinicalDeidentifier:
             bang_anh_xa[token] = val
             danh_sach_pii.append(ThucThePII("DIA_CHI", val, token, match.start(1), match.end(1)))
 
+        def _them_ten_biet_truoc(ten: str, token: str, loai: str) -> None:
+            """Ho ten day du + bien the TEN RIENG (tu cuoi) + "danh xung + ten rieng"."""
+            val = ten.strip()
+            bien_the = [(val, token)]
+            cac_tu = val.split()
+            if len(cac_tu) >= 2 and len(cac_tu[-1]) >= 2:
+                # "Nguyễn Văn An" -> "An" ("Anh An đau", "anh an đau") dung token rieng de
+                # giai ma tra lai dung chu da noi (khong bien "Anh An" thanh "Anh Nguyễn Văn An")
+                bien_the.append((cac_tu[-1], token[:-1] + "_TEN]"))
+            for gia_tri, tk in bien_the:
+                matches = [m for m in cls._tao_regex_ten_nguoi(gia_tri).finditer(van_ban)
+                           if not _chong(m.start(), m.end())]
+                if matches:
+                    bang_anh_xa[tk] = gia_tri
+                    for m in matches:
+                        danh_sach_pii.append(ThucThePII(loai, m.group(0), tk, m.start(), m.end()))
+
         # 7. Ẩn danh Tên bệnh nhân được truyền trực tiếp (bắt buộc ranh giới từ Unicode + bảo vệ từ ghép lâm sàng)
         if ten_benh_nhan and len(ten_benh_nhan.strip()) >= 2:
-            val = ten_benh_nhan.strip()
-            token = "[BENH_NHAN]"
-            pat_bn = cls._tao_regex_ten_nguoi(val)
-            matches_bn = list(pat_bn.finditer(van_ban))
-            if matches_bn:
-                bang_anh_xa[token] = val
-                for m in matches_bn:
-                    danh_sach_pii.append(ThucThePII("HO_TEN", m.group(0), token, m.start(), m.end()))
+            _them_ten_biet_truoc(ten_benh_nhan, "[BENH_NHAN]", "HO_TEN")
 
         # 8. Ẩn danh Tên thân nhân (bắt buộc ranh giới từ Unicode + bảo vệ từ ghép lâm sàng)
         if ten_than_nhan:
             for i, ten_tn in enumerate(ten_than_nhan, 1):
                 if ten_tn and len(ten_tn.strip()) >= 2:
-                    val = ten_tn.strip()
-                    token = f"[NGUOI_NHA_{i}]"
-                    pat_tn = cls._tao_regex_ten_nguoi(val)
-                    matches_tn = list(pat_tn.finditer(van_ban))
-                    if matches_tn:
-                        bang_anh_xa[token] = val
-                        for m in matches_tn:
-                            danh_sach_pii.append(ThucThePII("HO_TEN_NGUOI_NHA", m.group(0), token, m.start(), m.end()))
+                    _them_ten_biet_truoc(ten_tn, f"[NGUOI_NHA_{i}]", "HO_TEN_NGUOI_NHA")
 
-        # 9. Tự động bắt tên qua tiền tố đích danh
-        # Chỉ dùng (?i:...) cho phần tiền tố để [A-Z...][a-z...]+ giữ phân biệt hoa-thường,
-        # hỗ trợ cả tên 1 chữ cái ('Nguyễn Thị Ý' / 'TRẦN THỊ Ý') và không bao giờ nuốt triệu chứng chữ thường phía sau.
-        _chu_hoa = "A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ"
-        _chu_thuong = "a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ"
-        _tu_ten_hoa_dau = rf"[{_chu_hoa}][{_chu_thuong}]+"
-        _tu_ten_hoa_tiep = rf"[{_chu_hoa}][{_chu_thuong}]*"
-        _cum_ten = rf"(?:{_tu_ten_hoa_dau}(?:\s+{_tu_ten_hoa_tiep}){{0,4}}|[{_chu_hoa}]{{2,}}(?:\s+[{_chu_hoa}]{{1,}}){{1,4}})"
-        for tt in cls.TIEN_TO_TEN:
-            pattern = re.compile(rf"(?i:{re.escape(tt)})\s+({_cum_ten})(?!\w)")
-            for m in pattern.finditer(van_ban):
-                val = m.group(1).strip()
-                if len(val) >= 2 and not any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
-                    token = _lay_token("HO_TEN")
-                    bang_anh_xa[token] = val
-                    danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
+        # 9. Tự động bắt tên qua tiền tố đích danh, KHÔNG phân biệt hoa-thường (ASR hay ra chữ thường:
+        #    "tôi tên là nguyễn văn an"); dừng ở từ dừng ("Trần Thị Mai Sau đó" -> chỉ "Trần Thị Mai").
+        for a, b in tim_ten_theo_tien_to(van_ban):
+            if _chong(a, b):
+                continue
+            val = van_ban[a:b]
+            token = _lay_token("HO_TEN")
+            bang_anh_xa[token] = val
+            danh_sach_pii.append(ThucThePII("HO_TEN", val, token, a, b))
 
         # 10. Tự động bắt tên riêng người Việt đi sau danh xưng (vd: "Chào bác Nguyễn Văn An")
         for m in cls.RE_DANH_XUNG_HO_TEN.finditer(van_ban):
-            val = m.group(1).strip()
-            if not any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
-                token = _lay_token("HO_TEN")
-                bang_anh_xa[token] = val
-                danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
+            a, b = m.start(1), m.end(1)
+            # cat cac tu dung o duoi ("bác Trần Thị Mai Sau đó" -> "Trần Thị Mai")
+            tu = list(_RE_TU.finditer(van_ban, a, b))
+            while len(tu) > 2 and tu[-1].group(0).lower() in TU_DUNG_TEN:
+                tu.pop()
+            b = tu[-1].end()
+            val = van_ban[a:b]
+            if _chong(a, b) or any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
+                continue
+            token = _lay_token("HO_TEN")
+            bang_anh_xa[token] = val
+            danh_sach_pii.append(ThucThePII("HO_TEN", val, token, a, b))
 
-        # Thực hiện thay thế các thực thể trong văn bản (ưu tiên chuỗi dài trước + ranh giới từ Unicode)
-        _token_ten = lambda tk: tk == "[BENH_NHAN]" or tk.startswith("[NGUOI_NHA_") or tk.startswith("[HO_TEN_")
+        # Thay thế: (1) đúng VỊ TRÍ đã phát hiện (kể cả tên viết thường / tên đơn sau tiền tố),
+        # (2) rồi quét toàn văn theo GIÁ TRỊ để che các lần nhắc lại (ưu tiên chuỗi dài trước).
+        da_lay: List[Tuple[int, int, str]] = []
+        for p in sorted(danh_sach_pii, key=lambda p: (p.vi_tri_dau, -(p.vi_tri_cuoi - p.vi_tri_dau))):
+            if any(a < p.vi_tri_cuoi and p.vi_tri_dau < b for a, b, _ in da_lay):
+                continue
+            da_lay.append((p.vi_tri_dau, p.vi_tri_cuoi, p.ma_the_the))
+        for a, b, tk in sorted(da_lay, reverse=True):
+            vb_xu_ly = vb_xu_ly[:a] + tk + vb_xu_ly[b:]
+
+        _token_ten = lambda tk: tk.startswith("[BENH_NHAN") or tk.startswith("[NGUOI_NHA_") or tk.startswith("[HO_TEN_")
         for token, val_goc in sorted(bang_anh_xa.items(), key=lambda kv: len(kv[1]), reverse=True):
             if not val_goc:
                 continue
@@ -302,8 +469,24 @@ class ClinicalDeidentifier:
             danh_sach_pii=danh_sach_pii,
             bang_anh_xa_giai_ma=bang_anh_xa,
             tong_so_thuc_the=len(danh_sach_pii),
-            ti_le_an_toan_bao_mat=1.0 if len(danh_sach_pii) > 0 else 0.95
+            con_sot=cls.kiem_tra_con_sot(vb_xu_ly),
         )
+
+    @classmethod
+    def kiem_tra_con_sot(cls, van_ban: str) -> List[Dict[str, object]]:
+        """Quet lai van ban DA CHE: con chuoi so giong SDT/dinh danh, hay ten sau tien to dan ten,
+        thi tra danh sach (loai, vi tri) - KHONG tra gia tri goc de khoi lo qua log.
+
+        Dung lam chot fail-closed truoc khi gui ra may xa: danh sach khac rong -> khong gui.
+        """
+        ra: List[Dict[str, object]] = []
+        if not van_ban:
+            return ra
+        for a, b, loai in tim_so_dai(van_ban):
+            ra.append({"loai": loai, "vi_tri": [a, b]})
+        for a, b in tim_ten_theo_tien_to(van_ban):
+            ra.append({"loai": "HO_TEN", "vi_tri": [a, b]})
+        return ra
 
     @classmethod
     def giai_ma_van_ban(cls, van_ban_da_an_danh: str, bang_anh_xa: Dict[str, str]) -> str:
