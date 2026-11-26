@@ -368,16 +368,25 @@ def pha_danh_gia(a, tok, mau):
     import torch
     model = _nap_mo_hinh(a.model, a.adapter, huan_luyen=False)
     theo = defaultdict(lambda: [0, 0])
+    chenh = defaultdict(list)   # lp_tot - lp_xau: v3 da dung 280/280 (26/11) -> ti le dung
+    tung_cap = []               # kich tran, so sanh bang do CHENH va log-prob ban dung
     with torch.no_grad():
         for i, m in enumerate(mau, 1):
             lt, lx, _ = _logp_cap(model, m, tok.pad_token_id, a.ghep)
             theo[m["loai"]][0] += int(lt.item() > lx.item())
             theo[m["loai"]][1] += 1
+            chenh[m["loai"]].append(lt.item() - lx.item())
+            tung_cap.append({"khoa": m["khoa"], "loai": m["loai"], "tot": lt.item(), "xau": lx.item()})
             if i % 25 == 0:
                 print(f"[danh-gia] {i}/{len(mau)}", flush=True)
     dung = sum(v[0] for v in theo.values())
+    tat_ca = [x for v in chenh.values() for x in v]
     ket = {"adapter": str(a.adapter), "so_cap": len(mau), "ti_le_dung": dung / max(len(mau), 1),
-           "theo_loai": {k: {"dung": v[0], "tong": v[1]} for k, v in sorted(theo.items())}}
+           "chenh_tb": sum(tat_ca) / max(len(tat_ca), 1),
+           "logp_tot_tb": sum(x["tot"] for x in tung_cap) / max(len(tung_cap), 1),
+           "theo_loai": {k: {"dung": v[0], "tong": v[1],
+                             "chenh_tb": sum(chenh[k]) / len(chenh[k])} for k, v in sorted(theo.items())},
+           "tung_cap": tung_cap}
     print(json.dumps(ket, ensure_ascii=False, indent=1), flush=True)
     a.tep_ket_qua.parent.mkdir(parents=True, exist_ok=True)
     a.tep_ket_qua.write_text(json.dumps(ket, ensure_ascii=False, indent=1), encoding="utf-8")
