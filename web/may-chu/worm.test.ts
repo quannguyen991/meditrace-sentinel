@@ -4,7 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
-import { damBaoBangWorm, GENESIS_HASH_WORM, taoKhoWorm } from "./worm";
+import crypto from "node:crypto";
+import { damBaoBangWorm, GENESIS_HASH_WORM, layKhoaWorm, taoKhoWorm } from "./worm";
+
+process.env.MEDITRACE_WORM_KEY = "khoa-worm-kiem-thu-dai-hon-32-ky-tu-0123456789";
 
 function taoDbTam() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "meditrace-worm-"));
@@ -267,14 +270,179 @@ test("worm: phat hien tep .anchor.json bi pha hong hoac xoa .anchor.json kem cat
       /WORM Violation/,
     );
 
-    // 2. Kẻ tấn công xóa cả .anchor.json lẫn dòng cuối trong SQLite, nhưng .jsonl vẫn còn seq=2 -> vẫn phát hiện cắt đuôi!
+    // 2. Kẻ tấn công xóa cả .anchor.json lẫn dòng cuối trong SQLite -> mất neo được báo là bị can thiệp,
+    //    KHÔNG tự neo lại từ CSDL đã sửa; và đối chứng .jsonl vẫn phát hiện cắt đuôi.
     fs.unlinkSync(anchorPath);
     db.exec("DROP TRIGGER trg_worm_signoff_no_delete;");
     db.prepare("DELETE FROM worm_signoff WHERE seq = 2").run();
     const khoRestart2 = taoKhoWorm(db, jsonl);
+    assert.equal(fs.existsSync(anchorPath), false, "không được tự tạo lại tệp neo");
     const jsonlCrossCheck = khoRestart2.xacMinhChuoi();
     assert.equal(jsonlCrossCheck.hopLe, false);
-    assert.match(jsonlCrossCheck.loi || "", /JSONL/);
+    assert.match(jsonlCrossCheck.loi || "", /Thieu tep neo/);
+  } finally {
+    db.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+const kyMau = (sessionId: string) => ({
+  sessionId,
+  userId: null,
+  tongMenhDe: 2,
+  soGiu: 2,
+  soSua: 0,
+  soBo: 0,
+  tyLeCoNguon: 100,
+  contentHash: `h_${sessionId}`,
+  soChuaXacNhan: 0,
+});
+
+test("worm: chuoi dung HMAC co khoa — khong tinh lai duoc bang SHA-256 tran, sai khoa thi khong xac minh duoc", () => {
+  const { dir, db, jsonl } = taoDbTam();
+  try {
+    const kho = taoKhoWorm(db, jsonl);
+    kho.ghiSignOff(kyMau("s1"));
+    const [r] = kho.docLichSuSignOff();
+    assert.equal(r.thuat_toan, "hmac-sha256");
+    const { curr_hash, thuat_toan, ...payload } = r as any;
+    const shaTran = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+    assert.notEqual(curr_hash, shaTran, "băm phải có khoá");
+    const dungKhoa = crypto.createHmac("sha256", layKhoaWorm()).update(JSON.stringify(payload)).digest("hex");
+    assert.equal(curr_hash, dungKhoa);
+
+    const anchor = JSON.parse(fs.readFileSync(kho.duongDanAnchor()!, "utf-8"));
+    assert.equal(typeof anchor.mac, "string");
+    assert.equal(anchor.hmacTuSeq, 1);
+
+    // Mở lại bằng khoá khác -> báo bị can thiệp, không ký thêm được
+    const khoSaiKhoa = taoKhoWorm(db, jsonl, undefined, { khoa: "mot-khoa-hoan-toan-khac-0123456789abcdef" });
+    const kq = khoSaiKhoa.xacMinhChuoi();
+    assert.equal(kq.hopLe, false);
+    assert.match(kq.loi || "", /khoa WORM khac/);
+    assert.throws(() => khoSaiKhoa.ghiSignOff(kyMau("s2")), /WORM Violation/);
+
+    // Kẻ có quyền ghi tệp sửa tep neo (không có khoá) -> chữ ký neo hỏng
+    anchor.lastSeq = 1;
+    anchor.totalRecords = 1;
+    anchor.lastHash = "gia";
+    fs.writeFileSync(kho.duongDanAnchor()!, JSON.stringify(anchor), "utf-8");
+    const kq2 = taoKhoWorm(db, jsonl).xacMinhChuoi();
+    assert.equal(kq2.hopLe, false);
+    assert.match(kq2.loi || "", /HMAC/);
+  } finally {
+    db.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("worm: mat tep neo khi da co ban ghi -> khong tu neo lai; MEDITRACE_WORM_NEO_LAI=1 moi cho neo lai", () => {
+  const { dir, db, jsonl } = taoDbTam();
+  try {
+    const kho = taoKhoWorm(db, jsonl);
+    kho.ghiSignOff(kyMau("s1"));
+    const anchorPath = kho.duongDanAnchor()!;
+    fs.unlinkSync(anchorPath);
+
+    const khoMoi = taoKhoWorm(db, jsonl);
+    assert.equal(fs.existsSync(anchorPath), false);
+    const kq = khoMoi.xacMinhChuoi();
+    assert.equal(kq.hopLe, false);
+    assert.match(kq.loi || "", /Thieu tep neo/);
+    assert.throws(() => khoMoi.ghiSignOff(kyMau("s2")), /WORM Violation/);
+
+    const khoNeoLai = taoKhoWorm(db, jsonl, undefined, { env: { ...process.env, MEDITRACE_WORM_NEO_LAI: "1" } });
+    assert.equal(fs.existsSync(anchorPath), true);
+    assert.deepEqual(khoNeoLai.xacMinhChuoi(), { hopLe: true, soBanGhi: 1 });
+  } finally {
+    db.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("worm: neo cham dung 1 ban ghi (sap giua COMMIT va ghi neo) thi tu lanh; cham 2 ban ghi thi bao can thiep", () => {
+  const { dir, db, jsonl } = taoDbTam();
+  try {
+    const kho = taoKhoWorm(db, jsonl);
+    kho.ghiSignOff(kyMau("s1"));
+    const anchorPath = kho.duongDanAnchor()!;
+    const neoSau1 = fs.readFileSync(anchorPath, "utf-8");
+    kho.ghiSignOff(kyMau("s2"));
+    const neoSau2 = fs.readFileSync(anchorPath, "utf-8");
+    kho.ghiSignOff(kyMau("s3"));
+
+    // Giả lập sập sau COMMIT bản ghi 3: tệp neo vẫn ở trạng thái sau bản ghi 2
+    fs.writeFileSync(anchorPath, neoSau2, "utf-8");
+    const khoSauSap = taoKhoWorm(db, jsonl);
+    assert.deepEqual(khoSauSap.xacMinhChuoi(), { hopLe: true, soBanGhi: 3 });
+    assert.equal(JSON.parse(fs.readFileSync(anchorPath, "utf-8")).lastSeq, 3);
+    assert.equal(khoSauSap.ghiSignOff(kyMau("s4")).wormSeq, 4, "ký tiếp được, không 409 vĩnh viễn");
+
+    // Neo chậm 3 bản ghi: không tự lành
+    fs.writeFileSync(anchorPath, neoSau1, "utf-8");
+    const khoLech = taoKhoWorm(db, jsonl);
+    assert.equal(khoLech.xacMinhChuoi().hopLe, false);
+    assert.throws(() => khoLech.ghiSignOff(kyMau("s5")), /WORM Violation/);
+  } finally {
+    db.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("worm: chuoi cu (SHA-256 khong khoa, neo chua ky) van xac minh duoc va duoc noi tiep bang HMAC", () => {
+  const { dir, db, jsonl } = taoDbTam();
+  try {
+    damBaoBangWorm(db);
+    // Dựng 2 bản ghi theo đúng cách mã cũ (trước bản vá) đã ghi
+    let prev = GENESIS_HASH_WORM;
+    const them = db.prepare(
+      `INSERT INTO worm_signoff (seq, timestamp, nguoi_dung_id, event, session_id, tong_menh_de, so_giu, so_sua, so_bo,
+        ty_le_co_nguon, content_hash, prev_hash, curr_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    );
+    const hashes: string[] = [];
+    for (const seq of [1, 2]) {
+      const p = {
+        seq,
+        timestamp: `2026-11-2${seq}T00:00:00.000Z`,
+        user_id: null,
+        event: "doctor_forensic_signoff",
+        session_id: `cu_${seq}`,
+        tong_menh_de: 3,
+        so_giu: 3,
+        so_sua: 0,
+        so_bo: 0,
+        ty_le_co_nguon: 100,
+        content_hash: `c${seq}`,
+        prev_hash: prev,
+      };
+      const h = crypto.createHash("sha256").update(JSON.stringify(p)).digest("hex");
+      them.run(seq, p.timestamp, null, p.event, p.session_id, 3, 3, 0, 0, 100, p.content_hash, prev, h);
+      hashes.push(h);
+      prev = h;
+    }
+    const anchorPath = path.join(dir, "test.db.anchor.json");
+    fs.writeFileSync(
+      anchorPath,
+      JSON.stringify({ firstSeq: 1, firstPrevHash: GENESIS_HASH_WORM, firstHash: hashes[0], lastSeq: 2, lastHash: hashes[1], totalRecords: 2, updatedAt: "x" }),
+      "utf-8",
+    );
+
+    const kho = taoKhoWorm(db, jsonl);
+    assert.equal(typeof JSON.parse(fs.readFileSync(anchorPath, "utf-8")).mac, "string", "neo cũ được ký HMAC");
+    assert.deepEqual(kho.xacMinhChuoi(), { hopLe: true, soBanGhi: 2 });
+    assert.equal(kho.ghiSignOff(kyMau("moi")).wormSeq, 3);
+    assert.deepEqual(kho.xacMinhChuoi(), { hopLe: true, soBanGhi: 3 });
+    assert.equal(JSON.parse(fs.readFileSync(anchorPath, "utf-8")).hmacTuSeq, 3);
+
+    // Kẻ không có khoá nối thêm bản ghi SHA-256 trần sau bản ghi HMAC -> bị phát hiện
+    const p4 = {
+      seq: 4, timestamp: "t", user_id: null, event: "doctor_forensic_signoff", session_id: "gia", tong_menh_de: 1,
+      so_giu: 1, so_sua: 0, so_bo: 0, ty_le_co_nguon: 100, content_hash: "g",
+      prev_hash: (kho.docLichSuSignOff().at(-1) as any).curr_hash,
+    };
+    them.run(4, "t", null, p4.event, "gia", 1, 1, 0, 0, 100, "g", p4.prev_hash, crypto.createHash("sha256").update(JSON.stringify(p4)).digest("hex"));
+    const kq = kho.xacMinhChuoi();
+    assert.equal(kq.hopLe, false);
   } finally {
     db.close();
     fs.rmSync(dir, { recursive: true, force: true });

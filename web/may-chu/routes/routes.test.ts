@@ -14,6 +14,7 @@ process.env.MEDITRACE_CHO_NHAP_MS = "80";
 process.env.MEDITRACE_TRO_LY_CHO_MS = "50";
 process.env.MEDITRACE_TRO_LY_NGOAI = "tat";
 process.env.MEDITRACE_INTERNAL_TOKEN = "test-token-noi-bo";
+process.env.MEDITRACE_WORM_KEY = "khoa-worm-kiem-thu-routes-0123456789abcdef";
 
 // Mock dịch vụ Python cục bộ để kiểm thử tích hợp thực tế cho /api/generate-note và /api/transcribe
 let mockPyPort = 0;
