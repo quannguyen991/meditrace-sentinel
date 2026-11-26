@@ -116,6 +116,7 @@ Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa 
 | Đổi chỗ bệnh nhân và người nhà: điểm ROUGE-1 | 1,0000 | 1,0000 (không phát hiện) |
 | Cùng phép đổi đó: điểm riêng của dự án | — | giảm 0,1381 (phát hiện được) |
 | **Tỷ lệ bỏ sót mệnh đề lâm sàng (30 ca phát triển, 304 mệnh đề)** | Qwen3-4B chưa train: **43,1%** (khoảng 37,6%–48,7%) | Qwen3-4B + adapter: **11,5%** (khoảng 8,4%–15,6%, 0 ca JSON lỗi) |
+| Cùng phép đo, lần chạy 26/11/2026 | Adapter v1: **11,8%** (8,7%–16,0%) | Adapter v3: **14,1%** (10,7%–18,5%) — không tốt hơn v1 |
 
 **Những kết quả không có lợi, ghi đúng như đo:**
 
@@ -194,7 +195,7 @@ Các khoá bí mật (khoá Hugging Face, khoá và địa chỉ của dịch v�
 - Bước gom người còn một lỗi đã biết: khi mô hình ghi người được nhắc tới là "bố em", cụm này có thể bị gộp nhầm vào người bệnh.
 - Nhận dạng tiếng nói sai tên thuốc ở gần như mọi câu trong thử nghiệm; tách giọng người nói chưa được chạy thử với mô hình thật.
 - Các tính năng bổ sung 11/2026 (BHYT, chỉnh liều, đối chiếu lần khám, cờ đỏ) mới qua kiểm thử tự động, chưa được bác sĩ dùng thử. Bảng thuốc và mã bệnh chưa qua chuyên gia duyệt.
-- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) đã huấn luyện xong ngày 26/11/2026 nhưng **chưa có số đo**. Con số bỏ sót 11,5% ở trên là của bản v1.
+- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đang thử huấn luyện thêm v3 bằng DPO trên cặp lỗi khó (`src/train_dpo.py`); chưa có kết quả.
 
 ## Công cụ AI đã dùng để làm dự án
 

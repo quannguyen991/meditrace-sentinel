@@ -75,6 +75,22 @@ def test_ghep_lo_cung_do_dai_mat_na_toan_mot():
     assert all(all(x == 1 for x in r) for r in mat)
 
 
+def _L(lt, lx, rt, rx, beta, alpha, n):
+    z = beta * ((lt - rt) - (lx - rx))
+    return -math.log(1 / (1 + math.exp(-z))) + alpha * (-lt / n)
+
+
+@pytest.mark.parametrize("lt,lx", [(-10.0, -12.0), (-3.0, -1.0), (-0.05, -9.8)])
+def test_he_so_dpo_bang_dao_ham_so(lt, lx):
+    rt, rx, beta, alpha, n, h = -11.0, -11.5, 0.1, 1.0, 40, 1e-5
+    z = beta * ((lt - rt) - (lx - rx))
+    he_tot, he_xau = td.he_so_dpo(z, beta, alpha, n)
+    so_tot = (_L(lt + h, lx, rt, rx, beta, alpha, n) - _L(lt - h, lx, rt, rx, beta, alpha, n)) / (2 * h)
+    so_xau = (_L(lt, lx + h, rt, rx, beta, alpha, n) - _L(lt, lx - h, rt, rx, beta, alpha, n)) / (2 * h)
+    assert math.isclose(he_tot, so_tot, rel_tol=1e-5)
+    assert math.isclose(he_xau, so_xau, rel_tol=1e-5)
+
+
 def test_loss_dpo_bang_cong_thuc():
     torch = pytest.importorskip("torch")
     lt, lx, rt, rx, nll = map(torch.tensor, (-10.0, -12.0, -11.0, -11.0, 0.5))

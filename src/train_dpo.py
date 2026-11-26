@@ -21,6 +21,7 @@ Phan khong can torch (chon cap, dung mat na) chay duoc tren laptop de test truoc
 import argparse
 import io
 import json
+import math
 import random
 import sys
 from collections import defaultdict
@@ -109,6 +110,16 @@ def loss_dpo(lp_tot, lp_xau, ref_tot, ref_xau, nll_tot, beta=BETA, alpha=ALPHA):
     return -F.logsigmoid(le) + alpha * nll_tot, le
 
 
+def he_so_dpo(z: float, beta: float, alpha: float, n_tot: int):
+    """dL/dlp_tot va dL/dlp_xau cua L = -log sigmoid(z) + alpha * (-lp_tot / n_tot),
+    z = beta * ((lp_tot - ref_tot) - (lp_xau - ref_xau)).
+
+    Dung de lan truyen nguoc TUNG CHUOI MOT (moi luc chi giu mot do thi): backward
+    `he_tot * lp_tot` roi `he_xau * lp_xau` cho cung gradient nhu backward L."""
+    s = 1.0 / (1.0 + math.exp(z)) if z > -50 else 1.0  # sigmoid(-z)
+    return -beta * s - alpha / max(n_tot, 1), beta * s
+
+
 def logp_chuoi(model, ids, nhan, kich_thuoc_doan=512):
     """-> (tong log-prob cua cac token co nhan, so token). Khong tao logits ca chuoi."""
     import torch
@@ -169,12 +180,16 @@ def _logp_cap(model, m, ma_dem, ghep):
     """-> (lp_tot, lp_xau, n_tot). Ghep lo neu duoc; tran bo nho thi chay lan luot."""
     import torch
     if ghep:
+        tran = False
         try:
             lp, n = logp_lo(model, [m["tot"], m["xau"]], ma_dem)
             return lp[0], lp[1], int(n[0].item())
         except torch.cuda.OutOfMemoryError:
+            tran = True
+        # chay lai NGOAI khoi except: trong khoi, traceback con giu tensor cua lan hong
+        if tran:
             torch.cuda.empty_cache()
-            print(f"[tran bo nho] {m['khoa']} — chay lan luot", flush=True)
+            print(f"[tran bo nho] {m['khoa']} - chay lan luot", flush=True)
     lt, nt = logp_chuoi(model, *m["tot"])
     lx, _ = logp_chuoi(model, *m["xau"])
     return lt, lx, nt
@@ -257,27 +272,28 @@ def pha_train(a, tok, mau):
     import time
     t0 = time.time()
 
-    def mot_cap(m, ghep):
+    def mot_cap(m):
+        """Moi luc chi giu MOT do thi (giu ca hai thi tran bo nho o 0,70 — chay thu 26/11).
+        1) ban dung co gradient; 2) ban sai khong gradient -> z; 3) backward ban dung
+        theo he so; 4) ban sai co gradient, backward theo he so. Gradient bang backward L."""
         r = ref[m["khoa"]]
-        lt, lx, nt = _logp_cap(model, m, tok.pad_token_id, ghep)
-        loss, le = loss_dpo(lt, lx, torch.tensor(r["tot"], device=lt.device),
-                            torch.tensor(r["xau"], device=lt.device), -lt / max(nt, 1),
-                            a.beta, a.alpha)
-        (loss / a.tich_luy).backward()
-        return loss, le
+        lt, nt = logp_chuoi(model, *m["tot"])
+        with torch.no_grad():
+            lx0, _ = logp_chuoi(model, *m["xau"])
+        z = a.beta * ((lt.item() - r["tot"]) - (lx0.item() - r["xau"]))
+        he_tot, he_xau = he_so_dpo(z, a.beta, a.alpha, nt)
+        loss = -math.log(max(1e-12, 1.0 / (1.0 + math.exp(-z)))) + a.alpha * (-lt.item() / max(nt, 1))
+        (he_tot * lt / a.tich_luy).backward()
+        del lt
+        lx, _ = logp_chuoi(model, *m["xau"])
+        (he_xau * lx / a.tich_luy).backward()
+        return loss, z
 
     for i, m in enumerate(mau):
-        try:
-            loss, le = mot_cap(m, a.ghep_lo)
-        except torch.cuda.OutOfMemoryError:
-            # tran bo nho luc lan truyen nguoc: tat ghep lo cho phan con lai
-            torch.cuda.empty_cache()
-            a.ghep_lo = False
-            print(f"[tran bo nho khi lan truyen nguoc] {m['khoa']} - tat ghep lo", flush=True)
-            loss, le = mot_cap(m, False)
-        tong["loss"] += loss.item()
-        tong["le"] += le.item()
-        tong["dung"] += float(le.item() > 0)
+        loss, le = mot_cap(m)
+        tong["loss"] += loss
+        tong["le"] += le
+        tong["dung"] += float(le > 0)
         tong["n"] += 1
         if (i + 1) % a.tich_luy == 0 or i + 1 == len(mau):
             for g in opt.param_groups:
