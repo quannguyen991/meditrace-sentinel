@@ -77,7 +77,27 @@ Kết quả đúng: dị ứng amoxicillin thuộc về **bệnh nhân** (căn c
 | **Đầu vào âm thanh** (`src/audio/`) | Chép lời bằng **PhoWhisper** (mô hình nhận dạng tiếng nói tiếng Việt) chạy ngay trên máy. Có thể tách giọng từng người nói bằng pyannote; khi đó bác sĩ chọn vai (bác sĩ, bệnh nhân, người nhà) cho từng giọng. |
 | **Dịch vụ mô hình ngoài** (tuỳ chọn) | Chỉ dùng cho việc phụ như hỏi đáp về ca khám hoặc tra tài liệu. **Mặc định tắt**, chỉ chạy khi người dùng bật công tắc, có cảnh báo dữ liệu sẽ đi đâu, và **không bao giờ** dùng để viết bản nháp chính. Kết quả của phần này được ghi rõ là "chưa qua kiểm căn cứ". |
 
+| **Lớp cảnh báo** (`src/canh_bao/`) | Sau khi kiểm căn cứ, đối chiếu từng dòng với lời thoại để bắt lỗi khó thấy: sai người, đảo phủ định, sai số, sai bên trái/phải, sai mức độ, nhầm chuyện trước đây với hiện tại, giữ giá trị đã bị đính chính, biến lời dặn thành việc đã làm, bỏ sót. Mỗi cảnh báo nêu lượt nói và lý do. |
+| **Trợ lý nhiều tác tử** (`web/may-chu/tro-ly/`) | Bác sĩ hỏi ở ngăn bên phải màn soạn. Một bộ điều phối lập kế hoạch tối đa 6 bước rồi giao cho các tác tử tìm tài liệu, trả lời, đối chiếu, đối chiếu thuốc và dị ứng. Dữ liệu gửi ra ngoài được dựng từ danh sách cho phép (không có tên, số điện thoại, địa chỉ); câu hỏi có danh tính bị chặn. Quản trị có công tắc tắt toàn hệ thống. |
+
 Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ phần nào chạy ngay trên máy và phần nào có thể gửi ra ngoài.
+
+### Tính năng hỗ trợ bác sĩ (bổ sung 24–25/11/2026)
+
+Các tính năng này nằm quanh bản nháp. **Không tính năng nào thay đổi cách bản nháp được dựng.**
+
+| # | Tính năng | Làm gì | Tệp chính |
+|---|---|---|---|
+| 1 | **Nghe lại đúng đoạn** | Bấm vào một dòng để phát lại đoạn ghi âm gốc (thêm 0,5 giây hai đầu). Dòng có số kèm đơn vị, có từ phủ định, hoặc chép lời kém chắc chắn được tô sáng. | `web/src/lib/asrHighlight.ts`, `DuyetBenCanh.tsx` |
+| 2 | **Ký duyệt có chuỗi băm** | Khi bác sĩ ký duyệt, bản ghi được nối vào nhật ký chỉ-ghi-thêm có chuỗi băm SHA-256 (WORM), sửa lén một bản là vỡ chuỗi. | `web/may-chu/worm.ts`, `src/worm_audit_log.py` |
+| 3 | **Phiếu bàn giao SBAR và chép sang HIS** | Tạo phiếu bàn giao SBAR từ bản nháp (tôn trọng dòng đã giữ/sửa/bỏ) và chép nhanh từng ô sang phần mềm bệnh viện. | `web/src/lib/sbar.ts`, `HisSmartCopyPopover.tsx` |
+| 4 | **Gợi ý câu hỏi cờ đỏ** | Trong lúc khám, gợi ý tối đa 2 câu hỏi an toàn chưa hỏi (theo tuổi, giới); tự đánh dấu khi bác sĩ đã hỏi. Chạy tại chỗ, không gọi mô hình. | `web/src/lib/radarCoDo.ts` |
+| 5 | **Tờ dặn dò cho người bệnh** | Tờ dặn dò in được, có nút đọc to bằng giọng tiếng Việt của trình duyệt. | `ToDanDoBenhNhanModal.tsx` |
+| 6 | **Tiền kiểm BHYT** | Gợi ý mã ICD-10 (gồm mã 4 ký tự) và cảnh báo các điểm dễ bị xuất toán; không gợi ý mã cho bệnh đã bị phủ định. | `src/kiem_duyet_bhyt_va_bo_sot.py`, `BhytPrecheckModal.tsx` |
+| 7 | **Đọc phiếu xét nghiệm, đơn thuốc cũ** | Bóc chỉ số từ phiếu cũ, quy đổi đơn vị (creatinin µmol/L ↔ mg/dL), tính độ thanh thải creatinin để gợi ý chỉnh liều, cảnh báo kết hợp nguy hiểm (ví dụ kali ≥ 5,0 kèm spironolacton). | `src/ocr_lam_sang.py`, `src/hieu_chinh_lieu.py` |
+| 8 | **Đối chiếu với lần khám trước** | Báo khi dị ứng, bệnh nền hoặc thuốc mạn tính trái với các lần khám trước của cùng người bệnh; bỏ qua dòng bác sĩ đã bỏ hoặc đã đính chính. | `web/src/lib/doiChieuLanKham.ts`, `CrossVisitBanner.tsx` |
+
+Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa được dược sĩ hay bác sĩ duyệt** (`data/tri_thuc_thuoc.json`, mọi mục `da_duyet = false`). Chúng chỉ là gợi ý để đối chiếu.
 
 ---
 
@@ -105,6 +125,21 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 - Đáp án mô phỏng gần như chép nguyên văn từ lời thoại, nên kết quả **chỉ có hiệu lực trên dữ liệu mô phỏng**, chưa nói được điều gì về hội thoại thật.
 - **Tỷ lệ lặp câu của bộ dữ liệu v2 dừng ở 47,37%** (câu $\ge 8$ từ lặp 42,19%), do bản chất tự nhiên của 5.000 ca khám lâm sàng chứa các phản xạ chào hỏi và xác nhận lịch sự của người bệnh ("của tôi ạ.", "vâng ạ."); dự án không cắt gọt gượng ép để làm đẹp chỉ số.
 
+**Đo lớp cảnh báo bằng cách cấy lỗi (25–26/11/2026).** Chưa có nhãn của người, nên dự án đo lớp cảnh báo bằng cách lấy đáp án đúng làm bản ghi hoàn hảo, cố ý cấy **đúng một lỗi đã biết**, rồi xem lớp cảnh báo có bắt được không. Tiêu chí, ngưỡng và tập dữ liệu đã đăng ký trước trong `docs/dang-ky-truoc-bo-luat.md`.
+
+| Đo trên 400 ca tập điều chỉnh | Trước khi sửa luật | Sau khi sửa luật |
+|---|---|---|
+| 16 loại lỗi cơ bản (đổi người, đảo phủ định, đổi số, xoá dị ứng…): tỷ lệ bắt đúng loại | 0,801 | **0,871** |
+| 14 loại lỗi khó (lệch 1 đơn vị, đổi bên trái/phải, nhầm quá khứ/hiện tại, đính chính ngược…) | 0,682 | **0,889** |
+| Số cảnh báo trên bản ghi **không có lỗi**, trung bình mỗi ca | 8,98 | **7,11** |
+
+- Trên tập giữ kín (240 ca, chạy đúng một lần sau 5 vòng đầu): bắt đúng 0,871, báo nhầm 8,0 cảnh báo mỗi ca sạch.
+- 4 luật của vòng 6 chỉ đo trên tập điều chỉnh, nên con số lỗi khó là số **lạc quan**.
+- Lỗi do chương trình tạo ra đều đặn hơn lỗi thật của mô hình. Đây là phép đo khả năng bắt lỗi, **không phải** độ chính xác trên hồ sơ thật.
+- Còn nhiều báo nhầm: trung bình 7 cảnh báo trên một bản ghi đúng hoàn toàn, chủ yếu là cảnh báo "có thể bỏ sót" ở mức cần xem.
+
+Chi tiết: `docs/ket-qua/cay-loi.md`.
+
 **Tốc độ.** Khoảng **3,5 phút** để tạo một bản nháp trên một card RTX 3060. Các bước theo luật mất dưới một giây.
 
 ---
@@ -114,12 +149,13 @@ Trang chủ của phần mềm có bảng **"Ai xử lý phần nào"** nói rõ
 | Đường dẫn | Nội dung |
 |---|---|
 | `src/` | Toàn bộ phần xử lý bằng Python (xem bảng các bước ở trên). |
-| `tests/` | **1.528 bài kiểm thử tự động** (`pytest`, 27 bỏ qua theo môi trường phần cứng) và 11 nhóm kiểm thử TypeScript (`web/`) vượt qua 100%. |
-| `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ. |
+| `tests/` | **1.729 bài kiểm thử `pytest` qua**, 27 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 25 tệp kiểm thử TypeScript, đều qua. |
+| `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ, công cụ cấy lỗi (`cay_loi.py`, `cay_loi_kho.py`). |
+| `data/` | Chỉ có bảng tri thức thuốc, vân tay (mã băm) của các tập dữ liệu và manifest. Bản thân dữ liệu không nằm trong kho. |
 | `kaggle-kernels/` | Mỗi thư mục là một lượt huấn luyện hoặc chạy mô hình trên Kaggle (điền tên tài khoản Kaggle của bạn trong `kernel-metadata.json` nếu muốn chạy lại). |
 | `web/` | Giao diện web và máy chủ; xem `web/README.md`. |
 
-Không có trong kho này: dữ liệu, trọng số mô hình, kết quả chạy thô, tài liệu nội bộ. Dữ liệu mô phỏng sinh lại được bằng mã có sẵn.
+Không có trong kho này: dữ liệu hội thoại, trọng số mô hình, kết quả chạy thô, tài liệu nội bộ. Dữ liệu mô phỏng sinh lại được bằng mã có sẵn.
 
 ## Chạy thử trên máy của bạn
 
@@ -157,6 +193,8 @@ Các khoá bí mật (khoá Hugging Face, khoá và địa chỉ của dịch v�
 - Cấu trúc bản nháp là 9 mục cố định, trong khi hồ sơ thật thay đổi theo lý do khám và chuyên khoa. Phần mềm chưa đọc kết quả xét nghiệm.
 - Bước gom người còn một lỗi đã biết: khi mô hình ghi người được nhắc tới là "bố em", cụm này có thể bị gộp nhầm vào người bệnh.
 - Nhận dạng tiếng nói sai tên thuốc ở gần như mọi câu trong thử nghiệm; tách giọng người nói chưa được chạy thử với mô hình thật.
+- Các tính năng bổ sung 11/2026 (BHYT, chỉnh liều, đối chiếu lần khám, cờ đỏ) mới qua kiểm thử tự động, chưa được bác sĩ dùng thử. Bảng thuốc và mã bệnh chưa qua chuyên gia duyệt.
+- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) đã huấn luyện xong ngày 26/11/2026 nhưng **chưa có số đo**. Con số bỏ sót 11,5% ở trên là của bản v1.
 
 ## Công cụ AI đã dùng để làm dự án
 
