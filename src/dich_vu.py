@@ -19,6 +19,23 @@ Duong:
                                          -> ban nhap + tung menh de kem bang chung
   GET  /api/ca-mau[?bo=...]              danh sach ca da chay truoc (demo khong can GPU)
 
+XAC THUC (26/11/2026). Moi duong /api/* tru GET /api/suc-khoe deu doi header
+`X-MediTrace-Internal-Token` (so bang hmac.compare_digest):
+  - co bien MEDITRACE_INTERNAL_TOKEN -> dung khoa do;
+  - khong co -> luc khoi dong (main) nap khoa tu tep data/.meditrace_internal_token, chua co thi
+    sinh ngau nhien va ghi vao tep do (in DUONG DAN ra log, khong in khoa). Phia web dat
+    MEDITRACE_INTERNAL_TOKEN = noi dung tep nay;
+  - khong co khoa nao (vd lop May dung truc tiep khong qua main) -> tu choi (fail-closed).
+  Header Host phai la localhost / 127.0.0.1 / ::1 / dia chi --dia-chi hoac MEDITRACE_ALLOWED_HOSTS
+  (chong DNS rebinding). Content-Length am / khong phai so nguyen -> 400, qua GIOI_HAN_THAN -> 413.
+  `user_id` trong than yeu cau chi la KHAI BAO cua ben goi: ghi WORM duoi chu the da xac thuc
+  ("dich_vu_noi_bo/khai_bao:<id>"), khong ghi thang nhu danh tinh da xac minh.
+  Goi may xa (--mo-hinh-xa) gui kem MEDITRACE_REMOTE_TOKEN (khong co thi MEDITRACE_INTERNAL_TOKEN).
+
+MAY XA. Hoi thoai duoc khu dinh danh truoc khi gui; con sot dau vet PII (kiem_tra_con_sot)
+thi TU CHOI gui (loi khu_dinh_danh_chua_sach). Thong tin benh nhan / xet nghiem KHONG gui ra
+may xa; lop `lam_sang_nang_cao` va `canh_bao` luon tinh lai TAI CHO sau khi co ket qua.
+
 MOI DAP AN DEU CO TRUONG `nguon`:
   "mo_hinh"     khau trich chay ngay bang mo hinh cua du an
   "bo_dem"      khau trich lay tu tep dem da chay truoc, khau sinh chay ngay
@@ -30,6 +47,7 @@ from __future__ import annotations
 import argparse
 import base64
 import binascii
+import hmac
 import io
 import json
 import os
@@ -46,6 +64,11 @@ from src import duong_dan
 NHANH_CHO_PHEP = ("C_khoa", "C_khoa_v2", "C_khoa_hoi", "C", "B")
 MAX_TOKEN = 3072
 GIOI_HAN_AM_THANH = 40 * 1024 * 1024        # 40 MB
+# Than JSON toi da: am thanh 40 MB sau base64 ~54 MB + phan con lai
+GIOI_HAN_THAN = GIOI_HAN_AM_THANH * 2
+TEP_KHOA_NOI_BO = duong_dan.GOC_DU_AN / "data" / ".meditrace_internal_token"
+CHU_THE_NOI_BO = "dich_vu_noi_bo"            # chu the da xac thuc bang khoa noi bo
+HOST_MAC_DINH = ("localhost", "127.0.0.1", "::1")
 # Hang nhe cho /api/suc-khoe de KHONG keo cham_he_thong -> sai_so -> scipy luc khoi dong
 PHIEN_BAN_BO_CHAM = "2026-09-22"
 CHINH_SACH_CONG_MAC_DINH = "C-2026-09-22"
@@ -58,6 +81,38 @@ class LoiDichVu(Exception):
     def __init__(self, ma, thong_diep, code=400):
         super().__init__(thong_diep)
         self.ma, self.thong_diep, self.code = ma, thong_diep, code
+
+
+def nap_hoac_tao_khoa_noi_bo(tep=None) -> str:
+    """Khoa noi bo khi KHONG dat MEDITRACE_INTERNAL_TOKEN: doc tu tep, chua co thi sinh moi va ghi.
+
+    Tep nam trong data/ (bo qua khoi git). Khoa on dinh qua cac lan khoi dong lai de phia web
+    chi can dat mot lan MEDITRACE_INTERNAL_TOKEN = noi dung tep.
+    """
+    import secrets
+    khoa_env = os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip()
+    if khoa_env:
+        return khoa_env
+    tep = Path(tep) if tep is not None else TEP_KHOA_NOI_BO
+    try:
+        cu = tep.read_text(encoding="utf-8").strip()
+        if cu:
+            return cu
+    except OSError:
+        pass
+    moi = secrets.token_urlsafe(32)
+    tep.parent.mkdir(parents=True, exist_ok=True)
+    tep.write_text(moi + "\n", encoding="utf-8")
+    try:
+        os.chmod(tep, 0o600)
+    except OSError:
+        pass
+    return moi
+
+
+def _khoa_goi_may_xa() -> str:
+    return (os.environ.get("MEDITRACE_REMOTE_TOKEN", "").strip()
+            or os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip())
 
 
 # ----------------------------------------------------------------- mo hinh
@@ -170,8 +225,11 @@ class Loi:
         if metadata is not None:
             payload_xa["metadata"] = metadata
         du = json.dumps(payload_xa, ensure_ascii=False).encode("utf-8")
-        yc = urllib.request.Request(f"{self.mo_hinh_xa}/api/ho-so", data=du,
-                                    headers={"Content-Type": "application/json"})
+        tieu_de = {"Content-Type": "application/json"}
+        khoa_xa = _khoa_goi_may_xa()
+        if khoa_xa:
+            tieu_de["X-MediTrace-Internal-Token"] = khoa_xa
+        yc = urllib.request.Request(f"{self.mo_hinh_xa}/api/ho-so", data=du, headers=tieu_de)
         t0 = time.time()
         try:
             with urllib.request.urlopen(yc, timeout=1800) as res:
@@ -224,10 +282,22 @@ class Loi:
                 else None
             )
             kq_ad = ClinicalDeidentifier.an_danh_van_ban(hoi_thoai, ten_benh_nhan=ten_bn_xa)
-            try:
-                r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh, metadata=metadata)
-            except TypeError:
-                r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh)
+            # Fail-closed: quet lai van ban DA CHE; con dau vet PII (so dai, ten sau tien to)
+            # thi KHONG gui ra may xa.
+            con_sot = ClinicalDeidentifier.kiem_tra_con_sot(kq_ad.van_ban_da_an_danh)
+            if con_sot:
+                loai_sot = sorted({str(x.get("loai")) for x in con_sot})
+                raise LoiDichVu("khu_dinh_danh_chua_sach",
+                                "Khử định danh chưa sạch (còn " + ", ".join(loai_sot) + "): không gửi hội "
+                                "thoại ra máy xa. Sửa bản ghi hoặc chạy mô hình tại chỗ.", 422)
+            # Thong tin benh nhan / xet nghiem KHONG gui ra may xa
+            r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh, metadata=metadata)
+            if not isinstance(r_xa, dict):
+                raise LoiDichVu("loi_may_xa", "máy xa trả kết quả không hợp lệ", 502)
+            # May xa tinh lop canh bao / lam sang tren van ban da che va KHONG co thong tin benh
+            # nhan: bo di de _them_canh_bao tinh lai TAI CHO tren van ban da khoi phuc.
+            r_xa.pop("lam_sang_nang_cao", None)
+            r_xa.pop("canh_bao", None)
             if kq_ad.bang_anh_xa_giai_ma:
                 # Khôi phục cục bộ các token PII sau khi máy xa xử lý xong (máy xa không bao giờ thấy PII gốc)
                 def _giai_ma(obj):
@@ -244,6 +314,7 @@ class Loi:
                 r_xa = _giai_ma(r_xa)
             r_xa["da_khu_dinh_danh_truoc_gui_xa"] = True
             r_xa["so_pii_da_chan"] = kq_ad.tong_so_thuc_the
+            r_xa["lam_sang_tinh_tai_cho"] = True
             if metadata is not None:
                 _gan_metadata_am_thanh(r_xa, metadata)
             return r_xa
@@ -467,12 +538,33 @@ class May(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(du)
 
+    khoa_noi_bo = None                       # dat boi main() khi khong co bien moi truong
+    host_cho_phep = ()                       # them ngoai HOST_MAC_DINH (--dia-chi)
+
+    def _khoa_hieu_luc(self):
+        return os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip() or (self.khoa_noi_bo or "")
+
     def _kiem_khoa_noi_bo(self):
-        khoa_env = os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip()
-        if khoa_env:
-            nhan = (self.headers.get("X-MediTrace-Internal-Token") or "").strip()
-            if nhan != khoa_env:
-                raise LoiDichVu("khong_hop_le_token_noi_bo", "Thiếu hoặc sai khóa xác thực nội bộ", 403)
+        """Fail-closed: khong co khoa cau hinh thi tu choi; so khoa bang hmac.compare_digest."""
+        khoa = self._khoa_hieu_luc()
+        if not khoa:
+            raise LoiDichVu("chua_cau_hinh_khoa_noi_bo",
+                            "Dịch vụ chưa có khóa nội bộ (MEDITRACE_INTERNAL_TOKEN); từ chối truy cập.", 503)
+        nhan = (self.headers.get("X-MediTrace-Internal-Token") or "").strip()
+        if not hmac.compare_digest(nhan.encode("utf-8"), khoa.encode("utf-8")):
+            raise LoiDichVu("khong_hop_le_token_noi_bo", "Thiếu hoặc sai khóa xác thực nội bộ", 403)
+
+    def _kiem_host(self):
+        """Chong DNS rebinding: Host phai la may nay (hoac dia chi da cau hinh)."""
+        host = (self.headers.get("Host") or "").strip().lower()
+        if host.startswith("["):                      # [::1]:8765
+            ten = host[1:].split("]", 1)[0]
+        else:
+            ten = host.rsplit(":", 1)[0] if host.count(":") == 1 else host
+        them = [x.strip().lower() for x in os.environ.get("MEDITRACE_ALLOWED_HOSTS", "").split(",") if x.strip()]
+        cho_phep = set(HOST_MAC_DINH) | {h.lower() for h in self.host_cho_phep} | set(them)
+        if not ten or ten not in cho_phep:
+            raise LoiDichVu("host_khong_hop_le", "Host không được phép", 403)
 
     @staticmethod
     def _kiem_ma_phien(phien: str) -> str:
@@ -482,13 +574,19 @@ class May(BaseHTTPRequestHandler):
         return phien_sach
 
     def _than(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        if n > GIOI_HAN_AM_THANH * 2:
+        cl = (self.headers.get("Content-Length") or "0").strip()
+        if not re.fullmatch(r"\d{1,12}", cl):
+            raise LoiDichVu("content_length_khong_hop_le", "Content-Length không hợp lệ", 400)
+        n = int(cl)
+        if n > GIOI_HAN_THAN:
             raise LoiDichVu("qua_lon", "nội dung gửi lên quá lớn", 413)
         try:
-            return json.loads(self.rfile.read(n) or b"{}")
-        except json.JSONDecodeError as exc:
+            than = json.loads(self.rfile.read(n) or b"{}")
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             raise LoiDichVu("json_hong", str(exc))
+        if not isinstance(than, dict):
+            raise LoiDichVu("json_hong", "thân yêu cầu phải là một đối tượng JSON")
+        return than
 
     def do_OPTIONS(self):
         self._tra({}, 204)
@@ -503,6 +601,10 @@ class May(BaseHTTPRequestHandler):
                         continue
                     k_p, _, v_p = phan.partition("=")
                     tham[k_p] = v_p
+            self._kiem_host()
+            # Moi duong /api/* tru suc-khoe deu can khoa noi bo
+            if duong.startswith("/api/") and duong != "/api/suc-khoe":
+                self._kiem_khoa_noi_bo()
             if duong == "/api/suc-khoe":
                 cfg_am = self.am.cau_hinh_nhe()
                 cr_mod = sys.modules.get("src.cong_rui_ro")
@@ -527,7 +629,6 @@ class May(BaseHTTPRequestHandler):
             if duong == "/api/ca-mau":
                 return self._tra({"ca": ca_mau(tham.get("bo"))})
             if duong.startswith("/api/phien/"):
-                self._kiem_khoa_noi_bo()
                 phien = self._kiem_ma_phien(duong[len("/api/phien/"):])
                 pipe = self.am.pipeline()
                 return self._tra({"phien": phien,
@@ -560,6 +661,7 @@ class May(BaseHTTPRequestHandler):
 
     def _xu_ly_post(self):
         try:
+            self._kiem_host()
             self._kiem_khoa_noi_bo()
             duong = self.path.split("?")[0]
             than = self._than()
@@ -590,7 +692,7 @@ class May(BaseHTTPRequestHandler):
                 from src.ocr_lam_sang import boc_tach_phieu_cu
                 kq = boc_tach_phieu_cu(
                     van_ban=txt,
-                    tuoi=than.get("tuoi", 50),
+                    tuoi=than.get("tuoi"),          # thieu tuoi -> khong mac dinh 50
                     la_nu=bool(than.get("laNu", False)),
                     can_nang_kg=than.get("canNangKg"),
                 )
@@ -631,21 +733,30 @@ class May(BaseHTTPRequestHandler):
                 "ghi_chu": ghi_chu_tach(tach)}
 
     def _ho_so(self, than):
-        thong_tin_bn = than.get("thong_tin_benh_nhan")
-        du_lieu_xn = than.get("du_lieu_xet_nghiem")
+        # Bien vao: ep kieu an toan ("25" -> 25.0, rac -> thieu) truoc khi toi bat ky cong nao
+        from src.ep_kieu_dau_vao import (chuan_hoa_du_lieu_xet_nghiem_dau_vao,
+                                         chuan_hoa_thong_tin_benh_nhan)
+        than = dict(than)
+        thong_tin_bn = than["thong_tin_benh_nhan"] = chuan_hoa_thong_tin_benh_nhan(than.get("thong_tin_benh_nhan"))
+        du_lieu_xn = than["du_lieu_xet_nghiem"] = chuan_hoa_du_lieu_xet_nghiem_dau_vao(
+            than.get("du_lieu_xet_nghiem"))
         kq = _them_canh_bao(
             self._ho_so_tho(than),
-            thong_tin_benh_nhan=thong_tin_bn if isinstance(thong_tin_bn, dict) else None,
-            du_lieu_xet_nghiem=du_lieu_xn if isinstance(du_lieu_xn, dict) else None,
+            thong_tin_benh_nhan=thong_tin_bn,
+            du_lieu_xet_nghiem=du_lieu_xn,
         )
         try:
-            user_id = str(than.get("user_id") or "system_dich_vu")
+            # Chu the DA XAC THUC la ben giu khoa noi bo; `user_id` trong than chi la khai bao cua
+            # ben goi -> ghi ro "khai_bao:" chu khong ghi nhu danh tinh da xac minh.
+            khai_bao = str(than.get("user_id") or "").strip()[:128]
+            user_id = f"{CHU_THE_NOI_BO}/khai_bao:{khai_bao}" if khai_bao else CHU_THE_NOI_BO
             ma_ca = str(kq.get("id") or than.get("ca_id") or "ca_kham")
             worm_ev = lay_worm_logger().append_event(
                 user_id=user_id,
                 action="HO_SO_TAO_BAN_NHAP",
                 case_id=ma_ca,
-                payload={"nhanh": kq.get("nhanh"), "nguon": kq.get("nguon"), "so_phat_bieu": len(kq.get("phat_bieu") or [])},
+                payload={"nhanh": kq.get("nhanh"), "nguon": kq.get("nguon"), "so_phat_bieu": len(kq.get("phat_bieu") or []),
+                         "user_id_khai_bao": khai_bao or None},
                 details="Sinh bản nháp & kiểm duyệt 8 chốt",
             )
             kq["worm_seq"] = worm_ev.get("seq")
@@ -877,6 +988,13 @@ def main():
 
     May.loi = Loi(a.model, a.adapter_trich, cho_nap_mo_hinh=not a.khong_mo_hinh, mo_hinh_xa=a.mo_hinh_xa,
                   nhuong_cho=[x.strip() for x in a.nhuong_cho.split(",") if x.strip()])
+    # Khoa noi bo: bien moi truong, khong co thi doc/sinh tep (in duong dan, KHONG in khoa)
+    May.khoa_noi_bo = nap_hoac_tao_khoa_noi_bo()
+    if not os.environ.get("MEDITRACE_INTERNAL_TOKEN", "").strip():
+        print(f"[dich-vu] chua dat MEDITRACE_INTERNAL_TOKEN: dung khoa trong tep {TEP_KHOA_NOI_BO} "
+              "(dat MEDITRACE_INTERNAL_TOKEN o phia web = noi dung tep nay)", flush=True)
+    if a.dia_chi not in ("0.0.0.0", "::", ""):
+        May.host_cho_phep = (a.dia_chi,)
     if a.tran_ram_gb:
         canh_ram(a.tran_ram_gb)
     May.am = AmThanh()

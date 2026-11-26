@@ -173,7 +173,7 @@ def test_a4_an_danh_truoc_khi_gui_ho_so_xa():
     loi._dem_theo_chu = {}
     da_gui = {}
 
-    def fake_ho_so_xa(ca_id, hoi_thoai, nhanh):
+    def fake_ho_so_xa(ca_id, hoi_thoai, nhanh, metadata=None):
         da_gui["text"] = hoi_thoai
         return {"id": ca_id, "input": hoi_thoai, "phat_bieu": [], "du_doan": hoi_thoai}
 
@@ -313,6 +313,7 @@ def test_b3_xuat_xml_1_5_va_http_persistent():
 
     class _MayTest(May):
         loi = Loi(cho_nap_mo_hinh=False)
+        khoa_noi_bo = "khoa-thu"  # dich vu doi khoa noi bo cho moi /api tru suc-khoe
         am = AmThanh()
         def log_message(self, *args):
             pass
@@ -327,7 +328,7 @@ def test_b3_xuat_xml_1_5_va_http_persistent():
             "POST",
             "/api/ocr/phieu-cu",
             body=json.dumps({"text": "Creatinin 165 umol/L, Metformin 850mg", "tuoi": 68}),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "X-MediTrace-Internal-Token": "khoa-thu"},
         )
         r1 = conn.getresponse()
         d1 = json.loads(r1.read().decode("utf-8"))
@@ -338,7 +339,7 @@ def test_b3_xuat_xml_1_5_va_http_persistent():
             "POST",
             "/api/bhyt/precheck",
             body=json.dumps({"propositions": [{"id": 1, "text": "Tăng huyết áp"}], "transcript": "Tăng huyết áp"}),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "X-MediTrace-Internal-Token": "khoa-thu"},
         )
         r2 = conn.getresponse()
         d2 = json.loads(r2.read().decode("utf-8"))

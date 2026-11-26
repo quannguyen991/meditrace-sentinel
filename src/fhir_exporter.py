@@ -84,12 +84,25 @@ class FHIRExporter:
         re.IGNORECASE,
     )
 
+    # "không rõ" / "chưa rõ" KHONG phai la "khong di ung": la trang thai CHUA BIET, phai giu lai
+    _RE_DI_UNG_KHONG_RO = re.compile(
+        r"^\s*(?:[-*•]\s*)?(?:(?:tiền\s+sử\s+)?dị\s+ứng\s*[:=-]?\s*)?(?:không|chưa|ko)\s+rõ"
+        r"(?:\s+(?:có\s+)?(?:tiền\s+sử\s+)?(?:dị\s+ứng|mẫn\s+cảm)(?:\s+(?:gì|không))?)?\s*[.!]?\s*$",
+        re.IGNORECASE,
+    )
+
+    @classmethod
+    def _la_di_ung_khong_ro(cls, van_ban: Any) -> bool:
+        return bool(cls._RE_DI_UNG_KHONG_RO.match(str(van_ban or "")))
+
     @classmethod
     def _la_di_ung_phu_dinh(cls, van_ban: Any) -> bool:
         """Trả về True nếu toàn bộ nội dung mục DỊ ỨNG mang nghĩa phủ định / chưa ghi nhận."""
         txt = str(van_ban or "").strip()
         if not txt:
             return True
+        if cls._la_di_ung_khong_ro(txt):
+            return False          # chua biet != khong di ung
         cac_ve = [v.strip() for v in cls._RE_TACH_VE_DI_UNG.split(txt) if v and v.strip()]
         if not cac_ve:
             return True
@@ -374,6 +387,7 @@ class FHIRExporter:
         # 4. Tạo Resource: AllergyIntolerance (Dị ứng thuốc/thức ăn — bỏ qua khi mang nghĩa phủ định/chưa ghi nhận)
         di_ung = ban_nhap.get("DỊ ỨNG", "") or ban_nhap.get("di_ung", "")
         if di_ung and not cls._la_di_ung_phu_dinh(di_ung):
+            di_ung_khong_ro = cls._la_di_ung_khong_ro(di_ung)
             al_id = cls._tao_id("allergy")
             all_res_ids.append(al_id)
             al_res = {
@@ -389,13 +403,14 @@ class FHIRExporter:
                 "verificationStatus": {
                     "coding": [{
                         "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
-                        "code": "confirmed",
-                        "display": "Confirmed"
+                        # tien su di ung chua ro -> unconfirmed, khong ngam dinh la khong di ung
+                        "code": "unconfirmed" if di_ung_khong_ro else "confirmed",
+                        "display": "Unconfirmed" if di_ung_khong_ro else "Confirmed"
                     }]
                 },
                 "type": "allergy",
-                "criticality": "high",
-                "code": {"text": str(di_ung).strip()},
+                "criticality": "unable-to-assess" if di_ung_khong_ro else "high",
+                "code": {"text": ("Chưa rõ tiền sử dị ứng: " if di_ung_khong_ro else "") + str(di_ung).strip()},
                 "patient": {"reference": f"urn:uuid:{patient_id}"},
                 "recordedDate": now_iso
             }

@@ -47,3 +47,6 @@ data/ngoai/
 *.ppt
 *.xlsx
 *.xls
+
+# 26/11/2026: khoa noi bo tu sinh cua src/dich_vu.py (bi mat, khong commit)
+data/.meditrace_internal_token

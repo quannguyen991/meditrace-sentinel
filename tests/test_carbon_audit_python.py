@@ -536,6 +536,7 @@ def test_p1_http_integration_full_endpoints_va_metadata_am_thanh(tmp_path: Path,
 
     _MayHttpTest.loi = loi
     _MayHttpTest.am = am
+    _MayHttpTest.khoa_noi_bo = "khoa-thu"  # dich vu doi khoa noi bo cho moi /api tru suc-khoe
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), _MayHttpTest)
     port = server.server_address[1]
@@ -561,7 +562,7 @@ def test_p1_http_integration_full_endpoints_va_metadata_am_thanh(tmp_path: Path,
             "POST",
             "/api/ho-so",
             body=json.dumps({"phien": phien_id, "nhanh": "C_khoa"}),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "X-MediTrace-Internal-Token": "khoa-thu"},
         )
         r_hs = conn.getresponse()
         d_hs = json.loads(r_hs.read().decode("utf-8"))
@@ -582,7 +583,7 @@ def test_p1_http_integration_full_endpoints_va_metadata_am_thanh(tmp_path: Path,
                 ],
                 "transcript": "Bác sĩ chẩn đoán tăng huyết áp, mẹ bị tiểu đường.",
             }),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "X-MediTrace-Internal-Token": "khoa-thu"},
         )
         r_bh = conn.getresponse()
         d_bh = json.loads(r_bh.read().decode("utf-8"))
@@ -595,7 +596,7 @@ def test_p1_http_integration_full_endpoints_va_metadata_am_thanh(tmp_path: Path,
             "POST",
             "/api/ocr/phieu-cu",
             body=json.dumps({"text": "Creatinin: 210 umol/L, Glucophage 850mg ngày 2 viên", "tuoi": 72}),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "X-MediTrace-Internal-Token": "khoa-thu"},
         )
         r_ocr = conn.getresponse()
         d_ocr = json.loads(r_ocr.read().decode("utf-8"))

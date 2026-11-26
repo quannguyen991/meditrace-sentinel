@@ -71,7 +71,7 @@ def _lay_so_float(pattern: str, text: str) -> Optional[float]:
 
 def boc_tach_phieu_cu(
     van_ban: str,
-    tuoi: Optional[int] = 50,
+    tuoi: Optional[int] = None,
     la_nu: bool = False,
     can_nang_kg: Optional[float] = None,
 ) -> Dict[str, Any]:
@@ -95,10 +95,17 @@ def boc_tach_phieu_cu(
             chi_so["creatinine_mg_dl"] = c_norm["mg_dl"]
 
     egfr_in = _lay_so_float(r"(?:egfr|mlct)\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
-    tuoi_chuan = 50 if tuoi is None else int(tuoi)
+    # Thieu tuoi (hoac tuoi khong doc duoc) -> KHONG mac dinh 50, khong uoc tinh eGFR;
+    # hieu_chinh_lieu se danh dau phuong_phap_uoc_tinh="thieu_tuoi"
+    try:
+        tuoi_chuan: Optional[int] = int(float(str(tuoi).strip().replace(",", "."))) if tuoi is not None else None
+    except (ValueError, TypeError):
+        tuoi_chuan = None
+    if tuoi_chuan is not None and tuoi_chuan <= 0:
+        tuoi_chuan = None
     if egfr_in is not None:
         chi_so["egfr"] = egfr_in
-    elif "creatinine" in chi_so and tuoi_chuan >= 18:
+    elif "creatinine" in chi_so and tuoi_chuan is not None and tuoi_chuan >= 18:
         chi_so["egfr"] = tinh_egfr_ckd_epi_2021(chi_so["creatinine"], tuoi_chuan, la_nu)
 
     hba1c = _lay_so_float(r"hba1c\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
