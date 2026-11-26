@@ -130,7 +130,7 @@ export const BangDongCoLamSangThucTinh: React.FC<BangDongCoLamSangThucTinhProps>
   onOpenPolypharmacyModal,
   onSelectSocratesChip,
 }) => {
-  const [thuGon, setThuGon] = useState(false);
+  const [thuGon, setThuGon] = useState(true);
   const [moChiTietXn, setMoChiTietXn] = useState(false);
   const [diemDangMo, setDiemDangMo] = useState<string | null>(null);
   const [chipDaXacNhan, setChipDaXacNhan] = useState<Record<string, boolean>>({});

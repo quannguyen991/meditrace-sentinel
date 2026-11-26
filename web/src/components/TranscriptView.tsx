@@ -93,6 +93,8 @@ interface TranscriptViewProps {
   /** Nạp một ca đã chạy trước từ dịch vụ tại chỗ (dùng khi GPU đang bận). */
   onLoadSample?: () => void;
   audioUrl?: string;
+  /** Tệp âm thanh vừa tải lên: giữ lại để nghe lại từng lượt / từng mệnh đề. */
+  onDatAmThanh?: (url: string) => void;
 }
 
 const VAI_RE = /^\s*(bác sĩ|bệnh nhân|người nhà|chưa rõ vai|người nói\s+\d+|doctor|patient|bs|bn|speaker_\d+)\s*:/i;
@@ -132,6 +134,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   onOpenTemplates,
   onLoadSample,
   audioUrl,
+  onDatAmThanh,
 }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<boolean | null>(null);
@@ -459,6 +462,8 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
           }))
         );
       }
+      // Mốc thời gian chỉ khớp với tệp đầu tiên của ca (lượt bắt đầu từ 1).
+      if (onDatAmThanh && offsetLuot === 0) onDatAmThanh(URL.createObjectURL(file));
       onUpdateTranscript(transcript ? `${transcript.trimEnd()}\n${moi}` : moi);
       setGhiChuTach(moTaTach(data.diarization));
     } catch (err: any) {

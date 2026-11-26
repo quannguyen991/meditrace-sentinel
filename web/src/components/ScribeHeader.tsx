@@ -434,15 +434,6 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
 
       {/* Phải: Thao tác ghi âm, thiết bị âm thanh, tạo tài liệu */}
       <div className="flex flex-wrap items-center justify-end gap-1.5 @md:gap-2 ml-auto">
-        {/* Nút In / Xuất PDF */}
-        <button
-          onClick={() => (onPrintNote ? onPrintNote() : window.print())}
-          className="flex items-center gap-1 px-2.5 py-1.5 text-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#A7F3D0] rounded-xl transition-all text-xs font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer active:scale-95"
-          title="In hồ sơ bệnh án hoặc Lưu tệp PDF chuẩn y khoa (Ctrl+P)"
-        >
-          <Printer size={13} className="text-[#0D9488]" />
-          <span className="hidden sm:inline text-[11px]">In PDF</span>
-        </button>
 
         {/* Nút + Tạo tài liệu */}
         <button
@@ -559,7 +550,7 @@ export const ScribeHeader: React.FC<ScribeHeaderProps> = ({
         </div>
 
         {/* Loa phát - chỉ hiện trên màn hình rất rộng */}
-        <div className="relative hidden @5xl:flex flex-shrink-0">
+        <div className="relative hidden flex-shrink-0">
           <button
             onClick={() =>
               setAudioDropdownMode(audioDropdownMode === "speaker" ? null : "speaker")

@@ -713,6 +713,28 @@ export const VerificationView: React.FC<Props> = ({
                             <MessageSquare size={12} /> {t === 0 ? "Không dẫn lượt" : `Từ lượt ${t}`}
                           </span>
                         ))}
+                        {/* Nghe lại đúng đoạn ghi âm gốc làm căn cứ cho mệnh đề này */}
+                        {p.evidenceTurns
+                          .filter((t) => audioUrl && khoangPhatLaiLuot(t, segments))
+                          .map((t) => (
+                            <button
+                              key={`nghe-${t}`}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                phatDoanLuot(t);
+                              }}
+                              title={dangPhatLuot === t ? "Dừng nghe" : `Nghe lại ghi âm gốc lượt ${t}`}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border text-[11.5px] font-semibold whitespace-nowrap ${
+                                dangPhatLuot === t
+                                  ? "bg-[#0284C7] text-white border-[#0284C7]"
+                                  : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                              }`}
+                            >
+                              {dangPhatLuot === t ? <Square size={11} /> : <Play size={11} />}
+                              {dangPhatLuot === t ? "Dừng" : p.evidenceTurns.length > 1 ? `Nghe lượt ${t}` : "Nghe lại"}
+                            </button>
+                          ))}
                       </div>
                       <div className="flex-1 min-w-0">
                         {suaId === p.id ? (

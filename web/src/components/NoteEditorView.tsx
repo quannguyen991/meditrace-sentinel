@@ -1265,11 +1265,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       <div className="flex items-center justify-between px-2.5 sm:px-5 py-2 border-b border-[#CCE3F0] bg-[#F8FBFC] shadow-[0_1px_4px_rgba(2,132,199,0.04)] gap-x-2 gap-y-1.5 flex-wrap no-print">
         {/* Trái: Nhãn tài liệu & Chọn định dạng phong cách */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-[#E0F2FE] border border-[#BAE6FD] shadow-tactile-doctor-pill text-xs font-semibold text-[#0369A1] whitespace-nowrap flex-shrink-0">
-            <FileText size={13} className="text-[#0284C7]" />
-            <span className="truncate max-w-[120px] sm:max-w-[200px]">{tab.title}</span>
-          </div>
-
           {/* Chọn phong cách: Cân bằng / Tự do */}
           <div className="relative flex-shrink-0">
             <button
@@ -1327,15 +1322,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               </>
             )}
           </div>
-
-          <button
-            onClick={() => onRegenerateNote && onRegenerateNote(tab.templateStyle || "Goldilocks")}
-            disabled={isGenerating}
-            className="p-1 rounded-lg text-[#0369A1] hover:text-[#0284C7] hover:bg-[#E0F2FE] transition-colors disabled:opacity-40 flex-shrink-0"
-            title="Dựng lại bản nháp bằng mô hình Qwen3-4B tại chỗ"
-          >
-            <RefreshCw size={13} className={isGenerating ? "animate-spin" : ""} />
-          </button>
         </div>
 
         {/* Phải: Đọc chính tả PhoWhisper (F2), Hoàn tác, Làm lại, Các công cụ lâm sàng & Xuất */}
@@ -1601,18 +1587,6 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             </button>
           )}
 
-
-          {/* Nút In / Xuất PDF trực tiếp */}
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] text-[#0D9488] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="In hồ sơ bệnh án hoặc Lưu tệp PDF chuẩn y khoa (Ctrl+P)"
-          >
-            <Printer size={12} className="text-[#0D9488]" />
-            <span className="text-[11px]">In / Xuất PDF</span>
-          </button>
-
           {/* Nút Sao chép & Menu Xuất file */}
           <div className="relative flex-shrink-0">
             <div className="flex items-center bg-[#0284C7] text-white rounded-xl overflow-hidden shadow-tactile-doctor hover:bg-[#0369A1] transition-all whitespace-nowrap">
@@ -1635,7 +1609,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                 className="px-1.5 py-1 border-l border-white/20 hover:bg-[#0369A1]"
-                title="Tùy chọn tải về / In"
+                title="In / Lưu PDF, tải tệp"
               >
                 <ChevronDown size={11} />
               </button>
@@ -1657,6 +1631,16 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                   >
                     <Copy size={13} className="text-[#0284C7]" />
                     <span>Sao chép vào Clipboard</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsExportMenuOpen(false);
+                      window.print();
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                  >
+                    <Printer size={13} className="text-[#0D9488]" />
+                    <span>In / Lưu PDF</span>
                   </button>
                   <button
                     onClick={handleDownloadTxt}
