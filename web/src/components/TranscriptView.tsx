@@ -15,6 +15,8 @@ import {
   Edit3,
   AlertTriangle,
   Fingerprint,
+  Volume2,
+  Square,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { realAudioService } from "../services/realAudioService";
@@ -146,6 +148,35 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   >({});
   const [thongBaoDaGanNhanh, setThongBaoDaGanNhanh] = useState<string | null>(null);
   const [activeTurnIdx, setActiveTurnIdx] = useState<number | null>(null);
+
+  // Đọc to một lượt bằng giọng tiếng Việt có sẵn trong trình duyệt (chạy tại chỗ, không gửi dữ liệu đi),
+  // dùng cho ca chỉ có chữ như ca mẫu. Bác sĩ một giọng, bệnh nhân / người nhà giọng khác nếu máy có.
+  const [dangDocLuot, setDangDocLuot] = useState<number | null>(null);
+  const docLuot = (idx: number, noiDung: string, vai: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const tts = window.speechSynthesis;
+    tts.cancel();
+    if (dangDocLuot === idx) {
+      setDangDocLuot(null);
+      return;
+    }
+    const giongVi = tts.getVoices().filter((v) => v.lang.toLowerCase().startsWith("vi"));
+    const tot = [...giongVi].sort(
+      (a, b) => Number(/natural|online|neural/i.test(b.name)) - Number(/natural|online|neural/i.test(a.name)),
+    );
+    const laBacSi = vai === "Bác sĩ";
+    const giong =
+      tot.find((v) => (laBacSi ? /nam ?minh|male|nam\b/i : /hoai ?my|female|an\b/i).test(v.name)) || tot[laBacSi ? 0 : Math.min(1, tot.length - 1)];
+    const u = new SpeechSynthesisUtterance(noiDung);
+    u.lang = "vi-VN";
+    if (giong) u.voice = giong;
+    u.rate = 1.3;
+    u.onend = () => setDangDocLuot((c) => (c === idx ? null : c));
+    u.onerror = () => setDangDocLuot((c) => (c === idx ? null : c));
+    setDangDocLuot(idx);
+    tts.speak(u);
+  };
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
 
   /** Mẫu giọng Bác sĩ lưu 100% cục bộ trong localStorage (`meditrace_doctor_voiceprint_v1`). */
   const [mauGiongBs, setMauGiongBs] = useState<MauGiongBacSiCucBo | null>(() => docMauGiongCucBo());
@@ -935,6 +966,23 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
                           </span>
                         )}
                       </div>
+
+                      {/* Nghe lượt này: đọc to lời thoại (ca không có tệp ghi âm) */}
+                      {!audioUrl && text && (
+                        <button
+                          type="button"
+                          onClick={() => docLuot(idx, text, vai)}
+                          title={dangDocLuot === idx ? "Dừng đọc" : "Nghe lượt này (đọc to bằng giọng tiếng Việt của máy)"}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold flex-shrink-0 ${
+                            dangDocLuot === idx
+                              ? "bg-[#0284C7] text-white border-[#0284C7]"
+                              : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                          }`}
+                        >
+                          {dangDocLuot === idx ? <Square size={11} /> : <Volume2 size={12} />}
+                          {dangDocLuot === idx ? "Dừng" : "Nghe"}
+                        </button>
+                      )}
 
                       {/* Pill 1-click BS / BN / NN cho dòng chưa gán (hoặc hiện khi hover dòng đã gán để sửa nhanh) */}
                       <div
