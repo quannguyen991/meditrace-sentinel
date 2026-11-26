@@ -291,6 +291,10 @@ def pha_ref(a, tok, mau):
 def pha_train(a, tok, mau):
     import torch
     ref = _doc_jsonl(a.tep_ref)
+    if a.chi_cap_co_ref:
+        # rut gon khi gap han (26/11): chi train tren cac cap DA tinh ref, giu thu tu da tron
+        mau = [m for m in mau if m["khoa"] in ref]
+        print(f"[train] chi cap co ref: {len(mau)} cap", flush=True)
     thieu = [m["khoa"] for m in mau if m["khoa"] not in ref]
     if thieu:
         raise SystemExit(f"Thieu ref cho {len(thieu)} cap — chay --pha ref truoc.")
@@ -412,6 +416,8 @@ def main(argv=None):
     ap.add_argument("--luu-moi", type=int, default=50)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--tep-ket-qua", type=Path, default=None)
+    ap.add_argument("--chi-cap-co-ref", action="store_true",
+                    help="train chi tren cac cap da co trong ref_logp.jsonl")
     ap.add_argument("--khong-ghep-lo", dest="ghep_lo", action="store_false",
                     help="chay ban dung va ban sai lan luot thay vi mot lo 2 chuoi")
     a = ap.parse_args(argv)
