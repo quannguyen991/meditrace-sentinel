@@ -628,7 +628,11 @@ def _suy_trang_thai(m: Dict[str, Any]) -> str:
         return "bị thay thế"
     if raw in ("chưa giải quyết", "chua_giai_quyet", "unresolved", "conflict", "can_xac_nhan", "quarantine", "pending"):
         return "chưa giải quyết"
-    return "còn hiệu lực"
+    # "than" = trang thai "thang" (qua thang, khong can xac nhan) cua giao dien web (api-contract.ts)
+    if not raw or raw in ("còn hiệu lực", "con_hieu_luc", "than", "active", "current", "confirmed", "kept", "giu"):
+        return "còn hiệu lực"
+    # Gia tri la: KHONG ngam dinh la con hieu luc (fail-open) -> danh dau chua giai quyet
+    return "chưa giải quyết"
 
 
 def _suy_nguoi_noi(m: Dict[str, Any]) -> str:
@@ -639,13 +643,16 @@ def _suy_nguoi_noi(m: Dict[str, Any]) -> str:
         return "điều dưỡng"
     if raw in ("người nhà", "family_member", "family", "nguoi_nha"):
         return "người nhà"
-    if raw in ("người khác", "other", "nguoi_khac"):
-        from src.phat_bieu import NGUOI_NOI
-        return "người khác" if "người khác" in NGUOI_NOI else "bệnh nhân"
+    if raw in ("bệnh nhân", "benh_nhan", "patient", "bn", "người bệnh"):
+        return "bệnh nhân"
     sec_up = str(m.get("section") or m.get("muc") or "").strip().upper()
     if sec_up == "CHẨN ĐOÁN" and not raw:
         return "bác sĩ"
-    return "bệnh nhân"
+    if not raw:
+        # Khong khai bao nguoi noi: giu mac dinh cu (benh nhan) cho tuong thich dau vao web
+        return "bệnh nhân"
+    # Gia tri la ("người khác", "other" hay rac): ghi ro la nguoi khac, khong ngam dinh benh nhan
+    return "người khác"
 
 
 def tien_kiem_bhyt_tu_du_lieu(
