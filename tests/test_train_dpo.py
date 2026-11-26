@@ -75,6 +75,25 @@ def test_ghep_lo_cung_do_dai_mat_na_toan_mot():
     assert all(all(x == 1 for x in r) for r in mat)
 
 
+def _m(a, b):
+    return {"tot": ([0] * a, [0] * a), "xau": ([0] * b, [0] * b)}
+
+
+def test_nen_ghep_theo_nguong_va_tat():
+    assert td.nen_ghep({"nguong": 100}, _m(90, 100))
+    assert not td.nen_ghep({"nguong": 100}, _m(90, 101))
+    assert not td.nen_ghep(None, _m(1, 1))
+
+
+def test_ha_nguong_sau_khi_tran_chi_giam_khong_tang():
+    g = {"nguong": 4096}
+    td.ha_nguong(g, _m(3000, 3100))
+    assert g["nguong"] == 3099
+    assert not td.nen_ghep(g, _m(3100, 10))
+    td.ha_nguong(g, _m(3500, 3500))  # cap dai hon khong lam nguong tang lai
+    assert g["nguong"] == 3099
+
+
 def _L(lt, lx, rt, rx, beta, alpha, n):
     z = beta * ((lt - rt) - (lx - rx))
     return -math.log(1 / (1 + math.exp(-z))) + alpha * (-lt / n)

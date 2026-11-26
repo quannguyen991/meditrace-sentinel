@@ -176,10 +176,26 @@ def logp_lo(model, cac_mau, ma_dem, kich_thuoc_doan=512):
     return tong, (y != -100).sum(dim=1)
 
 
+def do_dai_cap(m) -> int:
+    return max(len(m["tot"][0]), len(m["xau"][0]))
+
+
+def nen_ghep(ghep, m) -> bool:
+    """`ghep` = None (tat) hoac {"nguong": so token}: chi ghep khi cap ngan hon nguong."""
+    return ghep is not None and do_dai_cap(m) <= ghep["nguong"]
+
+
+def ha_nguong(ghep, m):
+    """Cap nay tran bo nho -> moi cap dai bang no tro len se chay lan luot ngay tu dau
+    (chay thu 26/11: 60% cap tran o tran 0,70, moi lan tran phi mot luot chay)."""
+    ghep["nguong"] = min(ghep["nguong"], do_dai_cap(m) - 1)
+
+
 def _logp_cap(model, m, ma_dem, ghep):
-    """-> (lp_tot, lp_xau, n_tot). Ghep lo neu duoc; tran bo nho thi chay lan luot."""
+    """-> (lp_tot, lp_xau, n_tot). Ghep lo neu cap du ngan; tran bo nho thi ha nguong
+    va chay lan luot."""
     import torch
-    if ghep:
+    if nen_ghep(ghep, m):
         tran = False
         try:
             lp, n = logp_lo(model, [m["tot"], m["xau"]], ma_dem)
@@ -189,7 +205,8 @@ def _logp_cap(model, m, ma_dem, ghep):
         # chay lai NGOAI khoi except: trong khoi, traceback con giu tensor cua lan hong
         if tran:
             torch.cuda.empty_cache()
-            print(f"[tran bo nho] {m['khoa']} - chay lan luot", flush=True)
+            ha_nguong(ghep, m)
+            print(f"[tran bo nho] {m['khoa']} - chay lan luot, nguong ghep {ghep['nguong']}", flush=True)
     lt, nt = logp_chuoi(model, *m["tot"])
     lx, _ = logp_chuoi(model, *m["xau"])
     return lt, lx, nt
@@ -234,8 +251,8 @@ def pha_ref(a, tok, mau):
     model = _nap_mo_hinh(a.model, a.adapter_goc, huan_luyen=False)
     with open(a.tep_ref, "a", encoding="utf-8") as f, torch.no_grad():
         for i, m in enumerate(can, 1):
-            lt, lx, nt = _logp_cap(model, m, tok.pad_token_id, a.ghep_lo)
-            if i == 1 and a.ghep_lo:
+            lt, lx, nt = _logp_cap(model, m, tok.pad_token_id, a.ghep)
+            if i == 1 and nen_ghep(a.ghep, m):
                 # tu kiem: lo 2 chuoi phai cho cung log-prob voi chay lan luot
                 st, _ = logp_chuoi(model, *m["tot"])
                 sx, _ = logp_chuoi(model, *m["xau"])
@@ -326,7 +343,7 @@ def pha_danh_gia(a, tok, mau):
     theo = defaultdict(lambda: [0, 0])
     with torch.no_grad():
         for i, m in enumerate(mau, 1):
-            lt, lx, _ = _logp_cap(model, m, tok.pad_token_id, a.ghep_lo)
+            lt, lx, _ = _logp_cap(model, m, tok.pad_token_id, a.ghep)
             theo[m["loai"]][0] += int(lt.item() > lx.item())
             theo[m["loai"]][1] += 1
             if i % 25 == 0:
@@ -363,6 +380,7 @@ def main(argv=None):
                     help="chay ban dung va ban sai lan luot thay vi mot lo 2 chuoi")
     a = ap.parse_args(argv)
     a.tep_ref = a.thu_muc_ra / "ref_logp.jsonl"
+    a.ghep = {"nguong": a.do_dai} if a.ghep_lo else None
 
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained(a.model)
