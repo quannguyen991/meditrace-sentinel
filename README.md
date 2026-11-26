@@ -12,8 +12,11 @@
 
 1. Mở **https://meditrace-sentinel.meditrace.workers.dev** và đăng nhập bằng tài khoản dùng thử ghi trong hồ sơ dự thi. (Phần mềm yêu cầu tài khoản để bảo vệ dữ liệu của người dùng.)
 2. Ở **Trang chủ**, bấm nút **"Xem thử với ca mẫu"**. Mỗi lần bấm, phần mềm xoay vòng qua **3 ca khám đa người nói dựng sẵn** (*Bác sĩ – Mẹ – Bệnh nhi*, *Hai người bệnh cùng phòng trao đổi*, *Bác sĩ – Cụ ông 74 tuổi – Con gái*), có sẵn bản nháp và mục `Cần xác nhận`, không cần GPU và không phải chờ.
-3. Vào **"Bằng chứng hội thoại"** (màn **"Duyệt từng mệnh đề"**) hoặc ngăn duyệt ngay cạnh bản nháp. Bên trái là lời thoại, bên phải là từng thông tin được rút ra kèm chủ thể và đường nối căn cứ. Những thông tin chưa chắc nằm trong mục **Cần xác nhận** kèm lý do — hệ thống **khóa cứng không cho ký duyệt hoàn tất hồ sơ** cho tới khi bác sĩ xác nhận, sửa hoặc bỏ hết các mục này.
-4. Thử **ghi âm**: bấm "Bắt đầu ghi âm" và nói vài câu. Dải trên cùng có các vạch nhảy theo giọng để cho biết micrô đang thu.
+3. Bấm vào một dòng trong bản nháp để mở **ngăn duyệt** ngay bên cạnh, hoặc bấm nút xanh **"Duyệt từng mệnh đề"** để sang màn duyệt đầy đủ. Bên trái là lời thoại, bên phải là từng thông tin được rút ra kèm chủ thể và đường nối căn cứ. Những thông tin chưa chắc nằm trong mục **Cần xác nhận** kèm lý do — hệ thống **khóa cứng không cho ký duyệt hoàn tất hồ sơ** cho tới khi bác sĩ xác nhận, sửa hoặc bỏ hết các mục này.
+4. Thử **ghi âm**: bấm "Bắt đầu ghi âm" và nói vài câu, hoặc "Tải tệp âm thanh". Với ca có ghi âm, mỗi mệnh đề có nút **"Nghe lại"** phát đúng đoạn ghi âm gốc làm căn cứ. Ca mẫu chỉ có chữ, nên mỗi lượt thoại có nút **"Nghe"** đọc to bằng giọng tiếng Việt của trình duyệt (nghe tự nhiên nhất trên Microsoft Edge).
+5. Các công cụ lâm sàng (tiền kiểm BHYT/ICD-10, đơn thuốc TT26/DDI, cam đoan thủ thuật, đi buồng, SBAR, chép sang HIS, tờ dặn dò kèm mã QR cho người bệnh) nằm trong menu **"Công cụ"** trên thanh bản nháp.
+
+> **Báo cáo cải tiến theo góp ý của ban giám khảo (26/11/2026):** [`docs/bao-cao-cai-tien/BAO_CAO_CAI_TIEN_BGK_26-11-2026.pdf`](docs/bao-cao-cai-tien/BAO_CAO_CAI_TIEN_BGK_26-11-2026.pdf) (12 trang; có bản HTML cùng tên).
 
 Ghi chú: giao diện bằng tiếng Việt. Tạo một bản nháp mới bằng mô hình thật mất khoảng **3,5 phút** trên một card đồ hoạ phổ thông, nên nên dùng ca mẫu để xem nhanh.
 
@@ -152,7 +155,7 @@ Chi tiết: `docs/ket-qua/cay-loi.md`.
 | Đường dẫn | Nội dung |
 |---|---|
 | `src/` | Toàn bộ phần xử lý bằng Python (xem bảng các bước ở trên). |
-| `tests/` | **1.900 bài kiểm thử `pytest` qua**, 27 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 76 bài kiểm thử TypeScript (giao diện + máy chủ, chạy bằng `npm test`), đều qua. |
+| `tests/` | **1.942 bài kiểm thử `pytest` qua**, 27 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). 3 bài hỏng khi chạy cả bộ trên Windows không bật UTF-8 hoặc khi máy bận (2 bài in tiếng Việt qua dòng lệnh, 1 bài đo độ trễ < 50 ms); bật `PYTHONUTF8=1` và chạy riêng thì qua. Phần `web/` có 96 bài kiểm thử TypeScript (giao diện + máy chủ, chạy bằng `npm test`), đều qua. |
 | `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ, công cụ cấy lỗi (`cay_loi.py`, `cay_loi_kho.py`). |
 | `data/` | Chỉ có bảng tri thức thuốc, vân tay (mã băm) của các tập dữ liệu và manifest. Bản thân dữ liệu không nằm trong kho. |
 | `kaggle-kernels/` | Mỗi thư mục là một lượt huấn luyện hoặc chạy mô hình trên Kaggle (điền tên tài khoản Kaggle của bạn trong `kernel-metadata.json` nếu muốn chạy lại). |
@@ -191,7 +194,7 @@ Biến môi trường cần đặt từ 26/11/2026 (đủ danh sách ở `web/.e
 | `HOST`, `MEDITRACE_ALLOWED_HOSTS` | Chế độ dev chỉ nghe `127.0.0.1`; muốn mở qua đường hầm thì liệt kê tên miền. |
 | `MEDITRACE_NGOAI_TOI_DA_PHUT`, `MEDITRACE_NGOAI_TOI_DA_NGAY` | Giới hạn số lần gọi mô hình ngoài mỗi người dùng (mặc định 10/phút, 200/ngày). |
 
-Bản chạy thử công khai (từ 26/11/2026, thay Vercel): máy chủ web và dịch vụ Python chạy trên một máy có GPU, ra ngoài qua đường hầm Cloudflare; một Cloudflare Worker (`trien-khai/cloudflare/`) giữ địa chỉ cố định https://meditrace-sentinel.meditrace.workers.dev và chuyển tiếp tới đường hầm hiện tại (đọc từ kho KV, đổi bằng một lệnh `wrangler kv key put`).
+Bản chạy thử công khai (từ 26/11/2026, thay Vercel): máy chủ web và dịch vụ Python chạy trên một máy có GPU, ra ngoài qua đường hầm Cloudflare; một Cloudflare Worker (`trien-khai/cloudflare/`) giữ địa chỉ cố định https://meditrace-sentinel.meditrace.workers.dev và chuyển tiếp tới đường hầm hiện tại (đọc từ kho KV). Khi đường hầm đổi địa chỉ, máy chủ tự gửi địa chỉ mới lên Worker qua một đường riêng có mật mã chung (`cap-nhat-kv.ps1`), không cần khoá API Cloudflare. Trang chính không được trình duyệt giữ bản cũ; các tệp giao diện của bản trước được giữ lại khi triển khai, nên trang đang mở không bị lỗi khi máy chủ đổi bản.
 
 ## Quyền riêng tư và an toàn
 
