@@ -5,10 +5,12 @@ import { goiDichVu, traLoi } from "./dung-chung";
 export function dangKyCaKhamRoutes(app: express.Express) {
   // /api/ca-kham giữ lại tương thích ngược 100% cho giao diện hiện có; /api/kho/<tên> dùng cho các kho khác.
   app.get(["/api/ca-kham", "/api/kho/:ten"], (req, res) => {
+    const uid = req.nguoiDung?.id;
+    if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
     const ten = req.params.ten || "ca-kham";
     if (!laTenKho(ten)) return res.status(404).json({ error: `Không có kho ${ten}` });
     try {
-      res.set("Cache-Control", "no-store").json(docKho(req.nguoiDung!.id, ten));
+      res.set("Cache-Control", "no-store").json(docKho(uid, ten));
     } catch (err: any) {
       console.error(`[kho ${ten}] đọc lỗi:`, err);
       res.status(500).json({ error: `Không đọc được kho ${ten}` });
@@ -17,14 +19,17 @@ export function dangKyCaKhamRoutes(app: express.Express) {
 
   // Ghi cả danh sách: chỉ xoá ca trong `deletedIds`; có `baseUpdatedAt` thì ca nào đã mới hơn -> 409.
   app.put(["/api/ca-kham", "/api/kho/:ten"], (req, res) => {
+    const uid = req.nguoiDung?.id;
+    if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
     const ten = req.params.ten || "ca-kham";
     if (!laTenKho(ten)) return res.status(404).json({ error: `Không có kho ${ten}` });
-    const { sessions, savedAt, baseUpdatedAt, deletedIds } = req.body || {};
-    if (!Array.isArray(sessions)) return res.status(400).json({ error: "Thiếu danh sách" });
+    const { sessions, items, savedAt, baseUpdatedAt, deletedIds } = req.body || {};
+    const danhSach = Array.isArray(sessions) ? sessions : ten !== "ca-kham" && Array.isArray(items) ? items : null;
+    if (!danhSach) return res.status(400).json({ error: "Thiếu danh sách" });
     if (deletedIds !== undefined && !Array.isArray(deletedIds)) return res.status(400).json({ error: "deletedIds phải là mảng" });
     try {
-      const kq = ghiKho(req.nguoiDung!.id, ten, sessions, savedAt, { baseUpdatedAt, deletedIds });
-      res.json({ ok: true, count: sessions.length, ...kq });
+      const kq = ghiKho(uid, ten, danhSach, savedAt, { baseUpdatedAt, deletedIds });
+      res.json({ ok: true, count: danhSach.length, ...kq });
     } catch (err: any) {
       const status = Number(err?.status || err?.ma) || 500;
       if (status >= 500) console.error(`[kho ${ten}] ghi lỗi:`, err);

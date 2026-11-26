@@ -56,10 +56,10 @@ CREATE TABLE IF NOT EXISTS ca_kham (
   PRIMARY KEY (nguoi_dung_id, id)
 );
 
--- Các danh sách nhỏ khác của từng người: lịch sử tra cứu, mẫu văn bản tự tạo.
+-- Các danh sách nhỏ khác của từng người: lịch sử tra cứu, mẫu văn bản tự tạo, hồ sơ bệnh nhân, nhiệm vụ lâm sàng.
 CREATE TABLE IF NOT EXISTS muc_kho (
   nguoi_dung_id  INTEGER NOT NULL REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-  kho            TEXT    NOT NULL CHECK (kho IN ('tra-cuu', 'mau-van-ban')),
+  kho            TEXT    NOT NULL CHECK (kho IN ('tra-cuu', 'mau-van-ban', 'benh-nhan', 'nhiem-vu')),
   thu_tu         INTEGER NOT NULL,
   du_lieu        TEXT    NOT NULL CHECK (json_valid(du_lieu)),
   PRIMARY KEY (nguoi_dung_id, kho, thu_tu)

@@ -10,7 +10,9 @@ Nhiệm vụ Phase 3 (Trục 1):
 - Tối ưu hóa bộ nhớ CPU INT8: Toàn bộ 600 khuôn và danh mục thuốc chỉ tốn < 65 MB RAM, tra cứu O(1).
 """
 from __future__ import annotations
+import csv
 from dataclasses import dataclass, field
+import io
 import re
 import threading
 import unicodedata
@@ -202,6 +204,30 @@ class ContextualPrefixTrie600:
         self._thu_tu_lam_sang_theo_he: Dict[str, List[str]] = {he: [] for he in HE_CO_QUAN_CHUAN}
         self._thuoc_theo_he: Dict[str, List[str]] = {he: [] for he in HE_CO_QUAN_CHUAN}
         self._tat_ca_thuoc: List[str] = []
+        self._tap_thuoc_hop_le_low: Set[str] = set()
+        self._bang_g2p_thuoc: Dict[str, str] = {
+            "ooc men tin": "Augmentin",
+            "oc mang tin": "Augmentin",
+            "oóc măng tin": "Augmentin",
+            "am lo di pin": "Amlodipin",
+            "am lô đi pin": "Amlodipin",
+            "met pho min": "Metformin",
+            "méc pho min": "Metformin",
+            "pa ra se ta mol": "Paracetamol",
+            "pa ra xê ta môn": "Paracetamol",
+            "a moc xi xi lin": "Amoxicillin",
+            "a móc xi xi lin": "Amoxicillin",
+            "a móc xi lin": "Amoxicillin",
+            "ô mê pra zôn": "Omeprazol",
+            "o me pra zon": "Omeprazol",
+            "lo sa tan": "Losartan",
+            "lô sa tan": "Losartan",
+            "a to va ta tin": "Atorvastatin",
+            "clô pi đô gren": "Clopidogrel",
+            "xê phi xim": "Cefixim",
+            "a zi thrô mi xin": "Azithromycin",
+            "war pha rin": "Warfarin",
+        }
 
     def lay_thuc_the_theo_he_co_quan(self, he_co_quan: str) -> Set[str]:
         """Tra cứu tập thực thể lâm sàng của hệ cơ quan (chấp nhận cả tiếng Việt có dấu lẫn snake_case)."""
@@ -259,6 +285,12 @@ class ContextualPrefixTrie600:
 
         ten_sach = (canonical_name or "").strip()
         if entity_type == "thuoc":
+            if ten_sach:
+                self._tap_thuoc_hop_le_low.add(ten_sach.lower())
+                if ten_sach.endswith("e") and len(ten_sach) > 5:
+                    self._tap_thuoc_hop_le_low.add(ten_sach[:-1].lower())
+                else:
+                    self._tap_thuoc_hop_le_low.add((ten_sach + "e").lower())
             if ten_sach and ten_sach.lower() not in {x.lower() for x in self._tat_ca_thuoc}:
                 self._tat_ca_thuoc.append(ten_sach)
             if he_chuan:
@@ -314,13 +346,180 @@ class ContextualPrefixTrie600:
 
     def nap_duoc_thu_va_g2p(self, danh_muc_thuoc: Dict[str, List[str]]) -> None:
         """Nạp danh mục thuốc kèm biến thể ngữ âm G2P tiếng Việt."""
+        try:
+            from src import tri_thuc_thuoc as _ttt
+            tap_ten_chinh_thuc = set(_ttt.tat_ca_ten())
+        except Exception:
+            tap_ten_chinh_thuc = set()
+
         for ten_chuan, bien_the in danh_muc_thuoc.items():
             eid = f"DRUG_{chuan_hoa_am_tiet(ten_chuan).replace(' ', '_')}"
             # Chèn tên chuẩn quốc tế Latin
             self.chen_cum_tu(ten_chuan, eid, ten_chuan, entity_type="thuoc")
             # Chèn các biến thể ngữ âm bác sĩ/bệnh nhân đọc
             for bt in bien_the:
+                bt_sach = chuan_hoa_am_tiet(bt)
+                if not bt_sach:
+                    continue
                 self.chen_cum_tu(bt, eid, ten_chuan, entity_type="thuoc")
+                if bt_sach in tap_ten_chinh_thuc:
+                    self._tap_thuoc_hop_le_low.add(bt_sach)
+                elif (" " in bt_sach or "-" in bt_sach) and bt_sach != ten_chuan.lower():
+                    self._bang_g2p_thuoc[bt_sach] = ten_chuan
+                    self._bang_g2p_thuoc[bt_sach.replace("-", " ")] = ten_chuan
+
+    def nap_danh_muc_trung_thau_csv(self, noi_dung_csv: str) -> int:
+        """Nạp danh mục thuốc trúng thầu BHYT của bệnh viện từ nội dung CSV/TSV.
+
+        Hỗ trợ linh hoạt:
+          - 4+ cột: `hoat_chat,biet_duoc,ham_luong,he_co_quan`
+          - 2-3 cột: `hoat_chat,biet_duoc[,ham_luong]`
+          - 1 cột: danh sách tên thuốc / hoạt chất
+        Chèn cả hoạt chất và biệt dược vào Trie (kèm liên kết chuyên khoa nếu có) và trả về
+        tổng số mục từ thuốc đã nạp thành công.
+        """
+        if not noi_dung_csv or not str(noi_dung_csv).strip():
+            return 0
+
+        van_ban = str(noi_dung_csv).lstrip("\ufeff").strip()
+        cac_dong_tho = [
+            d for d in van_ban.splitlines()
+            if d.strip() and not d.strip().startswith("#")
+        ]
+        if not cac_dong_tho:
+            return 0
+
+        mau_dau = cac_dong_tho[0]
+        if "\t" in mau_dau:
+            delim = "\t"
+        elif ";" in mau_dau and "," not in mau_dau:
+            delim = ";"
+        else:
+            delim = ","
+
+        tu_khoa_tieu_de = {
+            "hoat_chat", "ten_hoat_chat", "hoạt chất", "tên hoạt chất", "active_ingredient",
+            "biet_duoc", "ten_biet_duoc", "biệt dược", "tên thuốc", "ten_thuoc", "brand_name",
+            "stt", "ma_thuoc", "mã thuốc",
+        }
+
+        so_muc_da_nap = 0
+        reader = csv.reader(io.StringIO("\n".join(cac_dong_tho)), delimiter=delim)
+        for idx_dong, cot in enumerate(reader):
+            cot_sach = [str(c or "").strip() for c in cot]
+            if not any(cot_sach):
+                continue
+            if idx_dong == 0 and any(
+                c.lower() in tu_khoa_tieu_de or _bo_dau_viet(c) in tu_khoa_tieu_de
+                for c in cot_sach[:2] if c
+            ):
+                continue
+
+            hoat_chat = cot_sach[0] if len(cot_sach) >= 1 else ""
+            biet_duoc = cot_sach[1] if len(cot_sach) >= 2 else ""
+            # Cột 3 là hàm lượng (nếu có), cột 4 là hệ cơ quan (nếu có)
+            he_raw = cot_sach[3] if len(cot_sach) >= 4 and cot_sach[3] else None
+            he_chuan = chuan_hoa_he_co_quan(he_raw) if he_raw else None
+
+            # Làm sạch hàm lượng dính đuôi nếu file 1 cột ghi "Cefoperazon 1g"
+            def _tach_ten_thuoc(s: str) -> str:
+                s_clean = re.sub(r"\s+\d+(?:[.,]\d+)?\s*(?:mg|g|mcg|ml|iu|%)\b.*$", "", s.strip(), flags=re.I)
+                return s_clean.strip() or s.strip()
+
+            hc_ten = _tach_ten_thuoc(hoat_chat) if hoat_chat else ""
+            bd_ten = _tach_ten_thuoc(biet_duoc) if biet_duoc else ""
+
+            if hc_ten:
+                eid_hc = f"DRUG_CSV_{_bo_dau_viet(hc_ten)}"
+                self.chen_cum_tu(hc_ten, eid_hc, hc_ten, entity_type="thuoc", he_co_quan=he_chuan)
+                so_muc_da_nap += 1
+
+            if bd_ten and bd_ten.lower() != hc_ten.lower():
+                eid_bd = f"DRUG_CSV_{_bo_dau_viet(bd_ten)}"
+                self.chen_cum_tu(bd_ten, eid_bd, bd_ten, entity_type="thuoc", he_co_quan=he_chuan)
+                so_muc_da_nap += 1
+
+        return so_muc_da_nap
+
+    def quet_goi_y_sua_am_vi(self, van_ban: str) -> List[Dict[str, str]]:
+        """Quét văn bản gỡ băng ASR để tìm các biến thể phiên âm G2P hoặc lỗi chính tả gần âm vị
+        của tên thuốc — TUYỆT ĐỐI KHÔNG tự sửa văn bản gốc, chỉ trả danh sách gợi ý cho bác sĩ duyệt:
+            `[{"tu_goc": ..., "goi_y_chuan": ..., "loai": "thuoc"}]`
+        """
+        if not van_ban or not str(van_ban).strip():
+            return []
+
+        vb = unicodedata.normalize("NFC", str(van_ban))
+        vb_low = vb.lower()
+        goi_y: List[Dict[str, str]] = []
+        da_ghi: Set[str] = set()
+
+        # 1. Quét các cụm biến thể ngữ âm đa âm tiết (G2P aliases)
+        for cum_am_vi, ten_chuan in sorted(self._bang_g2p_thuoc.items(), key=lambda kv: -len(kv[0])):
+            if not cum_am_vi or cum_am_vi == ten_chuan.lower():
+                continue
+            mau = re.compile(rf"(?i)(?<![\wÀ-ỹ]){re.escape(cum_am_vi)}(?![\wÀ-ỹ])")
+            for m in mau.finditer(vb):
+                tu_goc = m.group(0)
+                if tu_goc.lower() not in da_ghi and tu_goc.lower() != ten_chuan.lower():
+                    da_ghi.add(tu_goc.lower())
+                    goi_y.append({
+                        "tu_goc": tu_goc,
+                        "goi_y_chuan": ten_chuan,
+                        "loai": "thuoc",
+                    })
+
+        # 2. Quét các từ đơn Latin dài >= 6 ký tự bị sai chính tả 1-2 ký tự so với dược thư
+        tu_tieng_viet_khong_dau = {
+            "nhung", "khong", "truoc", "chinh", "thuong", "chuyen", "nghieng",
+            "phuong", "nguyen", "truyen", "khoang", "chuong", "duong", "huong",
+            "luong", "tuong", "xuong", "nhiễm", "kháng", "thuốc", "viêm",
+        }
+
+        def _levenshtein_nho(a: str, b: str, gioi_han: int = 2) -> int:
+            if abs(len(a) - len(b)) > gioi_han:
+                return gioi_han + 1
+            dp = list(range(len(b) + 1))
+            for i, ca in enumerate(a, start=1):
+                dp_moi = [i]
+                nho_nhat_hang = i
+                for j, cb in enumerate(b, start=1):
+                    chi_phi = 0 if ca == cb else 1
+                    val = min(dp[j] + 1, dp_moi[j - 1] + 1, dp[j - 1] + chi_phi)
+                    dp_moi.append(val)
+                    if val < nho_nhat_hang:
+                        nho_nhat_hang = val
+                if nho_nhat_hang > gioi_han:
+                    return gioi_han + 1
+                dp = dp_moi
+            return dp[-1]
+
+        ds_ung_vien_thuoc = [t for t in self._tat_ca_thuoc if len(t) >= 6 and " " not in t]
+        for m_tok in re.finditer(r"(?<![\wÀ-ỹ])[A-Za-z]{6,}(?![\wÀ-ỹ])", vb):
+            tu_goc = m_tok.group(0)
+            tu_low = tu_goc.lower()
+            if tu_low in da_ghi or tu_low in self._tap_thuoc_hop_le_low or tu_low in tu_tieng_viet_khong_dau:
+                continue
+            gioi_han_kc = 1 if len(tu_low) <= 8 else 2
+            tot_nhat: Optional[Tuple[int, str]] = None
+            for th in ds_ung_vien_thuoc:
+                th_low = th.lower()
+                # Giữ 2 ký tự mở đầu trùng nhau để tránh gợi ý nhiễu từ thông thường
+                if tu_low[:2] != th_low[:2]:
+                    continue
+                kc = _levenshtein_nho(tu_low, th_low, gioi_han=gioi_han_kc)
+                if 1 <= kc <= gioi_han_kc:
+                    if tot_nhat is None or kc < tot_nhat[0]:
+                        tot_nhat = (kc, th)
+            if tot_nhat is not None:
+                da_ghi.add(tu_low)
+                goi_y.append({
+                    "tu_goc": tu_goc,
+                    "goi_y_chuan": tot_nhat[1],
+                    "loai": "thuoc",
+                })
+
+        return goi_y
 
     def buoc_trie(
         self,

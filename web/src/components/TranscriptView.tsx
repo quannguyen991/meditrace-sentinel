@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Copy,
   Trash2,
@@ -8,20 +8,79 @@ import {
   Mic,
   Upload,
   Play,
-  Activity,
-  User,
   Sparkles,
   Loader2,
   FileAudio,
   Download,
   Edit3,
-  ChevronDown,
   AlertTriangle,
+  Fingerprint,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { realAudioService } from "../services/realAudioService";
-import { cacNguoiNoiChuaGan, dongTuDoan, ganVaiNguoiNoi, moTaTach, soNguoiNoiLonNhat } from "../lib/nguoiNoi";
+import {
+  apDungVaiGoiY,
+  cacNguoiNoiChuaGan,
+  dongTuDoan,
+  ganVaiNguoiNoi,
+  goiYVaiTuDoan,
+  goiYVaiTuVanBanLuot,
+  moTaTach,
+  soNguoiNoiLonNhat,
+  type VaiChuan,
+} from "../lib/nguoiNoi";
 import { quetRadarCoDo } from "../lib/radarCoDo";
+
+const KHOA_MAU_GIONG_BS = "meditrace_doctor_voiceprint_v1";
+
+interface MauGiongBacSiCucBo {
+  version: 1;
+  enrolledAt: string;
+  f0Hz: number;
+  spectralBands: number[];
+  sampleSeconds: number;
+}
+
+function docMauGiongCucBo(): MauGiongBacSiCucBo | null {
+  try {
+    const raw = localStorage.getItem(KHOA_MAU_GIONG_BS);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.version === 1 && typeof parsed.f0Hz === "number") {
+      return parsed as MauGiongBacSiCucBo;
+    }
+  } catch {}
+  return null;
+}
+
+/** Ước lượng tần số cơ bản F0 (Hz) bằng tự tương quan miền thời gian ngay trong RAM trình duyệt. */
+function uocLuongPitchTuKhung(buf: Float32Array, sampleRate: number): number | null {
+  let rms = 0;
+  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / buf.length);
+  if (rms < 0.012) return null;
+
+  const minLag = Math.floor(sampleRate / 340);
+  const maxLag = Math.min(buf.length - 1, Math.floor(sampleRate / 75));
+  let bestLag = -1;
+  let bestCorr = 0;
+
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let corr = 0;
+    for (let i = 0; i < buf.length - lag; i++) {
+      corr += buf[i] * buf[i + lag];
+    }
+    corr /= buf.length - lag;
+    if (corr > bestCorr) {
+      bestCorr = corr;
+      bestLag = lag;
+    }
+  }
+
+  if (bestLag <= 0 || bestCorr < 0.0002) return null;
+  const hz = sampleRate / bestLag;
+  return hz >= 75 && hz <= 340 ? hz : null;
+}
 
 interface TranscriptViewProps {
   transcript: string;
@@ -38,19 +97,21 @@ interface TranscriptViewProps {
 
 const VAI_RE = /^\s*(bác sĩ|bệnh nhân|người nhà|chưa rõ vai|người nói\s+\d+|doctor|patient|bs|bn|speaker_\d+)\s*:/i;
 const THU_TU_VAI = ["Bác sĩ", "Bệnh nhân", "Người nhà", "Chưa rõ vai"];
-const VAI_GAN = ["Bác sĩ", "Bệnh nhân", "Người nhà"];
+const VAI_GAN: VaiChuan[] = ["Bác sĩ", "Bệnh nhân", "Người nhà"];
 const KIEU_VAI: Record<string, { tat: string; mau: string }> = {
   "Bác sĩ": { tat: "BS", mau: "bg-[#E0F2FE] text-[#0369A1] border-[#BAE6FD]" },
   "Bệnh nhân": { tat: "BN", mau: "bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]" },
   "Người nhà": { tat: "NN", mau: "bg-[#F5F3FF] text-[#6D28D9] border-[#DDD6FE]" },
   "Chưa rõ vai": { tat: "?", mau: "bg-[#FEF6E0] text-[#A16207] border-[#F2DFA8]" },
 };
+
 /** "Người nói N" (máy tách theo giọng, chưa gán vai): cùng màu chờ với "Chưa rõ vai". */
 function kieuVai(vai: string) {
   const m = vai.match(/^Người nói (\d+)$/);
   if (m) return { tat: `Nói ${m[1]}`, mau: KIEU_VAI["Chưa rõ vai"].mau };
   return KIEU_VAI[vai] || KIEU_VAI["Chưa rõ vai"];
 }
+
 function chuanVai(x: string) {
   const t = x.trim().toLowerCase();
   if (t === "bác sĩ" || t === "doctor" || t === "bs") return "Bác sĩ";
@@ -76,16 +137,211 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   const [liked, setLiked] = useState<boolean | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  /** Đổi vai của một lượt: sửa đúng tiền tố "Vai:" của dòng đó trong lời thoại. */
+  /** Gợi ý vai từ `/api/transcribe` (ưu tiên) kết hợp heuristic tại chỗ (Boost 1). */
+  const [suggestedRolesByTurn, setSuggestedRolesByTurn] = useState<
+    Record<number, { vai: VaiChuan; lyDo?: string | null }>
+  >({});
+  const [thongBaoDaGanNhanh, setThongBaoDaGanNhanh] = useState<string | null>(null);
+  const [activeTurnIdx, setActiveTurnIdx] = useState<number | null>(null);
+
+  /** Mẫu giọng Bác sĩ lưu 100% cục bộ trong localStorage (`meditrace_doctor_voiceprint_v1`). */
+  const [mauGiongBs, setMauGiongBs] = useState<MauGiongBacSiCucBo | null>(() => docMauGiongCucBo());
+  const [dangThuMauGiong, setDangThuMauGiong] = useState(false);
+  const [demNguocMauGiong, setDemNguocMauGiong] = useState(0);
+  const [loiMauGiong, setLoiMauGiong] = useState<string | null>(null);
+  const huyThuMauRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => {
+      huyThuMauRef.current?.();
+    };
+  }, []);
+
+  /** Thu mẫu giọng bác sĩ trong 5 giây bằng Web Audio API cục bộ (0 byte gửi ra ngoài). */
+  const thuMauGiongBacSi5Giay = async () => {
+    if (dangThuMauGiong) {
+      huyThuMauRef.current?.();
+      return;
+    }
+    setLoiMauGiong(null);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setLoiMauGiong("Trình duyệt không hỗ trợ truy cập micrô cục bộ.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx: AudioContext = new AudioCtx();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      const timeBuf = new Float32Array(analyser.fftSize);
+      const freqBuf = new Uint8Array(analyser.frequencyBinCount);
+      const dsPitch: number[] = [];
+      const tongBands = new Array(8).fill(0);
+      let soKhung = 0;
+
+      setDangThuMauGiong(true);
+      setDemNguocMauGiong(5);
+
+      const sampleTimer = window.setInterval(() => {
+        analyser.getFloatTimeDomainData(timeBuf);
+        const f0 = uocLuongPitchTuKhung(timeBuf, ctx.sampleRate);
+        if (f0 !== null) dsPitch.push(f0);
+
+        analyser.getByteFrequencyData(freqBuf);
+        const kichThuocNhom = Math.max(1, Math.floor(freqBuf.length / 8));
+        for (let b = 0; b < 8; b++) {
+          let sum = 0;
+          for (let j = 0; j < kichThuocNhom; j++) {
+            sum += freqBuf[b * kichThuocNhom + j] || 0;
+          }
+          tongBands[b] += sum / kichThuocNhom;
+        }
+        soKhung += 1;
+      }, 120);
+
+      const countdownTimer = window.setInterval(() => {
+        setDemNguocMauGiong((c) => Math.max(0, c - 1));
+      }, 1000);
+
+      const donDep = () => {
+        window.clearInterval(sampleTimer);
+        window.clearInterval(countdownTimer);
+        stream.getTracks().forEach((t) => t.stop());
+        ctx.close().catch(() => {});
+        setDangThuMauGiong(false);
+        setDemNguocMauGiong(0);
+        huyThuMauRef.current = null;
+      };
+
+      const finishTimeout = window.setTimeout(() => {
+        donDep();
+        const trungViF0 =
+          dsPitch.length > 0
+            ? Math.round([...dsPitch].sort((a, b) => a - b)[Math.floor(dsPitch.length / 2)])
+            : 145;
+        const spectralBands = tongBands.map((v) => Math.round((v / Math.max(1, soKhung)) * 10) / 10);
+        const hoSoMoi: MauGiongBacSiCucBo = {
+          version: 1,
+          enrolledAt: new Date().toISOString(),
+          f0Hz: trungViF0,
+          spectralBands,
+          sampleSeconds: 5,
+        };
+        try {
+          localStorage.setItem(KHOA_MAU_GIONG_BS, JSON.stringify(hoSoMoi));
+        } catch {}
+        setMauGiongBs(hoSoMoi);
+      }, 5000);
+
+      huyThuMauRef.current = () => {
+        window.clearTimeout(finishTimeout);
+        donDep();
+      };
+    } catch (err: any) {
+      setDangThuMauGiong(false);
+      setLoiMauGiong(err?.message || "Không mở được micrô để lấy mẫu giọng tại máy.");
+    }
+  };
+
+  /** Gán trực tiếp một vai cụ thể cho một lượt `idx` (0-based trên các dòng không rỗng). */
+  const ganVaiMotDong = useCallback(
+    (idx: number, vaiMoi: string) => {
+      let dem = -1;
+      const cacDong = transcript.split("\n").map((dong) => {
+        if (!dong.trim()) return dong;
+        dem += 1;
+        if (dem !== idx) return dong;
+        const m = dong.match(VAI_RE);
+        const noiDung = m ? dong.slice(m[0].length).trim() : dong.trim();
+        return `${vaiMoi}: ${noiDung}`;
+      });
+      onUpdateTranscript(cacDong.join("\n"));
+    },
+    [transcript, onUpdateTranscript]
+  );
+
+  /** Đổi vai vòng tròn của một lượt: Bác sĩ → Bệnh nhân → Người nhà → Chưa rõ vai. */
   const doiVai = (idx: number) => {
     const lines = transcript.split("\n").filter((l) => l.trim().length > 0);
+    if (!lines[idx]) return;
     const m = lines[idx].match(VAI_RE);
     const cu = m ? chuanVai(m[1]) : "Chưa rõ vai";
     const moi = THU_TU_VAI[(THU_TU_VAI.indexOf(cu) + 1) % THU_TU_VAI.length];
-    const noiDung = m ? lines[idx].slice(m[0].length).trim() : lines[idx].trim();
-    lines[idx] = `${moi}: ${noiDung}`;
-    onUpdateTranscript(lines.join("\n"));
+    ganVaiMotDong(idx, moi);
   };
+
+  // Phím tắt 1 (Bác sĩ) / 2 (Bệnh nhân) / 3 (Người nhà) khi trỏ chuột hoặc focus vào một thẻ lượt thoại
+  useEffect(() => {
+    if (isEditing || activeTurnIdx === null) return;
+    const xuLyPhim = (e: KeyboardEvent) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName?.toUpperCase();
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el?.isContentEditable) return;
+
+      if (e.key === "1") {
+        e.preventDefault();
+        ganVaiMotDong(activeTurnIdx, "Bác sĩ");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        ganVaiMotDong(activeTurnIdx, "Bệnh nhân");
+      } else if (e.key === "3") {
+        e.preventDefault();
+        ganVaiMotDong(activeTurnIdx, "Người nhà");
+      }
+    };
+    window.addEventListener("keydown", xuLyPhim);
+    return () => window.removeEventListener("keydown", xuLyPhim);
+  }, [activeTurnIdx, isEditing, ganVaiMotDong]);
+
+  // Tổng hợp gợi ý vai khả dụng trên các dòng đang Chưa rõ vai / Người nói N
+  const thongKeGoiY = useMemo(() => {
+    const lines = (transcript || "").split("\n").filter((l) => l.trim().length > 0);
+    const mapTheoLuot: Record<number, VaiChuan> = {};
+    const lyDoTheoLuot: Record<number, string> = {};
+    let soLuotChuaGan = 0;
+    let soGoiYSanCo = 0;
+
+    lines.forEach((line, idx) => {
+      const luot = idx + 1;
+      const m = line.match(VAI_RE);
+      const vai = m ? chuanVai(m[1]) : "Chưa rõ vai";
+      if (VAI_GAN.includes(vai as VaiChuan)) return;
+      soLuotChuaGan += 1;
+
+      const tuServer = suggestedRolesByTurn[luot];
+      if (tuServer?.vai) {
+        mapTheoLuot[luot] = tuServer.vai;
+        if (tuServer.lyDo) lyDoTheoLuot[luot] = tuServer.lyDo;
+        soGoiYSanCo += 1;
+        return;
+      }
+      const tuHeuristic = goiYVaiTuVanBanLuot(line);
+      if (tuHeuristic.vaiGoiY) {
+        mapTheoLuot[luot] = tuHeuristic.vaiGoiY;
+        if (tuHeuristic.lyDo) lyDoTheoLuot[luot] = tuHeuristic.lyDo;
+        soGoiYSanCo += 1;
+      }
+    });
+
+    return { soLuotChuaGan, soGoiYSanCo, mapTheoLuot, lyDoTheoLuot };
+  }, [transcript, suggestedRolesByTurn]);
+
+  const handleApDungGoiYMotCham = () => {
+    const { transcriptMoi, soDongDaGan } = apDungVaiGoiY(transcript, thongKeGoiY.mapTheoLuot);
+    if (soDongDaGan > 0) {
+      onUpdateTranscript(transcriptMoi);
+      setThongBaoDaGanNhanh(
+        `Đã điền nhanh ${soDongDaGan} vai gợi ý. Bác sĩ chỉ cần đọc lướt kiểm lại và bấm BS/BN/NN (hoặc phím 1/2/3) ở dòng ngoại lệ.`
+      );
+    }
+  };
+
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   /** Câu báo về tách người nói của lần chép gần nhất (đã tách mấy người, hay vì sao chưa). */
@@ -132,19 +388,21 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   const handleClear = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa toàn bộ bản ghi lời thoại này không?")) {
       onUpdateTranscript("");
+      setSuggestedRolesByTurn({});
+      setThongBaoDaGanNhanh(null);
       setInterimText("");
     }
   };
 
-  // Upload tệp âm thanh thực tế và chuyển thể bằng Gemini AI
+  // Upload tệp âm thanh thực tế và chuyển thể bằng PhoWhisper tại chỗ
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset input
     e.target.value = "";
     setIsUploading(true);
     setUploadError(null);
+    setThongBaoDaGanNhanh(null);
 
     try {
       const reader = new FileReader();
@@ -179,11 +437,20 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
       const data = await response.json();
       const doan: any[] = data.segments || [];
       if (!doan.length) throw new Error("PhoWhisper không nghe ra câu nào trong tệp này.");
-      // Mỗi lượt một dòng. Máy đã tách người nói thì dòng mang nhãn "Người nói N", chưa tách thì
-      // "Chưa rõ vai" — vai Bác sĩ / Bệnh nhân / Người nhà luôn do người dùng gán.
-      // Không chèn dòng tiêu đề: dòng nào trong lời thoại cũng bị tính là một lượt nói.
-      const moi = dongTuDoan(doan, data.diarization, soNguoiNoiLonNhat(transcript)).join("\n");
+
       const offsetLuot = transcript ? transcript.split("\n").filter((l) => l.trim()).length : 0;
+      const dsGoiY = goiYVaiTuDoan(doan);
+      setSuggestedRolesByTurn((prev) => {
+        const tiep = { ...prev };
+        for (const g of dsGoiY) {
+          if (g.vaiGoiY) {
+            tiep[offsetLuot + g.luot] = { vai: g.vaiGoiY, lyDo: g.lyDo };
+          }
+        }
+        return tiep;
+      });
+
+      const moi = dongTuDoan(doan, data.diarization, soNguoiNoiLonNhat(transcript)).join("\n");
       if (onUpdateSegments && Array.isArray(data.transcriptSegments) && data.transcriptSegments.length > 0) {
         onUpdateSegments(
           data.transcriptSegments.map((s: any, idx: number) => ({
@@ -202,7 +469,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
     }
   };
 
-  // Trạng thái Chưa ghi nhận cuộc hội thoại (Empty State tinh gọn - ít chữ)
+  // Trạng thái Chưa ghi nhận cuộc hội thoại
   if (!transcript || transcript.trim().length === 0) {
     return (
       <motion.div
@@ -221,7 +488,6 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
             Chưa có bản ghi âm
           </h2>
 
-          {/* Nút hành động tinh gọn với hiệu ứng nổi khối */}
           <div className="w-full flex flex-col gap-2.5">
             {onStartRecording && (
               <button
@@ -252,15 +518,36 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               )}
               <span>{isUploading ? "Đang xử lý..." : "Tải tệp âm thanh"}</span>
             </button>
+
+            <button
+              type="button"
+              onClick={thuMauGiongBacSi5Giay}
+              className={`w-full py-2 px-3 rounded-xl border transition-all flex items-center justify-center gap-1.5 text-[11.5px] font-medium ${
+                dangThuMauGiong
+                  ? "bg-amber-50 border-amber-300 text-amber-800 animate-pulse"
+                  : mauGiongBs
+                  ? "bg-[#F0FDF4] border-[#BBF7D0] text-[#15803D]"
+                  : "bg-white border-[#CCE3F0] text-[#0C4A6E] hover:bg-[#F0F9FF]"
+              }`}
+              title="Lưu đặc trưng tần số giọng bác sĩ cục bộ trên trình duyệt (0 byte gửi ra ngoài)"
+            >
+              <Fingerprint size={13} />
+              <span>
+                {dangThuMauGiong
+                  ? `Đang lấy mẫu giọng tại máy (${demNguocMauGiong}s)...`
+                  : mauGiongBs
+                  ? `Mẫu giọng Bác sĩ tại máy (F0 ~${mauGiongBs.f0Hz}Hz · Thu lại 5s)`
+                  : "Mẫu giọng Bác sĩ tại máy (5s)"}
+              </span>
+            </button>
           </div>
 
-          {uploadError && (
+          {(uploadError || loiMauGiong) && (
             <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
-              {uploadError}
+              {uploadError || loiMauGiong}
             </div>
           )}
 
-          {/* Ca đã chạy trước — lấy từ dịch vụ tại chỗ, có nhãn nguồn rõ ràng */}
           {onLoadSample && (
             <div className="mt-6 flex items-center gap-2 text-[11px] text-[#64748B]">
               <button
@@ -284,8 +571,8 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
     >
       <div>
         {/* Thao tác nhanh phía trên */}
-        <div className="flex items-center justify-between mb-4 border-b border-[#CCE3F0] pb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-[#CCE3F0] pb-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-[#0F172A]">
               Biên bản hội thoại khám bệnh
             </span>
@@ -300,7 +587,30 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Mẫu giọng Bác sĩ cục bộ tại máy (5s - 0 byte gửi ra ngoài) */}
+            <button
+              type="button"
+              onClick={thuMauGiongBacSi5Giay}
+              className={`text-xs px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1.5 font-medium cursor-pointer ${
+                dangThuMauGiong
+                  ? "bg-amber-50 border-amber-300 text-amber-800 animate-pulse"
+                  : mauGiongBs
+                  ? "bg-[#F0FDF4] border-[#BBF7D0] text-[#15803D] hover:bg-[#DCFCE7]"
+                  : "border-[#CCE3F0] bg-white text-[#0C4A6E] hover:bg-[#E0F2FE]"
+              }`}
+              title="Trích đặc trưng phổ/cao độ giọng Bác sĩ bằng Web Audio API và chỉ lưu trong localStorage trình duyệt (0 byte gửi ra ngoài)"
+            >
+              <Fingerprint size={12} />
+              <span>
+                {dangThuMauGiong
+                  ? `Đang thu mẫu (${demNguocMauGiong}s)...`
+                  : mauGiongBs
+                  ? `Mẫu giọng BS (${mauGiongBs.f0Hz}Hz)`
+                  : "Mẫu giọng Bác sĩ tại máy (5s)"}
+              </span>
+            </button>
+
             {/* Tải tệp âm thanh bổ sung */}
             <input
               type="file"
@@ -366,9 +676,50 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
           </div>
         </div>
 
-        {uploadError && (
+        {(uploadError || loiMauGiong) && (
           <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs">
-            {uploadError}
+            {uploadError || loiMauGiong}
+          </div>
+        )}
+
+        {/* Boost 1: Thanh 1 chạm áp dụng vai gợi ý để bác sĩ kiểm lại thay vì bấm tay từng dòng */}
+        {!isEditing && thongKeGoiY.soLuotChuaGan > 0 && thongKeGoiY.soGoiYSanCo > 0 && (
+          <div className="max-w-4xl mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-[#E0F2FE] via-[#F0F9FF] to-[#ECFEFF] border border-[#7DD3FC] shadow-tactile-doctor-card flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0 flex-1 text-xs text-[#0C4A6E]">
+              <div className="font-bold text-[#0369A1] flex items-center gap-1.5">
+                <Sparkles size={14} className="text-[#0284C7] flex-shrink-0" />
+                <span>
+                  Có {thongKeGoiY.soGoiYSanCo}/{thongKeGoiY.soLuotChuaGan} lượt chưa gán đã có gợi ý vai tất định tại chỗ
+                </span>
+              </div>
+              <p className="mt-0.5 text-[11.5px] text-[#334155]">
+                Bấm một lần để điền vai gợi ý (không ghi đè dòng đã gán), sau đó đọc lướt kiểm lại hoặc dùng phím{" "}
+                <kbd className="px-1 py-0.5 rounded bg-white border border-[#BAE6FD] font-mono text-[10px]">1</kbd> BS ·{" "}
+                <kbd className="px-1 py-0.5 rounded bg-white border border-[#BAE6FD] font-mono text-[10px]">2</kbd> BN ·{" "}
+                <kbd className="px-1 py-0.5 rounded bg-white border border-[#BAE6FD] font-mono text-[10px]">3</kbd> NN khi trỏ vào dòng.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleApDungGoiYMotCham}
+              className="px-3.5 py-2 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-semibold shadow-tactile-doctor active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <Check size={14} />
+              <span>Áp dụng {thongKeGoiY.soGoiYSanCo} vai gợi ý để bác sĩ kiểm lại</span>
+            </button>
+          </div>
+        )}
+
+        {thongBaoDaGanNhanh && !isEditing && (
+          <div className="max-w-4xl mb-3 p-2.5 bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl text-[#065F46] text-xs flex items-center justify-between gap-2">
+            <span>{thongBaoDaGanNhanh}</span>
+            <button
+              type="button"
+              onClick={() => setThongBaoDaGanNhanh(null)}
+              className="text-[11px] font-semibold underline hover:no-underline cursor-pointer"
+            >
+              Ẩn
+            </button>
           </div>
         )}
 
@@ -493,7 +844,6 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               </span>
             </div>
 
-            {/* Dynamic frequency equalizer wave */}
             <div className="flex items-center gap-1.5 h-6 px-2 py-1 bg-white/80 rounded-lg shadow-[inset_0_1px_2px_rgba(2,132,199,0.1)]">
               {liveFreqs.map((freq, idx) => (
                 <div
@@ -508,7 +858,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
           </div>
         )}
 
-        {/* Nội dung lời thoại (Chế độ xem hoặc Chế độ sửa tay) với hiệu ứng nổi khối */}
+        {/* Nội dung lời thoại (Chế độ xem hoặc Chế độ sửa tay) */}
         {isEditing ? (
           <div className="max-w-4xl bg-white rounded-2xl border border-[#E5DFD5] shadow-tactile-card p-4 sm:p-6">
             <textarea
@@ -531,29 +881,79 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               }
               const lines = transcript.split("\n").filter((l) => l.trim().length > 0);
               return lines.map((line, idx) => {
-                // Đọc tiền tố vai đúng như người dùng / bản chép ghi. KHÔNG đoán vai khi không
-                // có tiền tố (bản cũ xen kẽ BS/BN theo số dòng — đó là bịa).
+                const luot = idx + 1;
                 const m = line.match(VAI_RE);
                 const vai = m ? chuanVai(m[1]) : "Chưa rõ vai";
                 const text = m ? line.slice(m[0].length).trim() : line.trim();
                 const kieu = kieuVai(vai);
-                const daGan = VAI_GAN.includes(vai);
+                const daGan = VAI_GAN.includes(vai as VaiChuan);
+                const goiY = !daGan ? thongKeGoiY.mapTheoLuot[luot] : undefined;
+                const lyDoGoiY = !daGan ? thongKeGoiY.lyDoTheoLuot[luot] : undefined;
+
                 return (
-                  <div key={idx} className="flex items-start gap-3 group">
+                  <div
+                    key={idx}
+                    tabIndex={0}
+                    onMouseEnter={() => setActiveTurnIdx(idx)}
+                    onMouseLeave={() => setActiveTurnIdx((cur) => (cur === idx ? null : cur))}
+                    onFocus={() => setActiveTurnIdx(idx)}
+                    className="flex items-start gap-3 group focus:outline-none"
+                  >
                     <div className="flex flex-col items-center flex-shrink-0 w-16 pt-1 text-center gap-1">
                       <button
                         onClick={() => doiVai(idx)}
-                        title="Bấm để đổi vai: Bác sĩ → Bệnh nhân → Người nhà → Chưa rõ vai"
+                        title="Bấm để đổi vai (hoặc trỏ chuột vào dòng rồi nhấn phím 1=BS, 2=BN, 3=NN)"
                         className={`px-1.5 h-7 min-w-[2.25rem] rounded-full flex items-center justify-center font-bold text-[10px] border whitespace-nowrap ${kieu.mau}`}
                       >
                         {kieu.tat}
                       </button>
-                      <span className="text-[9px] text-[#64748B] font-mono">lượt {idx + 1}</span>
+                      <span className="text-[9px] text-[#64748B] font-mono">lượt {luot}</span>
                     </div>
-                    <div className={`flex-1 bg-white rounded-2xl border p-4 flex items-start justify-between gap-3 ${daGan ? "border-[#BAE6FD]" : "border-[#F2DFA8]"}`}>
-                      <div className="text-[13px] sm:text-[14px] leading-relaxed text-[#0F172A] font-sans">
+                    <div
+                      className={`flex-1 bg-white rounded-2xl border p-4 flex flex-wrap items-start justify-between gap-3 transition-colors ${
+                        activeTurnIdx === idx
+                          ? "border-[#0284C7] ring-1 ring-[#BAE6FD]"
+                          : daGan
+                          ? "border-[#BAE6FD]"
+                          : "border-[#F2DFA8]"
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1 text-[13px] sm:text-[14px] leading-relaxed text-[#0F172A] font-sans">
                         <span className="text-[11px] font-semibold text-[#64748B] mr-1.5">{vai}:</span>
                         {text}
+                        {goiY && (
+                          <span
+                            className="ml-2 inline-flex items-center gap-1 text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-[#F0F9FF] text-[#0369A1] border border-[#BAE6FD]"
+                            title={lyDoGoiY || "Gợi ý vai tất định"}
+                          >
+                            Gợi ý: {goiY}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Pill 1-click BS / BN / NN cho dòng chưa gán (hoặc hiện khi hover dòng đã gán để sửa nhanh) */}
+                      <div
+                        className={`flex items-center gap-1 flex-shrink-0 ${
+                          daGan ? "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" : ""
+                        }`}
+                      >
+                        {([
+                          ["Bác sĩ", "BS", "1"],
+                          ["Bệnh nhân", "BN", "2"],
+                          ["Người nhà", "NN", "3"],
+                        ] as const).map(([tenVai, tat, phimTat]) => (
+                          <button
+                            key={tenVai}
+                            type="button"
+                            onClick={() => ganVaiMotDong(idx, tenVai)}
+                            title={`Gán ${tenVai} (Phím ${phimTat})`}
+                            className={`px-2 py-0.5 rounded-lg border text-[10.5px] font-bold cursor-pointer hover:brightness-95 transition-all ${
+                              KIEU_VAI[tenVai].mau
+                            } ${goiY === tenVai ? "ring-1 ring-[#0284C7]" : ""}`}
+                          >
+                            {tat}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

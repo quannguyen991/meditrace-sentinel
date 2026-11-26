@@ -23,7 +23,7 @@ export function trichNguCanhChoTroLy(params: {
   const kq: NguCanhAnDanhGuiDi = {};
   const namHienTai = new Date().getFullYear();
 
-  // 1. Tuổi
+  // 1. Tuổi (hỗ trợ cả trẻ nhũ nhi/trẻ nhỏ tính theo tháng tuổi)
   if (params.patient?.dob) {
     const mNam = params.patient.dob.match(/(19\d{2}|20\d{2})/);
     if (mNam) {
@@ -33,8 +33,11 @@ export function trichNguCanhChoTroLy(params: {
   }
   if (kq.tuoi === undefined) {
     const gop = `${params.patientSubtitle || ""} ${params.contextNotes || ""}`;
+    const mThang = gop.match(/(?<![\p{L}\p{N}_])(\d{1,2})\s*tháng\s*tuổi(?![\p{L}\p{N}_])/iu);
     const mTuoi = gop.match(/\b(\d{1,3})\s*tuổi\b/i);
-    if (mTuoi) {
+    if (mThang && Number(mThang[1]) >= 0 && Number(mThang[1]) < 72) {
+      kq.tuoi = Math.floor(Number(mThang[1]) / 12);
+    } else if (mTuoi) {
       const t = Number(mTuoi[1]);
       if (t >= 0 && t <= 120) kq.tuoi = t;
     } else {
@@ -52,8 +55,8 @@ export function trichNguCanhChoTroLy(params: {
 
   // 2. Giới tính (dùng ranh giới Unicode tiếng Việt vì \b không nhận chữ có dấu)
   const gText = `${params.patient?.gender || ""} ${params.patientSubtitle || ""} ${params.contextNotes || ""}`.toLowerCase();
-  if (/(?<![\p{L}\p{N}_])(nữ|female)(?![\p{L}\p{N}_])/iu.test(gText)) kq.gioi = "nữ";
-  else if (/(?<![\p{L}\p{N}_])(nam|male)(?![\p{L}\p{N}_])/iu.test(gText)) kq.gioi = "nam";
+  if (/(?<![\p{L}\p{N}_])(nữ|female|bé\s*gái)(?![\p{L}\p{N}_])/iu.test(gText)) kq.gioi = "nữ";
+  else if (/(?<![\p{L}\p{N}_])(nam|male|bé\s*trai)(?![\p{L}\p{N}_])/iu.test(gText)) kq.gioi = "nam";
 
   // 3. Có thai (chỉ xác nhận khi không phải nam và có mệnh đề/ngữ cảnh khẳng định, loại trừ phủ định)
   if (kq.gioi !== "nam") {
@@ -81,6 +84,8 @@ function laySoFloat(re: RegExp, vanBan: string): number | undefined {
 /**
  * Gom dữ liệu từ `patientIdentifier`, `patientSubtitle` và tab `context` (`ContextView`)
  * để gửi kèm lên `/api/generate-note`. Tuyệt đối KHÔNG bịa tuổi/giới mặc định nếu bác sĩ chưa nhập.
+ * Boost 9B: Bóc tách đầy đủ 14 chỉ số xét nghiệm trọng yếu (Kali, Na, Troponin, WBC, Hb, PLT, Urea,
+ * AST, ALT, CRP, INR, Creatinine, eGFR, HbA1c, Glucose) + tháng tuổi & chiều cao Nhi khoa.
  */
 export function xayNguCanhChoTaoHoSo(params: {
   sessionId?: string;
@@ -99,7 +104,10 @@ export function xayNguCanhChoTaoHoSo(params: {
   });
 
   const gop = `${subtitle}\n${contextText}`;
-  const canNang = laySoFloat(/(?:cân\s*nặng|cn|weight)?\s*[:=]?\s*(\d{1,3}(?:[.,]\d+)?)\s*kg\b/i, gop);
+  const canNang = laySoFloat(/(?:cân\s*nặng|cn|weight)?\s*[:=]?\s*(\d{1,3}(?:[.,]\d+)?)\s*kg\b/iu, gop);
+  const chieuCao = laySoFloat(/(?<![\p{L}\p{N}_])(?:chiều\s*cao|cao)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*cm\b/iu, gop);
+  const mThangTuoi = gop.match(/(?<![\p{L}\p{N}_])(\d{1,2})\s*tháng\s*tuổi(?![\p{L}\p{N}_])/iu);
+  const thangTuoi = mThangTuoi ? Number(mThangTuoi[1]) : undefined;
 
   const duLieuXn: Record<string, number> = {};
   const mCreat = gop.match(/(?:creatinin[e]?|scr)(?:_umol_l|_mg_dl)?\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)\s*(µmol\/l|umol\/l|mg\/dl)?/i);
@@ -115,12 +123,48 @@ export function xayNguCanhChoTaoHoSo(params: {
       }
     }
   }
-  const egfr = laySoFloat(/(?:egfr|mlct)\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/i, gop);
+
+  const egfr = laySoFloat(/(?<![\p{L}\p{N}_])(?:egfr|mlct)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
   if (egfr !== undefined) duLieuXn.egfr = egfr;
-  const hba1c = laySoFloat(/hba1c\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/i, gop);
+
+  const hba1c = laySoFloat(/(?<![\p{L}\p{N}_])hba1c(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
   if (hba1c !== undefined) duLieuXn.hba1c = hba1c;
-  const glu = laySoFloat(/(?:glucose|đường\s*huyết)(?:_mmol_l)?\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/i, gop);
+
+  const glu = laySoFloat(/(?<![\p{L}\p{N}_])(?:glucose|đường\s*huyết)(?:_mmol_l)?(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
   if (glu !== undefined) duLieuXn.glucose_mmol_l = glu;
+
+  const kali = laySoFloat(/(?<![\p{L}\p{N}_])(?:kali(?![\p{L}\p{N}_])|k\+)\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (kali !== undefined) duLieuXn.kali = kali;
+
+  const na = laySoFloat(/(?<![\p{L}\p{N}_])(?:natri(?![\p{L}\p{N}_])|na\+|na(?![\p{L}\p{N}_]))\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (na !== undefined) duLieuXn.na = na;
+
+  const troponin = laySoFloat(/(?<![\p{L}\p{N}_])troponin(?:\s*[ti])?(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (troponin !== undefined) duLieuXn.troponin = troponin;
+
+  const wbc = laySoFloat(/(?<![\p{L}\p{N}_])(?:wbc|bạch\s*cầu)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (wbc !== undefined) duLieuXn.wbc = wbc;
+
+  const hb = laySoFloat(/(?<![\p{L}\p{N}_])(?:hb|hgb|hemoglobin|huyết\s*sắc\s*tố)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (hb !== undefined) duLieuXn.hb = hb;
+
+  const plt = laySoFloat(/(?<![\p{L}\p{N}_])(?:plt|tiểu\s*cầu)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (plt !== undefined) duLieuXn.plt = plt;
+
+  const urea = laySoFloat(/(?<![\p{L}\p{N}_])(?:urea|ure|bun)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (urea !== undefined) duLieuXn.urea = urea;
+
+  const ast = laySoFloat(/(?<![\p{L}\p{N}_])(?:ast|got)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (ast !== undefined) duLieuXn.ast = ast;
+
+  const alt = laySoFloat(/(?<![\p{L}\p{N}_])(?:alt|gpt)(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (alt !== undefined) duLieuXn.alt = alt;
+
+  const crp = laySoFloat(/(?<![\p{L}\p{N}_])crp(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (crp !== undefined) duLieuXn.crp = crp;
+
+  const inr = laySoFloat(/(?<![\p{L}\p{N}_])inr(?![\p{L}\p{N}_])\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)/iu, gop);
+  if (inr !== undefined) duLieuXn.inr = inr;
 
   const ten = (params.patientIdentifier || "").trim();
   const coTenThat = Boolean(ten && !/^thêm\s+(?:tên\s+)?định\s+danh/i.test(ten));
@@ -132,12 +176,19 @@ export function xayNguCanhChoTaoHoSo(params: {
     ttBn.ten = ten;
   }
   if (nc.tuoi !== undefined) ttBn.tuoi = nc.tuoi;
+  if (thangTuoi !== undefined && Number.isFinite(thangTuoi) && thangTuoi >= 0) {
+    ttBn.thang_tuoi = thangTuoi;
+    if (thangTuoi < 72) {
+      ttBn.tuoi = Math.floor(thangTuoi / 12);
+    }
+  }
   if (nc.gioi !== undefined) {
     ttBn.gioi_tinh = nc.gioi;
     ttBn.la_nu = nc.gioi === "nữ";
   }
   if (nc.coThai) ttBn.co_thai = true;
   if (canNang !== undefined && canNang > 0 && canNang <= 300) ttBn.can_nang_kg = canNang;
+  if (chieuCao !== undefined && chieuCao > 0 && chieuCao <= 260) ttBn.chieu_cao_cm = chieuCao;
   if (contextText) ttBn.ngu_canh = contextText;
   if (subtitle && subtitle !== "Ca khám bệnh mới") ttBn.mo_ta_ca = subtitle;
 

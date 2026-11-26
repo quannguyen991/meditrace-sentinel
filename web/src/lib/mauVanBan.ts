@@ -1,7 +1,7 @@
 /**
  * Mẫu văn bản cho nút "Tạo". Mỗi mẫu là một CÂU CHỈ DẪN cấu trúc gửi cho mô hình ngoài, cùng lời
- * thoại + bản nháp + tab Ngữ cảnh của ca. Mô hình chỉ được dùng thông tin có trong ba nguồn đó;
- * thiếu thì ghi [cần bổ sung] (xem /api/generate-document trong server.ts).
+ * thoại + bản nháp + tab Ngữ cảnh của ca; HOẶC là biểu mẫu pháp lý / chuyên khoa biên dịch 100% tại chỗ
+ * bằng luật tất định (`bienDichLuatTaiCho: true`, < 10 ms, 0 byte gửi ra ngoài).
  *
  * Riêng "Bản nháp hồ sơ lâm sàng" do Qwen3-4B của dự án sinh tại chỗ — đó là phần được đo.
  */
@@ -14,10 +14,14 @@ export interface MauVanBan {
   id: string;
   ten: string;
   nhom: NhomMau;
-  /** Chỉ dẫn cấu trúc cho mô hình. */
+  /** Chỉ dẫn cấu trúc cho mô hình hoặc mô tả khung pháp lý. */
   chiDan: string;
   /** true: do Qwen3-4B tại chỗ sinh (không gửi ra ngoài). */
   taiCho?: boolean;
+  /** true: biên dịch tất định 100% tại chỗ từ mệnh đề đã duyệt theo luật BYT (không gọi mô hình ngoài). */
+  bienDichLuatTaiCho?: boolean;
+  /** Alias tương thích cho các trình gọi kiểm tra biên dịch tại chỗ. */
+  taiChoBienDich?: boolean;
   /** Mẫu do người dùng tạo. */
   tuTao?: boolean;
 }
@@ -37,6 +41,78 @@ export const MAU_BAN_NHAP: MauVanBan = {
 };
 
 export const MAU_CO_SAN: MauVanBan[] = [
+  {
+    id: "phieu-chuyen-co-so-kcb-tt01-2025",
+    ten: "Phiếu chuyển cơ sở KCB BHYT (Phụ lục TT 01/2025/TT-BYT)",
+    nhom: "hanh_chinh",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Phiếu chuyển cơ sở KCB BHYT theo Thông tư 01/2025/TT-BYT (3 cấp chuyên môn kỹ thuật: Ban đầu / Cơ bản / Chuyên sâu, tóm tắt lâm sàng, CLS, ICD-10, thuốc đã dùng, giá trị 1 năm bệnh mạn tính).",
+  },
+  {
+    id: "phieu-chuyen-cls-tt01-2025",
+    ten: "Phiếu chuyển dịch vụ cận lâm sàng (TT 01/2025/TT-BYT)",
+    nhom: "hanh_chinh",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Phiếu chuyển người bệnh/mẫu bệnh phẩm thực hiện dịch vụ cận lâm sàng theo Thông tư 01/2025/TT-BYT.",
+  },
+  {
+    id: "giay-nghi-bhxh-tt25-2025",
+    ten: "Giấy chứng nhận nghỉ việc hưởng BHXH (TT 25/2025/TT-BYT)",
+    nhom: "hanh_chinh",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Giấy chứng nhận nghỉ việc hưởng BHXH theo Thông tư 25/2025/TT-BYT (kiểm tra trần tối đa 30 ngày/lần ngoại trú và họ tên cha/mẹ khi bệnh nhi < 7 tuổi).",
+  },
+  {
+    id: "tom-tat-hsba-ra-vien-tt32",
+    ten: "Bản tóm tắt hồ sơ bệnh án & Giấy ra viện (TT 32/2023/TT-BYT)",
+    nhom: "hanh_chinh",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Bản tóm tắt hồ sơ bệnh án & Giấy ra viện đúng biểu mẫu Thông tư 32/2023/TT-BYT từ mệnh đề bác sĩ đã duyệt.",
+  },
+  {
+    id: "bien-ban-hoi-chan-tt32",
+    ten: "Biên bản hội chẩn khoa / liên khoa (TT 32/2023/TT-BYT)",
+    nhom: "ho_so",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Biên bản hội chẩn khoa / liên khoa theo Thông tư 32/2023/TT-BYT kèm dẫn nguồn [T_i].",
+  },
+  {
+    id: "khuon-nhi-khoa",
+    ten: "Bệnh án Nhi khoa chuyên biệt (TT 26/2025 · mg/kg/ngày)",
+    nhom: "ho_so",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Bệnh án Nhi khoa: bắt buộc cân nặng (TT 26/2025), tháng tuổi, liều mg/kg/ngày, tiền sử tiêm chủng & dinh dưỡng, tách riêng lời khai người chăm sóc.",
+  },
+  {
+    id: "khuon-san-phu-khoa",
+    ten: "Bệnh án Sản - Phụ khoa (PARA · Tuổi thai · Tim thai)",
+    nhom: "ho_so",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Bệnh án Sản - Phụ khoa: chỉ số PARA, tuổi thai, kinh cuối, thai máy, tim thai và rà soát thuốc an toàn thai kỳ.",
+  },
+  {
+    id: "khuon-cap-cuu-chan-thuong",
+    ten: "Bệnh án Cấp cứu - Chấn thương (ABCDE + AMPLE + Glasgow)",
+    nhom: "ho_so",
+    bienDichLuatTaiCho: true,
+    taiChoBienDich: true,
+    chiDan:
+      "Biên dịch tại chỗ Bệnh án Cấp cứu - Chấn thương theo khảo sát sơ cấp ABCDE, thang điểm Glasgow (GCS) và bệnh sử AMPLE.",
+  },
   {
     id: "soap",
     ten: "Bệnh án SOAP",

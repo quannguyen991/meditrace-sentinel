@@ -324,8 +324,23 @@ class Loi:
                 kq_tho, nguon = None, "mo_hinh"
                 t0 = time.time()
                 try:
-                    kq = _nhanh.chay_trung_gian(mau, tok, model, prefix_fn, nhanh,
-                                                max_token=MAX_TOKEN, kq_tho=kq_tho)
+                    import inspect
+                    plt_raw = os.environ.get("MEDITRACE_PROMPT_LOOKUP_TOKENS", "5").strip()
+                    plt_tok = max(0, int(plt_raw)) if plt_raw.lstrip("-").isdigit() else 5
+                    sig = inspect.signature(_nhanh.chay_trung_gian)
+                    if "prompt_lookup_num_tokens" in sig.parameters or any(
+                        p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+                    ):
+                        kq = _nhanh.chay_trung_gian(
+                            mau, tok, model, prefix_fn, nhanh,
+                            max_token=MAX_TOKEN, kq_tho=kq_tho,
+                            prompt_lookup_num_tokens=plt_tok,
+                        )
+                    else:
+                        kq = _nhanh.chay_trung_gian(
+                            mau, tok, model, prefix_fn, nhanh,
+                            max_token=MAX_TOKEN, kq_tho=kq_tho,
+                        )
                 except LoiDichVu:
                     raise
                 except Exception as exc:
@@ -705,6 +720,46 @@ class May(BaseHTTPRequestHandler):
                     menh_de_sua=than.get("menh_de_sua"),
                 )
                 return self._tra({"ok": True, "quy_ket": kq})
+            if duong == "/api/cam-doan-thu-thuat":
+                from src.cam_doan_thu_thuat import kiem_chung_cam_doan_thu_thuat
+                ht_cd = str(than.get("hoi_thoai") or than.get("transcript") or than.get("input") or "")
+                pb_cd = than.get("phat_bieu") or than.get("propositions") or []
+                meta_cd = than.get("metadata_am_thanh") or than.get("metadata")
+                ten_tt = than.get("ten_thu_thuat") or than.get("procedureName")
+                kq = kiem_chung_cam_doan_thu_thuat(
+                    hoi_thoai=ht_cd,
+                    phat_bieu=pb_cd if isinstance(pb_cd, list) else [],
+                    metadata_am_thanh=meta_cd if isinstance(meta_cd, list) else None,
+                    ten_thu_thuat=str(ten_tt).strip() if ten_tt else None,
+                )
+                return self._tra(kq)
+            if duong == "/api/noi-tru/to-dieu-tri":
+                from src.di_buong_noi_tru import tong_hop_to_dieu_tri_noi_tru
+                pb_nay = than.get("phat_bieu_hom_nay") or than.get("todayPropositions") or []
+                pb_qua = than.get("phat_bieu_hom_qua") or than.get("yesterdayPropositions") or []
+                ht_nay = str(than.get("hoi_thoai_hom_nay") or than.get("transcriptToday") or than.get("input") or "")
+                ngay_raw = than.get("ngay_dieu_tri_thu") if than.get("ngay_dieu_tri_thu") is not None else than.get("treatmentDay")
+                ngay_so = int(ngay_raw) if str(ngay_raw or "").strip().isdigit() else None
+                kq = tong_hop_to_dieu_tri_noi_tru(
+                    phat_bieu_hom_nay=pb_nay if isinstance(pb_nay, list) else [],
+                    phat_bieu_hom_qua=pb_qua if isinstance(pb_qua, list) else [],
+                    hoi_thoai_hom_nay=ht_nay,
+                    ngay_dieu_tri_thu=ngay_so,
+                )
+                return self._tra(kq)
+            if duong == "/api/duoc-thu/nap-csv":
+                from src.audio.asr.contextual_trie_600 import tao_trie_600_mac_dinh
+                csv_txt = str(than.get("noi_dung_csv") or than.get("csv") or than.get("text") or "").strip()
+                if not csv_txt:
+                    raise LoiDichVu("thieu_noi_dung_csv", "Cần nội dung CSV danh mục thuốc (`noi_dung_csv` hoặc `csv`)", 400)
+                trie = tao_trie_600_mac_dinh()
+                so_da_nap = trie.nap_danh_muc_trung_thau_csv(csv_txt)
+                return self._tra({
+                    "ok": True,
+                    "so_muc_da_nap": so_da_nap,
+                    "tong_so_thuc_the_trie": trie.so_thuc_the,
+                    "tong_so_thuoc": len(trie._tat_ca_thuoc),
+                })
             raise LoiDichVu("khong_co_duong", f"không có đường {duong}", 404)
         except Exception as exc:
             self._bao_loi(exc)
@@ -829,10 +884,12 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
 
     if not r.get("lam_sang_nang_cao"):
         try:
+            from src.cam_doan_thu_thuat import co_dau_hieu_thu_thuat, kiem_chung_cam_doan_thu_thuat
             from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
             from src.kiem_duyet_bhyt_va_bo_sot import (
                 ActiveOmissionRecoveryEngine,
                 BHYTXmlPreChecker,
+                doi_soat_da_don_va_don_quoc_gia,
                 xuat_goi_xml_1_5_qd130,
             )
             ma_ca = str(r.get("id") or "ca_kham")
@@ -854,16 +911,24 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
                 thong_tin_benh_nhan=thong_tin_benh_nhan,
                 hoi_thoai=r["input"],
             )
+            ddi_dict = asdict(dp.kiem_duyet_duoc_ly)
+            doi_soat_tt26 = doi_soat_da_don_va_don_quoc_gia(
+                ps,
+                hoi_thoai=r["input"],
+                thong_tin_benh_nhan=thong_tin_benh_nhan,
+                duoc_ly_ddi=ddi_dict,
+            )
             from src.canh_bao import lam_sang
             from src.canh_bao.phat_hien import NguCanh
-            r["lam_sang_nang_cao"] = {
+            ls_nang_cao = {
                 # 25/11/2026: lieu / tuong tac / di ung theo ma cua lop canh bao (thu nghiem, co muc
                 # tin cay), doc tu cung tri_thuc_thuoc voi cac truong ben duoi.
                 "lop_canh_bao_lam_sang": [c.to_dict() for c in lam_sang.quet(NguCanh(r["input"]), ps)],
                 "bhyt_icd10": bhyt.to_dict(),
                 "goi_xml_1_5": xml_1_5,
+                "doi_soat_thuoc_tt26": doi_soat_tt26,
                 "khoi_phuc_bo_sot_tang_45": [x.to_dict() for x in bo_sot],
-                "duoc_ly_ddi": asdict(dp.kiem_duyet_duoc_ly),
+                "duoc_ly_ddi": ddi_dict,
                 "doi_soat_can_lam_sang": asdict(dp.doi_soat_can_lam_sang) if dp.doi_soat_can_lam_sang else None,
                 "thang_diem_nguy_co": dp.thang_diem_nguy_co,
                 "hieu_chinh_lieu": dp.hieu_chinh_lieu,
@@ -876,6 +941,13 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
                 },
                 "fhir_bundle": dp.fhir_bundle,
             }
+            if co_dau_hieu_thu_thuat(r["input"], ps):
+                ls_nang_cao["cam_doan_thu_thuat"] = kiem_chung_cam_doan_thu_thuat(
+                    hoi_thoai=r["input"],
+                    phat_bieu=ps,
+                    metadata_am_thanh=r.get("metadata") if isinstance(r.get("metadata"), list) else None,
+                )
+            r["lam_sang_nang_cao"] = ls_nang_cao
         except Exception:
             traceback.print_exc()
     return r

@@ -46,7 +46,7 @@ class _TachLoiCauHinh:
 
 
 def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Gợi ý vai người nói tự động ('doctor' / 'patient') khi diarization lùi về 1 người nói.
+    """Gợi ý vai người nói tự động ('doctor' / 'patient' / 'family_member') khi diarization lùi về 1 người nói.
     Không ghi đè `speaker_role` (giữ nguyên để bác sĩ xác nhận), chỉ gắn `suggested_role`.
     """
     import re
@@ -56,6 +56,14 @@ def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]
         r"để\s+(?:tôi|em|bác\s+sĩ)\s+(?:khám|nghe|đo|kê)|"
         r"(?:tôi|bác\s+sĩ)\s+(?:kê\s+đơn|cho\s+thuốc|hẹn\s+tái\s+khám|chỉ\s+định)|"
         r"huyết\s+áp\s+(?:đo\s+được|của\s+(?:bác|anh|chị)))\b"
+    )
+    re_nguoi_nha = re.compile(
+        r"(?i)\b("
+        r"con\s+(?:tôi|em|mình)|"
+        r"(?:cháu|bé)\s+nhà\s+(?:em|tôi|mình)|"
+        r"(?:mẹ|bố|ba|má|ông|bà|cụ|chồng|vợ)\s+(?:tôi|em)|"
+        r"(?:nhà\s+em|nhà\s+tôi|gia\s+đình|em|tôi)\s+đưa\s+(?:cụ|ông|bà|bố|mẹ|cháu|bé|con|chồng|vợ)\s+(?:đi\s+khám|vào\s+viện|tới\s+khám|đến\s+khám)"
+        r")\b"
     )
     re_benh_nhan = re.compile(
         r"(?i)\b(bác\s+sĩ\s+ơi|dạ\s+(?:vâng|có|không|đúng|thưa)|"
@@ -67,16 +75,169 @@ def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]
         if not txt:
             continue
         m_bs = re_bac_si.search(txt)
+        m_nn = re_nguoi_nha.search(txt)
         m_bn = re_benh_nhan.search(txt)
-        if m_bs and not m_bn:
+        if m_bs and not m_nn and not m_bn:
             seg["suggested_role"] = "doctor"
             seg["suggested_role_reason"] = f"Khớp mẫu câu hỏi/chỉ định bác sĩ: '{m_bs.group(0)}'"
+        elif m_nn and not m_bs:
+            seg["suggested_role"] = "family_member"
+            seg["suggested_role_reason"] = f"Khớp mẫu lời kể người nhà/chăm sóc: '{m_nn.group(0)}'"
         elif m_bn and not m_bs:
             seg["suggested_role"] = "patient"
             seg["suggested_role_reason"] = f"Khớp mẫu lời kể bệnh nhân: '{m_bn.group(0)}'"
         elif txt.endswith("?"):
             seg["suggested_role"] = "doctor"
             seg["suggested_role_reason"] = "Câu hỏi lâm sàng kết thúc bằng dấu hỏi"
+    return transcript
+
+
+def trich_dac_trung_giong_nhe(
+    wav_path: Path,
+    start_s: float = 0.0,
+    end_s: float | None = None,
+) -> list[float]:
+    """Trích xuất vector đặc trưng âm học 8 chiều tất định (thuần `numpy` + `wave`, không thư viện nặng).
+
+    8 chiều đã quy chuẩn tâm không (zero-centered acoustic contrast) để cosine similarity phân tách
+    chính xác các giọng nói khác cao độ / âm sắc mà bất biến với âm lượng micro:
+      [0] Độ lệch tần số cơ bản f0 so với 175 Hz
+      [1] Độ mạnh tương quan tuần hoàn (pitch harmonicity / voicing clarity)
+      [2] Độ lệch trọng tâm phổ (spectral centroid contrast)
+      [3] Độ rộng phổ (spectral spread contrast)
+      [4] Điểm cuộn phổ 85% (spectral rolloff contrast)
+      [5] Tỷ lệ qua điểm không (zero-crossing rate contrast)
+      [6] Tương phản năng lượng dải trầm (80-450 Hz) vs dải trung (450-1800 Hz)
+      [7] Tương phản năng lượng dải trung (450-1800 Hz) vs dải cao (1800-4000 Hz)
+    """
+    import wave
+    import numpy as np
+
+    p = Path(wav_path)
+    if not p.exists():
+        return [0.0] * 8
+    try:
+        with wave.open(str(p), "rb") as wf:
+            sr = wf.getframerate()
+            n_ch = wf.getnchannels()
+            sw = wf.getsampwidth()
+            n_total = wf.getnframes()
+            if sr <= 0 or n_total <= 0:
+                return [0.0] * 8
+            f_start = max(0, min(n_total, int(round(max(0.0, float(start_s)) * sr))))
+            f_end = n_total if end_s is None else max(f_start, min(n_total, int(round(float(end_s) * sr))))
+            if f_end - f_start < 64:
+                return [0.0] * 8
+            wf.setpos(f_start)
+            raw = wf.readframes(f_end - f_start)
+    except Exception:
+        return [0.0] * 8
+
+    if sw == 2:
+        x = np.frombuffer(raw, dtype="<i2").astype(np.float64) / 32768.0
+    elif sw == 1:
+        x = (np.frombuffer(raw, dtype=np.uint8).astype(np.float64) - 128.0) / 128.0
+    elif sw == 4:
+        x = np.frombuffer(raw, dtype="<i4").astype(np.float64) / 2147483648.0
+    else:
+        return [0.0] * 8
+
+    if n_ch > 1:
+        x = x.reshape(-1, n_ch).mean(axis=1)
+    if len(x) < 64:
+        return [0.0] * 8
+
+    x = x - float(np.mean(x))
+    rms = float(np.sqrt(np.mean(x * x)))
+    if rms < 1e-6:
+        return [0.0] * 8
+    x_norm = x / rms
+
+    # 1. Ước lượng f0 bằng tự tương quan trên cửa sổ giọng nói (75 Hz .. 400 Hz)
+    win_len = min(len(x_norm), int(sr * 1.5))
+    seg = x_norm[:win_len]
+    n_fft_ac = 1 << int(np.ceil(np.log2(max(128, 2 * len(seg)))))
+    spec_ac = np.fft.rfft(seg, n=n_fft_ac)
+    acf = np.fft.irfft(spec_ac * np.conj(spec_ac), n=n_fft_ac)[:len(seg)]
+    acf0 = float(acf[0]) if acf[0] > 1e-9 else 1.0
+    lag_min = max(1, int(sr / 400.0))
+    lag_max = min(len(acf) - 1, int(sr / 75.0))
+    if lag_max > lag_min:
+        sub_acf = acf[lag_min:lag_max + 1]
+        best_idx = int(np.argmax(sub_acf))
+        lag_peak = lag_min + best_idx
+        f0_hz = float(sr) / float(lag_peak)
+        voicing = float(sub_acf[best_idx]) / acf0
+    else:
+        f0_hz = 175.0
+        voicing = 0.0
+
+    # 2. Đặc trưng phổ trung bình qua cửa sổ Hann
+    win = np.hanning(len(seg))
+    mag = np.abs(np.fft.rfft(seg * win)) + 1e-12
+    freqs = np.fft.rfftfreq(len(seg), d=1.0 / sr)
+    power = mag * mag
+    total_pow = float(np.sum(power))
+
+    centroid = float(np.sum(freqs * power)) / total_pow
+    spread = float(np.sqrt(np.sum(((freqs - centroid) ** 2) * power) / total_pow))
+    cumsum_pow = np.cumsum(power)
+    rolloff_idx = int(np.searchsorted(cumsum_pow, 0.85 * total_pow))
+    rolloff = float(freqs[min(rolloff_idx, len(freqs) - 1)])
+
+    zcr = float(np.mean(np.abs(np.diff(np.signbit(seg)))))
+
+    e_low = float(np.sum(power[(freqs >= 70.0) & (freqs < 450.0)])) / total_pow
+    e_mid = float(np.sum(power[(freqs >= 450.0) & (freqs < 1800.0)])) / total_pow
+    e_high = float(np.sum(power[(freqs >= 1800.0) & (freqs <= min(4500.0, sr / 2.0))])) / total_pow
+
+    vec = [
+        (f0_hz - 175.0) / 85.0,
+        (voicing - 0.45) * 2.0,
+        (centroid - 900.0) / 700.0,
+        (spread - 650.0) / 500.0,
+        (rolloff - 1600.0) / 1100.0,
+        (zcr - 0.12) / 0.08,
+        float(np.log((e_low + 1e-4) / (e_mid + 1e-4))) / 3.0,
+        float(np.log((e_mid + 1e-4) / (e_high + 1e-4))) / 3.0,
+    ]
+    return [round(float(v), 6) for v in vec]
+
+
+def khop_mau_giong_bac_si(
+    transcript: list[dict[str, Any]],
+    wav_path: Path,
+    mau_vector: list[float],
+    nguong_cosine: float = 0.92,
+) -> list[dict[str, Any]]:
+    """So khớp từng đoạn âm thanh với mẫu giọng bác sĩ 5s cục bộ (cosine >= 0.92 -> `suggested_role = 'doctor'`).
+    TUYỆT ĐỐI không ghi đè `speaker_role` (bác sĩ vẫn là người xác nhận cuối cùng).
+    """
+    import numpy as np
+
+    if not mau_vector or len(mau_vector) != 8 or not Path(wav_path).exists():
+        return transcript
+    ref = np.asarray(mau_vector, dtype=np.float64)
+    ref_norm = float(np.linalg.norm(ref))
+    if ref_norm < 1e-8:
+        return transcript
+
+    for seg in transcript:
+        st = float(seg.get("start_time") or 0.0)
+        et_raw = seg.get("end_time")
+        et = float(et_raw) if et_raw is not None else None
+        vec = trich_dac_trung_giong_nhe(Path(wav_path), st, et)
+        v = np.asarray(vec, dtype=np.float64)
+        v_norm = float(np.linalg.norm(v))
+        if v_norm < 1e-8:
+            continue
+        sim = float(np.dot(v, ref) / (v_norm * ref_norm))
+        seg["doctor_voiceprint_similarity"] = round(sim, 4)
+        if sim >= nguong_cosine:
+            seg["suggested_role"] = "doctor"
+            seg["suggested_role_reason"] = (
+                f"Khớp mẫu giọng bác sĩ cục bộ (cosine={sim:.3f} >= {nguong_cosine:.2f})"
+            )
     return transcript
 
 
@@ -180,6 +341,9 @@ class AudioPipeline:
             transcript = [s.to_dict() for s in doan]
             if not tach_info.get("tach_that") or (tach_info.get("so_nguoi_noi") or 1) <= 1:
                 goi_y_vai_nguoi_noi(transcript)
+                mau_giong = session.get("doctor_voiceprint")
+                if isinstance(mau_giong, list) and len(mau_giong) == 8:
+                    khop_mau_giong_bac_si(transcript, processed, mau_giong)
             self._flag_disagreements(session_id, processed, raw, transcript, asr_info)
             self.store.path(session_id, "transcript.json").write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
             value = self.store.update(session_id, status=SessionStatus.TRANSCRIPT_READY.value, transcript_status="ready")

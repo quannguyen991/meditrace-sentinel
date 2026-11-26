@@ -27,6 +27,8 @@ import { trichNguCanhChoTroLy, xayNguCanhChoTaoHoSo } from "./lib/nguCanhTroLy";
 import { phatHienMauThuanXuyenLanKham } from "./lib/doiChieuLanKham";
 import { computeNoteSignOffHash, kiemTraDieuKienKyDuyet } from "./lib/compileEffectiveNote";
 import { chonTabBenhAnDeBam, khoaDuyetCuaNote } from "./lib/kyDuyet";
+import { bienDichBieuMauPhapLyTaiCho } from "./lib/bieuMauPhapLyOffline";
+import { taoDaiTomTatTruocKham } from "./lib/trichNhiemVuVaTomTat";
 import { useSessionsStore } from "./hooks/useSessionsStore";
 
 const VerificationView = React.lazy(() =>
@@ -702,6 +704,34 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       return;
     }
 
+    if (mau.bienDichLuatTaiCho) {
+      const noiDungOffline = bienDichBieuMauPhapLyTaiCho(mau.id, {
+        session: currentSession,
+        note: noteMeta,
+        quyetDuyet,
+        banSuaDuyet,
+      });
+      if (noiDungOffline) {
+        const id = `tab-doc-${Date.now()}`;
+        const nhanOffline =
+          "\n\n---\n[Biên dịch bằng luật xác định tại chỗ · 100% offline · không gửi dữ liệu ra ngoài · giữ nguyên mỏ neo [T_i] và chỗ trống [cần bổ sung].]";
+        capNhatCaTheoId(targetId, (ca) => ({
+          tabs: [
+            ...ca.tabs,
+            {
+              id,
+              title: mau.ten.slice(0, 60),
+              type: "custom",
+              content: `${noiDungOffline}${nhanOffline}`,
+              isClosable: true,
+            },
+          ],
+          activeTabId: id,
+        }));
+        return;
+      }
+    }
+
     setGeneratingSessionId(targetId);
     try {
       const d = await goiNgoai("/api/generate-document", {
@@ -1152,7 +1182,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                               ? `Đang chờ ${tienDoNhap.truoc} bản nháp khác tạo xong (máy chủ chỉ có một GPU)…`
                               : `Đang tạo bản nháp · ${Math.floor((Date.now() - tienDoNhap.batDau) / 60000)} phút ${Math.floor(
                                   ((Date.now() - tienDoNhap.batDau) % 60000) / 1000,
-                                )} giây (thường mất 3–4 phút). Có thể chuyển sang ca khác, bản nháp vẫn vào đúng ca này.`
+                                )} giây (tối ưu hóa VRAM & Prompt Lookup). Có thể chuyển sang ca khác, bản nháp vẫn vào đúng ca này.`
                             : "Đang xử lý tạo hồ sơ... Bác sĩ có thể chuyển sang ca khám khác hoặc bắt đầu ca khám mới."}
                         </span>
                       </div>
@@ -1217,25 +1247,55 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   {/* Nội dung tab đang hiển thị — gắn key={currentSession.id} chống nhiễm bẩn PHI chéo bệnh nhân */}
                   <div ref={vungGiuaRef} className="print-unclip flex-1 flex flex-col min-h-0 overflow-hidden">
                     <div className="print-unclip flex-1 flex flex-col min-h-0 min-w-0 bg-[#F8FBFC] overflow-hidden relative">
-                      {currentTab?.type === "transcript" && (
-                        <TranscriptView
-                          key={currentSession.id}
-                          transcript={currentSession.transcript}
-                          gioiTinh={currentSession.patientSubtitle}
-                          onUpdateTranscript={handleUpdateTranscript}
-                          onUpdateSegments={(segs) => {
-                            const targetId = currentSession.id;
-                            capNhatCaTheoId(targetId, (ca) => ({
-                              transcriptSegments: [...(ca.transcriptSegments || []), ...segs],
-                            }));
-                          }}
-                          isRecording={currentSession.isRecording}
-                          audioUrl={currentSession.audioUrl}
-                          onStartRecording={() => handleUpdateSession({ isRecording: true })}
-                          onOpenTemplates={() => setIsTemplateModalOpen(true)}
-                          onLoadSample={handleLoadSample}
-                        />
-                      )}
+                      {currentTab?.type === "transcript" && (() => {
+                        const tomTatTruocKham = taoDaiTomTatTruocKham(currentSession, sessions);
+                        return (
+                          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                            {tomTatTruocKham.coDuLieuCu && (
+                              <div className="no-print px-4 py-2 bg-[#F0F9FF] border-b border-[#BAE6FD] text-[11.5px] text-[#0C4A6E] flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span className="font-bold text-[#0369A1]">
+                                  Tóm tắt 10s ({tomTatTruocKham.soLanKhamTruoc} lần khám trước):
+                                </span>
+                                {tomTatTruocKham.diUngDaXacNhan.length > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-[#FFF5F5] border border-[#F5C2C2] text-[#B4232C] font-semibold">
+                                    Dị ứng: {tomTatTruocKham.diUngDaXacNhan.join(", ")}
+                                  </span>
+                                )}
+                                {tomTatTruocKham.thuocManTinh.length > 0 && (
+                                  <span>Thuốc cũ: {tomTatTruocKham.thuocManTinh.slice(0, 4).join(", ")}</span>
+                                )}
+                                {tomTatTruocKham.bienThienSinhHieuXn.length > 0 && (
+                                  <span className="font-mono text-[#0284C7]">
+                                    {tomTatTruocKham.bienThienSinhHieuXn.join(" · ")}
+                                  </span>
+                                )}
+                                {tomTatTruocKham.viecHenTonDong.length > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-[#FEF9E7] border border-[#F5E6B8] text-[#7A4B00]">
+                                    Hẹn đọc lại: {tomTatTruocKham.viecHenTonDong[0]}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <TranscriptView
+                              key={currentSession.id}
+                              transcript={currentSession.transcript}
+                              gioiTinh={currentSession.patientSubtitle}
+                              onUpdateTranscript={handleUpdateTranscript}
+                              onUpdateSegments={(segs) => {
+                                const targetId = currentSession.id;
+                                capNhatCaTheoId(targetId, (ca) => ({
+                                  transcriptSegments: [...(ca.transcriptSegments || []), ...segs],
+                                }));
+                              }}
+                              isRecording={currentSession.isRecording}
+                              audioUrl={currentSession.audioUrl}
+                              onStartRecording={() => handleUpdateSession({ isRecording: true })}
+                              onOpenTemplates={() => setIsTemplateModalOpen(true)}
+                              onLoadSample={handleLoadSample}
+                            />
+                          </div>
+                        );
+                      })()}
 
                       {currentTab?.type === "context" && (
                         <ContextView
@@ -1289,6 +1349,28 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                               onKiemChungLuot={handleKiemChungLuot}
                               noteMeta={noteMeta}
                               patientIdentifier={currentSession.patientIdentifier}
+                              patientInfo={
+                                xayNguCanhChoTaoHoSo({
+                                  sessionId: currentSession.id,
+                                  patientIdentifier: currentSession.patientIdentifier,
+                                  patientSubtitle: currentSession.patientSubtitle,
+                                  tabs: currentSession.tabs,
+                                  contextNotes: currentSession.contextNotes,
+                                }).thong_tin_benh_nhan
+                              }
+                              currentSession={currentSession}
+                              allSessions={sessions}
+                              onCreateCustomTab={(title, content) => {
+                                const targetId = currentSession.id;
+                                const id = `tab-doc-${Date.now()}`;
+                                capNhatCaTheoId(targetId, (ca) => ({
+                                  tabs: [
+                                    ...ca.tabs,
+                                    { id, title: title.slice(0, 60), type: "custom", content, isClosable: true },
+                                  ],
+                                  activeTabId: id,
+                                }));
+                              }}
                               quyetDuyet={quyetDuyet}
                               banSuaDuyet={banSuaDuyet}
                               signOff={currentSession.signOff}
@@ -1372,6 +1454,54 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                 onDong={() => setMoDuyetBenCanh(false)}
                                 audioUrl={currentSession.audioUrl}
                                 segments={currentSession.transcriptSegments}
+                                onKhoiPhucBoSot={(muc) => {
+                                  const targetId = currentSession.id;
+                                  const noiDungKhoiPhuc = (muc?.noi_dung_goi_y || muc?.trich_dan_nguyen_van || "").trim();
+                                  if (!noiDungKhoiPhuc) return;
+                                  const luot = Number(muc?.luot) || 1;
+                                  const loai = String(muc?.loai_thong_tin || "");
+                                  const section =
+                                    loai === "di_ung"
+                                      ? "DỊ ỨNG"
+                                      : loai === "thuoc" || loai === "thuoc_dong_y_ngam"
+                                      ? "THUỐC ĐANG DÙNG"
+                                      : loai === "sinh_hieu"
+                                      ? "SINH HIỆU"
+                                      : "BỆNH SỬ HIỆN TẠI";
+                                  const newPropId =
+                                    Math.max(0, ...(noteMeta?.propositions || []).map((p) => p.id)) + 1;
+                                  const dongMoi = `- ${noiDungKhoiPhuc} [T${luot}] (Khôi phục Tầng 4.5 — Bác sĩ xác nhận)`;
+                                  capNhatCaTheoId(targetId, (ca) => {
+                                    const updatedTabs = ca.tabs.map((t) =>
+                                      t.id === ca.activeTabId || t.type === "soap"
+                                        ? {
+                                            ...t,
+                                            content: t.content
+                                              ? `${t.content.trimEnd()}\n${dongMoi}`
+                                              : dongMoi,
+                                          }
+                                        : t,
+                                    );
+                                    const updatedNote = ca.note
+                                      ? {
+                                          ...ca.note,
+                                          propositions: [
+                                            ...(ca.note.propositions || []),
+                                            {
+                                              id: newPropId,
+                                              text: noiDungKhoiPhuc,
+                                              section,
+                                              status: "than" as const,
+                                              subject: "bệnh nhân",
+                                              evidenceTurns: [luot],
+                                              quotes: muc?.trich_dan_nguyen_van ? [muc.trich_dan_nguyen_van] : [],
+                                            },
+                                          ],
+                                        }
+                                      : ca.note;
+                                    return { tabs: updatedTabs, note: updatedNote };
+                                  });
+                                }}
                               />
                             </div>
                           )}
@@ -1485,7 +1615,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             {/* Nhiệm vụ Lâm sàng */}
             {activeView === "tasks" && (
               <Suspense fallback={<KhungDangTaiManHinh />}>
-                <TasksView />
+                <TasksView
+                  sessions={sessions}
+                  onOpenSession={(sessionId) => {
+                    setActiveSessionId(sessionId);
+                    handleSelectNavigationItem("sessions");
+                  }}
+                />
               </Suspense>
             )}
 

@@ -17,6 +17,7 @@ Mot mo hinh sinh JSON dep ma gan nham chu the thi vo dung cho du an nay.
 import argparse
 import io
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -153,9 +154,35 @@ def nap(ten_mo_hinh, ep_json=True, adapter=None):
     bnb = BitsAndBytesConfig(
         load_in_4bit=True, bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16)
-    model = AutoModelForCausalLM.from_pretrained(
-        ten_mo_hinh, quantization_config=bnb, torch_dtype=torch.bfloat16,
-        device_map="auto")
+
+    # Boost 2: Neu GPU con >= 3.5 GB VRAM trong, ghim toan bo mo hinh 4-bit len GPU 0
+    # (`device_map={"": 0}`) de tranh `device_map="auto"` am tham offload layer sang CPU RAM
+    # qua PCIe lam cham 5-10x; neu thieu VRAM hoac OOM thi tu dong lui ve `device_map="auto"`.
+    cuda_mod = getattr(torch, "cuda", None)
+    co_cuda = bool(cuda_mod is not None and callable(getattr(cuda_mod, "is_available", None)) and cuda_mod.is_available())
+    vram_trong_gb = 0.0
+    if co_cuda and callable(getattr(cuda_mod, "mem_get_info", None)):
+        try:
+            vram_trong_gb = float(cuda_mod.mem_get_info()[0]) / (1024 ** 3)
+        except Exception:
+            vram_trong_gb = 0.0
+
+    oom_cls = getattr(cuda_mod, "OutOfMemoryError", RuntimeError) if cuda_mod is not None else RuntimeError
+    if co_cuda and vram_trong_gb >= 3.5:
+        try:
+            model = AutoModelForCausalLM.from_pretrained(
+                ten_mo_hinh, quantization_config=bnb, torch_dtype=torch.bfloat16,
+                device_map={"": 0})
+        except (oom_cls, RuntimeError, MemoryError):
+            if callable(getattr(cuda_mod, "empty_cache", None)):
+                cuda_mod.empty_cache()
+            model = AutoModelForCausalLM.from_pretrained(
+                ten_mo_hinh, quantization_config=bnb, torch_dtype=torch.bfloat16,
+                device_map="auto")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            ten_mo_hinh, quantization_config=bnb, torch_dtype=torch.bfloat16,
+            device_map="auto")
     if adapter:
         # Adapter huan luyen RIENG cho khau trich (`--nhiem-vu trich`).
         # Khac han adapter cua nhanh A, von hoc viet benh an.
@@ -200,6 +227,15 @@ def trich(tok, model, prefix_fn, mau_list, max_token=1536, vi_du=None,
     co_adapter = bool(getattr(model, "_co_adapter_trich", False))
     if vi_du is None:
         vi_du = not co_adapter
+    if prompt_lookup_num_tokens is None:
+        env_plt = os.environ.get("MEDITRACE_PROMPT_LOOKUP_TOKENS", "").strip()
+        if env_plt != "":
+            try:
+                prompt_lookup_num_tokens = max(0, int(env_plt))
+            except ValueError:
+                prompt_lookup_num_tokens = 5 if co_adapter else None
+        elif co_adapter:
+            prompt_lookup_num_tokens = 5
     # Chay tiep bo qua mau THEO ID. Nhung id la `hv_xxxx` o MOI bo tu sinh,
     # nen mot tep dem cua bo 3.000 se duoc dung lai nguyen cho bo 5.000 —
     # va do la mot phep do tren du lieu tron lan, im lang hoan toan.
@@ -245,11 +281,14 @@ def trich(tok, model, prefix_fn, mau_list, max_token=1536, vi_du=None,
             tep.close()
 
 
+_CACHE_LOI_NHAC_TINH = {}
+
+
 def _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=None,
                   prompt_lookup_num_tokens=None):
     import torch
     kw = dict(max_new_tokens=max_token, do_sample=False,
-              pad_token_id=tok.eos_token_id)
+              use_cache=True, pad_token_id=tok.eos_token_id)
     if prefix_fn is not None:
         kw["prefix_allowed_tokens_fn"] = prefix_fn
     elif prompt_lookup_num_tokens:
@@ -260,7 +299,11 @@ def _sinh_mot_mau(tok, model, inp, max_token, prefix_fn=None,
         except TypeError:
             # Mo hinh gia trong test hoac phien ban transformers cu khong nhan tham so phu
             kw.pop("prompt_lookup_num_tokens", None)
-            out = model.generate(**inp, **kw)
+            try:
+                out = model.generate(**inp, **kw)
+            except TypeError:
+                kw.pop("use_cache", None)
+                out = model.generate(**inp, **kw)
     vao_len = inp["input_ids"].shape[1]
     van_ban = tok.decode(out[0][vao_len:], skip_special_tokens=True)
     del out
@@ -271,6 +314,12 @@ def _vong_trich(tok, model, prefix_fn, mau_list, max_token, vi_du,
                 da_co, tep, ket_qua, co_adapter=False,
                 prompt_lookup_num_tokens=None):
     from src.train_baseline import LOI_NHAC_HE_THONG_TRICH
+    khoa_nhac = bool(vi_du)
+    if khoa_nhac not in _CACHE_LOI_NHAC_TINH:
+        _CACHE_LOI_NHAC_TINH[khoa_nhac] = HUONG_DAN + (
+            f"\n\n{VI_DU}\n\nBây giờ đến lượt bạn." if khoa_nhac else ""
+        )
+    loi_nhac = _CACHE_LOI_NHAC_TINH[khoa_nhac]
     for i, m in enumerate(mau_list, 1):
         if m["id"] in da_co:
             ket_qua.append(da_co[m["id"]])
@@ -278,7 +327,6 @@ def _vong_trich(tok, model, prefix_fn, mau_list, max_token, vi_du,
                   flush=True)
             continue
         danh_so, so_luot = danh_so_luot(m["input"])
-        loi_nhac = HUONG_DAN + (f"\n\n{VI_DU}\n\nBây giờ đến lượt bạn." if vi_du else "")
         noi_dung_user = f"{loi_nhac}\n\nHội thoại:\n{danh_so}"
         if co_adapter:
             msgs = [{"role": "system", "content": LOI_NHAC_HE_THONG_TRICH},

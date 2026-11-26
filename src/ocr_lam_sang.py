@@ -6,11 +6,13 @@ và cảnh báo hiệu chỉnh liều thuốc ngay khi bác sĩ nhập hoặc qu
 """
 from __future__ import annotations
 
+from dataclasses import asdict
 import json
 import re
 import sys
 from typing import Any, Dict, List, Optional
 
+from src.can_lam_sang import ParaclinicalCorrelator
 from src.chuan_hoa_don_vi_xet_nghiem import (
     chuan_hoa_creatinine,
     chuan_hoa_glucose,
@@ -153,6 +155,59 @@ def boc_tach_phieu_cu(
     if kali is not None:
         chi_so["kali"] = kali
 
+    # Boost 9: Mở rộng trích xuất cận lâm sàng huyết học - đông máu - tim mạch - viêm - gan mật
+    wbc = _lay_so_float(r"\b(?:wbc|bạch\s*cầu)\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if wbc is not None:
+        chi_so["wbc"] = wbc
+
+    m_hb = re.search(
+        r"\b(?:hb|hgb|hemoglobin|huyết\s*sắc\s*tố)\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)\s*(g/dl|g/l)?",
+        chu,
+        flags=re.IGNORECASE,
+    )
+    if m_hb:
+        hb_raw = float(m_hb.group(1).replace(",", "."))
+        hb_dv = (m_hb.group(2) or "").strip().lower()
+        if hb_dv == "g/l" or (not hb_dv and hb_raw > 35.0):
+            chi_so["hb_g_l"] = hb_raw
+            chi_so["hb"] = round(hb_raw / 10.0, 2)
+        else:
+            chi_so["hb"] = hb_raw
+
+    plt = _lay_so_float(r"\b(?:plt|tiểu\s*cầu)\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if plt is not None:
+        chi_so["plt"] = plt
+
+    troponin = _lay_so_float(
+        r"\b(?:hs[\-\s]*)?troponin(?:\s*[ti])?\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)",
+        chu,
+    )
+    if troponin is not None:
+        chi_so["troponin"] = troponin
+
+    crp = _lay_so_float(r"\b(?:hs[\-\s]*)?crp\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if crp is not None:
+        chi_so["crp"] = crp
+
+    na = _lay_so_float(r"(?<!\w)(?:na\s*\+|na|natri)(?!\w)\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if na is not None:
+        chi_so["na"] = na
+
+    inr = _lay_so_float(r"\binr\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if inr is not None:
+        chi_so["inr"] = inr
+
+    bilirubin = _lay_so_float(
+        r"\bbilirubin(?:\s*(?:tp|toàn\s*phần|tt|trực\s*tiếp))?\b\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)",
+        chu,
+    )
+    if bilirubin is not None:
+        chi_so["bilirubin"] = bilirubin
+
+    albumin = _lay_so_float(r"\balbumin\b(?!\s*niệu)\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)", chu)
+    if albumin is not None:
+        chi_so["albumin"] = albumin
+
     # 2. Thuốc trong đơn cũ (chuẩn hóa biệt dược -> hoạt chất)
     chu_thuong = chu.lower()
     thuoc_tim_duoc: List[str] = []
@@ -188,10 +243,13 @@ def boc_tach_phieu_cu(
         ) + len(hieu_chinh.get("huong_dan_tuong_tac_thuc_pham", []))
         hieu_chinh["co_canh_bao_critical"] = True
 
+    kq_cls = ParaclinicalCorrelator.phan_tich_xet_nghiem(chi_so, chu)
+
     return {
         "chi_so": chi_so,
         "thuoc_nhan_dien": thuoc_tim_duoc,
         "hieu_chinh_lieu": hieu_chinh,
+        "doi_soat_can_lam_sang": asdict(kq_cls),
     }
 
 

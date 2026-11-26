@@ -8,7 +8,8 @@ import "./may-chu/env";
  *   - `llm-ngoai.ts`: /api/external/status, /api/edit-note, /api/clinical-qa, /api/questions-external, ...
  *   - `tra-cuu.ts`:   /api/pubmed-search, /api/phac-do/muc-luc, /api/lookup-official
  *   - `tro-ly.ts`:    /api/tro-ly/*
- *   - `bhyt-ocr.ts`:  /api/ocr/phieu-cu, /api/bhyt/precheck
+ *   - `bhyt-ocr.ts`:  /api/ocr/phieu-cu, /api/bhyt/precheck, /api/bhyt/recompile
+ *   - `boost-lam-sang.ts`: /api/clinical/informed-consent, /api/inpatient/ward-round-diff, /api/formulary/upload-csv
  *   - `sign-off.ts`:  /api/sessions/:id/sign-off, /api/worm/verify
  */
 import express from "express";
@@ -22,6 +23,7 @@ import { dangKyLlmNgoaiRoutes } from "./may-chu/routes/llm-ngoai";
 import { dangKyTraCuuRoutes } from "./may-chu/routes/tra-cuu";
 import { dangKyTroLyRoutes } from "./may-chu/routes/tro-ly";
 import { dangKyBhytOcrRoutes } from "./may-chu/routes/bhyt-ocr";
+import { dangKyBoostLamSangRoutes } from "./may-chu/routes/boost-lam-sang";
 import { dangKySignOffRoutes } from "./may-chu/routes/sign-off";
 
 export function taoUngDung() {
@@ -50,6 +52,7 @@ export function taoUngDung() {
   dangKyTraCuuRoutes(ungDung);
   dangKyTroLyRoutes(ungDung);
   dangKyBhytOcrRoutes(ungDung);
+  dangKyBoostLamSangRoutes(ungDung);
   dangKySignOffRoutes(ungDung);
 
   // Catch-all 404 JSON chuẩn cho mọi đường dẫn /api/* không khớp

@@ -11,12 +11,71 @@ const TEP_DB = process.env.MEDITRACE_DB || path.join(process.cwd(), "data", "med
 const THU_MUC = path.dirname(TEP_DB);
 fs.mkdirSync(THU_MUC, { recursive: true });
 
+/**
+ * Migration lũy đẳng nâng cấp CHECK constraint của bảng `muc_kho` trên các tệp `meditrace.db` cũ
+ * (vốn chỉ cho phép `'tra-cuu'`, `'mau-van-ban'`) sang hỗ trợ thêm `'benh-nhan'` và `'nhiem-vu'`,
+ * bảo toàn toàn bộ dữ liệu cũ và trạng thái `PRAGMA foreign_keys`.
+ */
+export function damBaoKhoMoRong(targetDb: DatabaseSync): boolean {
+  const meta = targetDb
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'muc_kho'")
+    .get() as { sql?: string } | undefined;
+
+  if (!meta?.sql) {
+    targetDb.exec(`
+      CREATE TABLE IF NOT EXISTS muc_kho (
+        nguoi_dung_id  INTEGER NOT NULL REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+        kho            TEXT    NOT NULL CHECK (kho IN ('tra-cuu', 'mau-van-ban', 'benh-nhan', 'nhiem-vu')),
+        thu_tu         INTEGER NOT NULL,
+        du_lieu        TEXT    NOT NULL CHECK (json_valid(du_lieu)),
+        PRIMARY KEY (nguoi_dung_id, kho, thu_tu)
+      );
+    `);
+    return true;
+  }
+
+  if (meta.sql.includes("'benh-nhan'") && meta.sql.includes("'nhiem-vu'")) {
+    return false;
+  }
+
+  const fkRow = targetDb.prepare("PRAGMA foreign_keys").get() as { foreign_keys?: number } | undefined;
+  const fkWasOn = Boolean(fkRow?.foreign_keys);
+  if (fkWasOn) targetDb.exec("PRAGMA foreign_keys = OFF;");
+  try {
+    targetDb.exec("BEGIN IMMEDIATE");
+    try {
+      targetDb.exec(`
+        DROP TABLE IF EXISTS muc_kho_new;
+        CREATE TABLE muc_kho_new (
+          nguoi_dung_id  INTEGER NOT NULL REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+          kho            TEXT    NOT NULL CHECK (kho IN ('tra-cuu', 'mau-van-ban', 'benh-nhan', 'nhiem-vu')),
+          thu_tu         INTEGER NOT NULL,
+          du_lieu        TEXT    NOT NULL CHECK (json_valid(du_lieu)),
+          PRIMARY KEY (nguoi_dung_id, kho, thu_tu)
+        );
+        INSERT INTO muc_kho_new (nguoi_dung_id, kho, thu_tu, du_lieu)
+          SELECT nguoi_dung_id, kho, thu_tu, du_lieu FROM muc_kho;
+        DROP TABLE muc_kho;
+        ALTER TABLE muc_kho_new RENAME TO muc_kho;
+      `);
+      targetDb.exec("COMMIT");
+    } catch (err) {
+      targetDb.exec("ROLLBACK");
+      throw err;
+    }
+  } finally {
+    if (fkWasOn) targetDb.exec("PRAGMA foreign_keys = ON;");
+  }
+  return true;
+}
+
 export const db = new DatabaseSync(TEP_DB);
 db.exec("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 3000; PRAGMA foreign_keys = ON;");
 const TEP_SCHEMA = fs.existsSync(path.join(process.cwd(), "db", "schema.sql"))
   ? path.join(process.cwd(), "db", "schema.sql")
   : path.join(process.cwd(), "web", "db", "schema.sql");
 db.exec(fs.readFileSync(TEP_SCHEMA, "utf-8"));
+damBaoKhoMoRong(db);
 // Đảm bảo migration bảng + trigger `worm_signoff` cho cả các tệp DB cũ đã tồn tại từ trước
 damBaoBangWorm(db);
 // Phiên chép âm (ASR) của dịch vụ Python gắn với người tạo: chặn dùng mã phiên của bác sĩ khác.
@@ -64,7 +123,7 @@ export function ghiNhatKy(nguoiDungId: number | null, hanhDong: string, chiTiet?
 }
 
 // ------------------------------------------------------------------ các kho của từng người
-export const TEN_KHO = ["ca-kham", "tra-cuu", "mau-van-ban"] as const;
+export const TEN_KHO = ["ca-kham", "tra-cuu", "mau-van-ban", "benh-nhan", "nhiem-vu"] as const;
 export type TenKho = (typeof TEN_KHO)[number];
 export const laTenKho = (t: string): t is TenKho => (TEN_KHO as readonly string[]).includes(t);
 
@@ -224,9 +283,16 @@ export function ghiKho(
       for (const id of canXoa) xoa.run(uid, id);
       for (const d of coSan.values()) if (!conLai.has(d.id) && !canXoa.includes(d.id)) updatedAt[d.id] = d.cap_nhat_luc;
     } else {
+      const chuoiMuc = ds.map((m) => {
+        const j = JSON.stringify(m);
+        if (typeof j !== "string") {
+          throw Object.assign(new Error("Mục dữ liệu trong kho không hợp lệ"), { ma: 400, status: 400 });
+        }
+        return j;
+      });
       db.prepare("DELETE FROM muc_kho WHERE nguoi_dung_id = ? AND kho = ?").run(uid, kho);
       const them = db.prepare("INSERT INTO muc_kho (nguoi_dung_id, kho, thu_tu, du_lieu) VALUES (?, ?, ?, ?)");
-      ds.forEach((m, i) => them.run(uid, kho, i, JSON.stringify(m)));
+      chuoiMuc.forEach((json, i) => them.run(uid, kho, i, json));
     }
 
     db.prepare(

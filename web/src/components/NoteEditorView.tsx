@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { DocumentTabItem, SignOffRecord } from "../types";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { DocumentTabItem, Session, SignOffRecord } from "../types";
 import { ghepMenhDe } from "../lib/ghepMenhDe";
 import {
   compileEffectiveNote,
@@ -11,8 +11,9 @@ import {
   trichChanDoanVaThuocTuSoap,
 } from "../lib/compileEffectiveNote";
 import { taoPhieuSbar, tachMucHis } from "../lib/sbar";
+import { xuatGoiFhirVaBhytHieuLuc } from "../lib/taiBienDichHieuLuc";
 import type { CanhBaoMauThuanLanKham } from "../lib/doiChieuLanKham";
-import type { Quyet } from "./VerificationView";
+import type { Proposition, Quyet } from "./VerificationView";
 import {
   FileText,
   Edit2,
@@ -35,6 +36,7 @@ import {
   AlertTriangle,
   AlertCircle,
   ShieldAlert,
+  ShieldCheck,
   CheckCircle2,
   User,
   Stethoscope,
@@ -50,11 +52,18 @@ import {
 } from "lucide-react";
 import type { NoteMeta } from "./VerificationView";
 import { NhatKyTienTrinhAIModal } from "./NhatKyTienTrinhAIModal";
-import { HO_SO_MAU, HoSoDD, ToDanDoBenhNhanModal } from "./ToDanDoBenhNhanModal";
+import { HO_SO_MAU, HoSoDD, MucDan, Thuoc, ToDanDoBenhNhanModal } from "./ToDanDoBenhNhanModal";
 import { CrossVisitBanner } from "./CrossVisitBanner";
 import { HisSmartCopyPopover } from "./HisSmartCopyPopover";
 import { BhytPrecheckModal, type BhytPrecheckResult } from "./BhytPrecheckModal";
 import { SbarModal } from "./SbarModal";
+import {
+  BangDoiSoatThuocVaDonQuocGiaModal,
+  phanTichDongDonTt26TuMenhDe,
+} from "./BangDoiSoatThuocVaDonQuocGiaModal";
+import { CamDoanThuThuatModal } from "./CamDoanThuThuatModal";
+import { DiBuongNoiTruModal } from "./DiBuongNoiTruModal";
+import { BangDongCoLamSangThucTinh } from "./BangDongCoLamSangThucTinh";
 
 /** Một mệnh đề cần tô trong bản nháp khi ngăn duyệt đang mở. */
 export type DanhDauMD = {
@@ -84,6 +93,10 @@ interface NoteEditorViewProps {
   /** Dữ liệu mệnh đề & kiểm duyệt lâm sàng nâng cao từ backend */
   noteMeta?: NoteMeta | null;
   patientIdentifier?: string;
+  patientInfo?: Record<string, unknown>;
+  currentSession?: Session | null;
+  allSessions?: Session[];
+  onCreateCustomTab?: (title: string, content: string) => void;
   quyetDuyet?: Record<number, Quyet>;
   banSuaDuyet?: Record<number, string>;
   signOff?: SignOffRecord;
@@ -91,6 +104,187 @@ interface NoteEditorViewProps {
   crossVisitAlerts?: CanhBaoMauThuanLanKham[];
   savedLeaflet?: HoSoDD;
   onSaveLeaflet?: (hoSo: HoSoDD) => void;
+}
+
+/**
+ * Chèn ghi nhận trực tiếp của bác sĩ (PhoWhisper rảnh tay F2, chip SOCRATES, hoặc biện luận CLS)
+ * vào đúng mục mục tiêu (mặc định `KHÁM LÂM SÀNG`) với nhãn nguồn minh bạch.
+ */
+export function chenGhiNhanKhamTrucTiep(
+  noiDungHienTai: string,
+  vanBanMoi: string,
+  nhanNguon = "[Bác sĩ đọc ghi nhận khám trực tiếp]",
+  mauTieuDeMuc = /(?:KHÁM\s+LÂM\s+SÀNG|KHÁM\s+THỰC\s+THỂ|O\s*[—–-]\s*OBJECTIVE|THỰC\s+THỂ\s*&\s*CẬN\s+LÂM\s+SÀNG)/iu,
+): string {
+  const sach = (vanBanMoi || "").trim();
+  if (!sach) return noiDungHienTai;
+  const dongChen = sach.startsWith("- ") ? sach : `- ${nhanNguon}: ${sach}`;
+  const goc = (noiDungHienTai || "").trimEnd();
+  if (!goc) return `KHÁM LÂM SÀNG\n${dongChen}`;
+
+  const cacDong = goc.split("\n");
+  let viTriMuc = -1;
+  for (let i = 0; i < cacDong.length; i++) {
+    if (laTieuDeMuc(cacDong[i]) && mauTieuDeMuc.test(cacDong[i])) {
+      viTriMuc = i;
+      break;
+    }
+  }
+
+  if (viTriMuc >= 0) {
+    let viTriChen = cacDong.length;
+    for (let j = viTriMuc + 1; j < cacDong.length; j++) {
+      const dj = cacDong[j].trim();
+      if ((laTieuDeMuc(cacDong[j]) && !/^#\s+/.test(dj)) || /^---|^___|^\*\*\*$/.test(dj)) {
+        viTriChen = j;
+        break;
+      }
+    }
+    while (viTriChen > viTriMuc + 1 && !cacDong[viTriChen - 1].trim()) {
+      viTriChen--;
+    }
+    const truoc = cacDong.slice(0, viTriChen);
+    const sau = cacDong.slice(viTriChen);
+    return [...truoc, dongChen, ...sau].join("\n");
+  }
+
+  if (nhanNguon.includes("Bác sĩ đọc ghi nhận khám")) {
+    return `${goc}\n\nKHÁM LÂM SÀNG\n${dongChen}`;
+  }
+  return `${goc}\n${dongChen}`;
+}
+
+/**
+ * Boost 4C: Biên dịch gói xuất HL7 FHIR R4 & BHYT QĐ 130/4750 (.json) sao cho phản ánh 100%
+ * quyết định `Giữ / Sửa / Bỏ` của bác sĩ (loại bỏ triệt để mệnh đề `bo` và cập nhật `banSuaDuyet`).
+ */
+export function taoGoiFhirBhytHieuLuc(
+  noteMeta: NoteMeta | null | undefined,
+  fallbackId: string,
+  quyetDuyet: Record<number, Quyet> = {},
+  banSuaDuyet: Record<number, string> = {},
+) {
+  const rawProps: Proposition[] = noteMeta?.propositions || [];
+  const rejectedIds = new Set<number>();
+  const rejectedTexts = new Set<string>();
+  const editedById = new Map<number, string>();
+  const editedByOldText = new Map<string, string>();
+
+  for (const p of rawProps) {
+    const q = quyetDuyet[p.id];
+    if (q === "bo") {
+      rejectedIds.add(p.id);
+      if (p.text?.trim()) rejectedTexts.add(p.text.trim().toLowerCase());
+      if (p.drug?.trim()) rejectedTexts.add(p.drug.trim().toLowerCase());
+    } else if (q === "sua" && banSuaDuyet[p.id]?.trim()) {
+      const moi = banSuaDuyet[p.id].trim();
+      editedById.set(p.id, moi);
+      if (p.text?.trim()) editedByOldText.set(p.text.trim(), moi);
+    }
+  }
+
+  const effectivePropositions = rawProps
+    .filter((p) => quyetDuyet[p.id] !== "bo")
+    .map((p) => {
+      const q = quyetDuyet[p.id] || "cho";
+      const sua = editedById.get(p.id);
+      return sua
+        ? { ...p, text: sua, originalText: p.text, doctorDecision: q }
+        : { ...p, doctorDecision: q };
+    });
+
+  // Lọc và cập nhật HL7 FHIR R4 Bundle
+  let fhirOut: any = noteMeta?.clinicalSafety?.fhir_bundle
+    ? JSON.parse(JSON.stringify(noteMeta.clinicalSafety.fhir_bundle))
+    : null;
+
+  if (fhirOut && Array.isArray(fhirOut.entry)) {
+    fhirOut.entry = fhirOut.entry
+      .filter((ent: any) => {
+        const res = ent?.resource || {};
+        const resId = String(res.id || "");
+        const mId = resId.match(/(?:^|[-_])(?:prop[-_])?(\d+)$/i);
+        if (mId && rejectedIds.has(Number(mId[1]))) return false;
+
+        const textsToCheck = [
+          res?.code?.text,
+          res?.medicationCodeableConcept?.text,
+          res?.valueString,
+          ...(Array.isArray(res?.note) ? res.note.map((n: any) => n?.text) : []),
+        ]
+          .filter((x) => typeof x === "string")
+          .map((x: string) => x.trim().toLowerCase());
+
+        if (textsToCheck.some((t) => rejectedTexts.has(t))) return false;
+        return true;
+      })
+      .map((ent: any) => {
+        const res = ent?.resource;
+        if (!res) return ent;
+        const resId = String(res.id || "");
+        const mId = resId.match(/(?:^|[-_])(?:prop[-_])?(\d+)$/i);
+        const suaTheoId = mId ? editedById.get(Number(mId[1])) : undefined;
+
+        const thayChuoi = (goc: unknown): unknown => {
+          if (typeof goc !== "string") return goc;
+          if (suaTheoId) return suaTheoId;
+          return editedByOldText.get(goc.trim()) || goc;
+        };
+
+        if (res.code?.text) res.code.text = thayChuoi(res.code.text);
+        if (res.medicationCodeableConcept?.text) {
+          res.medicationCodeableConcept.text = thayChuoi(res.medicationCodeableConcept.text);
+        }
+        if (typeof res.valueString === "string") res.valueString = thayChuoi(res.valueString);
+        if (Array.isArray(res.note)) {
+          res.note = res.note.map((n: any) => (n?.text ? { ...n, text: thayChuoi(n.text) } : n));
+        }
+        return ent;
+      });
+
+    if (typeof fhirOut.total === "number") {
+      fhirOut.total = fhirOut.entry.length;
+    }
+  }
+
+  // Lọc và cập nhật gói BHYT QĐ 130/4750
+  let bhytOut: any = noteMeta?.clinicalSafety?.bhyt_icd10
+    ? JSON.parse(JSON.stringify(noteMeta.clinicalSafety.bhyt_icd10))
+    : null;
+
+  if (bhytOut?.bang_xml_130_4750) {
+    const xml = bhytOut.bang_xml_130_4750;
+    if (Array.isArray(xml.XML2_THUOC)) {
+      xml.XML2_THUOC = xml.XML2_THUOC.filter((row: any) => {
+        const ten = String(row?.TEN_THUOC || "").trim().toLowerCase();
+        return !ten || !rejectedTexts.has(ten);
+      }).map((row: any, idx: number) => {
+        const tenGoc = String(row?.TEN_THUOC || "").trim();
+        const sua = editedByOldText.get(tenGoc);
+        return { ...row, STT: idx + 1, ...(sua ? { TEN_THUOC: sua } : {}) };
+      });
+    }
+    if (Array.isArray(xml.XML5_DIEN_BIEN_LS)) {
+      xml.XML5_DIEN_BIEN_LS = xml.XML5_DIEN_BIEN_LS.filter((row: any) => {
+        const db = String(row?.DIEN_BIEN_LS || "").trim().toLowerCase();
+        return !db || !rejectedTexts.has(db);
+      }).map((row: any, idx: number) => {
+        const dbGoc = String(row?.DIEN_BIEN_LS || "").trim();
+        const sua = editedByOldText.get(dbGoc);
+        return { ...row, STT: idx + 1, ...(sua ? { DIEN_BIEN_LS: sua } : {}) };
+      });
+    }
+  }
+
+  return {
+    caseId: noteMeta?.caseId || fallbackId,
+    exportedAt: new Date().toISOString(),
+    bhyt_qd130_4750: bhytOut,
+    stage_45_omission_recovery: noteMeta?.clinicalSafety?.khoi_phuc_bo_sot_tang_45 || [],
+    audit_trail_worm: noteMeta?.clinicalSafety?.audit_trail_worm || null,
+    hl7_fhir_r4_bundle: fhirOut,
+    propositions: effectivePropositions,
+  };
 }
 
 const MAU_TO: Record<DanhDauMD["trangThai"], string> = {
@@ -236,6 +430,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   onKiemChungLuot,
   noteMeta = null,
   patientIdentifier = "",
+  patientInfo,
+  currentSession = null,
+  allSessions = [],
+  onCreateCustomTab,
   quyetDuyet = {},
   banSuaDuyet = {},
   signOff,
@@ -250,8 +448,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [personalisationOn, setPersonalisationOn] = useState(true);
 
-  // Dictation state (Đọc chính tả trực tiếp bằng giọng nói)
+  // Dictation state (Boost 3: Đọc khám thực thể rảnh tay F2 bằng PhoWhisper cục bộ — 0 byte gửi Google)
   const [isDictating, setIsDictating] = useState(false);
+  const [isTranscribingDictation, setIsTranscribingDictation] = useState(false);
+  const [dictationNotice, setDictationNotice] = useState<string | null>(null);
+
   const [dangSua, setDangSua] = useState(false);
   const [moModalTienTrinhAI, setMoModalTienTrinhAI] = useState(false);
   const [moModalDanDo, setMoModalDanDo] = useState(false);
@@ -261,6 +462,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   const [moModalBhyt, setMoModalBhyt] = useState(false);
   const [dangKiemBhyt, setDangKiemBhyt] = useState(false);
   const [kqBhyt, setKqBhyt] = useState<BhytPrecheckResult | null>(null);
+  const [moModalThuocTt26, setMoModalThuocTt26] = useState(false);
+  const [moModalCamDoanPttt, setMoModalCamDoanPttt] = useState(false);
+  const [moModalDiBuong, setMoModalDiBuong] = useState(false);
   // Tờ dặn dò sửa tay của từng ca, theo mã tab, để chuyển tab rồi quay lại vẫn còn.
   const [hoSoDanDo, setHoSoDanDo] = useState<Record<string, HoSoDD>>({});
   const [luotDangXem, setLuotDangXem] = useState<number | null>(null);
@@ -307,29 +511,45 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   };
   useEffect(() => {
     if (chonId === null || chonId === undefined) return;
-    // Đợi khung hình sau: màn hẹp vừa chuyển từ ngăn duyệt sang bản nháp (đang ẩn -> hiện), cuộn ngay
-    // lúc đó không có tác dụng (thử 24/09).
     const h = requestAnimationFrame(() =>
       giayRef.current?.querySelector(`[data-md="${chonId}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
     return () => cancelAnimationFrame(h);
   }, [chonId]);
-  const recognitionRef = useRef<any>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const tabContentRef = useRef<string>(tab.content);
+  tabContentRef.current = tab.content;
 
   // Undo / Redo history
   const [history, setHistory] = useState<string[]>([tab.content]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
+  const dungLuotGhiAmTam = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+    }
+    setIsDictating(false);
+  }, []);
+
   useEffect(() => {
     setHistory([tab.content]);
     setHistoryIndex(0);
-    // Stop dictation if tab changes
-    if (isDictating && recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {}
-      setIsDictating(false);
-    }
-  }, [tab.id]);
+    dungLuotGhiAmTam();
+  }, [tab.id, dungLuotGhiAmTam]);
+
+  useEffect(() => {
+    return () => {
+      dungLuotGhiAmTam();
+    };
+  }, [dungLuotGhiAmTam]);
 
   // Văn bản hiệu lực đã áp dụng mọi quyết định "Sửa" và loại bỏ mệnh đề "Bỏ"
   const laTabBenhAn =
@@ -361,13 +581,18 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
     [noteMeta?.propositions, quyetDuyet, banSuaDuyet],
   );
 
-  const handleTextChange = (newVal: string) => {
-    onUpdateContent(newVal);
-    const newHist = history.slice(0, historyIndex + 1);
-    newHist.push(newVal);
-    setHistory(newHist);
-    setHistoryIndex(newHist.length - 1);
-  };
+  const handleTextChange = useCallback(
+    (newVal: string) => {
+      onUpdateContent(newVal);
+      setHistory((prevHist) => {
+        const sliced = prevHist.slice(0, historyIndex + 1);
+        sliced.push(newVal);
+        setHistoryIndex(sliced.length - 1);
+        return sliced;
+      });
+    },
+    [onUpdateContent, historyIndex],
+  );
 
   const handleUndo = () => {
     if (historyIndex > 0) {
@@ -415,17 +640,15 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
     setIsExportMenuOpen(false);
   };
 
-  // Tải gói chuẩn liên thông HL7 FHIR R4 & BHYT XML 130/4750 (.json)
+  // Boost 4C: Tải gói chuẩn liên thông HL7 FHIR R4 & BHYT XML 130/4750 (.json) đã lọc mục Bỏ & áp dụng mục Sửa
   const handleDownloadFhirBhytJson = () => {
-    const payload = {
+    const payload = xuatGoiFhirVaBhytHieuLuc({
+      noteMeta,
+      quyetDuyet,
+      banSuaDuyet,
       caseId: noteMeta?.caseId || tab.id,
-      exportedAt: new Date().toISOString(),
-      bhyt_qd130_4750: noteMeta?.clinicalSafety?.bhyt_icd10 || null,
-      stage_45_omission_recovery: noteMeta?.clinicalSafety?.khoi_phuc_bo_sot_tang_45 || [],
-      audit_trail_worm: noteMeta?.clinicalSafety?.audit_trail_worm || null,
-      hl7_fhir_r4_bundle: noteMeta?.clinicalSafety?.fhir_bundle || null,
-      propositions: noteMeta?.propositions || [],
-    };
+      patientIdentifier,
+    });
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -436,9 +659,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
     setIsExportMenuOpen(false);
   };
 
-  // Dựng tờ dặn dò động từ dữ liệu ca khám thật (nếu có); tuyệt đối KHÔNG chép bừa Plavix/Stent/mạch vành từ HO_SO_MAU sang ca thật!
+  // Boost 4C: Dựng tờ dặn dò động từ dữ liệu ca khám thật — giữ đầy đủ thuốc `can_xac_nhan` đã được bác sĩ Giữ/Sửa,
+  // tách rõ "Đơn thuốc kê mới đợt này" và "Thuốc nền đang dùng tại nhà", lấy chế độ ăn & dấu hiệu đỏ từ `ban_dan_do_benh_nhan`!
   const hoSoDanDoTuCa = useMemo<HoSoDD>(() => {
     const icd = noteMeta?.clinicalSafety?.bhyt_icd10?.ma_icd10_chinh;
+    const banDanDoBe = noteMeta?.clinicalSafety?.ban_dan_do_benh_nhan;
     const rawProps = noteMeta?.propositions || [];
     const activeProps = rawProps
       .filter((p) => quyetDuyet[p.id] !== "bo")
@@ -448,16 +673,25 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       }))
       .filter((p) => p.effectiveText.length > 0);
 
-    const dsThuoc = activeProps.filter(
-      (p) =>
-        p.status === "than" &&
-        (p.drug ||
-          p.section === "THUỐC ĐANG DÙNG" ||
-          p.section === "ĐƠN THUỐC" ||
-          p.section === "KẾ HOẠCH ĐIỀU TRỊ"),
-    );
+    const dsThuoc = activeProps.filter((p) => {
+      if (p.negated) return false;
+      const daXacNhanHoacThan =
+        p.status === "than" || quyetDuyet[p.id] === "giu" || quyetDuyet[p.id] === "sua";
+      if (!daXacNhanHoacThan) return false;
+      const sec = (p.section || "").toUpperCase();
+      if (sec === "DỊ ỨNG" || sec === "TIỀN SỬ GIA ĐÌNH") return false;
+      if (/dị ứng|mẫn cảm|đã ngưng|đã ngừng/i.test(p.effectiveText)) return false;
+      return Boolean(
+        p.drug ||
+          sec === "THUỐC ĐANG DÙNG" ||
+          sec === "ĐƠN THUỐC" ||
+          sec === "KẾ HOẠCH ĐIỀU TRỊ" ||
+          (sec === "CẦN XÁC NHẬN" && /\b(?:\d+\s*(?:mg|g|ml|viên)|uống|tiêm|xịt)\b/i.test(p.effectiveText)),
+      );
+    });
+
     const propChanDoan = activeProps.find(
-      (p) => p.section === "CHẨN ĐOÁN" || p.section === "ĐÁNH GIÁ" || p.section === "TÓM TẮT",
+      (p) => !p.negated && (p.section === "CHẨN ĐOÁN" || p.section === "ĐÁNH GIÁ" || p.section === "TÓM TẮT"),
     );
     const thuCong = trichChanDoanVaThuocTuSoap(effectiveContent);
 
@@ -476,35 +710,63 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       ? `${icd.ten_benh_byt} [ICD-10: ${icd.ma_icd10}]`
       : propChanDoan?.effectiveText || thuCong.chanDoan || "[chẩn đoán xác định do bác sĩ ghi]";
 
-    const thuocCa =
-      dsThuoc.length > 0
-        ? dsThuoc.slice(0, 8).map((p, idx) => ({
-            id: idx + 1,
-            ten: p.drug || p.effectiveText,
-            loai: p.section === "THUỐC ĐANG DÙNG" ? "Thuốc đang điều trị" : "Y lệnh / Kế hoạch điều trị",
-            nhan: p.warning ? "LƯU Ý" : "ĐÃ KIỂM CHỨNG",
-            mau: p.warning
-              ? "bg-amber-50 text-amber-800 border-amber-200"
-              : "bg-emerald-50 text-emerald-700 border-emerald-200",
-            sang: "[liều sáng]",
-            trua: "—",
-            chieu: "—",
-            toi: "—",
-            loiDan: `${p.effectiveText} (Căn cứ lượt thoại T${(p.evidenceTurns || []).join(", T") || "1"})`,
-          }))
+    // Sắp xếp Đơn thuốc kê mới lên trước, Thuốc nền đang dùng tại nhà ở sau
+    const dsThuocSapXep = [...dsThuoc].sort((a, b) => {
+      const aNha =
+        a.section === "THUỐC ĐANG DÙNG" || /\bđang uống|đang dùng|ở nhà\b/i.test(a.effectiveText) ? 1 : 0;
+      const bNha =
+        b.section === "THUỐC ĐANG DÙNG" || /\bđang uống|đang dùng|ở nhà\b/i.test(b.effectiveText) ? 1 : 0;
+      return aNha - bNha;
+    });
+
+    const thuocCa: Thuoc[] =
+      dsThuocSapXep.length > 0
+        ? dsThuocSapXep.slice(0, 10).map((p, idx) => {
+            const laThuocNha =
+              p.section === "THUỐC ĐANG DÙNG" || /\bđang uống|đang dùng|ở nhà\b/i.test(p.effectiveText);
+            const pt = phanTichDongDonTt26TuMenhDe(p.effectiveText, p.drug, p.evidenceTurns || [], String(idx + 1));
+            const daSua = quyetDuyet[p.id] === "sua";
+            return {
+              id: idx + 1,
+              ten: p.drug || p.effectiveText,
+              loai: laThuocNha
+                ? "Thuốc nền đang dùng tại nhà — theo đối soát bác sĩ"
+                : "Đơn thuốc kê mới đợt này",
+              nhan: p.warning
+                ? "LƯU Ý"
+                : laThuocNha
+                ? "THUỐC NỀN TẠI NHÀ"
+                : daSua
+                ? "ĐÃ HIỆU CHỈNH"
+                : "ĐƠN KÊ MỚI",
+              mau: p.warning
+                ? "bg-amber-50 text-amber-800 border-amber-200"
+                : laThuocNha
+                ? "bg-sky-50 text-sky-700 border-sky-200"
+                : "bg-emerald-50 text-emerald-700 border-emerald-200",
+              sang: pt.sang,
+              trua: pt.trua,
+              chieu: pt.chieu,
+              toi: pt.toi,
+              loiDan: `${p.effectiveText} (Căn cứ lượt thoại T${(p.evidenceTurns || []).join(", T") || "1"})`,
+            };
+          })
         : thuCong.thuoc.length > 0
-        ? thuCong.thuoc.slice(0, 8).map((dongThuoc, idx) => ({
-            id: idx + 1,
-            ten: dongThuoc,
-            loai: "Y lệnh do bác sĩ ghi nhận",
-            nhan: "BÁC SĨ CHỈ ĐỊNH",
-            mau: "bg-sky-50 text-sky-700 border-sky-200",
-            sang: "[liều sáng]",
-            trua: "—",
-            chieu: "—",
-            toi: "—",
-            loiDan: dongThuoc,
-          }))
+        ? thuCong.thuoc.slice(0, 8).map((dongThuoc, idx) => {
+            const pt = phanTichDongDonTt26TuMenhDe(dongThuoc, null, [], String(idx + 1));
+            return {
+              id: idx + 1,
+              ten: dongThuoc,
+              loai: "Đơn thuốc kê mới đợt này (do bác sĩ ghi nhận)",
+              nhan: "BÁC SĨ CHỈ ĐỊNH",
+              mau: "bg-emerald-50 text-emerald-700 border-emerald-200",
+              sang: pt.sang,
+              trua: pt.trua,
+              chieu: pt.chieu,
+              toi: pt.toi,
+              loiDan: dongThuoc,
+            };
+          })
         : [
             {
               id: 1,
@@ -524,6 +786,74 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       /DẶN\s*DÒ|HƯỚNG\s*DẪN|CHẾ\s*ĐỘ\s*ĂN|SINH\s*HOẠT/iu.test(p.section || ""),
     );
 
+    const anUongTuBe: MucDan[] = [];
+    if (banDanDoBe?.che_do_an_uong) {
+      const nenAn: string[] = Array.isArray(banDanDoBe.che_do_an_uong.nen_an)
+        ? banDanDoBe.che_do_an_uong.nen_an
+        : [];
+      const kiengCu: string[] = Array.isArray(banDanDoBe.che_do_an_uong.kieng_cu)
+        ? banDanDoBe.che_do_an_uong.kieng_cu
+        : [];
+      if (nenAn.length > 0) {
+        anUongTuBe.push({ id: 1, tieuDe: "Thực phẩm nên dùng", noiDung: nenAn.join("; ") });
+      }
+      if (kiengCu.length > 0) {
+        anUongTuBe.push({ id: 2, tieuDe: "Thực phẩm & thói quen cần kiêng", noiDung: kiengCu.join("; ") });
+      }
+    }
+
+    const anUong: MucDan[] =
+      dsDanDo.length > 0
+        ? [
+            ...dsDanDo.map((d, idx) => ({ id: idx + 1, tieuDe: "Dặn dò bác sĩ", noiDung: d.effectiveText })),
+            ...anUongTuBe.map((m, idx) => ({ ...m, id: dsDanDo.length + idx + 1 })),
+          ]
+        : anUongTuBe.length > 0
+        ? anUongTuBe
+        : [
+            {
+              id: 1,
+              tieuDe: "Chế độ ăn & sinh hoạt",
+              noiDung: "[hướng dẫn ăn uống, nghỉ ngơi phù hợp chẩn đoán của ca khám]",
+            },
+          ];
+
+    const loiDanAnToanBe: string[] = Array.isArray(banDanDoBe?.loi_dan_uong_thuoc_an_toan)
+      ? banDanDoBe.loi_dan_uong_thuoc_an_toan
+      : [];
+    const theoDoi: MucDan[] =
+      loiDanAnToanBe.length > 0
+        ? loiDanAnToanBe.map((nd, idx) => ({
+            id: idx + 1,
+            tieuDe: idx === 0 ? "Nguyên tắc dùng thuốc an toàn" : "Lưu ý theo dõi",
+            noiDung: String(nd),
+          }))
+        : [
+            {
+              id: 1,
+              tieuDe: "Theo dõi tại nhà",
+              noiDung: "[triệu chứng và chỉ số sinh tồn cần theo dõi theo dặn dò bác sĩ]",
+            },
+          ];
+
+    const dauHieuDoBe: string[] = Array.isArray(banDanDoBe?.dau_hieu_do_can_cap_cuu)
+      ? banDanDoBe.dau_hieu_do_can_cap_cuu
+      : [];
+    const dauHieu: MucDan[] =
+      dauHieuDoBe.length > 0
+        ? dauHieuDoBe.slice(0, 5).map((rf, idx) => ({
+            id: idx + 1,
+            tieuDe: "",
+            noiDung: String(rf),
+          }))
+        : [
+            {
+              id: 1,
+              tieuDe: "",
+              noiDung: "[dấu hiệu bất thường cần tái khám sớm hoặc đến phòng cấp cứu gần nhất ngay]",
+            },
+          ];
+
     return {
       coSo: "[Tên cơ sở khám bệnh]",
       khoa: "[Khoa / phòng khám]",
@@ -538,100 +868,147 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
       bacSi: "[tên bác sĩ điều trị]",
       chanDoan: chanDoanCa,
       thuoc: thuocCa,
-      anUong:
-        dsDanDo.length > 0
-          ? dsDanDo.map((d, idx) => ({ id: idx + 1, tieuDe: "Dặn dò", noiDung: d.effectiveText }))
-          : [
-              {
-                id: 1,
-                tieuDe: "Chế độ ăn & sinh hoạt",
-                noiDung: "[hướng dẫn ăn uống, nghỉ ngơi phù hợp chẩn đoán của ca khám]",
-              },
-            ],
-      theoDoi: [
-        {
-          id: 1,
-          tieuDe: "Theo dõi tại nhà",
-          noiDung: "[triệu chứng và chỉ số sinh tồn cần theo dõi theo dặn dò bác sĩ]",
-        },
-      ],
-      dauHieu: [
-        {
-          id: 1,
-          tieuDe: "",
-          noiDung: "[dấu hiệu bất thường cần tái khám sớm hoặc đến phòng cấp cứu gần nhất ngay]",
-        },
-      ],
-      ngayTaiKham: "[ngày tái khám]",
+      anUong,
+      theoDoi,
+      dauHieu,
+      ngayTaiKham:
+        typeof banDanDoBe?.hen_tai_kham === "string" && banDanDoBe.hen_tai_kham.trim()
+          ? banDanDoBe.hen_tai_kham.trim()
+          : "[ngày tái khám]",
       diaDiemTaiKham: "[địa điểm tái khám]",
       ngayKy: new Date().toLocaleDateString("vi-VN"),
       cchn: "[số chứng chỉ hành nghề]",
     };
   }, [noteMeta, quyetDuyet, banSuaDuyet, sessionId, effectiveContent]);
 
-  // Toggle Đọc chính tả trực tiếp bằng giọng nói
-  const toggleDictation = () => {
-    // Tắt có chủ đích: Web Speech API trên Chrome gửi âm thanh lên máy chủ Google.
-    const SpeechRecognition: any = null;
+  // Boost 3: Đọc khám thực thể rảnh tay (F2) bằng MediaRecorder + PhoWhisper chạy 100% tại chỗ (0 byte lên Google)
+  const toggleDictation = useCallback(async () => {
+    if (isTranscribingDictation) return;
 
-    if (!SpeechRecognition) {
-      alert("Đọc chính tả trực tiếp đã tắt: nhận dạng giọng nói của trình duyệt gửi âm thanh lên máy chủ Google. Dùng nút Ghi âm ở đầu trang — tệp ghi âm được chép bằng PhoWhisper chạy tại chỗ.");
+    if (isDictating) {
+      dungLuotGhiAmTam();
       return;
     }
 
-    if (isDictating) {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {}
-      }
-      setIsDictating(false);
-    } else {
-      try {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = false;
-        recognition.lang = "vi-VN";
-
-        recognition.onresult = (event: any) => {
-          let dictatedChunk = "";
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-              dictatedChunk += event.results[i][0].transcript;
-            }
-          }
-          if (dictatedChunk.trim()) {
-            const updated = tab.content ? `${tab.content.trimEnd()} ${dictatedChunk.trim()}` : dictatedChunk.trim();
-            handleTextChange(updated);
-          }
-        };
-
-        recognition.onerror = (e: any) => {
-          if (e.error !== "no-speech") {
-            console.warn("Dictation error:", e);
-          }
-        };
-
-        recognition.onend = () => {
-          // If user hasn't explicitly stopped, keep going
-          if (isDictating && recognitionRef.current) {
-            try {
-              recognition.start();
-            } catch (err) {}
-          } else {
-            setIsDictating(false);
-          }
-        };
-
-        recognition.start();
-        recognitionRef.current = recognition;
-        setIsDictating(true);
-      } catch (err) {
-        console.error("Lỗi khi mở đọc chính tả:", err);
-        setIsDictating(false);
-      }
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setDictationNotice("Trình duyệt không hỗ trợ thu âm MediaRecorder cho PhoWhisper cục bộ.");
+      return;
     }
-  };
+
+    try {
+      setDictationNotice(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      audioChunksRef.current = [];
+
+      const mimeUuTien = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+      ].find((m) => MediaRecorder.isTypeSupported?.(m));
+
+      const recorder = mimeUuTien ? new MediaRecorder(stream, { mimeType: mimeUuTien }) : new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (ev: BlobEvent) => {
+        if (ev.data && ev.data.size > 0) {
+          audioChunksRef.current.push(ev.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+          mediaStreamRef.current = null;
+        }
+        setIsDictating(false);
+
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        audioChunksRef.current = [];
+        if (blob.size < 256) return;
+
+        setIsTranscribingDictation(true);
+        try {
+          const audioBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const res = String(reader.result || "");
+              const idx = res.indexOf(",");
+              resolve(idx >= 0 ? res.slice(idx + 1) : res);
+            };
+            reader.onerror = () => reject(new Error("Không đọc được luồng âm thanh"));
+            reader.readAsDataURL(blob);
+          });
+
+          const r = await fetch("/api/transcribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              audioBase64,
+              fileName: "kham-thuc-the.webm",
+              diarize: false,
+            }),
+          });
+
+          if (!r.ok) {
+            const errJson = await r.json().catch(() => ({}));
+            throw new Error(errJson?.error || `Lỗi chép âm PhoWhisper (${r.status})`);
+          }
+
+          const d = await r.json();
+          const tuSegments = Array.isArray(d?.segments)
+            ? d.segments
+                .map((s: any) => String(s?.text_original || "").trim())
+                .filter(Boolean)
+                .join(" ")
+            : "";
+          const tuTranscript = String(d?.transcript || "")
+            .replace(/^[^:\n]{1,20}:\s*/gm, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          const vanBanDoc = (tuSegments || tuTranscript).trim();
+          if (vanBanDoc) {
+            const capNhat = chenGhiNhanKhamTrucTiep(
+              tabContentRef.current,
+              vanBanDoc,
+              "[Bác sĩ đọc ghi nhận khám trực tiếp]",
+            );
+            handleTextChange(capNhat);
+            setDictationNotice("Đã chèn ghi nhận khám trực tiếp bằng PhoWhisper tại chỗ.");
+            setTimeout(() => setDictationNotice((cur) => (cur?.startsWith("Đã chèn") ? null : cur)), 3000);
+          } else {
+            setDictationNotice("PhoWhisper không nhận diện được tiếng nói rõ ràng trong đoạn vừa thu.");
+          }
+        } catch (err: any) {
+          setDictationNotice(err?.message || "Không kết nối được dịch vụ PhoWhisper tại chỗ.");
+        } finally {
+          setIsTranscribingDictation(false);
+        }
+      };
+
+      recorder.start();
+      setIsDictating(true);
+    } catch (err: any) {
+      console.error("Lỗi mở mic PhoWhisper:", err);
+      setDictationNotice("Không thể truy cập micro. Vui lòng cấp quyền micro trên trình duyệt.");
+      setIsDictating(false);
+    }
+  }, [isDictating, isTranscribingDictation, dungLuotGhiAmTam, handleTextChange]);
+
+  // Phím tắt F2 bật/tắt đọc khám thực thể rảnh tay khi đang khám cho bệnh nhân
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "F2") {
+        if (document.querySelector('[role="dialog"]')) return;
+        e.preventDefault();
+        void toggleDictation();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [toggleDictation]);
 
   // Du an chi co MOT cach viet ho so (nhanh C_khoa). Khong co "phong cach" theo loi nhac:
   // de nut do lai thi nguoi xem tuong doi phong cach la doi cach sinh.
@@ -959,29 +1336,42 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           </button>
         </div>
 
-        {/* Phải: Đọc chính tả, Hoàn tác, Làm lại, Sao chép & Xuất */}
+        {/* Phải: Đọc chính tả PhoWhisper (F2), Hoàn tác, Làm lại, Các công cụ lâm sàng & Xuất */}
         <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-          {/* Nút Đọc chính tả thực tế */}
+          {/* Nút Đọc khám thực thể rảnh tay bằng PhoWhisper cục bộ (F2) */}
           <button
-            onClick={toggleDictation}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 ${
+            type="button"
+            onClick={() => void toggleDictation()}
+            disabled={isTranscribingDictation}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 cursor-pointer ${
               isDictating
                 ? "bg-red-50 border-red-300 text-red-700 font-semibold animate-pulse"
+                : isTranscribingDictation
+                ? "bg-[#E0F2FE] border-[#0284C7] text-[#0369A1] font-semibold"
                 : "text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white"
             }`}
-            title={isDictating ? "Bấm để dừng đọc chính tả" : "Bấm và nói tiếng Việt để ghi văn bản trực tiếp"}
+            title={
+              isDictating
+                ? "Đang thu âm cục bộ — Bấm hoặc nhấn F2 để dừng và chép bằng PhoWhisper tại chỗ"
+                : "Đọc kết quả khám lâm sàng rảnh tay bằng PhoWhisper tại chỗ (Phím tắt F2 — 0 byte gửi Google)"
+            }
           >
             {isDictating ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
                 <MicOff size={13} />
-                <span>Đang đọc...</span>
+                <span>Dừng đọc (F2)</span>
+              </>
+            ) : isTranscribingDictation ? (
+              <>
+                <RefreshCw size={13} className="animate-spin text-[#0284C7]" />
+                <span>PhoWhisper...</span>
               </>
             ) : (
               <>
                 <Mic size={13} className="text-[#0284C7]" />
-                <span className="text-[11px] hidden sm:inline font-medium">Đọc chính tả</span>
-                <span className="text-[11px] inline sm:hidden font-medium">Đọc</span>
+                <span className="text-[11px] hidden sm:inline font-medium">Đọc khám (F2)</span>
+                <span className="text-[11px] inline sm:hidden font-medium">F2</span>
               </>
             )}
           </button>
@@ -1030,7 +1420,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden sm:inline">Tiến trình AI</span>
           </button>
 
-          {/* Nút Tiền kiểm BHYT & ICD-10 */}
+          {/* Boost 5: Nút Tiền kiểm BHYT & ICD-10 (truyền đầy đủ thong_tin_benh_nhan + mệnh đề đã sửa/lọc) */}
           <button
             type="button"
             disabled={dangKiemBhyt}
@@ -1042,8 +1432,15 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    propositions: (noteMeta?.propositions || []).filter((p) => quyetDuyet[p.id] !== "bo"),
+                    propositions: (noteMeta?.propositions || [])
+                      .filter((p) => quyetDuyet[p.id] !== "bo")
+                      .map((p) =>
+                        quyetDuyet[p.id] === "sua" && banSuaDuyet[p.id]?.trim()
+                          ? { ...p, text: banSuaDuyet[p.id].trim() }
+                          : p,
+                      ),
                     transcript,
+                    thong_tin_benh_nhan: patientInfo || null,
                   }),
                 });
                 if (r.ok) setKqBhyt(await r.json());
@@ -1052,10 +1449,44 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               }
             }}
             className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#7A4B00] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Tiền kiểm mã ICD-10 (4 ký tự) & Cảnh báo xuất toán BHYT"
+            title="Tiền kiểm mã ICD-10 (4 ký tự), Biện luận CLS XML3/4 ↔ XML5 & Xuất gói XML1–XML5 QĐ 130/4750"
           >
             <ShieldAlert size={12} className="text-[#B45309]" />
             <span className="text-[11px] hidden lg:inline">{dangKiemBhyt ? "Đang kiểm..." : "BHYT / ICD-10"}</span>
+          </button>
+
+          {/* Boost 6: Nút Đối soát Đa thuốc & Đơn thuốc Quốc gia TT 26/2025 */}
+          <button
+            type="button"
+            onClick={() => setMoModalThuocTt26(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="Đối soát Đa thuốc ở nhà (DDI/ATC/ACB) & Lập nháp Đơn thuốc Quốc gia Thông tư 26/2025/TT-BYT"
+          >
+            <Pill size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden xl:inline">Đơn thuốc TT26 / DDI</span>
+            <span className="text-[11px] hidden md:inline xl:hidden">TT26</span>
+          </button>
+
+          {/* Boost 8: Nút Cam đoan Thủ thuật / Phẫu thuật WORM (Luật KBCB 2023) */}
+          <button
+            type="button"
+            onClick={() => setMoModalCamDoanPttt(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="Kiểm định 6 trụ cột Điều 10 & 63 Luật KBCB 2023 & Xuất Phiếu Cam Đoan PTTT đóng dấu WORM"
+          >
+            <ShieldCheck size={12} className="text-[#0D9488]" />
+            <span className="text-[11px] hidden xl:inline">Cam đoan PTTT</span>
+          </button>
+
+          {/* Boost 10: Nút Đi buồng Nội trú TT 32/2023 & Sổ Bàn giao Ca trực */}
+          <button
+            type="button"
+            onClick={() => setMoModalDiBuong(true)}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
+            title="Tờ điều trị Nội trú Mẫu BV-01/BV2 (Thông tư 32/2023) & Sổ Bàn giao Ca trực Toàn khoa"
+          >
+            <Stethoscope size={12} className="text-[#0284C7]" />
+            <span className="text-[11px] hidden xl:inline">Đi buồng / Trực</span>
           </button>
 
           {/* Nút Tạo phiếu bàn giao SBAR */}
@@ -1238,6 +1669,33 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
       {/* Editor Main Content Area: Giấy bệnh án nổi khối */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 relative bg-gradient-to-b from-[#F0F7FA] via-[#F8FBFC] to-[#EEF6FB]">
+        {dictationNotice && (
+          <div className="max-w-3xl mx-auto mb-3 px-3.5 py-2 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] text-[#0369A1] text-xs font-medium flex items-center justify-between gap-2 no-print print:hidden">
+            <span>{dictationNotice}</span>
+            <button
+              type="button"
+              onClick={() => setDictationNotice(null)}
+              className="p-0.5 rounded hover:bg-[#E0F2FE] text-[#0284C7] cursor-pointer"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
+        <BangDongCoLamSangThucTinh
+          clinicalSafety={noteMeta?.clinicalSafety}
+          onOpenPolypharmacyModal={() => setMoModalThuocTt26(true)}
+          onSelectSocratesChip={(chip) => {
+            const capNhat = chenGhiNhanKhamTrucTiep(
+              tabContentRef.current,
+              chip,
+              "[Bác sĩ xác nhận trực tiếp tại bàn khám]",
+              /(?:BỆNH\s+SỬ|S\s*[—–-]\s*SUBJECTIVE|KHÁM\s+LÂM\s+SÀNG)/iu,
+            );
+            handleTextChange(capNhat);
+          }}
+        />
+
         <CrossVisitBanner alerts={crossVisitAlerts} />
         {isGenerating && (
           <div className="absolute inset-0 bg-white/80 backdrop-blur-2xs flex items-center justify-center z-10">
@@ -1510,6 +1968,73 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
         loading={dangKiemBhyt}
         result={kqBhyt}
         onClose={() => setMoModalBhyt(false)}
+        onInsertJustification={(cauBienLuan) => {
+          const capNhat = chenGhiNhanKhamTrucTiep(
+            tabContentRef.current,
+            cauBienLuan,
+            "[Bổ sung biện luận chỉ định CLS]",
+          );
+          handleTextChange(capNhat);
+        }}
+      />
+
+      <BangDoiSoatThuocVaDonQuocGiaModal
+        open={moModalThuocTt26}
+        onClose={() => setMoModalThuocTt26(false)}
+        patientName={tenBenhNhanHienThi}
+        patientInfo={patientInfo}
+        transcript={transcript}
+        noteMeta={noteMeta}
+        quyetDuyet={quyetDuyet}
+        banSuaDuyet={banSuaDuyet}
+        onInsertReconciliationToNote={(summaryBlock) => {
+          const capNhat = chenGhiNhanKhamTrucTiep(
+            tabContentRef.current,
+            summaryBlock,
+            "[Đối soát thuốc nền tại nhà]",
+            /(?:THUỐC\s+ĐANG\s+DÙNG|TIỀN\s+SỬ|KẾ\s+HOẠCH\s+ĐIỀU\s+TRỊ|P\s*[—–-]\s*PLAN)/iu,
+          );
+          handleTextChange(capNhat);
+        }}
+        onSyncToLeaflet={(thuocDonMoi) => {
+          const goc = savedLeaflet ?? hoSoDanDo[khoaHoSoDanDo] ?? hoSoDanDoTuCa;
+          const giuThuocNha = (goc.thuoc || []).filter((t) =>
+            /thuốc nền đang dùng tại nhà/i.test(t.loai || ""),
+          );
+          const moi: HoSoDD = {
+            ...goc,
+            thuoc: [
+              ...thuocDonMoi,
+              ...giuThuocNha.map((t, idx) => ({ ...t, id: thuocDonMoi.length + idx + 1 })),
+            ],
+          };
+          setHoSoDanDo((cu) => ({ ...cu, [khoaHoSoDanDo]: moi }));
+          onSaveLeaflet?.(moi);
+        }}
+      />
+
+      <CamDoanThuThuatModal
+        open={moModalCamDoanPttt}
+        onClose={() => setMoModalCamDoanPttt(false)}
+        sessionId={sessionId || tab.id}
+        patientName={tenBenhNhanHienThi}
+        patientInfo={patientInfo}
+        transcript={transcript}
+        noteMeta={noteMeta}
+        quyetDuyet={quyetDuyet}
+        banSuaDuyet={banSuaDuyet}
+        onCreateConsentTab={onCreateCustomTab}
+      />
+
+      <DiBuongNoiTruModal
+        open={moModalDiBuong}
+        onClose={() => setMoModalDiBuong(false)}
+        currentSession={currentSession}
+        allSessions={allSessions}
+        noteMeta={noteMeta}
+        quyetDuyet={quyetDuyet}
+        banSuaDuyet={banSuaDuyet}
+        onCreateTab={onCreateCustomTab}
       />
 
       <SbarModal

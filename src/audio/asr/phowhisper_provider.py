@@ -46,6 +46,7 @@ from typing import Any, Optional
 import numpy as np
 
 from .base import ASRProvider, read_wav_16k_mono
+from .contextual_trie_600 import ContextualPrefixTrie600, tao_trie_600_mac_dinh
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
 # Ma commit tren Hugging Face, doc ngay 22/09/2026 — ghim du an lap thi nghiem.
@@ -129,11 +130,17 @@ class PhoWhisperProvider(ASRProvider):
     external = False
 
     def __init__(self, model: str = "vinai/PhoWhisper-small", device: Optional[str] = None,
-                 revision: Optional[str] = None, word_timestamps: bool = True):
+                 revision: Optional[str] = None, word_timestamps: bool = True,
+                 trie_600: Optional[ContextualPrefixTrie600] = None,
+                 he_co_quan: Optional[str] = None,
+                 prompt_hotwords: Optional[str] = None):
         self.model = model
         self.revision = revision or REVISIONS.get(model)
         self.device_req = device
         self.word_timestamps = word_timestamps
+        self.trie_600 = trie_600 if trie_600 is not None else tao_trie_600_mac_dinh()
+        self.he_co_quan = he_co_quan
+        self.prompt_hotwords = prompt_hotwords
 
     # -- nap mo hinh -------------------------------------------------------
     def _load(self):
@@ -215,9 +222,15 @@ class PhoWhisperProvider(ASRProvider):
     def transcribe(self, audio_path: str | Path) -> ASRResult:
         audio, duration = read_wav_16k_mono(audio_path)
         _, _, dev, dtype = self._load()
+        hotwords_str = (
+            self.prompt_hotwords
+            if self.prompt_hotwords is not None
+            else (self.trie_600.xuat_hotwords(he_co_quan=self.he_co_quan, max_terms=60) if self.trie_600 is not None else "")
+        )
         cfg = {"language": "vi", "task": "transcribe", "num_beams": 1, "do_sample": False,
                "timestamp_tokens": False, "word_times": "cross_attention_dtw" if self.word_timestamps else None,
-               "max_new_tokens_per_s": TOKEN_MOI_GIAY, "window_s": CUA_SO_TOI_DA}
+               "max_new_tokens_per_s": TOKEN_MOI_GIAY, "window_s": CUA_SO_TOI_DA,
+               "trie_hotwords_active": bool(hotwords_str), "he_co_quan": self.he_co_quan}
         t0 = time.time()
         notes: list[str] = []
         chunks: list[dict] = []
@@ -277,6 +290,15 @@ class PhoWhisperProvider(ASRProvider):
                     segments.append(ASRSegment(f"seg_{len(segments) + 1:03d}", round(a / SR, 2),
                                                round(b / SR, 2), text, conf))
         cfg["timestamps"] = level
+        van_ban_gop = " ".join(s.text for s in segments if s.text)
+        goi_y_am_vi = (
+            self.trie_600.quet_goi_y_sua_am_vi(van_ban_gop)
+            if (self.trie_600 is not None and van_ban_gop)
+            else []
+        )
+        cfg["phonetic_candidates"] = goi_y_am_vi
+        for gy in goi_y_am_vi:
+            notes.append(f"goi_y_sua_am_vi: '{gy['tu_goc']}' -> '{gy['goi_y_chuan']}' ({gy['loai']})")
         return ASRResult(provider=self.name, model=self.model, language="vi", segments=segments,
                          revision=self.revision, device=dev, dtype=dtype, timestamp_level=level,
                          inference_config=cfg, processing_seconds=round(time.time() - t0, 3),
@@ -284,4 +306,6 @@ class PhoWhisperProvider(ASRProvider):
 
     def info(self) -> dict[str, Any]:
         return {"provider": self.name, "model": self.model, "revision": self.revision,
-                "external": self.external, "word_timestamps": self.word_timestamps}
+                "external": self.external, "word_timestamps": self.word_timestamps,
+                "trie_hotwords_active": self.trie_600 is not None,
+                "he_co_quan": self.he_co_quan}

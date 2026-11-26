@@ -186,7 +186,8 @@ def ten_ket_qua(nhanh, adapter):
 
 def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                     max_token=1536, kq_tho=None, prefix_phan=None,
-                    bat_buoc_trich_dan=None, chinh_sach="C"):
+                    bat_buoc_trich_dan=None, chinh_sach="C",
+                    prompt_lookup_num_tokens=None):
     """Ba nhanh dung chung mot duong ong, khac nhau DUNG hai buoc.
 
         B        trich -> sinh.          Khong lien ket thuc the, khong ap luat.
@@ -221,7 +222,11 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
 
     assert nhanh in NHANH_TRUNG_GIAN, nhanh
     if kq_tho is None:
-        kq_tho = bakeoff.trich(tok, model, prefix_fn, mau_list, max_token=max_token)
+        if prompt_lookup_num_tokens is not None:
+            kq_tho = bakeoff.trich(tok, model, prefix_fn, mau_list, max_token=max_token,
+                                   prompt_lookup_num_tokens=prompt_lookup_num_tokens)
+        else:
+            kq_tho = bakeoff.trich(tok, model, prefix_fn, mau_list, max_token=max_token)
     if bat_buoc_trich_dan is None:
         # Tu dong theo DAU RA, mot lan cho ca lan chay: adapter the he 5 viet
         # truong trich dan, nen thieu trich dan la loi va bi chan. Dau ra cu (the

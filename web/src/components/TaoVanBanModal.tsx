@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Search, Sparkles, PenLine, Plus, X, Trash2, Lock, Cpu, Check } from "lucide-react";
+import { Search, Sparkles, PenLine, Plus, X, Trash2, Lock, Cpu, Check, ShieldCheck } from "lucide-react";
 import type { Session } from "../types";
 import type { NoteMeta } from "./VerificationView";
 import { MAU_BAN_NHAP, MAU_CO_SAN, MauVanBan, NhomMau, TEN_NHOM } from "../lib/mauVanBan";
+import { laMauBienDichTaiCho } from "../lib/bieuMauPhapLyOffline";
 import { useKho } from "../lib/useKho";
 
 /**
  * Nút "Tạo" (kiểu Heidi): gõ để tìm mẫu, hoặc gõ yêu cầu bất kỳ rồi Enter để AI soạn.
  * - "Bản nháp hồ sơ lâm sàng" do Qwen3-4B của dự án sinh tại chỗ, không gửi ra ngoài.
- * - Mọi mục khác do mô hình ngoài soạn từ lời thoại + bản nháp + tab Ngữ cảnh; cần bật công tắc.
- * Không có nhãn "Pro", không có mẫu viết sẵn cho một bệnh cụ thể: gợi ý lấy lý do khám của chính ca.
+ * - Các biểu mẫu pháp lý & chuyên khoa BYT (`bienDichLuatTaiCho: true`) biên dịch tất định 100% tại chỗ
+ *   trong < 10 ms từ mệnh đề đã duyệt — KHÔNG BAO GIỜ bị khoá khi tắt "Mô hình ngoài".
+ * - Mọi mục tự do khác do mô hình ngoài soạn; cần bật công tắc.
  */
 interface Props {
   isOpen: boolean;
@@ -23,6 +25,10 @@ interface Props {
 }
 
 type Loc = "tat_ca" | NhomMau | "cua_toi";
+
+function laMauChayTaiCho(m: MauVanBan): boolean {
+  return Boolean(m.taiCho || m.bienDichLuatTaiCho || m.taiChoBienDich || laMauBienDichTaiCho(m.id));
+}
 
 export const TaoVanBanModal: React.FC<Props> = ({
   isOpen, onClose, session, note, allowExternal, onEnableExternal, onCreate,
@@ -48,7 +54,7 @@ export const TaoVanBanModal: React.FC<Props> = ({
 
   const khop = (m: MauVanBan) => {
     const s = q.trim().toLowerCase();
-    if (s && !m.ten.toLowerCase().includes(s)) return false;
+    if (s && !m.ten.toLowerCase().includes(s) && !m.chiDan.toLowerCase().includes(s)) return false;
     if (loc === "tat_ca") return true;
     if (loc === "cua_toi") return !!m.tuTao;
     return m.nhom === loc;
@@ -59,15 +65,21 @@ export const TaoVanBanModal: React.FC<Props> = ({
   const s = q.trim();
   if (s) muc.push({ nhom: "Tạo bằng AI", mau: { id: "tu-do", ten: s, nhom: "ho_so", chiDan: s }, yeuCau: s });
   if (khop(MAU_BAN_NHAP)) muc.push({ nhom: "Bản nháp chính", mau: MAU_BAN_NHAP });
+
+  const mauLuatByt = MAU_CO_SAN.filter((m) => (m.bienDichLuatTaiCho || m.taiChoBienDich) && khop(m));
+  mauLuatByt.forEach((m) => muc.push({ nhom: "Biểu mẫu Pháp lý & Chuyên khoa BYT (100% tại chỗ)", mau: m }));
+
   mauRieng.filter(khop).forEach((m) => muc.push({ nhom: "Mẫu của tôi", mau: m }));
-  MAU_CO_SAN.filter(khop).forEach((m) => muc.push({ nhom: "Mẫu", mau: m }));
+  MAU_CO_SAN.filter((m) => !(m.bienDichLuatTaiCho || m.taiChoBienDich) && khop(m)).forEach((m) =>
+    muc.push({ nhom: "Mẫu soạn bằng AI ngoài", mau: m })
+  );
 
   if (!isOpen) return null;
 
   const dung = (i: number) => {
     const x = muc[i];
     if (!x) return;
-    if (!x.mau.taiCho && !allowExternal) return;
+    if (!laMauChayTaiCho(x.mau) && !allowExternal) return;
     onCreate(x.mau, x.yeuCau);
     onClose();
   };
@@ -125,7 +137,7 @@ export const TaoVanBanModal: React.FC<Props> = ({
                 setChon(0);
               }}
               onKeyDown={phim}
-              placeholder="Tìm mẫu, hoặc gõ văn bản muốn tạo rồi Enter"
+              placeholder="Tìm biểu mẫu BYT (TT 01/2025, TT 25/2025, Nhi, Sản, Cấp cứu) hoặc gõ yêu cầu..."
               className="flex-1 min-w-0 text-[15px] text-[#0F172A] placeholder-[#94A3B8] bg-transparent focus:outline-none py-1"
             />
             <button onClick={onClose} className="p-1 rounded-lg text-[#64748B] hover:bg-[#E0F2FE]" title="Đóng (Esc)">
@@ -153,9 +165,11 @@ export const TaoVanBanModal: React.FC<Props> = ({
         </div>
 
         {!allowExternal && (
-          <div className="px-4 sm:px-5 py-2 bg-[#FEF9E7] border-b border-[#F5E6B8] text-[11.5px] text-[#7A4B00] flex flex-wrap items-center justify-between gap-2">
-            <span>Văn bản soạn bằng AI cần bật “Mô hình ngoài”: nội dung ca khám sẽ gửi tới máy chủ của dịch vụ mô hình ngoài.</span>
-            <button onClick={onEnableExternal} className="px-2.5 py-1 rounded-lg bg-white border border-[#F5E6B8] font-semibold">
+          <div className="px-4 sm:px-5 py-2 bg-[#ECFDF5] border-b border-[#A7F3D0] text-[11.5px] text-[#065F46] flex flex-wrap items-center justify-between gap-2">
+            <span>
+              Đang tắt “Mô hình ngoài”: toàn bộ <strong>8 Biểu mẫu Pháp lý &amp; Chuyên khoa BYT</strong> vẫn chạy <strong>100% tại chỗ (&lt; 10 ms)</strong>. Chỉ các mẫu tự do mới cần bật mô hình ngoài.
+            </span>
+            <button onClick={onEnableExternal} className="px-2.5 py-1 rounded-lg bg-white border border-[#A7F3D0] text-[#065F46] font-semibold">
               Bật mô hình ngoài
             </button>
           </div>
@@ -170,7 +184,9 @@ export const TaoVanBanModal: React.FC<Props> = ({
           {muc.length === 0 && <p className="px-3 py-6 text-center text-xs text-[#64748B]">Không có mẫu nào khớp.</p>}
           {muc.map((x, i) => {
             const dauNhom = i === 0 || muc[i - 1].nhom !== x.nhom;
-            const khoa = !x.mau.taiCho && !allowExternal;
+            const laLuatByt = Boolean(x.mau.bienDichLuatTaiCho || x.mau.taiChoBienDich || laMauBienDichTaiCho(x.mau.id));
+            const chayTaiCho = laMauChayTaiCho(x.mau);
+            const khoa = !chayTaiCho && !allowExternal;
             return (
               <React.Fragment key={`${x.nhom}-${x.mau.id}`}>
                 {dauNhom && (
@@ -184,18 +200,42 @@ export const TaoVanBanModal: React.FC<Props> = ({
                   className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer ${
                     chon === i ? "bg-[#F0F9FF]" : ""
                   } ${khoa ? "opacity-55 cursor-not-allowed" : ""}`}
-                  title={khoa ? "Cần bật “Mô hình ngoài”" : x.mau.chiDan || "Qwen3-4B tạo tại chỗ"}
+                  title={
+                    khoa
+                      ? "Cần bật “Mô hình ngoài”"
+                      : laLuatByt
+                      ? `Biên dịch tất định 100% tại chỗ (< 10 ms): ${x.mau.chiDan}`
+                      : x.mau.chiDan || "Qwen3-4B tạo tại chỗ"
+                  }
                 >
-                  <span className="w-7 h-7 rounded-lg bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center flex-shrink-0">
-                    {x.mau.taiCho ? <Cpu size={14} /> : x.yeuCau ? <Sparkles size={14} /> : <PenLine size={14} />}
+                  <span
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      laLuatByt ? "bg-[#ECFDF5] text-[#059669]" : "bg-[#E0F2FE] text-[#0284C7]"
+                    }`}
+                  >
+                    {laLuatByt ? (
+                      <ShieldCheck size={14} />
+                    ) : x.mau.taiCho ? (
+                      <Cpu size={14} />
+                    ) : x.yeuCau ? (
+                      <Sparkles size={14} />
+                    ) : (
+                      <PenLine size={14} />
+                    )}
                   </span>
                   <span className="flex-1 min-w-0 text-[13.5px] text-[#0F172A] truncate">
                     {x.yeuCau ? <>Tạo: <strong>{x.yeuCau}</strong></> : x.mau.ten}
                   </span>
-                  {x.mau.taiCho && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#E6F4F1] text-[#0D5F57] border border-[#BCE3DB] flex-shrink-0">
-                      tại chỗ
+                  {laLuatByt ? (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] flex-shrink-0">
+                      100% tại chỗ · Luật BYT
                     </span>
+                  ) : (
+                    x.mau.taiCho && (
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#E6F4F1] text-[#0D5F57] border border-[#BCE3DB] flex-shrink-0">
+                        tại chỗ
+                      </span>
+                    )
                   )}
                   {khoa && <Lock size={13} className="text-[#94A3B8] flex-shrink-0" />}
                   {x.mau.tuTao && (

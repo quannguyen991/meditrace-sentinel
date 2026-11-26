@@ -159,6 +159,133 @@ RE_THUOC_DONG_Y_NGAM = re.compile(
 )
 BIET_DUOC_CHUA_PARACETAMOL = tuple(_ttt.ten_cua("paracetamol"))
 
+# Boost 5: Quy tắc đối chiếu Chỉ định Cận lâm sàng / DVKT chi phí cao (XML3/XML4) <-> Diễn biến lâm sàng (XML5)
+QUY_TAC_CHI_DINH_CLS_BHYT: Dict[str, Dict[str, Any]] = {
+    "chụp mri": {
+        "ma_dvkt": "17.0001",
+        "ten_dich_vu": "Chụp cộng hưởng từ (MRI)",
+        "mau_nhan_dien": r"(?i)\b(?:chụp\s+)?mri\b",
+        "trieu_chung_bat_buoc": (
+            "đau đầu kéo dài", "đau đầu dữ dội", "yếu liệt", "tê bì", "thoát vị đĩa đệm",
+            "đau cột sống", "đau thắt lưng lan", "co giật", "chóng mặt", "thần kinh khu trú",
+            "đứt dây chằng", "đau khớp gối", "chấn thương", "u não", "đột quỵ",
+        ),
+    },
+    "cộng hưởng từ": {
+        "ma_dvkt": "17.0001",
+        "ten_dich_vu": "Chụp cộng hưởng từ (MRI)",
+        "mau_nhan_dien": r"(?i)\bcộng\s+hưởng\s+từ\b",
+        "trieu_chung_bat_buoc": (
+            "đau đầu kéo dài", "đau đầu dữ dội", "yếu liệt", "tê bì", "thoát vị đĩa đệm",
+            "đau cột sống", "đau thắt lưng lan", "co giật", "chóng mặt", "thần kinh khu trú",
+            "đứt dây chằng", "đau khớp gối", "chấn thương", "u não", "đột quỵ",
+        ),
+    },
+    "ct-scan": {
+        "ma_dvkt": "17.0002",
+        "ten_dich_vu": "Chụp cắt lớp vi tính (CT-Scan)",
+        "mau_nhan_dien": r"(?i)\b(?:ct[\-\s]*scan|chụp\s+ct)\b",
+        "trieu_chung_bat_buoc": (
+            "chấn thương", "đột quỵ", "tai biến", "đau đầu dữ dội", "yếu nửa người", "hôn mê",
+            "ho ra máu", "đau bụng cấp", "khó thở", "viêm xoang", "u phổi", "sỏi thận", "sỏi niệu quản",
+        ),
+    },
+    "cắt lớp vi tính": {
+        "ma_dvkt": "17.0002",
+        "ten_dich_vu": "Chụp cắt lớp vi tính (CT-Scan)",
+        "mau_nhan_dien": r"(?i)\bcắt\s+lớp\s+vi\s+tính\b",
+        "trieu_chung_bat_buoc": (
+            "chấn thương", "đột quỵ", "tai biến", "đau đầu dữ dội", "yếu nửa người", "hôn mê",
+            "ho ra máu", "đau bụng cấp", "khó thở", "viêm xoang", "u phổi", "sỏi thận", "sỏi niệu quản",
+        ),
+    },
+    "nội soi dạ dày": {
+        "ma_dvkt": "03.0001",
+        "ten_dich_vu": "Nội soi thực quản - dạ dày - tá tràng",
+        "mau_nhan_dien": r"(?i)\bnội\s+soi\s+(?:thực\s+quản\s*[-–]?\s*)?dạ\s+dày\b",
+        "trieu_chung_bat_buoc": (
+            "đau thượng vị", "đau dạ dày", "đau bao tử", "ợ hơi", "ợ chua", "trào ngược",
+            "nóng rát", "nôn ra máu", "phân đen", "nuốt nghẹn", "buồn nôn", "xót ruột",
+            "viêm dạ dày", "loét dạ dày",
+        ),
+    },
+    "nội soi đại tràng": {
+        "ma_dvkt": "03.0002",
+        "ten_dich_vu": "Nội soi đại trực tràng",
+        "mau_nhan_dien": r"(?i)\bnội\s+soi\s+đại\s+(?:trực\s+)?tràng\b",
+        "trieu_chung_bat_buoc": (
+            "đi ngoài ra máu", "đi cầu ra máu", "phân nhầy máu", "rối loạn đại tiện",
+            "tiêu chảy kéo dài", "táo bón kéo dài", "đau bụng dưới", "đau dọc khung đại tràng",
+            "sụt cân", "viêm đại tràng", "polyp",
+        ),
+    },
+    "troponin": {
+        "ma_dvkt": "23.0105",
+        "ten_dich_vu": "Định lượng Troponin T/I máu",
+        "mau_nhan_dien": r"(?i)\b(?:hs[\-\s]*)?troponin(?:\s*[ti])?\b",
+        "trieu_chung_bat_buoc": (
+            "đau ngực", "tức ngực", "đau thắt ngực", "nặng ngực", "khó thở",
+            "vã mồ hôi", "nhồi máu cơ tim", "hội chứng vành cấp", "thiếu máu cơ tim", "hồi hộp",
+        ),
+    },
+    "siêu âm doppler mạch": {
+        "ma_dvkt": "18.0020",
+        "ten_dich_vu": "Siêu âm Doppler mạch máu",
+        "mau_nhan_dien": r"(?i)\bsiêu\s+âm\s+doppler\s+mạch\b",
+        "trieu_chung_bat_buoc": (
+            "tê chân", "tê bì", "đau cách hồi", "phù chân", "suy giãn tĩnh mạch",
+            "huyết khối", "chóng mặt", "tăng huyết áp", "cao huyết áp", "đái tháo đường",
+            "tiểu đường", "xơ vữa", "lạnh đầu chi",
+        ),
+    },
+    "hba1c": {
+        "ma_dvkt": "23.0042",
+        "ten_dich_vu": "Định lượng HbA1c máu",
+        "mau_nhan_dien": r"(?i)\bhba1c\b",
+        "trieu_chung_bat_buoc": (
+            "đái tháo đường", "tiểu đường", "đường huyết cao", "tăng đường huyết",
+            "khát nước nhiều", "tiểu nhiều", "sụt cân", "rối loạn dung nạp đường",
+        ),
+    },
+    "x-quang ngực": {
+        "ma_dvkt": "16.0001",
+        "ten_dich_vu": "Chụp X-quang ngực thẳng",
+        "mau_nhan_dien": r"(?i)\bx[\-\s]*quang\s+(?:ngực|tim\s+phổi|phổi)\b",
+        "trieu_chung_bat_buoc": (
+            "ho", "khó thở", "đau ngực", "tức ngực", "sốt", "viêm phổi", "viêm phế quản",
+            "hen", "copd", "ran ẩm", "ran nổ", "ran rít", "ho đờm", "ho ra máu",
+        ),
+    },
+    "điện tâm đồ": {
+        "ma_dvkt": "02.0001",
+        "ten_dich_vu": "Ghi điện tâm đồ (ECG)",
+        "mau_nhan_dien": r"(?i)\b(?:điện\s+tâm\s+đồ|điện\s+tim|ecg)\b",
+        "trieu_chung_bat_buoc": (
+            "đau ngực", "tức ngực", "khó thở", "hồi hộp", "đánh trống ngực", "loạn nhịp",
+            "rung nhĩ", "tăng huyết áp", "cao huyết áp", "suy tim", "ngất", "chóng mặt",
+            "mạch nhanh", "mạch chậm",
+        ),
+    },
+    "crp": {
+        "ma_dvkt": "23.0088",
+        "ten_dich_vu": "Định lượng CRP (C-Reactive Protein)",
+        "mau_nhan_dien": r"(?i)\b(?:hs[\-\s]*)?crp\b",
+        "trieu_chung_bat_buoc": (
+            "sốt", "viêm", "nhiễm trùng", "nhiễm khuẩn", "ho đờm", "đau họng",
+            "tiểu buốt", "sưng đau", "áp xe",
+        ),
+    },
+    "d-dimer": {
+        "ma_dvkt": "22.0055",
+        "ten_dich_vu": "Định lượng D-Dimer",
+        "mau_nhan_dien": r"(?i)\bd[\-\s]*dimer\b",
+        "trieu_chung_bat_buoc": (
+            "khó thở", "đau ngực", "sưng phù", "phù một chân", "huyết khối",
+            "tắc mạch phổi", "thuyên tắc", "rung nhĩ", "rối loạn đông máu",
+        ),
+    },
+}
+
 
 # ---------------------------------------------------------------------------
 # 2. TẦNG 4.5: ĐỘNG CƠ KHÔI PHỤC BỎ SÓT CHỦ ĐỘNG (ACTIVE OMISSION RECOVERY)
@@ -252,6 +379,7 @@ class KetQuaTienKiemBHYT:
     canh_bao_da_thuoc_dong_tay_y: List[str]
     bang_xml_130_4750: Dict[str, Any]
     dat_chuan_cdss_muc_6_7_tt54: bool
+    bien_luan_chi_dinh_cls: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -330,6 +458,120 @@ class BHYTXmlPreChecker:
         return None
 
     @classmethod
+    def kiem_tra_chi_dinh_cls(
+        cls, ps: List[PhatBieu], hoi_thoai: str = ""
+    ) -> List[Dict[str, Any]]:
+        """Boost 5: Đối chiếu chỉ định Cận lâm sàng / DVKT (XML3/XML4) với Diễn biến lâm sàng (XML5)."""
+        # Tập mệnh đề lâm sàng dương tính còn hiệu lực của bệnh nhân (chu_the_id == 0)
+        ps_bang_chung_ls = [
+            p for p in ps
+            if getattr(p, "chu_the_id", 0) == 0
+            and getattr(p, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+            and not getattr(p, "phu_dinh", False)
+            and getattr(p, "tinh_huong", "thực tế") != "giả định"
+        ]
+
+        # Thu thập các nguồn chỉ định CLS của bác sĩ (từ mệnh đề kế hoạch/bác sĩ + các lượt bác sĩ nói trong hội thoại)
+        nguon_chi_dinh: List[Tuple[str, List[int]]] = []
+        re_dong_tu_chi_dinh = re.compile(
+            r"(?i)\b(chỉ\s+định|cho\s+làm|cho\s+chụp|cần\s+chụp|đi\s+chụp|xét\s+nghiệm|làm\s+thêm|kiểm\s+tra|đo\s+điện|nội\s+soi|siêu\s+âm)\b"
+        )
+        re_ket_qua_cu = re.compile(r"(?i)\b(năm\s+ngoái|trước\s+đây|phiếu\s+cũ|kết\s+quả\s+cũ|đã\s+chụp\s+từ)\b")
+        re_phu_dinh_cd = re.compile(r"(?i)\b(không\s+cần|chưa\s+cần|không\s+chỉ\s+định|không\s+chụp|không\s+làm)\b")
+
+        for p in ps:
+            if getattr(p, "trang_thai", "còn hiệu lực") != "còn hiệu lực" or getattr(p, "phu_dinh", False):
+                continue
+            if getattr(p, "tinh_huong", "thực tế") == "giả định" or getattr(p, "thoi_gian_su_kien", "") == "quá khứ":
+                continue
+            nd = p.noi_dung or ""
+            if re_ket_qua_cu.search(nd) or re_phu_dinh_cd.search(nd):
+                continue
+            la_chi_dinh = (
+                getattr(p, "tinh_huong", "") == "kế hoạch"
+                or getattr(p, "hanh_vi", "") == "kế hoạch"
+                or getattr(p, "nguoi_noi", "") == "bác sĩ"
+                or bool(re_dong_tu_chi_dinh.search(nd))
+            )
+            if la_chi_dinh:
+                nguon_chi_dinh.append((nd, list(p.bang_chung or [])))
+
+        if hoi_thoai:
+            for idx_dong, dong in enumerate([d.strip() for d in hoi_thoai.splitlines() if d.strip()], start=1):
+                sach = re.sub(r"^\s*\d+[.)]\s*", "", dong)
+                if re.match(r"(?i)^(?:bác\s+s[ĩỹ]|bs|doctor|bac_si)\s*:", sach):
+                    if not re_phu_dinh_cd.search(sach) and not re_ket_qua_cu.search(sach) and "?" not in sach:
+                        nguon_chi_dinh.append((sach, [idx_dong]))
+
+        da_xet_ma_dvkt = set()
+        ket_qua_cls: List[Dict[str, Any]] = []
+
+        for tu_khoa_cls, quy_tac in QUY_TAC_CHI_DINH_CLS_BHYT.items():
+            ma_dvkt = quy_tac["ma_dvkt"]
+            if ma_dvkt in da_xet_ma_dvkt:
+                continue
+            mau_re = re.compile(quy_tac["mau_nhan_dien"])
+            luot_order: List[int] = []
+            for vb_cd, bc_cd in nguon_chi_dinh:
+                if mau_re.search(vb_cd):
+                    for b in bc_cd:
+                        if int(b) not in luot_order:
+                            luot_order.append(int(b))
+            if not luot_order:
+                continue
+
+            da_xet_ma_dvkt.add(ma_dvkt)
+            ten_dv = quy_tac["ten_dich_vu"]
+            ds_tc_yeu_cau: Tuple[str, ...] = quy_tac["trieu_chung_bat_buoc"]
+
+            # Đối chiếu với tập mệnh đề dương tính còn hiệu lực của bệnh nhân
+            khop_ps: List[PhatBieu] = []
+            tu_khoa_da_khop: List[str] = []
+            for p_ev in ps_bang_chung_ls:
+                nd_low = (p_ev.noi_dung or "").lower()
+                for tc in ds_tc_yeu_cau:
+                    if tc in nd_low:
+                        if p_ev not in khop_ps:
+                            khop_ps.append(p_ev)
+                        if tc not in tu_khoa_da_khop:
+                            tu_khoa_da_khop.append(tc)
+
+            if khop_ps:
+                luot_can_cu = sorted({int(t) for p_ev in khop_ps for t in (p_ev.bang_chung or [])})
+                tag_str = " ".join(f"[T{t}]" for t in luot_can_cu) if luot_can_cu else f"[T{luot_order[0]}]"
+                trich_ls = "; ".join(dict.fromkeys((p_ev.noi_dung or "").strip() for p_ev in khop_ps if p_ev.noi_dung))
+                ket_qua_cls.append({
+                    "dich_vu": ten_dv,
+                    "tu_khoa_lenh": tu_khoa_cls,
+                    "ma_dvkt": ma_dvkt,
+                    "hop_le": True,
+                    "cau_bien_luan": f"Chỉ định {ten_dv} hợp lệ dựa trên triệu chứng/dấu hiệu lâm sàng: {trich_ls} {tag_str}",
+                    "luot_can_cu": luot_can_cu,
+                    "ma_xml": "XML3",
+                })
+            else:
+                canh_bao_msg = (
+                    f"[CẢNH BÁO XUẤT TOÁN CLS - XML3/XML5]: Chỉ định '{ten_dv}' (Lượt {luot_order}) "
+                    f"chưa có triệu chứng/dấu hiệu lâm sàng tương ứng trong Diễn biến bệnh (XML5) "
+                    f"(cần có ít nhất một dấu hiệu chỉ điểm như: {', '.join(ds_tc_yeu_cau[:5])})."
+                )
+                ket_qua_cls.append({
+                    "dich_vu": ten_dv,
+                    "tu_khoa_lenh": tu_khoa_cls,
+                    "ma_dvkt": ma_dvkt,
+                    "hop_le": False,
+                    "canh_bao": canh_bao_msg,
+                    "goi_y_bo_sung": (
+                        f"Hỏi bổ sung và ghi nhận triệu chứng lâm sàng chỉ điểm ({', '.join(ds_tc_yeu_cau[:4])}...) "
+                        f"vào Diễn biến bệnh (XML5) trước khi ký chỉ định {ten_dv}."
+                    ),
+                    "luot_can_cu": luot_order,
+                    "ma_xml": "XML3",
+                })
+
+        return ket_qua_cls
+
+    @classmethod
     def kiem_duyet_ho_so(cls, ma_ca: str, ps: List[PhatBieu], hoi_thoai: str = "",
                          thong_tin_benh_nhan: Optional[Dict[str, Any]] = None) -> KetQuaTienKiemBHYT:
         ds_icd10 = cls.goi_y_icd10(ps, hoi_thoai)
@@ -349,7 +591,11 @@ class BHYTXmlPreChecker:
             and getattr(p, "tinh_huong", "thực tế") != "giả định"
             and not getattr(p, "phu_dinh", False)
             and not cls._la_thuoc_da_ngung(p)
-            and (getattr(p, "thuoc", None) or any(t in (p.noi_dung or "").lower() for t in QUY_TAC_THUOC_ICD10_BHYT))
+            and (
+                getattr(p, "thuoc", None)
+                or any(t in (p.noi_dung or "").lower() for t in QUY_TAC_THUOC_ICD10_BHYT)
+                or (_ttt.hoat_chat(p.noi_dung or "") is not None and "dị ứng" not in (p.noi_dung or "").lower())
+            )
         ]
 
         # 1. Kiểm tra chéo chỉ định Thuốc (XML2) với Mã ICD-10 (XML1)
@@ -368,6 +614,12 @@ class BHYTXmlPreChecker:
                             f"(Yêu cầu một trong các mã: {', '.join(ma_hop_le)}). {giai_thich}"
                         )
 
+        # 1b. Boost 5: Kiểm tra chéo chỉ định Cận lâm sàng / DVKT (XML3/XML4) với Diễn biến lâm sàng (XML5)
+        bien_luan_cls = cls.kiem_tra_chi_dinh_cls(ps, hoi_thoai)
+        for muc_cls in bien_luan_cls:
+            if not muc_cls.get("hop_le") and muc_cls.get("canh_bao"):
+                canh_bao_bhyt.append(str(muc_cls["canh_bao"]))
+
         # 2. Kiểm tra thiếu diễn biến lâm sàng hoặc sinh hiệu bắt buộc trong XML1 / XML5
         if not ds_icd10:
             canh_bao_bhyt.append(
@@ -375,14 +627,46 @@ class BHYTXmlPreChecker:
                 "Cần bổ sung nhận định chẩn đoán trước khi đẩy cổng giám định BHXH."
             )
 
-        # 3. Kiểm tra liều Nhi khoa theo cân nặng (mg/kg/ngày)
+        # 3. Kiểm tra liều Nhi khoa theo cân nặng (mg/kg/ngày) & Thông tư 26/2025/TT-BYT (< 72 tháng tuổi)
         can_nang = cls._tim_can_nang_kg(ps, hoi_thoai, thong_tin_benh_nhan)
-        tuoi_bn: Optional[int] = None
-        if isinstance(thong_tin_benh_nhan, dict) and thong_tin_benh_nhan.get("tuoi") is not None:
-            try:
-                tuoi_bn = int(thong_tin_benh_nhan["tuoi"])
-            except (ValueError, TypeError):
-                tuoi_bn = None
+        tuoi_bn: Optional[float] = None
+        thang_tuoi: Optional[int] = None
+        if isinstance(thong_tin_benh_nhan, dict):
+            if thong_tin_benh_nhan.get("tuoi") is not None:
+                try:
+                    tuoi_bn = float(thong_tin_benh_nhan["tuoi"])
+                except (ValueError, TypeError):
+                    tuoi_bn = None
+            thang_raw = (
+                thong_tin_benh_nhan.get("thang_tuoi")
+                if thong_tin_benh_nhan.get("thang_tuoi") is not None
+                else thong_tin_benh_nhan.get("so_thang_tuoi")
+            )
+            if thang_raw is not None:
+                try:
+                    thang_tuoi = int(float(thang_raw))
+                except (ValueError, TypeError):
+                    thang_tuoi = None
+
+        vb_tuoi = " ".join([p.noi_dung or "" for p in ps if getattr(p, "chu_the_id", 0) == 0] + [hoi_thoai or ""])
+        if thang_tuoi is None:
+            m_thang = re.search(r"(?i)\b(\d{1,2})\s*tháng(?:\s+tuổi)?\b", vb_tuoi)
+            if m_thang and re.search(r"(?i)\b(tháng\s+tuổi|bé|cháu|con|trẻ|bệnh\s+nhi)\b", vb_tuoi):
+                thang_tuoi = int(m_thang.group(1))
+        if tuoi_bn is None:
+            m_tuoi_tre = re.search(r"(?i)\b(?:bé|cháu|con|bệnh\s+nhi)(?:\s+nhà\s+(?:em|tôi))?\s+(\d{1,2})\s*tuổi\b", vb_tuoi)
+            if m_tuoi_tre:
+                tuoi_bn = float(m_tuoi_tre.group(1))
+
+        tre_duoi_72_thang = (
+            (tuoi_bn is not None and tuoi_bn < 6)
+            or (thang_tuoi is not None and thang_tuoi < 72)
+        )
+        if tre_duoi_72_thang and can_nang is None and len(ps_thuoc) > 0:
+            canh_bao_nhi.append(
+                "[CẢNH BÁO BẮT BUỘC TT 26/2025/TT-BYT]: Trẻ dưới 72 tháng tuổi bắt buộc ghi Cân nặng (kg) "
+                "trên đơn thuốc điện tử và hồ sơ khám để kiểm soát liều an toàn [cần bổ sung cân nặng]."
+            )
         la_tre_em = (
             (can_nang is not None and can_nang < 40.0)
             or (tuoi_bn is not None and tuoi_bn < 15)
@@ -486,7 +770,8 @@ class BHYTXmlPreChecker:
             canh_bao_lieu_nhi_khoa=canh_bao_nhi,
             canh_bao_da_thuoc_dong_tay_y=canh_bao_dong_tay,
             bang_xml_130_4750={"XML1_TONG_HOP": xml1, "XML2_THUOC": xml2, "XML5_DIEN_BIEN_LS": xml5},
-            dat_chuan_cdss_muc_6_7_tt54=True
+            dat_chuan_cdss_muc_6_7_tt54=True,
+            bien_luan_chi_dinh_cls=bien_luan_cls,
         )
 
 
@@ -743,7 +1028,371 @@ def tien_kiem_bhyt_tu_du_lieu(
         thong_tin_benh_nhan=thong_tin_benh_nhan,
         hoi_thoai=hoi_thoai,
     )
+    kq["doi_soat_thuoc_tt26"] = doi_soat_da_don_va_don_quoc_gia(
+        ds_pb,
+        hoi_thoai=hoi_thoai,
+        thong_tin_benh_nhan=thong_tin_benh_nhan,
+    )
     return kq
+
+
+_SO_TU_CHU_VIET: Dict[str, float] = {
+    "nửa": 0.5,
+    "rưỡi": 1.5,
+    "một": 1.0,
+    "hai": 2.0,
+    "ba": 3.0,
+    "bốn": 4.0,
+    "tư": 4.0,
+    "năm": 5.0,
+    "sáu": 6.0,
+    "bảy": 7.0,
+    "tám": 8.0,
+    "chín": 9.0,
+    "mười": 10.0,
+    "mười bốn": 14.0,
+    "mười lăm": 15.0,
+}
+
+
+def _doi_chu_hoac_so_sang_float(chuoi: str) -> Optional[float]:
+    s = (chuoi or "").strip().lower()
+    if not s:
+        return None
+    if s in _SO_TU_CHU_VIET:
+        return _SO_TU_CHU_VIET[s]
+    if "/" in s:
+        phan = s.split("/", 1)
+        try:
+            mau = float(phan[1].strip().replace(",", "."))
+            if mau > 0:
+                return float(phan[0].strip().replace(",", ".")) / mau
+        except (ValueError, TypeError):
+            return None
+    try:
+        return float(s.replace(",", "."))
+    except (ValueError, TypeError):
+        return None
+
+
+def _fmt_so_lieu(v: Optional[float]) -> Any:
+    if v is None:
+        return None
+    return int(v) if float(v).is_integer() else round(float(v), 2)
+
+
+def _phan_tich_dong_don_tt26(
+    ten_thuoc: str,
+    hoat_chat_chuan: Optional[str],
+    thuoc_dict: Dict[str, Any],
+    noi_dung: str,
+    trich_dan_list: List[str],
+    bang_chung: List[int],
+) -> Dict[str, Any]:
+    """Cấu trúc hóa 1 dòng đơn thuốc theo chuẩn Đơn thuốc điện tử quốc gia (Thông tư 26/2025/TT-BYT).
+    Bất biến an toàn: KHÔNG bao giờ tự suy đoán hàm lượng, buổi uống hoặc tổng số lượng khi thiếu dữ kiện.
+    """
+    vb_gop = " | ".join(
+        x for x in [
+            noi_dung,
+            str(thuoc_dict.get("lieu") or ""),
+            str(thuoc_dict.get("so_lan") or ""),
+            str(thuoc_dict.get("duong_dung") or ""),
+            *trich_dan_list,
+        ]
+        if x
+    )
+    vb_low = vb_gop.lower()
+
+    # 1. Hàm lượng (ví dụ: 500mg, 20 mg, 850mg, 100IU/ml)
+    m_hl = re.search(
+        r"(?i)\b(\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|iu|ui|%)(?:\s*/\s*\d*(?:[.,]\d+)?\s*(?:mg|mcg|g|ml))?)\b",
+        vb_gop,
+    )
+    ham_luong = re.sub(r"\s+", "", m_hl.group(1)) if m_hl else "[cần bổ sung]"
+
+    # 2. Chia liều Sáng / Trưa / Chiều / Tối (chỉ điền khi văn bản nêu tường minh buổi dùng)
+    mau_so = r"(\d+(?:[.,/]\d+)?|nửa|một|hai|ba|bốn)"
+    mau_don_vi = r"(?:\s*(?:viên|gói|ống|nhát|giọt|ml|lọ|liều))?"
+
+    def _tim_lieu_buoi(mau_buoi: str) -> Optional[float]:
+        m_b = re.search(rf"(?i)\b(?:buổi\s+|mỗi\s+)?(?:{mau_buoi})\s+(?:uống\s+|dùng\s+|xịt\s+|tiêm\s+)?{mau_so}{mau_don_vi}\b", vb_gop)
+        if m_b:
+            return _doi_chu_hoac_so_sang_float(m_b.group(1))
+        m_nguoc = re.search(rf"(?i)\b{mau_so}\s*(?:viên|gói|ống|nhát|giọt|ml)\s+(?:vào\s+)?(?:buổi\s+)?(?:{mau_buoi})\b", vb_gop)
+        if m_nguoc:
+            return _doi_chu_hoac_so_sang_float(m_nguoc.group(1))
+        return None
+
+    sang_v = _tim_lieu_buoi("sáng")
+    trua_v = _tim_lieu_buoi("trưa")
+    chieu_v = _tim_lieu_buoi("chiều")
+    toi_v = _tim_lieu_buoi("tối|đêm|trước khi đi ngủ|trước ngủ")
+
+    co_buoi_tuong_minh = any(v is not None for v in (sang_v, trua_v, chieu_v, toi_v))
+    if co_buoi_tuong_minh:
+        sang = _fmt_so_lieu(sang_v or 0.0)
+        trua = _fmt_so_lieu(trua_v or 0.0)
+        chieu = _fmt_so_lieu(chieu_v or 0.0)
+        toi = _fmt_so_lieu(toi_v or 0.0)
+        tong_don_vi_moi_ngay: Optional[float] = float((sang_v or 0.0) + (trua_v or 0.0) + (chieu_v or 0.0) + (toi_v or 0.0))
+    else:
+        sang = trua = chieu = toi = None
+        tong_don_vi_moi_ngay = None
+        # Kiểm tra xem có đủ cả số đơn vị mỗi lần VÀ số lần/ngày tường minh không ("1 viên x 2 lần/ngày", "ngày 2 lần mỗi lần 1 viên", "ngày uống 2 viên")
+        m_nhan = re.search(
+            rf"(?i)\b{mau_so}\s*(?:viên|gói|ống|nhát)\s*(?:x|×|\*)\s*{mau_so}\s*lần\s*(?:/|\s*một\s*|\s*trong\s*)?ngày\b",
+            vb_gop,
+        )
+        m_moi_lan = re.search(rf"(?i)\bmỗi\s+lần\s+{mau_so}\s*(?:viên|gói|ống|nhát)\b", vb_gop)
+        m_so_lan_ngay = re.search(
+            rf"(?i)\b(?:ngày\s+(?:uống\s+|dùng\s+)?{mau_so}\s*lần|{mau_so}\s*lần\s*/\s*ngày)\b",
+            vb_gop,
+        )
+        m_ngay_vien = re.search(rf"(?i)\bngày\s+(?:uống\s+|dùng\s+)?{mau_so}\s*(?:viên|gói|ống)\b", vb_gop)
+        if m_nhan:
+            a_v = _doi_chu_hoac_so_sang_float(m_nhan.group(1))
+            b_v = _doi_chu_hoac_so_sang_float(m_nhan.group(2))
+            if a_v is not None and b_v is not None:
+                tong_don_vi_moi_ngay = a_v * b_v
+        elif m_moi_lan and m_so_lan_ngay:
+            a_v = _doi_chu_hoac_so_sang_float(m_moi_lan.group(1))
+            b_str = m_so_lan_ngay.group(1) or m_so_lan_ngay.group(2)
+            b_v = _doi_chu_hoac_so_sang_float(b_str)
+            if a_v is not None and b_v is not None:
+                tong_don_vi_moi_ngay = a_v * b_v
+        elif m_ngay_vien:
+            tong_don_vi_moi_ngay = _doi_chu_hoac_so_sang_float(m_ngay_vien.group(1))
+
+    la_khi_can = bool(re.search(r"(?i)\bkhi\s+(?:cần|đau|sốt|khó\s+thở|ho)\b", vb_low))
+
+    # 3. Số ngày dùng thuốc ("trong 5 ngày", "uống 7 ngày", "1 tuần" -> 7, "2 tuần" -> 14)
+    so_ngay: Optional[int] = None
+    m_ngay = re.search(
+        r"(?i)(?:trong|uống|dùng|kéo\s+dài|đợt|x|×|,)\s*(\d+|mười\s+bốn|mười\s+lăm|mười|một|hai|ba|bốn|năm|sáu|bảy|tám|chín)\s*ngày\b",
+        vb_gop,
+    )
+    if not m_ngay:
+        m_ngay = re.search(
+            r"(?i)\b(\d+|mười\s+bốn|mười\s+lăm|mười|một|hai|ba|bốn|năm|sáu|bảy|tám|chín)\s*ngày\b(?!\s*(?:một\s+lần|hai\s+lần|ba\s+lần|\d+\s*lần|uống|dùng|nay|trước|qua))",
+            vb_gop,
+        )
+    m_tuan = re.search(r"(?i)(?<!ngừng\s)(?<!ngưng\s)\b(\d+|một|hai|ba|bốn)\s*tuần\b(?!\s*(?:nay|trước|qua))", vb_gop)
+    m_thang_dt = re.search(r"(?i)(?:trong|uống|dùng)\s*(\d+|một|hai|ba)\s*tháng\b", vb_gop)
+
+    if m_ngay:
+        v_n = _doi_chu_hoac_so_sang_float(m_ngay.group(1))
+        if v_n is not None and v_n > 0:
+            so_ngay = int(round(v_n))
+    elif m_tuan:
+        v_t = _doi_chu_hoac_so_sang_float(m_tuan.group(1))
+        if v_t is not None and v_t > 0:
+            so_ngay = int(round(v_t * 7))
+    elif m_thang_dt:
+        v_th = _doi_chu_hoac_so_sang_float(m_thang_dt.group(1))
+        if v_th is not None and v_th > 0:
+            so_ngay = int(round(v_th * 30))
+
+    # 4. Tổng số lượng: CHỈ tự tính khi cả tổng đơn vị mỗi ngày VÀ số ngày đều tường minh, không phải thuốc "khi cần"
+    if (
+        tong_don_vi_moi_ngay is not None
+        and tong_don_vi_moi_ngay > 0
+        and so_ngay is not None
+        and so_ngay > 0
+        and not la_khi_can
+    ):
+        tong_so_luong = _fmt_so_lieu(tong_don_vi_moi_ngay * so_ngay)
+    else:
+        tong_so_luong = None
+
+    # 5. Đường dùng & Lời dặn ăn uống
+    duong_dung = str(thuoc_dict.get("duong_dung") or "").strip()
+    if not duong_dung:
+        m_dd = re.search(r"(?i)\b(uống|xịt|bôi|nhỏ\s+mắt|nhỏ\s+mũi|nhỏ|tiêm|ngậm|hít|đặt)\b", vb_gop)
+        duong_dung = m_dd.group(1).lower() if m_dd else "[cần bổ sung]"
+
+    m_an = re.search(
+        r"(?i)\b(trước\s+(?:bữa\s+)?ăn\s*\d*\s*(?:phút)?|sau\s+(?:bữa\s+)?ăn(?:\s+no)?|trong\s+bữa\s+ăn|lúc\s+đói|ngay\s+sau\s+ăn|trước\s+khi\s+(?:đi\s+)?ngủ)\b",
+        vb_gop,
+    )
+    loi_dan_an_uong = m_an.group(1).strip() if m_an else "[cần bổ sung]"
+
+    thieu: List[str] = []
+    if ham_luong == "[cần bổ sung]":
+        thieu.append("ham_luong")
+    if not co_buoi_tuong_minh and tong_don_vi_moi_ngay is None:
+        thieu.append("lieu_dung_trong_ngay")
+    if so_ngay is None:
+        thieu.append("so_ngay")
+    if tong_so_luong is None:
+        thieu.append("tong_so_luong")
+    if duong_dung == "[cần bổ sung]":
+        thieu.append("duong_dung")
+    if loi_dan_an_uong == "[cần bổ sung]":
+        thieu.append("loi_dan_an_uong")
+
+    tags_bc = [f"[T{int(t)}]" for t in sorted({int(x) for x in (bang_chung or []) if int(x) > 0})]
+
+    return {
+        "ten_thuoc": ten_thuoc,
+        "hoat_chat": hoat_chat_chuan or "[cần bổ sung]",
+        "ham_luong": ham_luong,
+        "sang": sang,
+        "trua": trua,
+        "chieu": chieu,
+        "toi": toi,
+        "so_ngay": so_ngay,
+        "tong_so_luong": tong_so_luong,
+        "duong_dung": duong_dung,
+        "loi_dan_an_uong": loi_dan_an_uong,
+        "bang_chung": tags_bc,
+        "thieu_thong_tin": thieu,
+    }
+
+
+def doi_soat_da_don_va_don_quoc_gia(
+    ps: List[PhatBieu],
+    hoi_thoai: str = "",
+    thong_tin_benh_nhan: Optional[Dict[str, Any]] = None,
+    duoc_ly_ddi: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Boost 6: Đối soát đa đơn thuốc (Thuốc đang dùng ở nhà vs Đơn mới kê) & Cấu trúc hóa Đơn thuốc quốc gia TT 26/2025/TT-BYT."""
+    thuoc_dang_dung_o_nha: List[Dict[str, Any]] = []
+    don_thuoc_moi_tt26: List[Dict[str, Any]] = []
+    tat_ca_muc_hoat_dong: List[Dict[str, Any]] = []
+
+    for idx_p, raw_p in enumerate(ps or [], start=1):
+        if isinstance(raw_p, dict):
+            chu_the_id, ten_ct = _suy_chu_the_id(raw_p)
+            trang_thai = _suy_trang_thai(raw_p)
+            tinh_huong = _suy_tinh_huong(raw_p)
+            nguoi_noi = _suy_nguoi_noi(raw_p)
+            phu_dinh = bool(raw_p.get("phu_dinh", raw_p.get("negated", False)))
+            noi_dung = str(raw_p.get("noi_dung") or raw_p.get("text") or "").strip()
+            hanh_vi = str(raw_p.get("hanh_vi") or "")
+            muc = str(raw_p.get("muc") or raw_p.get("section") or "").upper()
+            thuoc_obj = raw_p.get("thuoc") if isinstance(raw_p.get("thuoc"), dict) else {}
+            if not thuoc_obj and raw_p.get("drug"):
+                thuoc_obj = {"ten": str(raw_p["drug"]).strip()}
+            bc = [int(x) for x in (raw_p.get("bang_chung") or raw_p.get("luot_thoai") or raw_p.get("evidenceTurns") or [idx_p])]
+            td_raw = raw_p.get("trich_dan") or raw_p.get("quotes") or []
+            td_list = [td_raw] if isinstance(td_raw, str) else [str(x) for x in td_raw if x]
+            da_ngung = (
+                thuoc_obj.get("trang_thai_dung") == "đã ngừng"
+                or any(kw in noi_dung.lower() for kw in ("đã ngừng", "ngừng dùng", "ngưng dùng", "đã ngưng"))
+            )
+        else:
+            chu_the_id = getattr(raw_p, "chu_the_id", 0)
+            trang_thai = getattr(raw_p, "trang_thai", "còn hiệu lực")
+            tinh_huong = getattr(raw_p, "tinh_huong", "thực tế")
+            nguoi_noi = getattr(raw_p, "nguoi_noi", "bệnh nhân")
+            phu_dinh = bool(getattr(raw_p, "phu_dinh", False))
+            noi_dung = str(getattr(raw_p, "noi_dung", "") or "").strip()
+            hanh_vi = str(getattr(raw_p, "hanh_vi", "") or "")
+            muc = str(getattr(raw_p, "muc", "") or "").upper()
+            thuoc_obj = getattr(raw_p, "thuoc", None) or {}
+            bc = list(getattr(raw_p, "bang_chung", None) or [])
+            td_list = list(getattr(raw_p, "trich_dan", None) or [])
+            da_ngung = BHYTXmlPreChecker._la_thuoc_da_ngung(raw_p)
+
+        if chu_the_id != 0 or trang_thai != "còn hiệu lực" or phu_dinh or tinh_huong == "giả định" or da_ngung:
+            continue
+        nd_low = noi_dung.lower()
+        if "dị ứng" in nd_low or "mẫn cảm" in nd_low:
+            continue
+
+        ten_th = str(thuoc_obj.get("ten") or "").strip()
+        if not ten_th:
+            m_rx = _ttt.regex_ten_thuoc().search(noi_dung)
+            if m_rx:
+                ten_th = m_rx.group(1).strip()
+        if not ten_th:
+            continue
+
+        hc = _ttt.hoat_chat(ten_th) or _ttt.hoat_chat(noi_dung)
+        tags_bc = [f"[T{int(t)}]" for t in sorted({int(x) for x in bc if int(x) > 0})]
+
+        la_don_moi = (
+            tinh_huong == "kế hoạch"
+            or hanh_vi == "kế hoạch"
+            or muc == "KẾ HOẠCH ĐIỀU TRỊ"
+            or thuoc_obj.get("trang_thai_dung") == "được kê, chưa dùng"
+            or (nguoi_noi == "bác sĩ" and muc != "THUỐC ĐANG DÙNG" and thuoc_obj.get("trang_thai_dung") != "đang dùng")
+        )
+
+        if la_don_moi:
+            dong_tt26 = _phan_tich_dong_don_tt26(
+                ten_thuoc=ten_th,
+                hoat_chat_chuan=hc,
+                thuoc_dict=thuoc_obj,
+                noi_dung=noi_dung,
+                trich_dan_list=td_list,
+                bang_chung=bc,
+            )
+            don_thuoc_moi_tt26.append(dong_tt26)
+            tat_ca_muc_hoat_dong.append({
+                "nguon_don": "don_moi",
+                "ten_thuoc": ten_th,
+                "hoat_chat": hc,
+                "bang_chung": tags_bc,
+            })
+        else:
+            thuoc_dang_dung_o_nha.append({
+                "ten_thuoc": ten_th,
+                "hoat_chat": hc or "[cần bổ sung]",
+                "lieu": thuoc_obj.get("lieu"),
+                "so_lan": thuoc_obj.get("so_lan"),
+                "duong_dung": thuoc_obj.get("duong_dung"),
+                "trang_thai_dung": thuoc_obj.get("trang_thai_dung") or "đang dùng",
+                "noi_dung_goc": noi_dung,
+                "bang_chung": tags_bc,
+            })
+            tat_ca_muc_hoat_dong.append({
+                "nguon_don": "thuoc_nha",
+                "ten_thuoc": ten_th,
+                "hoat_chat": hc,
+                "bang_chung": tags_bc,
+            })
+
+    # Phát hiện trùng lặp hoạt chất giữa các biệt dược (thuốc nhà <-> đơn mới, hoặc nội bộ từng nhóm)
+    theo_hc: Dict[str, List[Dict[str, Any]]] = {}
+    for m_act in tat_ca_muc_hoat_dong:
+        hc_key = m_act.get("hoat_chat")
+        if hc_key:
+            theo_hc.setdefault(hc_key.lower(), []).append(m_act)
+
+    canh_bao_trung_hoat_chat: List[Dict[str, Any]] = []
+    for hc_low, ds_trung in theo_hc.items():
+        if len(ds_trung) < 2:
+            continue
+        tap_nguon = {x["nguon_don"] for x in ds_trung}
+        if tap_nguon == {"thuoc_nha", "don_moi"}:
+            pham_vi = "giua_thuoc_nha_va_don_moi"
+        elif tap_nguon == {"thuoc_nha"}:
+            pham_vi = "trong_thuoc_nha"
+        else:
+            pham_vi = "trong_don_moi"
+        ds_ten = [x["ten_thuoc"] for x in ds_trung]
+        ds_bc = sorted({b for x in ds_trung for b in x["bang_chung"]})
+        canh_bao_trung_hoat_chat.append({
+            "hoat_chat": hc_low,
+            "cac_thuoc": ds_ten,
+            "pham_vi": pham_vi,
+            "bang_chung": ds_bc,
+            "canh_bao": (
+                f"[CẢNH BÁO TRÙNG HOẠT CHẤT ĐA ĐƠN]: Hoạt chất '{hc_low}' bị trùng lặp giữa "
+                f"{', '.join(ds_ten)} ({', '.join(ds_bc) if ds_bc else 'cần rà soát'}) — nguy cơ quá liều tích lũy!"
+            ),
+        })
+
+    return {
+        "chuan_don_thuoc": "Thông tư 26/2025/TT-BYT",
+        "thuoc_dang_dung_o_nha": thuoc_dang_dung_o_nha,
+        "don_thuoc_moi_tt26": don_thuoc_moi_tt26,
+        "canh_bao_trung_hoat_chat": canh_bao_trung_hoat_chat,
+        "co_trung_hoat_chat": len(canh_bao_trung_hoat_chat) > 0,
+        "tuong_tac_ddi_kem_theo": (duoc_ly_ddi or {}).get("canh_bao_tuong_tac", []) if isinstance(duoc_ly_ddi, dict) else [],
+    }
 
 
 def xuat_goi_xml_1_5_qd130(
@@ -825,9 +1474,8 @@ def xuat_goi_xml_1_5_qd130(
         + "</DSACH_CHI_TIET_THUOC>\n</CHITIEU_CHITIET_THUOC>"
     )
 
-    # XML3: Dịch vụ kỹ thuật
-    xml3 = (
-        '<?xml version="1.0" encoding="utf-8"?>\n<CHITIEU_CHITIET_DVKT_VTYT>\n<DSACH_CHI_TIET_DVKT>\n'
+    # XML3: Dịch vụ kỹ thuật (Khám bệnh ngoại trú + toàn bộ chỉ định Cận lâm sàng / DVKT phát hiện được)
+    dvkt_items: List[str] = [
         "  <CHI_TIET_DVKT>\n"
         f"    <MA_LK>{ma_lk_esc}</MA_LK>\n"
         "    <STT>1</STT>\n"
@@ -835,8 +1483,32 @@ def xuat_goi_xml_1_5_qd130(
         "    <TEN_DICH_VU>Khám bệnh ngoại trú</TEN_DICH_VU>\n"
         "    <SO_LUONG>1</SO_LUONG>\n"
         f"    <NGAY_YL>{now_str}</NGAY_YL>\n"
-        "  </CHI_TIET_DVKT>\n"
-        "</DSACH_CHI_TIET_DVKT>\n</CHITIEU_CHITIET_DVKT_VTYT>"
+        "  </CHI_TIET_DVKT>"
+    ]
+    ds_cls_bhyt = (
+        ket_qua_bhyt.get("bien_luan_chi_dinh_cls")
+        if isinstance(ket_qua_bhyt, dict)
+        else getattr(ket_qua_bhyt, "bien_luan_chi_dinh_cls", None)
+    )
+    if ds_cls_bhyt is None:
+        ds_cls_bhyt = BHYTXmlPreChecker.kiem_tra_chi_dinh_cls(danh_sach_phat_bieu, hoi_thoai)
+    for idx_dv, muc_dv in enumerate(ds_cls_bhyt or [], start=2):
+        ma_dv = _xml_escape(str(muc_dv.get("ma_dvkt") or f"99.{idx_dv:04d}"))
+        ten_dv = _xml_escape(str(muc_dv.get("dich_vu") or "Dịch vụ cận lâm sàng"))
+        dvkt_items.append(
+            "  <CHI_TIET_DVKT>\n"
+            f"    <MA_LK>{ma_lk_esc}</MA_LK>\n"
+            f"    <STT>{idx_dv}</STT>\n"
+            f"    <MA_DICH_VU>{ma_dv}</MA_DICH_VU>\n"
+            f"    <TEN_DICH_VU>{ten_dv}</TEN_DICH_VU>\n"
+            "    <SO_LUONG>1</SO_LUONG>\n"
+            f"    <NGAY_YL>{now_str}</NGAY_YL>\n"
+            "  </CHI_TIET_DVKT>"
+        )
+    xml3 = (
+        '<?xml version="1.0" encoding="utf-8"?>\n<CHITIEU_CHITIET_DVKT_VTYT>\n<DSACH_CHI_TIET_DVKT>\n'
+        + "\n".join(dvkt_items) + "\n"
+        + "</DSACH_CHI_TIET_DVKT>\n</CHITIEU_CHITIET_DVKT_VTYT>"
     )
 
     # XML4: Cận lâm sàng

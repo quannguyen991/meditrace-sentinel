@@ -1,12 +1,35 @@
 import React from "react";
 import { DocumentTabItem } from "../types";
-import { FileText, Save, Check, ScanText, AlertTriangle, Plus, ImagePlus, X, UserCheck } from "lucide-react";
+import {
+  FileText,
+  Save,
+  Check,
+  ScanText,
+  AlertTriangle,
+  Plus,
+  ImagePlus,
+  X,
+  UserCheck,
+  Upload,
+  Pill,
+  ShieldAlert,
+} from "lucide-react";
 import { trichNguCanhChoTroLy } from "../lib/nguCanhTroLy";
 
 interface ContextViewProps {
   tab: DocumentTabItem;
   onUpdateContent: (content: string) => void;
   patientSubtitle?: string;
+}
+
+interface ChiSoCanLamSangItem {
+  ma_xet_nghiem?: string;
+  ten_chi_so?: string;
+  gia_tri?: number;
+  don_vi?: string;
+  khoang_tham_chieu?: string;
+  trang_thai?: "BINH_THUONG" | "TANG_CAO" | "GIAM_THAP" | "NGUY_KICH" | string;
+  y_nghia_lam_sang?: string;
 }
 
 export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, patientSubtitle }) => {
@@ -18,6 +41,15 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
   const [thongBaoAnh, setThongBaoAnh] = React.useState<string | null>(null);
   const [loiOcr, setLoiOcr] = React.useState<string | null>(null);
   const oChonAnh = React.useRef<HTMLInputElement>(null);
+
+  // Boost 12: Công cụ nạp Danh mục Thuốc Bệnh viện (.csv) tại chỗ
+  const oChonCsv = React.useRef<HTMLInputElement>(null);
+  const [dangTaiCsv, setDangTaiCsv] = React.useState(false);
+  const [ketQuaFormulary, setKetQuaFormulary] = React.useState<{
+    ok: boolean;
+    thongBao: string;
+    soThuoc?: number;
+  } | null>(null);
 
   // Tự trích sẵn Tuổi & Giới tính nếu có trong patientSubtitle hoặc contextNotes; KHÔNG gán ngầm 50 tuổi hay Nam!
   const khoiTaoNc = React.useMemo(
@@ -96,6 +128,14 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
       canh_bao_hieu_chinh_than?: Array<{ thuoc?: string; muc_do?: string; khuyen_cao?: string }>;
       canh_bao_hieu_chinh_gan?: Array<{ thuoc?: string; muc_do?: string; khuyen_cao?: string }>;
     };
+    doi_soat_can_lam_sang?: {
+      co_gia_tri_nguy_kich?: boolean;
+      bao_dong_do_khan_cap?: string[];
+      danh_sach_chi_so?: ChiSoCanLamSangItem[];
+      chan_doan_duoc_xac_nhan?: string[];
+      canh_bao_bat_tuong_dong?: string[];
+      khuyen_cao_dieu_tri?: string[];
+    };
   } | null>(null);
 
   const handleSave = () => {
@@ -107,7 +147,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
     const raw = tuoiEgfr.trim();
     if (!raw || !/^\d{1,3}$/.test(raw)) return null;
     const n = Number(raw);
-    return Number.isInteger(n) && n >= 1 && n <= 120 ? n : null;
+    return Number.isInteger(n) && n >= 0 && n <= 120 ? n : null;
   }, [tuoiEgfr]);
 
   const duDieuKienEgfr = tuoiHopLe !== null && (gioiEgfr === "nam" || gioiEgfr === "nữ");
@@ -116,7 +156,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
     if (!ocrInput.trim()) return;
     if (tuoiHopLe === null || (gioiEgfr !== "nam" && gioiEgfr !== "nữ")) {
       setLoiOcr(
-        "Cần nhập đúng Tuổi (1–120) và chọn Giới tính (Nữ / Nam) trước khi tính mức lọc cầu thận eGFR (CKD-EPI) & hiệu chỉnh liều thuốc.",
+        "Cần nhập đúng Tuổi (0–120) và chọn Giới tính (Nữ / Nam) trước khi tính mức lọc cầu thận eGFR (CKD-EPI) & đối soát cận lâm sàng.",
       );
       return;
     }
@@ -152,6 +192,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
       .map(([k, v]) => `${k}: ${v}`)
       .join(", ");
     const phanThuoc = (ketQuaOcr.thuoc_nhan_dien || []).join(", ");
+    const baoDong = (ketQuaOcr.doi_soat_can_lam_sang?.bao_dong_do_khan_cap || []).join("; ");
     const phanCoDia =
       tuoiHopLe !== null && gioiEgfr
         ? `[Cơ địa tính eGFR] ${gioiEgfr === "nữ" ? "Nữ" : "Nam"}, ${tuoiHopLe} tuổi`
@@ -159,12 +200,71 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
     const dongMoi = [
       phanCoDia,
       phanChiSo && `[Xét nghiệm cũ] ${phanChiSo}`,
+      baoDong && `[Báo động đỏ CLS] ${baoDong}`,
       phanThuoc && `[Đơn thuốc cũ] ${phanThuoc}`,
     ]
       .filter(Boolean)
       .join("\n");
     if (dongMoi) {
       onUpdateContent(tab.content.trim() ? `${tab.content.trimEnd()}\n${dongMoi}` : dongMoi);
+    }
+  };
+
+  const xuLyTaiCsvFormulary = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setDangTaiCsv(true);
+    setKetQuaFormulary(null);
+    try {
+      const csvText = await file.text();
+      const r = await fetch("/api/formulary/upload-csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          csv: csvText,
+          csv_text: csvText,
+          csvText,
+          fileName: file.name,
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setKetQuaFormulary({
+          ok: false,
+          thongBao: data?.error || `Không nạp được danh mục thuốc bệnh viện (mã ${r.status}).`,
+        });
+        return;
+      }
+      const soThuoc =
+        data?.count ?? data?.so_thuoc ?? data?.total ?? (Array.isArray(data?.items) ? data.items.length : undefined);
+      setKetQuaFormulary({
+        ok: true,
+        soThuoc,
+        thongBao:
+          data?.message ||
+          `Đã nạp danh mục thuốc bệnh viện từ "${file.name}"${soThuoc !== undefined ? ` (${soThuoc} mặt hàng thuốc/BHYT)` : ""}.`,
+      });
+    } catch (err: any) {
+      setKetQuaFormulary({
+        ok: false,
+        thongBao: err?.message || "Lỗi kết nối khi tải tệp CSV danh mục thuốc bệnh viện.",
+      });
+    } finally {
+      setDangTaiCsv(false);
+    }
+  };
+
+  const nhanTrangThaiCls = (tt?: string) => {
+    switch (tt) {
+      case "NGUY_KICH":
+        return { chu: "NGUY KỊCH", mau: "bg-red-600 text-white border-red-700" };
+      case "TANG_CAO":
+        return { chu: "Tăng cao ↑", mau: "bg-amber-50 text-amber-800 border-amber-300" };
+      case "GIAM_THAP":
+        return { chu: "Giảm thấp ↓", mau: "bg-sky-50 text-sky-800 border-sky-300" };
+      default:
+        return { chu: "Bình thường", mau: "bg-emerald-50 text-emerald-700 border-emerald-200" };
     }
   };
 
@@ -186,23 +286,23 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
         </div>
 
         <p className="text-xs text-[#64748B] mb-4 leading-relaxed">
-          Nhập thêm chỉ số sinh tồn ban đầu, tiền sử dị ứng thuốc, bệnh lý mãn tính hoặc kết quả cận lâm sàng trước đó để AI đối chiếu và tạo bệnh án chính xác nhất.
+          Nhập thêm chỉ số sinh tồn ban đầu, tháng tuổi/cân nặng Nhi khoa, tiền sử dị ứng thuốc, bệnh lý mạn tính hoặc kết quả cận lâm sàng (Kali, Na+, Troponin, WBC, Hb, PLT, Ure, Creatinine, eGFR, AST/ALT, CRP, INR, HbA1c, Glucose) để hệ thống đối chiếu chính xác nhất.
         </p>
 
         <textarea
           value={tab.content}
           onChange={(e) => onUpdateContent(e.target.value)}
-          placeholder="Nhập tiền sử bệnh, dị ứng thuốc, các thuốc đang sử dụng, kết quả xét nghiệm..."
+          placeholder="Nhập tiền sử bệnh, dị ứng thuốc, tháng tuổi / cân nặng, các thuốc đang sử dụng, kết quả xét nghiệm..."
           className="w-full h-56 p-4 rounded-xl border border-[#BAE6FD] bg-[#F0F7FA]/50 text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#0284C7] focus:ring-2 focus:ring-[#BAE6FD]/50 leading-relaxed resize-none font-sans shadow-tactile-inset"
         />
 
-        {/* Bộ bóc tách Phiếu XN / Đơn thuốc cũ nối thẳng hieu_chinh_lieu.py */}
+        {/* Bộ bóc tách Phiếu XN / Đơn thuốc cũ nối thẳng hieu_chinh_lieu.py & can_lam_sang.py */}
         <div className="mt-6 pt-5 border-t border-[#CCE3F0] space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <ScanText size={16} className="text-[#0284C7]" />
               <span className="text-sm font-bold text-[#0F172A]">
-                Bóc tách Phiếu Xét nghiệm / Đơn thuốc cũ (eGFR &amp; Hiệu chỉnh liều)
+                Bóc tách Phiếu Xét nghiệm / Đơn thuốc cũ (Panic Values, eGFR &amp; Hiệu chỉnh liều)
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -233,7 +333,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
             </div>
           </div>
 
-          {/* Hai ô chọn bắt buộc cho công thức CKD-EPI eGFR: Tuổi & Giới tính (không gán ngầm 50 tuổi hay Nam) */}
+          {/* Hai ô chọn bắt buộc cho công thức CKD-EPI eGFR: Tuổi & Giới tính */}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#BAE6FD] bg-[#F0F7FA]/75 px-3.5 py-2.5 text-xs">
             <div className="flex items-center gap-1.5 text-[#0C4A6E] font-semibold">
               <UserCheck size={14} className="text-[#0284C7] flex-shrink-0" />
@@ -244,7 +344,7 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
                 <span>Tuổi</span>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={120}
                   inputMode="numeric"
                   value={tuoiEgfr}
@@ -334,12 +434,38 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
           <textarea
             value={ocrInput}
             onChange={(e) => setOcrInput(e.target.value)}
-            placeholder="Dán nội dung OCR phiếu XN hoặc đơn thuốc cũ (ví dụ: Creatinin 165 umol/L, HbA1c 7.8%, Metformin 850mg, Allopurinol 300mg)..."
+            placeholder="Dán nội dung OCR phiếu XN hoặc đơn thuốc cũ (ví dụ: Kali 6.4 mmol/L, Troponin T 0.85, Hb 6.5 g/dL, Creatinin 165 umol/L, HbA1c 7.8%, Metformin 850mg)..."
             className="w-full h-24 p-3.5 rounded-xl border border-[#BAE6FD] bg-[#F0F7FA]/50 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#0284C7] focus:ring-2 focus:ring-[#BAE6FD]/50 resize-none font-sans shadow-tactile-inset"
           />
 
           {ketQuaOcr && (
-            <div className="rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] p-3.5 text-xs space-y-2 shadow-tactile-doctor-pill">
+            <div className="rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] p-3.5 text-xs space-y-3 shadow-tactile-doctor-pill">
+              {/* Boost 9B: Báo động đỏ Giá trị Xét nghiệm Nguy kịch (Panic Values) */}
+              {ketQuaOcr.doi_soat_can_lam_sang?.bao_dong_do_khan_cap &&
+                ketQuaOcr.doi_soat_can_lam_sang.bao_dong_do_khan_cap.length > 0 && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border-2 border-red-500 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 p-3.5 text-red-950 shadow-sm space-y-1.5"
+                  >
+                    <div className="flex items-center gap-2 font-bold text-red-800 text-[12.5px] uppercase tracking-wide">
+                      <ShieldAlert size={16} className="text-red-600 animate-pulse flex-shrink-0" />
+                      <span>Báo động đỏ giá trị cận lâm sàng nguy kịch (Panic Value)</span>
+                    </div>
+                    <ul className="list-disc pl-5 space-y-1 text-xs font-medium text-red-900">
+                      {ketQuaOcr.doi_soat_can_lam_sang.bao_dong_do_khan_cap.map((bd, idx) => (
+                        <li key={idx}>{bd}</li>
+                      ))}
+                    </ul>
+                    {ketQuaOcr.doi_soat_can_lam_sang.khuyen_cao_dieu_tri &&
+                      ketQuaOcr.doi_soat_can_lam_sang.khuyen_cao_dieu_tri.length > 0 && (
+                        <div className="pt-1 text-[11.5px] text-red-800 border-t border-red-200/80">
+                          <strong>Gợi ý xử trí để bác sĩ xem xét:</strong>{" "}
+                          {ketQuaOcr.doi_soat_can_lam_sang.khuyen_cao_dieu_tri.join(" · ")}
+                        </div>
+                      )}
+                  </div>
+                )}
+
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="font-semibold text-[#0369A1]">
                   Chỉ số nhận diện:{" "}
@@ -357,11 +483,54 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
                   <Plus size={12} className="text-[#0284C7]" /> Chèn vào Ngữ cảnh
                 </button>
               </div>
+
+              {/* Boost 9B: Bảng phân tích chi tiết chỉ số cận lâm sàng */}
+              {ketQuaOcr.doi_soat_can_lam_sang?.danh_sach_chi_so &&
+                ketQuaOcr.doi_soat_can_lam_sang.danh_sach_chi_so.length > 0 && (
+                  <div className="overflow-x-auto rounded-xl border border-[#CCE3F0] bg-white">
+                    <table className="w-full text-left border-collapse text-[11.5px]">
+                      <thead>
+                        <tr className="bg-[#F0F7FA] border-b border-[#CCE3F0] text-[#475569] font-bold">
+                          <th className="py-2 px-3">Chỉ số XN</th>
+                          <th className="py-2 px-3">Kết quả</th>
+                          <th className="py-2 px-3">Tham chiếu</th>
+                          <th className="py-2 px-3">Mức độ</th>
+                          <th className="py-2 px-3">Nhận định cận lâm sàng</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E0F2FE] text-[#0F172A]">
+                        {ketQuaOcr.doi_soat_can_lam_sang.danh_sach_chi_so.map((row, idx) => {
+                          const badge = nhanTrangThaiCls(row.trang_thai);
+                          return (
+                            <tr
+                              key={`${row.ma_xet_nghiem || idx}`}
+                              className={row.trang_thai === "NGUY_KICH" ? "bg-red-50/70" : ""}
+                            >
+                              <td className="py-2 px-3 font-semibold">{row.ten_chi_so || row.ma_xet_nghiem}</td>
+                              <td className="py-2 px-3 font-mono font-bold">
+                                {row.gia_tri} {row.don_vi || ""}
+                              </td>
+                              <td className="py-2 px-3 text-[#64748B] font-mono">{row.khoang_tham_chieu || "—"}</td>
+                              <td className="py-2 px-3">
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.mau}`}>
+                                  {badge.chu}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-[#334155]">{row.y_nghia_lam_sang || ""}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
               {ketQuaOcr.thuoc_nhan_dien && ketQuaOcr.thuoc_nhan_dien.length > 0 && (
                 <div className="text-[#0F172A]">
                   <strong>Thuốc đơn cũ:</strong> {ketQuaOcr.thuoc_nhan_dien.join(", ")}
                 </div>
               )}
+
               {(() => {
                 const cbs = [
                   ...(ketQuaOcr.hieu_chinh_lieu?.canh_bao_hieu_chinh_than || []),
@@ -381,6 +550,62 @@ export const ContextView: React.FC<ContextViewProps> = ({ tab, onUpdateContent, 
                   </div>
                 );
               })()}
+            </div>
+          )}
+        </div>
+
+        {/* Boost 12: Công cụ Nạp Danh mục Thuốc Bệnh viện / Thầu BHYT (.csv) tại chỗ */}
+        <div className="mt-6 pt-5 border-t border-[#CCE3F0] space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Pill size={16} className="text-[#0D9488]" />
+              <div>
+                <span className="text-sm font-bold text-[#0F172A]">
+                  Danh mục Thuốc Bệnh viện &amp; Thầu BHYT tại chỗ (.csv)
+                </span>
+                <p className="text-[11px] text-[#64748B]">
+                  Tải tệp CSV danh mục thuốc nội viện (hoạt chất, hàm lượng, tồn kho, trần BHYT) để đối chiếu kê đơn 100% nội bộ.
+                </p>
+              </div>
+            </div>
+            <div>
+              <input
+                ref={oChonCsv}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={xuLyTaiCsvFormulary}
+                className="hidden"
+                aria-label="Tải tệp CSV danh mục thuốc bệnh viện"
+              />
+              <button
+                type="button"
+                disabled={dangTaiCsv}
+                onClick={() => oChonCsv.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#BCE3DB] bg-[#E6F4F1] hover:bg-[#D1ECE6] disabled:opacity-50 text-[#0D5F57] text-xs font-semibold transition-all shadow-tactile-doctor-pill cursor-pointer"
+              >
+                <Upload size={13} />
+                <span>{dangTaiCsv ? "Đang nạp CSV..." : "Tải Danh mục Thuốc (.csv)"}</span>
+              </button>
+            </div>
+          </div>
+
+          {ketQuaFormulary && (
+            <div
+              className={`rounded-xl border px-3.5 py-2.5 text-xs flex items-center justify-between gap-2 ${
+                ketQuaFormulary.ok
+                  ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]"
+                  : "bg-[#FFF5F5] border-[#F5C2C2] text-[#B4232C]"
+              }`}
+            >
+              <span>{ketQuaFormulary.thongBao}</span>
+              <button
+                type="button"
+                onClick={() => setKetQuaFormulary(null)}
+                className="p-0.5 rounded hover:bg-black/5 cursor-pointer"
+                aria-label="Đóng thông báo danh mục thuốc"
+              >
+                <X size={13} />
+              </button>
             </div>
           )}
         </div>
