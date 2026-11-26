@@ -12,11 +12,32 @@ from __future__ import annotations
 
 from typing import Any
 
-ROLE_TO_CORE = {"doctor": "bac_si", "patient": "benh_nhan", "family_member": "nguoi_nha",
-                "other": "nguoi_khac", "unknown": "unknown"}
+ROLE_TO_CORE = {
+    "doctor": "bac_si",
+    "nurse": "dieu_duong",
+    "patient": "benh_nhan",
+    "family_member": "nguoi_nha",
+    "other": "nguoi_khac",
+    "unknown": "unknown",
+    "bác sĩ": "bac_si",
+    "điều dưỡng": "dieu_duong",
+    "bệnh nhân": "benh_nhan",
+    "người nhà": "nguoi_nha",
+    "người khác": "nguoi_khac",
+}
 # Nhan vai trong chuoi `input` cua bo du lieu MediTrace
-ROLE_LABEL = {"doctor": "Bác sĩ", "patient": "Bệnh nhân", "family_member": "Người nhà",
-              "other": "Người khác"}
+ROLE_LABEL = {
+    "doctor": "Bác sĩ",
+    "nurse": "Điều dưỡng",
+    "patient": "Bệnh nhân",
+    "family_member": "Người nhà",
+    "other": "Người khác",
+    "bác sĩ": "Bác sĩ",
+    "điều dưỡng": "Điều dưỡng",
+    "bệnh nhân": "Bệnh nhân",
+    "người nhà": "Người nhà",
+    "người khác": "Người khác",
+}
 
 
 def to_meditrace(segments: list[dict[str, Any]], strict: bool = False) -> dict[str, Any]:
@@ -28,7 +49,8 @@ def to_meditrace(segments: list[dict[str, Any]], strict: bool = False) -> dict[s
     turns, metadata, lines = [], [], []
     for index, segment in enumerate(segments, 1):
         text = (segment.get("text_original") or "").strip()
-        role = segment.get("speaker_role", "unknown")
+        raw_role = segment.get("speaker_role", "unknown")
+        role = str(raw_role.value if hasattr(raw_role, "value") else raw_role).strip().lower() or "unknown"
         if strict and role not in ROLE_LABEL:
             raise ValueError("speaker_unknown")
         turns.append({"luot": index, "nguoi_noi": ROLE_TO_CORE.get(role, "unknown"), "noi_dung": text})

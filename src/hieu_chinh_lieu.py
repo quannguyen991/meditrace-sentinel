@@ -360,10 +360,17 @@ TUONG_TAC_THUC_PHAM = [
     },
     {
         "thuoc": "warfarin",
-        "ten_chuan": "Warfarin (Sintrom / Coumadin)",
+        "ten_chuan": "Warfarin (Coumadin)",
         "thuc_pham": "Rau xanh đậm màu (rau muống, bông cải xanh, cải xoăn, rau chân vịt)",
         "khuyen_cao": "Duy trì chế độ ăn rau xanh ổn định hàng ngày, không ăn tăng vọt đột ngột.",
         "ly_do": "Vitamin K tự nhiên trong rau xanh đậm là chất đối kháng trực tiếp cơ chế chống đông của Warfarin."
+    },
+    {
+        "thuoc": "acenocoumarol",
+        "ten_chuan": "Acenocoumarol (Sintrom)",
+        "thuc_pham": "Rau xanh đậm màu giàu Vitamin K (rau muống, bông cải xanh, cải bó xôi)",
+        "khuyen_cao": "Duy trì chế độ ăn rau xanh ổn định hàng ngày, không ăn tăng giảm đột ngột và tránh rượu bia.",
+        "ly_do": "Vitamin K tự nhiên đối kháng trực tiếp cơ chế kháng Vitamin K của Sintrom (Acenocoumarol), làm biến động INR."
     },
     {
         "thuoc": "paracetamol",
@@ -387,6 +394,89 @@ TUONG_TAC_THUC_PHAM = [
         "ly_do": "Chất Furanocoumarin trong bưởi chùm ức chế enzym ruột CYP3A4, làm tăng vọt nồng độ thuốc gây tụt huyết áp nghiêm trọng."
     }
 ]
+
+
+_BIET_DUOC_HIEU_CHINH: Dict[str, str] = {
+    "losec": "omeprazole",
+    "omepral": "omeprazole",
+    "lomac": "omeprazole",
+    "nexium": "esomeprazole",
+    "plavix": "clopidogrel",
+    "clopistad": "clopidogrel",
+    "sintrom": "acenocoumarol",
+    "minisintrom": "acenocoumarol",
+    "coumadin": "warfarin",
+    "marevan": "warfarin",
+    "cordarone": "amiodarone",
+    "glucophage": "metformin",
+    "panfor": "metformin",
+    "crestor": "rosuvastatin",
+    "lipitor": "atorvastatin",
+    "cozaar": "losartan",
+    "aldactone": "spironolactone",
+    "verospiron": "spironolactone",
+    "norvasc": "amlodipine",
+    "amlor": "amlodipine",
+    "panadol": "paracetamol",
+    "hapacol": "paracetamol",
+    "efferalgan": "paracetamol",
+    "advil": "ibuprofen",
+    "brufen": "ibuprofen",
+    "ciprobay": "ciprofloxacin",
+    "lanoxin": "digoxin",
+    "zyloric": "allopurinol",
+    "pradaxa": "dabigatran",
+    "xarelto": "rivaroxaban",
+    "lovenox": "enoxaparin",
+    "flagyl": "metronidazole",
+    "vibramycin": "tetracycline",
+    "doxycycline": "tetracycline",
+    "doxycyclin": "tetracycline",
+}
+
+
+def _goc_thuoc(ten: str) -> str:
+    s = (ten or "").strip().lower()
+    return s[:-1] if len(s) > 5 and s.endswith("e") else s
+
+
+def _tap_goc_thuoc_tu_danh_sach(danh_sach_thuoc: List[str]) -> set:
+    from src import tri_thuc_thuoc as _ttt
+
+    tap_goc = set()
+    for raw in danh_sach_thuoc:
+        s = (raw or "").strip().lower()
+        if not s:
+            continue
+        for bd, hc_bd in _BIET_DUOC_HIEU_CHINH.items():
+            if re.search(rf"(?<!\w){re.escape(bd)}(?!\w)", s):
+                tap_goc.add(_goc_thuoc(hc_bd))
+        hc_direct = _ttt.hoat_chat(s)
+        if hc_direct:
+            tap_goc.add(_goc_thuoc(hc_direct))
+            if _goc_thuoc(hc_direct) == "doxycyclin":
+                tap_goc.add(_goc_thuoc("tetracycline"))
+        for m_rx in _ttt.regex_ten_thuoc().finditer(s):
+            hc_m = _ttt.hoat_chat(m_rx.group(1)) or m_rx.group(1).lower()
+            tap_goc.add(_goc_thuoc(hc_m))
+            if _goc_thuoc(hc_m) == "doxycyclin":
+                tap_goc.add(_goc_thuoc("tetracycline"))
+        for tok in re.findall(r"[a-zA-Z][\w\-]{2,}", s):
+            tap_goc.add(_goc_thuoc(tok))
+    return tap_goc
+
+
+def _lay_benh_nen_bn(thong_tin_bn: Dict[str, Any]) -> List[str]:
+    ra: List[str] = []
+    for k in ("benh_nen", "tien_su_benh"):
+        raw = thong_tin_bn.get(k)
+        if not raw:
+            continue
+        if isinstance(raw, str):
+            ra.extend([x.strip().lower() for x in re.split(r"[,;\n]+", raw) if x.strip()])
+        elif isinstance(raw, (list, tuple, set)):
+            ra.extend([str(x).strip().lower() for x in raw if x is not None and str(x).strip()])
+    return ra
 
 
 def kiem_tra_hieu_chinh_lieu(
@@ -422,7 +512,12 @@ def kiem_tra_hieu_chinh_lieu(
     except (ValueError, TypeError):
         tuoi = 50
 
-    can_nang_raw = thong_tin_benh_nhan.get("can_nang_kg")
+    # Hỗ trợ đồng thời cả `can_nang_kg` lẫn `can_nang`
+    can_nang_raw = (
+        thong_tin_benh_nhan.get("can_nang_kg")
+        if thong_tin_benh_nhan.get("can_nang_kg") is not None
+        else thong_tin_benh_nhan.get("can_nang")
+    )
     can_nang: Optional[float] = None
     if can_nang_raw is not None:
         try:
@@ -432,7 +527,9 @@ def kiem_tra_hieu_chinh_lieu(
         except (ValueError, TypeError):
             can_nang = None
 
-    la_nu_raw = thong_tin_benh_nhan.get("la_nu", False)
+    la_nu_raw = thong_tin_benh_nhan.get("la_nu")
+    if la_nu_raw is None:
+        la_nu_raw = thong_tin_benh_nhan.get("gioi_tinh", False)
     la_nu = False
     if isinstance(la_nu_raw, bool):
         la_nu = la_nu_raw
@@ -514,21 +611,23 @@ def kiem_tra_hieu_chinh_lieu(
     except (ValueError, TypeError):
         bili_val = 15.0
     
-    gan_bat_thuong = (ast_val > 100 or alt_val > 100 or bili_val > 30)
-    
+    benh_nen_list = _lay_benh_nen_bn(thong_tin_benh_nhan)
+    co_benh_gan_nen = any("suy gan" in b or "xơ gan" in b for b in benh_nen_list)
+    gan_bat_thuong = (ast_val > 100 or alt_val > 100 or bili_val > 30 or co_benh_gan_nen)
+
     canh_bao_than: List[Dict[str, Any]] = []
     canh_bao_gan: List[Dict[str, Any]] = []
     canh_bao_thuc_pham: List[Dict[str, Any]] = []
-    
-    # Chuẩn hóa an toàn danh sách thuốc
+
+    # Chuẩn hóa an toàn danh sách thuốc (không phân biệt 'e' cuối & nhận diện biệt dược phổ biến)
     danh_sach_thuoc_an_toan = danh_sach_thuoc if isinstance(danh_sach_thuoc, list) else []
     thuoc_lower = [str(t).lower().strip() for t in danh_sach_thuoc_an_toan if t is not None and str(t).strip()]
-    chuoi_thuoc_gop = " ".join(thuoc_lower)
-    
+    tap_goc_thuoc = _tap_goc_thuoc_tu_danh_sach(thuoc_lower)
+
     # Kiểm tra hiệu chỉnh thận
     if chi_so_than_chinh is not None:
         for qt in QUY_TAC_THAN:
-            if qt["thuoc"] in chuoi_thuoc_gop or any(re.search(r'\b' + re.escape(qt["thuoc"]) + r'\b', t) for t in thuoc_lower):
+            if _goc_thuoc(qt["thuoc"]) in tap_goc_thuoc:
                 if qt["dieu_kien"](chi_so_than_chinh):
                     canh_bao_than.append({
                         "thuoc": qt["ten_chuan"],
@@ -538,23 +637,47 @@ def kiem_tra_hieu_chinh_lieu(
                         "lieu_de_xuat": qt["lieu_de_xuat"],
                         "ly_do_lam_sang": qt["ly_do"]
                     })
-    
-    # Kiểm tra hiệu chỉnh gan
+
+    # Kiểm tra thêm Spironolacton/Spironolactone khi Kali máu > 5.0 mmol/L
+    kali_raw = ket_qua_xet_nghiem.get("kali") if ket_qua_xet_nghiem.get("kali") is not None else ket_qua_xet_nghiem.get("k")
+    if kali_raw is not None and _goc_thuoc("spironolactone") in tap_goc_thuoc:
+        try:
+            kali_f = float(kali_raw)
+            if kali_f > 5.0 and not any("Spironolacton" in c["thuoc"] for c in canh_bao_than):
+                canh_bao_than.append({
+                    "thuoc": "Spironolactone (Spironolacton)",
+                    "muc_do": "CRITICAL" if kali_f >= 5.5 else "WARNING",
+                    "chi_so_danh_gia": f"Kali máu = {kali_f} mmol/L",
+                    "khuyen_cao": "CHỐNG CHỈ ĐỊNH Spironolacton khi tăng Kali máu (> 5.0 mmol/L)",
+                    "lieu_de_xuat": "Ngừng Spironolacton ngay lập tức và theo dõi điện tâm đồ / điện giải đồ.",
+                    "ly_do_lam_sang": "Nguy cơ tăng Kali máu ác tính gây loạn nhịp thất và ngừng tim.",
+                })
+        except (ValueError, TypeError):
+            pass
+
+    # Kiểm tra hiệu chỉnh gan (tính cả bệnh nền suy gan / xơ gan khi AST/ALT chưa làm)
+    ast_danh_gia = max(ast_val, 210.0) if co_benh_gan_nen else ast_val
+    alt_danh_gia = max(alt_val, 210.0) if co_benh_gan_nen else alt_val
     for qt in QUY_TAC_GAN:
-        if qt["thuoc"] in chuoi_thuoc_gop or any(re.search(r'\b' + re.escape(qt["thuoc"]) + r'\b', t) for t in thuoc_lower):
-            if qt["dieu_kien"](ast_val, alt_val, bili_val):
+        if _goc_thuoc(qt["thuoc"]) in tap_goc_thuoc:
+            if qt["dieu_kien"](ast_danh_gia, alt_danh_gia, bili_val):
+                chi_so_gan_str = (
+                    f"Bệnh nền suy gan/xơ gan (AST={ast_val} U/L, ALT={alt_val} U/L)"
+                    if co_benh_gan_nen and ast_val <= 100 and alt_val <= 100
+                    else f"AST={ast_val} U/L, ALT={alt_val} U/L, Bilirubin={bili_val} µmol/L"
+                )
                 canh_bao_gan.append({
                     "thuoc": qt["ten_chuan"],
                     "muc_do": qt["muc_do"],
-                    "chi_so_danh_gia": f"AST={ast_val} U/L, ALT={alt_val} U/L, Bilirubin={bili_val} µmol/L",
+                    "chi_so_danh_gia": chi_so_gan_str,
                     "khuyen_cao": qt["khuyen_cao"],
                     "lieu_de_xuat": qt["lieu_de_xuat"],
                     "ly_do_lam_sang": qt["ly_do"]
                 })
-                
+
     # Kiểm tra tương tác thuốc - thức ăn
     for tt in TUONG_TAC_THUC_PHAM:
-        if tt["thuoc"] in chuoi_thuoc_gop or any(re.search(r'\b' + re.escape(tt["thuoc"]) + r'\b', t) for t in thuoc_lower):
+        if _goc_thuoc(tt["thuoc"]) in tap_goc_thuoc:
             canh_bao_thuc_pham.append({
                 "thuoc": tt["ten_chuan"],
                 "thuc_pham_kieng_cu": tt["thuc_pham"],

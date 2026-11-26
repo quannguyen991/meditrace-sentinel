@@ -15,6 +15,7 @@ probability. It measures how sure the recogniser is about the words — nothing 
 from __future__ import annotations
 
 import math
+import threading
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -24,6 +25,8 @@ from .contextual_trie_600 import ContextualPrefixTrie600, tao_trie_600_mac_dinh
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
 _CACHE: dict[tuple, Any] = {}
+_CACHE_LOCK = threading.Lock()
+_INFER_LOCK = threading.Lock()
 
 
 class FasterWhisperProvider(ASRProvider):
@@ -62,12 +65,14 @@ class FasterWhisperProvider(ASRProvider):
                 dev = "cpu"
         ct = self.compute_type or ("float16" if dev == "cuda" else "int8")
         key = (self.model, dev, ct)
-        if key not in _CACHE:
-            try:
-                _CACHE[key] = WhisperModel(self.model, device=dev, compute_type=ct)
-            except Exception as exc:
-                raise ASRError("asr_load_failed", f"{type(exc).__name__}: {exc}") from exc
-        return _CACHE[key], dev, ct
+        with _CACHE_LOCK:
+            if key not in _CACHE:
+                try:
+                    _CACHE[key] = WhisperModel(self.model, device=dev, compute_type=ct)
+                except Exception as exc:
+                    raise ASRError("asr_load_failed", f"{type(exc).__name__}: {exc}") from exc
+            model_inst = _CACHE[key]
+        return model_inst, dev, ct
 
     def transcribe(self, audio_path: str | Path) -> ASRResult:
         audio, duration = read_wav_16k_mono(audio_path)
@@ -77,12 +82,13 @@ class FasterWhisperProvider(ASRProvider):
                "hotwords": self.hotwords}
         t0 = time.time()
         try:
-            it, _info = model.transcribe(audio, language="vi", beam_size=1, temperature=0.0,
-                                         vad_filter=self.vad_filter,
-                                         condition_on_previous_text=False,
-                                         word_timestamps=self.word_timestamps,
-                                         hotwords=self.hotwords)
-            raw = list(it)
+            with _INFER_LOCK:
+                it, _info = model.transcribe(audio, language="vi", beam_size=1, temperature=0.0,
+                                             vad_filter=self.vad_filter,
+                                             condition_on_previous_text=False,
+                                             word_timestamps=self.word_timestamps,
+                                             hotwords=self.hotwords)
+                raw = list(it)
         except Exception as exc:
             raise ASRError("asr_inference_failed", f"{type(exc).__name__}: {exc}") from exc
         segs = []

@@ -26,7 +26,7 @@ from typing import List
 
 LOAI = ("người", "thuốc", "xét nghiệm", "bệnh")
 
-VAI_NOI = ("bác sĩ", "bệnh nhân", "người nhà", "điều dưỡng")
+VAI_NOI = ("bác sĩ", "bệnh nhân", "người nhà", "điều dưỡng", "người khác")
 
 # Tu chi quan he. "<quan he> toi" tro toi mot nguoi KHAC nguoi noi.
 QUAN_HE = ("chồng", "vợ", "con trai", "con gái", "con", "cháu", "mẹ", "bố",

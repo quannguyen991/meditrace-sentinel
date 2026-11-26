@@ -60,10 +60,22 @@ class ParaclinicalCorrelator:
 
         vb_lower = (hoi_thoai_hoac_benh_su + " " + chan_doan_so_bo).lower()
 
+        def _lay_chi_so(*khoa: str) -> Any:
+            for k in khoa:
+                v = du_lieu_xet_nghiem.get(k)
+                if v is not None and not isinstance(v, bool):
+                    if isinstance(v, str):
+                        v_str = v.strip().replace(",", ".")
+                        if not v_str:
+                            continue
+                        return v_str
+                    return v
+            return None
+
         # ----------------------------------------------------------------------
         # 1. BẠCH CẦU (WBC - White Blood Cells)
         # ----------------------------------------------------------------------
-        wbc = du_lieu_xet_nghiem.get("wbc") or du_lieu_xet_nghiem.get("bach_cau")
+        wbc = _lay_chi_so("wbc", "bach_cau")
         if wbc is not None:
             wbc_val = float(wbc)
             if wbc_val > 20.0:
@@ -96,7 +108,7 @@ class ParaclinicalCorrelator:
         # ----------------------------------------------------------------------
         # 2. HEMOGLOBIN (HB - Huyết sắc tố)
         # ----------------------------------------------------------------------
-        hb = du_lieu_xet_nghiem.get("hb") or du_lieu_xet_nghiem.get("hemoglobin")
+        hb = _lay_chi_so("hb", "hemoglobin")
         if hb is not None:
             hb_val = float(hb)
             if hb_val < 7.0:
@@ -123,7 +135,7 @@ class ParaclinicalCorrelator:
         # ----------------------------------------------------------------------
         # 3. MEN TIM (TROPONIN T / I)
         # ----------------------------------------------------------------------
-        trop = du_lieu_xet_nghiem.get("troponin") or du_lieu_xet_nghiem.get("troponin_t") or du_lieu_xet_nghiem.get("troponin_i")
+        trop = _lay_chi_so("troponin", "troponin_t", "troponin_i")
         if trop is not None:
             trop_val = float(trop)
             # Ngưỡng bình thường Troponin T < 0.014 ng/mL hoặc Troponin I < 0.04 ng/mL
@@ -146,7 +158,7 @@ class ParaclinicalCorrelator:
         # ----------------------------------------------------------------------
         # 4. KALI MÁU (K+)
         # ----------------------------------------------------------------------
-        k_val = du_lieu_xet_nghiem.get("k") or du_lieu_xet_nghiem.get("kali")
+        k_val = _lay_chi_so("k", "kali")
         if k_val is not None:
             k_f = float(k_val)
             if k_f >= 6.0:
@@ -213,6 +225,9 @@ class ParaclinicalCorrelator:
             if urea_val > 15.0:
                 tt = "NGUY_KICH"
                 yn = "Ure máu tăng rất cao: Suy thận cấp/mạn nặng hoặc xuất huyết tiêu hóa trên."
+                bao_dong_do.append(
+                    f"Ure máu = {urea_val} mmol/L: Tăng ure máu nguy kịch (> 15.0 mmol/L), nguy cơ suy thận cấp/mạn nặng hoặc xuất huyết tiêu hóa trên."
+                )
             elif urea_val > 7.5:
                 tt = "TANG_CAO"
                 yn = "Ure máu tăng nhẹ đến vừa."

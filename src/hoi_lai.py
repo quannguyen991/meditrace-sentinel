@@ -330,10 +330,14 @@ def ap_dung_tra_loi(p, cau_hoi: CauHoi, cau_tra_loi: str) -> None:
     ly = cau_hoi.ly_do
 
     if ly == "mau_thuan":
-        if "không" not in tl:
+        if "không" not in tl and "chưa đúng" not in tl:
             p.moc_thoi_gian = cau_tra_loi
-            p.quan_he = "bổ sung"
-            p.quan_he_voi = None
+            if getattr(p, "quan_he_voi", None) is not None:
+                p.quan_he = "bổ sung"
+            else:
+                p.quan_he = None
+                p.quan_he_voi = None
+            p.trang_thai = "còn hiệu lực"
     elif ly == "chu_the" or ly == "gom_chu_the_mo_ho":
         if "bệnh nhân" in tl:
             p.chu_the_id = 0
@@ -346,10 +350,20 @@ def ap_dung_tra_loi(p, cau_hoi: CauHoi, cau_tra_loi: str) -> None:
         elif "nghi ngờ" in tl:
             p.do_chac_chan = "nghi ngờ"
     elif ly == "di_ung_chua_ghi_nhan":
-        if "có" in tl or "dị ứng" in tl:
+        if getattr(p, "chu_the_id", 0) != 0:
+            return
+        if any(x in tl for x in ("chưa bao giờ", "chưa từng", "chưa dùng", "chưa thấy", "không chắc", "chưa rõ")):
+            p.do_chac_chan = "chưa ghi nhận"
+            p.phu_dinh = False
+        elif (
+            any(x in tl for x in ("an toàn", "không có", "không dị ứng", "không bị", "không phản ứng", "không mẫn cảm"))
+            or tl in ("không", "ko", "dạ không")
+        ):
             p.do_chac_chan = "chắc chắn"
-        elif "chưa bao giờ" in tl or "an toàn" in tl:
-            p.do_chac_chan = "không có"
+            p.phu_dinh = True
+        elif "có" in tl or "dị ứng" in tl:
+            p.do_chac_chan = "chắc chắn"
+            p.phu_dinh = False
 
 
 def mo_phong_hoi_lai(

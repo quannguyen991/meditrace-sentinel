@@ -26,6 +26,7 @@ class SessionStatus(str, Enum):
 
 class SpeakerRole(str, Enum):
     DOCTOR = "doctor"
+    NURSE = "nurse"
     PATIENT = "patient"
     FAMILY_MEMBER = "family_member"
     OTHER = "other"

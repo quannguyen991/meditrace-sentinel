@@ -10,6 +10,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import json
+import re
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -18,7 +19,8 @@ from src.guardrails import (
     SpeakerConsistencyGuardrail,
     DialogueActGuardrail,
     EvidenceIntegrityGuardrail,
-    ClinicalSafetyGuardrail
+    ClinicalSafetyGuardrail,
+    DUOC_THU_QUOC_GIA,
 )
 from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine
 from src.fhir_exporter import FHIRExporter
@@ -76,22 +78,43 @@ class KetQuaDieuPhoi:
     tro_ly_lam_sang: Optional[Any] = None
 
 
+_RE_CAU_DI_UNG = re.compile(
+    r"(?i)(?<!\w)(dị\s+ứng|mẫn\s+cảm|phản\s+vệ|sốc\s+phản\s+vệ|"
+    r"nổi\s+mề\s+đay\s+(?:khi|với|do)|phát\s+ban\s+(?:khi|với|do)|mẩn\s+ngứa\s+(?:khi|với|do))(?!\w)"
+)
+
+
 def _trich_danh_sach_thuoc_hop_le(danh_sach_phat_bieu: List[PhatBieu]) -> List[str]:
     """Lọc thuốc đang dùng hoặc được kê trong kế hoạch điều trị của chính bệnh nhân (chu_the_id == 0),
-    loại bỏ phủ định, phát biểu bị thay thế, và thuốc đã ngừng."""
+    loại bỏ phủ định, giả định, phát biểu bị thay thế, thuốc đã ngừng, câu dị ứng và lời dặn không phải thuốc."""
+    from src import tri_thuc_thuoc as _ttt
+
     ket_qua: List[str] = []
     for p in danh_sach_phat_bieu:
         if getattr(p, "chu_the_id", 0) != 0:
             continue
         if getattr(p, "phu_dinh", False):
             continue
-        if getattr(p, "trang_thai", "còn hiệu lực") == "bị thay thế":
+        if getattr(p, "trang_thai", "còn hiệu lực") != "còn hiệu lực":
+            continue
+        if getattr(p, "tinh_huong", "thực tế") == "giả định":
+            continue
+        if getattr(p, "do_chac_chan", "chắc chắn") == "chưa ghi nhận":
             continue
 
         thuoc_dict = getattr(p, "thuoc", None)
-        muc = getattr(p, "muc", "") or ""
+        muc = (getattr(p, "muc", "") or "").strip().upper()
+        if not muc and hasattr(p, "to_dict"):
+            muc, _ = sinh_benh_an._muc_cho(p.to_dict(), 0)
         noi_dung = (getattr(p, "noi_dung", "") or "").strip()
         nd_low = noi_dung.lower()
+
+        # Loại trừ câu dị ứng / mẫn cảm để chất gây dị ứng không bao giờ bị coi là thuốc đang dùng/kê đơn
+        if muc == "DỊ ỨNG" or _RE_CAU_DI_UNG.search(nd_low):
+            continue
+
+        if any(kw in nd_low for kw in ("đã ngừng", "ngừng dùng", "ngưng dùng", "đã ngưng")):
+            continue
 
         if isinstance(thuoc_dict, dict):
             if thuoc_dict.get("trang_thai_dung") == "đã ngừng":
@@ -101,12 +124,31 @@ def _trich_danh_sach_thuoc_hop_le(danh_sach_phat_bieu: List[PhatBieu]) -> List[s
                 ket_qua.append(ten)
                 continue
 
-        if any(kw in nd_low for kw in ("đã ngừng", "ngừng dùng", "ngưng dùng", "đã ngưng")):
+        if not noi_dung:
             continue
 
-        if muc in ("THUỐC ĐANG DÙNG", "KẾ HOẠCH ĐIỀU TRỊ") or getattr(p, "hanh_vi", None) == "kế hoạch" or "thuốc" in nd_low or isinstance(thuoc_dict, dict):
-            if noi_dung:
-                ket_qua.append(noi_dung)
+        # Khi không có PhatBieu.thuoc có cấu trúc: chỉ nhận tên thuốc thật khớp danh mục hoạt chất/biệt dược
+        thuoc_khop: List[str] = []
+        da_thay = set()
+        for m_rx in _ttt.regex_ten_thuoc().finditer(noi_dung):
+            ten_m = m_rx.group(1).strip()
+            hc_m = _ttt.hoat_chat(ten_m) or ten_m.lower()
+            if hc_m not in da_thay:
+                da_thay.add(hc_m)
+                thuoc_khop.append(ten_m)
+        for m_aho in ClinicalPharmacovigilanceEngine.nhan_dien_thuoc_aho_corasick(noi_dung):
+            hc_a = m_aho["hoat_chat"]
+            if hc_a not in da_thay:
+                da_thay.add(hc_a)
+                thuoc_khop.append(m_aho["tu_khoa_khop"])
+        for dt in DUOC_THU_QUOC_GIA:
+            if re.search(rf"(?i)(?<!\w){re.escape(dt)}(?!\w)", nd_low):
+                hc_dt = _ttt.hoat_chat(dt) or dt
+                if hc_dt not in da_thay:
+                    da_thay.add(hc_dt)
+                    thuoc_khop.append(dt)
+
+        ket_qua.extend(thuoc_khop)
     return ket_qua
 
 
@@ -193,10 +235,10 @@ class MediTracePipelineOrchestrator:
         xac_nhan_map = {**ly_do_khoa_map, **cong_rui_ro.dua_sang_xac_nhan(danh_gia_rr)}
 
         # BỔ SUNG QUY TẮC AN TOÀN DƯỢC THƯ ASR (HUMAN-IN-THE-LOOP):
-        # Mọi tên thuốc do ASR nhận diện từ âm vị dân gian hoặc có thể nghe sai ('a móc', 'ô mê'...)
-        # BẮT BUỘC BÔI ĐỎ và ĐẨY SANG MỤC "CẦN BÁC SĨ XÁC NHẬN", cấm tự ý gán vào đơn thuốc.
-        if res_asr.goi_y:
-            for idx_g, (am_vi, chuan) in enumerate(res_asr.goi_y.items()):
+        # CHỈ áp dụng cho gợi ý âm vị tên thuốc (`goi_y_thuoc`), tuyệt đối KHÔNG gắn nhãn thuốc cho biến âm triệu chứng/phương ngữ!
+        goi_y_thuoc_asr = getattr(res_asr, "goi_y_thuoc", None)
+        if goi_y_thuoc_asr:
+            for idx_g, (am_vi, chuan) in enumerate(goi_y_thuoc_asr.items()):
                 khoa_id = f"ASR_THUOC_{idx_g + 1}"
                 xac_nhan_map[khoa_id] = (
                     f"[BÔI ĐỎ - CẦN BÁC SĨ XÁC NHẬN TÊN THUỐC]: Tín hiệu ASR ghi nhận âm vị '{am_vi}' "
@@ -204,12 +246,13 @@ class MediTracePipelineOrchestrator:
                     f"Do tạp âm phòng khám/phát âm không chuẩn, hệ thống CẤM tự ý đưa vào đơn. Bác sĩ cần xác nhận đúng hay không."
                 )
 
+        so_bi_chan = sum(1 for k in (kq_khoa.get("ket_qua") or []) if not k.qua)
         dur_c4 = round((time.perf_counter() - t_c4) * 1000, 2)
         chot_kiem_soat.append(AuditCheckpoint(
             ten_chot="Tầng Khóa căn cứ & Cổng Rủi ro lâm sàng",
             thoi_gian_ms=dur_c4,
-            trang_thai="DAT" if not kq_khoa.get("co_loi") else "CANH_BAO",
-            chi_tiet=f"{len(xac_nhan_map)} mục chuyển sang Cần xác nhận.",
+            trang_thai="DAT" if so_bi_chan == 0 else "CANH_BAO",
+            chi_tiet=f"{so_bi_chan} mệnh đề bị chặn, {len(xac_nhan_map)} mục chuyển sang Cần xác nhận.",
             canh_bao=[f"Chuyển ID {i}: {ly}" for i, ly in xac_nhan_map.items()]
         ))
 
@@ -238,8 +281,8 @@ class MediTracePipelineOrchestrator:
         # XUẤT BẢN: Bệnh án 3 phân vùng & HL7 FHIR Bundle (Trụ cột 2)
         # ----------------------------------------------------------------------
         vb_benh_an, _ = sinh_benh_an.sinh(danh_sach_phat_bieu, ly_do_chan=xac_nhan_map)
-        
-        # Bóc tách các phân vùng từ văn bản bệnh án
+
+        # Bóc tách các phân vùng từ văn bản bệnh án (không khởi tạo trùng lặp CẦN XÁC NHẬN trước khi tách)
         ban_nhap_dict = {
             "CHẨN ĐOÁN": "",
             "TIỀN SỬ BỆNH": "",
@@ -249,7 +292,7 @@ class MediTracePipelineOrchestrator:
             "BỆNH SỬ HIỆN TẠI": "",
             "KHÁM LÂM SÀNG": "",
             "KẾ HOẠCH ĐIỀU TRỊ": "",
-            "CẦN XÁC NHẬN": "\n".join(f"- {ly}" for ly in xac_nhan_map.values())
+            "CẦN XÁC NHẬN": "",
         }
         parts = [p.strip() for p in vb_benh_an.split("\n\n") if p.strip()]
         curr_muc = None
@@ -264,17 +307,41 @@ class MediTracePipelineOrchestrator:
                 else:
                     ban_nhap_dict[curr_muc] = p
 
+        # Chỉ nối thêm các mục tổng hợp không gắn với ID mệnh đề (ví dụ: ASR_THUOC_*) để không nhân đôi CẦN XÁC NHẬN
+        tap_id_pb = {getattr(pb_item, "id", None) for pb_item in danh_sach_phat_bieu}
+        muc_xac_nhan_phu = [f"- {ly}" for k_id, ly in xac_nhan_map.items() if k_id not in tap_id_pb]
+        if muc_xac_nhan_phu:
+            phu_text = "\n".join(muc_xac_nhan_phu)
+            if ban_nhap_dict["CẦN XÁC NHẬN"]:
+                ban_nhap_dict["CẦN XÁC NHẬN"] += "\n" + phu_text
+            else:
+                ban_nhap_dict["CẦN XÁC NHẬN"] = phu_text
+
         # Xuất HL7 FHIR Document Bundle
         fhir_bundle = FHIRExporter.xuat_fhir_bundle(
-            ma_ca, ban_nhap_dict, thong_tin_benh_nhan, danh_sach_phat_bieu
+            ma_ca,
+            ban_nhap_dict,
+            thong_tin_benh_nhan,
+            danh_sach_phat_bieu,
+            du_lieu_xet_nghiem=du_lieu_xet_nghiem,
         )
 
         # ----------------------------------------------------------------------
         # CHỐT 6: Đối soát Cận lâm sàng & Thang điểm Nguy cơ Quốc tế
         # ----------------------------------------------------------------------
         t_c6 = time.perf_counter()
-        du_lieu_cls_tho = du_lieu_xet_nghiem or (thong_tin_benh_nhan.get("xet_nghiem") if thong_tin_benh_nhan else None) or {}
-        du_lieu_cls = chuan_hoa_du_lieu_xet_nghiem(du_lieu_cls_tho) if du_lieu_cls_tho else {}
+        du_lieu_cls_gop: Dict[str, Any] = {}
+        if isinstance(thong_tin_benh_nhan, dict):
+            for nested_xn in ("xet_nghiem", "du_lieu_xet_nghiem"):
+                if isinstance(thong_tin_benh_nhan.get(nested_xn), dict):
+                    for k_xn, v_xn in thong_tin_benh_nhan[nested_xn].items():
+                        if v_xn is not None:
+                            du_lieu_cls_gop[k_xn] = v_xn
+        if isinstance(du_lieu_xet_nghiem, dict):
+            for k_xn, v_xn in du_lieu_xet_nghiem.items():
+                if v_xn is not None:
+                    du_lieu_cls_gop[k_xn] = v_xn
+        du_lieu_cls = chuan_hoa_du_lieu_xet_nghiem(du_lieu_cls_gop) if du_lieu_cls_gop else {}
         kq_cls = None
         thang_diem_dict = {}
         cb_cls = []
@@ -288,11 +355,12 @@ class MediTracePipelineOrchestrator:
             if kq_cls.canh_bao_bat_tuong_dong:
                 cb_cls.extend(kq_cls.canh_bao_bat_tuong_dong)
 
-            tuoi = int(thong_tin_benh_nhan.get("tuoi", 0)) if thong_tin_benh_nhan else 0
+            tuoi = int(thong_tin_benh_nhan["tuoi"]) if (isinstance(thong_tin_benh_nhan, dict) and thong_tin_benh_nhan.get("tuoi") is not None) else 0
             if "viêm phổi" in hoi_thoai.lower() or "sốt" in hoi_thoai.lower() or "wbc" in du_lieu_cls:
+                urea_val = next((du_lieu_cls.get(k) for k in ("urea_mmol_l", "urea", "ure") if du_lieu_cls.get(k) is not None), None)
                 curb = ClinicalRiskScoringEngine.tinh_curb65(
                     tuoi=tuoi,
-                    urea_mmol_l=du_lieu_cls.get("urea_mmol_l") or du_lieu_cls.get("urea") or du_lieu_cls.get("ure"),
+                    urea_mmol_l=urea_val,
                     van_ban_kham=hoi_thoai
                 )
                 thang_diem_dict["CURB-65"] = asdict(curb)

@@ -154,7 +154,13 @@ def phan_tich_co_dia_benh_nhan(bn: Optional[Dict[str, Any]]) -> ChiTietRuiRoBenh
 
     # 3. Chuc nang than (eGFR hoac phan do CKD)
     egfr = bn.get("egfr")
-    benh_nen = [str(b).lower() for b in bn.get("benh_nen", [])]
+    benh_nen: List[str] = []
+    for k_bn in ("benh_nen", "tien_su_benh"):
+        raw_bn = bn.get(k_bn)
+        if isinstance(raw_bn, str):
+            benh_nen.append(raw_bn.lower())
+        elif isinstance(raw_bn, (list, tuple, set)):
+            benh_nen.extend(str(b).lower() for b in raw_bn if b is not None)
     if egfr is not None:
         if egfr < 15:
             delta_he_so.append(0.6)

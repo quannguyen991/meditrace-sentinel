@@ -21,13 +21,16 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Danh muc hoat chat & thuoc thuong gap theo Duoc thu Quoc gia Viet Nam
 DUOC_THU_QUOC_GIA: Set[str] = {
-    "paracetamol", "amoxicillin", "clavulanic", "augmentin", "ibuprofen",
-    "aspirin", "clopidogrel", "atorvastatin", "rosuvastatin", "amlodipin",
-    "losartan", "enalapril", "captopril", "metformin", "gliclazide", "insulin",
-    "omeprazole", "esomeprazole", "pantoprazole", "ranitidine", "berberin",
+    "paracetamol", "panadol", "hapacol", "efferalgan",
+    "amoxicillin", "clavulanic", "augmentin", "ibuprofen",
+    "aspirin", "clopidogrel", "plavix", "atorvastatin", "lipitor", "rosuvastatin", "crestor",
+    "amlodipin", "amlodipine", "losartan", "cozaar", "enalapril", "captopril",
+    "metformin", "glucophage", "gliclazide", "insulin",
+    "omeprazol", "omeprazole", "losec", "esomeprazol", "esomeprazole", "pantoprazol", "pantoprazole",
+    "ranitidine", "berberin", "spironolacton", "spironolactone", "amiodaron", "amiodarone", "cordarone",
     "ceftriaxone", "cefuroxime", "ciprofloxacin", "levofloxacin", "azithromycin",
-    "erythromycin", "clarithromycin", "gentamicin", "vancomycin", "warfarin",
-    "sintrom", "heparin", "enoxaparin", "digoxin", "theophylline", "salbutamol",
+    "erythromycin", "clarithromycin", "gentamicin", "vancomycin", "warfarin", "coumadin",
+    "acenocoumarol", "sintrom", "heparin", "enoxaparin", "digoxin", "theophylline", "salbutamol",
     "budesonide", "prednisolone", "methylprednisolone", "dexamethasone",
     "cetirizine", "loratadine", "fexofenadine", "carbamazepine", "valproat",
     "phenytoin", "diazepam", "sertraline", "fluoxetine"
@@ -36,7 +39,7 @@ DUOC_THU_QUOC_GIA: Set[str] = {
 # Bang am vi Viet hoa hay gap khi nguoi benh doc ten thuoc / ASR nghe nham
 AM_VI_THUOC = {
     "a mô xi lin": "amoxicillin", "a móc": "amoxicillin", "amox": "amoxicillin",
-    "pha ra xê ta mon": "paracetamol", "panadol": "paracetamol", "hapacol": "paracetamol",
+    "pha ra xê ta mon": "paracetamol", "pa na đôn": "paracetamol", "ha pa côn": "paracetamol",
     "óp me pra zôn": "omeprazole", "ô mê": "omeprazole",
     "am lô đi pin": "amlodipin", "am lo": "amlodipin",
     "met pho min": "metformin",
@@ -52,6 +55,8 @@ class GuardrailResult:
     canh_bao: List[str] = field(default_factory=list)
     goi_y: Dict[str, Any] = field(default_factory=dict)
     chi_tiet: str = ""
+    goi_y_thuoc: Dict[str, str] = field(default_factory=dict)
+    goi_y_phuong_ngu: Dict[str, str] = field(default_factory=dict)
 
 
 # Biến âm vùng miền 3 miền phổ biến trong hội thoại y khoa (l/n, tr/ch, s/x, hỏi/ngã)
@@ -122,47 +127,59 @@ class ASRQualityGuardrail:
 
     @staticmethod
     def kiem_tra_phien_am(van_ban_phien_am: str) -> GuardrailResult:
-        canh_bao = []
-        goi_y = {}
-        thap = van_ban_phien_am.lower().strip()
+        canh_bao: List[str] = []
+        loi_asr: List[str] = []
+        goi_y_thuoc: Dict[str, str] = {}
+        goi_y_phuong_ngu: Dict[str, str] = {}
+        thap = (van_ban_phien_am or "").lower().strip()
 
         # 1. Kiem tra do dai toi thieu va ky tu la
         if len(thap) < 3:
             return GuardrailResult(False, ["Âm thanh quá ngắn hoặc không nhận dạng được tiếng nói"], {}, "ASR_EMPTY")
 
-        # 2. Phat hien phat am am vi dan gian cua ten thuoc de chuan hoa
+        # 2. Phat hien phat am am vi dan gian cua ten thuoc de chuan hoa (tach rieng voi phuong ngu trieu chung)
         for am_vi, chuan in AM_VI_THUOC.items():
-            if am_vi in thap:
-                canh_bao.append(f"Phát hiện phát âm tên thuốc dạng âm vị dân gian: '{am_vi}' -> gợi ý '{chuan}'")
-                goi_y[am_vi] = chuan
+            if re.search(rf"(?<!\w){re.escape(am_vi)}(?!\w)", thap):
+                msg = f"Phát hiện phát âm tên thuốc dạng âm vị dân gian: '{am_vi}' -> gợi ý '{chuan}'"
+                canh_bao.append(msg)
+                loi_asr.append(msg)
+                goi_y_thuoc[am_vi] = chuan
 
         # 3. Phat hien cac chuoi nghi ngo la ASR bi lap tu hoac ao giac (hallucination loop)
-        tu_lap = re.findall(r"\b(\w+)(?:\s+\1){3,}\b", thap)
+        tu_lap = re.findall(r"(?<!\w)(\w+(?:\s+\w+)?)(?:[\s.,;!]+\1){3,}(?!\w)", thap)
         if tu_lap:
-            canh_bao.append(f"Phát hiện vòng lặp âm thanh ASR bất thường: lặp từ '{tu_lap[0]}'")
+            msg_lap = f"Phát hiện vòng lặp âm thanh ASR bất thường: lặp từ '{tu_lap[0]}'"
+            canh_bao.append(msg_lap)
+            loi_asr.append(msg_lap)
 
         # 4. Rà soát phương ngữ & khẩu ngữ dân gian lâm sàng 3 miền + biến âm (l/n, tr/ch, s/x, hỏi/ngã)
         bien_am = ASRQualityGuardrail.chuan_hoa_bien_am_vung_mien(van_ban_phien_am)
         for tu_bien, tu_chuan in bien_am["thay_the"].items():
-            goi_y[tu_bien] = tu_chuan
-            canh_bao.append(f"Chuẩn hóa biến âm vùng miền: '{tu_bien}' -> '{tu_chuan}'")
+            if tu_bien not in goi_y_thuoc:
+                goi_y_phuong_ngu[tu_bien] = tu_chuan
+                canh_bao.append(f"Chuẩn hóa biến âm vùng miền: '{tu_bien}' -> '{tu_chuan}'")
 
         try:
             from src.phuong_ngu_lam_sang import ClinicalDialectEngine
             kq_pn = ClinicalDialectEngine.phan_tich_va_chuan_hoa(van_ban_phien_am, doi_thuat_ngu_y_khoa=False)
             for th in kq_pn.danh_sach_phat_hien:
-                if th.tu_goc.lower() not in goi_y:
-                    goi_y[th.tu_goc] = th.thuat_ngu_chuan
+                k_low = th.tu_goc.lower()
+                if k_low not in goi_y_thuoc and k_low not in goi_y_phuong_ngu:
+                    goi_y_phuong_ngu[th.tu_goc] = th.thuat_ngu_chuan
             if kq_pn.canh_bao_lam_sang:
                 canh_bao.extend(kq_pn.canh_bao_lam_sang)
+                loi_asr.extend(kq_pn.canh_bao_lam_sang)
         except Exception:
             pass
 
+        goi_y = {**goi_y_thuoc, **goi_y_phuong_ngu}
         return GuardrailResult(
-            hop_le=len(canh_bao) == 0 or len(goi_y) > 0,
+            hop_le=len(loi_asr) == 0,
             canh_bao=canh_bao,
             goi_y=goi_y,
-            chi_tiet=f"Đã rà soát {len(thap.split())} từ."
+            chi_tiet=f"Đã rà soát {len(thap.split())} từ.",
+            goi_y_thuoc=goi_y_thuoc,
+            goi_y_phuong_ngu=goi_y_phuong_ngu,
         )
 
 
@@ -173,11 +190,15 @@ class SpeakerConsistencyGuardrail:
     """Kiem tra mâu thuan giua vai nguoi noi va dai tu xung ho tieng Viet.
     
     Ngan chan loi nghiem trong: Nhan nguoi nha lai ghi nhan thanh benh nhan va nguoc lai.
+    Luu y nhi khoa: Cac cum chi benh nhi ('bé nhà em', 'con tôi', 'cháu nhà tôi'...) la hop le khi chu_the_id == 0.
     """
 
-    TU_KHOA_NGUOI_NHA = (r"\bmẹ tôi\b", r"\bbố tôi\b", r"\bcon tôi\b", r"\bchồng tôi\b",
-                         r"\bvợ tôi\b", r"\bbà tôi\b", r"\bông tôi\b", r"\bcháu nhà tôi\b",
-                         r"\bbé nhà em\b", r"\bcon em\b", r"\bông nhà tôi\b", r"\bbà nhà tôi\b")
+    TU_KHOA_NGUOI_NHA = (
+        r"\bmẹ tôi\b", r"\bbố tôi\b", r"\bba tôi\b", r"\bmá tôi\b",
+        r"\bchồng tôi\b", r"\bvợ tôi\b", r"\bbà tôi\b", r"\bông tôi\b",
+        r"\bông nội tôi\b", r"\bbà nội tôi\b", r"\bông ngoại tôi\b", r"\bbà ngoại tôi\b",
+        r"\banh trai tôi\b", r"\bchị gái tôi\b", r"\bem trai tôi\b", r"\bem gái tôi\b",
+    )
 
     @staticmethod
     def kiem_tra_xung_ho(nguoi_noi: str, chu_the_id: int, cau_noi: str) -> GuardrailResult:

@@ -125,6 +125,6 @@ def test_tinh_child_pugh_xo_gan():
 def test_tinh_bmi_chau_a():
     # 75 kg, 165 cm -> BMI = 27.5 (Béo phì độ I theo chuẩn WPRO)
     kq = ClinicalRiskScoringEngine.tinh_bmi(can_nang_kg=75.0, chieu_cao_cm=165.0)
-    assert kq.diem_so == 27
+    assert kq.diem_so == 27.5
     assert "BÉO PHÌ ĐỘ I" in kq.ten_thang_diem
     assert kq.phan_tang_nguy_co == "CAO"

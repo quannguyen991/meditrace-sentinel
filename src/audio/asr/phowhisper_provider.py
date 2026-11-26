@@ -38,6 +38,7 @@ The model is loaded once per (model, revision, device) and cached in the process
 from __future__ import annotations
 
 import math
+import threading
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -54,6 +55,8 @@ REVISIONS = {
     "vinai/PhoWhisper-large": "b9136a44b5f2ca664bd0b8f74baecf1715f6eeeb",
 }
 _CACHE: dict[tuple, Any] = {}
+_CACHE_LOCK = threading.Lock()
+_INFER_LOCK = threading.Lock()
 
 SR = 16000
 GAP_SPLIT = 0.8            # khoang lang (giay) giua hai tu thi cat thanh doan moi
@@ -142,15 +145,16 @@ class PhoWhisperProvider(ASRProvider):
         dev = self.device_req or ("cuda" if torch.cuda.is_available() else "cpu")
         dtype = torch.float16 if dev.startswith("cuda") else torch.float32
         key = (self.model, self.revision, dev)
-        if key not in _CACHE:
-            try:
-                proc = WhisperProcessor.from_pretrained(self.model, revision=self.revision)
-                m = WhisperForConditionalGeneration.from_pretrained(
-                    self.model, revision=self.revision, torch_dtype=dtype).to(dev).eval()
-            except Exception as exc:  # mang, dia, bo nho, sai ten
-                raise ASRError("phowhisper_load_failed", f"{type(exc).__name__}: {exc}") from exc
-            _CACHE[key] = (m, proc)
-        m, proc = _CACHE[key]
+        with _CACHE_LOCK:
+            if key not in _CACHE:
+                try:
+                    proc = WhisperProcessor.from_pretrained(self.model, revision=self.revision)
+                    m = WhisperForConditionalGeneration.from_pretrained(
+                        self.model, revision=self.revision, torch_dtype=dtype).to(dev).eval()
+                except Exception as exc:  # mang, dia, bo nho, sai ten
+                    raise ASRError("phowhisper_load_failed", f"{type(exc).__name__}: {exc}") from exc
+                _CACHE[key] = (m, proc)
+            m, proc = _CACHE[key]
         return m, proc, dev, str(dtype).replace("torch.", "")
 
     def _decode_window(self, audio: np.ndarray) -> dict[str, Any]:
@@ -169,7 +173,7 @@ class PhoWhisperProvider(ASRProvider):
                   return_timestamps=False, max_new_tokens=min(TOKEN_TRAN, int(TOKEN_MOI_GIAY * dur) + 16),
                   return_dict_in_generate=True, output_scores=True)
         dtw = self.word_timestamps
-        with torch.no_grad():
+        with _INFER_LOCK, torch.no_grad():
             try:
                 out = m.generate(feats, attention_mask=mask, return_token_timestamps=dtw, **kw)
             except Exception:

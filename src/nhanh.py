@@ -155,11 +155,13 @@ CO_HAU_KIEM = ("D", "D_quan_he")
 # va nhanh nao chon them cau HOI LAI (tang 6). Ca ba tang la MA THUAN doi chieu
 # voi chinh hoi thoai, nen chay duoc bang `--tu-dem`, khong can GPU. C_khoa la C
 # CONG khoa, khong gi khac: chenh lech C_khoa - C la dong gop cua rieng tang khoa.
-CO_KHOA = ("C_khoa", "C_khoa_hoi")
+# `C_khoa_v2` su dung `may_trang_thai_hoi_thoai` (Conversational FSM) thay cho `cap_nhat`,
+# bao toan 100% hanh vi cua nhanh `C_khoa` cu.
+CO_KHOA = ("C_khoa", "C_khoa_hoi", "C_khoa_v2")
 
 NHANH_TRUNG_GIAN = ("B", "C", "C_ghi_de", "D", "C_khong_lien_ket",
                     "C_khong_luat", "C_quan_he", "C_quan_he_luat", "D_quan_he",
-                    "C_khoa", "C_khoa_hoi")
+                    "C_khoa", "C_khoa_hoi", "C_khoa_v2")
 
 
 def ten_ket_qua(nhanh, adapter):
@@ -262,8 +264,35 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                 ps, _van_ban_theo_luot(m["input"]), duong=tk_phan_duong,
                 tok=tok, model=model, prefix_fn=prefix_phan)
 
+        fsm_meta = {}
         if nhanh in CO_AP_LUAT:
-            ps = cap_nhat.ap_luat(ps)
+            ps = cap_nhat.ap_luat(ps, hoi_thoai=m["input"])
+        elif nhanh == "C_khoa_v2":
+            from src import may_trang_thai_hoi_thoai as _fsm_mod
+            fsm = _fsm_mod.MayTrangThaiHoiThoai()
+            canh_bao_l2_l3 = []
+            for item_p in ps:
+                ok_l23, loi_l23 = _fsm_mod.kiem_tra_l2_sang_l3(item_p)
+                if not ok_l23:
+                    canh_bao_l2_l3.extend(loi_l23)
+                fsm.them_phat_bieu(item_p)
+            ps = fsm.danh_sach
+            fsm_meta = {
+                "fsm_lich_su_chuyen": [
+                    {
+                        "id_moi": s.id_moi,
+                        "id_cu": s.id_cu,
+                        "quan_he": s.quan_he,
+                        "trang_thai_truoc": s.trang_thai_truoc,
+                        "trang_thai_sau": s.trang_thai_sau,
+                        "ly_do": s.ly_do,
+                    }
+                    for s in fsm.lich_su_chuyen
+                ],
+                "fsm_dinh_chinh": fsm.lay_lich_su_dinh_chinh_kem_am_thanh(),
+                "fsm_mau_thuan": fsm.lay_danh_sach_mau_thuan_kem_am_thanh(),
+                "fsm_canh_bao_l2_l3": canh_bao_l2_l3,
+            }
         elif nhanh == "C_ghi_de":
             ps = cap_nhat.ghi_de_phat_bieu_truoc(ps)
 
@@ -274,7 +303,8 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
             from src import cong_rui_ro, hoi_lai, khoa_bang_chung
             kk = khoa_bang_chung.khoa_ca(ps, m["input"],
                                          bat_buoc_trich_dan=bat_buoc_trich_dan)
-            dg = cong_rui_ro.cham(ps, kk["ket_qua"])
+            thong_tin_bn = m.get("thong_tin_benh_nhan") if isinstance(m.get("thong_tin_benh_nhan"), dict) else None
+            dg = cong_rui_ro.cham(ps, kk["ket_qua"], thong_tin_bn)
             ly_do_chan = khoa_bang_chung.ly_do_chan(kk["ket_qua"])
             # Chinh sach cach C (22/09/2026): di ung / thuoc co canh bao cung sang
             # CAN XAC NHAN. Ly do chan cua khoa duoc uu tien khi trung id.
@@ -297,7 +327,8 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                     "bat_buoc_trich_dan": bat_buoc_trich_dan,
                     "chinh_sach": (canh_bao_gop.CHINH_SACH_D if chinh_sach == "D"
                                    else cong_rui_ro.CHINH_SACH),
-                    "canh_bao": canh_bao_gop.to_dict(cb)}
+                    "canh_bao": canh_bao_gop.to_dict(cb),
+                    **fsm_meta}
 
         van, ghi_chu = sinh_benh_an.sinh(ps, ten_chu_the=ten_chu_the,
                                          ly_do_chan=ly_do_chan)

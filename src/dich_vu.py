@@ -43,9 +43,12 @@ from pathlib import Path
 
 from src import duong_dan
 
-NHANH_CHO_PHEP = ("C_khoa", "C_khoa_hoi", "C", "B")
+NHANH_CHO_PHEP = ("C_khoa", "C_khoa_v2", "C_khoa_hoi", "C", "B")
 MAX_TOKEN = 3072
 GIOI_HAN_AM_THANH = 40 * 1024 * 1024        # 40 MB
+# Hang nhe cho /api/suc-khoe de KHONG keo cham_he_thong -> sai_so -> scipy luc khoi dong
+PHIEN_BAN_BO_CHAM = "2026-09-22"
+CHINH_SACH_CONG_MAC_DINH = "C-2026-09-22"
 THU_MUC_PHIEN = duong_dan.GOC_DU_AN / "data" / "audio" / "phien-dich-vu"
 THU_MUC_CHAY_TRUOC = duong_dan.GOC_DU_AN / "kaggle-ra" / "the-he-8-chinh-sach-C"
 THU_MUC_BO = duong_dan.GOC_DU_AN / "kaggle-ra" / "the-he-8"
@@ -76,30 +79,43 @@ class Loi:
         self.nhuong_cho = tuple(nhuong_cho or ())
         self._mo_hinh = None
         self._khoa = threading.Lock()
+        self._khoa_suy_luan = threading.Lock()
+        self._khoa_dem = threading.Lock()
         self._dem = None
+        self._dem_theo_chu = {}
 
     # -- bo dem khau trich (chay lai trong vai giay, khong can GPU) -------
     @property
     def dem(self):
         if self._dem is None:
-            self._dem, self._dem_theo_chu = {}, {}
-            for tep in sorted((duong_dan.GOC_DU_AN / "data").glob("trich_*_hl.jsonl")):
-                for dong in open(tep, encoding="utf-8"):
-                    if dong.strip():
-                        b = json.loads(dong)
-                        self._dem.setdefault(b["id"], b)
-            # Tep dem chi co ma ca, khong co loi thoai. Giao dien lai gui LOI THOAI. Dung
-            # chi muc loi thoai -> ma ca tu chinh cac bo du lieu de tra nguoc lai.
-            for tep in sorted(THU_MUC_BO.glob("*.jsonl")):
-                if tep.name.startswith("ra_"):
-                    continue
-                for dong in open(tep, encoding="utf-8"):
-                    if not dong.strip():
-                        continue
-                    c = json.loads(dong)
-                    if c.get("id") in self._dem and c.get("input"):
-                        self._dem_theo_chu.setdefault(" ".join(c["input"].split()), self._dem[c["id"]])
+            with self._khoa_dem:
+                if self._dem is None:
+                    dem_moi, dem_chu_moi = {}, {}
+                    for tep in sorted((duong_dan.GOC_DU_AN / "data").glob("trich_*_hl.jsonl")):
+                        with open(tep, encoding="utf-8") as fh:
+                            for dong in fh:
+                                if dong.strip():
+                                    b = json.loads(dong)
+                                    dem_moi.setdefault(b["id"], b)
+                    # Tep dem chi co ma ca, khong co loi thoai. Giao dien lai gui LOI THOAI. Dung
+                    # chi muc loi thoai -> ma ca tu chinh cac bo du lieu de tra nguoc lai.
+                    for tep in sorted(THU_MUC_BO.glob("*.jsonl")):
+                        if tep.name.startswith("ra_"):
+                            continue
+                        with open(tep, encoding="utf-8") as fh:
+                            for dong in fh:
+                                if not dong.strip():
+                                    continue
+                                c = json.loads(dong)
+                                if c.get("id") in dem_moi and c.get("input"):
+                                    dem_chu_moi.setdefault(" ".join(c["input"].split()), dem_moi[c["id"]])
+                    self._dem_theo_chu = dem_chu_moi
+                    self._dem = dem_moi
         return self._dem
+
+    def so_ca_bo_dem(self) -> int:
+        """Tra so ca da nap trong bo dem ma KHONG ep quet dia neu chua nap."""
+        return len(self._dem) if self._dem is not None else 0
 
     def dem_theo_chu(self, hoi_thoai):
         _ = self.dem                                  # bao dam da nap
@@ -131,18 +147,29 @@ class Loi:
     def da_nap(self):
         return self._mo_hinh is not None
 
-    def thiet_bi(self):
+    def thiet_bi(self, cho_import: bool = False):
+        """Khong tu y `import torch` neu `torch` chua co trong `sys.modules` (tranh treo /api/suc-khoe)."""
+        torch_mod = sys.modules.get("torch")
+        if torch_mod is None:
+            if not cho_import:
+                return "chua_nap"
+            try:
+                import torch as torch_mod
+            except Exception:
+                return "khong ro"
         try:
-            import torch
-            return f"cuda ({torch.cuda.get_device_name(0)})" if torch.cuda.is_available() else "cpu"
+            return f"cuda ({torch_mod.cuda.get_device_name(0)})" if torch_mod.cuda.is_available() else "cpu"
         except Exception:
             return "khong ro"
 
-    def _ho_so_xa(self, ca_id, hoi_thoai, nhanh):
+    def _ho_so_xa(self, ca_id, hoi_thoai, nhanh, metadata=None):
         """Chuyen nguyen yeu cau sang dich vu o may khac; ket qua giu `nguon` = mo_hinh."""
         import urllib.error
         import urllib.request
-        du = json.dumps({"input": hoi_thoai, "nhanh": nhanh, "ca_id": ca_id}, ensure_ascii=False).encode("utf-8")
+        payload_xa = {"input": hoi_thoai, "nhanh": nhanh, "ca_id": ca_id}
+        if metadata is not None:
+            payload_xa["metadata"] = metadata
+        du = json.dumps(payload_xa, ensure_ascii=False).encode("utf-8")
         yc = urllib.request.Request(f"{self.mo_hinh_xa}/api/ho-so", data=du,
                                     headers={"Content-Type": "application/json"})
         t0 = time.time()
@@ -163,12 +190,15 @@ class Loi:
         return r
 
     # -- sinh ho so -------------------------------------------------------
-    def ho_so(self, ca_id, hoi_thoai, nhanh="C_khoa"):
+    def ho_so(self, ca_id, hoi_thoai, nhanh="C_khoa", thong_tin_benh_nhan=None, metadata=None):
         """-> ban ghi ket qua cua `src.nhanh.chay_trung_gian` + truong `nguon`."""
         if nhanh not in NHANH_CHO_PHEP:
             raise LoiDichVu("nhanh_khong_hop_le", f"nhánh {nhanh} không dùng được ở dịch vụ này")
         from src import nhanh as _nhanh
-        mau = [{"id": ca_id, "input": hoi_thoai}]
+        mau_item = {"id": ca_id, "input": hoi_thoai}
+        if isinstance(thong_tin_benh_nhan, dict):
+            mau_item["thong_tin_benh_nhan"] = thong_tin_benh_nhan
+        mau = [mau_item]
         dem = self.dem.get(ca_id)
         if dem is None or dem.get("input", hoi_thoai) != hoi_thoai:
             dem = self.dem_theo_chu(hoi_thoai)        # khong co ma ca thi tra theo loi thoai
@@ -177,17 +207,34 @@ class Loi:
         if dem is not None:
             tok = model = prefix_fn = None
             kq_tho, nguon = [dem], "bo_dem"
+            t0 = time.time()
+            try:
+                kq = _nhanh.chay_trung_gian(mau, tok, model, prefix_fn, nhanh,
+                                            max_token=MAX_TOKEN, kq_tho=kq_tho)
+            except LoiDichVu:
+                raise
+            except Exception as exc:
+                traceback.print_exc()
+                raise LoiDichVu("loi_sinh_ho_so", f"{type(exc).__name__}: {exc}", 500)
         elif self.mo_hinh_xa:
             from src.khu_dinh_danh import ClinicalDeidentifier
-            kq_ad = ClinicalDeidentifier.an_danh_van_ban(hoi_thoai)
-            r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh)
+            ten_bn_xa = (
+                (thong_tin_benh_nhan.get("ten") or thong_tin_benh_nhan.get("ho_ten"))
+                if isinstance(thong_tin_benh_nhan, dict)
+                else None
+            )
+            kq_ad = ClinicalDeidentifier.an_danh_van_ban(hoi_thoai, ten_benh_nhan=ten_bn_xa)
+            try:
+                r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh, metadata=metadata)
+            except TypeError:
+                r_xa = self._ho_so_xa(ca_id, kq_ad.van_ban_da_an_danh, nhanh)
             if kq_ad.bang_anh_xa_giai_ma:
                 # Khôi phục cục bộ các token PII sau khi máy xa xử lý xong (máy xa không bao giờ thấy PII gốc)
                 def _giai_ma(obj):
                     if isinstance(obj, str):
                         s = obj
-                        for tok, goc in kq_ad.bang_anh_xa_giai_ma.items():
-                            s = s.replace(tok, goc)
+                        for tok_pii, goc in kq_ad.bang_anh_xa_giai_ma.items():
+                            s = s.replace(tok_pii, goc)
                         return s
                     if isinstance(obj, list):
                         return [_giai_ma(x) for x in obj]
@@ -197,24 +244,65 @@ class Loi:
                 r_xa = _giai_ma(r_xa)
             r_xa["da_khu_dinh_danh_truoc_gui_xa"] = True
             r_xa["so_pii_da_chan"] = kq_ad.tong_so_thuc_the
+            if metadata is not None:
+                _gan_metadata_am_thanh(r_xa, metadata)
             return r_xa
         else:
-            tok, model, prefix_fn = self.nap()
-            kq_tho, nguon = None, "mo_hinh"
-        t0 = time.time()
-        try:
-            kq = _nhanh.chay_trung_gian(mau, tok, model, prefix_fn, nhanh,
-                                        max_token=MAX_TOKEN, kq_tho=kq_tho)
-        except LoiDichVu:
-            raise
-        except Exception as exc:
-            traceback.print_exc()
-            raise LoiDichVu("loi_sinh_ho_so", f"{type(exc).__name__}: {exc}", 500)
+            with self._khoa_suy_luan:
+                tok, model, prefix_fn = self.nap()
+                kq_tho, nguon = None, "mo_hinh"
+                t0 = time.time()
+                try:
+                    kq = _nhanh.chay_trung_gian(mau, tok, model, prefix_fn, nhanh,
+                                                max_token=MAX_TOKEN, kq_tho=kq_tho)
+                except LoiDichVu:
+                    raise
+                except Exception as exc:
+                    traceback.print_exc()
+                    raise LoiDichVu("loi_sinh_ho_so", f"{type(exc).__name__}: {exc}", 500)
         r = kq[0]
         r["nguon"] = nguon
         r["nhanh"] = nhanh
         r["giay_xu_ly"] = round(time.time() - t0, 2)
+        if metadata is not None:
+            _gan_metadata_am_thanh(r, metadata)
         return r
+
+
+def _gan_metadata_am_thanh(r: dict, metadata: list) -> None:
+    """Gan `metadata` am thanh cua `to_meditrace` vao ho so va dien `audio_spans` cho menh de."""
+    if not isinstance(r, dict) or not isinstance(metadata, list):
+        return
+    r["metadata"] = metadata
+    theo_luot = {
+        int(m["luot"]): m
+        for m in metadata
+        if isinstance(m, dict) and m.get("luot") is not None
+    }
+    if not theo_luot:
+        return
+    for pb in r.get("phat_bieu") or []:
+        if not isinstance(pb, dict) or pb.get("audio_spans"):
+            continue
+        spans = []
+        trich_list = pb.get("trich_dan") or []
+        for idx_bc, luot_so in enumerate(pb.get("bang_chung") or []):
+            m_luot = theo_luot.get(int(luot_so))
+            if not m_luot:
+                continue
+            a_start = m_luot.get("audio_start")
+            a_end = m_luot.get("audio_end")
+            if a_start is None and a_end is None:
+                continue
+            quote = trich_list[idx_bc] if idx_bc < len(trich_list) else (trich_list[0] if trich_list else (pb.get("noi_dung") or ""))
+            spans.append({
+                "start_ms": int(round(float(a_start or 0.0) * 1000)),
+                "end_ms": int(round(float(a_end or 0.0) * 1000)),
+                "speaker_id": str(m_luot.get("speaker_id") or m_luot.get("speaker_role") or ""),
+                "exact_quote": str(quote),
+            })
+        if spans:
+            pb["audio_spans"] = spans
 
 
 # ----------------------------------------------------------------- am thanh
@@ -223,6 +311,15 @@ class AmThanh:
     def __init__(self):
         self._pipe = None
         self._khoa = threading.Lock()
+        self._khoa_suy_luan = threading.Lock()
+
+    def cau_hinh_nhe(self):
+        """Doc cau hinh ASR/Diarization nhe tu bien moi truong ma KHONG khoi tao `_pipe`
+        (giu nguyen `self._pipe is None` de khong pha vo `canh_nghi`)."""
+        if self._pipe is not None:
+            return self._pipe.settings
+        from src.audio.config import AudioSettings
+        return AudioSettings.from_env()
 
     def pipeline(self):
         with self._khoa:
@@ -237,7 +334,8 @@ class AmThanh:
         pipe = self.pipeline()
         phien = pipe.store.create()["session_id"]
         pipe.upload(phien, du_lieu, ten_tep)
-        pipe.process(phien, tach_nguoi_noi=tach_nguoi_noi)
+        with self._khoa_suy_luan:
+            pipe.process(phien, tach_nguoi_noi=tach_nguoi_noi)
         return phien, pipe.transcript(phien)
 
 
@@ -333,6 +431,7 @@ def doc_ca(ca_id, nhanh="C_khoa"):
 
 class May(BaseHTTPRequestHandler):
     server_version = "MediTrace/1.0"
+    timeout = 60
     loi: Loi
     am: AmThanh
     lan_cuoi = time.time()                   # moc yeu cau POST gan nhat XONG (cho canh_nghi)
@@ -383,20 +482,34 @@ class May(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            duong = self.path.split("?")[0]
-            tham = dict(x.split("=", 1) for x in self.path.split("?")[1].split("&")) \
-                if "?" in self.path else {}
+            duong, _, chuoi_tham = self.path.partition("?")
+            tham = {}
+            if chuoi_tham:
+                for phan in chuoi_tham.split("&"):
+                    if not phan:
+                        continue
+                    k_p, _, v_p = phan.partition("=")
+                    tham[k_p] = v_p
             if duong == "/api/suc-khoe":
-                from src import cham_he_thong, cong_rui_ro
+                cfg_am = self.am.cau_hinh_nhe()
+                cr_mod = sys.modules.get("src.cong_rui_ro")
+                chinh_sach_cong = getattr(cr_mod, "CHINH_SACH", CHINH_SACH_CONG_MAC_DINH)
                 return self._tra({
-                    "ok": True, "mo_hinh": self.loi.ten_mo_hinh, "adapter_trich": self.loi.adapter_trich,
-                    "da_nap_mo_hinh": self.loi.da_nap(), "cho_nap_mo_hinh": self.loi.cho_nap_mo_hinh,
+                    "ok": True,
+                    "mo_hinh": self.loi.ten_mo_hinh,
+                    "adapter_trich": self.loi.adapter_trich,
+                    "da_nap_mo_hinh": self.loi.da_nap(),
+                    "cho_nap_mo_hinh": self.loi.cho_nap_mo_hinh,
                     "mo_hinh_xa": self.loi.mo_hinh_xa,
-                    "thiet_bi": self.loi.thiet_bi(), "so_ca_bo_dem": len(self.loi.dem),
-                    "chinh_sach_cong": cong_rui_ro.CHINH_SACH, "bo_cham": cham_he_thong.PHIEN_BAN,
-                    "asr": {"nha_cung_cap": self.am.pipeline().settings.asr_provider,
-                            "mo_hinh": self.am.pipeline().settings.asr_model},
-                    "tach_nguoi_noi": self.am.pipeline().settings.diarization_provider,
+                    "thiet_bi": self.loi.thiet_bi(cho_import=False),
+                    "so_ca_bo_dem": self.loi.so_ca_bo_dem(),
+                    "chinh_sach_cong": chinh_sach_cong,
+                    "bo_cham": PHIEN_BAN_BO_CHAM,
+                    "asr": {
+                        "nha_cung_cap": cfg_am.asr_provider,
+                        "mo_hinh": cfg_am.asr_model or cfg_am.whisper_model,
+                    },
+                    "tach_nguoi_noi": cfg_am.diarization_provider,
                 })
             if duong == "/api/ca-mau":
                 return self._tra({"ca": ca_mau(tham.get("bo"))})
@@ -450,9 +563,11 @@ class May(BaseHTTPRequestHandler):
                 return self._tra(self._ho_so(than))
             if duong == "/api/bhyt/precheck":
                 from src.kiem_duyet_bhyt_va_bo_sot import tien_kiem_bhyt_tu_du_lieu
+                tt_bn = than.get("thong_tin_benh_nhan")
                 kq = tien_kiem_bhyt_tu_du_lieu(
                     than.get("propositions") or [],
                     than.get("transcript") or "",
+                    thong_tin_benh_nhan=tt_bn if isinstance(tt_bn, dict) else None,
                 )
                 return self._tra(kq)
             if duong == "/api/ocr/phieu-cu":
@@ -529,24 +644,32 @@ class May(BaseHTTPRequestHandler):
     def _ho_so_tho(self, than):
         nhanh = than.get("nhanh") or "C_khoa"
         ca_id = than.get("ca_id") or f"ui_{int(time.time())}"
+        thong_tin_bn = than.get("thong_tin_benh_nhan") if isinstance(than.get("thong_tin_benh_nhan"), dict) else None
+        metadata = than.get("metadata") if isinstance(than.get("metadata"), list) else None
         if than.get("chay_truoc"):
             r = doc_ca(than["chay_truoc"], nhanh)
             r["nguon"], r["giay_xu_ly"] = "chay_truoc", 0.0
             r.setdefault("nhanh", "C_khoa")
+            if metadata is not None:
+                _gan_metadata_am_thanh(r, metadata)
             return r
         if than.get("phien"):
             from src.audio.adapter import to_meditrace
-            doan = self.am.pipeline().transcript(than["phien"])
+            phien_id = self._kiem_ma_phien(than["phien"])
+            doan = self.am.pipeline().transcript(phien_id)
+            if any(s.get("asr_review_required") for s in doan):
+                raise LoiDichVu("asr_review_pending", "Chưa gán vai cho người nói, hoặc còn đoạn chờ người duyệt.", 409)
             try:
                 vao = to_meditrace(doan, strict=True)
             except ValueError as exc:
                 raise LoiDichVu(str(exc), "Chưa gán vai cho người nói, hoặc còn đoạn chờ người duyệt.", 409)
             hoi_thoai = vao["input"]
+            metadata = vao.get("metadata")
         else:
             hoi_thoai = (than.get("input") or "").strip()
         if not hoi_thoai:
             raise LoiDichVu("thieu_hoi_thoai", "cần `input`, `phien` hoặc `chay_truoc`")
-        return self.loi.ho_so(ca_id, hoi_thoai, nhanh)
+        return self.loi.ho_so(ca_id, hoi_thoai, nhanh, thong_tin_benh_nhan=thong_tin_bn, metadata=metadata)
 
     def _bao_loi(self, exc):
         if isinstance(exc, LoiDichVu):
@@ -597,7 +720,9 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
                 du_lieu_xet_nghiem=du_lieu_xet_nghiem,
             )
             bo_sot = ActiveOmissionRecoveryEngine.quet_khoi_phuc(ps, r["input"])
-            bhyt = BHYTXmlPreChecker.kiem_duyet_ho_so(ma_ca, ps, r["input"])
+            bhyt = BHYTXmlPreChecker.kiem_duyet_ho_so(
+                ma_ca, ps, r["input"], thong_tin_benh_nhan=thong_tin_benh_nhan
+            )
             xml_1_5 = xuat_goi_xml_1_5_qd130(
                 ma_lk=ma_ca,
                 ket_qua_bhyt=bhyt,

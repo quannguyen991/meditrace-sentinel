@@ -25,7 +25,7 @@ TINH_HUONG = ("thực tế", "giả định", "kế hoạch")
 QUAN_HE = ("bổ sung", "đính chính", "diễn biến", "mâu thuẫn")
 TRANG_THAI = ("còn hiệu lực", "bị thay thế", "chưa giải quyết")
 THOI_GIAN = ("hiện tại", "quá khứ", "chưa rõ")
-NGUOI_NOI = ("bác sĩ", "bệnh nhân", "người nhà", "điều dưỡng")
+NGUOI_NOI = ("bác sĩ", "bệnh nhân", "người nhà", "điều dưỡng", "người khác")
 
 # Loai phat bieu — THEM 11/09/2026 cho tang "phat bieu nguyen tu".
 #
@@ -247,6 +247,49 @@ def id_khac_an_toan(id_theo_ten, mac_dinh=1):
     return max(so) + 1 if so else mac_dinh
 
 
+_ANH_XA_NGUOI_NOI = {
+    "bác sĩ": "bác sĩ",
+    "bác sỹ": "bác sĩ",
+    "bs": "bác sĩ",
+    "bac_si": "bác sĩ",
+    "doctor": "bác sĩ",
+    "y sĩ": "bác sĩ",
+    "điều dưỡng": "điều dưỡng",
+    "dieu_duong": "điều dưỡng",
+    "nurse": "điều dưỡng",
+    "y tá": "điều dưỡng",
+    "bệnh nhân": "bệnh nhân",
+    "người bệnh": "bệnh nhân",
+    "benh_nhan": "bệnh nhân",
+    "patient": "bệnh nhân",
+    "người nhà": "người nhà",
+    "nguoi_nha": "người nhà",
+    "family_member": "người nhà",
+    "mẹ": "người nhà",
+    "bố": "người nhà",
+    "ba": "người nhà",
+    "má": "người nhà",
+    "vợ": "người nhà",
+    "chồng": "người nhà",
+    "người khác": "người khác",
+    "nguoi_khac": "người khác",
+    "other": "người khác",
+}
+
+
+def _chuan_hoa_nguoi_noi(vai) -> str:
+    raw = str(vai.value if hasattr(vai, "value") else (vai or "")).strip().lower()
+    if not raw:
+        return "bệnh nhân"
+    if raw in NGUOI_NOI:
+        return raw
+    if raw in _ANH_XA_NGUOI_NOI:
+        return _ANH_XA_NGUOI_NOI[raw]
+    if la_vai_nhan_vien(raw):
+        return "điều dưỡng" if ("điều dưỡng" in raw or "y tá" in raw) else "bác sĩ"
+    return "người khác"
+
+
 def tu_json(ps, nguoi_noi_theo_luot=None, id_theo_ten=None, id_khac=None):
     """Doi dau ra JSON cua mo hinh thanh danh sach PhatBieu da kiem hop le.
 
@@ -270,7 +313,8 @@ def tu_json(ps, nguoi_noi_theo_luot=None, id_theo_ten=None, id_khac=None):
             bang_chung = [int(x) for x in (p.get("luot_thoai") or p.get("bang_chung") or [])]
             if not bang_chung:
                 raise ValueError("khong co luot thoai lam bang chung")
-            nguoi_noi = nguoi_noi_theo_luot.get(max(bang_chung), "bệnh nhân")
+            nguoi_noi_tho = nguoi_noi_theo_luot.get(max(bang_chung), p.get("nguoi_noi", "bệnh nhân"))
+            nguoi_noi = _chuan_hoa_nguoi_noi(nguoi_noi_tho)
             ten = str(p.get("chu_the", "")).strip().lower()
             # Vai nhan vien y te khong phai chu the cua thong tin lam sang:
             # cau bac si noi la thong tin VE BENH NHAN. Quy ve benh nhan thay

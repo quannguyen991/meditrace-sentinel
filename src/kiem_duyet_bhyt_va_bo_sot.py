@@ -125,6 +125,14 @@ QUY_TAC_THUOC_ICD10_BHYT: Dict[str, Tuple[Tuple[str, ...], str]] = {
                      "Kháng sinh Azithromycin cần mã ICD-10 nhiễm khuẩn đường hô hấp hoặc mô mềm."),
     "warfarin": (("I48",),
                  "Chống đông kháng Vitamin K (Warfarin) cần mã ICD-10 Rung nhĩ (I48) hoặc Huyết khối tĩnh mạch/Van tim cơ học."),
+    "coumadin": (("I48",),
+                 "Coumadin (Warfarin) cần mã ICD-10 Rung nhĩ (I48) hoặc Huyết khối tĩnh mạch/Van tim cơ học."),
+    "acenocoumarol": (("I48",),
+                      "Chống đông kháng Vitamin K (Acenocoumarol) cần mã ICD-10 Rung nhĩ (I48) hoặc Huyết khối tĩnh mạch/Van tim cơ học."),
+    "sintrom": (("I48",),
+                "Sintrom (Acenocoumarol) cần mã ICD-10 Rung nhĩ (I48) hoặc Huyết khối tĩnh mạch/Van tim cơ học."),
+    "losec": (("K29.7", "K21.9", "M54.5", "M17.9", "M10.9"),
+              "Losec (Omeprazole) cần mã ICD-10 bệnh lý dạ dày-trào ngược (K21/K29) hoặc dự phòng loét do NSAID."),
     "colchicin": (("M10.9",),
                   "Colchicin cần mã ICD-10 Bệnh Gút (M10.x)."),
     "glucophage": (("E11.9", "E11.2", "E11.3", "E11.4"),
@@ -295,14 +303,26 @@ class BHYTXmlPreChecker:
                         break
         return da_chon
 
+    @staticmethod
+    def _la_thuoc_da_ngung(p: Any) -> bool:
+        t_dict = getattr(p, "thuoc", None)
+        if isinstance(t_dict, dict) and t_dict.get("trang_thai_dung") == "đã ngừng":
+            return True
+        nd_low = (getattr(p, "noi_dung", "") or "").lower()
+        return any(kw in nd_low for kw in ("đã ngừng", "ngừng dùng", "ngưng dùng", "đã ngưng"))
+
     @classmethod
     def _tim_can_nang_kg(cls, ps: List[PhatBieu], hoi_thoai: str,
                          thong_tin_bn: Optional[Dict[str, Any]]) -> Optional[float]:
-        if thong_tin_bn and thong_tin_bn.get("can_nang"):
-            try:
-                return float(thong_tin_bn["can_nang"])
-            except (ValueError, TypeError):
-                pass
+        if isinstance(thong_tin_bn, dict):
+            cn_raw = thong_tin_bn.get("can_nang_kg") if thong_tin_bn.get("can_nang_kg") is not None else thong_tin_bn.get("can_nang")
+            if cn_raw is not None:
+                try:
+                    val = float(cn_raw)
+                    if val > 0:
+                        return val
+                except (ValueError, TypeError):
+                    pass
         vb = " ".join([p.noi_dung for p in ps if getattr(p, "chu_the_id", 0) == 0] + [hoi_thoai or ""])
         m = re.search(r"(?i)\b(?:nặng|cân\s+nặng)\s*(\d{1,3}(?:[.,]\d)?)\s*(?:kg|cân|ký)\b", vb)
         if m:
@@ -321,22 +341,26 @@ class BHYTXmlPreChecker:
         canh_bao_nhi: List[str] = []
         canh_bao_dong_tay: List[str] = []
 
-        # Lấy danh sách mệnh đề thuốc của bệnh nhân
+        # Lấy danh sách mệnh đề thuốc còn đang dùng / kê đơn của bệnh nhân (loại bỏ thuốc đã ngừng & giả định)
         ps_thuoc = [
             p for p in ps
             if getattr(p, "chu_the_id", 0) == 0
             and getattr(p, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+            and getattr(p, "tinh_huong", "thực tế") != "giả định"
             and not getattr(p, "phu_dinh", False)
+            and not cls._la_thuoc_da_ngung(p)
             and (getattr(p, "thuoc", None) or any(t in (p.noi_dung or "").lower() for t in QUY_TAC_THUOC_ICD10_BHYT))
         ]
 
         # 1. Kiểm tra chéo chỉ định Thuốc (XML2) với Mã ICD-10 (XML1)
         for p in ps_thuoc:
             nd_thap = (p.noi_dung or "").lower()
+            if "dị ứng" in nd_thap or "mẫn cảm" in nd_thap:
+                continue
             ten_th = ((p.thuoc or {}).get("ten") or "").lower() if isinstance(getattr(p, "thuoc", None), dict) else ""
             chuoi_kiem = f"{ten_th} {nd_thap}"
             for hoat_chat, (ma_hop_le, giai_thich) in QUY_TAC_THUOC_ICD10_BHYT.items():
-                if hoat_chat in chuoi_kiem:
+                if re.search(rf"(?i)(?<!\w){re.escape(hoat_chat)}e?(?!\w)", chuoi_kiem):
                     if not (tap_ma_icd & set(ma_hop_le)):
                         canh_bao_bhyt.append(
                             f"[CẢNH BÁO XUẤT TOÁN BHYT - QĐ 4750/QĐ-BYT]: Thuốc '{hoat_chat.capitalize()}' "
@@ -353,16 +377,30 @@ class BHYTXmlPreChecker:
 
         # 3. Kiểm tra liều Nhi khoa theo cân nặng (mg/kg/ngày)
         can_nang = cls._tim_can_nang_kg(ps, hoi_thoai, thong_tin_benh_nhan)
+        tuoi_bn: Optional[int] = None
+        if isinstance(thong_tin_benh_nhan, dict) and thong_tin_benh_nhan.get("tuoi") is not None:
+            try:
+                tuoi_bn = int(thong_tin_benh_nhan["tuoi"])
+            except (ValueError, TypeError):
+                tuoi_bn = None
         la_tre_em = (
             (can_nang is not None and can_nang < 40.0)
-            or (thong_tin_benh_nhan and int(thong_tin_benh_nhan.get("tuoi", 99)) < 15)
+            or (tuoi_bn is not None and tuoi_bn < 15)
             or bool(re.search(r"(?i)\b(cháu\s+bé|bé\s+nhà|bệnh\s+nhi|\d+\s+tháng\s+tuổi)\b", hoi_thoai or ""))
         )
         if la_tre_em and can_nang and can_nang > 0:
             for p in ps:
-                if getattr(p, "chu_the_id", 0) != 0 or getattr(p, "trang_thai", "còn hiệu lực") != "còn hiệu lực":
+                if (
+                    getattr(p, "chu_the_id", 0) != 0
+                    or getattr(p, "trang_thai", "còn hiệu lực") != "còn hiệu lực"
+                    or getattr(p, "tinh_huong", "thực tế") == "giả định"
+                    or getattr(p, "phu_dinh", False)
+                    or cls._la_thuoc_da_ngung(p)
+                ):
                     continue
                 nd_thap = (p.noi_dung or "").lower()
+                if "dị ứng" in nd_thap or "mẫn cảm" in nd_thap:
+                    continue
                 lieu_str = ((p.thuoc or {}).get("lieu") or "") if isinstance(getattr(p, "thuoc", None), dict) else ""
                 chuoi_th = f"{nd_thap} {lieu_str}".lower()
                 for ten_th, (max_lan, max_ngay, ghi_chu) in LIEU_TRAN_NHI_KHOA_MG_KG_NGAY.items():
@@ -423,6 +461,12 @@ class BHYTXmlPreChecker:
             }
             for idx, p in enumerate(ps_thuoc)
         ]
+        ps_dien_bien = [
+            p for p in ps
+            if getattr(p, "chu_the_id", 0) == 0
+            and getattr(p, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+            and getattr(p, "tinh_huong", "thực tế") != "giả định"
+        ]
         xml5 = [
             {
                 "MA_LK": ma_ca,
@@ -432,8 +476,7 @@ class BHYTXmlPreChecker:
                 "LUOT_THOAI_GOC": p.bang_chung,
                 "TRICH_DAN_NGUYEN_VAN": p.trich_dan,
             }
-            for idx, p in enumerate(ps)
-            if getattr(p, "chu_the_id", 0) == 0 and getattr(p, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+            for idx, p in enumerate(ps_dien_bien)
         ]
 
         return KetQuaTienKiemBHYT(
@@ -543,10 +586,80 @@ class ClinicalHarmWeightedEvaluator:
         }
 
 
-def tien_kiem_bhyt_tu_du_lieu(menh_de_raw: List[Dict[str, Any]], hoi_thoai: str = "") -> Dict[str, Any]:
+_CHU_THE_BENH_NHAN_CHUAN = {
+    "bệnh nhân", "người bệnh", "tôi", "tui", "mình", "bản thân", "patient", "self",
+    "trẻ", "bé", "em bé", "trẻ nhỏ", "bệnh nhi", "cháu", "cháu bé",
+    "bé nhà em", "bé nhà tôi", "cháu nhà tôi", "cháu nhà em",
+}
+
+
+def _suy_chu_the_id(m: Dict[str, Any]) -> Tuple[int, str]:
+    from src.phat_bieu import la_vai_nhan_vien
+
+    ten_subj = str(m.get("subject") or m.get("ten_chu_the") or m.get("chu_the") or "").strip()
+    if m.get("chu_the_id") is not None:
+        try:
+            return int(m["chu_the_id"]), ten_subj
+        except (ValueError, TypeError):
+            pass
+    sec_low = str(m.get("section") or m.get("muc") or "").strip().upper()
+    if "GIA ĐÌNH" in sec_low:
+        return 1, ten_subj or "gia đình"
+    if ten_subj:
+        if la_vai_nhan_vien(ten_subj):
+            return 0, ten_subj
+        if ten_subj.lower() not in _CHU_THE_BENH_NHAN_CHUAN:
+            return 1, ten_subj
+    return 0, ten_subj
+
+
+def _suy_tinh_huong(m: Dict[str, Any]) -> str:
+    raw = str(m.get("tinh_huong") or m.get("situation") or "").strip().lower()
+    if raw in ("giả định", "gia_dinh", "hypothetical", "conditional"):
+        return "giả định"
+    if raw in ("kế hoạch", "ke_hoach", "plan", "planned"):
+        return "kế hoạch"
+    return "thực tế"
+
+
+def _suy_trang_thai(m: Dict[str, Any]) -> str:
+    raw = str(m.get("trang_thai") or m.get("status") or "").strip().lower()
+    if raw in ("bị thay thế", "bi_thay_the", "superseded", "replaced", "bo", "rejected", "cancelled"):
+        return "bị thay thế"
+    if raw in ("chưa giải quyết", "chua_giai_quyet", "unresolved", "conflict", "can_xac_nhan", "quarantine", "pending"):
+        return "chưa giải quyết"
+    return "còn hiệu lực"
+
+
+def _suy_nguoi_noi(m: Dict[str, Any]) -> str:
+    raw = str(m.get("nguoi_noi") or m.get("speaker") or "").strip().lower()
+    if raw in ("bác sĩ", "bác sỹ", "bs", "doctor", "bac_si"):
+        return "bác sĩ"
+    if raw in ("điều dưỡng", "nurse", "dieu_duong", "y tá", "y sĩ"):
+        return "điều dưỡng"
+    if raw in ("người nhà", "family_member", "family", "nguoi_nha"):
+        return "người nhà"
+    if raw in ("người khác", "other", "nguoi_khac"):
+        from src.phat_bieu import NGUOI_NOI
+        return "người khác" if "người khác" in NGUOI_NOI else "bệnh nhân"
+    sec_up = str(m.get("section") or m.get("muc") or "").strip().upper()
+    if sec_up == "CHẨN ĐOÁN" and not raw:
+        return "bác sĩ"
+    return "bệnh nhân"
+
+
+def tien_kiem_bhyt_tu_du_lieu(
+    menh_de_raw: List[Dict[str, Any]],
+    hoi_thoai: str = "",
+    thong_tin_benh_nhan: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Hàm cầu nối gọn cho Node/API: nhận danh sách mệnh đề dict + hội thoại, trả về kết quả BHYTXmlPreChecker."""
+    from src.phat_bieu import _doc_hanh_vi, _doc_thuoc
+
     ds_pb: List[PhatBieu] = []
     for idx, m in enumerate(menh_de_raw or [], start=1):
+        if not isinstance(m, dict):
+            continue
         td_raw = m.get("trich_dan") or m.get("quotes") or []
         if isinstance(td_raw, str):
             td_list = [td_raw] if td_raw else []
@@ -556,18 +669,38 @@ def tien_kiem_bhyt_tu_du_lieu(menh_de_raw: List[Dict[str, Any]], hoi_thoai: str 
         drug_str = str(m.get("drug") or "").strip()
         if drug_str and drug_str.lower() not in noi_dung_str.lower():
             noi_dung_str = f"{noi_dung_str} ({drug_str})".strip()
+
+        chu_the_id, ten_chu_the = _suy_chu_the_id(m)
+        tinh_huong = _suy_tinh_huong(m)
+        trang_thai = _suy_trang_thai(m)
+        nguoi_noi = _suy_nguoi_noi(m)
+        thuoc_obj = _doc_thuoc(m)
+        if thuoc_obj is None and drug_str:
+            drug_status_raw = str(m.get("drugStatus") or m.get("trang_thai_dung") or "").strip().lower()
+            tt_dung = "đã ngừng" if drug_status_raw in ("đã ngừng", "stopped", "discontinued") else None
+            thuoc_obj = {
+                "ten": drug_str, "lieu": None, "so_lan": None,
+                "duong_dung": None, "bat_dau": None, "ngung": None,
+                "trang_thai_dung": tt_dung,
+            }
+
         ds_pb.append(
             PhatBieu(
                 id=int(m.get("id") or idx),
-                nguoi_noi=str(m.get("nguoi_noi") or "bệnh nhân"),
-                chu_the_id=int(m.get("chu_the_id") or 0),
+                nguoi_noi=nguoi_noi,
+                chu_the_id=chu_the_id,
+                ten_chu_the=ten_chu_the,
                 noi_dung=noi_dung_str,
-                bang_chung=list(m.get("evidenceTurns") or m.get("bang_chung") or [1]),
+                bang_chung=[int(x) for x in (m.get("evidenceTurns") or m.get("bang_chung") or [1])],
                 phu_dinh=bool(m.get("negated", m.get("phu_dinh", False))),
+                tinh_huong=tinh_huong,
+                trang_thai=trang_thai,
                 trich_dan=td_list,
+                hanh_vi=_doc_hanh_vi(m),
+                thuoc=thuoc_obj,
             )
         )
-    kq_obj = BHYTXmlPreChecker.kiem_duyet_ho_so("web", ds_pb, hoi_thoai)
+    kq_obj = BHYTXmlPreChecker.kiem_duyet_ho_so("web", ds_pb, hoi_thoai, thong_tin_benh_nhan=thong_tin_benh_nhan)
     kq = kq_obj.to_dict()
     ds_icd = []
     if kq.get("ma_icd10_chinh"):
@@ -581,7 +714,14 @@ def tien_kiem_bhyt_tu_du_lieu(menh_de_raw: List[Dict[str, Any]], hoi_thoai: str 
         khoa = item.get("chuyen_khoa") or item.get("khoa") or ""
         trich_dan_khop = ""
         for pb in ds_pb:
-            if not pb.phu_dinh and pb.noi_dung and any(kw in pb.noi_dung.lower() for m_code, _, _, kws in DANH_MUC_ICD10_BYT if m_code == ma_icd for kw in kws):
+            if (
+                getattr(pb, "chu_the_id", 0) == 0
+                and getattr(pb, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+                and getattr(pb, "tinh_huong", "thực tế") != "giả định"
+                and not pb.phu_dinh
+                and pb.noi_dung
+                and any(kw in pb.noi_dung.lower() for m_code, _, _, kws in DANH_MUC_ICD10_BYT if m_code == ma_icd for kw in kws)
+            ):
                 trich_dan_khop = (pb.trich_dan[0] if pb.trich_dan else "") or pb.noi_dung
                 break
         goi_y.append({"ma": ma_icd, "ten": ten_icd, "khoa": khoa, "trich_dan": trich_dan_khop})
@@ -593,6 +733,7 @@ def tien_kiem_bhyt_tu_du_lieu(menh_de_raw: List[Dict[str, Any]], hoi_thoai: str 
         ma_lk="web",
         ket_qua_bhyt=kq_obj,
         danh_sach_phat_bieu=ds_pb,
+        thong_tin_benh_nhan=thong_tin_benh_nhan,
         hoi_thoai=hoi_thoai,
     )
     return kq
@@ -641,13 +782,17 @@ def xuat_goi_xml_1_5_qd130(
         "</TONG_HOP>"
     )
 
-    # XML2: Chi tiết thuốc
+    # XML2: Chi tiết thuốc (lọc bỏ thuốc đã ngừng, phủ định, giả định hoặc khác chủ thể)
     thuoc_items: List[str] = []
     stt_t = 0
     for pb in danh_sach_phat_bieu:
         if getattr(pb, "chu_the_id", 0) != 0 or getattr(pb, "phu_dinh", False):
             continue
-        if getattr(pb, "trang_thai", "còn hiệu lực") == "bị thay thế":
+        if getattr(pb, "trang_thai", "còn hiệu lực") != "còn hiệu lực":
+            continue
+        if getattr(pb, "tinh_huong", "thực tế") == "giả định":
+            continue
+        if BHYTXmlPreChecker._la_thuoc_da_ngung(pb):
             continue
         t_dict = getattr(pb, "thuoc", None)
         muc = getattr(pb, "muc", "") or ""
@@ -689,7 +834,9 @@ def xuat_goi_xml_1_5_qd130(
 
     # XML4: Cận lâm sàng
     cls_items: List[str] = []
-    xn_dict = bn.get("xet_nghiem") if isinstance(bn.get("xet_nghiem"), dict) else {}
+    xn_dict = bn.get("xet_nghiem") if isinstance(bn.get("xet_nghiem"), dict) else (
+        bn.get("du_lieu_xet_nghiem") if isinstance(bn.get("du_lieu_xet_nghiem"), dict) else {}
+    )
     for idx_cls, (k_xn, v_xn) in enumerate(xn_dict.items(), start=1):
         cls_items.append(
             "  <CHI_TIET_CLS>\n"
@@ -707,10 +854,13 @@ def xuat_goi_xml_1_5_qd130(
         + "</DSACH_CHI_TIET_CLS>\n</CHITIEU_CHITIET_CLS>"
     )
 
-    # XML5: Diễn biến lâm sàng
+    # XML5: Diễn biến lâm sàng (chỉ lấy mệnh đề còn hiệu lực, thực tế của chính bệnh nhân chu_the_id == 0)
     dien_bien_text = "; ".join(
         pb.noi_dung for pb in danh_sach_phat_bieu
-        if getattr(pb, "trang_thai", "còn hiệu lực") == "còn hiệu lực" and pb.noi_dung
+        if getattr(pb, "chu_the_id", 0) == 0
+        and getattr(pb, "trang_thai", "còn hiệu lực") == "còn hiệu lực"
+        and getattr(pb, "tinh_huong", "thực tế") != "giả định"
+        and pb.noi_dung
     ) or (hoi_thoai[:500] if hoi_thoai else "Khám ngoại trú")
     xml5 = (
         '<?xml version="1.0" encoding="utf-8"?>\n<CHITIEU_CHITIET_DIEN_BIEN_BENH>\n<DSACH_CHI_TIET_DIEN_BIEN_BENH>\n'
@@ -740,5 +890,10 @@ if __name__ == "__main__":
     if "--precheck" in sys.argv:
         raw = sys.stdin.read().lstrip("\ufeff")
         data = json.loads(raw) if raw.strip() else {}
-        out = tien_kiem_bhyt_tu_du_lieu(data.get("propositions") or [], data.get("transcript") or "")
+        tt_bn = data.get("thong_tin_benh_nhan") or data.get("patientInfo")
+        out = tien_kiem_bhyt_tu_du_lieu(
+            data.get("propositions") or [],
+            data.get("transcript") or "",
+            thong_tin_benh_nhan=tt_bn if isinstance(tt_bn, dict) else None,
+        )
         print(json.dumps(out, ensure_ascii=False))

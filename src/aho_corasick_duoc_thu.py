@@ -180,8 +180,7 @@ def _ltd(hc):
 
 
 # Dữ liệu mẫu đại diện Dược thư Quốc gia Việt Nam 2022 (offline knowledge base)
-# 25/11/2026: LIỀU đọc từ data/tri_thuc_thuoc.json (chưa duyệt). Bảng này ghi sintrom là biệt
-# dược của warfarin — sai (sintrom là acenocoumarol); xem docs/tri-thuc-thuoc-can-duyet.md.
+# LIỀU đọc từ MOT nguồn data/tri_thuc_thuoc.json. Sintrom được ánh xạ chuẩn sang acenocoumarol (tách biệt với warfarin).
 CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-N02BE01",
@@ -206,13 +205,13 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
         chong_chi_dinh_thai_ky="Chống chỉ định tuyệt đối 3 tháng cuối thai kỳ (Category D)",
         chong_chi_dinh_egfr=30.0,
         chong_chi_dinh_benh_nen=["loét dạ dày tá tràng tiến triển", "hen suyễn (hội chứng widal)", "suy thận nặng"],
-        tuong_tac_chong_chi_dinh=["warfarin", "aspirin"],
+        tuong_tac_chong_chi_dinh=["warfarin", "acenocoumarol", "aspirin"],
         tuong_tac_nghiem_trong=["captopril", "enalapril", "methotrexate"]
     ),
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-B01AA03",
         ten_hoat_chat="warfarin",
-        ten_biet_duoc=["coumadin", "sintrom", "marevan"],
+        ten_biet_duoc=["coumadin", "marevan"],
         nhom_duoc_ly="Thuốc chống đông kháng vitamin K",
         ma_atc="B01AA03",
         lieu_toi_da_24h_mg=_ltd("warfarin"),
@@ -221,6 +220,19 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
         chong_chi_dinh_benh_nen=["nguy cơ xuất huyết cao", "loét tiêu hóa tiến triển"],
         tuong_tac_chong_chi_dinh=["aspirin", "ibuprofen", "clopidogrel"],
         tuong_tac_nghiem_trong=["amiodarone", "ciprofloxacin", "metronidazole"]
+    ),
+    ThongTinDuocThu(
+        ma_hoat_chat="DTQG-B01AA07",
+        ten_hoat_chat="acenocoumarol",
+        ten_biet_duoc=["sintrom", "minisintrom", "acenocoumarole"],
+        nhom_duoc_ly="Thuốc chống đông kháng vitamin K",
+        ma_atc="B01AA07",
+        lieu_toi_da_24h_mg=_ltd("acenocoumarol"),
+        chong_chi_dinh_thai_ky="Chống chỉ định tuyệt đối thai kỳ (Category X - dị tật bào thai và xuất huyết)",
+        chong_chi_dinh_egfr=15.0,
+        chong_chi_dinh_benh_nen=["nguy cơ xuất huyết cao", "loét tiêu hóa tiến triển"],
+        tuong_tac_chong_chi_dinh=["aspirin", "ibuprofen", "clopidogrel"],
+        tuong_tac_nghiem_trong=["amiodarone", "ciprofloxacin", "metronidazole", "rifampicin"]
     ),
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-B01AC04",
@@ -238,7 +250,7 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-A02BC01",
         ten_hoat_chat="omeprazole",
-        ten_biet_duoc=["losec", "omepral", "lomac"],
+        ten_biet_duoc=["omeprazol", "losec", "omepral", "lomac"],
         nhom_duoc_ly="Thuốc ức chế bơm proton (PPI)",
         ma_atc="A02BC01",
         lieu_toi_da_24h_mg=_ltd("omeprazole"),
@@ -303,7 +315,7 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-C03DA01",
         ten_hoat_chat="spironolactone",
-        ten_biet_duoc=["aldactone", "verospiron"],
+        ten_biet_duoc=["spironolacton", "aldactone", "verospiron"],
         nhom_duoc_ly="Thuốc lợi tiểu kháng Aldosterone",
         ma_atc="C03DA01",
         lieu_toi_da_24h_mg=_ltd("spironolactone"),
@@ -488,7 +500,7 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-C01BD01",
         ten_hoat_chat="amiodarone",
-        ten_biet_duoc=["cordarone"],
+        ten_biet_duoc=["amiodaron", "cordarone"],
         nhom_duoc_ly="Thuốc chống loạn nhịp tim nhóm III (NTI)",
         ma_atc="C01BD01",
         lieu_toi_da_24h_mg=_ltd("amiodarone"),
@@ -496,7 +508,7 @@ CO_SO_DU_LIEU_DUOC_THU_2022: List[ThongTinDuocThu] = [
         chong_chi_dinh_egfr=None,
         chong_chi_dinh_benh_nen=["nhịp chậm xoang nặng", "block nhĩ thất độ 2-3", "bệnh lý tuyến giáp"],
         tuong_tac_chong_chi_dinh=[],
-        tuong_tac_nghiem_trong=["digoxin", "warfarin", "simvastatin"]
+        tuong_tac_nghiem_trong=["digoxin", "warfarin", "acenocoumarol", "simvastatin"]
     ),
     ThongTinDuocThu(
         ma_hoat_chat="DTQG-L01BA01",

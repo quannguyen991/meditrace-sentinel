@@ -118,6 +118,50 @@ class ClinicalDeidentifier:
         r"(?:\s+[A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ][a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]+){1,3})\b"
     )
 
+    # Các hậu tố từ ghép tiếng Việt thông dụng/lâm sàng không được phép tách nhầm khi tên người là tên đơn (1 âm tiết)
+    _HAU_TO_TU_GHEP_DON: Dict[str, Tuple[str, ...]] = {
+        "an": ("toàn", "thần", "tâm", "nghỉ", "ninh", "khang", "sinh"),
+        "bình": ("thường", "ổn", "tĩnh", "đẳng", "quân", "phục", "nguyên"),
+        "tâm": ("thu", "trương", "thần", "nhĩ", "thất", "lý", "phế", "vị", "đồ"),
+        "thanh": ("quản", "niên", "huyết", "nhiệt", "đờm", "mạc"),
+        "thành": ("bụng", "ngực", "mạch", "phần", "công"),
+        "minh": ("mẫn", "bạch"),
+        "phúc": ("mạc",),
+        "kết": ("mạc", "luận", "quả"),
+        "mai": ("sau",),
+    }
+
+    @classmethod
+    def _tao_regex_ten_nguoi(cls, ten_goc: str) -> re.Pattern:
+        """Tạo biểu thức chính quy có ranh giới từ Unicode an toàn cho họ tên.
+        - Với họ tên đa âm tiết ('Nguyễn Văn An'): khớp không phân biệt hoa-thường trên ranh giới từ.
+        - Với tên đơn 1 âm tiết ('An', 'Bình', 'Tâm'): chỉ khớp khi viết hoa đầu từ hoặc đứng sau danh xưng,
+          đồng thời loại trừ các từ ghép lâm sàng/thông dụng ('an thần', 'an toàn', 'bình thường', 'tâm đồ'...).
+        """
+        val = ten_goc.strip()
+        if len(val.split()) >= 2:
+            return re.compile(rf"(?<!\w){re.escape(val)}(?!\w)", re.IGNORECASE)
+
+        thap = val.lower()
+        hau_to = cls._HAU_TO_TU_GHEP_DON.get(thap, ())
+        chan_sau = rf"(?!(?i:\s+(?:{'|'.join(re.escape(h) for h in hau_to)}))(?!\w))" if hau_to else ""
+        chan_truoc = (
+            r"(?<!\bđiện )(?<!\bĐiện )(?<!\bthuốc )(?<!\bThuốc )(?<!\báp )(?<!\bÁp )(?<!\btim )(?<!\bTim )"
+            if thap in ("tâm", "an", "bình", "thanh")
+            else ""
+        )
+        v_cap = val[0].upper() + val[1:].lower()
+        v_up = val.upper()
+        nhanh_hoa = rf"{chan_truoc}(?<!\w)(?:{re.escape(v_cap)}|{re.escape(v_up)})(?!\w){chan_sau}"
+        danh_xung_co_dinh = (
+            "bác", "Bác", "anh", "Anh", "chị", "Chị", "cô", "Cô", "chú", "Chú",
+            "ông", "Ông", "bà", "Bà", "em", "Em", "cháu", "Cháu", "bé", "Bé",
+            "bệnh nhân", "Bệnh nhân", "người bệnh", "Người bệnh", "bn", "BN",
+        )
+        lb_dx = "|".join(rf"(?<=\b{re.escape(dx)} )" for dx in danh_xung_co_dinh)
+        nhanh_dx = rf"(?:{lb_dx})(?<!\w)(?i:{re.escape(val)})(?!\w){chan_sau}"
+        return re.compile(rf"(?:{nhanh_hoa}|{nhanh_dx})")
+
     @classmethod
     def an_danh_van_ban(
         cls,
@@ -187,30 +231,43 @@ class ClinicalDeidentifier:
             bang_anh_xa[token] = val
             danh_sach_pii.append(ThucThePII("DIA_CHI", val, token, match.start(1), match.end(1)))
 
-        # 7. Ẩn danh Tên bệnh nhân được truyền trực tiếp
+        # 7. Ẩn danh Tên bệnh nhân được truyền trực tiếp (bắt buộc ranh giới từ Unicode + bảo vệ từ ghép lâm sàng)
         if ten_benh_nhan and len(ten_benh_nhan.strip()) >= 2:
             val = ten_benh_nhan.strip()
             token = "[BENH_NHAN]"
-            bang_anh_xa[token] = val
-            for m in re.finditer(re.escape(val), van_ban, re.IGNORECASE):
-                danh_sach_pii.append(ThucThePII("HO_TEN", m.group(0), token, m.start(), m.end()))
+            pat_bn = cls._tao_regex_ten_nguoi(val)
+            matches_bn = list(pat_bn.finditer(van_ban))
+            if matches_bn:
+                bang_anh_xa[token] = val
+                for m in matches_bn:
+                    danh_sach_pii.append(ThucThePII("HO_TEN", m.group(0), token, m.start(), m.end()))
 
-        # 8. Ẩn danh Tên thân nhân
+        # 8. Ẩn danh Tên thân nhân (bắt buộc ranh giới từ Unicode + bảo vệ từ ghép lâm sàng)
         if ten_than_nhan:
             for i, ten_tn in enumerate(ten_than_nhan, 1):
                 if ten_tn and len(ten_tn.strip()) >= 2:
                     val = ten_tn.strip()
                     token = f"[NGUOI_NHA_{i}]"
-                    bang_anh_xa[token] = val
-                    for m in re.finditer(re.escape(val), van_ban, re.IGNORECASE):
-                        danh_sach_pii.append(ThucThePII("HO_TEN_NGUOI_NHA", m.group(0), token, m.start(), m.end()))
+                    pat_tn = cls._tao_regex_ten_nguoi(val)
+                    matches_tn = list(pat_tn.finditer(van_ban))
+                    if matches_tn:
+                        bang_anh_xa[token] = val
+                        for m in matches_tn:
+                            danh_sach_pii.append(ThucThePII("HO_TEN_NGUOI_NHA", m.group(0), token, m.start(), m.end()))
 
         # 9. Tự động bắt tên qua tiền tố đích danh
+        # Chỉ dùng (?i:...) cho phần tiền tố để [A-Z...][a-z...]+ giữ phân biệt hoa-thường,
+        # hỗ trợ cả tên 1 chữ cái ('Nguyễn Thị Ý' / 'TRẦN THỊ Ý') và không bao giờ nuốt triệu chứng chữ thường phía sau.
+        _chu_hoa = "A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ"
+        _chu_thuong = "a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ"
+        _tu_ten_hoa_dau = rf"[{_chu_hoa}][{_chu_thuong}]+"
+        _tu_ten_hoa_tiep = rf"[{_chu_hoa}][{_chu_thuong}]*"
+        _cum_ten = rf"(?:{_tu_ten_hoa_dau}(?:\s+{_tu_ten_hoa_tiep}){{0,4}}|[{_chu_hoa}]{{2,}}(?:\s+[{_chu_hoa}]{{1,}}){{1,4}})"
         for tt in cls.TIEN_TO_TEN:
-            pattern = re.compile(rf"(?i){re.escape(tt)}\s+([A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ][a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]+(?:\s+[A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ][a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]+)+)")
+            pattern = re.compile(rf"(?i:{re.escape(tt)})\s+({_cum_ten})(?!\w)")
             for m in pattern.finditer(van_ban):
                 val = m.group(1).strip()
-                if not any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
+                if len(val) >= 2 and not any(p.gia_tri_goc.lower() == val.lower() for p in danh_sach_pii):
                     token = _lay_token("HO_TEN")
                     bang_anh_xa[token] = val
                     danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
@@ -223,9 +280,22 @@ class ClinicalDeidentifier:
                 bang_anh_xa[token] = val
                 danh_sach_pii.append(ThucThePII("HO_TEN", val, token, m.start(1), m.end(1)))
 
-        # Thực hiện thay thế các thực thể trong văn bản
-        for token, val_goc in bang_anh_xa.items():
-            vb_xu_ly = re.sub(re.escape(val_goc), token, vb_xu_ly, flags=re.IGNORECASE)
+        # Thực hiện thay thế các thực thể trong văn bản (ưu tiên chuỗi dài trước + ranh giới từ Unicode)
+        _token_ten = lambda tk: tk == "[BENH_NHAN]" or tk.startswith("[NGUOI_NHA_") or tk.startswith("[HO_TEN_")
+        for token, val_goc in sorted(bang_anh_xa.items(), key=lambda kv: len(kv[1]), reverse=True):
+            if not val_goc:
+                continue
+            if _token_ten(token):
+                vb_xu_ly = cls._tao_regex_ten_nguoi(val_goc).sub(lambda _m, t=token: t, vb_xu_ly)
+                continue
+            left_b = r"(?<!\w)" if (val_goc[0].isalnum() or val_goc[0] == "_") else ""
+            right_b = r"(?!\w)" if (val_goc[-1].isalnum() or val_goc[-1] == "_") else ""
+            vb_xu_ly = re.sub(
+                rf"{left_b}{re.escape(val_goc)}{right_b}",
+                lambda _m, t=token: t,
+                vb_xu_ly,
+                flags=re.IGNORECASE,
+            )
 
         return KetQuaKhuDinhDanh(
             van_ban_da_an_danh=vb_xu_ly,

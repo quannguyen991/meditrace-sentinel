@@ -185,13 +185,107 @@ BANG_TUONG_TAC_THUOC: List[TuongTacThuoc] = [
         co_che="Rifampicin là chất cảm ứng enzym CYP2C9 và CYP3A4 cực mạnh làm tăng thanh thải Warfarin",
         hau_qua="Giảm mạnh hiệu lực kháng đông của Warfarin, nguy cơ hình thành huyết khối tái phát",
         khuyen_cao="Theo dõi chỉ số INR sát sao và thường phải tăng liều Warfarin lên gấp 2-3 lần khi dùng chung Rifampicin"
-    )
+    ),
+    TuongTacThuoc(
+        thuoc_1="acenocoumarol", thuoc_2="aspirin",
+        muc_do=DDI_CHONG_CHI_DINH,
+        co_che="Hiệp đồng ức chế đông máu (kháng Vitamin K) và kết tập tiểu cầu, tổn thương niêm mạc dạ dày",
+        hau_qua="Nguy cơ xuất huyết tiêu hóa ồ ạt và xuất huyết nội sọ nghiêm trọng",
+        khuyen_cao="Tránh phối hợp Sintrom (Acenocoumarol) với Aspirin trừ chỉ định van tim cơ học đặc biệt có theo dõi sát INR"
+    ),
+    TuongTacThuoc(
+        thuoc_1="acenocoumarol", thuoc_2="ibuprofen",
+        muc_do=DDI_CHONG_CHI_DINH,
+        co_che="NSAID ức chế COX-1 làm loét niêm mạc tiêu hóa và tăng nguy cơ chảy máu trên nền kháng Vitamin K",
+        hau_qua="Nguy cơ chảy máu nội tạng nghiêm trọng",
+        khuyen_cao="Chống chỉ định phối hợp Sintrom (Acenocoumarol) với NSAID. Thay bằng Paracetamol để giảm đau hạ sốt"
+    ),
+    TuongTacThuoc(
+        thuoc_1="acenocoumarol", thuoc_2="amiodarone",
+        muc_do=DDI_NGHIEM_TRONG,
+        co_che="Amiodarone ức chế mạnh CYP2C9 làm giảm chuyển hóa Acenocoumarol",
+        hau_qua="Tăng vọt chỉ số INR và nguy cơ xuất huyết nặng",
+        khuyen_cao="Giảm 30-50% liều Acenocoumarol (Sintrom) và kiểm tra INR chặt chẽ khi phối hợp Amiodarone (Cordarone)"
+    ),
+    TuongTacThuoc(
+        thuoc_1="warfarin", thuoc_2="amiodarone",
+        muc_do=DDI_NGHIEM_TRONG,
+        co_che="Amiodarone ức chế mạnh CYP2C9 làm tăng nồng độ Warfarin huyết tương",
+        hau_qua="Tăng vọt chỉ số INR và nguy cơ xuất huyết nặng",
+        khuyen_cao="Giảm 30-50% liều Warfarin (Coumadin) và theo dõi INR sát sao khi dùng kèm Amiodarone (Cordarone)"
+    ),
+    TuongTacThuoc(
+        thuoc_1="rifampicin", thuoc_2="acenocoumarol",
+        muc_do=DDI_NGHIEM_TRONG,
+        co_che="Rifampicin cảm ứng mạnh CYP2C9 làm tăng chuyển hóa Acenocoumarol",
+        hau_qua="Giảm hiệu lực chống đông của Sintrom (Acenocoumarol), nguy cơ huyết khối tắc mạch",
+        khuyen_cao="Theo dõi sát INR và hiệu chỉnh liều Acenocoumarol khi bắt đầu hoặc ngừng Rifampicin"
+    ),
 ]
 
 # Liều tối đa hàng ngày (Maximum Daily Dose) cho người lớn
 # 25/11/2026: doc tu MOT nguon (data/tri_thuc_thuoc.json, chua duyet).
 from src import tri_thuc_thuoc as _ttt
 LIEU_TOI_DA_NGAY: Dict[str, Tuple[float, str]] = {t: (v, "mg") for t, v in _ttt.bang_lieu_nguoi_lon().items()}
+
+
+_BIET_DUOC_PHO_BIEN: Dict[str, str] = {
+    "losec": "omeprazole",
+    "omepral": "omeprazole",
+    "lomac": "omeprazole",
+    "nexium": "esomeprazole",
+    "plavix": "clopidogrel",
+    "clopistad": "clopidogrel",
+    "sintrom": "acenocoumarol",
+    "minisintrom": "acenocoumarol",
+    "coumadin": "warfarin",
+    "marevan": "warfarin",
+    "cordarone": "amiodarone",
+    "glucophage": "metformin",
+    "panfor": "metformin",
+    "crestor": "rosuvastatin",
+    "lipitor": "atorvastatin",
+    "cozaar": "losartan",
+    "aldactone": "spironolactone",
+    "verospiron": "spironolactone",
+    "norvasc": "amlodipin",
+    "amlor": "amlodipin",
+    "panadol": "paracetamol",
+    "hapacol": "paracetamol",
+    "efferalgan": "paracetamol",
+    "advil": "ibuprofen",
+    "brufen": "ibuprofen",
+    "renitec": "enalapril",
+    "lanoxin": "digoxin",
+    "zyloric": "allopurinol",
+    "ciprobay": "ciprofloxacin",
+    "theostat": "theophylline",
+    "imuran": "azathioprine",
+    "tegretol": "carbamazepine",
+    "depakine": "valproat",
+}
+
+
+def _goc_khong_e(ten: str) -> str:
+    """Chuẩn hóa gốc tên hoạt chất không phân biệt chữ 'e' cuối (omeprazol == omeprazole, spironolacton == spironolactone)."""
+    s = (ten or "").strip().lower()
+    return s[:-1] if len(s) > 5 and s.endswith("e") else s
+
+
+def _trich_danh_sach_benh_nen(co_dia: Optional[Dict[str, Any]]) -> List[str]:
+    """Hỗ trợ đồng thời cả khóa `benh_nen` lẫn `tien_su_benh` (dạng list hoặc chuỗi)."""
+    if not isinstance(co_dia, dict):
+        return []
+    ket_qua: List[str] = []
+    for khoa in ("tien_su_benh", "benh_nen"):
+        raw = co_dia.get(khoa)
+        if not raw:
+            continue
+        if isinstance(raw, str):
+            ket_qua.extend([x.strip().lower() for x in re.split(r"[,;\n]+", raw) if x.strip()])
+        elif isinstance(raw, (list, tuple, set)):
+            ket_qua.extend([str(x).strip().lower() for x in raw if x is not None and str(x).strip()])
+    return ket_qua
 
 
 class ClinicalPharmacovigilanceEngine:
@@ -215,81 +309,169 @@ class ClinicalPharmacovigilanceEngine:
     def chuan_hoa_ten_thuoc(ten: str) -> str:
         t = (ten or "").strip().lower()
         t = re.sub(r"\b(thuốc|viên|gói|uống|tiêm)\b", "", t).strip()
-        return t
+        return re.sub(r"\s+", " ", t)
+
+    @classmethod
+    def phan_giai_hoat_chat(cls, chuoi_thuoc: str) -> List[str]:
+        """Phân giải chuỗi tên thuốc / biệt dược / hàm lượng thành danh sách hoạt chất chuẩn."""
+        norm = cls.chuan_hoa_ten_thuoc(chuoi_thuoc)
+        if not norm:
+            return []
+        ket_qua: List[str] = []
+        da_co: Set[str] = set()
+
+        def _them(hc_raw: Optional[str]) -> None:
+            if not hc_raw:
+                return
+            g = _goc_khong_e(hc_raw)
+            if g and g not in da_co:
+                da_co.add(g)
+                ket_qua.append(hc_raw.strip().lower())
+
+        if "thuoc_can_quang" in norm or "cản quang" in norm:
+            _them("thuoc_can_quang")
+
+        for bd, hc_bd in _BIET_DUOC_PHO_BIEN.items():
+            if re.search(rf"(?<!\w){re.escape(bd)}(?!\w)", norm):
+                _them(hc_bd)
+
+        hc_direct = _ttt.hoat_chat(norm)
+        if hc_direct:
+            _them(hc_direct)
+
+        for m_rx in _ttt.regex_ten_thuoc().finditer(norm):
+            _them(_ttt.hoat_chat(m_rx.group(1)) or m_rx.group(1))
+
+        for m_aho in cls.nhan_dien_thuoc_aho_corasick(norm):
+            _them(m_aho["hoat_chat"])
+
+        if not ket_qua:
+            for tok in re.findall(r"[a-zA-ZÀ-ỹ][\w\-]{3,}", norm):
+                tok_l = tok.lower()
+                if not re.match(r"^\d", tok_l) and tok_l not in {"ngay", "ngày", "sáng", "trưa", "chiều", "tối", "tuần"}:
+                    _them(tok_l)
+        return ket_qua
 
     @classmethod
     def kiem_tra_tuong_tac(cls, danh_sach_thuoc: List[str]) -> List[TuongTacThuoc]:
-        """Phát hiện tương tác thuốc đa hoạt chất (DDI)."""
+        """Phát hiện tương tác thuốc đa hoạt chất (DDI), hỗ trợ biệt dược & biến thể chữ 'e' cuối."""
         ra: List[TuongTacThuoc] = []
-        cac_thuoc = [cls.chuan_hoa_ten_thuoc(t) for t in danh_sach_thuoc if t]
-        
-        for i in range(len(cac_thuoc)):
-            for j in range(i + 1, len(cac_thuoc)):
-                t1, t2 = cac_thuoc[i], cac_thuoc[j]
-                for tt in BANG_TUONG_TAC_THUOC:
-                    if (tt.thuoc_1 in t1 and tt.thuoc_2 in t2) or (tt.thuoc_1 in t2 and tt.thuoc_2 in t1):
-                        if tt not in ra:
-                            ra.append(tt)
+        tap_goc_moi_muc: List[Set[str]] = []
+        for raw in danh_sach_thuoc or []:
+            if not raw or not str(raw).strip():
+                continue
+            hcs = cls.phan_giai_hoat_chat(str(raw))
+            gocs = {_goc_khong_e(h) for h in hcs}
+            norm = cls.chuan_hoa_ten_thuoc(str(raw))
+            for tok in re.findall(r"[a-z0-9_]+", norm):
+                gocs.add(_goc_khong_e(tok))
+            tap_goc_moi_muc.append(gocs)
+
+        # Gộp cả trường hợp nhiều thuốc nằm trong cùng 1 chuỗi hoặc giữa các phần tử khác nhau
+        tat_ca_goc: Set[str] = set().union(*tap_goc_moi_muc) if tap_goc_moi_muc else set()
+        for tt in BANG_TUONG_TAC_THUOC:
+            g1 = _goc_khong_e(tt.thuoc_1)
+            g2 = _goc_khong_e(tt.thuoc_2)
+            if g1 in tat_ca_goc and g2 in tat_ca_goc and g1 != g2:
+                if tt not in ra:
+                    ra.append(tt)
         return ra
 
     @classmethod
     def kiem_tra_co_dia_chong_chi_dinh(cls, danh_sach_thuoc: List[str], co_dia: Optional[Dict[str, Any]]) -> List[str]:
-        """Kiểm tra chống chỉ định tuyệt đối theo cơ địa lâm sàng."""
+        """Kiểm tra chống chỉ định tuyệt đối theo cơ địa lâm sàng (hỗ trợ cả `benh_nen` & `tien_su_benh`)."""
         if not co_dia:
             return []
-        
-        canh_bao = []
-        cac_thuoc = [cls.chuan_hoa_ten_thuoc(t) for t in danh_sach_thuoc if t]
-        
+
+        canh_bao: List[str] = []
+        muc_thuoc: List[Tuple[str, Set[str]]] = []
+        for raw in danh_sach_thuoc or []:
+            if not raw or not str(raw).strip():
+                continue
+            t_norm = cls.chuan_hoa_ten_thuoc(str(raw))
+            gocs = {_goc_khong_e(h) for h in cls.phan_giai_hoat_chat(str(raw))}
+            for tok in re.findall(r"[a-z0-9_]+", t_norm):
+                gocs.add(_goc_khong_e(tok))
+            muc_thuoc.append((t_norm, gocs))
+
+        def _khop_nhom(gocs: Set[str], t_norm: str, danh_sach_ten: Tuple[str, ...]) -> Optional[str]:
+            for x in danh_sach_ten:
+                gx = _goc_khong_e(x)
+                if gx in gocs or x in t_norm:
+                    return x
+            return None
+
+        def _nhan_thuoc(t_norm: str, hc_khop: str) -> str:
+            return t_norm if hc_khop in t_norm else f"{t_norm} ({hc_khop})"
+
         # 1. Suy thận nặng (eGFR < 30 ml/phút hoặc CKD stage 4-5)
         egfr = co_dia.get("egfr")
+        if egfr is None and isinstance(co_dia.get("xet_nghiem"), dict):
+            egfr = co_dia["xet_nghiem"].get("egfr")
         ckd = co_dia.get("ckd_stage")
-        suy_than_nang = (egfr is not None and egfr < 30) or ckd in (4, 5, "4", "5")
-        
+        suy_than_nang = (egfr is not None and float(egfr) < 30) or ckd in (4, 5, "4", "5")
+
         if suy_than_nang:
-            for t in cac_thuoc:
-                if any(x in t for x in ("ibuprofen", "meloxicam", "diclofenac", "celecoxib", "nsaid")):
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc NSAID '{t}' bị cấm khi suy thận nặng (eGFR < 30) do nguy cơ suy thận cấp vô niệu")
-                if "metformin" in t:
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc hạ đường huyết '{t}' bị cấm khi eGFR < 30 do nguy cơ nhiễm toan lactic tử vong")
-                if any(x in t for x in ("gentamicin", "vancomycin")):
-                    canh_bao.append(f"CẢNH BÁO CAO: Kháng sinh độc thận '{t}' cần giảm liều triệt để và định lượng nồng độ đáy")
+            for t_norm, gocs in muc_thuoc:
+                m_nsaid = _khop_nhom(gocs, t_norm, ("ibuprofen", "meloxicam", "diclofenac", "celecoxib", "naproxen", "piroxicam", "etoricoxib", "nsaid"))
+                if m_nsaid:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc NSAID '{_nhan_thuoc(t_norm, m_nsaid)}' bị cấm khi suy thận nặng (eGFR < 30) do nguy cơ suy thận cấp vô niệu")
+                m_met = _khop_nhom(gocs, t_norm, ("metformin",))
+                if m_met:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc hạ đường huyết '{_nhan_thuoc(t_norm, m_met)}' bị cấm khi eGFR < 30 do nguy cơ nhiễm toan lactic tử vong")
+                m_spi = _khop_nhom(gocs, t_norm, ("spironolactone",))
+                if m_spi:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Lợi tiểu kháng Aldosterone '{_nhan_thuoc(t_norm, m_spi)}' chống chỉ định khi eGFR < 30 do nguy cơ tăng kali máu ngừng tim")
+                m_neph = _khop_nhom(gocs, t_norm, ("gentamicin", "vancomycin"))
+                if m_neph:
+                    canh_bao.append(f"CẢNH BÁO CAO: Kháng sinh độc thận '{_nhan_thuoc(t_norm, m_neph)}' cần giảm liều triệt để và định lượng nồng độ đáy")
 
         # 2. Phụ nữ mang thai (Thai kỳ Category X/D)
         mang_thai = co_dia.get("mang_thai") or co_dia.get("thai_ky")
         if mang_thai:
-            for t in cac_thuoc:
-                if any(x in t for x in ("captopril", "enalapril", "losartan", "valsartan")):
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Nhóm hạ áp '{t}' (ACEi/ARB) gây quái thai, suy thận và vô sọ ở thai nhi (Category D)")
-                if any(x in t for x in ("atorvastatin", "rosuvastatin", "simvastatin")):
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Statin '{t}' chống chỉ định trong thai kỳ do nguy cơ dị tật xương (Category X)")
-                if "warfarin" in t:
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Thuốc chống đông '{t}' gây hội chứng thai nhi Warfarin dị tật sọ mặt và xuất huyết thai")
-                if "methotrexate" in t:
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: '{t}' là thuốc độc tế bào gây sảy thai và dị tật nặng")
+            for t_norm, gocs in muc_thuoc:
+                m_raa = _khop_nhom(gocs, t_norm, ("captopril", "enalapril", "lisinopril", "perindopril", "ramipril", "losartan", "valsartan", "telmisartan", "irbesartan", "candesartan"))
+                if m_raa:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Nhóm hạ áp '{_nhan_thuoc(t_norm, m_raa)}' (ACEi/ARB) gây quái thai, suy thận và vô sọ ở thai nhi (Category D)")
+                m_statin = _khop_nhom(gocs, t_norm, ("atorvastatin", "rosuvastatin", "simvastatin", "pravastatin", "lovastatin"))
+                if m_statin:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Statin '{_nhan_thuoc(t_norm, m_statin)}' chống chỉ định trong thai kỳ do nguy cơ dị tật xương (Category X)")
+                m_vka = _khop_nhom(gocs, t_norm, ("warfarin", "acenocoumarol"))
+                if m_vka:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: Thuốc chống đông kháng Vitamin K '{_nhan_thuoc(t_norm, m_vka)}' gây dị tật bào thai và xuất huyết thai (Category X)")
+                m_mtx = _khop_nhom(gocs, t_norm, ("methotrexate",))
+                if m_mtx:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI: '{_nhan_thuoc(t_norm, m_mtx)}' là thuốc độc tế bào gây sảy thai và dị tật nặng")
 
-        # 3. Tiền sử bệnh nền đặc thù
-        benh_nen = [str(b).lower() for b in co_dia.get("tien_su_benh", [])]
+        # 3. Tiền sử bệnh nền đặc thù (đọc cả `tien_su_benh` và `benh_nen`)
+        benh_nen = _trich_danh_sach_benh_nen(co_dia)
         if any("hen" in b for b in benh_nen):
-            for t in cac_thuoc:
-                if any(x in t for x in ("propranolol", "timolol", "carvedilol")):
-                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc chẹn beta '{t}' gây co thắt phế quản cấp nguy hiểm ở bệnh nhân hen suyễn")
-                if any(x in t for x in ("aspirin", "ibuprofen")):
-                    canh_bao.append(f"CẢNH BÁO: Bệnh nhân hen phế quản có nguy cơ co thắt phế quản nặng do NSAID/Aspirin (Hội chứng Widal)")
+            for t_norm, gocs in muc_thuoc:
+                m_bb = _khop_nhom(gocs, t_norm, ("propranolol", "timolol", "carvedilol", "nadolol", "sotalol"))
+                if m_bb:
+                    canh_bao.append(f"CHỐNG CHỈ ĐỊNH: Thuốc chẹn beta '{_nhan_thuoc(t_norm, m_bb)}' gây co thắt phế quản cấp nguy hiểm ở bệnh nhân hen suyễn")
+                m_widal = _khop_nhom(gocs, t_norm, ("aspirin", "ibuprofen", "diclofenac", "meloxicam", "naproxen"))
+                if m_widal:
+                    canh_bao.append("CẢNH BÁO: Bệnh nhân hen phế quản có nguy cơ co thắt phế quản nặng do NSAID/Aspirin (Hội chứng Widal)")
 
         if any("loét dạ dày" in b or "loét tá tràng" in b or "xuất huyết tiêu hóa" in b for b in benh_nen):
-            for t in cac_thuoc:
-                if any(x in t for x in ("aspirin", "ibuprofen", "diclofenac", "prednisolone")):
-                    canh_bao.append(f"CẢNH BÁO CAO: Thuốc '{t}' gây kích ứng và tái phát loét/xuất huyết tiêu hóa nặng trên bệnh nhân có tiền sử bệnh dạ dày")
+            for t_norm, gocs in muc_thuoc:
+                m_ulcer = _khop_nhom(gocs, t_norm, ("aspirin", "ibuprofen", "diclofenac", "meloxicam", "naproxen", "prednisolone", "methylprednisolone"))
+                if m_ulcer:
+                    canh_bao.append(f"CẢNH BÁO CAO: Thuốc '{_nhan_thuoc(t_norm, m_ulcer)}' gây kích ứng và tái phát loét/xuất huyết tiêu hóa nặng trên bệnh nhân có tiền sử bệnh dạ dày")
 
         return canh_bao
 
     @classmethod
     def kiem_tra_lieu_tran(cls, ten_thuoc: str, lieu_mg: float) -> Optional[str]:
         """Kiểm tra nếu liều thuốc vượt quá liều trần cho phép trong ngày."""
-        # 25/11/2026 (ra soat): tra theo HOAT CHAT, khong do chuoi con — "kháng sinh" tung khop
-        # "inh" (isoniazid). So doc tu tri_thuc_thuoc (chua duyet).
-        hc = _ttt.hoat_chat(cls.chuan_hoa_ten_thuoc(ten_thuoc))
+        norm = cls.chuan_hoa_ten_thuoc(ten_thuoc)
+        hc = _ttt.hoat_chat(norm)
+        if not hc:
+            for bd, hc_bd in _BIET_DUOC_PHO_BIEN.items():
+                if re.search(rf"(?<!\w){re.escape(bd)}(?!\w)", norm):
+                    hc = hc_bd
+                    break
         l = _ttt.lieu_toi_da(hc, "nguoi_lon") if hc else None
         if l is not None and lieu_mg > l.gia_tri:
             return (f"VƯỢT LIỀU TRẦN: Liều dùng {lieu_mg} mg vượt quá liều tối đa hàng ngày cho phép "
@@ -300,28 +482,32 @@ class ClinicalPharmacovigilanceEngine:
     def kiem_tra_da_thuoc_va_trung_nhom_atc(cls, danh_sach_thuoc: List[str]) -> Dict[str, Any]:
         """Phát hiện trùng nhóm ATC (NSAID, Statin, PPI, ACEi/ARB), đa thuốc (>= 5) và cộng dồn nguy cơ Kali/QT."""
         thuoc_chuan: List[str] = []
-        seen: Set[str] = set()
+        seen_goc: Set[str] = set()
         for raw in danh_sach_thuoc or []:
             if not raw or not str(raw).strip():
                 continue
-            norm = cls.chuan_hoa_ten_thuoc(str(raw))
-            hc = _ttt.hoat_chat(norm) or norm
-            if hc and hc not in seen:
-                seen.add(hc)
-                thuoc_chuan.append(hc)
+            hcs = cls.phan_giai_hoat_chat(str(raw))
+            for hc in hcs:
+                g = _goc_khong_e(hc)
+                if g and g not in seen_goc:
+                    seen_goc.add(g)
+                    thuoc_chuan.append(hc)
 
         trung_nhom: List[str] = []
         chi_tiet_atc: Dict[str, List[str]] = {}
         for ten_nhom, (mo_ta, ds_goc) in NHOM_ATC_TRUNG_LAP.items():
-            khop = [t for t in thuoc_chuan if any(g in t for g in ds_goc)]
+            tap_goc_atc = {_goc_khong_e(g) for g in ds_goc}
+            khop = [t for t in thuoc_chuan if _goc_khong_e(t) in tap_goc_atc]
             if len(khop) >= 2:
                 chi_tiet_atc[ten_nhom] = khop
                 trung_nhom.append(
                     f"[TRÙNG NHÓM ATC - {ten_nhom}] Phát hiện {len(khop)} thuốc cùng nhóm ({', '.join(khop)}): {mo_ta}"
                 )
 
-        kali_drugs = [t for t in thuoc_chuan if any(k in t for k in THUOC_TANG_KALI)]
-        qt_drugs = [t for t in thuoc_chuan if any(q in t for q in THUOC_KEO_DAI_QT)]
+        tap_goc_kali = {_goc_khong_e(k) for k in THUOC_TANG_KALI}
+        tap_goc_qt = {_goc_khong_e(q) for q in THUOC_KEO_DAI_QT}
+        kali_drugs = [t for t in thuoc_chuan if _goc_khong_e(t) in tap_goc_kali]
+        qt_drugs = [t for t in thuoc_chuan if _goc_khong_e(t) in tap_goc_qt]
         cong_don_rui_ro: List[str] = []
         if len(kali_drugs) >= 2:
             cong_don_rui_ro.append(

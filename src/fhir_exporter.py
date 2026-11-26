@@ -51,8 +51,56 @@ class FHIRExporter:
         "huyet_ap": {"code": "85354-9", "display": "Blood pressure panel with all children optional", "unit": "mmHg"},
         "nhip_tim": {"code": "8867-4", "display": "Heart rate", "unit": "/min"},
         "than_nhiet": {"code": "8310-5", "display": "Body temperature", "unit": "Cel"},
-        "spo2": {"code": "59408-5", "display": "Oxygen saturation in Arterial blood by Pulse oximetry", "unit": "%"}
+        "spo2": {"code": "59408-5", "display": "Oxygen saturation in Arterial blood by Pulse oximetry", "unit": "%"},
+        "wbc": {"code": "6690-2", "display": "Leukocytes [#/volume] in Blood by Automated count", "unit": "10*9/L"},
+        "hb": {"code": "718-7", "display": "Hemoglobin [Mass/volume] in Blood", "unit": "g/dL"},
+        "kali": {"code": "2823-3", "display": "Potassium [Moles/volume] in Serum or Plasma", "unit": "mmol/L"},
+        "troponin": {"code": "6598-7", "display": "Troponin T.cardiac [Mass/volume] in Serum or Plasma", "unit": "ng/mL"},
     }
+
+    _RE_DI_UNG_PHU_DINH = re.compile(
+        r"^\s*(?:[-*•]\s*)?(?:bệnh\s+nhân\s+|bn\s+|người\s+bệnh\s+)?"
+        r"(?:"
+        r"(?:không|ko|chẳng|chả)\s+(?:(?:có|bị|thấy|ghi\s+nhận|phát\s+hiện|rõ)\s+)*(?:tiền\s+sử\s+)?(?:dị\s+ứng|mẫn\s+cảm)"
+        r"|(?:chưa(?:\s+(?:ghi\s+nhận|từng|thấy|có|bị|phát\s+hiện|rõ|bao\s+giờ))+)\s*(?:tiền\s+sử\s+)?(?:dị\s+ứng|mẫn\s+cảm)?"
+        r"|(?:dị\s+ứng|tiền\s+sử\s+dị\s+ứng)\s*[:=-]\s*(?:không(?:\s+có|\s+rõ)?|chưa(?:\s+ghi\s+nhận|\s+rõ)?|âm\s+tính)"
+        r"|không\s+có\s+tiền\s+sử\s+dị\s+ứng"
+        r"|(?:không(?:\s+có|\s+rõ)?|âm\s+tính|nkda|nka)\s*$"
+        r")",
+        re.IGNORECASE,
+    )
+
+    _RE_TACH_VE_DI_UNG = re.compile(
+        r"[.;\n]+"
+        r"|,\s*(?=(?:có\s+|bị\s+|dị\s+ứng|mẫn\s+cảm|không|ko|chưa|chẳng|còn|nhưng|chỉ|trừ|ngoài|"
+        r"nổi\s+mề\s+đay|mề\s+đay|mẩn\s+ngứa|phát\s+ban|sốc|phản\s+vệ|phù\s+|khó\s+thở|khi\s+(?:uống|dùng|tiêm|ăn))\b)"
+        r"|\b(?:nhưng|song|tuy\s+nhiên|ngoại\s+trừ)\b"
+        r"|\b(?:chỉ|trừ|ngoài|mà)\s+(?=(?:có|bị|dị\s+ứng|mẫn\s+cảm|nổi|mề\s+đay|mẩn|ngứa|phát\s+ban|sốc|phản\s+vệ|phù|với|khi|[a-zA-Z]{4,})\b)",
+        re.IGNORECASE,
+    )
+
+    _RE_DAU_HIEU_DUONG_TINH_DI_UNG = re.compile(
+        r"\b(?:nổi\s+mề\s+đay|mẩn\s+ngứa|sốc\s+phản\s+vệ|phản\s+vệ|phát\s+ban|phù\s+(?:mạch|mi|mắt|môi|thanh\s+quản))\b",
+        re.IGNORECASE,
+    )
+
+    @classmethod
+    def _la_di_ung_phu_dinh(cls, van_ban: Any) -> bool:
+        """Trả về True nếu toàn bộ nội dung mục DỊ ỨNG mang nghĩa phủ định / chưa ghi nhận."""
+        txt = str(van_ban or "").strip()
+        if not txt:
+            return True
+        cac_ve = [v.strip() for v in cls._RE_TACH_VE_DI_UNG.split(txt) if v and v.strip()]
+        if not cac_ve:
+            return True
+        for ve in cac_ve:
+            m = cls._RE_DI_UNG_PHU_DINH.search(ve)
+            if not m:
+                return False
+            phan_du = ve[m.end():]
+            if cls._RE_DAU_HIEU_DUONG_TINH_DI_UNG.search(phan_du) and not re.search(r"\b(?:không|chưa|ko)\b", phan_du, re.I):
+                return False
+        return True
 
     @staticmethod
     def _tao_id(prefix: str = "res") -> str:
@@ -107,7 +155,8 @@ class FHIRExporter:
         thong_tin_benh_nhan: Optional[Dict[str, Any]] = None,
         danh_sach_phat_bieu: Optional[List[Any]] = None,
         trich_dan_chung_cu: Optional[Dict[str, Any]] = None,
-        thong_tin_bac_si: Optional[Dict[str, Any]] = None
+        thong_tin_bac_si: Optional[Dict[str, Any]] = None,
+        du_lieu_xet_nghiem: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Tạo HL7 FHIR R4 Document Bundle từ kết quả xử lý của MediTrace Sentinel.
         
@@ -322,9 +371,9 @@ class FHIRExporter:
                 fmh_res["extension"] = [cite_fmh]
             entries.append({"fullUrl": f"urn:uuid:{fmh_id}", "resource": fmh_res})
 
-        # 4. Tạo Resource: AllergyIntolerance (Dị ứng thuốc/thức ăn)
+        # 4. Tạo Resource: AllergyIntolerance (Dị ứng thuốc/thức ăn — bỏ qua khi mang nghĩa phủ định/chưa ghi nhận)
         di_ung = ban_nhap.get("DỊ ỨNG", "") or ban_nhap.get("di_ung", "")
-        if di_ung:
+        if di_ung and not cls._la_di_ung_phu_dinh(di_ung):
             al_id = cls._tao_id("allergy")
             all_res_ids.append(al_id)
             al_res = {
@@ -355,13 +404,12 @@ class FHIRExporter:
                 al_res["extension"] = [cite_al]
             entries.append({"fullUrl": f"urn:uuid:{al_id}", "resource": al_res})
 
-        # 5. Tạo Resource: MedicationRequest (Y lệnh điều trị / Thuốc kê đơn)
-        thuoc_ke_don = ban_nhap.get("KẾ HOẠCH ĐIỀU TRỊ", "") or ban_nhap.get("ke_hoach_dieu_tri", "")
-        thuoc_hien_tai = ban_nhap.get("THUỐC ĐANG DÙNG", "") or ban_nhap.get("thuoc_dang_dung", "")
-        
-        # Luôn tạo MedicationRequest cho y lệnh điều trị
-        noi_dung_thuoc = thuoc_ke_don or thuoc_hien_tai
-        if noi_dung_thuoc:
+        # 5. Tạo Resource: MedicationRequest (CHỈ tạo y lệnh order khi có thuoc_ke_don thực sự;
+        # tuyệt đối không lấy thuoc_hien_tai gán thành y lệnh mới intent="order")
+        thuoc_ke_don = str(ban_nhap.get("KẾ HOẠCH ĐIỀU TRỊ", "") or ban_nhap.get("ke_hoach_dieu_tri", "") or "").strip()
+        thuoc_hien_tai = str(ban_nhap.get("THUỐC ĐANG DÙNG", "") or ban_nhap.get("thuoc_dang_dung", "") or "").strip()
+
+        if thuoc_ke_don:
             med_req_id = cls._tao_id("medication-request")
             all_res_ids.append(med_req_id)
             med_req_res = {
@@ -373,14 +421,14 @@ class FHIRExporter:
                 "encounter": {"reference": f"urn:uuid:{encounter_id}"},
                 "authoredOn": now_iso,
                 "medicationCodeableConcept": {
-                    "text": str(noi_dung_thuoc).strip(),
+                    "text": thuoc_ke_don,
                     "coding": [{
                         "system": "https://dav.gov.vn/drug-codes",
-                        "display": str(noi_dung_thuoc).strip()
+                        "display": thuoc_ke_don
                     }]
                 },
                 "dosageInstruction": [{
-                    "text": str(noi_dung_thuoc).strip()
+                    "text": thuoc_ke_don
                 }]
             }
             cite_med = cls._tao_citation_extension(trich_dan.get("ke_hoach_dieu_tri") or trich_dan.get("thuoc"))
@@ -388,7 +436,7 @@ class FHIRExporter:
                 med_req_res["extension"] = [cite_med]
             entries.append({"fullUrl": f"urn:uuid:{med_req_id}", "resource": med_req_res})
 
-        # Giữ MedicationStatement cho thuốc đang dùng để bảo đảm tương thích ngược
+        # MedicationStatement cho thuốc đang dùng (không mang intent="order")
         if thuoc_hien_tai:
             med_id = cls._tao_id("medication")
             all_res_ids.append(med_id)
@@ -396,7 +444,7 @@ class FHIRExporter:
                 "resourceType": "MedicationStatement",
                 "id": med_id,
                 "status": "active",
-                "medicationCodeableConcept": {"text": str(thuoc_hien_tai).strip()},
+                "medicationCodeableConcept": {"text": thuoc_hien_tai},
                 "subject": {"reference": f"urn:uuid:{patient_id}"},
                 "effectiveDateTime": now_iso
             }
@@ -437,11 +485,23 @@ class FHIRExporter:
             entries.append({"fullUrl": f"urn:uuid:{obs_id}", "resource": obs_res})
 
         # Tạo thêm các Resource: Observation cho kết quả xét nghiệm cận lâm sàng (mã hóa LOINC chuẩn)
-        if thong_tin_benh_nhan and isinstance(thong_tin_benh_nhan, dict):
-            lab_src = dict(thong_tin_benh_nhan)
-            if isinstance(thong_tin_benh_nhan.get("xet_nghiem"), dict):
-                for k_xn, v_xn in thong_tin_benh_nhan["xet_nghiem"].items():
-                    lab_src.setdefault(k_xn, v_xn)
+        # Hỗ trợ đồng thời cả `du_lieu_xet_nghiem` độc lập lẫn `thong_tin_benh_nhan["xet_nghiem"]`
+        lab_src: Dict[str, Any] = {}
+        if isinstance(thong_tin_benh_nhan, dict):
+            for k_bn, v_bn in thong_tin_benh_nhan.items():
+                if k_bn not in ("id", "ten", "ho_ten", "gioi_tinh", "tuoi", "la_nu", "xet_nghiem", "du_lieu_xet_nghiem", "thang_diem", "benh_nen", "tien_su_benh"):
+                    lab_src[k_bn] = v_bn
+            for nested_key in ("xet_nghiem", "du_lieu_xet_nghiem"):
+                if isinstance(thong_tin_benh_nhan.get(nested_key), dict):
+                    for k_xn, v_xn in thong_tin_benh_nhan[nested_key].items():
+                        if v_xn is not None:
+                            lab_src.setdefault(k_xn, v_xn)
+        if isinstance(du_lieu_xet_nghiem, dict):
+            for k_xn, v_xn in du_lieu_xet_nghiem.items():
+                if v_xn is not None:
+                    lab_src[k_xn] = v_xn
+
+        if lab_src:
             lab_norm = chuan_hoa_du_lieu_xet_nghiem(lab_src)
             if "creatinine_mg_dl" in lab_norm:
                 lab_norm["creatinine"] = lab_norm["creatinine_mg_dl"]
@@ -449,6 +509,17 @@ class FHIRExporter:
                 lab_norm["glucose"] = lab_norm["glucose_mg_dl"]
             if "urea_mmol_l" in lab_norm:
                 lab_norm["urea"] = lab_norm["urea_mmol_l"]
+            if "kali" not in lab_norm and lab_norm.get("k") is not None:
+                lab_norm["kali"] = lab_norm["k"]
+            if "wbc" not in lab_norm and lab_norm.get("bach_cau") is not None:
+                lab_norm["wbc"] = lab_norm["bach_cau"]
+            if "hb" not in lab_norm and lab_norm.get("hemoglobin") is not None:
+                lab_norm["hb"] = lab_norm["hemoglobin"]
+            if "troponin" not in lab_norm:
+                for k_tr in ("troponin_t", "troponin_i"):
+                    if lab_norm.get(k_tr) is not None:
+                        lab_norm["troponin"] = lab_norm[k_tr]
+                        break
             for lab_key, lab_meta in cls.BANG_MA_LOINC.items():
                 if lab_key in lab_norm and lab_norm[lab_key] is not None:
                     val = lab_norm[lab_key]
@@ -477,7 +548,7 @@ class FHIRExporter:
                         "encounter": {"reference": f"urn:uuid:{encounter_id}"},
                         "effectiveDateTime": now_iso
                     }
-                    if isinstance(val, (int, float)):
+                    if isinstance(val, (int, float)) and not isinstance(val, bool):
                         lab_obs_res["valueQuantity"] = {
                             "value": float(val),
                             "unit": lab_meta["unit"],

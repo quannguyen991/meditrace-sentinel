@@ -11,13 +11,13 @@ Hỗ trợ tự động bóc tách thông tin từ hội thoại, bệnh sử, s
 
 from dataclasses import dataclass, field
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
 class KetQuaThangDiem:
     ten_thang_diem: str
-    diem_so: int
+    diem_so: Union[int, float]
     phan_tang_nguy_co: str      # THAP, TRUNG_BINH, CAO, NGUY_KICH
     khuyen_cao_lam_sang: str     # Khuyến cáo xử trí / điều trị cụ thể cho bác sĩ
     chi_tiet_tieu_chi: List[str] = field(default_factory=list)
@@ -231,15 +231,15 @@ class ClinicalRiskScoringEngine:
             diem += 1.0
             tieu_chi.append("[+1.0] Bệnh lý ác tính (ung thư đang tiến triển/điều trị)")
 
-        diem_int = round(diem, 1)
-        if diem <= 4.0:
+        diem_thuc = round(diem, 1)
+        if diem_thuc <= 4.0:
             nguy_co = "THAP"
             khuyen_cao = "Ít khả năng thuyên tắc phổi (Xác suất < 15%). Khuyến cáo làm xét nghiệm D-dimer độ nhạy cao để loại trừ, tránh chụp CT không cần thiết."
         else:
             nguy_co = "CAO"
             khuyen_cao = "XÁC SUẤT NGUY CƠ CAO (Xác suất > 40%). Chỉ định khẩn cấp chụp cắt lớp vi tính động mạch phổi có cản quang (CTPA) và cân nhắc chống đông sớm."
 
-        return KetQuaThangDiem("Wells PE", int(diem), nguy_co, khuyen_cao, tieu_chi)
+        return KetQuaThangDiem("Wells PE", diem_thuc, nguy_co, khuyen_cao, tieu_chi)
 
     # --------------------------------------------------------------------------
     # 4. THANG ĐIỂM GLASGOW-BLATCHFORD (XUẤT HUYẾT TIÊU HÓA TRÊN)
@@ -598,7 +598,7 @@ class ClinicalRiskScoringEngine:
     ) -> KetQuaThangDiem:
         """Tính chỉ số khối cơ thể (BMI) theo chuẩn dành cho người Châu Á (WPRO)."""
         if chieu_cao_cm <= 0 or can_nang_kg <= 0:
-            return KetQuaThangDiem("BMI (Châu Á)", 0, "KHONG_XAC_DINH", "Thiếu chiều cao hoặc cân nặng", [])
+            return KetQuaThangDiem("BMI (Châu Á)", 0.0, "KHONG_XAC_DINH", "Thiếu chiều cao hoặc cân nặng", [])
 
         chieu_cao_m = chieu_cao_cm / 100.0
         bmi = round(can_nang_kg / (chieu_cao_m * chieu_cao_m), 1)
@@ -625,4 +625,4 @@ class ClinicalRiskScoringEngine:
             nguy_co = "NGUY_KICH"
             khuyen_cao = f"BMI = {bmi} kg/m² (>= 30.0). Béo phì mức độ nặng. Nguy cơ rất cao xảy ra biến cố tim mạch và hội chứng ngưng thở khi ngủ."
 
-        return KetQuaThangDiem(f"Chỉ số thể trạng BMI ({phan_loai})", int(bmi), nguy_co, khuyen_cao, tieu_chi)
+        return KetQuaThangDiem(f"Chỉ số thể trạng BMI ({phan_loai})", bmi, nguy_co, khuyen_cao, tieu_chi)
