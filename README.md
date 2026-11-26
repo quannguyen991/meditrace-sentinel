@@ -8,9 +8,11 @@
 
 ## Dành cho ban người đánh giá: xem thử trong 3 phút
 
+> **Báo cáo cải tiến Chặng 1 (AI 2026):** Xem đối chiếu chi tiết từng yêu cầu cải tiến (giảm bỏ sót & chốt chặn không hoàn tất hồ sơ khi thiếu căn cứ; kiểm soát lỗi giữa các bước AI & demo đa người nói; kiểm tra tính độc lập bộ dữ liệu 657 khuôn & kịch bản ngoài khuôn) tại **[`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)**.
+
 1. Mở **https://meditrace-sentinel.vercel.app** và đăng nhập bằng tài khoản dùng thử ghi trong hồ sơ dự thi. (Phần mềm yêu cầu tài khoản để bảo vệ dữ liệu của người dùng.)
-2. Ở **Trang chủ**, bấm nút **"Xem thử với ca mẫu"**. Phần mềm mở ngay một ca khám mô phỏng đã được xử lý trước, có sẵn bản nháp, không phải chờ.
-3. Vào **"Bằng chứng hội thoại"** (màn **"Duyệt từng mệnh đề"**). Bên trái là lời thoại, bên phải là từng thông tin được rút ra. Các đường nối chỉ ra thông tin nào lấy từ câu nói nào. Những thông tin đáng ngờ nằm trong ô vàng kèm lý do.
+2. Ở **Trang chủ**, bấm nút **"Xem thử với ca mẫu"**. Mỗi lần bấm, phần mềm xoay vòng qua **3 ca khám đa người nói dựng sẵn** (*Bác sĩ – Mẹ – Bệnh nhi*, *Hai người bệnh cùng phòng trao đổi*, *Bác sĩ – Cụ ông 74 tuổi – Con gái*), có sẵn bản nháp và mục `Cần xác nhận`, không cần GPU và không phải chờ.
+3. Vào **"Bằng chứng hội thoại"** (màn **"Duyệt từng mệnh đề"**) hoặc ngăn duyệt ngay cạnh bản nháp. Bên trái là lời thoại, bên phải là từng thông tin được rút ra kèm chủ thể và đường nối căn cứ. Những thông tin chưa chắc nằm trong mục **Cần xác nhận** kèm lý do — hệ thống **khóa cứng không cho ký duyệt hoàn tất hồ sơ** cho tới khi bác sĩ xác nhận, sửa hoặc bỏ hết các mục này.
 4. Thử **ghi âm**: bấm "Bắt đầu ghi âm" và nói vài câu. Dải trên cùng có các vạch nhảy theo giọng để cho biết micrô đang thu.
 
 Ghi chú: giao diện bằng tiếng Việt. Tạo một bản nháp mới bằng mô hình thật mất khoảng **3,5 phút** trên một card đồ hoạ phổ thông, nên nên dùng ca mẫu để xem nhanh.
@@ -89,7 +91,7 @@ Các tính năng này nằm quanh bản nháp. **Không tính năng nào thay đ
 | # | Tính năng | Làm gì | Tệp chính |
 |---|---|---|---|
 | 1 | **Nghe lại đúng đoạn** | Bấm vào một dòng để phát lại đoạn ghi âm gốc (thêm 0,5 giây hai đầu). Dòng có số kèm đơn vị, có từ phủ định, hoặc chép lời kém chắc chắn được tô sáng. | `web/src/lib/asrHighlight.ts`, `DuyetBenCanh.tsx` |
-| 2 | **Ký duyệt có chuỗi băm** | Khi bác sĩ ký duyệt, bản ghi được nối vào nhật ký chỉ-ghi-thêm có chuỗi băm SHA-256 (WORM), sửa lén một bản là vỡ chuỗi. | `web/may-chu/worm.ts`, `src/worm_audit_log.py` |
+| 2 | **Ký duyệt có chuỗi băm & chốt chặn căn cứ** | Chặn cứng ký duyệt khi chưa có mệnh đề có căn cứ hoặc còn mục `Cần xác nhận` chưa xử lý. Khi ký, bản ghi nối vào nhật ký chỉ-ghi-thêm có chuỗi băm SHA-256 (WORM) kèm tệp neo `.anchor.json`; sửa sau ký hiện cảnh báo `Đã sửa · Ký lại`. | `web/may-chu/worm.ts`, `compileEffectiveNote.ts`, `src/worm_audit_log.py` |
 | 3 | **Phiếu bàn giao SBAR và chép sang HIS** | Tạo phiếu bàn giao SBAR từ bản nháp (tôn trọng dòng đã giữ/sửa/bỏ) và chép nhanh từng ô sang phần mềm bệnh viện. | `web/src/lib/sbar.ts`, `HisSmartCopyPopover.tsx` |
 | 4 | **Gợi ý câu hỏi cờ đỏ** | Trong lúc khám, gợi ý tối đa 2 câu hỏi an toàn chưa hỏi (theo tuổi, giới); tự đánh dấu khi bác sĩ đã hỏi. Chạy tại chỗ, không gọi mô hình. | `web/src/lib/radarCoDo.ts` |
 | 5 | **Tờ dặn dò cho người bệnh** | Tờ dặn dò in được, có nút đọc to bằng giọng tiếng Việt của trình duyệt. | `ToDanDoBenhNhanModal.tsx` |
@@ -150,7 +152,7 @@ Chi tiết: `docs/ket-qua/cay-loi.md`.
 | Đường dẫn | Nội dung |
 |---|---|
 | `src/` | Toàn bộ phần xử lý bằng Python (xem bảng các bước ở trên). |
-| `tests/` | **1.729 bài kiểm thử `pytest` qua**, 27 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 25 tệp kiểm thử TypeScript, đều qua. |
+| `tests/` | **1.779 bài kiểm thử `pytest` qua**, 25 bỏ qua theo môi trường phần cứng (chạy lại ngày 26/11/2026). Phần `web/` có 43 bài kiểm thử TypeScript (frontend + backend), đều qua. |
 | `tools/` | Các lệnh chạy thí nghiệm (`.ps1`, `.py`), đóng gói để chạy trên Kaggle, bộ đo tốc độ, công cụ cấy lỗi (`cay_loi.py`, `cay_loi_kho.py`). |
 | `data/` | Chỉ có bảng tri thức thuốc, vân tay (mã băm) của các tập dữ liệu và manifest. Bản thân dữ liệu không nằm trong kho. |
 | `kaggle-kernels/` | Mỗi thư mục là một lượt huấn luyện hoặc chạy mô hình trên Kaggle (điền tên tài khoản Kaggle của bạn trong `kernel-metadata.json` nếu muốn chạy lại). |

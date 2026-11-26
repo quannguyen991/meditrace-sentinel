@@ -383,22 +383,25 @@ def ghi_chu_tach(tach: dict | None) -> str:
 # ----------------------------------------------------------------- ca mau
 
 def ca_mau(bo=None):
-    """Danh sach ca da chay truoc, de demo khi GPU ban."""
-    ra = []
-    for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_*.jsonl")):
-        if "C_khoa_hoi" in tep.name:
-            continue
-        ten_bo = tep.name[len("ra_C_khoa_"):-len(".jsonl")]
-        if bo and bo != ten_bo:
-            continue
-        for dong in open(tep, encoding="utf-8"):
-            if not dong.strip():
+    """Danh sach ca da chay truoc, de demo khi GPU ban (kem 3 ca demo BGK khi khong co kaggle-ra)."""
+    from src.ca_mau_bgk import danh_sach_ca_demo
+    ra = list(danh_sach_ca_demo(bo))
+    if THU_MUC_CHAY_TRUOC.exists():
+        for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_*.jsonl")):
+            if "C_khoa_hoi" in tep.name:
                 continue
-            r = json.loads(dong)
-            ra.append({"id": r["id"], "bo": ten_bo,
-                       "so_luot": len([x for x in r["input"].split("\n") if x.strip()]),
-                       "so_menh_de": len(r.get("phat_bieu") or []),
-                       "so_can_xac_nhan": r.get("so_can_xac_nhan", 0)})
+            ten_bo = tep.name[len("ra_C_khoa_"):-len(".jsonl")]
+            if bo and bo != ten_bo:
+                continue
+            with open(tep, encoding="utf-8") as fh:
+                for dong in fh:
+                    if not dong.strip():
+                        continue
+                    r = json.loads(dong)
+                    ra.append({"id": r["id"], "bo": ten_bo,
+                               "so_luot": len([x for x in r["input"].split("\n") if x.strip()]),
+                               "so_menh_de": len(r.get("phat_bieu") or []),
+                               "so_can_xac_nhan": r.get("so_can_xac_nhan", 0)})
     return ra
 
 
@@ -408,22 +411,32 @@ def doc_ca(ca_id, nhanh="C_khoa"):
     Nhanh C_khoa_hoi co cung phat bieu voi C_khoa (da so tren ca 4 bo), chi them cau hoi lam ro;
     hoi nhanh C_khoa_hoi thi doc tep C_khoa_hoi, khong co thi lui ve C_khoa.
     """
-    if nhanh == "C_khoa_hoi":
-        for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_hoi_*.jsonl")):
-            for dong in open(tep, encoding="utf-8"):
-                if dong.strip():
-                    r = json.loads(dong)
-                    if r["id"] == ca_id:
-                        r["nhanh"] = "C_khoa_hoi"
-                        return r
-    for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_*.jsonl")):
-        if "C_khoa_hoi" in tep.name:
-            continue
-        for dong in open(tep, encoding="utf-8"):
-            if dong.strip():
-                r = json.loads(dong)
-                if r["id"] == ca_id:
-                    return r
+    from src.ca_mau_bgk import doc_ca_demo
+    r_demo = doc_ca_demo(ca_id, nhanh)
+    if r_demo is not None:
+        if r_demo.get("metadata"):
+            _gan_metadata_am_thanh(r_demo, r_demo["metadata"])
+        return r_demo
+
+    if THU_MUC_CHAY_TRUOC.exists():
+        if nhanh == "C_khoa_hoi":
+            for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_hoi_*.jsonl")):
+                with open(tep, encoding="utf-8") as fh:
+                    for dong in fh:
+                        if dong.strip():
+                            r = json.loads(dong)
+                            if r["id"] == ca_id:
+                                r["nhanh"] = "C_khoa_hoi"
+                                return r
+        for tep in sorted(THU_MUC_CHAY_TRUOC.glob("ra_C_khoa_*.jsonl")):
+            if "C_khoa_hoi" in tep.name:
+                continue
+            with open(tep, encoding="utf-8") as fh:
+                for dong in fh:
+                    if dong.strip():
+                        r = json.loads(dong)
+                        if r["id"] == ca_id:
+                            return r
     raise LoiDichVu("khong_co_ca", f"không có ca {ca_id} trong thư mục ca mẫu", 404)
 
 

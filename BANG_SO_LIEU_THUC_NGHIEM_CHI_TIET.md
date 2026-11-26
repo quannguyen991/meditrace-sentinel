@@ -2,7 +2,9 @@
 ## (COMPREHENSIVE EXPERIMENTAL BENCHMARKS & ABLATION STUDIES)
 
 **Dự án:** MediTrace Sentinel — Trợ lý Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa  
-**Mục tiêu tài liệu:** Cung cấp đầy đủ hệ thống 6 bảng thực nghiệm định lượng chi tiết cho từng cấu phần của hệ thống, trả lời dứt điểm các câu hỏi phản biện của Hội đồng Giám khảo về: *Hiệu quả từng tầng (Ablation), So sánh mô hình thương mại, Chống nhiễu ASR, Khái quát hóa ngoài khuôn (Template-Disjoint), An toàn dược lý CDSS, và Thử nghiệm thực tế với bác sĩ.*
+**Lưu ý đọc bảng (cập nhật 26/11/2026 theo `docs/doi-chieu-so-lieu-bao-cao.md`):**  
+- Các số đo **có tệp đầu ra tự động đối chứng trực tiếp** nằm tại **Mục 4.4, 4.5, 4.6**, [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md), [`README.md`](README.md) và thư mục [`docs/ket-qua/`](docs/ket-qua/).  
+- Các bảng 1, 2, 3, 5, 6 dưới đây được biên soạn từ bản thuyết minh tháng 10/2026; trong đó **Bảng 2** (so sánh mô hình thương mại) và **Bảng 6** (nghiên cứu bác sĩ) **chưa có lần chạy thực tế**, còn **Bảng 5** phản ánh kết quả vượt qua các kịch bản kiểm thử đơn vị (`pytest`), không phải tỷ lệ lâm sàng trên bệnh nhân thật. Xem bảng đối chiếu đính chính đầy đủ tại [`docs/doi-chieu-so-lieu-bao-cao.md`](docs/doi-chieu-so-lieu-bao-cao.md).
 
 ---
 
@@ -131,13 +133,25 @@ Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 m�
 *Ghi chú về giới hạn dừng:* Tỷ lệ lặp câu mọi câu dừng ở mức 47,37% (câu $\ge 8$ từ lặp 42,19%) do đặc thù tự nhiên của 5.000 ca khám chứa các lượt đáp ngắn lịch sự của bệnh nhân ("của tôi ạ.", "vâng ạ."); toàn bộ câu hỏi bác sĩ đã được ngữ cảnh hóa và không còn câu nào trong top 20 lặp nhiều nhất.
 
 ### 4.5. Thí nghiệm đo Tỷ lệ Bỏ sót Mệnh đề Lâm sàng (Omission Evaluation — 30 ca phát triển)
-Đo bằng `tools/do_bo_sot_tren_tap.py` trên 30 ca đầu tập phát triển (304 mệnh đề đáp án, khoảng tin cậy Wilson 95%):
+Đo bằng `tools/do_bo_sot_tren_tap.py` trên 30 ca đầu tập phát triển (304 mệnh đề đáp án v1, khoảng tin cậy Wilson 95%):
 
 | Mô hình kiểm nghiệm | Số mệnh đề đáp án | Bị bỏ sót | Tỷ lệ bỏ sót (%) | Khoảng tin cậy 95% | Số ca JSON lỗi |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Qwen3-4B chưa huấn luyện (Zero-shot)** | 304 | 131 | **43,1%** | 37,6% – 48,7% | 0 / 30 |
 | **Qwen3-4B + adapter (best_checkpoint)** | 304 | 35 | **11,5%** | **8,4% – 15,6%** | 0 / 30 |
 | **Mức độ giảm thiểu bỏ sót** | — | **-96 mệnh đề** | **Giảm 31,6 điểm %** | P-value < 0.001 | 0 lỗi cú pháp |
+
+### 4.6. Đo Lớp Cảnh báo bằng Cấy lỗi Nhân tạo & Ma trận Độc lập Train–Test 657 Khuôn (25–26/11/2026)
+Đo tự động bằng `src/do_cay_loi.py` (`docs/ket-qua/cay-loi.md`) và `src/kiem_nghiem_ngoai_khuon.py`:
+
+| Phép đo kiểm chứng độc lập | Tập đánh giá / Quy mô | Kết quả đo tự động | Nguồn đối chứng |
+| :--- | :---: | :---: | :--- |
+| **Độ nhạy bắt 16 loại lỗi cơ bản (tập điều chỉnh)** | 400 ca (`viet_train_v2`) | `0,801` → **0,871** (báo nhầm giảm `8,98 → 7,11`/ca sạch) | `docs/ket-qua/cay-loi.md` |
+| **Độ nhạy bắt 16 loại lỗi cơ bản (tập giữ kín, chạy 1 lần)** | 240 ca (`thach_thuc_v2`) | **0,871** (giữ nguyên độ nhạy, không quá khớp) | `docs/ket-qua/cay-loi.md` |
+| **Độ nhạy bắt 14 loại lỗi khó (vòng 6)** | 400 ca (`viet_train_v2`) | `0,682` → **0,889** *(số cận lạc quan trên tập điều chỉnh)* | `docs/ket-qua/cay-loi.md` |
+| **Ma trận trùng lặp từ khóa triệu chứng Train – Test** | 515 khuôn Train × 70 khuôn Test | Giao tên khuôn = **0**; Jaccard TB = **0,0587** (`p95 = 0,1172`) | `src/kiem_nghiem_ngoai_khuon.py` |
+| **10 kịch bản bệnh hiếm ngoài kho 657 khuôn (tầng luật)** | 10 ca (`OOT_01..10`, 52 mệnh đề) | Đúng chủ thể **52/52**, chống nhầm người nhà **11/11**, bắt đính chính **10/10** | `src/kiem_nghiem_ngoai_khuon.py` |
+| **Thử nghiệm ngoài nguồn thực tế (`ViMQ`)** | 200 câu người bệnh Việt Nam | Phủ thực thể **284/322 (88,2%)**, JSON hợp lệ **96,0%** | `docs/tien-do-21-11-2026.md` |
 
 ---
 

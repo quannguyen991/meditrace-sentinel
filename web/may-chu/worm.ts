@@ -18,6 +18,7 @@ export interface WormSignOffInput {
   soBo: number;
   tyLeCoNguon: number;
   contentHash: string;
+  soChuaXacNhan?: number;
 }
 
 export interface WormSignOffRow {
@@ -156,6 +157,21 @@ function kiemTraInputSignOff(input: WormSignOffInput): string {
       throw loiDauVao(`Gia tri khong hop le cho ${k}: ${v} (phai la so nguyen >= 0)`);
     }
   }
+  if (input.tongMenhDe < 1) {
+    throw loiDauVao("Gia tri khong hop le cho tongMenhDe: 0 (khong duoc hoan tat/ky duyet ho so khi chua co menh de co can cu)");
+  }
+  if (input.soBo >= input.tongMenhDe) {
+    throw loiDauVao(
+      `Gia tri khong hop le: tat ca menh de deu bi bo (${input.soBo}/${input.tongMenhDe}), ho so khong con can cu hop le`,
+    );
+  }
+  if (input.soChuaXacNhan !== undefined) {
+    if (typeof input.soChuaXacNhan !== "number" || !Number.isInteger(input.soChuaXacNhan) || input.soChuaXacNhan !== 0) {
+      throw loiDauVao(
+        `Gia tri khong hop le cho soChuaXacNhan: ${input.soChuaXacNhan} (con muc can bac si xac nhan chua xu ly, khong duoc ky duyet)`,
+      );
+    }
+  }
   if (input.soGiu + input.soSua + input.soBo > input.tongMenhDe) {
     throw loiDauVao(
       `Gia tri khong hop le: soGiu + soSua + soBo (${input.soGiu + input.soSua + input.soBo}) vuot tongMenhDe (${input.tongMenhDe})`,
@@ -164,10 +180,10 @@ function kiemTraInputSignOff(input: WormSignOffInput): string {
   if (
     typeof input.tyLeCoNguon !== "number" ||
     !Number.isFinite(input.tyLeCoNguon) ||
-    input.tyLeCoNguon < 0 ||
+    input.tyLeCoNguon <= 0 ||
     input.tyLeCoNguon > 100
   ) {
-    throw loiDauVao(`Gia tri khong hop le cho tyLeCoNguon: ${input.tyLeCoNguon} (phai trong doan 0..100)`);
+    throw loiDauVao(`Gia tri khong hop le cho tyLeCoNguon: ${input.tyLeCoNguon} (phai trong khoang (0..100], khong duoc thieu can cu)`);
   }
   const contentHash = typeof input.contentHash === "string" ? input.contentHash.trim() : "";
   if (!contentHash || contentHash.length > 256) {

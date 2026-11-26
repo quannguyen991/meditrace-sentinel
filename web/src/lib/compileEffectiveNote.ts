@@ -437,6 +437,110 @@ export async function computeNoteSignOffHash(
   return sha256Hex(buildSignOffCanonicalPayload(soapRawContent, quyetDuyet, banSuaDuyet));
 }
 
+export interface MenhDeKiemTraKyDuyet {
+  id: number;
+  status?: "than" | "can_xac_nhan" | string;
+  stateD?: string | null;
+  evidenceTurns?: number[] | null;
+}
+
+export interface KetQuaKiemTraKyDuyet {
+  duDieuKien: boolean;
+  maLoi?: "khong_co_menh_de" | "con_muc_can_xac_nhan" | "thieu_can_cu_luot" | "da_bo_het_menh_de";
+  thongDiep?: string;
+  soCanXacNhanChuaDuyet: number;
+  soThieuCanCu: number;
+  chuaXacNhanIds: number[];
+}
+
+/**
+ * Chốt chặn cứng trước khi hoàn tất / ký duyệt hồ sơ WORM (Yêu cầu 1 BGK AI 2026):
+ * Tuyệt đối KHÔNG tự hoàn tất hồ sơ khi thiếu căn cứ hoặc còn thông tin chưa chắc
+ * trong mục "Cần bác sĩ xác nhận" chưa được bác sĩ Giữ / Sửa / Bỏ.
+ */
+export function kiemTraDieuKienKyDuyet(
+  propositions: MenhDeKiemTraKyDuyet[] | null | undefined,
+  quyetDuyet?: Record<number, QuyetDuyet> | null,
+  banSuaDuyet?: Record<number, string> | null,
+): KetQuaKiemTraKyDuyet {
+  const ds = Array.isArray(propositions) ? propositions : [];
+  const quyet = quyetDuyet || {};
+  const banSua = banSuaDuyet || {};
+
+  if (ds.length === 0) {
+    return {
+      duDieuKien: false,
+      maLoi: "khong_co_menh_de",
+      thongDiep:
+        "Hồ sơ chưa có mệnh đề lâm sàng có căn cứ từ hội thoại. Tuyệt đối không hoàn tất hoặc ký duyệt hồ sơ khi thiếu căn cứ.",
+      soCanXacNhanChuaDuyet: 0,
+      soThieuCanCu: 0,
+      chuaXacNhanIds: [],
+    };
+  }
+
+  const chuaXacNhanIds: number[] = [];
+  const khongNguonIds: number[] = [];
+  let soConHieuLuc = 0;
+
+  for (const p of ds) {
+    const q = quyet[p.id];
+    if (q !== "bo") soConHieuLuc += 1;
+
+    const laSuaRong = q === "sua" && !(banSua[p.id] || "").trim();
+    if (canXacNhan(p) && (!q || q === "cho" || laSuaRong)) {
+      chuaXacNhanIds.push(p.id);
+    }
+
+    const coLuot = Array.isArray(p.evidenceTurns) && p.evidenceTurns.length > 0;
+    const daSuaHopLe = q === "sua" && Boolean((banSua[p.id] || "").trim());
+    if (q !== "bo" && !coLuot && !daSuaHopLe) {
+      khongNguonIds.push(p.id);
+    }
+  }
+
+  if (chuaXacNhanIds.length > 0) {
+    return {
+      duDieuKien: false,
+      maLoi: "con_muc_can_xac_nhan",
+      thongDiep: `Còn ${chuaXacNhanIds.length} thông tin chưa chắc trong mục “Cần bác sĩ xác nhận” chưa được xử lý (Xác nhận / Sửa / Bỏ). Hãy duyệt hết ở ngăn bên phải trước khi ký hoàn tất hồ sơ.`,
+      soCanXacNhanChuaDuyet: chuaXacNhanIds.length,
+      soThieuCanCu: khongNguonIds.length,
+      chuaXacNhanIds,
+    };
+  }
+
+  if (khongNguonIds.length > 0) {
+    return {
+      duDieuKien: false,
+      maLoi: "thieu_can_cu_luot",
+      thongDiep: `Còn ${khongNguonIds.length} mệnh đề thiếu căn cứ lượt thoại gốc chưa được bác sĩ chỉnh sửa hoặc loại bỏ. Không được hoàn tất hồ sơ khi thiếu căn cứ.`,
+      soCanXacNhanChuaDuyet: 0,
+      soThieuCanCu: khongNguonIds.length,
+      chuaXacNhanIds: khongNguonIds,
+    };
+  }
+
+  if (soConHieuLuc === 0) {
+    return {
+      duDieuKien: false,
+      maLoi: "da_bo_het_menh_de",
+      thongDiep:
+        "Tất cả mệnh đề trong bản nháp đã bị bác sĩ loại bỏ — hồ sơ không còn căn cứ hợp lệ để ký duyệt hoàn tất.",
+      soCanXacNhanChuaDuyet: 0,
+      soThieuCanCu: 0,
+      chuaXacNhanIds: [],
+    };
+  }
+
+  return {
+    duDieuKien: true,
+    soCanXacNhanChuaDuyet: 0,
+    soThieuCanCu: 0,
+    chuaXacNhanIds: [],
+  };
+}
+
 /** Kiểm tra bệnh án hoặc quyết định duyệt đã bị chỉnh sửa sau thời điểm ký WORM hay chưa. */
 export function isSignOffStale(
   signOff: Pick<SignOffRecord, "hash" | "contentHash"> | null | undefined,

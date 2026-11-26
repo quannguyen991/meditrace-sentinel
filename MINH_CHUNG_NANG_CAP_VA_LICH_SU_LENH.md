@@ -3,26 +3,26 @@
 
 **Dự án:** MediTrace Sentinel — Hệ thống Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa  
 **Mã dự án:** `quannguyen991/meditrace-sentinel`  
-**Nhánh Git:** `main` | **Thời điểm nghiệm thu:** 17/10/2026 – 18/10/2026  
+**Nhánh Git:** `main` | **Thời điểm nghiệm thu cập nhật:** 17/10/2026 – 26/11/2026  
 **Môi trường Production (Vercel):** [https://meditrace-sentinel.vercel.app](https://meditrace-sentinel.vercel.app)  
-**Môi trường Reverse Proxy (Cloudflare Tunnel):** `https://tunnel.meditrace.vn` (Bảo vệ API backend)  
+**Báo cáo cải tiến Chặng 1 (AI 2026):** [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)  
 **Quy chuẩn lưu trữ:** Bản quyền mã nguồn cục bộ và GitHub Public Repository  
 
 ---
 
 ## 1. TỔNG QUAN MINH CHỨNG NÂNG CẤP TOÀN DIỆN
 
-### 1.1. Thống kê biến động mã nguồn (Git Metrics)
+### 1.1. Thống kê biến động mã nguồn (Git Metrics — cập nhật 26/11/2026)
 | Tiêu chí | Trước khi nâng cấp | Sau khi nâng cấp hoàn thiện | Mức tăng trưởng / Thay đổi |
 | :--- | :---: | :---: | :---: |
-| **Tổng số lượng bài test tự động** | 370 tests | **1.330 tests** | **+960 tests (+259.5%) - PASS 100%** |
-| **Số tệp mã nguồn thay đổi / thêm mới** | 4 commits ban đầu | **102 files** | **+13.812 dòng code sạch** |
-| **Khóa an toàn dược lý (DDI & Liều trần)** | Chưa có | **3 chốt kiểm soát lâm sàng** | Hỗ trợ rà soát các tương tác nguy cơ cao |
+| **Tổng số lượng bài test tự động** | 370 tests | **1.779 tests Pytest + 43 tests TypeScript** | **Tăng 4,9× — PASS 100%** |
+| **Kho ngữ liệu hội thoại mô phỏng** | 200 khuôn (lặp câu 76,92%) | **657 khuôn / 21 hệ cơ quan (lặp câu 47,37%)** | **45.835 câu duy nhất (+127%), 0 rò rỉ tập** |
+| **Lớp cảnh báo lỗi lâm sàng** | Chưa tách nhóm | **13 nhóm lớn, 56 mã lỗi (2 trục độc lập)** | **Độ nhạy cấy lỗi cơ bản 0,871 (giữ kín 240 ca)** |
+| **Chốt chặn ký duyệt & Nhật ký WORM** | Chưa có | **Chặn cứng thiếu căn cứ + WORM SHA-256 `.anchor.json`** | **Không tự hoàn tất hồ sơ khi còn mục Cần xác nhận** |
+| **Khóa an toàn dược lý (DDI & Liều trần)** | Chưa có | **3 chốt kiểm soát lâm sàng + Tiền kiểm BHYT** | Hỗ trợ rà soát tương tác & mã ICD-10 4 ký tự |
 | **Thang điểm nguy cơ CDSS chuẩn hóa** | 0 thang điểm | **9 thang điểm quốc tế** | Tự động tính toán có căn cứ đối chiếu |
-| **Cơ chế cách ly âm vị ASR (Bôi đỏ tên thuốc)** | Chưa có | **Bôi đỏ & Chuyển sang Cần xác nhận** | Giảm thiểu nhầm lẫn âm vị tên thuốc |
-| **Chuẩn hóa xuất EMR/HIS** | JSON nội bộ | **HL7 FHIR R4 tiêu chuẩn** | Sẵn sàng cấu hình tích hợp bệnh viện |
-| **Bộ sơ đồ luồng kiến trúc (Flow Diagrams)** | Sơ đồ đơn sơ | **7 Master Diagrams (4K UHD 16:9)** | Thiết kế Executive Y khoa |
-| **Tài liệu phản biện Ban giám khảo** | Sơ khai | **35 câu hỏi Handbook Q&A (.docx)** | Đầy đủ lý thuyết & kỹ thuật |
+| **Cơ chế cách ly âm vị ASR (Bôi đỏ tên thuốc)** | Chưa có | **Bôi đỏ & Chuyển sang Cần xác nhận + Nghe lại** | Giảm thiểu nhầm lẫn âm vị tên thuốc, có mốc âm thanh |
+| **Chuẩn hóa xuất EMR/HIS** | JSON nội bộ | **HL7 FHIR R4 + BHYT XML1–XML5 + SBAR** | Sẵn sàng cấu hình tích hợp bệnh viện |
 
 ---
 
@@ -45,13 +45,13 @@
   * Bổ sung công cụ đồ họa sinh 7 sơ đồ Flow 4K `tools/tao_bo_anh_flow_meditrace.py`.
   * Bổ sung cẩm nang Q&A 35 câu hỏi giám khảo và các báo cáo kỹ thuật định dạng Word (`.docx`).
 
-### Commit 2: Vá lỗi An ninh CSRF & Bảo vệ Tên miền Vercel
-* **Commit Hash:** `73b5a3b`
-* **Thời gian:** `Sat Oct 17 18:21:10 2026 +0700`
-* **Tác giả:** `quannguyen991 <quannguyen991@users.noreply.github.com>`
-* **Thông điệp:** `fix(auth): cho phep origin tu Vercel va Cloudflare tunnel trong middleware bao ve CSRF`
-* **Quy mô thay đổi:** `1 file changed, 18 insertions(+), 4 deletions(-)`
-* **Mục tiêu:** Cho phép Origin Header từ `meditrace-sentinel.vercel.app` và `*.trycloudflare.com` đi qua lớp kiểm tra bảo vệ CSRF của Node.js Express, giải quyết triệt để lỗi *"Yêu cầu từ trang khác bị từ chối"*.
+### Commit 2–6: Chuỗi Nâng cấp Chặng 1 AI 2026 & Kiểm toán Kiến trúc Toàn diện (Tháng 11/2026)
+* **`3424284`:** Triển khai 8 tính năng lâm sàng, tiền kiểm BHYT/ICD-10 4 ký tự, đọc phiếu xét nghiệm cũ chỉnh liều thận, tách mô-đun `web/server.ts` sang `web/may-chu/routes/*` và hợp đồng kiểu 2 chiều `api_contract`.
+* **`e9a1866` (`feat(python)`):** Kiểm toán tầng Python — sửa khử định danh `khu_dinh_danh.py`, tách chủ thể người nhà trong BHYT & FHIR R4, chuẩn hóa `Sintrom → acenocoumarol`, làm sạch `ContextualPrefixTrie600`, tối ưu `GET /api/suc-khoe` khởi động lạnh `< 1s`.
+* **`d83d225` (`feat(may-chu)`):** Kiểm toán tầng BFF — gỡ bỏ hoàn toàn wildcard CSRF (`.vercel.app` / `.trycloudflare.com`), chỉ chấp nhận danh sách nguồn HTTPS tường minh `MEDITRACE_NGUON_DUOC_PHEP`; bổ sung nhật ký ký duyệt bất biến SQLite WORM kèm tệp neo `.anchor.json` chống cắt chuỗi/xoá trắng; khóa đồng bộ lạc quan `409 Conflict` cho `PUT /api/ca-kham/:id`; giữ nhãn `[DỊ ỨNG]` trong trợ lý ẩn danh.
+* **`eef14d2` (`feat(giao-dien)`):** Kiểm toán giao diện React — thêm 3 lớp `ErrorBoundary`, phát lại âm thanh gốc theo lượt `useTurnAudioPlayer`, biên dịch văn bản hiệu lực `compileEffectiveNote` đồng bộ băm FIPS `SHA-256`, cô lập dữ liệu liên ca/liên người dùng.
+* **`fbf987e` & `dad18a4` (`feat/perf(train)`):** Bổ sung huấn luyện DPO trên 1.200 cặp lỗi khó chia đều 14 loại từ adapter v3, gộp lô 2 chuỗi có tự kiểm sai số log-prob.
+* **Cập nhật hoàn thiện Chặng 1 (26/11/2026):** Bổ sung chốt chặn cứng 2 tầng không cho hoàn tất/ký duyệt hồ sơ khi thiếu căn cứ hoặc còn mục `Cần xác nhận` chưa xử lý (`kiemTraDieuKienKyDuyet` + `worm.ts`), và tích hợp sẵn **3 ca mẫu đa người nói** chạy ngay không cần GPU (`src/ca_mau_bgk.py`).
 
 ---
 
@@ -231,64 +231,38 @@ def kiem_tra_an_toan_duoc_ly(don_thuoc: List[Dict[str, Any]], egfr: float = None
     return canh_bao
 ```
 
-### 4.4. Minh chứng 4: Khắc phục lỗi CSRF Origin Middleware (`web/may-chu/tai-khoan.ts`)
-Bảo vệ chống tấn công CSRF nhưng cho phép hợp lệ các tên miền Production của dự án:
+### 4.4. Minh chứng 4: Khóa An ninh CSRF Tường minh Không Wildcard & Chốt chặn Ký duyệt WORM (`web/may-chu/tai-khoan.ts`, `web/may-chu/worm.ts`)
+Đã gỡ bỏ toàn bộ mẫu khớp đuôi đại diện (`*.vercel.app`, `*.trycloudflare.com`) và chặn hạ cấp giao thức `http://` đối với tên miền ngoài; chỉ chấp nhận danh sách nguồn cấu hình tường minh qua `MEDITRACE_NGUON_DUOC_PHEP`, đồng thời chặn ký duyệt WORM nếu hồ sơ chưa có mệnh đề có căn cứ hoặc còn mục `Cần xác nhận` chưa được bác sĩ xử lý:
 ```typescript
-// Trích từ web/may-chu/tai-khoan.ts:
-const nguonDuocPhep = new Set([
-  "meditrace-sentinel.vercel.app",
-  "meditrace-sentinel-siu6.vercel.app",
-  ...(process.env.MEDITRACE_NGUON_DUOC_PHEP || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
-]);
-
-app.use("/api", (req, res, next) => {
-  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
-  const nguon = req.get("origin");
-  if (nguon) {
-    try {
-      const may = new URL(nguon).host.toLowerCase();
-      const reqHost = (req.get("host") || "").toLowerCase().split(":")[0];
-      const fwdHost = (req.get("x-forwarded-host") || "").toLowerCase().split(":")[0];
-      const mayClean = may.split(":")[0];
-      const hopLe =
-        mayClean === reqHost ||
-        mayClean === fwdHost ||
-        nguonDuocPhep.has(may) ||
-        nguonDuocPhep.has(mayClean) ||
-        mayClean.endsWith(".vercel.app") ||
-        mayClean.endsWith(".trycloudflare.com") ||
-        mayClean === "localhost" ||
-        mayClean === "127.0.0.1";
-      if (!hopLe)
-        return res.status(403).json({ error: "Yêu cầu từ trang khác bị từ chối" });
-    } catch {
-      return res.status(403).json({ error: "Origin không hợp lệ" });
-    }
-  }
-  next();
-});
+// Trích từ web/may-chu/tai-khoan.ts & web/may-chu/worm.ts:
+const nguonDuocPhep = new Set(
+  (process.env.MEDITRACE_NGUON_DUOC_PHEP || "https://meditrace-sentinel.vercel.app")
+    .split(",")
+    .map((s) => chuanHoaOrigin(s))
+    .filter((s): s is string => Boolean(s)),
+);
+// Trong worm.ts (kiemTraInputSignOff):
+if (input.tongMenhDe < 1) {
+  throw loiDauVao("Gia tri khong hop le cho tongMenhDe: 0 (khong duoc hoan tat/ky duyet ho so khi chua co menh de co can cu)");
+}
+if (input.soChuaXacNhan !== undefined && input.soChuaXacNhan !== 0) {
+  throw loiDauVao("Gia tri khong hop le cho soChuaXacNhan: con muc can bac si xac nhan chua xu ly, khong duoc ky duyet");
+}
 ```
 
 ---
 
 ## 5. DANH MỤC TỆP ĐỒNG BỘ TRÊN MÁY CỤC BỘ
 
-Để phục vụ công tác in ấn, đối chứng hoặc trình bày trước Hội đồng Giám khảo, toàn bộ các tệp minh chứng đã được đồng bộ sẵn sàng tại các thư mục:
+Để phục vụ công tác đối chứng trước Hội đồng Giám khảo, các tệp báo cáo và minh chứng chính nằm tại:
 
-1. **Thư mục Desktop:** `C:\Users\admin\Desktop\Hinh_Flow_MediTrace\`
-   * Toàn bộ 7 ảnh Flow Master 4K PNG.
-   * `Bo_Cau_Hoi_Va_Tra_Loi_Ban_Giam_Khao_MediTrace.docx`
-   * `Bao_Cao_Ky_Thuat_Chi_Tiet_MediTrace_Sentinel.docx`
-   * `Bao_Cao_Nang_Cap_Toan_Dien_MediTrace_Sentinel.docx`
-   * `SO_DO_FLOW_HE_THONG_MEDITRACE.md`
-   * `MINH_CHUNG_NANG_CAP_VA_LICH_SU_LENH.md`
-2. **Thư mục Downloads:** `C:\Users\admin\Downloads\hinh_flow_meditrace\` (Chứa bản sao lưu đồng bộ tương tự).
-3. **Thư mục Mã nguồn Dự án:** `d:\Claude\meditrace-ma-nguon\docs\tai-lieu\`
+1. **Gốc kho mã nguồn:** [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md), [`README.md`](README.md), [`MINH_CHUNG_NANG_CAP_VA_LICH_SU_LENH.md`](MINH_CHUNG_NANG_CAP_VA_LICH_SU_LENH.md).
+2. **Thư mục kết quả đo tự động:** [`docs/ket-qua/cay-loi.md`](docs/ket-qua/cay-loi.md), [`docs/ket-qua/bo-sot-qwen3-4b.md`](docs/ket-qua/bo-sot-qwen3-4b.md), [`docs/ket-qua/canh-bao-moc-0.md`](docs/ket-qua/canh-bao-moc-0.md), [`data/manifest_v2_mo_rong_5000.json`](data/manifest_v2_mo_rong_5000.json).
 
 ---
 
 ## 6. KẾT LUẬN & CAM KẾT KỸ THUẬT
 
-1. **Tính trung thực & Khả năng tái lập (Reproducibility):** Mọi con số (1.330 bài test, 7 sơ đồ Flow, 9 thang điểm nguy cơ) đều được lập trình bằng mã nguồn cụ thể, có thể tái lập 100% bằng câu lệnh `pytest tests/` và các script trong thư mục `tools/`.
-2. **An toàn dữ liệu Y khoa:** Hệ thống vận hành theo kiến trúc Neuro-Symbolic chạy hoàn toàn tại chỗ (On-premise/Edge), tuân thủ Nghị định 13/2023/NĐ-CP và Luật Khám bệnh, chữa bệnh 2023.
-3. **Tính sẵn sàng Production:** Ứng dụng đã online ổn định tại `https://meditrace-sentinel.vercel.app`, đáp ứng tiêu chuẩn nghiệm thu của Hội đồng Giám khảo.
+1. **Tính trung thực & Khả năng tái lập (Reproducibility):** Mọi con số (1.779 bài test `pytest`, 43 bài test TypeScript, độ nhạy lớp cảnh báo 0,871 trên tập giữ kín, tỷ lệ bỏ sót 43,1% → 11,5%, thống kê lặp câu 47,37%) đều do mã nguồn trong kho in ra và tái lập được bằng lệnh thực thi.
+2. **An toàn dữ liệu Y khoa:** Hệ thống vận hành theo kiến trúc Neuro-Symbolic chạy tại chỗ (On-premise/Edge), không tự hoàn tất hồ sơ khi thiếu căn cứ, tuân thủ Nghị định 13/2023/NĐ-CP và Luật Khám bệnh, chữa bệnh 2023.
+3. **Tính sẵn sàng Production:** Ứng dụng chạy thử tại `https://meditrace-sentinel.vercel.app` (có sẵn 3 ca mẫu đa người nói mở ngay không cần GPU).

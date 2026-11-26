@@ -5,6 +5,7 @@ import {
   compileEffectiveNote,
   computeNoteSignOffHashSync,
   isSignOffStale,
+  kiemTraDieuKienKyDuyet,
   laTieuDeMuc,
   tachLuot,
   trichChanDoanVaThuocTuSoap,
@@ -353,6 +354,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   const daSuaSauKy = useMemo(
     () => isSignOffStale(signOff, currentSignOffHash),
     [signOff, currentSignOffHash],
+  );
+
+  const kiemTraKy = useMemo(
+    () => kiemTraDieuKienKyDuyet(noteMeta?.propositions, quyetDuyet, banSuaDuyet),
+    [noteMeta?.propositions, quyetDuyet, banSuaDuyet],
   );
 
   const handleTextChange = (newVal: string) => {
@@ -947,7 +953,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             onClick={() => onRegenerateNote && onRegenerateNote(tab.templateStyle || "Goldilocks")}
             disabled={isGenerating}
             className="p-1 rounded-lg text-[#0369A1] hover:text-[#0284C7] hover:bg-[#E0F2FE] transition-colors disabled:opacity-40 flex-shrink-0"
-            title="Tạo lại bệnh án bằng Gemini AI"
+            title="Dựng lại bản nháp bằng mô hình Qwen3-4B tại chỗ"
           >
             <RefreshCw size={13} className={isGenerating ? "animate-spin" : ""} />
           </button>
@@ -1076,7 +1082,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <span className="text-[11px] hidden md:inline">Chép HIS</span>
           </button>
 
-          {/* Nút Ký duyệt pháp lý WORM */}
+          {/* Nút Ký duyệt pháp lý WORM (Chốt cứng: không hoàn tất hồ sơ khi thiếu căn cứ / còn mục Cần xác nhận) */}
           {onSignOff && tab.type !== "leaflet" && (
             <button
               type="button"
@@ -1086,21 +1092,25 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                 try { await onSignOff(); } finally { setDangKyDuyet(false); }
               }}
               className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl font-semibold transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0 ${
-                signOff
+                !kiemTraKy.duDieuKien
+                  ? "border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#92400E] shadow-tactile-doctor-pill"
+                  : signOff
                   ? daSuaSauKy
                     ? "border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#92400E] shadow-tactile-doctor-pill"
                     : "border-[#0D9488] bg-[#F0FDF4] hover:bg-[#DCFCE7] text-[#0D9488] shadow-tactile-doctor-pill"
                   : "border-[#0284C7] bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-tactile-doctor"
               }`}
               title={
-                signOff
+                !kiemTraKy.duDieuKien
+                  ? kiemTraKy.thongDiep
+                  : signOff
                   ? daSuaSauKy
                     ? `Nội dung bệnh án hoặc quyết định duyệt đã thay đổi sau lần ký #${signOff.wormSeq ?? "WORM"} — bấm để ký lại`
                     : `Đã ký duyệt lúc ${new Date(signOff.signedAt).toLocaleString("vi-VN")} (WORM #${signOff.wormSeq ?? ""})`
                   : "Chốt & Ký duyệt pháp lý WORM (SHA-256)"
               }
             >
-              {signOff && daSuaSauKy ? (
+              {!kiemTraKy.duDieuKien || (signOff && daSuaSauKy) ? (
                 <AlertTriangle size={12} className="text-[#D97706]" />
               ) : (
                 <CheckCircle2 size={12} />
@@ -1108,6 +1118,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               <span className="text-[11px]">
                 {dangKyDuyet
                   ? "Đang ký..."
+                  : !kiemTraKy.duDieuKien
+                  ? kiemTraKy.soCanXacNhanChuaDuyet > 0
+                    ? `Cần xác nhận (${kiemTraKy.soCanXacNhanChuaDuyet})`
+                    : "Chưa đủ căn cứ"
                   : signOff
                   ? daSuaSauKy
                     ? "Đã sửa · Ký lại"

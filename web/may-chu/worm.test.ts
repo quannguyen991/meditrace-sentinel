@@ -131,11 +131,15 @@ test("worm: chan gia tri NaN/am, so thap phan, tong vuot tongMenhDe, tyLeCoNguon
     const kho = taoKhoWorm(db, jsonl);
     const invalidInputs = [
       { tongMenhDe: Number.NaN, soGiu: 0, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "x" },
+      { tongMenhDe: 0, soGiu: 0, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "x" },
       { tongMenhDe: -1, soGiu: 0, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "x" },
       { tongMenhDe: 3.5, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "x" },
+      { tongMenhDe: 3, soGiu: 0, soSua: 0, soBo: 3, tyLeCoNguon: 100, contentHash: "x" },
       { tongMenhDe: 5, soGiu: 3, soSua: 2, soBo: 1, tyLeCoNguon: 100, contentHash: "x" },
+      { tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: 0, contentHash: "x" },
       { tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: 100.5, contentHash: "x" },
       { tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: -5, contentHash: "x" },
+      { tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "x", soChuaXacNhan: 1 },
       { tongMenhDe: 5, soGiu: 5, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "   " },
     ];
     for (const bad of invalidInputs) {

@@ -25,7 +25,11 @@ import type { NguoiDung } from "./lib/taiKhoan";
 import { cacNguoiNoiChuaGan } from "./lib/nguoiNoi";
 import { trichNguCanhChoTroLy, xayNguCanhChoTaoHoSo } from "./lib/nguCanhTroLy";
 import { phatHienMauThuanXuyenLanKham } from "./lib/doiChieuLanKham";
-import { computeNoteSignOffHash, layNoiDungBenhAnDeBam } from "./lib/compileEffectiveNote";
+import {
+  computeNoteSignOffHash,
+  kiemTraDieuKienKyDuyet,
+  layNoiDungBenhAnDeBam,
+} from "./lib/compileEffectiveNote";
 import { bamChuoi, useSessionsStore } from "./hooks/useSessionsStore";
 
 const VerificationView = React.lazy(() =>
@@ -611,8 +615,9 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   };
 
   /**
-   * Nạp một ca ĐÃ CHẠY TRƯỚC từ dịch vụ tại chỗ (chụp `targetId` trước `await`).
+   * Nạp một ca ĐÃ CHẠY TRƯỚC từ dịch vụ tại chỗ (chụp `targetId` trước `await`, xoay vòng qua các ca demo BGK).
    */
+  const chiSoCaMauRef = useRef(0);
   const handleLoadSample = async () => {
     const targetId = currentSession.id;
     setApiError(null);
@@ -622,16 +627,23 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       if (!res.ok) throw new Error(data?.error || `Dich vu tra ma ${res.status}`);
       const ds = data.ca || [];
       if (!ds.length) throw new Error("Dich vu khong co ca nao da chay truoc");
-      const ca = ds[Math.floor(Math.random() * ds.length)];
+      const uuTienDemo = ds.filter((x: any) => x?.bo === "demo_bgk");
+      const nguonChon = uuTienDemo.length > 0 ? uuTienDemo : ds;
+      const ca = nguonChon[chiSoCaMauRef.current % nguonChon.length];
+      chiSoCaMauRef.current += 1;
       const meta = await taoHoSo({ sampleCaseId: ca.id }, targetId);
       if (!meta) return;
       const tabId = `tab-doc-${Date.now()}`;
       capNhatCaTheoId(targetId, (phien) => ({
-        patientIdentifier: `Ca ${ca.id}`,
+        patientIdentifier: ca.ten || `Ca ${ca.id}`,
         patientSubtitle: `Dữ liệu tổng hợp của dự án · bộ ${ca.bo}`,
         transcript: meta.transcript || "",
+        duyet: undefined,
+        signOff: undefined,
         tabs: [
-          ...phien.tabs.map((t) => (t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t)),
+          ...phien.tabs
+            .filter((t) => t.title !== "Bản nháp hồ sơ")
+            .map((t) => (t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t)),
           { id: tabId, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true },
         ],
         activeTabId: tabId,
@@ -1291,6 +1303,20 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                 const ds = noteMeta?.propositions || [];
                                 const qSnap = { ...quyetDuyet };
                                 const bSnap = { ...banSuaDuyet };
+                                const kiemTra = kiemTraDieuKienKyDuyet(ds, qSnap, bSnap);
+                                if (!kiemTra.duDieuKien) {
+                                  setApiError(
+                                    kiemTra.thongDiep ||
+                                      "Chưa đủ căn cứ hoặc còn mục cần xác nhận chưa xử lý — không thể ký duyệt.",
+                                  );
+                                  if (ds.length > 0) {
+                                    setMoDuyetBenCanh(true);
+                                    if (kiemTra.chuaXacNhanIds.length > 0) {
+                                      setChonMD(kiemTra.chuaXacNhanIds[0]);
+                                    }
+                                  }
+                                  return;
+                                }
                                 const soapRaw = layNoiDungBenhAnDeBam(
                                   currentSession.tabs,
                                   currentSession.activeTabId,
@@ -1299,8 +1325,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                 const soGiu = ds.filter((p) => qSnap[p.id] === "giu").length;
                                 const soSua = ds.filter((p) => qSnap[p.id] === "sua").length;
                                 const soBo = ds.filter((p) => qSnap[p.id] === "bo").length;
-                                const coNguon = ds.filter((p) => p.evidenceTurns.length > 0).length;
-                                const tyLeCoNguon = ds.length ? Math.round((coNguon / ds.length) * 100) : 100;
+                                const conHieuLuc = ds.filter((p) => qSnap[p.id] !== "bo");
+                                const coNguon = conHieuLuc.filter(
+                                  (p) => p.evidenceTurns.length > 0 || (qSnap[p.id] === "sua" && Boolean(bSnap[p.id]?.trim())),
+                                ).length;
+                                const tyLeCoNguon = conHieuLuc.length
+                                  ? Math.round((coNguon / conHieuLuc.length) * 100)
+                                  : 0;
                                 const contentHash = await computeNoteSignOffHash(soapRaw, qSnap, bSnap);
 
                                 const res = await fetch(`/api/sessions/${encodeURIComponent(targetId)}/sign-off`, {
@@ -1313,6 +1344,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                                     soBo,
                                     tyLeCoNguon,
                                     contentHash,
+                                    soChuaXacNhan: kiemTra.soCanXacNhanChuaDuyet,
                                   }),
                                 });
                                 if (res.ok) {

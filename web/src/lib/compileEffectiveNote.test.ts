@@ -7,6 +7,7 @@ import {
   computeNoteSignOffHash,
   computeNoteSignOffHashSync,
   isSignOffStale,
+  kiemTraDieuKienKyDuyet,
   layNoiDungBenhAnDeBam,
   sha256Hex,
   sha256HexSync,
@@ -651,4 +652,56 @@ test("Khong nhan doi contextNotes, trich tuoi tu Ngay sinh, bao ve phien dang gh
   );
   assert.equal(soapThuCong.chanDoan, "Viêm dạ dày cấp");
   assert.deepEqual(soapThuCong.thuoc, ["Esomeprazole 40mg sáng 1 viên trước ăn 30 phút"]);
+});
+
+test("kiemTraDieuKienKyDuyet: chan cung hoan tat ho so khi thieu can cu hoac con muc Can xac nhan chua duyet", () => {
+  // 1. Hồ sơ rỗng (0 mệnh đề) -> chặn cứng
+  const rRong = kiemTraDieuKienKyDuyet([], {}, {});
+  assert.equal(rRong.duDieuKien, false);
+  assert.equal(rRong.maLoi, "khong_co_menh_de");
+
+  // 2. Còn mệnh đề trong mục Cần xác nhận chưa được bác sĩ Giữ / Sửa / Bỏ -> chặn cứng
+  const props = [
+    { id: 1, status: "than", evidenceTurns: [2] },
+    { id: 2, status: "can_xac_nhan", evidenceTurns: [5] },
+    { id: 3, status: "than", stateD: "cần xác nhận", evidenceTurns: [6] },
+  ];
+  const rChuaDuyet = kiemTraDieuKienKyDuyet(props, { 1: "giu" }, {});
+  assert.equal(rChuaDuyet.duDieuKien, false);
+  assert.equal(rChuaDuyet.maLoi, "con_muc_can_xac_nhan");
+  assert.equal(rChuaDuyet.soCanXacNhanChuaDuyet, 2);
+  assert.deepEqual(rChuaDuyet.chuaXacNhanIds, [2, 3]);
+
+  // 3. Chọn "sua" nhưng nội dung sửa để trống -> vẫn chặn
+  const rSuaRong = kiemTraDieuKienKyDuyet(props, { 2: "sua", 3: "bo" }, { 2: "   " });
+  assert.equal(rSuaRong.duDieuKien, false);
+  assert.equal(rSuaRong.maLoi, "con_muc_can_xac_nhan");
+  assert.deepEqual(rSuaRong.chuaXacNhanIds, [2]);
+
+  // 4. Mệnh đề thân không có evidenceTurns và chưa được sửa/bỏ -> chặn vì thiếu căn cứ
+  const rThieuLuot = kiemTraDieuKienKyDuyet(
+    [
+      { id: 1, status: "than", evidenceTurns: [2] },
+      { id: 4, status: "than", evidenceTurns: [] },
+    ],
+    {},
+    {},
+  );
+  assert.equal(rThieuLuot.duDieuKien, false);
+  assert.equal(rThieuLuot.maLoi, "thieu_can_cu_luot");
+  assert.deepEqual(rThieuLuot.chuaXacNhanIds, [4]);
+
+  // 5. Tất cả mệnh đề đều bị bác sĩ bấm "bo" -> không còn căn cứ hợp lệ để hoàn tất
+  const rBoHet = kiemTraDieuKienKyDuyet(props, { 1: "bo", 2: "bo", 3: "bo" }, {});
+  assert.equal(rBoHet.duDieuKien, false);
+  assert.equal(rBoHet.maLoi, "da_bo_het_menh_de");
+
+  // 6. Khi toàn bộ mục Cần xác nhận đã được bác sĩ Xác nhận ("giu"), Sửa hợp lệ ("sua") hoặc Bỏ ("bo") -> cho phép ký duyệt!
+  const rHopLe = kiemTraDieuKienKyDuyet(
+    props,
+    { 2: "sua", 3: "bo" },
+    { 2: "Mẹ bệnh nhân dị ứng Penicillin (tiền sử gia đình)" },
+  );
+  assert.equal(rHopLe.duDieuKien, true);
+  assert.equal(rHopLe.soCanXacNhanChuaDuyet, 0);
 });

@@ -58,11 +58,45 @@ def test_tra_theo_chu_bo_qua_khac_biet_khoang_trang(loi):
 
 
 def test_ca_mau_co_nhan_bo_va_dem_menh_de():
-    if not dich_vu.THU_MUC_CHAY_TRUOC.exists():
-        pytest.skip("chua co thu muc ket qua chay truoc")
     ds = dich_vu.ca_mau()
     assert ds and all({"id", "bo", "so_menh_de"} <= set(x) for x in ds)
     assert all("C_khoa_hoi" not in x["bo"] for x in ds)
+
+
+def test_ba_ca_demo_bgk_da_nguoi_noi_chay_khong_can_gpu():
+    """Ngay ca khi khong co `kaggle-ra/`, `/api/ca-mau` van co du 3 tinh huong BGK yeu cau."""
+    ds_demo = dich_vu.ca_mau("demo_bgk")
+    assert len(ds_demo) == 3
+    ids = {x["id"] for x in ds_demo}
+    assert ids == {"demo_bs_nguoi_nha_nhi", "demo_hai_benh_nhan", "demo_lao_khoa_con_gai"}
+
+    # Ca 1: Me - Benh nhi (di ung Penicillin cua me tach khoi benh nhan, dinh chinh 4 ngay -> chieu hom qua)
+    r1 = dich_vu.doc_ca("demo_bs_nguoi_nha_nhi", "C_khoa_hoi")
+    assert r1["nhanh"] == "C_khoa_hoi"
+    assert r1["so_can_xac_nhan"] >= 1
+    than1 = r1["du_doan_khong_muc_phu"].lower()
+    assert "chiều hôm qua" in than1
+    assert "4 ngày nay" not in than1
+    # Di ung penicillin nam o TIEN SU GIA DINH, khong o DI UNG cua be
+    muc_di_ung_1 = ""
+    cac_khoi = r1["du_doan_khong_muc_phu"].split("\n\n")
+    for idx, khoi in enumerate(cac_khoi):
+        if khoi.strip() == "DỊ ỨNG" and idx + 1 < len(cac_khoi):
+            muc_di_ung_1 = cac_khoi[idx + 1].lower()
+    assert "penicillin" not in muc_di_ung_1
+    assert any(pb.get("audio_spans") for pb in r1["phat_bieu"])
+
+    # Ca 2: Hai benh nhan trao doi cung phong -> di ung cefuroxim cua nguoi ke tiep bi K3 chan sang CAN XAC NHAN
+    r2 = dich_vu.doc_ca("demo_hai_benh_nhan", "C_khoa_hoi")
+    assert r2["so_can_xac_nhan"] >= 1
+    assert "cefuroxim" not in r2["du_doan_khong_muc_phu"].lower()
+    assert "CẦN XÁC NHẬN" in r2["du_doan"]
+
+    # Ca 3: Cu ong 74 tuoi & con gai -> dinh chinh quen thuoc + thuoc dan gian "a moc" sang CAN XAC NHAN
+    r3 = dich_vu.doc_ca("demo_lao_khoa_con_gai", "C_khoa_hoi")
+    assert r3["so_can_xac_nhan"] >= 1
+    assert "cả tuần nay quên" not in r3["du_doan_khong_muc_phu"].lower()
+    assert "amoxicillin" not in r3["du_doan_khong_muc_phu"].lower()
 
 
 def test_ca_mau_nhanh_hoi_giu_nguyen_phat_bieu_them_cau_hoi():

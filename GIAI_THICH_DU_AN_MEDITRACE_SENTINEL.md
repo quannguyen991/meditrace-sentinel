@@ -187,24 +187,25 @@ Nhằm đáp ứng trọn vẹn 5 ý kiến đóng góp của Ban Giám khảo v
 * **Vấn đề giải quyết:** Nếu kiểm tra quá gắt gao thì sẽ vô tình vứt bỏ những lời nói lấp lửng của bệnh nhân về dị ứng thuốc hoặc tiền sử bệnh tim.
 * **Cách giải quyết:** Mọi thông tin nguy cấp (dị ứng, thuốc nguy hiểm) dù có chút nghi ngờ cũng **không bao giờ bị âm thầm xóa bỏ**, mà được đưa vào mục riêng *"Cần bác sĩ xác nhận"* kèm cờ đỏ cảnh báo để bác sĩ tự tay quyết định.
 
-### 14. Nhân đôi cơ sở dữ liệu lên 200 khuôn ca bệnh lâm sàng — `src/sinh_hoi_thoai_viet.py`
-* **Vấn đề giải quyết:** Tránh hiện tượng mô hình học vẹt dữ liệu do số lượng ca mẫu quá ít.
-* **Cách giải quyết:** Mở rộng gấp đôi từ 100 lên 200 khuôn ca bệnh thuộc đầy đủ 10 chuyên khoa (Hô hấp, Tim mạch, Tiêu hóa, Thần kinh, Cơ xương khớp, Thận - Tiết niệu, Nội tiết, Da liễu, Truyền nhiễm, Nhi khoa), bảo đảm các ca bệnh đa dạng và phong phú.
+### 14. Mở rộng kho ngữ liệu lên 657 khuôn ca bệnh lâm sàng (21 hệ cơ quan) — `src/kho_khuon.py`
+* **Vấn đề giải quyết:** Tránh hiện tượng mô hình học vẹt dữ liệu do số lượng khuôn mẫu ít và kiểm soát nghiêm ngặt tính độc lập giữa tập huấn luyện và kiểm thử.
+* **Cách giải quyết:** Mở rộng lên **657 khuôn ca bệnh trên 21 hệ cơ quan** (`515` khuôn Train / `72` khuôn Dev / `70` khuôn Test tách rời tuyệt đối, `0` khuôn giao nhau, Jaccard từ khóa triệu chứng trung bình giữa Train và Test chỉ `5,87%`), sinh 5.000 ca v2 mở rộng đạt `45.835` câu duy nhất (+127% so với v1).
 
 ---
 
 <a name="7-số-liệu-thực-nghiệm"></a>
 ## 7. BẢNG SỐ LIỆU THỰC NGHIỆM CHỨNG MINH HIỆU QUẢ
 
-Toàn bộ các cải tiến trên không phải chỉ là lời nói lý thuyết, mà được đo đạc bằng số liệu thực nghiệm khoa học độc lập:
+Toàn bộ các cải tiến trên được đo đạc bằng số liệu thực nghiệm do chương trình in ra (xem chi tiết và điều kiện đo tại [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)):
 
-| Chỉ số đo đạc | Phiên bản cũ trước đây | Phiên bản mới nâng cấp | Kết quả thực tế đạt được |
+| Chỉ số đo đạc | Phiên bản cũ / Đối chứng | Phiên bản nâng cấp hiện tại | Ghi chú phương pháp & Kết quả đạt được |
 | :--- | :--- | :--- | :--- |
-| **Kiểm thử tự động toàn diện (Test Cases)** | Chưa đầy đủ | **1.528 test Pytest + 11 test TypeScript passed 100%** | Kết quả đo đạc thực tế trên bản mã nguồn hiện tại, 0 lỗi. |
-| **Tỷ lệ giữ lại thông tin cũ khi bệnh nhân đính chính** | 11.48% (Cứ 100 ca có 11 ca bị nhớ sai) | **0.80% (Gần như triệt tiêu hoàn toàn)** | Giảm lỗi nhớ nhầm thông tin cũ hơn **14 lần** nhờ Cổng K7. |
-| **Tỷ lệ nhầm bệnh của người nhà thành của bệnh nhân** | 12.4% (Thường xuyên nhầm lẫn) | **2.1% (Tách biệt rành mạch)** | Giảm nhầm lẫn chủ thể gần **6 lần** nhờ Tầng 2. |
-| **Tỷ lệ thông tin đúng bị hệ thống chặn nhầm** | Chưa kiểm soát | **0.0% (0 / 30.136 dòng bị chặn oan)** | Kết quả này chỉ đúng với tập kiểm thử và phương pháp đánh giá đã nêu. |
-| **Độ phong phú và câu duy nhất (5.000 ca)** | v1: 20.190 câu duy nhất (lặp 76,92%) | **v2: 45.835 câu duy nhất (lặp 47,37%, $\ge 8$ từ: 42,19%)** | 657 khuôn thuộc 21 hệ cơ quan; MTLD 145,4 (+56,3%), 100% trích dẫn chuỗi con (52.634/52.634). [ĐÃ RÚT: con số 78,3% cũ không có phép đo tương ứng trong mã]. |
+| **Kiểm thử tự động toàn diện (Test Cases)** | 370 test ban đầu | **1.779 test Pytest + 43 test TypeScript passed 100%** | Chạy xác nhận ngày 26/11/2026 trên mã nguồn hiện tại, 0 lỗi. |
+| **Tỷ lệ bỏ sót mệnh đề (30 ca phát triển, 304 mệnh đề)** | Qwen3-4B chưa train: **43,1%** | **Qwen3-4B + adapter: 11,5%** (Wilson 95%: `8,4%–15,6%`) | Giảm **31,6 điểm %** tỷ lệ bỏ sót trên khuôn chưa từng thấy, `0` ca JSON lỗi. |
+| **Tỷ lệ giữ lại thông tin cũ khi bệnh nhân đính chính** | 11,48% (bộ thử thách *tự sửa*) | **0,80%** | Giảm lỗi lưu thông tin đã bị sửa hơn **14 lần** nhờ FSM cập nhật & Khóa K7. |
+| **Độ nhạy lớp cảnh báo trên lỗi cấy nhân tạo (`cay-loi.md`)** | 16 lỗi cơ bản: `0,801`; 14 lỗi khó: `0,682` | **Cơ bản: 0,871 (tập giữ kín 240 ca: 0,871); Khó: 0,889** | Tiêu chí đăng ký trước; giữ nguyên độ nhạy khi chuyển sang tập giữ kín. |
+| **Tỷ lệ chặn nhầm của Khóa căn cứ** | Đáp án chuẩn: `0 / 30.136` (`0,0%`) | **Đầu ra mô hình thật: chặn thừa 8,0% (C) / 6,1% (D)** | Dòng bị chặn không mất đi mà nằm ở mục `Cần xác nhận` chờ bác sĩ duyệt. |
+| **Độ phong phú và câu duy nhất (5.000 ca)** | v1: 20.190 câu duy nhất (lặp 76,92%) | **v2: 45.835 câu duy nhất (lặp 47,37%, $\ge 8$ từ: 42,19%)** | 657 khuôn thuộc 21 hệ cơ quan; MTLD 145,4 (+56,3%), 100% trích dẫn chuỗi con (52.634/52.634). |
 
 ---
 

@@ -25,6 +25,7 @@ export function dangKySignOffRoutes(app: express.Express) {
         soBo = 0,
         tyLeCoNguon = 100,
         contentHash,
+        soChuaXacNhan,
       } = body;
 
       const kq = khoWorm.ghiSignOff({
@@ -36,6 +37,7 @@ export function dangKySignOffRoutes(app: express.Express) {
         soBo,
         tyLeCoNguon,
         contentHash,
+        ...(soChuaXacNhan !== undefined ? { soChuaXacNhan } : {}),
       });
 
       ghiNhatKy(uid, "ky_duyet_worm", `session=${sessionId} seq=${kq.wormSeq}`);

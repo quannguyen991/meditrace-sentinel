@@ -291,9 +291,13 @@ test("Express HTTP routes: ca-kham (batch + granular + 409 lock), sign-off/WORM 
   // Các dữ liệu sai ràng buộc số nguyên, tổng mệnh đề, tỷ lệ nguồn, contentHash rỗng -> đều bị chặn 400
   const invalidPayloads = [
     { tongMenhDe: "khong-phai-so", contentHash: "h" },
+    { tongMenhDe: 0, soGiu: 0, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h" },
     { tongMenhDe: 2.5, soGiu: 2, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h" },
+    { tongMenhDe: 3, soGiu: 0, soSua: 0, soBo: 3, tyLeCoNguon: 100, contentHash: "h" },
     { tongMenhDe: 3, soGiu: 2, soSua: 1, soBo: 1, tyLeCoNguon: 100, contentHash: "h" },
+    { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 0, contentHash: "h" },
     { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 150, contentHash: "h" },
+    { tongMenhDe: 3, soGiu: 2, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "h", soChuaXacNhan: 1 },
     { tongMenhDe: 3, soGiu: 3, soSua: 0, soBo: 0, tyLeCoNguon: 100, contentHash: "   " },
   ];
   for (const p of invalidPayloads) {

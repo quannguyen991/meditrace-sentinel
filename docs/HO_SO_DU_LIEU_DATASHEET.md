@@ -24,9 +24,10 @@
 - **Đơn vị chia tách độc lập là KHUÔN BỆNH (`benh`), tuyệt đối không chia ngẫu nhiên theo dòng hội thoại:**
   - **Tập chia v1 gốc (`hoi_thoai_viet_5000.jsonl`):** 150 khuôn bệnh Train (3.751 ca, 31.916 mệnh đề) / 26 khuôn Dev (663 ca, 5.620 mệnh đề) / 24 khuôn Test (586 ca).
   - **Tập chia v2 mở rộng (`hoi_thoai_viet_v2_mo_rong.jsonl`):**
-    - `viet_train_v2.jsonl`: 514 khuôn bệnh lâm sàng (3.925 ca khám).
+    - `viet_train_v2.jsonl`: 515 khuôn phân bổ (514 khuôn xuất hiện trong 3.925 ca khám, 37.232 mệnh đề).
     - `viet_phat_trien_v2.jsonl`: 72 khuôn bệnh độc lập (551 ca khám, 5.345 mệnh đề).
     - `viet_kiem_tra_cuoi_v2.jsonl`: 70 khuôn bệnh độc lập (524 ca khám, 4.953 mệnh đề).
+- **Ma trận độc lập ngữ nghĩa Train – Test (`src/kiem_nghiem_ngoai_khuon.py`):** Trên 36.050 cặp khuôn giữa 515 khuôn Train và 70 khuôn Test, giao tập tên khuôn bằng **0**, độ tương đồng Jaccard từ khóa triệu chứng trung bình chỉ **0,0587** (`p95 = 0,1172`, tỷ lệ cặp $\ge 0,20$ chỉ **0,17%**), Bigram Jaccard **0,0891**, Trigram Jaccard **0,0287**. Danh sách tên từng khuôn theo tập được đóng băng công khai tại [`data/manifest_v2_mo_rong_5000.json`](../data/manifest_v2_mo_rong_5000.json).
 - **Bảo toàn biên giới khi mở rộng (`tests/test_chia_khuon_mo_rong_khong_doi.py`):** Mọi lô khuôn mở rộng từ khuôn 201 trở đi được chia độc lập theo từng đợt (80% Train / 10% Dev / 10% Test), đảm bảo **0 khuôn nào trong 200 khuôn gốc bị dịch chuyển tập** (Mã băm vàng `sinh_bo(200, seed=42)` = `2bedc64168fe45dd…`).
 
 ## 4. Giới hạn Đã biết & Minh bạch Khoa học (Known Limitations)

@@ -95,6 +95,7 @@ Khác với các ứng dụng AI đàm thoại thông thường (như ChatGPT, G
 
 ```
 d:\Claude\meditrace-ma-nguon\
+├── BAO_CAO_CAI_TIEN_CHANG_1.md                # Báo cáo cải tiến Chặng 1 (AI 2026) đối chiếu 3 yêu cầu BGK
 ├── HANDOVER.md                                # TÀI LIỆU NÀY (Bàn giao dự án cho Gemini/AI/Dev)
 ├── README.md                                  # Hướng dẫn tổng quan ngắn gọn của dự án
 ├── GIAI_THICH_DU_AN_MEDITRACE_SENTINEL.md     # Bản giải thích toàn diện bối cảnh, lý do, sự khác biệt
@@ -132,7 +133,7 @@ d:\Claude\meditrace-ma-nguon\
 │   ├── canh_bao/                              # Gói chính sách phân loại cờ đỏ lâm sàng
 │   └── sinh_hoi_thoai_viet.py                 # Bộ sinh hội thoại từ 200 khuôn ca bệnh (ngu_lieu_viet.BENH)
 │
-├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.528 test Pytest + 11 test TypeScript passed 100%, 24/11/2026)
+├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.779 test Pytest + 43 test TypeScript passed 100%, 26/11/2026)
 │   ├── test_guardrails.py                     # Test 5 tầng Guardrails, chống ảo giác số liệu & liều trần
 │   ├── test_khoa_bang_chung.py                # Test 26 kịch bản khóa bằng chứng K1-K7
 │   ├── test_cong_rui_ro.py                    # Test cổng cách ly an toàn & phân nhóm rủi ro
@@ -232,12 +233,15 @@ class GuardrailResult:
 * Card đồ họa: Tùy chọn (Hỗ trợ GPU CUDA hoặc CPU thuần).
 
 ### 6.2 Lệnh chạy toàn bộ kiểm thử tự động (Unit Test Suite)
-Dự án có bộ kiểm thử tự động gồm **1.357 bài test** được thu thập (ngày 17/11/2026). Chưa xác nhận được là tất cả đều xanh: một lượt chạy đầy đủ bị treo ở khoảng 47%, và các test âm thanh chạy mô hình thật nên cần tách riêng. Chạy phần không âm thanh:
+Dự án có bộ kiểm thử tự động gồm **1.779 bài test `pytest` vượt qua** (25 test bỏ qua theo môi trường phần cứng) và **43 bài test TypeScript** trong `web/` (cập nhật 26/11/2026):
 ```powershell
-# Chạy toàn bộ test suite an toàn lâm sàng cốt lõi
-pytest tests/test_guardrails.py tests/test_khoa_bang_chung.py tests/test_cong_rui_ro.py tests/test_thang_diem_lam_sang.py
+# Chạy toàn bộ kiểm thử Python
+$env:PYTHONUTF8="1"; python -m pytest tests/ -q
 
-# Ví dụ kết quả từng ghi nhận cho nhóm test cốt lõi; đây không phải tổng số test của repo.
+# Chạy kiểm tra kiểu và toàn bộ kiểm thử TypeScript (Frontend + Backend BFF)
+cd web
+npm run lint
+npx tsx --test src/lib/*.test.ts may-chu/*.test.ts may-chu/routes/*.test.ts may-chu/tra-cuu/*.test.ts may-chu/tro-ly/*.test.ts
 ```
 
 ### 6.3 Lệnh khởi động dịch vụ Backend API

@@ -52,8 +52,8 @@
   * **Hệ thống áp dụng triết lý "Định tuyến bất đối xứng theo độ rủi ro" (Fail-Safe Asymmetric Routing):**
     * Với thông tin thông thường (ví dụ: đau bụng âm ỉ, mệt mỏi): Ưu tiên độ chính xác (Precision). Nếu trượt bài kiểm tra K1–K7 thì loại khỏi thân bệnh án.
     * Với thông tin nguy cấp (Dị ứng thuốc, Thuốc có khoảng điều trị hẹp như Digoxin/Warfarin, Bệnh tim mạch): **Tuyệt đối không bao giờ âm thầm xóa bỏ (Zero Information Loss)**.
-  * **Giải pháp kỹ thuật:** Dù mẩu tin dị ứng có bị nghi ngờ (ví dụ người nhà nói lấp lửng), hệ thống vẫn giữ lại $100\%$ và chuyển sang mục *"CẦN BÁC SĨ XÁC NHẬN"* kèm cờ đỏ.
-  * **Kết quả thực nghiệm:** Tỷ lệ bỏ sót dị ứng giảm về **$0.0\%$**, trong khi tỷ lệ thông tin đúng bị chặn nhầm đạt **$0 / 30.136$ dòng**.
+  * **Giải pháp kỹ thuật:** Dù mẩu tin dị ứng có bị nghi ngờ (ví dụ người nhà nói lấp lửng), hệ thống vẫn giữ lại $100\%$ và chuyển sang mục *"CẦN BÁC SĨ XÁC NHẬN"* kèm cờ đỏ. Đồng thời, chốt chặn `kiemTraDieuKienKyDuyet` + WORM API **tuyệt đối khóa không cho hoàn tất/ký duyệt hồ sơ** khi còn bất kỳ mục *"Cần xác nhận"* nào chưa được bác sĩ xử lý (`Xác nhận / Sửa / Bỏ`) hoặc khi hồ sơ thiếu căn cứ lượt thoại.
+  * **Kết quả thực nghiệm:** Trên phép đo cấy lỗi có đăng ký trước (`docs/ket-qua/cay-loi.md`), độ nhạy bắt lỗi xoá dị ứng (`xoa_di_ung`) đạt **98,3%** trên tập điều chỉnh (400 ca) và **97,2%** trên tập giữ kín (240 ca). Ở bước khóa căn cứ, tỷ lệ chặn nhầm đáp án chuẩn là **$0 / 30.136$ dòng** (do đáp án chép sát lời thoại); trên đầu ra mô hình thật ở 4 bộ thử thách, tỷ lệ chặn thừa sang mục `Cần xác nhận` là **8,0%** (chính sách C) và **6,1%** (chính sách D).
 
 ---
 
@@ -178,8 +178,8 @@
 
 ### ❓ Giám khảo hỏi: *"Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?"*
 * **🎯 Phản biện tự tin:**  
-  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.528 bài test tự động** (Pytest, 27 test bỏ qua theo môi trường phần cứng) và 11 nhóm kiểm thử TypeScript (`web/`) bao phủ toàn bộ 14 module lâm sàng, 7 cổng khóa bằng chứng và các tình huống kiểm thử nghịch đảo. Hiện tại, toàn bộ 1.528 bài test đều vượt qua $100\%$ không có lỗi.  
-  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với hơn 5.000 hội thoại mô phỏng (bản v2 mở rộng đạt 45.835 câu duy nhất, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích) và 300 ca thử thách đối đầu ranh giới, bảo đảm hệ thống sẵn sàng hoạt động ổn định trong môi trường thực tế."*
+  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.779 bài test tự động** (`pytest`, 25 test bỏ qua theo môi trường phần cứng) và **43 bài kiểm thử TypeScript** (`web/`) bao phủ toàn bộ các tầng Python Core, Node/Express BFF + WORM và giao diện React. Hiện tại, toàn bộ bài kiểm thử đều vượt qua $100\%$ không có lỗi.  
+  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với 5.000 hội thoại mô phỏng thế hệ v2 (đạt 45.835 câu duy nhất, lặp câu giảm từ 76,92% xuống 47,37%, Jaccard từ khóa triệu chứng trung bình giữa 515 khuôn Train và 70 khuôn Test chỉ 5,87%, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích), 240 ca giữ kín `thach_thuc_v2` và 10 kịch bản bệnh hiếm ngoài khuôn (`src/kiem_nghiem_ngoai_khuon.py`), bảo đảm tính độc lập dữ liệu và khả năng kiểm chứng chặt chẽ."*
 
 ---
 

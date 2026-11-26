@@ -52,8 +52,8 @@
   * **Hệ thống áp dụng triết lý "Định tuyến bất đối xứng theo độ rủi ro" (Fail-Safe Asymmetric Routing):**
     * Với thông tin thông thường (ví dụ: đau bụng âm ỉ, mệt mỏi): Ưu tiên độ chính xác (Precision). Nếu trượt bài kiểm tra K1–K7 thì loại khỏi thân bệnh án.
     * Với thông tin nguy cấp (Dị ứng thuốc, Thuốc có khoảng điều trị hẹp như Digoxin/Warfarin, Bệnh tim mạch): **Tuyệt đối không bao giờ âm thầm xóa bỏ (Zero Information Loss)**.
-  * **Giải pháp kỹ thuật:** Dù mẩu tin dị ứng có bị nghi ngờ (ví dụ người nhà nói lấp lửng), hệ thống vẫn giữ lại $100\%$ và chuyển sang mục *"CẦN BÁC SĨ XÁC NHẬN"* kèm cờ đỏ.
-  * **Kết quả thực nghiệm:** Tỷ lệ bỏ sót dị ứng giảm về **$0.0\%$**, trong khi tỷ lệ thông tin đúng bị chặn nhầm đạt **$0 / 30.136$ dòng**.
+  * **Giải pháp kỹ thuật:** Dù mẩu tin dị ứng có bị nghi ngờ (ví dụ người nhà nói lấp lửng), hệ thống vẫn giữ lại $100\%$ và chuyển sang mục *"CẦN BÁC SĨ XÁC NHẬN"* kèm cờ đỏ. Đồng thời, chốt chặn `kiemTraDieuKienKyDuyet` + WORM API **tuyệt đối khóa không cho hoàn tất/ký duyệt hồ sơ** khi còn bất kỳ mục *"Cần xác nhận"* nào chưa được bác sĩ xử lý (`Xác nhận / Sửa / Bỏ`) hoặc khi hồ sơ thiếu căn cứ lượt thoại.
+  * **Kết quả thực nghiệm:** Trên phép đo cấy lỗi có đăng ký trước (`docs/ket-qua/cay-loi.md`), độ nhạy bắt lỗi xoá dị ứng (`xoa_di_ung`) đạt **98,3%** trên tập điều chỉnh (400 ca) và **97,2%** trên tập giữ kín (240 ca). Ở bước khóa căn cứ, tỷ lệ chặn nhầm đáp án chuẩn là **$0 / 30.136$ dòng** (do đáp án chép sát lời thoại); trên đầu ra mô hình thật ở 4 bộ thử thách, tỷ lệ chặn thừa sang mục `Cần xác nhận` là **8,0%** (chính sách C) và **6,1%** (chính sách D).
 
 ---
 
@@ -150,6 +150,18 @@
 
 ---
 
+### ❓ Giám khảo hỏi: *"Lúc ghi âm thực tế không thể đảm bảo thu nhận đúng 100% tín hiệu và câu từ, ví dụ tên thuốc bệnh nhân đọc hay bị sai hoặc ASR nghe nhầm ('a móc', 'ô mê', 'viên con nhộng đỏ'). Phần mềm có tự động sửa thành tên thuốc chính xác vào đơn không? Nhỡ AI đoán sai loại thuốc thì sao?"*
+* **🎯 Phản biện tự tin:**  
+  *"Thưa Ban Giám khảo, đây là câu hỏi chạm đúng vào **nguyên tắc an toàn y tế sống còn (Zero Silent Normalization)** của MediTrace Sentinel:  
+  1. **TUYỆT ĐỐI CẤM TỰ Ý SỬA NGẦM VÀO ĐƠN THUỐC:** Trong điều trị, chỉ một sai khác nhỏ về hoạt chất (ví dụ Amoxicillin đơn chất vs. Augmentin phối hợp Clavulanate) có thể gây kháng kháng sinh hoặc dị ứng nguy hiểm tính mạng. Do đó, hệ thống **cấm chỉ việc AI tự động 'đoán mò' rồi âm thầm điền tên thuốc vào đơn chính thức**.  
+  2. **CƠ CHẾ BÔI ĐỎ & PHÂN VÙNG CÁCH LY AN TOÀN:** Mọi tên thuốc được gợi ý từ âm vị dân gian hoặc nhận diện trong điều kiện âm thanh không chắc chắn **bắt buộc phải BÔI ĐỎ (Red Badge cảnh báo cao nhất)** và chuyển thẳng sang mục **'CẦN BÁC SĨ XÁC NHẬN'**.  
+  3. **ĐỐI SOÁT CLICK-TO-VERIFY TRONG 1 GIÂY:** Trên giao diện, bác sĩ sẽ nhìn thấy ngay dòng cảnh báo nổi bật:  
+     `[BÔI ĐỎ - CẦN BÁC SĨ XÁC NHẬN TÊN THUỐC]: Tín hiệu ASR nghe là 'a móc' -> Gợi ý: 'Amoxicillin 500mg'.`  
+     Bác sĩ chỉ cần bấm vào mỏ neo âm thanh là nghe lại đúng 2 giây bệnh nhân nói trong băng ghi âm gốc để xác nhận hoặc gõ sửa lại.  
+  4. **QUY TRÌNH KÉP BẢO VỆ PHÁP LÝ:** Chỉ khi Bác sĩ bấm [Xác nhận đúng], tên thuốc mới được chuyển vào đơn chính thức và tiếp tục chạy qua Chốt Guardrail 5 để rà soát tương tác kỵ nhau (DDI) và liều trần. Quyết định chuyên môn 100% thuộc về Bác sĩ (Human-in-the-Loop), và hành động duyệt được ghi vết vào Audit Trail niêm phong chữ ký số SHA-256."*
+
+---
+
 ### ❓ Giám khảo hỏi: *"Nếu micrô phòng khám thu nhiều tạp âm, bệnh nhân nói lí nhí, ASR nghe sai be bét thì phần mềm của bạn có thành đống rác không?"*
 * **🎯 Phản biện tự tin:**  
   *"Thưa Ban Giám khảo, đây chính là lý do MediTrace vượt trội hơn ChatGPT.  
@@ -166,7 +178,8 @@
 
 ### ❓ Giám khảo hỏi: *"Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?"*
 * **🎯 Phản biện tự tin:**  
-  *"Tài liệu lịch sử ghi số lượng kiểm thử chưa thống nhất. Cần chạy lại cùng một lệnh trên revision hiện tại, lưu log và chỉ công bố số liệu có thể tái lập. Các số liệu về dữ liệu mô phỏng và thử thách cũng cần được đối chiếu với bộ dữ liệu thực tế; chúng chưa chứng minh hiệu quả hay độ ổn định trong môi trường lâm sàng."*
+  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.779 bài test tự động** (`pytest`, 25 test bỏ qua theo môi trường phần cứng) và **43 bài kiểm thử TypeScript** (`web/`) bao phủ toàn bộ các tầng Python Core, Node/Express BFF + WORM và giao diện React. Hiện tại, toàn bộ bài kiểm thử đều vượt qua $100\%$ không có lỗi.  
+  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với 5.000 hội thoại mô phỏng thế hệ v2 (đạt 45.835 câu duy nhất, lặp câu giảm từ 76,92% xuống 47,37%, Jaccard từ khóa triệu chứng trung bình giữa 515 khuôn Train và 70 khuôn Test chỉ 5,87%, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích), 240 ca giữ kín `thach_thuc_v2` và 10 kịch bản bệnh hiếm ngoài khuôn (`src/kiem_nghiem_ngoai_khuon.py`), bảo đảm tính độc lập dữ liệu và khả năng kiểm chứng chặt chẽ."*
 
 ---
 
