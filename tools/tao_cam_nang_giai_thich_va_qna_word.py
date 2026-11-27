@@ -504,9 +504,15 @@ BAN_DO_MA_NGUON_PYTHON = [
     ],
     [
         "6. Bộ dữ liệu 657 khuôn & Đo kiểm độc lập",
-        "`src/kho_khuon.py`\n`src/ngu_lieu_viet.py`\n`src/khuon_mo_rong.py`\n`src/bien_the_cau.py`\n`src/sinh_hoi_thoai_viet.py`\n`src/tach_tap_viet.py`\n`src/do_lap_cau.py`\n`src/do_bo_sot.py`\n`src/do_cay_loi.py`\n`src/kiem_nghiem_ngoai_khuon.py`",
-        "`ds_khuon()`, `phan_khuon()`, `tinh_ma_tran_trung_lap_train_test()`, `chay_kiem_nghiem_ngoai_khuon()`",
-        "Hợp nhất 657 khuôn ca bệnh (21 hệ cơ quan), chia tập độc lập tuyệt đối `515 Train / 72 Dev / 70 Test` (`0` khuôn giao nhau), đo lặp câu/MTLD/Distinct-2, đo tỷ lệ bỏ sót, cấy lỗi 16 cơ bản + 14 lỗi khó và kiểm nghiệm 10 kịch bản ngoài khuôn.",
+        "`src/kho_khuon.py`\n`src/ngu_lieu_viet.py`\n`src/khuon_mo_rong.py`\n`src/bien_the_cau.py`\n`src/sinh_hoi_thoai_viet.py`\n`src/tach_tap_viet.py`\n`src/do_lap_cau.py`\n`src/do_bo_sot.py`\n`src/do_cay_loi.py`\n`src/kiem_nghiem_ngoai_khuon.py`\n`tools/khu_trung_tap_du_lieu.py`\n`tools/do_truyen_lan_loi_tung_tang.py`",
+        "`ds_khuon()`, `phan_khuon()`, `khu_trung_train_doi_chieu_dev_test()`, `do_tung_bo()`",
+        "Hợp nhất 657 khuôn ca bệnh (21 hệ cơ quan), chia tập độc lập tuyệt đối `515 Train / 72 Dev / 70 Test` (`0` khuôn giao nhau), khử trùng câu nguyên văn Train–Dev về `0,00%`, và đo truyền lan/chặn lỗi từng tầng trên 4 bộ thử thách.",
+    ],
+    [
+        "7. MediTrace Sentinel M1–M4 (An toàn sâu, KHTH BHYT, QR & LIS HL7)",
+        "`src/di_ung_cheo.py`\n`src/quy_dao_lam_sang.py`\n`src/dieu_phoi_ha_tang.py`\n`src/kiem_toan_xml_bhyt.py`\n`src/ho_so_benh_nhan_qr.py`\n`src/lis_hl7_oru.py`",
+        "`kiem_tra_di_ung_cheo()`, `phan_tich_quy_dao_lam_sang()`, `tai_kiem_tra_nhanh()`, `kiem_toan_goi_xml_bhyt()`, `phan_tich_lis_dau_vao()`",
+        "Đồ thị dị ứng chéo ATC/Beta-lactam/Sulfa/NSAID; quỹ đạo KDIGO AKI & độ dốc eGFR/HbA1c/INR; tái kiểm tra vòng lặp kín `<50ms`; kiểm toán XML1–5 BHYT + TT 20/2022; cổng QR bệnh nhân theo dõi 48h/7d; bộ đọc HL7 v2 ORU^R01 / LIS.",
     ],
 ]
 
@@ -546,7 +552,13 @@ BAN_DO_MA_NGUON_WEB = [
         "Công cụ Lâm sàng Quanh Bản nháp",
         "`TranscriptView.tsx` + `radarCoDo.ts`\n`ContextView.tsx`\n`BhytPrecheckModal.tsx`\n`SbarModal.tsx` + `HisSmartCopyPopover.tsx`\n`ToDanDoBenhNhanModal.tsx`\n`CrossVisitBanner.tsx`",
         "`quetCoDo()`, `taoPhieuSbar()`, `tachMucHis()`, `phatHienMauThuanXuyenLanKham()`",
-        "Gợi ý tối đa 2 câu hỏi cờ đỏ tại chỗ (0 token); nhập tuổi/giới tường minh & đọc phiếu xét nghiệm cũ; tiền kiểm ICD-10 4 ký tự; tạo phiếu bàn giao SBAR & chép từng ô sang phần mềm HIS; in tờ dặn dò A4 kèm đọc giọng nói tiếng Việt TTS; cảnh báo mâu thuẫn với lần khám trước.",
+        "Gợi ý tối đa 2 câu hỏi cờ đỏ tại chỗ (0 token); nhập tuổi/giới tường minh, đọc phiếu XN cũ & nhập tệp LIS/HL7; tiền kiểm ICD-10 4 ký tự; tạo phiếu bàn giao SBAR & chép từng ô sang HIS; in tờ dặn dò A4 kèm mã QR ISO-18004 & đọc giọng nói TTS; cảnh báo mâu thuẫn với lần khám trước.",
+    ],
+    [
+        "Trung tâm KHTH/BHYT & Cổng Bệnh nhân QR (M2–M3)",
+        "`web/may-chu/routes/quan-tri-bv.ts`\n`web/may-chu/routes/benh-nhan-portal.ts`\n`web/src/components/HospitalCommandCenterView.tsx`\n`web/src/components/PatientPortalView.tsx`\n`web/src/lib/qrEncoder.ts`",
+        "`taoRouterQuanTriBv()`, `taoRouterBenhNhanPortal()`, `HospitalCommandCenterView`, `PatientPortalView`",
+        "Dashboard KHTH/QLCL thống kê KPI toàn viện, phân tầng kháng sinh WHO AWaRe & kiểm toán gói XML1–5; cổng bệnh nhân công khai qua mã QR (`?portal=<token>`) cho phép báo cáo dấu hiệu đỏ 48h/7d đẩy thẳng vào `TasksView`.",
     ],
 ]
 
@@ -979,20 +991,29 @@ def xuat_word():
         mau_nen=HEX_BG_TEAL,
     )
 
-    # Chèn ảnh sơ đồ luồng nếu tồn tại trên đĩa
-    hinh_flow = THUMUC_HINH / "flow-1-tong-the-5-tang-guardrails.png"
-    if hinh_flow.exists():
-        p_img = doc.add_paragraph()
-        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_img.paragraph_format.space_before = Pt(4)
-        p_img.paragraph_format.space_after = Pt(2)
-        p_img.add_run().add_picture(str(hinh_flow), width=Inches(6.5))
-        p_cap = them_doan(
-            doc,
-            "Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic và các chốt kiểm soát của MediTrace Sentinel.",
-            co_chu=8.8, mau=C_MUTED, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_tren=0, cach_duoi=8,
-        )
-        p_cap.runs[0].italic = True
+    # Chèn bộ ảnh sơ đồ kiến trúc & minh họa giao diện nếu tồn tại trên đĩa
+    cac_hinh = [
+        ("flow-1-tong-the-5-tang-guardrails.png", "Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic và các chốt kiểm soát của MediTrace Sentinel."),
+        ("h13-audio-pipeline.png", "Hình 2. Đường ống xử lý âm thanh tại chỗ (VAD, PyAnnote, PhoWhisper & Trie 600 dược thư)."),
+        ("flow-2-khoa-bang-chung-k1-k7.png", "Hình 3. Cơ chế Khóa bằng chứng K1–K7 chống ảo giác và đẩy câu nghi ngờ sang CẦN XÁC NHẬN."),
+        ("flow-3-an-toan-duoc-ly-cdss.png", "Hình 4. Tầng an toàn dược lý, dị ứng chéo ATC, hiệu chỉnh liều thận CrCl/eGFR và 9 thang điểm CDSS."),
+        ("flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png", "Hình 5. Quy trình bác sĩ khám, kiểm chứng Click-to-Verify và ký duyệt bất biến WORM (< 60 giây)."),
+        ("giao-dien-ban-lam-viec-bac-si-nut-moi.png", "Hình 6. Minh họa giao diện làm việc của bác sĩ với các công cụ hỗ trợ lâm sàng & kiểm chứng."),
+    ]
+    for ten_hinh, chu_thich in cac_hinh:
+        p_hinh = THUMUC_HINH / ten_hinh
+        if p_hinh.exists():
+            p_img = doc.add_paragraph()
+            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_img.paragraph_format.space_before = Pt(4)
+            p_img.paragraph_format.space_after = Pt(2)
+            p_img.add_run().add_picture(str(p_hinh), width=Inches(6.5))
+            p_cap = them_doan(
+                doc,
+                chu_thich,
+                co_chu=8.8, mau=C_MUTED, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_tren=0, cach_duoi=8,
+            )
+            p_cap.runs[0].italic = True
 
     them_muc_con(doc, "1.2. Ba khối kiến trúc phần mềm khi triển khai thực tế")
     them_gach_dau_dong(doc, "**Khối 1 — Lõi xử lý Y khoa & AI bằng Python (`src/`, cổng nội bộ `127.0.0.1:8765`):** Chứa đường ống âm thanh `PhoWhisper`, mô hình trích xuất `Qwen3-4B` QLoRA, liên kết thực thể, máy trạng thái đính chính, khóa căn cứ K1–K6, lớp cảnh báo 13 nhóm, bộ ghép bản nháp SOAP, dược lý Aho-Corasick, tiền kiểm BHYT/ICD-10 và xuất HL7 FHIR R4.")
@@ -1175,6 +1196,23 @@ def xuat_markdown():
     for r in BANG_LUONG_8_TRAM:
         cells = [c.replace("\n", "<br>") for c in r]
         lines.append(f"| {cells[0]} | {cells[1]} | {cells[2]} | {cells[3]} | {cells[4]} |")
+
+    lines.extend([
+        "",
+        "### 1.1. Sơ đồ kiến trúc & Ảnh minh họa giao diện",
+        "",
+        "![Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic](hinh/flow-1-tong-the-5-tang-guardrails.png)",
+        "",
+        "![Hình 2. Đường ống xử lý âm thanh tại chỗ](hinh/h13-audio-pipeline.png)",
+        "",
+        "![Hình 3. Cơ chế Khóa bằng chứng K1–K7](hinh/flow-2-khoa-bang-chung-k1-k7.png)",
+        "",
+        "![Hình 4. Tầng an toàn dược lý & CDSS](hinh/flow-3-an-toan-duoc-ly-cdss.png)",
+        "",
+        "![Hình 5. Quy trình bác sĩ khám & Click-to-Verify](hinh/flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png)",
+        "",
+        "![Hình 6. Giao diện làm việc của bác sĩ](hinh/giao-dien-ban-lam-viec-bac-si-nut-moi.png)",
+    ])
 
     lines.extend([
         "",
