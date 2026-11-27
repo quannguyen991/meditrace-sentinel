@@ -1,0 +1,534 @@
+{
+ "test": {
+  "central": {
+   "so_cau": 1067,
+   "them_bot": 97,
+   "bo_qua": 853,
+   "doi_thua": 71,
+   "loi_goc": 3832,
+   "loi_sau": 1831,
+   "so_tu": 11834,
+   "doi_dung": 1715,
+   "doi_khac_chu": 610
+  },
+  "tat_ca": {
+   "so_cau": 1603,
+   "them_bot": 147,
+   "bo_qua": 1587,
+   "doi_thua": 80,
+   "loi_goc": 5228,
+   "loi_sau": 2870,
+   "so_tu": 17389,
+   "doi_dung": 2022,
+   "doi_khac_chu": 655
+  },
+  "southern": {
+   "so_cau": 335,
+   "them_bot": 49,
+   "doi_dung": 259,
+   "doi_thua": 3,
+   "loi_goc": 1166,
+   "loi_sau": 846,
+   "so_tu": 3672,
+   "bo_qua": 563,
+   "doi_khac_chu": 43
+  },
+  "northern": {
+   "so_cau": 201,
+   "them_bot": 1,
+   "bo_qua": 171,
+   "doi_khac_chu": 2,
+   "doi_thua": 6,
+   "loi_goc": 230,
+   "loi_sau": 193,
+   "so_tu": 1883,
+   "doi_dung": 48
+  }
+ },
+ "test_chi_chac": {
+  "central": {
+   "so_cau": 1067,
+   "them_bot": 97,
+   "bo_qua": 867,
+   "doi_thua": 59,
+   "loi_goc": 3832,
+   "loi_sau": 1819,
+   "so_tu": 11834,
+   "doi_dung": 1705,
+   "doi_khac_chu": 606
+  },
+  "tat_ca": {
+   "so_cau": 1603,
+   "them_bot": 147,
+   "bo_qua": 1605,
+   "doi_thua": 63,
+   "loi_goc": 5228,
+   "loi_sau": 2854,
+   "so_tu": 17389,
+   "doi_dung": 2009,
+   "doi_khac_chu": 650
+  },
+  "southern": {
+   "so_cau": 335,
+   "them_bot": 49,
+   "doi_dung": 256,
+   "doi_thua": 3,
+   "loi_goc": 1166,
+   "loi_sau": 852,
+   "so_tu": 3672,
+   "bo_qua": 567,
+   "doi_khac_chu": 42
+  },
+  "northern": {
+   "so_cau": 201,
+   "them_bot": 1,
+   "bo_qua": 171,
+   "doi_khac_chu": 2,
+   "doi_thua": 1,
+   "loi_goc": 230,
+   "loi_sau": 183,
+   "so_tu": 1883,
+   "doi_dung": 48
+  }
+ },
+ "dev": {
+  "bo_qua": [
+   [
+    "đó → đấy",
+    43
+   ],
+   [
+    "coi → xem",
+    37
+   ],
+   [
+    "răng → sao",
+    36
+   ],
+   [
+    "nha → nhé",
+    21
+   ],
+   [
+    "mai → hôm",
+    13
+   ],
+   [
+    "mốt → nào",
+    13
+   ],
+   [
+    "rầu → rồi",
+    13
+   ],
+   [
+    "bựa → bữa",
+    13
+   ],
+   [
+    "ả → chị",
+    11
+   ],
+   [
+    "mai → sau",
+    11
+   ],
+   [
+    "mốt → này",
+    11
+   ],
+   [
+    "á → đấy",
+    11
+   ],
+   [
+    "á → ấy",
+    11
+   ],
+   [
+    "ngài → người",
+    10
+   ],
+   [
+    "trốc → đầu",
+    10
+   ],
+   [
+    "kiếm → tìm",
+    10
+   ],
+   [
+    "túi → tối",
+    9
+   ],
+   [
+    "nhờ → nhỉ",
+    8
+   ],
+   [
+    "mồ → nào",
+    8
+   ],
+   [
+    "thâu → thôi",
+    8
+   ],
+   [
+    "nghe → nhé",
+    8
+   ],
+   [
+    "o → cô",
+    8
+   ],
+   [
+    "nhẽ → lẽ",
+    7
+   ],
+   [
+    "lẹ → lẽ",
+    7
+   ],
+   [
+    "bùng → vòng",
+    7
+   ],
+   [
+    "binh → xoay",
+    7
+   ],
+   [
+    "nhởi → chơi",
+    7
+   ],
+   [
+    "quại → ngoại",
+    6
+   ],
+   [
+    "chửa → chưa",
+    6
+   ],
+   [
+    "mụ → bà",
+    6
+   ],
+   [
+    "bây → chúng mày",
+    6
+   ],
+   [
+    "đàng → đường",
+    5
+   ],
+   [
+    "cun → con",
+    5
+   ],
+   [
+    "nhông → chồng",
+    5
+   ],
+   [
+    "dậy → vậy",
+    5
+   ],
+   [
+    "quơ → quê",
+    5
+   ],
+   [
+    "hẹ → nhỉ",
+    5
+   ],
+   [
+    "nhứt → nhất",
+    5
+   ],
+   [
+    "làm → uống một",
+    5
+   ],
+   [
+    "liền → ngay",
+    5
+   ]
+  ],
+  "doi_thua": [
+   [
+    "vô  (bảng: vào)",
+    19
+   ],
+   [
+    "chi  (bảng: gì)",
+    6
+   ],
+   [
+    "thiệt  (bảng: thật)",
+    4
+   ],
+   [
+    "tui  (bảng: tôi)",
+    4
+   ],
+   [
+    "ảnh  (bảng: anh ấy)",
+    4
+   ],
+   [
+    "cấy  (bảng: cái)",
+    2
+   ],
+   [
+    "hè  (bảng: nhỉ)",
+    2
+   ],
+   [
+    "rứa  (bảng: vậy)",
+    2
+   ],
+   [
+    "chớ  (bảng: chứ)",
+    2
+   ],
+   [
+    "răng  (bảng: sao)",
+    2
+   ],
+   [
+    "con nít  (bảng: trẻ em)",
+    2
+   ],
+   [
+    "giò  (bảng: chân)",
+    2
+   ],
+   [
+    "mô  (bảng: đâu)",
+    1
+   ],
+   [
+    "tới công chuyện  (bảng: trở nặng)",
+    1
+   ],
+   [
+    "đi cầu  (bảng: đi đại tiện)",
+    1
+   ],
+   [
+    "cụng  (bảng: cũng)",
+    1
+   ],
+   [
+    "hông  (bảng: không)",
+    1
+   ],
+   [
+    "bả  (bảng: bà ấy)",
+    1
+   ],
+   [
+    "hỉ  (bảng: nhỉ)",
+    1
+   ],
+   [
+    "mần  (bảng: làm)",
+    1
+   ],
+   [
+    "bữa ni  (bảng: hôm nay)",
+    1
+   ],
+   [
+    "dữ lắm  (bảng: rất nhiều)",
+    1
+   ],
+   [
+    "chộ  (bảng: thấy)",
+    1
+   ],
+   [
+    "nựa  (bảng: nữa)",
+    1
+   ],
+   [
+    "tề  (bảng: kìa)",
+    1
+   ],
+   [
+    "nỏ  (bảng: không)",
+    1
+   ],
+   [
+    "mi  (bảng: mày)",
+    1
+   ],
+   [
+    "nè  (bảng: này)",
+    1
+   ]
+  ],
+  "doi_khac_chu": [
+   [
+    "mô → nào  (bảng: đâu)",
+    63
+   ],
+   [
+    "ni → nay  (bảng: này)",
+    28
+   ],
+   [
+    "mô → nào  (bảng: khi nào)",
+    13
+   ],
+   [
+    "ni → nay  (bảng: hôm nay)",
+    12
+   ],
+   [
+    "ri → vậy  (bảng: thế)",
+    10
+   ],
+   [
+    "ri → thế này  (bảng: thế)",
+    9
+   ],
+   [
+    "rứa → thế  (bảng: vậy)",
+    9
+   ],
+   [
+    "nớ → đấy  (bảng: đó)",
+    7
+   ],
+   [
+    "chộ → chỗ  (bảng: thấy)",
+    7
+   ],
+   [
+    "mệ → mẹ  (bảng: bà)",
+    7
+   ],
+   [
+    "bữa → hôm  (bảng: hôm nay)",
+    5
+   ],
+   [
+    "răng → sao  (bảng: làm sao)",
+    5
+   ],
+   [
+    "chừ → giờ  (bảng: bây giờ)",
+    5
+   ],
+   [
+    "mô → ở đâu  (bảng: đâu)",
+    5
+   ],
+   [
+    "chi → sao  (bảng: gì)",
+    5
+   ],
+   [
+    "ri → như thế này  (bảng: thế)",
+    4
+   ],
+   [
+    "tau → tôi  (bảng: tao)",
+    4
+   ],
+   [
+    "chi → nào  (bảng: gì)",
+    3
+   ],
+   [
+    "chi → sự  (bảng: gì)",
+    3
+   ],
+   [
+    "dừ → bây giờ  (bảng: giờ)",
+    3
+   ],
+   [
+    "hầy → nhé  (bảng: nhỉ)",
+    3
+   ],
+   [
+    "chi → đâu  (bảng: gì)",
+    3
+   ],
+   [
+    "mần → làm  (bảng: làm sao)",
+    3
+   ],
+   [
+    "ni chi → nay cái gì  (bảng: hôm nay gì)",
+    2
+   ],
+   [
+    "rứa bây → vậy chúng mày  (bảng: vậy bây)",
+    2
+   ],
+   [
+    "choa → chúng tôi  (bảng: tôi)",
+    2
+   ],
+   [
+    "chi → làm gì  (bảng: gì)",
+    2
+   ],
+   [
+    "mô → đâu mà  (bảng: đâu)",
+    2
+   ],
+   [
+    "mô → đấy  (bảng: đâu)",
+    2
+   ],
+   [
+    "cấy → gái  (bảng: cái)",
+    2
+   ],
+   [
+    "chi → chị  (bảng: gì)",
+    2
+   ],
+   [
+    "nè → đây này  (bảng: này)",
+    2
+   ],
+   [
+    "hè → nhé  (bảng: nhỉ)",
+    2
+   ],
+   [
+    "chi → gì cho  (bảng: gì)",
+    1
+   ],
+   [
+    "bữa ni → dạo này có  (bảng: hôm nay)",
+    1
+   ],
+   [
+    "chi mô mô → rối bời không hiểu đâu vào đâu  (bảng: gì đâu đâu)",
+    1
+   ],
+   [
+    "a ri → như thế này  (bảng: a thế)",
+    1
+   ],
+   [
+    "hầy → bãi  (bảng: nhỉ)",
+    1
+   ],
+   [
+    "bựa ni → bữa nay im  (bảng: bựa này)",
+    1
+   ],
+   [
+    "chi → thật  (bảng: gì)",
+    1
+   ]
+  ]
+ }
+}

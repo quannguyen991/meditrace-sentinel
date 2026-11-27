@@ -13,7 +13,7 @@ Lời thoại theo lượt
    │  src/duong_ong/b1_*  ◄── AI      mô hình Qwen3-4B + adapter rút từng MỆNH ĐỀ kèm câu trích
    │  src/duong_ong/b2_*              gom người: thông tin nói về ai
    │  src/duong_ong/b3_*              cập nhật trạng thái: tự sửa, mâu thuẫn
-   │  src/duong_ong/b4_*              kiểm căn cứ: 6 phép kiểm với đúng lượt nói
+   │  src/duong_ong/b4_*              kiểm căn cứ: K1–K7 với đúng lượt nói  
    │  src/canh_bao/                   lớp cảnh báo lỗi khó thấy
    │  src/duong_ong/b5_*              xếp chỗ: thân bản nháp / Cần xác nhận / loại → viết bản nháp
    │  src/duong_ong/b6_*              gợi ý câu hỏi lại

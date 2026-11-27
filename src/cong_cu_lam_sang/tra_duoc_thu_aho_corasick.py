@@ -650,11 +650,13 @@ class BoTraCuuDuocThuAhoCorasick:
     def __init__(self, danh_sach_duoc_thu: Optional[List[ThongTinDuocThu]] = None):
         self.automaton = PurePythonAhoCorasick()
         self.bang_hoat_chat: Dict[str, ThongTinDuocThu] = {}
+        self._bo_sung_tu_tri_thuc = danh_sach_duoc_thu is None
         ds = danh_sach_duoc_thu or CO_SO_DU_LIEU_DUOC_THU_2022
         self._khoi_tao_tu_dien(ds)
 
     def _khoi_tao_tu_dien(self, ds: List[ThongTinDuocThu]) -> None:
         """Đăng ký toàn bộ hoạt chất và biệt dược vào máy trạng thái."""
+        da_dang_ky_tu_khoa: Set[str] = set()
         for dt in ds:
             self.bang_hoat_chat[dt.ten_hoat_chat] = dt
 
@@ -664,6 +666,7 @@ class BoTraCuuDuocThuAhoCorasick:
                 "hoat_chat_chuan": dt.ten_hoat_chat,
                 "thong_tin": dt
             })
+            da_dang_ky_tu_khoa.add(dt.ten_hoat_chat.lower())
 
             # Đăng ký các biệt dược
             for bd in dt.ten_biet_duoc:
@@ -672,6 +675,42 @@ class BoTraCuuDuocThuAhoCorasick:
                     "hoat_chat_chuan": dt.ten_hoat_chat,
                     "thong_tin": dt
                 })
+                da_dang_ky_tu_khoa.add(bd.lower())
+
+        # Bổ sung đầy đủ 158+ hoạt chất & biệt dược từ data/tri_thuc_thuoc.json
+        if self._bo_sung_tu_tri_thuc:
+            try:
+                from src.cong_cu_lam_sang import tri_thuc_thuoc as _ttt
+                for m in _ttt.tat_ca():
+                    hc = str(m.get("hoat_chat") or "").strip().lower()
+                    if not hc or len(hc) < 4:
+                        continue
+                    if hc not in self.bang_hoat_chat:
+                        self.bang_hoat_chat[hc] = ThongTinDuocThu(
+                            ten_hoat_chat=hc,
+                            ten_biet_duoc=list(m.get("biet_duoc") or []),
+                            nhom_duoc_ly=str(m.get("nhom") or "Dược thư QG"),
+                            lieu_toi_da_ngay_mg=m.get("lieu_toi_da_ngay_mg"),
+                        )
+                    dt_ref = self.bang_hoat_chat[hc]
+                    if hc not in da_dang_ky_tu_khoa:
+                        self.automaton.them_tu_khoa(hc, {
+                            "loai": "HOAT_CHAT",
+                            "hoat_chat_chuan": hc,
+                            "thong_tin": dt_ref,
+                        })
+                        da_dang_ky_tu_khoa.add(hc)
+                    for alias in list(m.get("ten_khac") or []) + list(m.get("biet_duoc") or []):
+                        al = str(alias or "").strip()
+                        if len(al) >= 4 and al.lower() not in da_dang_ky_tu_khoa:
+                            self.automaton.them_tu_khoa(al, {
+                                "loai": "BIET_DUOC",
+                                "hoat_chat_chuan": hc,
+                                "thong_tin": dt_ref,
+                            })
+                            da_dang_ky_tu_khoa.add(al.lower())
+            except Exception:
+                pass
 
         self.automaton.xay_dung()
 

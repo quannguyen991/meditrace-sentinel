@@ -108,6 +108,24 @@ THAY_DUOC = {
     ],
 }
 
+THAY_DUOC_MO_RONG = {
+    "trung": [
+        ("hôm qua", "bữa qua"),
+        ("đau đầu", "nhức trốc"),
+        ("bà ngoại", "mệ ngoại"),
+        ("bà nội", "mệ nội"),
+        ("sốt", "hầm hầm"),
+    ],
+    "nam": [
+        ("nôn", "ói mửa"),
+        ("tiêu chảy", "đi tháo"),
+        ("sưng chân", "phù giò"),
+        ("cộm mắt", "xốn mắt"),
+        ("đau vùng lưng dưới", "đau ngang hông"),
+        ("nhanh", "mau lẹ"),
+    ],
+}
+
 # Từ DÙNG SAU chặn phép thay. Không có bảng này thì bộ sinh viết ra tiếng Việt
 # sai, và đó là lỗi tệ hơn không có phương ngữ: dữ liệu hỏng mà nhìn bằng số
 # không thấy.
@@ -122,6 +140,12 @@ CHAN_SAU = {
     "sốt": {"cao", "nhẹ", "siêu", "xuất", "phát", "rét", "ruột", "li"},
     "mệt": {"mỏi"},
     "ngất": {"xỉu"},
+}
+
+CHAN_SAU_MO_RONG = {
+    "nôn": {"nao", "mửa", "trớ", "thốc", "hết"},
+    "đau đầu": {"dữ", "âm"},
+    "nhanh": {"nhẹn", "chóng"},
 }
 
 # Hai từ bị BỎ HẲN khỏi bảng thay, dù có trong từ điển:
@@ -151,6 +175,7 @@ DA_BO = {"không": "nỏ", "làm": "mần"}
 # còn lại của THAY_DUOC đều là CHẮC trong `chuan_hoa`, vẫn giữ nghĩa chuẩn. Test
 # `test_giu_nguyen_khop_chuan_hoa` bắt khi hai bảng lệch nhau.
 GIU_NGUYEN = {"nóng hầm hập"}
+GIU_NGUYEN_MO_RONG = {"nóng hầm hập", "hầm hầm"}
 
 
 # ─── _mau() — Tạo mẫu tìm nguyên cụm, không phân biệt hoa thường ──────────────────────
@@ -201,7 +226,7 @@ def ve_tu_chuan(noi_dung):
 
 # ═══ doi_sang_phuong_ngu() — Đổi một số từ chuẩn trong câu sang phương ngữ của vùng ═══
 # Mỗi cặp đổi với xác suất 0,6; trả câu mới và các cặp đã đổi.
-def doi_sang_phuong_ngu(cau, vung, rng, ty_le=0.6):
+def doi_sang_phuong_ngu(cau, vung, rng, ty_le=0.6, mo_rong=False):
     """Đổi một số từ chuẩn trong `cau` sang dạng phương ngữ của `vung`.
 
     -> (cau_moi, [các cặp đã đổi]). Trả về cả danh sách đã đổi để bộ sinh ghi
@@ -213,7 +238,13 @@ def doi_sang_phuong_ngu(cau, vung, rng, ty_le=0.6):
     không còn là "hiểu câu có lẫn phương ngữ".
     """
     da_doi = []
-    for chuan, dia_phuong in THAY_DUOC.get(vung, []):
+    cap_list = list(THAY_DUOC.get(vung, []))
+    chan = dict(CHAN_SAU)
+    if mo_rong:
+        cap_list += list(THAY_DUOC_MO_RONG.get(vung, []))
+        for k, v in CHAN_SAU_MO_RONG.items():
+            chan[k] = set(chan.get(k, ())) | set(v)
+    for chuan, dia_phuong in cap_list:
         # Không phân biệt hoa thường: "Hôm kia" đầu câu và "hôm kia" giữa câu
         # là một từ. Ban đầu khớp phân biệt hoa thường, và hậu quả là mọi từ
         # đứng ở ĐẦU CÂU đều không bao giờ được đổi — đúng những chỗ dễ nhìn
@@ -225,7 +256,7 @@ def doi_sang_phuong_ngu(cau, vung, rng, ty_le=0.6):
         # Ranh giới TỪ không phải ranh giới TỪ GHÉP — xem CHAN_SAU.
         sau = cau[m.end():].lstrip()
         tu_sau = re.split(r"[^\wÀ-ỹ]", sau, maxsplit=1)[0].lower()
-        if tu_sau in CHAN_SAU.get(chuan, ()):
+        if tu_sau in chan.get(chuan, ()):
             continue
         if rng.random() > ty_le:
             continue

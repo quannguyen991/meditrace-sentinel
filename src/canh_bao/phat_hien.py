@@ -43,7 +43,7 @@ from src.canh_bao.loai import (CAN_XEM, CAO, LOI_PHAT_HIEN, NGHI_RUI_RO, THAP, T
                                CanhBao, muc_do)
 from src.duong_ong.b4_kiem_can_cu import DAU_DIEU_KIEN, DAU_NGHI
 from src.duong_ong.b1_cau_truc_menh_de import la_vai_nhan_vien
-from src.duong_ong.b2_gom_nguoi_thuc_the import TU_DIEN_THUOC, tach_luot
+from src.duong_ong.b2_gom_nguoi_thuc_the import DAU_TIEN_SU_GIA_DINH, TU_DIEN_THUOC, tach_luot
 from src.do_luong.thuoc_do_quy_gan import _tu_noi_dung
 
 
@@ -821,6 +821,25 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
                           f"{nhan} “{ten}” không xuất hiện ở lượt nào trong hội thoại.",
                           LOI_PHAT_HIEN, THAP, "thuc_the", loai_tt))
 
+    # 8b. Thuốc khẳng định thực tế nhưng thiếu hoàn toàn thông tin cấu trúc (liều/tần suất/trạng thái)
+    if (loai_tt in ("thuoc", "thuoc_nti") and not getattr(p, "thuoc", None)
+            and _thuc_te(p) and not getattr(p, "phu_dinh", False) and not so_lieu.tach(p.noi_dung)):
+        ra.append(tao(ctx, p, "MEDICATION_ENTITY_MISMATCH", dan, [ctx.luot[s][1] for s in dan[:1]],
+                      "Mệnh đề thuốc thiếu thông tin liều/trạng thái có cấu trúc cần bác sĩ đối chiếu.",
+                      NGHI_RUI_RO, TRUNG, "thuc_the:thieu_chi_tiet_thuoc", loai_tt))
+
+    # 8c. Phát hiện âm tiết mất dấu kiểu nhiễu ASR trong nội dung y khoa trọng yếu
+    if loai_tt in ("di_ung", "thuoc", "thuoc_nti", "chan_doan"):
+        loi_dau = re.findall(
+            r"(?<!\w)(chuc|nieu|nhiem|thieu|duong|khang|truoc|huyet|tieu|loan|"
+            r"viem|benh|phoi|than|ruot|dia|bon|quan|vung|lung|beo|roi|ung|dung|nang|phai|cap|hoa)(?!\w)",
+            _thuong(p.noi_dung),
+        )
+        if loi_dau:
+            ra.append(tao(ctx, p, "UNSUPPORTED_INFORMATION", dan, [ctx.luot[s][1] for s in dan[:1]],
+                          f"Nội dung chứa từ mất dấu nghi nhiễu ASR ({', '.join(dict.fromkeys(loi_dau))}).",
+                          NGHI_RUI_RO, TRUNG, "thuc_the:nhieu_dau_asr", loai_tt))
+
     # Nếu người nhà nói bằng ngôi thứ nhất ("tôi thì...", "em thì...") nhưng bản ghi lại
     # gán sang ten_chu_the khác (vd "mẹ", "bố") không xuất hiện trong trích dẫn -> WRONG_SUBJECT
     if getattr(p, "chu_the_id", 0) != 0 and _thuong(getattr(p, "nguoi_noi", "")) == "người nhà":
@@ -828,10 +847,17 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         trich_list = [str(x) for x in (getattr(p, "trich_dan", None) or []) if x]
         trich_low = " ".join(_thuong(x) for x in trich_list)
         if ten_ct and ten_ct not in ("người nhà", "người khác", "không rõ") and ten_ct not in trich_low:
-            if re.search(r"(?:^|\b)(tôi|em|mình|cháu)\s+(?:thì|bị|dị ứng|đang|có|uống)\b", trich_low):
+            if re.search(r"(?:^|\b)(tôi|em|mình|cháu|toi|minh|chau)\s+(?:thì|thi|bị|bi|dị ứng|di ung|đang|dang|có|co|uống|uong)\b", trich_low):
                 ra.append(tao(ctx, p, "WRONG_SUBJECT", dan, trich_list[:2],
                               f"Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc '{ten_ct}'.",
                               LOI_PHAT_HIEN, THAP, "thuc_the:ngoi_nhat", loai_tt))
+        elif (loai_tt in ("di_ung", "thuoc", "thuoc_nti")
+              and ten_ct in ("bố", "mẹ", "chồng", "vợ", "ba", "má")
+              and ten_ct in trich_low
+              and not DAU_TIEN_SU_GIA_DINH.search(trich_low)):
+            ra.append(tao(ctx, p, "FAMILY_PATIENT_MIXUP", dan, trich_list[:2],
+                          f"Người nhà nhắc '{ten_ct}' trên thông tin trọng yếu; cần xác nhận là bệnh nhân hay người thân.",
+                          NGHI_RUI_RO, TRUNG, "thuc_the:nguoi_nha_chinh", loai_tt))
     return ra
 
 

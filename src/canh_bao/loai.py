@@ -278,7 +278,7 @@ CHUA_PHAT_HIEN = {
 
 # ----------------------------------------------------------------- mức độ
 # Loại thông tin — MỘT định nghĩa với `cong_rui_ro.loai_thong_tin`.
-LOAI_NANG = ("di_ung", "thuoc", "chan_doan")
+LOAI_NANG = ("di_ung", "thuoc", "thuoc_nti", "chan_doan")
 # Mã mà sai ở BẤT KỲ loại thông tin nào cũng nguy hiểm — không hạ xuống.
 LUON_CAO = {"NEGATION_FLIP", "NEGATION_SCOPE_ERROR", "UNKNOWN_AS_NEGATIVE", "FABRICATED_MEDICATION", "FABRICATED_ALLERGY",
             "DOSE_MISMATCH", "DECIMAL_MISMATCH", "UNIT_MISMATCH", "DISCONTINUED_AS_CURRENT",

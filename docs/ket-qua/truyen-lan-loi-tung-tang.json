@@ -10,11 +10,10 @@
       "loi_bi_loai_tang_2_3": 17,
       "loi_tang_1_con_hieu_luc": 115,
       "loi_nguy_hiem_tang_1": 25,
-      "loi_bi_chan_tang_4_5": 77,
-      "loi_nguy_hiem_bi_chan_tang_4_5": 20,
-      "loi_nguy_hiem_lot_vao_than": 5,
-      "ty_le_chan_loi_tang_4_5_pct": 67.0,
-      "ty_le_chan_loi_nguy_hiem_pct": 80.0
+      "loi_bi_chan_tang_4_5": 82,
+      "loi_nguy_hiem_bi_chan_tang_4_5": 25,
+      "ty_le_chan_loi_tang_4_5_pct": 71.3,
+      "ty_le_chan_loi_nguy_hiem_pct": 100.0
     },
     "thach_thuc_doi_chu_the_phat_trien": {
       "so_ca": 80,
@@ -25,11 +24,11 @@
       "loi_bi_loai_tang_2_3": 6,
       "loi_tang_1_con_hieu_luc": 274,
       "loi_nguy_hiem_tang_1": 113,
-      "loi_bi_chan_tang_4_5": 158,
-      "loi_nguy_hiem_bi_chan_tang_4_5": 99,
-      "loi_nguy_hiem_lot_vao_than": 14,
-      "ty_le_chan_loi_tang_4_5_pct": 57.7,
-      "ty_le_chan_loi_nguy_hiem_pct": 87.6
+      "loi_bi_chan_tang_4_5": 168,
+      "loi_nguy_hiem_bi_chan_tang_4_5": 109,
+      "loi_nguy_hiem_lot_vao_than": 4,
+      "ty_le_chan_loi_tang_4_5_pct": 61.3,
+      "ty_le_chan_loi_nguy_hiem_pct": 96.5
     },
     "thach_thuc_nhieu_asr_phat_trien": {
       "so_ca": 80,
@@ -38,13 +37,13 @@
       "con_hieu_luc": 706,
       "loi_tang_1_con_hieu_luc": 268,
       "loi_nguy_hiem_tang_1": 67,
-      "loi_nguy_hiem_lot_vao_than": 31,
-      "loi_bi_chan_tang_4_5": 84,
-      "loi_nguy_hiem_bi_chan_tang_4_5": 36,
+      "loi_bi_chan_tang_4_5": 107,
+      "loi_nguy_hiem_bi_chan_tang_4_5": 58,
+      "loi_nguy_hiem_lot_vao_than": 9,
       "tang_2_3_thay_the": 6,
       "loi_bi_loai_tang_2_3": 5,
-      "ty_le_chan_loi_tang_4_5_pct": 31.3,
-      "ty_le_chan_loi_nguy_hiem_pct": 53.7
+      "ty_le_chan_loi_tang_4_5_pct": 39.9,
+      "ty_le_chan_loi_nguy_hiem_pct": 86.6
     },
     "thach_thuc_phuong_ngu_phat_trien": {
       "so_ca": 80,
@@ -52,14 +51,14 @@
       "tong_phat_bieu": 742,
       "con_hieu_luc": 734,
       "loi_tang_1_con_hieu_luc": 108,
-      "loi_bi_chan_tang_4_5": 42,
+      "loi_bi_chan_tang_4_5": 44,
       "loi_nguy_hiem_tang_1": 15,
-      "loi_nguy_hiem_bi_chan_tang_4_5": 12,
+      "loi_nguy_hiem_bi_chan_tang_4_5": 14,
       "tang_2_3_thay_the": 8,
       "loi_bi_loai_tang_2_3": 8,
-      "loi_nguy_hiem_lot_vao_than": 3,
-      "ty_le_chan_loi_tang_4_5_pct": 38.9,
-      "ty_le_chan_loi_nguy_hiem_pct": 80.0
+      "loi_nguy_hiem_lot_vao_than": 1,
+      "ty_le_chan_loi_tang_4_5_pct": 40.7,
+      "ty_le_chan_loi_nguy_hiem_pct": 93.3
     }
   },
   "tong_hop": {
@@ -71,10 +70,10 @@
     "loi_bi_loai_tang_2_3": 36,
     "loi_tang_1_con_hieu_luc": 765,
     "loi_nguy_hiem_tang_1": 220,
-    "loi_bi_chan_tang_4_5": 361,
-    "loi_nguy_hiem_bi_chan_tang_4_5": 167,
-    "loi_nguy_hiem_lot_vao_than": 53,
-    "ty_le_chan_loi_tang_4_5_pct": 47.2,
-    "ty_le_chan_loi_nguy_hiem_pct": 75.9
+    "loi_bi_chan_tang_4_5": 401,
+    "loi_nguy_hiem_bi_chan_tang_4_5": 206,
+    "loi_nguy_hiem_lot_vao_than": 14,
+    "ty_le_chan_loi_tang_4_5_pct": 52.4,
+    "ty_le_chan_loi_nguy_hiem_pct": 93.6
   }
 }
