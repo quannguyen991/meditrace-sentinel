@@ -542,8 +542,15 @@ class ContextualPrefixTrie600:
         da_ghi: Set[str] = set()
 
         # 1. Quét các cụm biến thể ngữ âm đa âm tiết (G2P aliases)
+        _ngu_canh_thuoc = bool(re.search(
+            r"(?<!\w)(?:\d+\s+viên|uống|nhai|ngậm|tiêm|truyền|bôi|xịt|nhỏ|kê|toa|đơn\s+thuốc|thuốc|vỉ|gói|liều|dị\s+ứng|mg|ml|mcg)(?!\w)",
+            vb_low,
+        ))
         for cum_am_vi, ten_chuan in sorted(self._bang_g2p_thuoc.items(), key=lambda kv: -len(kv[0])):
             if not cum_am_vi or cum_am_vi == ten_chuan.lower():
+                continue
+            # Cụm 2 âm tiết quá ngắn (vd "a móc", "ô mê", "pa ra") chỉ gợi ý khi câu có ngữ cảnh thuốc
+            if len(cum_am_vi.split()) <= 2 and len(cum_am_vi) <= 8 and not _ngu_canh_thuoc:
                 continue
             mau = re.compile(rf"(?i)(?<![\wÀ-ỹ]){re.escape(cum_am_vi)}(?![\wÀ-ỹ])")
             for m in mau.finditer(vb):

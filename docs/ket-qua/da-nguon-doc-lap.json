@@ -3,29 +3,29 @@
     "co_du_lieu": true,
     "so_cau": 1603,
     "cho_thay_tu": 4264,
-    "doi_dung": 2022,
-    "ty_le_doi_dung_pct": 47.4,
-    "doi_khac_chu": 655,
-    "tong_phu_pct": 62.8,
-    "doi_thua": 80,
+    "doi_dung": 1192,
+    "ty_le_doi_dung_pct": 28.0,
+    "doi_khac_chu": 392,
+    "tong_phu_pct": 37.1,
+    "doi_thua": 44,
     "loi_tu_goc_pct": 30.1,
-    "loi_tu_sau_pct": 16.5
+    "loi_tu_sau_pct": 21.9
   },
   "ViHealthQA_test": {
     "co_du_lieu": true,
     "so_mau": 2013,
-    "mau_chuan_hoa_phuong_ngu": 112,
-    "mau_phat_hien_thuoc_aho_corasick": 4,
+    "mau_chuan_hoa_phuong_ngu": 96,
+    "mau_phat_hien_thuoc_aho_corasick": 14,
     "mau_trich_so_lieu_lam_sang": 459,
     "mau_che_pii": 0,
     "pii_con_sot": 0,
-    "mau_phat_hien_thuoc_trong_cau_tra_loi": 23
+    "mau_phat_hien_thuoc_trong_cau_tra_loi": 42
   },
   "ViMedAQA_test_500": {
     "co_du_lieu": true,
     "so_mau": 500,
     "mau_chuan_hoa_phuong_ngu": 17,
-    "mau_phat_hien_thuoc_aho_corasick": 33,
+    "mau_phat_hien_thuoc_aho_corasick": 87,
     "mau_trich_so_lieu_lam_sang": 49,
     "mau_che_pii": 1,
     "pii_con_sot": 0
@@ -33,21 +33,24 @@
   "ViMQ_test": {
     "co_du_lieu": true,
     "so_mau": 1000,
-    "mau_chuan_hoa_phuong_ngu": 58,
-    "mau_phat_hien_thuoc_aho_corasick": 2,
+    "mau_chuan_hoa_phuong_ngu": 49,
+    "mau_phat_hien_thuoc_aho_corasick": 10,
     "mau_trich_so_lieu_lam_sang": 164,
     "mau_che_pii": 0,
     "pii_con_sot": 0,
     "tong_thuc_the_thuoc_vimq": 334,
-    "khop_aho_corasick": 2
+    "khop_aho_corasick": 9
   },
   "PhoNER_COVID19_test_1000": {
     "co_du_lieu": true,
     "so_mau": 1000,
-    "mau_chuan_hoa_phuong_ngu": 37,
+    "mau_chuan_hoa_phuong_ngu": 5,
     "mau_phat_hien_thuoc_aho_corasick": 0,
     "mau_trich_so_lieu_lam_sang": 297,
     "mau_che_pii": 92,
-    "pii_con_sot": 0
+    "pii_con_sot": 0,
+    "gold_pii_name_id_tong": 847,
+    "gold_pii_name_id_che_duoc": 10,
+    "gold_pii_name_id_recall_pct": 1.2
   }
 }

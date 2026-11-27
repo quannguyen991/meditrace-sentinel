@@ -28,10 +28,10 @@
       "ma": "UNSUPPORTED_INFORMATION",
       "nhom": "UNSUPPORTED",
       "tin_cay": "on_dinh",
-      "so_lan_bao": 280,
-      "chinh_xac_cung_loai": 0.311,
-      "chinh_xac_co_loi_bat_ky": 0.518,
-      "so_lan_doi_trang_thai": 104
+      "so_lan_bao": 274,
+      "chinh_xac_cung_loai": 0.31,
+      "chinh_xac_co_loi_bat_ky": 0.522,
+      "so_lan_doi_trang_thai": 98
     },
     {
       "ma": "WRONG_SUBJECT",
@@ -106,15 +106,6 @@
       "so_lan_doi_trang_thai": 15
     },
     {
-      "ma": "MEDICATION_ENTITY_MISMATCH",
-      "nhom": "ENTITY_VALUE",
-      "tin_cay": "on_dinh",
-      "so_lan_bao": 43,
-      "chinh_xac_cung_loai": 1.0,
-      "chinh_xac_co_loi_bat_ky": 1.0,
-      "so_lan_doi_trang_thai": 43
-    },
-    {
       "ma": "PAST_CURRENT_CONFUSION",
       "nhom": "TEMPORAL",
       "tin_cay": "on_dinh",
@@ -149,6 +140,15 @@
       "chinh_xac_cung_loai": 0.875,
       "chinh_xac_co_loi_bat_ky": 0.938,
       "so_lan_doi_trang_thai": 16
+    },
+    {
+      "ma": "DOSE_MISMATCH",
+      "nhom": "ENTITY_VALUE",
+      "tin_cay": "on_dinh",
+      "so_lan_bao": 10,
+      "chinh_xac_cung_loai": 1.0,
+      "chinh_xac_co_loi_bat_ky": 1.0,
+      "so_lan_doi_trang_thai": 10
     },
     {
       "ma": "EVIDENCE_CONTEXT_MISSING",
@@ -216,15 +216,6 @@
     {
       "ma": "CORRECTION_NOT_APPLIED",
       "nhom": "STATE_UPDATE",
-      "tin_cay": "on_dinh",
-      "so_lan_bao": 3,
-      "chinh_xac_cung_loai": 1.0,
-      "chinh_xac_co_loi_bat_ky": 1.0,
-      "so_lan_doi_trang_thai": 3
-    },
-    {
-      "ma": "DOSE_MISMATCH",
-      "nhom": "ENTITY_VALUE",
       "tin_cay": "on_dinh",
       "so_lan_bao": 3,
       "chinh_xac_cung_loai": 1.0,
@@ -321,8 +312,8 @@
     },
     "khong_can_cu": {
       "so_loi": 235,
-      "co_canh_bao_cung_loai": 0.413,
-      "co_canh_bao_bat_ky": 0.604
+      "co_canh_bao_cung_loai": 0.391,
+      "co_canh_bao_bat_ky": 0.591
     },
     "sai_chu_the": {
       "so_loi": 218,
@@ -351,13 +342,13 @@
     },
     "sai_thoi_gian": {
       "so_loi": 19,
-      "co_canh_bao_cung_loai": 0.263,
+      "co_canh_bao_cung_loai": 0.158,
       "co_canh_bao_bat_ky": 0.474
     },
     "sai_thuoc": {
       "so_loi": 109,
-      "co_canh_bao_cung_loai": 0.468,
-      "co_canh_bao_bat_ky": 0.716
+      "co_canh_bao_cung_loai": 0.174,
+      "co_canh_bao_bat_ky": 0.633
     }
   },
   "chinh_sach": {
@@ -376,17 +367,17 @@
     "D": {
       "so_phat_bieu": 2789,
       "co_loi": 765,
-      "vao_than": 2182,
-      "lot": 364,
-      "ty_le_lot": 0.476,
-      "lot_nguy_hiem": 14,
+      "vao_than": 2198,
+      "lot": 376,
+      "ty_le_lot": 0.492,
+      "lot_nguy_hiem": 26,
       "loi_nguy_hiem": 220,
-      "ty_le_lot_nguy_hiem": 0.064,
-      "chan_thua": 206,
-      "ty_le_chan_thua": 0.102
+      "ty_le_lot_nguy_hiem": 0.118,
+      "chan_thua": 202,
+      "ty_le_chan_thua": 0.1
     }
   },
-  "canh_bao_hien_moi_phat_bieu": 0.449,
+  "canh_bao_hien_moi_phat_bieu": 0.434,
   "bo_sot": {
     "dap_an_sot": 200,
     "sot_co_canh_bao": 24,

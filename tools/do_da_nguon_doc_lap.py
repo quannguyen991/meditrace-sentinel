@@ -123,19 +123,58 @@ def danh_gia_vimq(base_dir: Path) -> Dict[str, Any]:
     }
 
 
+def _trich_thuc_the_gold_phoner(words: List[str], tags: List[str], loai_target: set) -> List[str]:
+    spans: List[str] = []
+    cur: List[str] = []
+    for w, t in zip(words, tags):
+        if t.startswith("B-") and t[2:] in loai_target:
+            if cur:
+                spans.append(" ".join(cur))
+            cur = [w]
+        elif t.startswith("I-") and cur and t[2:] in loai_target:
+            cur.append(w)
+        else:
+            if cur:
+                spans.append(" ".join(cur))
+                cur = []
+    if cur:
+        spans.append(" ".join(cur))
+    return spans
+
+
 def danh_gia_phoner(base_dir: Path) -> Dict[str, Any]:
     p = base_dir / "PhoNER_COVID19" / "data" / "syllable" / "test_syllable.json"
     if not p.exists():
         return {"co_du_lieu": False}
-    caus = []
+    caus: List[str] = []
+    gold_tong = 0
+    gold_che = 0
     for line in p.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         obj = json.loads(line)
         words = obj.get("words") or []
-        if words:
-            caus.append(" ".join(words))
-    return {"co_du_lieu": True, **_quet_van_ban_lam_sang(caus[:1000])}
+        tags = obj.get("tags") or []
+        if not words:
+            continue
+        van = " ".join(words)
+        caus.append(van)
+        if len(caus) <= 1000 and tags:
+            spans = _trich_thuc_the_gold_phoner(words, tags, {"NAME", "PATIENT_ID"})
+            if spans:
+                an = khu_dinh_danh.ClinicalDeidentifier.an_danh_van_ban(van)
+                sau_che = an.van_ban_da_an_danh
+                for sp in spans:
+                    gold_tong += 1
+                    if sp not in sau_che:
+                        gold_che += 1
+    return {
+        "co_du_lieu": True,
+        **_quet_van_ban_lam_sang(caus[:1000]),
+        "gold_pii_name_id_tong": gold_tong,
+        "gold_pii_name_id_che_duoc": gold_che,
+        "gold_pii_name_id_recall_pct": round(gold_che / max(gold_tong, 1) * 100, 1),
+    }
 
 
 def chay_tat_ca() -> Dict[str, Any]:

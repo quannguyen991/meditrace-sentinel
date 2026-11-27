@@ -687,10 +687,12 @@ class BoTraCuuDuocThuAhoCorasick:
                         continue
                     if hc not in self.bang_hoat_chat:
                         self.bang_hoat_chat[hc] = ThongTinDuocThu(
+                            ma_hoat_chat=f"TTT_{re.sub(r'[^a-z0-9]', '_', hc).upper()}",
                             ten_hoat_chat=hc,
-                            ten_biet_duoc=list(m.get("biet_duoc") or []),
+                            ten_biet_duoc=list(m.get("ten_khac") or []) + list(m.get("biet_duoc") or []),
                             nhom_duoc_ly=str(m.get("nhom") or "Dược thư QG"),
-                            lieu_toi_da_ngay_mg=m.get("lieu_toi_da_ngay_mg"),
+                            ma_atc="",
+                            lieu_toi_da_24h_mg=m.get("lieu_toi_da_ngay_mg"),
                         )
                     dt_ref = self.bang_hoat_chat[hc]
                     if hc not in da_dang_ky_tu_khoa:
@@ -709,8 +711,9 @@ class BoTraCuuDuocThuAhoCorasick:
                                 "thong_tin": dt_ref,
                             })
                             da_dang_ky_tu_khoa.add(al.lower())
-            except Exception:
-                pass
+            except Exception as exc:
+                import warnings
+                warnings.warn(f"Không nạp được tri_thuc_thuoc bổ sung: {exc}", RuntimeWarning, stacklevel=2)
 
         self.automaton.xay_dung()
 

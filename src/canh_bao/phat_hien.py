@@ -821,23 +821,24 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
                           f"{nhan} “{ten}” không xuất hiện ở lượt nào trong hội thoại.",
                           LOI_PHAT_HIEN, THAP, "thuc_the", loai_tt))
 
-    # 8b. Thuốc khẳng định thực tế nhưng thiếu hoàn toàn thông tin cấu trúc (liều/tần suất/trạng thái)
+    # 8b. Lượt dẫn có liều/số liệu thuốc nhưng mệnh đề thiếu trường `thuoc` và số liệu
     if (loai_tt in ("thuoc", "thuoc_nti") and not getattr(p, "thuoc", None)
-            and _thuc_te(p) and not getattr(p, "phu_dinh", False) and not so_lieu.tach(p.noi_dung)):
-        ra.append(tao(ctx, p, "MEDICATION_ENTITY_MISMATCH", dan, [ctx.luot[s][1] for s in dan[:1]],
-                      "Mệnh đề thuốc thiếu thông tin liều/trạng thái có cấu trúc cần bác sĩ đối chiếu.",
+            and _thuc_te(p) and not getattr(p, "phu_dinh", False)
+            and not so_lieu.tach(p.noi_dung)
+            and so_lieu.tach(ctx.van_dan(p))):
+        ra.append(tao(ctx, p, "DOSE_MISMATCH", dan, [ctx.luot[s][1] for s in dan[:1]],
+                      "Lượt nói được dẫn có nêu liều lượng/số liệu thuốc nhưng mệnh đề thiếu trường thuốc có cấu trúc.",
                       NGHI_RUI_RO, TRUNG, "thuc_the:thieu_chi_tiet_thuoc", loai_tt))
 
-    # 8c. Phát hiện âm tiết mất dấu kiểu nhiễu ASR trong nội dung y khoa trọng yếu
+    # 8c. Phát hiện âm tiết tiếng Việt mất dấu bắt buộc kiểu nhiễu ASR (chỉ tập từ không tồn tại ở dạng không dấu)
     if loai_tt in ("di_ung", "thuoc", "thuoc_nti", "chan_doan"):
         loi_dau = re.findall(
-            r"(?<!\w)(chuc|nieu|nhiem|thieu|duong|khang|truoc|huyet|tieu|loan|"
-            r"viem|benh|phoi|than|ruot|dia|bon|quan|vung|lung|beo|roi|ung|dung|nang|phai|cap|hoa)(?!\w)",
+            r"(?<!\w)(chuc|nieu|nhiem|thieu|duong|khang|truoc|huyet|tieu|viem|benh|phoi|ruot|dia|vung|phai)(?!\w)",
             _thuong(p.noi_dung),
         )
         if loi_dau:
             ra.append(tao(ctx, p, "UNSUPPORTED_INFORMATION", dan, [ctx.luot[s][1] for s in dan[:1]],
-                          f"Nội dung chứa từ mất dấu nghi nhiễu ASR ({', '.join(dict.fromkeys(loi_dau))}).",
+                          f"Nội dung chứa âm tiết mất dấu nghi nhiễu ASR ({', '.join(dict.fromkeys(loi_dau))}).",
                           NGHI_RUI_RO, TRUNG, "thuc_the:nhieu_dau_asr", loai_tt))
 
     # Nếu người nhà nói bằng ngôi thứ nhất ("tôi thì...", "em thì...") nhưng bản ghi lại
@@ -846,14 +847,22 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
         ten_ct = _thuong(getattr(p, "ten_chu_the", "") or "")
         trich_list = [str(x) for x in (getattr(p, "trich_dan", None) or []) if x]
         trich_low = " ".join(_thuong(x) for x in trich_list)
-        if ten_ct and ten_ct not in ("người nhà", "người khác", "không rõ") and ten_ct not in trich_low:
+        co_ten_ct = bool(
+            ten_ct
+            and re.search(rf"(?<![\wÀ-ỹ]){re.escape(ten_ct)}(?![\wÀ-ỹ])", trich_low)
+            and not re.search(
+                rf"(?<![\wÀ-ỹ]){re.escape(ten_ct)}\s+(?:ngày|tháng|năm|tuần|lần|viên|gói|ống|giờ|phút|độ|kg|lít|giọt|chữ|thứ|phần)\b",
+                trich_low,
+            )
+        )
+        if ten_ct and ten_ct not in ("người nhà", "người khác", "không rõ") and not co_ten_ct:
             if re.search(r"(?:^|\b)(tôi|em|mình|cháu|toi|minh|chau)\s+(?:thì|thi|bị|bi|dị ứng|di ung|đang|dang|có|co|uống|uong)\b", trich_low):
                 ra.append(tao(ctx, p, "WRONG_SUBJECT", dan, trich_list[:2],
                               f"Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc '{ten_ct}'.",
                               LOI_PHAT_HIEN, THAP, "thuc_the:ngoi_nhat", loai_tt))
         elif (loai_tt in ("di_ung", "thuoc", "thuoc_nti")
               and ten_ct in ("bố", "mẹ", "chồng", "vợ", "ba", "má")
-              and ten_ct in trich_low
+              and co_ten_ct
               and not DAU_TIEN_SU_GIA_DINH.search(trich_low)):
             ra.append(tao(ctx, p, "FAMILY_PATIENT_MIXUP", dan, trich_list[:2],
                           f"Người nhà nhắc '{ten_ct}' trên thông tin trọng yếu; cần xác nhận là bệnh nhân hay người thân.",

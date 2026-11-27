@@ -143,6 +143,7 @@ CHAN_SAU = {
 }
 
 CHAN_SAU_MO_RONG = {
+    "sốt": set(CHAN_SAU["sốt"]),
     "nôn": {"nao", "mửa", "trớ", "thốc", "hết"},
     "đau đầu": {"dữ", "âm"},
     "nhanh": {"nhẹn", "chóng"},
