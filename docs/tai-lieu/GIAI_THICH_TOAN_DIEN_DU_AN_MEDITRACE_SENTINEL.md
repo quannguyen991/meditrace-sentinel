@@ -106,8 +106,8 @@ Thư mục lõi Python `src/` được quy hoạch rành mạch thành **6 gói 
   * **Cổng K7 & Tầng 3 (`FSM`):** Khi người nói tự sửa (*"uống 2 viên… à nhầm 1 viên"*), bản cũ chuyển sang `bị thay thế` ở `CẦN XÁC NHẬN` để giữ vết kiểm toán chứ không xóa mất.
   * **Lớp cảnh báo Chính sách D (`src/canh_bao/` — cập nhật 27/11/2026):**
     * Đưa `"thuoc_nti"` vào `LOAI_NANG` (`src/canh_bao/loai.py`) để thuốc khoảng điều trị hẹp được bảo vệ ngang mức `"thuoc"` và `"di_ung"`.
-    * Bắt rơi liều (`DOSE_MISMATCH`) khi lượt dẫn có nêu số liệu/liều thuốc nhưng mệnh đề rút ra thiếu cả `thuoc` lẫn số liệu (`src/canh_bao/phat_hien.py`).
-    * Bắt 16 âm tiết tiếng Việt mất dấu bắt buộc nghi nhiễu ASR (`thuc_the:nhieu_dau_asr` -> `UNSUPPORTED_INFORMATION`) và lỗi trộn chủ thể người nhà có kiểm ranh giới từ (`FAMILY_PATIENT_MIXUP`, loại trừ tiền sử gia đình và số đếm *"ba ngày/ba lần"*).
+    * Bắt rơi liều (`DOSE_MISMATCH`) khi lượt dẫn có nêu đơn vị liều thuốc (`s.ho == "lieu"`, vd `mg`, `viên`, `ml`) nhưng mệnh đề rút ra thiếu cả `thuoc` lẫn liều (`src/canh_bao/phat_hien.py`).
+    * Bắt 16 âm tiết tiếng Việt mất dấu bắt buộc nghi nhiễu ASR (`thuc_the:nhieu_dau_asr` -> `UNSUPPORTED_INFORMATION`, bỏ qua chữ viết tắt in hoa như `DIA`) và lỗi trộn chủ thể người nhà có kiểm ranh giới từ (`FAMILY_PATIENT_MIXUP`, loại trừ tiền sử gia đình và số đếm *"ba ngày/ba lần"*).
 * **Tầng 5 (`b5_viet_ban_nhap.py` & `b5_xep_cho_cong_rui_ro.py`):** Tuyệt đối không dùng AI viết tự do; lắp ghép câu cố định vào đúng ngăn SOAP hoặc chuyển sang `CẦN XÁC NHẬN`.
 
 ---
@@ -175,8 +175,8 @@ Toàn bộ các cải tiến được đo đạc và tái lập trực tiếp b�
 
 | Hạng mục đo đạc | Đối chứng / Trước nâng cấp | Kết quả hiện tại (Cập nhật 27/11/2026) | Phạm vi & Ghi chú trung thực |
 | :--- | :--- | :--- | :--- |
-| **Kiểm thử tự động toàn kho** | 370 test ban đầu | **`1.970` test Pytest (`25` skip) + `96/96` test TypeScript/BFF** | TypeScript `tsc --noEmit` 0 lỗi, build sản xuất thành công. |
-| **Lỗi nguy hiểm lọt thân bản nháp (`lot_nguy_hiem`)** | Chính sách C: `45,9%` (`101/220`)<br>Chính sách D cũ: `24,1%` (`53/220`) | **Chính sách D mới: `11,8%` (`26/220`) — chặn `88,2%` (`194/220`)** | Đo trên 4 tập phát triển (300 ca, 2.789 phát biểu, so với bộ chấm tự động); đổi lại chặn thừa `8,0%` (C) → `10,0%` (D). Tập giữ kín `thach_thuc_v2` giữ `0,946` (`doi_chu_the`) & `0,871` (`cay-loi`). |
+| **Kiểm thử tự động toàn kho** | 370 test ban đầu | **`1.960+` test Pytest (`25–27` skip) + `96/96` test TypeScript/BFF** | TypeScript `tsc --noEmit` 0 lỗi, build sản xuất thành công. |
+| **Lỗi nguy hiểm lọt thân bản nháp (`lot_nguy_hiem`)** | Chính sách C: `45,9%` (`101/220`)<br>Chính sách D cũ: `24,1%` (`53/220`) | **Chính sách D mới: `11,8%` (`26/220`) — chặn `88,2%` (`194/220`)** | Đo trên **chính 4 tập phát triển đã dùng để viết các luật mới** (300 ca, 2.789 phát biểu, so với bộ chấm tự động — chưa phải số liệu trên tập kín); đổi lại chặn thừa `8,0%` (C) → `10,0%` (D). Tập giữ kín `thach_thuc_v2` giữ `0,946` (`doi_chu_the`) & `0,871` (`cay-loi`). |
 | **Chặn lỗi nguy hiểm theo nhóm (`do_truyen_lan_loi_tung_tang`)** | Tổng tuyến: `75,9%` (`167/220`)<br>Nhiễu ASR: `53,7%` (`36/67`) | **Tổng tuyến: `88,2%` (`194/220`)** — Đổi chủ thể `96,5%`, Phương ngữ `93,3%`, Đính chính `84,0%`, Nhiễu ASR **`74,6%` (`50/67`)** | Trên cùng 4 tập thách thức phát triển (`docs/ket-qua/truyen-lan-loi-tung-tang.json`). |
 | **Tỷ lệ bỏ sót mệnh đề (`bo-sot-qwen3-4b.md`)** | Qwen3-4B chưa train: `43,1%` | **Qwen3-4B + QLoRA: `11,5%`** (Wilson 95%: `8,4%–15,6%`, 0 lỗi JSON) | Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề); lưu ý trọng số Qwen3-4B chạy trên GPU 12 GB. |
 | **Chuẩn hóa phương ngữ trên `ViDia2Std/test.csv`** | Lỗi từ gốc so với câu chuẩn: `30,1%` | **Đổi đúng `28,0%` (`1.192/4.264`), tổng phủ `37,1%`, lỗi từ giảm còn `21,9%` (`doi_thua: 44`)** | 1.603 câu phương ngữ 63 tỉnh; bảng có khai thác thêm từ `ViDia2Std/train.csv`, giữ nguyên từ y khoa chuẩn. |

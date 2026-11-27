@@ -103,56 +103,68 @@ d:\Claude\meditrace-ma-nguon\
 ├── data/                                      # Dữ liệu mẫu, cache trích xuất (trich_*_hl.jsonl)
 ├── models/                                    # Thư mục lưu checkpoint QLoRA adapter
 │
-├── src/                                       # TOÀN BỘ MÃ NGUỒN XỬ LÝ LÕI (PYTHON)
-│   ├── audio/                                 # Module gỡ băng âm thanh & ASR
-│   │   ├── pipeline.py                        # Pipeline gỡ băng PhoWhisper + Pyannote diarization
-│   │   └── storage.py                         # Quản lý lưu trữ phiên âm thanh cục bộ
+├── src/                                       # MÃ NGUỒN XỬ LÝ LÕI PYTHON (6 GÓI NGHIỆP VỤ + AUDIO/TRAIN)
+│   ├── audio/                                 # Gỡ băng PhoWhisper, tách vai Pyannote & Trie G2P 600 thuốc
+│   │   ├── pipeline.py                        # Pipeline gỡ băng & gợi ý vai người nói
+│   │   ├── storage.py                         # Quản lý lưu trữ phiên âm thanh cục bộ
+│   │   └── asr/                               # schemas.py, disagreement.py, contextual_trie_600.py, phowhisper_provider.py
 │   │
-│   ├── nhanh.py                               # ĐIỀU PHỐI ĐƯỜNG ỐNG: So sánh nhánh A (AI thuần) và C (MediTrace)
-│   ├── phat_bieu.py                           # Định nghĩa cấu trúc mẩu tin lâm sàng nguyên tử (PhatBieu)
-│   ├── thuc_the.py                            # Tầng 2: Gom nhóm đại từ nhân xưng & liên kết thực thể
-│   ├── cap_nhat.py                            # Tầng 3: Máy trạng thái FSM xử lý đính chính và mâu thuẫn
-│   ├── khoa_bang_chung.py                     # Tầng 4: Bộ 7 cổng khóa bằng chứng K1-K7 đối soát thoại gốc
-│   ├── cong_rui_ro.py                         # Tầng 4: Phân loại rủi ro lâm sàng & cổng cách ly an toàn
-│   ├── sinh_benh_an.py                        # Tầng 5: Bộ mẫu sinh bệnh án SOAP từ bảng mệnh đề đã duyệt
-│   ├── dich_vu.py                             # Máy chủ HTTP API cục bộ (cổng 8765) cho Frontend Web
+│   ├── duong_ong/                             # ĐƯỜNG ỐNG 5 TẦNG (Bước 0 -> Bước 6)
+│   │   ├── b0_chuan_hoa_phuong_ngu.py         # Bước 0: Chuẩn hoá phương ngữ 3 miền kèm khiên bảo vệ y khoa
+│   │   ├── b1_cau_truc_menh_de.py             # Bước 1: Định nghĩa cấu trúc mệnh đề nguyên tử `PhatBieu`
+│   │   ├── b2_gom_nguoi_thuc_the.py           # Bước 2: Gom chủ thể, đại từ nhân xưng & pro-drop (`b2_bu_chu_ngu_tinh_luoc.py`)
+│   │   ├── b3_cap_nhat_trang_thai.py          # Bước 3: Máy trạng thái FSM xử lý đính chính & mâu thuẫn
+│   │   ├── b4_kiem_can_cu.py                  # Bước 4: Bộ 7 cổng khóa bằng chứng K1–K7 đối soát thoại gốc
+│   │   ├── b5_xep_cho_cong_rui_ro.py          # Bước 5a: Phân loại rủi ro (gồm `thuoc_nti`) & cổng cách ly an toàn
+│   │   ├── b5_viet_ban_nhap.py                # Bước 5b: Sinh bệnh án SOAP từ mẫu cố định
+│   │   └── chay_duong_ong.py                  # Điều phối thực thi & so sánh các nhánh A / C / C_khoa
 │   │
-│   ├── [14 MODULE NÂNG CẤP LÂM SÀNG MỚI]:
-│   ├── guardrails.py                          # Hệ thống 5 chốt kiểm tra tự động Guardrails đa tầng
-│   ├── duoc_ly_lam_sang.py                    # Cảnh báo tương tác thuốc DDI & Dược thư Quốc gia
-│   ├── hieu_chinh_lieu.py                     # Hiệu chỉnh liều thuốc suy thận (Cockcroft-Gault) & suy gan
-│   ├── thang_diem_lam_sang.py                 # Tự động tính 9 thang điểm lâm sàng (NEWS2, GCS, qSOFA...)
-│   ├── can_lam_sang.py                        # Báo động giá trị cận lâm sàng nguy kịch & soi mâu thuẫn
-│   ├── tro_ly_lam_sang.py                     # Trợ lý nhắc bác sĩ hỏi triệu chứng SOCRATES
-│   ├── khu_dinh_danh.py                       # Khử định danh thông tin cá nhân (HIPAA / NĐ 13)
-│   ├── fhir_exporter.py                       # Xuất bệnh án chuẩn quốc tế HL7 FHIR R4 JSON
-│   ├── dan_do_benh_nhan.py                    # Tự động sinh bản dặn dò uống thuốc & dấu hiệu đỏ cấp cứu
-│   ├── phuong_ngu_lam_sang.py                 # Bộ từ điển phương ngữ 3 miền & âm vị tên thuốc dân gian
-│   ├── da_benh_ly.py                          # Ma trận đa bệnh lý kết hợp (cấp tính + mạn tính)
-│   ├── dieu_phoi_ha_tang.py                   # Quản lý tài nguyên phần cứng, chống tràn RAM & chữ ký SHA-256
-│   ├── canh_bao/                              # Gói chính sách phân loại cờ đỏ lâm sàng
-│   └── sinh_hoi_thoai_viet.py                 # Bộ sinh hội thoại từ 200 khuôn ca bệnh (ngu_lieu_viet.BENH)
+│   ├── canh_bao/                              # LỚP CẢNH BÁO 13 NHÓM · 56 MÃ (Chính sách D)
+│   │   ├── loai.py, gop.py                    # Phân bậc `LOAI_NANG`, hợp nhất & triage 3 tầng chống mệt mỏi cảnh báo
+│   │   └── phat_hien.py, toan_ca.py, lam_sang.py # Bộ phát hiện rơi liều, mất dấu ASR, nhầm chủ thể, thiếu sót & DDI
+│   │
+│   ├── cong_cu_lam_sang/                      # CÁC MÔ-ĐUN HỖ TRỢ LÂM SÀNG, BHYT & FHIR
+│   │   ├── tra_duoc_thu_aho_corasick.py       # Aho-Corasick nạp 158 hoạt chất từ `tri_thuc_thuoc.py`
+│   │   ├── canh_bao_tuong_tac_thuoc.py        # Cảnh báo tương tác thuốc DDI & liều trần 24h
+│   │   ├── hieu_chinh_lieu.py                 # Hiệu chỉnh liều suy thận (Cockcroft-Gault / CKD-EPI)
+│   │   ├── thang_diem_nguy_co.py              # 9 thang điểm (GCS, qSOFA, CURB-65, CHA2DS2-VASc, Wells...)
+│   │   ├── doi_soat_can_lam_sang.py           # Báo động đỏ cận lâm sàng & `nap_ket_qua_lis_hl7.py`
+│   │   ├── goi_y_cau_hoi_socrates.py          # Nhắc hỏi bù triệu chứng SOCRATES
+│   │   ├── xuat_fhir_r4.py                    # Xuất HL7 FHIR R4 Bundle
+│   │   ├── tien_kiem_bhyt_va_khoi_phuc_bo_sot.py # Tiền kiểm BHYT XML1–XML5 (TT 26/2025) & `kiem_toan_xml_bhyt.py`
+│   │   ├── to_dan_do_benh_nhan.py             # Bản dặn dò đời thường & `ho_so_benh_nhan_qr.py`
+│   │   └── cam_doan_thu_thuat.py, di_buong_noi_tru.py # Cam đoan PTTT WORM & Đi buồng nội trú TT 32/2023
+│   │
+│   ├── he_thong/                              # DỊCH VỤ HTTP, AN TOÀN & BẢO MẬT
+│   │   ├── dich_vu_http.py                    # Máy chủ HTTP API nội bộ (cổng 8765) & `hop_dong_api.py`
+│   │   ├── khu_dinh_danh.py                   # Khử định danh PHI/PII theo mẫu cấu trúc
+│   │   ├── rao_chan_an_toan.py                # Hàng rào đa tầng & `dieu_phoi_cac_chot_an_toan.py`
+│   │   └── nhat_ky_ky_duyet_worm.py           # Nhật ký băm WORM SHA-256
+│   │
+│   ├── bo_du_lieu/ & do_luong/ & huan_luyen/  # KHO 657 KHUÔN BỆNH, ĐO LƯỜNG & HUẤN LUYỆN
+│   │   └── kho_khuon.py, sinh_ca_da_benh_ly.py, sinh_hoi_thoai_viet.py, do_canh_bao.py, do_vidia2std.py
 │
-├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.779 test Pytest + 43 test TypeScript passed 100%, 26/11/2026)
-│   ├── test_guardrails.py                     # Test 5 tầng Guardrails, chống ảo giác số liệu & liều trần
-│   ├── test_khoa_bang_chung.py                # Test 26 kịch bản khóa bằng chứng K1-K7
-│   ├── test_cong_rui_ro.py                    # Test cổng cách ly an toàn & phân nhóm rủi ro
-│   ├── test_thang_diem_lam_sang.py            # Test tính điểm 9 thang điểm lâm sàng
-│   ├── test_duoc_ly_lam_sang.py               # Test phát hiện tương tác thuốc kỵ nhau DDI
-│   ├── test_hieu_chinh_lieu.py                # Test chỉnh liều theo chức năng thận Cockcroft-Gault
-│   ├── test_can_lam_sang.py                   # Test cảnh báo cận lâm sàng nguy kịch
-│   └── test_kiem_khuon.py                     # Test bộ kiểm khuôn ca bệnh (src/bo_du_lieu/kiem_khuon.py), đo trên 200 khuôn
+├── tests/                                     # BỘ KIỂM THỬ TỰ ĐỘNG (1.960+ pytest + 96 TypeScript tests)
+│   ├── test_guardrails.py                     # Test hàng rào đa tầng & liều trần
+│   ├── test_khoa_bang_chung.py                # Test kịch bản khóa bằng chứng K1–K7
+│   ├── test_cong_rui_ro.py                    # Test cổng cách ly an toàn & `thuoc_nti`
+│   ├── test_da_nguon_doc_lap.py               # Test phương ngữ 3 miền, G2P ngữ cảnh, 158 hoạt chất & Chính sách D
+│   ├── test_thang_diem_lam_sang.py, test_duoc_ly_lam_sang.py, test_hieu_chinh_lieu.py, test_can_lam_sang.py
+│   └── test_bo_sinh_goc_khong_doi.py          # Phép thử vàng giữ nguyên 200 khuôn gốc (BAM_VANG SHA-256)
 │
-├── tools/                                     # CÔNG CỤ HỖ TRỢ & XUẤT BÁO CÁO
-│   ├── tao_bao_cao_nang_cap_word.py           # Script tự động xuất file Word báo cáo thẩm mỹ cao
-│   └── ve_slide_problem_evidence_meditrace.py # Script vẽ đồ thị trực quan hóa dữ liệu thực nghiệm
+├── tools/                                     # CÔNG CỤ ĐO ĐẠC & XUẤT TÀI LIỆU
+│   ├── do_da_nguon_doc_lap.py                 # Đánh giá chéo 5 bộ công khai (ViDia2Std, ViHealthQA, ViMedAQA, ViMQ, PhoNER)
+│   ├── do_truyen_lan_loi_tung_tang.py         # Đo tỷ lệ chặn lỗi từng tầng đường ống
+│   └── tao_cam_nang_giai_thich_va_qna_word.py # Xuất Cẩm nang Word (.docx) & Markdown phản biện BGK
 │
-├── web/                                       # GIAO DIỆN NGƯỜI DÙNG WEB (REACT + TYPESCRIPT)
-│   ├── src/components/EvidenceView.tsx        # Màn hình duyệt từng mệnh đề, nối đường bằng chứng
-│   └── src/components/NoteEditorView.tsx      # Màn soạn, sửa và in bệnh án (không còn SoapNote.tsx)
+├── web/                                       # GIAO DIỆN REACT + BFF NODE/EXPRESS + SQLITE WORM
+│   ├── src/components/EvidenceView.tsx        # Màn hình duyệt từng mệnh đề, nối dây đường bằng chứng
+│   ├── src/components/DuyetBenCanh.tsx        # Ngăn duyệt nhanh & phát lại âm thanh từng lượt
+│   ├── src/components/NoteEditorView.tsx      # Màn hình soạn, sửa, chép HIS, BHYT & ký duyệt WORM
+│   └── may-chu/worm.ts                        # Chuỗi băm WORM SHA-256 + tệp neo `.anchor.json`
 │
-└── docs/                                      # TÀI LIỆU, SLIDE & HÌNH ẢNH DỰ THI
-    └── tai-lieu/                              # Chứa file Word, Markdown giải thích chi tiết
+└── docs/                                      # TÀI LIỆU, KẾT QUẢ THỰC NGHIỆM & HÌNH ẢNH DỰ THI
+    └── tai-lieu/                              # Cẩm nang Word, Markdown giải thích, Q&A chi tiết
 ```
 
 ---
@@ -172,7 +184,7 @@ d:\Claude\meditrace-ma-nguon\
 | **9** | **Bản dặn dò Đời thường**<br>[`src/cong_cu_lam_sang/to_dan_do_benh_nhan.py`](file:///d:/Claude/meditrace-ma-nguon/src/cong_cu_lam_sang/to_dan_do_benh_nhan.py) | Đơn thuốc viết tắt thuật ngữ chuyên ngành bệnh nhân về nhà không hiểu, uống sai giờ. | Tự động dịch thành bản dặn dò bình dị, chia lịch uống thuốc 4 buổi (Sáng - Trưa - Chiều - Tối, trước/sau ăn), chế độ ăn kiêng và danh mục Dấu hiệu đỏ cấp cứu. |
 | **10** | **Phương ngữ & Âm vị thuốc**<br>[`src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py`](file:///d:/Claude/meditrace-ma-nguon/src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py) | Người bệnh dùng từ địa phương ("trúng gió", "xót ruột") hoặc đọc tên thuốc kiểu dân gian ("a móc", "ô mê"). | Bộ từ điển 60+ thuật ngữ dân gian 3 miền và bảng âm vị thuốc Tây, tự động chuẩn hóa về thuật ngữ y khoa chính tắc. |
 | **11** | **Điều phối Phần cứng & SHA-256**<br>[`src/he_thong/dieu_phoi_cac_chot_an_toan.py`](file:///d:/Claude/meditrace-ma-nguon/src/he_thong/dieu_phoi_cac_chot_an_toan.py) | Máy tính phòng khám yếu dễ bị treo RAM; hồ sơ bệnh án điện tử sợ bị sửa lén. | Tự động giải phóng bộ nhớ VRAM/RAM; Tự động đóng dấu băm SHA-256 niêm phong bệnh án sau khi bác sĩ duyệt để bảo đảm giá trị pháp lý trước tòa án. |
-| **12** | **Ma trận Đa bệnh lý**<br>[`src/cong_cu_lam_sang/da_benh_ly.py`](file:///d:/Claude/meditrace-ma-nguon/src/cong_cu_lam_sang/da_benh_ly.py) | Bệnh nhân thực tế thường mắc nhiều bệnh kết hợp (cấp tính trên nền mạn tính). | Ma trận kết hợp bệnh lý phức tạp (viêm phổi + đái tháo đường + tăng huyết áp), bảo đảm dữ liệu mô phỏng sát 100% thực tế. |
+| **12** | **Ma trận Đa bệnh lý**<br>[`src/bo_du_lieu/sinh_ca_da_benh_ly.py`](file:///d:/Claude/meditrace-ma-nguon/src/bo_du_lieu/sinh_ca_da_benh_ly.py) | Bệnh nhân thực tế thường mắc nhiều bệnh kết hợp (cấp tính trên nền mạn tính). | Ma trận kết hợp bệnh lý phức tạp (viêm phổi + đái tháo đường + tăng huyết áp), bảo đảm dữ liệu mô phỏng sát thực tế. |
 | **13** | **An toàn Bắt nhầm hơn bỏ sót**<br>[`src/canh_bao/`](file:///d:/Claude/meditrace-ma-nguon/src/canh_bao/) | Kiểm tra quá gắt sẽ làm mất các thông tin nguy hiểm (dị ứng, thuốc tim). | Không bao giờ âm thầm xóa bỏ thông tin nghi ngờ; chuyển toàn bộ vào mục "Cần bác sĩ xác nhận" kèm cờ đỏ để bác sĩ tự quyết định. |
 | **14** | **657 Khuôn ca bệnh Lâm sàng**<br>[`src/bo_du_lieu/kho_khuon.py`](file:///d:/Claude/meditrace-ma-nguon/src/bo_du_lieu/kho_khuon.py) | Số lượng bài mẫu ít dễ bị học vẹt, thiếu tính khái quát. | 657 khuôn bệnh thuộc 21 hệ cơ quan (200 khuôn gốc + 457 khuôn mở rộng, đếm ngày 24/11/2026). Toàn bộ khuôn mở rộng mang cờ `da_duyet = False`. Sinh 5.000 ca v2 mở rộng đạt 45.835 câu duy nhất (+127% so với v1), tỷ lệ lặp giảm từ 76,92% xuống 47,37% (câu $\ge 8$ từ lặp 42,19%), MTLD đạt 145,4, Distinct-2 đạt 0,0468, 52.634/52.634 trích dẫn khớp nguyên văn 100,0000% và 0 lỗi quy tắc câu. Đóng băng WORM tại `data/manifest_v2_mo_rong_5000.json`. |
 
@@ -233,15 +245,16 @@ class GuardrailResult:
 * Card đồ họa: Tùy chọn (Hỗ trợ GPU CUDA hoặc CPU thuần).
 
 ### 6.2 Lệnh chạy toàn bộ kiểm thử tự động (Unit Test Suite)
-Dự án có bộ kiểm thử tự động gồm **1.779 bài test `pytest` vượt qua** (25 test bỏ qua theo môi trường phần cứng) và **43 bài test TypeScript** trong `web/` (cập nhật 26/11/2026):
+Dự án có bộ kiểm thử tự động gồm **1.960+ bài test `pytest`** (25–27 test bỏ qua có điều kiện theo môi trường) và **96 bài test TypeScript & BFF** trong `web/` (cập nhật 27/11/2026):
 ```powershell
 # Chạy toàn bộ kiểm thử Python
-$env:PYTHONUTF8="1"; python -m pytest tests/ -q
+$env:PYTHONUTF8="1"; python -m pytest tests/ --basetemp=D:\temp\pytest -q
 
-# Chạy kiểm tra kiểu và toàn bộ kiểm thử TypeScript (Frontend + Backend BFF)
+# Chạy kiểm tra kiểu, test và đóng gói TypeScript (Frontend + Backend BFF)
 cd web
 npm run lint
-npx tsx --test src/lib/*.test.ts may-chu/*.test.ts may-chu/routes/*.test.ts may-chu/tra-cuu/*.test.ts may-chu/tro-ly/*.test.ts
+npm test
+npm run build
 ```
 
 ### 6.3 Lệnh khởi động dịch vụ Backend API

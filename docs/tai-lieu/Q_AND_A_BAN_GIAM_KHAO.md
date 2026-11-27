@@ -178,8 +178,8 @@
 
 ### ❓ Giám khảo hỏi: *"Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?"*
 * **🎯 Phản biện tự tin:**  
-  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.779 bài test tự động** (`pytest`, 25 test bỏ qua theo môi trường phần cứng) và **43 bài kiểm thử TypeScript** (`web/`) bao phủ toàn bộ các tầng Python Core, Node/Express BFF + WORM và giao diện React. Hiện tại, toàn bộ bài kiểm thử đều vượt qua $100\%$ không có lỗi.  
-  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với 5.000 hội thoại mô phỏng thế hệ v2 (đạt 45.835 câu duy nhất, lặp câu giảm từ 76,92% xuống 47,37%, Jaccard từ khóa triệu chứng trung bình giữa 515 khuôn Train và 70 khuôn Test chỉ 5,87%, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích), 240 ca giữ kín `thach_thuc_v2` và 10 kịch bản bệnh hiếm ngoài khuôn (`src/do_luong/kiem_nghiem_ngoai_khuon.py`), bảo đảm tính độc lập dữ liệu và khả năng kiểm chứng chặt chẽ."*
+  *"Hệ thống đã trải qua bộ kiểm thử tự động toàn diện với **1.960+ bài test tự động** (`pytest`, 25–27 test bỏ qua theo môi trường phần cứng) và **96 bài kiểm thử TypeScript** (`web/`) bao phủ toàn bộ các tầng Python Core, Node/Express BFF + WORM và giao diện React. Toàn bộ bài kiểm thử đều vượt qua không có lỗi.  
+  Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **657 khuôn ca bệnh thuộc 21 hệ cơ quan lâm sàng**, với 5.000 hội thoại mô phỏng thế hệ v2 (đạt 45.835 câu duy nhất, lặp câu giảm từ 76,92% xuống 47,37%, Jaccard từ khóa triệu chứng trung bình giữa 515 khuôn Train và 70 khuôn Test chỉ 5,87%, 100% trích dẫn chuỗi con nguyên văn 52.634/52.634 đoạn trích), 240 ca giữ kín `thach_thuc_v2` (`0,946` / `0,871`), 10 kịch bản bệnh hiếm ngoài khuôn (`src/do_luong/kiem_nghiem_ngoai_khuon.py`), và đối chiếu đa nguồn trên 5 bộ dữ liệu công khai (`ViDia2Std`, `ViHealthQA`, `ViMedAQA`, `ViMQ`, `PhoNER_COVID19` tại `tools/do_da_nguon_doc_lap.py`), bảo đảm tính độc lập dữ liệu và minh bạch cả các giới hạn còn lại."*
 
 ---
 

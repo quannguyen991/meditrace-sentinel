@@ -600,8 +600,20 @@ class May(BaseHTTPRequestHandler):
         else:
             self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:3000")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-MediTrace-Internal-Token")
+        if code >= 400:
+            self.close_connection = True
+            self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(du)
+        self.wfile.flush()
+        if code >= 400:
+            # Tránh WinError 10053 khi đóng socket trên Windows trong lúc thân POST nhỏ chưa được đọc hết
+            try:
+                import select
+                if getattr(self, "connection", None) and select.select([self.connection], [], [], 0.01)[0]:
+                    self.connection.recv(4096)
+            except Exception:
+                pass
 
     khoa_noi_bo = None                       # đặt bởi main() khi không có biến môi trường
     host_cho_phep = ()                       # thêm ngoài HOST_MAC_DINH (--dia-chi)

@@ -104,7 +104,7 @@ Trình duyệt ──> web/server.ts (Express, cổng 3000)
 
 **Chưa nối vào luồng chạy:**
 - Tám module lâm sàng trên chỉ được `src/he_thong/dieu_phoi_cac_chot_an_toan.py` import, và module đó không có ai gọi. Do đó bản nháp trên web không chạy qua tương tác thuốc, hiệu chỉnh liều hay thang điểm.
-- `src/cong_cu_lam_sang/da_benh_ly.py` và `src/he_thong/dieu_phoi_cac_chot_an_toan.py` không có nơi gọi.
+- `src/bo_du_lieu/sinh_ca_da_benh_ly.py` và `src/he_thong/dieu_phoi_cac_chot_an_toan.py` không có nơi gọi trong luồng chính (phục vụ sinh thử nghiệm/điều phối riêng).
 
 **Chưa có, cần thứ bên ngoài:**
 - Trọng số QLoRA (`models/` trống).

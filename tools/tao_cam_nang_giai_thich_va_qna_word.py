@@ -474,9 +474,9 @@ BAN_DO_MA_NGUON_PYTHON = [
     ],
     [
         "1. Âm thanh, PhoWhisper & Tách giọng",
-        "`src/audio/pipeline.py`\n`src/audio/schemas.py`\n`src/audio/asr/disagreement.py`\n`src/trie_duoc_thu.py`",
+        "`src/audio/pipeline.py`\n`src/audio/asr/schemas.py`\n`src/audio/asr/disagreement.py`\n`src/audio/asr/contextual_trie_600.py`",
         "`AudioPipeline`, `SpeakerRole`, `ContextualPrefixTrie600`",
-        "Quản lý phiên ghi âm cục bộ, chép lời PhoWhisper, tách người nói (pyannote ở môi trường tách rời), kiểm tra bất đồng ASR trên thực thể thuốc/số/phủ định và xuất hotwords từ cây Trie dược thư 21 hệ cơ quan.",
+        "Quản lý phiên ghi âm cục bộ, chép lời PhoWhisper, tách người nói (pyannote ở môi trường tách rời), kiểm tra bất đồng ASR trên thực thể thuốc/số/phủ định và xuất hotwords/gợi ý G2P từ cây Trie dược thư 21 hệ cơ quan.",
     ],
     [
         "2. Trích xuất AI & Huấn luyện QLoRA / DPO",
@@ -491,10 +491,10 @@ BAN_DO_MA_NGUON_PYTHON = [
         "Gom các cách xưng hô tiếng Việt (*con, cháu, mẹ, ông nhà*) về thực thể số nguyên; xử lý 4 quan hệ hội thoại (*bổ sung, đính chính, diễn biến, mâu thuẫn*) mà không bao giờ xoá mất dấu vết giá trị cũ.",
     ],
     [
-        "4. Khóa căn cứ K1–K6, Cổng rủi ro & Lớp cảnh báo",
-        "`src/duong_ong/b4_kiem_can_cu.py`\n`src/duong_ong/b5_xep_cho_cong_rui_ro.py`\n`src/canh_bao/loai.py`\n`src/canh_bao/gop.py`\n`src/canh_bao/than_the.py`\n`src/canh_bao/thoi_diem.py`\n`src/canh_bao/toan_ca.py`",
+        "4. Khóa căn cứ K1–K7, Cổng rủi ro & Lớp cảnh báo",
+        "`src/duong_ong/b4_kiem_can_cu.py`\n`src/duong_ong/b5_xep_cho_cong_rui_ro.py`\n`src/canh_bao/loai.py`\n`src/canh_bao/gop.py`\n`src/canh_bao/phat_hien.py`\n`src/canh_bao/toan_ca.py`",
         "`khoa_ca()`, `cham()`, `dua_sang_xac_nhan()`, `LOAI`, `muc_do()`, `gop.chay()`",
-        "Đối chiếu trực tiếp từng mệnh đề với lượt dẫn; khuếch đại rủi ro theo cơ địa (thai kỳ, sơ sinh, lão khoa, suy thận/gan, đa thuốc); phân loại 56 mã lỗi thuộc 13 nhóm (gồm cả sai bên trái/phải, sai mức độ, nhầm quá khứ/hiện tại, đính chính ngược).",
+        "Đối chiếu trực tiếp từng mệnh đề với lượt dẫn; khuếch đại rủi ro theo cơ địa (thai kỳ, sơ sinh, lão khoa, suy thận/gan, đa thuốc); phân loại 56 mã lỗi thuộc 13 nhóm (gồm `thuoc_nti` trong `LOAI_NANG`, rơi liều, mất dấu ASR, sai bên trái/phải, sai mức độ, nhầm quá khứ/hiện tại, đính chính ngược).",
     ],
     [
         "5. Sinh bệnh án, Dược lý, XN cũ, BHYT & FHIR",
@@ -611,7 +611,7 @@ BO_22_CAU_HOI_BGK = [
         3, "TRỌNG TÂM", "Yêu cầu 2 BGK · Kiểm soát lỗi dây chuyền",
         "Lỗi ở bước chép lời (ASR), gán người nói hoặc gán chủ thể có thể lan truyền làm ghi nhầm bệnh cho người khác (ví dụ hai bệnh nhân cùng phòng hoặc mẹ kể bệnh của mẹ). Hệ thống chặn ở từng bước ra sao?",
         "MediTrace đặt chốt kiểm tra riêng ở từng giao điểm giữa các bước thay vì tin mù quáng đầu ra bước trước: (1) Chặn tạo bản nháp khi còn lượt chưa gán vai; (2) Tách `nguoi_noi` khỏi `chu_the_id`; (3) Khóa K3 đối chiếu ngược đại từ trong câu trích dẫn gốc để bắt lỗi ngay cả khi AI gán nhầm chủ thể.",
-        "Bước 0: `dich_vu.py:660` trả `409 asr_review_pending` và `App.tsx:225` chặn nếu còn lượt thiếu vai. Bước 2: `src/duong_ong/b2_gom_nguoi_thuc_the.py` gán `chu_the_id != 0` cho người nhà/người đi cùng, `sinh_benh_an.py` cấm tuyệt đối `chu_the_id != 0` vào mục của bệnh nhân. Bước 4: `khoa_bang_chung.py` bắt mẫu người nhà tự xưng *'bản thân tôi / còn tôi bị dị ứng…'* (`chu_the_nguoi_ke`) đẩy thẳng xuống `CẦN XÁC NHẬN`.",
+        "Bước 0: `src/he_thong/dich_vu_http.py` trả `409 asr_review_pending` và `App.tsx` chặn nếu còn lượt thiếu vai. Bước 2: `src/duong_ong/b2_gom_nguoi_thuc_the.py` gán `chu_the_id != 0` cho người nhà/người đi cùng, `src/duong_ong/b5_viet_ban_nhap.py` cấm tuyệt đối `chu_the_id != 0` vào mục của bệnh nhân. Bước 4: `src/duong_ong/b4_kiem_can_cu.py` bắt mẫu người nhà tự xưng *'bản thân tôi / còn tôi bị dị ứng…'* (`chu_the_nguoi_ke`) đẩy thẳng xuống `CẦN XÁC NHẬN`.",
         "Trình diễn trực tiếp bằng **Ca mẫu 2 (`demo_hai_benh_nhan`)** và **Ca mẫu 1 (`demo_bs_nguoi_nha_nhi`)** trong `src/bo_du_lieu/ca_mau_bgk.py` (bấm *'Xem thử với ca mẫu'*, không cần GPU) và kiểm thử đối kháng `tests/test_demo_bac_si_nguoi_nha.py`. Trên tập giữ kín 240 ca `thach_thuc_v2`, độ nhạy bắt lỗi `doi_chu_the` đạt **0,946** (`[0,910–0,968]`). Trên 4 tập phát triển (300 ca, 2.789 phát biểu, đối chiếu bộ chấm tự động `docs/ket-qua/canh-bao.json` & `truyen-lan-loi-tung-tang.json`), Chính sách D chặn được **88,2% (`194/220`)** lỗi nguy hiểm: giảm lỗi nguy hiểm lọt thân từ `45,9%` (C) → **11,8% (`26/220`; đo trên chính 4 tập phát triển đã dùng để viết các luật mới — chưa phải kết quả trên tập kín)** (đổi lại chặn thừa tăng từ `8,0%` lên `10,0%`); theo nhóm: *đổi chủ thể* `96,5% (109/113)`, *đính chính* `84,0% (21/25)`, *nhiễu ASR* `74,6% (50/67)`, *phương ngữ* `93,3% (14/15)`.",
     ),
     (
@@ -653,9 +653,9 @@ BO_22_CAU_HOI_BGK = [
     ),
     (
         9, "CHUYÊN SÂU", "Khóa căn cứ K1–K6 vs Lớp cảnh báo",
-        "Trong code vừa có `khoa_bang_chung.py` (K1–K6) vừa có gói `src/canh_bao/` (56 mã lỗi). Hai tầng này khác nhau thế nào, có bị trùng lặp thừa thãi không?",
-        "Hai tầng trả lời **hai câu hỏi khác hẳn nhau**: `khoa_bang_chung` là **cổng gác cửa nhị phân** (*mệnh đề này có đủ căn cứ tối thiểu để vào thân bản nháp không?*), còn `canh_bao` là **bộ chẩn đoán chi tiết cho bác sĩ** (*nếu mệnh đề này có rủi ro sai tinh vi vượt qua cổng gác, nó sai kiểu gì và bác sĩ cần nhìn vào lượt nào?*).",
-        "`src/duong_ong/b4_kiem_can_cu.py` kiểm 6 điều kiện nền tảng. Còn `src/canh_bao/` (`than_the.py`, `thoi_diem.py`, `toan_ca.py`, `lam_sang.py`) bắt những lỗi tinh vi mà câu trích vẫn nguyên văn hợp lệ — ví dụ lượt dẫn nói *'hố chậu phải'* nhưng mệnh đề ghi *'trái'* (`LATERALITY_CHANGED`), nói *'từng hút thuốc'* ghi thành *'đang hút'* (`PAST_CURRENT_CONFUSION`), hoặc bỏ sót lượt có tên thuốc (`OMITTED_MEDICATION`).",
+        "Trong code vừa có `src/duong_ong/b4_kiem_can_cu.py` (K1–K7) vừa có gói `src/canh_bao/` (56 mã lỗi). Hai tầng này khác nhau thế nào, có bị trùng lặp thừa thãi không?",
+        "Hai tầng trả lời **hai câu hỏi khác hẳn nhau**: `b4_kiem_can_cu` là **cổng gác cửa nhị phân** (*mệnh đề này có đủ căn cứ tối thiểu để vào thân bản nháp không?*), còn `canh_bao` là **bộ chẩn đoán chi tiết cho bác sĩ** (*nếu mệnh đề này có rủi ro sai tinh vi vượt qua cổng gác, nó sai kiểu gì và bác sĩ cần nhìn vào lượt nào?*).",
+        "`src/duong_ong/b4_kiem_can_cu.py` kiểm các điều kiện nền tảng K1–K7. Còn `src/canh_bao/` (`phat_hien.py`, `toan_ca.py`, `lam_sang.py`) bắt những lỗi tinh vi mà câu trích vẫn nguyên văn hợp lệ — ví dụ lượt dẫn nói *'hố chậu phải'* nhưng mệnh đề ghi *'trái'* (`LATERALITY_CHANGED`), nói *'từng hút thuốc'* ghi thành *'đang hút'* (`PAST_CURRENT_CONFUSION`), hoặc bỏ sót lượt có tên thuốc (`OMITTED_MEDICATION`).",
         "Bổ sung 4 luật mới ở `src/canh_bao/` (vòng 6) giúp nâng độ nhạy bắt 14 loại lỗi khó (khi câu trích dẫn vẫn giữ nguyên văn!) từ **0,682** lên **0,889** (`doi_ben: 0,250 -> 0,950`, `doi_muc_do: 0,500 -> 0,970`, `qua_khu_hien_tai: 0,012 -> 0,730`, `dinh_chinh_nguoc: 0,000 -> 1,000`).",
     ),
     (
@@ -811,7 +811,7 @@ MINH_CHUNG_GIAI_QUYET = {
     6: "Chạy `python -m src.do_luong.kiem_nghiem_ngoai_khuon` trên 10 kịch bản bệnh hiếm ngoài kho (`OOT_01..OOT_10`) → đúng chủ thể `52/52`; chạy `python -m tools.do_da_nguon_doc_lap` (`docs/ket-qua/da-nguon-doc-lap.json`) → trên `ViDia2Std/test.csv` đổi đúng `28,0%` (`1.192/4.264`, phủ `37,1%`), WER giảm `30,1% -> 21,9%`; Aho-Corasick nhận `87` mẫu `ViMedAQA`; đồng thời chỉ rõ giới hạn `10/847` (`1,2%`) nhãn vàng `NAME`/`PATIENT_ID` trên `PhoNER` để tiếp tục cải thiện.",
     7: "Trong `NoteEditorView.tsx`, bấm vào bất kỳ câu nào trên bản nháp hoặc thẻ `[T3]` → khung thoại gốc sáng lên đúng câu nói của bệnh nhân và nút `Nghe lại` phát đúng giây ghi âm gốc. Ngược lại, một bản văn xuôi do LLM viết thẳng không thể làm được dây nối 2 chiều từng mệnh đề như vậy.",
     8: "Chạy thực tế `python -m src.he_thong.dich_vu_http --khong-mo-hinh` trên laptop không GPU hoặc chạy `Qwen3-4B` QLoRA 4-bit trên 1 card RTX 3060 12GB (chỉ tốn `~3,6 GB` VRAM). Kết hợp `prompt_lookup_num_tokens=5` (`bakeoff.py`) giúp sinh chuỗi JSON trích xuất nhanh gấp 2–3× mà không đổi phân phối mô hình.",
-    9: "Ví dụ thực tế: câu *'Bệnh nhân đau hố chậu phải [T3]'* nhưng AI Tầng 1 gõ nhầm thành *'đau hố chậu trái [T3]'*. Cổng `khoa_bang_chung` thấy lượt 3 có nói 'đau hố chậu' nên cho qua, nhưng `canh_bao/than_the.py` (`LATERALITY_CHANGED`) bắt ngay sự đảo chiều `phải ↔ trái` và bôi vàng cảnh báo cho bác sĩ.",
+    9: "Ví dụ thực tế: câu *'Bệnh nhân đau hố chậu phải [T3]'* nhưng AI Tầng 1 gõ nhầm thành *'đau hố chậu trái [T3]'*. Cổng `b4_kiem_can_cu` thấy lượt 3 có nói 'đau hố chậu' nên cho qua, nhưng `src/canh_bao/phat_hien.py` (`than_the()` / `LATERALITY_CHANGED`) bắt ngay sự đảo chiều `phải ↔ trái` và bôi vàng cảnh báo cho bác sĩ.",
     10: "Chạy `python -m src.do_luong.do_bo_chan_doan` hoặc `tests/test_do_quy_gan.py`: hoán đổi 2 từ `'bệnh nhân'` ↔ `'người nhà'` trên 400 hồ sơ → `ROUGE-1 = 1.0000`, trong khi `Attribution F1` của dự án tụt `0.1381`, chứng minh thước đo mới bắt được lỗi lâm sàng mà ROUGE bỏ lọt.",
     11: "Chạy `cd web && npx tsx --test may-chu/worm.test.ts`: kịch bản kiểm thử tự động thực hiện `DROP TRIGGER` rồi sửa/xoá lén bản ghi SQLite → hàm `xacMinhChuoi()` đối chiếu với `.anchor.json` phát hiện ngay `HTTP 409 WORM Violation` và từ chối ký tiếp.",
     12: "Mở ngăn **Trợ lý & Chứng cứ** bên phải trên giao diện, nhập câu hỏi có kèm tên/SĐT (VD: *'Bệnh nhân Nguyễn Văn A, 0912345678 uống thuốc gì?'*) → hệ thống chặn ngay từ phía máy chủ (`cau_hoi_co_danh_tinh`) và chỉ gửi đi các thông số ẩn danh (`tuổi, giới, mệnh đề đã lọc`), kiểm chứng qua `web/may-chu/tro-ly/an-danh.test.ts`.",
