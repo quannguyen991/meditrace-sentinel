@@ -1,7 +1,7 @@
 # BẢN GIẢI THÍCH TOÀN DIỆN DỰ ÁN MEDITRACE SENTINEL
 
 > **Tóm tắt một câu:**  
-> **MediTrace Sentinel** là trợ lý trí tuệ nhân tạo chuyên dụng lắng nghe cuộc khám bệnh bằng tiếng Việt, tự động dựng bản nháp bệnh án chuẩn cấu trúc SOAP, trong đó **các mệnh đề có liên kết căn cứ khi dữ liệu cho phép**, đồng thời đưa cảnh báo hỗ trợ rà soát dược lý. Các bước này hỗ trợ bác sĩ, không bảo đảm loại bỏ mọi lỗi; khử định danh chỉ che các mẫu trực tiếp nhận diện được.
+> **MediTrace Sentinel** là trợ lý trí tuệ nhân tạo chuyên dụng lắng nghe cuộc khám bệnh bằng tiếng Việt ngay trên máy trạm nội bộ, tự động dựng bản nháp bệnh án chuẩn cấu trúc SOAP trong đó **mỗi dòng đều nối về lượt thoại & giây ghi âm gốc (`Click-to-Verify`)**, đồng thời cô lập mọi mẩu tin chưa chắc vào mục **`CẦN XÁC NHẬN`** và hỗ trợ rà soát an toàn dược lý/BHYT cho bác sĩ. Các bước luật và cảnh báo giúp giảm tối đa rủi ro lâm sàng, không thay thế quyết định chuyên môn của bác sĩ; bộ khử định danh chỉ che các mẫu nhận diện được theo cấu trúc.
 
 ---
 
@@ -10,9 +10,9 @@
 2. [Tại sao cần phải giải quyết vấn đề này ngay lập tức?](#2-tại-sao-cần-phải-giải-quyết)
 3. [Bài toán cốt lõi MediTrace Sentinel giải quyết](#3-bài-toán-cốt-lõi)
 4. [Sự khác biệt, đặc biệt và cần thiết: Vì sao phải là MediTrace mà không thể dùng ChatGPT?](#4-sự-khác-biệt-và-đặc-biệt)
-5. [Cấu trúc 5 tầng: Cách MediTrace triệt tiêu hoàn toàn vấn đề AI bịa đặt (Hallucination)](#5-cấu-trúc-triệt-tiêu-ảo-giác)
-6. [Chi tiết 14 tính năng và nâng cấp mới: Giải quyết vấn đề gì và ra sao?](#6-chi-tiết-14-tính-năng-nâng-cấp)
-7. [Bảng số liệu thực nghiệm chứng minh hiệu quả](#7-số-liệu-thực-nghiệm)
+5. [Kiến trúc 5 tầng & 6 gói lõi: Cách MediTrace khoanh vùng ảo giác AI và khóa bằng chứng](#5-cấu-trúc-triệt-tiêu-ảo-giác)
+6. [Chi tiết 14 năng lực cốt lõi & Bộ công cụ thực chiến MediTrace Boost](#6-chi-tiết-14-tính-năng-nâng-cấp)
+7. [Bảng số liệu thực nghiệm & Kiểm chứng đa nguồn (Cập nhật 27/11/2026)](#7-số-liệu-thực-nghiệm)
 8. [Tầm nhìn và giá trị thực tế mang lại cho nền y tế Việt Nam](#8-giá-trị-thực-tế)
 
 ---
@@ -20,212 +20,179 @@
 <a name="1-bối-cảnh-thực-tế"></a>
 ## 1. BỐI CẢNH THỰC TẾ: KHỦNG HOẢNG QUÁ TẢI PHÒNG KHÁM VÀ ÁP LỰC BỆNH ÁN
 
-Tại các bệnh viện công lập và phòng khám đa khoa ở Việt Nam hiện nay, thực trạng khám chữa bệnh đang đối mặt với những áp lực vô cùng khốc liệt:
+Tại các bệnh viện công lập và phòng khám đa khoa ở Việt Nam hiện nay, công tác ghi chép hồ sơ khám bệnh đang đối mặt với áp lực lớn:
 
-* **Quá tải bệnh nhân cực độ:** Một bác sĩ ngoại trú thường phải tiếp nhận từ **50 đến 80 bệnh nhân mỗi ngày**. Thời gian dành cho mỗi ca khám chỉ vỏn vẹn từ **3 đến 5 phút**.
-* **Bác sĩ bị "trói tay vào bàn phím":** Trong 3–5 phút ngắn ngủi đó, bác sĩ phải dành tới **hơn 50% thời gian** để vừa hỏi vừa cắm cúi gõ bàn phím, điền thông tin vào phần mềm quản lý bệnh viện. Hiện tượng này làm mất đi sự kết nối mắt (eye-contact) giữa thầy thuốc và người bệnh, gây cảm giác xa cách, người bệnh cảm thấy không được lắng nghe thấu đáo.
-* **Tình trạng kiệt sức nghề nghiệp (Doctor Burnout):** Hàng giờ đồng hồ gõ máy tính lặp đi lặp lại khiến bác sĩ kiệt quệ về thể chất lẫn tinh thần. Sau ca trực, nhiều bác sĩ phải ở lại làm thêm giờ chỉ để hoàn tất các tập hồ sơ bệnh án hành chính.
-* **Yêu cầu số hóa bắt buộc của ngành y:** Theo **Thông tư 46/2018/TT-BYT**, các bệnh viện trên toàn quốc bắt buộc phải triển khai Bệnh án điện tử (EMR) thay cho hồ sơ giấy. Áp lực phải ghi chép đầy đủ, chi tiết, chuẩn hóa ngày càng tăng cao, nhưng nhân lực y tế lại không tăng tương ứng.
+* **Quá tải bệnh nhân ngoại trú:** Một bác sĩ ngoại trú thường tiếp nhận **50 đến 80 bệnh nhân/ngày**, mỗi lượt khám thường chỉ gói gọn **3 đến 5 phút**.
+* **Gánh nặng gõ bàn phím ("Pajama Time"):** Trong quỹ thời gian ngắn ngủi đó, bác sĩ phải vừa hỏi bệnh vừa nhập liệu vào phần mềm bệnh viện (HIS), làm giảm giao tiếp mắt trực tiếp với người bệnh và kéo dài giờ hoàn tất hồ sơ sau ca trực.
+* **Áp lực chuẩn hóa hồ sơ & pháp lý:** **Thông tư 46/2018/TT-BYT**, **Thông tư 32/2023/TT-BYT**, **Thông tư 26/2025/TT-BYT** và **Quyết định 130/QĐ-BYT** đòi hỏi bệnh án điện tử (EMR), đơn thuốc điện tử và bảng XML BHYT phải đầy đủ, chính xác và có căn cứ chặt chẽ.
 
 ---
 
 <a name="2-tại-sao-cần-phải-giải-quyết"></a>
 ## 2. TẠI SAO CẦN PHẢI GIẢI QUYẾT VẤN ĐỀ NÀY NGAY LẬP TỨC?
 
-Nếu không có một công cụ tự động hóa thông minh và an toàn hỗ trợ bác sĩ, các hậu quả nghiêm trọng sau đây sẽ tiếp tục xảy ra:
-
-1. **Ghi chép sơ sài, bỏ sót thông tin nguy hiểm:** Do quá vội để kịp khám cho hàng dài bệnh nhân đang chờ, bác sĩ rất dễ quên ghi nhận các thông tin cốt lõi như tiền sử dị ứng thuốc, bệnh lý nền mạn tính (suy thận, tăng huyết áp, tiểu đường) hoặc tiền sử gia đình.
-2. **Nguy cơ tai biến y khoa đe dọa tính mạng:**
-   * Bỏ sót tiền sử dị ứng kháng sinh có thể khiến bệnh nhân bị **sốc phản vệ tử vong**.
-   * Bác sĩ không kịp tra cứu tương tác thuốc khi kê đơn có thể kết hợp các thuốc kỵ nhau, dẫn tới xuất huyết tiêu hóa ồ ạt hoặc ngộ độc cơ tim.
-   * Người bệnh suy thận nhưng vẫn kê liều thuốc của người khỏe mạnh dẫn đến ứ đọng thuốc trong máu và suy đa tạng.
-3. **Rủi ro pháp lý nặng nề cho bệnh viện và thầy thuốc:** Hồ sơ bệnh án là căn cứ pháp lý duy nhất khi xảy ra tranh chấp hoặc sự cố y khoa. Nếu hồ sơ ghi sai, ghi thiếu hoặc nhầm lẫn giữa lời kể của người nhà với người bệnh, bác sĩ sẽ phải chịu trách nhiệm pháp lý rất lớn.
+1. **Nguy cơ ghi chép thiếu hoặc sót tiền sử trọng yếu:** Khi quá vội, các chi tiết nhạy cảm như dị ứng thuốc, bệnh nền (suy thận, tăng huyết áp, đái tháo đường) hoặc thuốc bệnh nhân tự mua uống ở nhà rất dễ bị bỏ sót.
+2. **Nguy cơ tai biến dược lý:**
+   * Quên ghi nhận dị ứng kháng sinh làm tăng rủi ro kê trùng thuốc gây phản vệ.
+   * Kê đồng thời hai thuốc có tương tác nặng (như Clopidogrel + Omeprazole hoặc Warfarin + Ibuprofen) mà không kịp tra cứu Dược thư.
+   * Chưa kịp hiệu chỉnh liều cho bệnh nhân suy thận theo độ lọc cầu thận (eGFR).
+3. **Rủi ro pháp lý khi hồ sơ thiếu truy vết:** Bệnh án là tài liệu pháp lý cốt lõi; nếu bản nháp ghi nhầm lời người nhà thành bệnh sử bệnh nhân hoặc giữ lại thông tin người bệnh đã đính chính, bác sĩ sẽ gánh rủi ro chuyên môn.
 
 ---
 
 <a name="3-bài-toán-cốt-lõi"></a>
 ## 3. BÀI TOÁN CỐT LÕI MEDITRACE SENTINEL GIẢI QUYẾT
 
-**MediTrace Sentinel** được sinh ra để thực hiện một sứ mệnh duy nhất: **Trả lại đôi mắt và đôi tay cho người thầy thuốc.**
+**MediTrace Sentinel** hướng tới mục tiêu: **Trả lại đôi mắt và đôi tay cho bác sĩ trong phòng khám, nhưng luôn giữ bác sĩ ở vị trí người duyệt cuối cùng có chứng cứ đối chiếu.**
 
-* Bác sĩ chỉ cần ngồi tập trung trò chuyện, lắng nghe và thăm khám cho người bệnh một cách tự nhiên nhất.
-* Phần mềm đóng vai trò như một **người trợ lý y khoa vô hình (Ambient Clinical Scribe)** ngồi bên cạnh: lắng nghe âm thanh cuộc khám, tự động chép lời và dựng thành bản nháp hồ sơ bệnh án hoàn chỉnh theo đúng cấu trúc chuẩn y khoa SOAP (Subjective - Khai bệnh, Objective - Khám & xét nghiệm, Assessment - Chẩn đoán, Plan - Điều trị).
-* Bác sĩ chỉ cần dành **15 đến 30 giây** liếc mắt nhìn lại màn hình, kiểm tra các câu cảnh báo (nếu có) và bấm nút xác nhận.
+* Bác sĩ tập trung trò chuyện và thăm khám tự nhiên với bệnh nhân và người nhà.
+* Hệ thống ghi âm/gỡ băng tại chỗ (`PhoWhisper`) và dựng **bản nháp bệnh án cấu trúc SOAP** (*Chủ quan – Khách quan – Đánh giá – Kế hoạch*).
+* Bất kỳ mẩu tin nào chưa chắc chắn, thiếu căn cứ đối chiếu, sai chủ thể hoặc nghi nhiễu ASR đều **không bị xóa ngầm** và **không tự lọt vào thân bệnh án**, mà được cô lập sang mục **`CẦN XÁC NHẬN`** kèm câu trích, giây ghi âm (`±0,5s`) và nút `Nghe lại` một chạm.
 
 ---
 
 <a name="4-sự-khác-biệt-và-đặc-biệt"></a>
 ## 4. SỰ KHÁC BIỆT, ĐẶC BIỆT VÀ CẦN THIẾT: VÌ SAO PHẢI DÙNG MEDITRACE MÀ KHÔNG THỂ DÙNG CHATGPT?
 
-Nhiều người thường đặt câu hỏi: *"Ngày nay đã có ChatGPT, Claude, Gemini rất thông minh, tại sao không dùng luôn các công cụ đó để tóm tắt bệnh án mà phải xây dựng MediTrace Sentinel?"*
-
-Câu trả lời: **Trong y tế, dùng ChatGPT để viết hồ sơ bệnh án là việc cực kỳ nguy hiểm và vi phạm pháp luật nghiêm trọng.** MediTrace Sentinel tạo ra sự khác biệt sống còn nhờ 5 đặc điểm độc nhất:
-
-| Tiêu chí | ChatGPT / AI đàm thoại thông thường | MediTrace Sentinel |
+| Tiêu chí | ChatGPT / LLM đám mây viết văn xuôi | MediTrace Sentinel |
 | :--- | :--- | :--- |
-| **1. Trách nhiệm pháp lý & Bảo mật dữ liệu** | **Vi phạm pháp luật.** Toàn bộ thông tin bệnh tật, tên tuổi người bệnh bị gửi lên máy chủ nước ngoài. Vi phạm Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân. | **Bảo mật tuyệt đối 100%.** Chạy hoàn toàn nội bộ trên máy tính phòng khám (On-premise). Có module tự động che tên thật, số điện thoại, CCCD trước khi xử lý. Không một byte dữ liệu nào lọt ra ngoài. |
-| **2. Độ tin cậy (Ảo giác AI)** | **Dễ bịa đặt thông tin (Hallucination).** AI luôn có xu hướng viết văn trơn tru, sẵn sàng "bịa" ra tiền sử bệnh hoặc con số huyết áp mà người bệnh không hề nói. | **Triệt tiêu hoàn toàn ảo giác (Zero Hallucination).** 100% dòng thông tin đều bị kiểm soát bởi 7 cổng khóa bằng chứng (K1–K7). Mẩu tin nào không có chữ trong lời thoại gốc sẽ bị chặn đứng ngay. |
-| **3. Khả năng kiểm chứng (Click-to-Verify)** | **Không thể kiểm chứng.** Trả ra một đoạn văn xuôi dài. Bác sĩ muốn biết câu "đau 3 ngày" lấy từ đâu thì phải tự đọc lại toàn bộ băng ghi âm 15 phút. | **Bấm là thấy căn cứ ngay trong 1 giây.** Bấm vào bất kỳ dòng nào trong bệnh án, màn hình hiện đường nối màu xanh trỏ thẳng vào đúng câu nói và đúng giây ghi âm gốc. |
-| **4. Hiểu đúng văn hóa & ngữ cảnh tiếng Việt** | **Rất hay nhầm lẫn người nói.** Người nhà nói: *"Bố em bị hen"*, ChatGPT rất dễ ghi: *"Bệnh nhân có tiền sử hen"*. Không hiểu cách nói nuốt chủ ngữ của người Việt. | **Bộ luật ngữ pháp & đại từ nhân xưng chuyên biệt.** Tách bạch chính xác giữa bệnh nhân và người nhà. Bệnh của bố được chuyển đúng vào mục "Tiền sử gia đình", không bao giờ gán nhầm cho bệnh nhân. |
-| **5. An toàn dược lý & Hỗ trợ quyết định (CDSS)** | **Không có chuyên môn dược thực tế.** Kê 2 thuốc uống chung làm xuất huyết dạ dày, ChatGPT chỉ chép lại vào đơn mà hoàn toàn không biết để cảnh báo. | **Có sẵn dược sĩ số & bảng điểm lâm sàng.** Tích hợp Dược thư Quốc gia Việt Nam, tự động cảnh báo thuốc kỵ nhau, cảnh báo quá liều, tự động tính độ lọc thận để chỉnh liều, tự tính 9 thang điểm nguy kịch. |
+| **1. Pháp lý & Bảo mật dữ liệu** | Gửi dữ liệu hội thoại nhạy cảm ra máy chủ bên thứ ba ngoài cơ sở khám chữa bệnh. Mặc định không đáp ứng yêu cầu giữ dữ liệu nội bộ tại chỗ. | **Chạy 100% nội bộ tại chỗ (`On-premise`).** Sử dụng mô hình mở `Qwen3-4B` (Apache-2.0); công tắc mô hình ngoài mặc định **TẮT**; Trợ lý tra cứu y văn dùng danh sách cho phép ẩn danh (Allowlist). |
+| **2. Kiểm soát ảo giác AI** | Sinh văn xuôi mượt mà trong hộp đen; có thể tự suy diễn lý do, chẩn đoán hoặc thông tin không có trong lời thoại. | **Kiến trúc Lai (Neuro-Symbolic):** AI chỉ rút JSON mệnh đề thô ở Bước 1; toàn bộ khâu gom người, đính chính, **7 cổng khóa K1–K7** và **56 mã cảnh báo (Chính sách D)** đều là mã luật kiểm thử được. |
+| **3. Truy vết hai chiều (`Click-to-Verify`)** | Văn xuôi dài không gắn chỉ mục từng câu về giây ghi âm gốc. | **Mỗi dòng bệnh án nối tới đúng lượt `[T_i]` và đoạn băng gốc `[start_s - 0.5, end_s + 0.5]`**, cho phép bấm `Space` nghe lại tức thì. |
+| **4. Xử lý bẫy ngôn ngữ Việt** | Dễ gộp nhầm *"Bố em bị hen"* vào bệnh nhân; dễ bỏ qua tự sửa *"4 ngày… à không, 10 ngày"*; dễ hiểu nhầm câu điều kiện/hỏi đáp. | **Tách riêng `nguoi_noi` và `chu_the_id`**, dùng **FSM đính chính** lưu vết trạng thái `bị thay thế`, khóa chặt mẫu người nhà tự xưng và câu hỏi chưa trả lời (`QUESTION_AS_FACT`). |
+| **5. Dược lý, BHYT & Chốt ký WORM** | Không tích hợp Dược thư VN, BHYT XML1–XML5 hay sổ cái chống sửa lén sau ký duyệt. | Tích hợp **158 hoạt chất Dược thư QG**, tính eGFR/9 thang điểm, tiền kiểm BHYT XML3/XML5 TT 26/2025, và **khóa cứng ký duyệt WORM `SHA-256` + `.anchor.json`** khi còn mục `Cần xác nhận`. |
 
 ---
 
 <a name="5-cấu-trúc-triệt-tiêu-ảo-giác"></a>
-## 5. CẤU TRÚC 5 TẦNG: CÁCH MEDITRACE TRIỆT TIÊU HOÀN TOÀN VẤN ĐỀ AI BỊA ĐẶT (HALLUCINATION)
+## 5. KIẾN TRÚC 5 TẦNG & 6 GÓI LÕI: CÁCH MEDITRACE KHOANH VÙNG ẢO GIÁC AI VÀ KHÓA BẰNG CHỨNG
 
-Điểm cốt lõi tạo nên sự chắc chắn của MediTrace Sentinel nằm ở **Kiến trúc Lai (Neuro-symbolic Pipeline)**: Không bao giờ giao toàn quyền cho AI tự do viết văn, mà chia quy trình thành 5 tầng độc lập:
+Thư mục lõi Python `src/` được quy hoạch rành mạch thành **6 gói nghiệp vụ** (chi tiết tại [`BAN_DO_MA_NGUON.md`](../../BAN_DO_MA_NGUON.md)): `bo_du_lieu/`, `duong_ong/`, `canh_bao/`, `cong_cu_lam_sang/`, `do_luong/`, `he_thong/` (cùng mô-đun `audio/` và `huan_luyen/`):
 
-```
+```text
 [Lời nói cuộc khám]
        │
        ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 0: Gỡ băng âm thanh (PhoWhisper)                 │ -> Chuyển tiếng nói thành chữ thô
-└──────────────────────┬─────────────────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 1: Bóc tách mẩu tin nguyên tử (Qwen3-4B QLoRA)   │ -> Chỉ nhặt mẩu tin, cấm viết văn
-└──────────────────────┬─────────────────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 2: Gom nhóm & Liên kết thực thể (Rule-based)      │ -> Phân biệt Bác sĩ / Bệnh nhân / Người nhà
-└──────────────────────┬─────────────────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 3: Cập nhật diễn biến & Đính chính (FSM)          │ -> Xử lý nói nhầm, sửa lại, mâu thuẫn
-└──────────────────────┬─────────────────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 4: Khóa bằng chứng K1–K7 & Cổng rủi ro (Code)    │ -> So khớp ký tự với thoại gốc (Chặn bịa đặt)
-└──────────────────────┬─────────────────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────────────────┐
-│ TẦNG 5: Sinh hồ sơ bệnh án theo khuôn mẫu (Template)  │ -> Xếp thông tin vào đúng ngăn SOAP
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 0: Gỡ băng & Chuẩn hóa đầu vào (PhoWhisper + b0_chuan_hoa)     │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 1: Rút mệnh đề nguyên tử `PhatBieu` (duy nhất dùng Qwen3-4B)   │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 2: Gom người & thực thể (b2_gom_nguoi_thuc_the.py)              │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 3: Máy trạng thái đính chính & diễn biến (b3_cap_nhat)          │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 4: Khóa căn cứ K1–K7 + Lớp cảnh báo 56 mã Chính sách D          │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ TẦNG 5: Ghép bản nháp SOAP mẫu cứng + Định tuyến 3 vùng (b5_*)       │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Chỉ Tầng 1 dùng mô hình AI:** Mô hình ngôn ngữ chỉ làm đúng nhiệm vụ "nhặt mẩu tin": ai nói, bệnh gì, thuốc gì, ở câu nào.
-* **Tầng 2 đến Tầng 5 là 100% thuật toán luật xác định:**
-  * **Cổng K1:** Dò xâu ký tự trực tiếp. Nếu câu trích dẫn không có trong câu thoại gốc $\rightarrow$ Gán nhãn `HALLUCINATION_DETECTED` và **CHẶN NGAY**, đẩy xuống mục "Cần bác sĩ xác nhận".
-  * **Cổng K2:** Kiểm tra đại từ nhân xưng. Nhắc đến "mẹ tôi", "con tôi" $\rightarrow$ Cấm không cho ghi vào tiền sử bệnh nhân.
-  * **Cổng K4:** Nhận diện câu giả định/dặn dò tương lai ("Nếu sốt thì...") $\rightarrow$ Cấm không cho biến thành sự thật đã xảy ra.
-  * **Cổng K6:** Đối soát số liệu liều lượng và đơn vị với lời thoại.
-  * **Cổng K7:** Theo dõi dòng thời gian đính chính. Bệnh nhân nói: *"Uống 2 viên... à nhầm 1 viên"* $\rightarrow$ Đánh dấu mẩu tin 2 viên là "bị thay thế", chỉ giữ lại 1 viên.
-  * **Tầng 5:** Dùng khuôn mẫu cấu trúc (Template) ghép các mẩu tin đã kiểm chứng vào bệnh án, **tuyệt đối không cho AI tự do viết văn xuôi**.
+* **Chỉ duy nhất Tầng 1 dùng AI (`Qwen3-4B` QLoRA 4-bit):** Đọc hội thoại và xuất JSON các `PhatBieu` (`noi_dung`, `nguoi_noi`, `chu_the_id`, `phu_dinh`, `do_chac_chan`, `tinh_huong`, `bang_chung`, `trich_dan`, `thuoc`, `audio_spans`).
+* **Từ Tầng 2 đến Tầng 5 là 100% mã luật xác định:**
+  * **Cổng K1 (`trich_khong_co` / `FABRICATED_QUOTE`):** Đối chiếu từng câu trích dẫn với đúng lượt nói được dẫn; sai lượt hoặc không tồn tại là chặn ngay.
+  * **Cổng K2–K3:** Khóa đại từ nhân xưng và tách biệt người nhà (`chu_the_id != 0`) khỏi hồ sơ chính của bệnh nhân.
+  * **Cổng K4–K6:** Chặn câu điều kiện/kế hoạch bị ghi thành sự việc đã làm, chặn nâng mức chắc chắn, và đối chiếu số liệu liều thuốc/thời gian.
+  * **Cổng K7 & Tầng 3 (`FSM`):** Khi người nói tự sửa (*"uống 2 viên… à nhầm 1 viên"*), bản cũ chuyển sang `bị thay thế` ở `CẦN XÁC NHẬN` để giữ vết kiểm toán chứ không xóa mất.
+  * **Lớp cảnh báo Chính sách D (`src/canh_bao/` — cập nhật 27/11/2026):**
+    * Đưa `"thuoc_nti"` vào `LOAI_NANG` (`src/canh_bao/loai.py`) để thuốc khoảng điều trị hẹp được bảo vệ ngang mức `"thuoc"` và `"di_ung"`.
+    * Bắt rơi liều (`DOSE_MISMATCH`) khi lượt dẫn có nêu số liệu/liều thuốc nhưng mệnh đề rút ra thiếu cả `thuoc` lẫn số liệu (`src/canh_bao/phat_hien.py`).
+    * Bắt 16 âm tiết tiếng Việt mất dấu bắt buộc nghi nhiễu ASR (`thuc_the:nhieu_dau_asr` -> `UNSUPPORTED_INFORMATION`) và lỗi trộn chủ thể người nhà có kiểm ranh giới từ (`FAMILY_PATIENT_MIXUP`, loại trừ tiền sử gia đình và số đếm *"ba ngày/ba lần"*).
+* **Tầng 5 (`b5_viet_ban_nhap.py` & `b5_xep_cho_cong_rui_ro.py`):** Tuyệt đối không dùng AI viết tự do; lắp ghép câu cố định vào đúng ngăn SOAP hoặc chuyển sang `CẦN XÁC NHẬN`.
 
 ---
 
 <a name="6-chi-tiết-14-tính-năng-nâng-cấp"></a>
-## 6. CHI TIẾT 14 TÍNH NĂNG VÀ NÂNG CẤP MỚI: GIẢI QUYẾT VẤN ĐỀ GÌ VÀ RA SAO?
+## 6. CHI TIẾT 14 NĂNG LỰC CỐT LÕI & BỘ CÔNG CỤ MEDITRACE BOOST
 
-Nhằm đáp ứng trọn vẹn 5 ý kiến đóng góp của Ban Giám khảo và giải quyết triệt để các bài toán an toàn lâm sàng, hệ thống đã được nâng cấp toàn diện 14 tính năng:
+### 1. Hệ thống chốt kiểm soát an toàn đa tầng — `src/duong_ong/b4_kiem_can_cu.py`, `src/canh_bao/`, `src/he_thong/rao_chan_an_toan.py`
+* **Vấn đề giải quyết:** Ngăn lỗi lan truyền dây chuyền từ ASR/diarization → rút mệnh đề → bản nháp bệnh án cuối.
+* **Cơ chế:** Kết hợp 7 khóa căn cứ (K1–K7), 56 mã cảnh báo phân tầng 3 mức chống mệt mỏi cảnh báo (`CHAN_NGAY`, `CAN_XEM_XET`, `TINH_LUOC` trong `src/canh_bao/gop.py`) và khóa cứng ký duyệt khi `tongMenhDe < 1` hoặc còn mục `Cần xác nhận` chưa xử lý (`web/may-chu/worm.ts`).
 
-### 1. Hệ thống 5 chốt kiểm tra tự động đa tầng (Guardrails) — `src/he_thong/rao_chan_an_toan.py`
-* **Vấn đề giải quyết:** Trước đây, lỗi sai ở khâu nghe âm thanh (ví dụ nghe nhầm tên thuốc) sẽ bị các khâu sau chép lại theo dây chuyền.
-* **Cách giải quyết:** Đặt 5 chốt chặn độc lập: Chốt 1 kiểm tra âm thanh và vòng lặp ASR; Chốt 2 kiểm tra nhất quán người nói; Chốt 3 kiểm tra đính chính và câu giả định; Chốt 4 đối soát trích dẫn và chống ảo giác số liệu; Chốt 5 định tuyến an toàn "bắt nhầm còn hơn bỏ sót".
+### 2. Bộ tra cứu dược lý Aho-Corasick & Tương tác thuốc (DDI) — `src/cong_cu_lam_sang/tra_duoc_thu_aho_corasick.py`, `canh_bao_tuong_tac_thuoc.py`
+* **Vấn đề giải quyết:** Phát hiện nhanh cặp thuốc tương tác nguy hiểm (Clopidogrel ↔ Omeprazole, Warfarin ↔ Ibuprofen), dị ứng chéo (`di_ung_cheo.py`), trùng hoạt chất từ nhiều toa cũ và liều trần 24h.
+* **Nâng cấp mới (27/11/2026):** Sửa lỗi nạp `ThongTinDuocThu` để `BoTraCuuDuocThuAhoCorasick` nạp đầy đủ **158 hoạt chất & biệt dược** từ `data/tri_thuc_thuoc.json` *(lưu ý: tệp tri thức mang cờ `da_duyet = false`, đóng vai trò tham khảo cho bác sĩ)*.
 
-### 2. Bộ kiểm tra an toàn thuốc & Cảnh báo tương tác thuốc (DDI) — `src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py`
-* **Vấn đề giải quyết:** Bác sĩ bận rộn dễ kê trùng các cặp thuốc kỵ nhau gây tai biến nghiêm trọng (ví dụ Clopidogrel uống chung với Omeprazole làm mất tác dụng chống đông gây tái phát nhồi máu cơ tim, Warfarin uống chung với Ibuprofen gây xuất huyết dạ dày ồ ạt).
-* **Cách giải quyết:** Tự động đối chiếu đơn thuốc với cơ sở dữ liệu Dược thư Quốc gia Việt Nam, phát hiện tương tác thuốc đa hoạt chất và kiểm soát liều trần an toàn (ví dụ Paracetamol không quá 4000mg/ngày).
+### 3. Hiệu chỉnh liều theo chức năng thận (eGFR) — `src/cong_cu_lam_sang/hieu_chinh_lieu.py`, `doc_phieu_xet_nghiem.py`, `chuan_hoa_don_vi_xet_nghiem.py`
+* **Cơ chế:** Bóc chỉ số từ phiếu xét nghiệm cũ, quy đổi đơn vị (`Creatinine µmol/L ↔ mg/dL`), tính Cockcroft-Gault / CKD-EPI theo tuổi-giới-cân nặng thật và nhắc điều chỉnh liều.
 
-### 3. Tự động chỉnh liều thuốc cho bệnh nhân suy gan, suy thận — `src/cong_cu_lam_sang/hieu_chinh_lieu.py`
-* **Vấn đề giải quyết:** Người cao tuổi, người suy thận nếu uống liều thuốc như người bình thường sẽ bị ngộ độc do thuốc không đào thải được. Bác sĩ thường không có thời gian ngồi bấm máy tính tính độ lọc thận cho từng người.
-* **Cách giải quyết:** Tự động đọc chỉ số Creatinine máu, áp dụng công thức Cockcroft-Gault tính độ lọc cầu thận (eGFR), tự động đưa ra khuyến cáo giảm 50% liều hoặc chống chỉ định dùng thuốc.
+### 4. Tự động tính 9 thang điểm nguy cơ lâm sàng — `src/cong_cu_lam_sang/thang_diem_nguy_co.py`
+* **Cơ chế:** Hỗ trợ tính nhanh **GCS, qSOFA, CURB-65, CHA2DS2-VASc, Wells, Glasgow-Blatchford, NYHA, Child-Pugh, BMI**.
 
-### 4. Tự động tính 9 thang điểm nguy cơ & mức độ nặng lâm sàng — `src/cong_cu_lam_sang/thang_diem_nguy_co.py`
-* **Vấn đề giải quyết:** Các bảng điểm đánh giá nguy cơ rất phức tạp, bác sĩ khó nhớ hết từng thang điểm trong lúc khám đông.
-* **Cách giải quyết:** Tự động trích xuất các triệu chứng và tính điểm chuẩn xác cho 9 tình huống:
-  1. **GCS:** Đo mức độ hôn mê và chấn thương sọ não (3–15 điểm).
-  2. **qSOFA:** Nhận diện nhanh sốc nhiễm trùng huyết nguy kịch.
-  3. **CURB-65:** Phân loại viêm phổi nhẹ cho về hay nặng phải nhập viện.
-  4. **CHA2DS2-VASc:** Tính nguy cơ đột quỵ ở bệnh nhân rung nhĩ.
-  5. **Wells:** Đánh giá xác suất huyết khối tĩnh mạch sâu/thuyên tắc phổi.
-  6. **Glasgow-Blatchford:** Tiên lượng xuất huyết tiêu hóa có cần truyền máu khẩn cấp không.
-  7. **NYHA:** Phân độ suy tim theo mức độ gắng sức (Độ I đến IV).
-  8. **Child-Pugh:** Đánh giá mức độ xơ gan mất bù (A, B, C).
-  9. **BMI:** Đánh giá thể trạng thừa cân/béo phì chuẩn Châu Á.
+### 5. Báo động đỏ cận lâm sàng & Đối soát kết quả — `src/cong_cu_lam_sang/doi_soat_can_lam_sang.py`, `nap_ket_qua_lis_hl7.py`
+* **Cơ chế:** Quét ngưỡng nguy hiểm sinh tồn (Troponin, Kali máu…) và hỗ trợ nạp thông điệp LIS HL7v2 ORU^R01.
 
-### 5. Báo động đỏ cận lâm sàng & Phát hiện mâu thuẫn — `src/cong_cu_lam_sang/doi_soat_can_lam_sang.py`
-* **Vấn đề giải quyết:** Kết quả xét nghiệm in ra giấy thường bị để lẫn trong tập hồ sơ dày, bác sĩ bận có thể chưa kịp đọc ngay, làm trễ "giờ vàng" cấp cứu.
-* **Cách giải quyết:** Tự động quét kết quả xét nghiệm, nếu chạm ngưỡng nguy hiểm đến tính mạng (men tim Troponin tăng vọt, Kali máu quá cao gây ngừng tim) thì lập tức nhấp nháy báo động đỏ. Đồng thời phát hiện mâu thuẫn giữa lời nói bệnh nhân và kết quả xét nghiệm.
+### 6. Gợi ý câu hỏi lâm sàng theo khung SOCRATES — `src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py`, `src/duong_ong/b6_goi_y_hoi_lai.py`
+* **Cơ chế:** Gợi ý tối đa 3 câu hỏi súc tích giúp bác sĩ hỏi nốt thông tin còn thiếu trong 3–5 phút khám.
 
-### 6. Trợ lý gợi ý câu hỏi lâm sàng thông minh (SOCRATES) — `src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py`
-* **Vấn đề giải quyết:** Trong 3 phút khám, bác sĩ rất dễ quên khai thác kỹ các đặc tính của triệu chứng đau (vị trí cụ thể, hướng lan, mức độ dữ dội, yếu tố tăng giảm).
-* **Cách giải quyết:** Tự động phát hiện khoảng trống thông tin theo chuẩn y khoa SOCRATES, hiển thị sẵn các nút gợi ý câu hỏi trên màn hình để bác sĩ chỉ cần liếc mắt là nhớ hỏi ngay.
+### 7. Khử định danh bảo vệ thông tin cá nhân (PHI/PII) — `src/he_thong/khu_dinh_danh.py`, `web/may-chu/tro-ly/an-danh.ts`
+* **Cơ chế:** `ClinicalDeidentifier` ẩn danh các định danh theo mẫu (tên có xưng hô, SĐT, CCCD, BHYT, địa chỉ) trước khi xuất/gửi ra trợ lý ngoài; trên Trợ lý y văn còn sử dụng Allowlist chỉ trích trường cấu trúc và chặn ngay câu hỏi có PII từ bác sĩ.
+* **Minh bạch giới hạn đo đạc (27/11/2026):** Khi kiểm tra chéo với **847 nhãn vàng `NAME`/`PATIENT_ID` trên 1.000 câu báo chí `PhoNER_COVID19`**, `ClinicalDeidentifier` mới che được **`10/847` (`1,2%`)** do văn bản báo chí viết mã số/tên viết tắt không khung (*"bệnh nhân 416", "bà H.T.P"*) — nhóm ghi nhận rõ để cải tiến nhận diện tên riêng không khung.
 
-### 7. Tự động khử định danh bảo mật thông tin người bệnh — `src/he_thong/khu_dinh_danh.py`
-* **Vấn đề giải quyết:** Nguy cơ rò rỉ thông tin đời tư bệnh nhân vi phạm pháp luật và đạo đức y tế.
-* **Cách giải quyết:** Tự động tìm và thay thế tên thật, số điện thoại, số CCCD, số thẻ BHYT, địa chỉ nhà thành các mã an toàn dạng `[BENH_NHAN_1]`, `[SDT_1]`. Chỉ bác sĩ tại phòng khám mới có chìa khóa giải mã nhìn lại tên thật.
+### 8. Liên thông chuẩn HL7 FHIR R4 & BHYT XML1–XML5 — `src/cong_cu_lam_sang/xuat_fhir_r4.py`, `tien_kiem_bhyt_va_khoi_phuc_bo_sot.py`, `kiem_toan_xml_bhyt.py`
+* **Cơ chế:** Xuất gói `HL7 FHIR R4 Bundle` (loại bỏ mệnh đề bị bác sĩ bấm `Bỏ` và thuốc đã ngừng) và tiền kiểm **13 quy tắc biện luận CLS (XML3/XML4 ↔ XML5)** + kiểm tra cân nặng Nhi khoa (`< 72 tháng` theo **TT 26/2025/TT-BYT**).
 
-### 8. Xuất dữ liệu hồ sơ theo chuẩn quốc tế HL7 FHIR R4 — `src/cong_cu_lam_sang/xuat_fhir_r4.py`
-* **Vấn đề giải quyết:** Các phần mềm bệnh viện (HIS/EMR) không nói chuyện được với nhau, dữ liệu bị phân mảnh thành từng ốc đảo.
-* **Cách giải quyết:** Xuất dữ liệu theo đúng chuẩn trao đổi y tế quốc tế HL7 FHIR R4 (Resources: Patient, Encounter, Condition, Observation, MedicationRequest), cắm thẳng vào hệ thống máy chủ của mọi bệnh viện mà không cần lập trình lại.
+### 9. Bản dặn dò người bệnh đời thường & Mã QR theo dõi — `src/cong_cu_lam_sang/to_dan_do_benh_nhan.py`, `ho_so_benh_nhan_qr.py`
+* **Cơ chế:** Dịch đơn thuốc thành lịch uống Sáng – Trưa – Chiều – Tối dễ hiểu kèm dấu hiệu cảnh báo đỏ cần tái khám ngay và cổng QR chỉ đọc có hạn cho bệnh nhân.
 
-### 9. Trình tự động sinh bản hướng dẫn & dặn dò người bệnh ngôn ngữ đời thường — `src/cong_cu_lam_sang/to_dan_do_benh_nhan.py`
-* **Vấn đề giải quyết:** Đơn thuốc của bác sĩ thường viết bằng thuật ngữ chuyên ngành khó hiểu (ví dụ: *"u.s.a"*, *"b.i.d"*), người bệnh về nhà không biết uống thuốc lúc nào, dễ uống sai giờ hoặc hoang mang.
-* **Cách giải quyết:** Tự động dịch bệnh án thành bản in dặn dò bình dị, chia lịch uống thuốc rõ ràng theo 4 khung giờ: Sáng – Trưa – Chiều – Tối (ghi rõ trước/sau ăn no), kèm chế độ ăn kiêng và danh mục "Dấu hiệu đỏ nguy hiểm" hướng dẫn đi viện cấp cứu ngay.
+### 10. Chuẩn hóa phương ngữ 3 miền & Từ điển âm vị thuốc ASR (G2P) — `src/duong_ong/b0_chuan_hoa_phuong_ngu.py`, `src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py`, `src/audio/asr/contextual_trie_600.py`
+* **Nâng cấp mới (27/11/2026):**
+  * Mở rộng phương ngữ 3 miền Bắc–Trung–Nam khai thác từ tập `ViDia2Std/train.csv`, kèm **khiên bảo vệ ngữ cảnh nghiêm ngặt** để không làm sai nghĩa thuật ngữ y khoa chuẩn (*tê bì tứ chi, sinh thiết mô gan, cấy ghép thận, vô kinh, viêm bờ mi, giời leo, ảnh chụp X-quang*).
+  * `ContextualPrefixTrie600` bổ sung **65+ biến thể G2P thuốc trại âm** (kèm điều kiện ngữ cảnh thuốc cho cụm 2 âm tiết để không báo nhầm với câu đời thường như *"nấm a mốc"*, *"đi pa ra công viên"*), **chỉ trả thẻ gợi ý đối chiếu chứ tuyệt đối không tự sửa đè chữ gốc**.
 
-### 10. Động cơ nhận diện phương ngữ lâm sàng 3 miền — `src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py`
-* **Vấn đề giải quyết:** Người bệnh các vùng quê hay dùng từ địa phương (như *"trúng gió"*, *"xót ruột"*, *"mệt trong người"*, *"nấc cục"*), AI thông thường không hiểu hoặc chép sai.
-* **Cách giải quyết:** Xây dựng từ điển phương ngữ lâm sàng 3 miền Bắc – Trung – Nam với hơn 60 thuật ngữ dân gian và từ điển âm vị thuốc Tây, giúp máy hiểu chính xác lời kể của bà con trên khắp cả nước.
+### 11. Điều phối phần cứng & Hàng đợi bất đồng bộ — `src/he_thong/dieu_phoi_cac_chot_an_toan.py`, `dich_vu_http.py`, `web/may-chu/hang-doi.ts`
+* **Cơ chế:** Hỗ trợ chạy chế độ không GPU (`--khong-mo-hinh`), tự nhả VRAM khi nghỉ (`--nghi-sau-phut`), giới hạn RAM (`--tran-ram-gb`) và xử lý hàng đợi tạo nháp nền `202 Accepted` để bác sĩ khám cuốn chiếu ngay sang bệnh nhân kế tiếp.
 
-### 11. Đánh giá tương thích phần cứng & Kiểm soát tràn bộ nhớ — `src/he_thong/dieu_phoi_cac_chot_an_toan.py`
-* **Vấn đề giải quyết:** Máy tính tại các phòng khám Việt Nam thường có cấu hình vừa phải, card đồ họa yếu, nếu nạp mô hình lớn sẽ bị treo máy hoặc tràn RAM.
-* **Cách giải quyết:** Tự động đo bộ nhớ VRAM, tự động dọn rác bộ nhớ đệm (garbage collection) và cho phép chuyển cuộc gọi sang máy chủ nội bộ qua đường hầm an toàn khi máy trạm quá tải.
+### 12. Ma trận đa bệnh lý & Sinh hội thoại có kiểm soát — `src/bo_du_lieu/sinh_ca_da_benh_ly.py`
+* **Cơ chế:** Ghép bệnh cấp tính trên nền bệnh mạn tính để tăng tính chân thực của dữ liệu mô phỏng và đánh giá khả năng tách diễn biến của hệ thống.
 
-### 12. Bảng tổng hợp đa bệnh lý kết hợp (Multimorbidity Matrix) — `src/cong_cu_lam_sang/da_benh_ly.py`
-* **Vấn đề giải quyết:** Bệnh nhân thực tế ít khi chỉ mắc 1 bệnh đơn lẻ mà thường kết hợp 1 bệnh cấp tính (như viêm phổi) trên nền bệnh mạn tính (tiểu đường, tăng huyết áp).
-* **Cách giải quyết:** Xây dựng ma trận đa bệnh lý, ghép các bệnh nền vào diễn biến ca khám, giúp dữ liệu huấn luyện và kiểm thử phản ánh đúng 100% độ phức tạp của đời thực.
+### 13. Định tuyến an toàn "Không bao giờ xóa ngầm" (`CẦN XÁC NHẬN`) — `src/canh_bao/`, `src/duong_ong/b5_xep_cho_cong_rui_ro.py`
+* **Cơ chế:** Tách 2 trục (mức nghiêm trọng lâm sàng × độ bất định căn cứ); thông tin trọng yếu còn nghi ngờ luôn nằm trong `CẦN XÁC NHẬN` và khóa nút ký duyệt.
 
-### 13. Triết lý an toàn "Bắt nhầm còn hơn bỏ sót" (Fail-Safe Routing) — `src/canh_bao/`
-* **Vấn đề giải quyết:** Nếu kiểm tra quá gắt gao thì sẽ vô tình vứt bỏ những lời nói lấp lửng của bệnh nhân về dị ứng thuốc hoặc tiền sử bệnh tim.
-* **Cách giải quyết:** Mọi thông tin nguy cấp (dị ứng, thuốc nguy hiểm) dù có chút nghi ngờ cũng **không bao giờ bị âm thầm xóa bỏ**, mà được đưa vào mục riêng *"Cần bác sĩ xác nhận"* kèm cờ đỏ cảnh báo để bác sĩ tự tay quyết định.
+### 14. Mở rộng kho 657 khuôn bệnh độc lập & Kiểm chứng 5 bộ dữ liệu ngoài nguồn — `src/bo_du_lieu/kho_khuon.py`, `tools/do_da_nguon_doc_lap.py`
+* **Cơ chế:** Mở rộng từ 200 lên **657 khuôn ca bệnh (21 hệ cơ quan)** chia rời theo tên bệnh (`515` Train / `72` Dev / `70` Test, `0` khuôn giao nhau, bảo toàn nguyên vẹn mã băm vàng `BAM_VANG` 200 khuôn gốc trong `tests/test_bo_sinh_goc_khong_doi.py`), đồng thời kiểm chứng chéo trên **5 bộ dữ liệu tiếng Việt công khai bên ngoài**: `ViDia2Std`, `ViHealthQA`, `ViMedAQA`, `ViMQ`, `PhoNER_COVID19`.
 
-### 14. Nhân đôi cơ sở dữ liệu lên 200 khuôn ca bệnh lâm sàng — `src/bo_du_lieu/sinh_hoi_thoai_viet.py`
-* **Vấn đề giải quyết:** Tránh hiện tượng mô hình học vẹt dữ liệu do số lượng ca mẫu quá ít.
-* **Cách giải quyết:** Mở rộng gấp đôi từ 100 lên 200 khuôn ca bệnh thuộc đầy đủ 10 chuyên khoa (Hô hấp, Tim mạch, Tiêu hóa, Thần kinh, Cơ xương khớp, Thận - Tiết niệu, Nội tiết, Da liễu, Truyền nhiễm, Nhi khoa), bảo đảm các ca bệnh đa dạng và phong phú.
+### MediTrace Boost (Tối ưu thực chiến phòng khám & Pháp lý bệnh viện)
+* **Chép HIS 1 chạm & Giữ chữ ký WORM chống sửa lén:** Chuỗi dán 5 ô VNPT-HIS/Viettel HIS (`HisSmartCopyPopover.tsx`), kết hợp sổ cái WORM `SHA-256` kèm tệp neo ngoài `.anchor.json` phát hiện cả thao tác sửa/xóa trực tiếp dưới SQLite (`worm.ts` / `nhat_ky_ky_duyet_worm.py`).
+* **8 biểu mẫu hành chính chạy tại chỗ & Nội trú/Thủ thuật:** Phiếu chuyển tuyến TT 01/2025, Giấy nghỉ BHXH kiểm trần 30 ngày TT 25/2025, Tờ điều trị đi buồng nội trú TT 32/2023 (`di_buong_noi_tru.py`), Cam đoan PTTT 6 trụ cột Luật KCB 2023 (`cam_doan_thu_thuat.py`), cùng thao tác bàn phím `J/K/Enter/Space` và đọc khám thực thể `F2`.
 
 ---
 
 <a name="7-số-liệu-thực-nghiệm"></a>
 ## 7. BẢNG SỐ LIỆU THỰC NGHIỆM CHỨNG MINH HIỆU QUẢ
 
-Toàn bộ các cải tiến trên không phải chỉ là lời nói lý thuyết, mà được đo đạc bằng số liệu thực nghiệm khoa học độc lập:
+Toàn bộ các cải tiến được đo đạc và tái lập trực tiếp bằng kịch bản Python/TypeScript trong kho mã (xem điều kiện đo và giới hạn chi tiết tại [`BAO_CAO_CAI_TIEN_CHANG_1.md`](../../BAO_CAO_CAI_TIEN_CHANG_1.md) và `docs/ket-qua/`):
 
-| Chỉ số đo đạc | Phiên bản cũ trước đây | Phiên bản mới nâng cấp | Kết quả thực tế đạt được |
+| Hạng mục đo đạc | Đối chứng / Trước nâng cấp | Kết quả hiện tại (Cập nhật 27/11/2026) | Phạm vi & Ghi chú trung thực |
 | :--- | :--- | :--- | :--- |
-| **Kiểm thử tự động toàn diện (Test Cases)** | Chưa đầy đủ | **1.528 test Pytest + 11 test TypeScript passed 100%** | Kết quả đo đạc thực tế trên bản mã nguồn hiện tại, 0 lỗi. |
-| **Tỷ lệ giữ lại thông tin cũ khi bệnh nhân đính chính** | 11.48% (Cứ 100 ca có 11 ca bị nhớ sai) | **0.80% (Gần như triệt tiêu hoàn toàn)** | Giảm lỗi nhớ nhầm thông tin cũ hơn **14 lần** nhờ Cổng K7. |
-| **Tỷ lệ nhầm bệnh của người nhà thành của bệnh nhân** | 12.4% (Thường xuyên nhầm lẫn) | **2.1% (Tách biệt rành mạch)** | Giảm nhầm lẫn chủ thể gần **6 lần** nhờ Tầng 2. |
-| **Tỷ lệ thông tin đúng bị hệ thống chặn nhầm** | Chưa kiểm soát | **0.0% (0 / 30.136 dòng bị chặn oan)** | Kết quả này chỉ đúng với tập kiểm thử và phương pháp đánh giá đã nêu. |
-| **Độ phong phú và câu duy nhất (5.000 ca)** | v1: 20.190 câu duy nhất (lặp 76,92%) | **v2: 45.835 câu duy nhất (lặp 47,37%, $\ge 8$ từ: 42,19%)** | 657 khuôn thuộc 21 hệ cơ quan; MTLD 145,4 (+56,3%), 100% trích dẫn chuỗi con (52.634/52.634). [ĐÃ RÚT: con số 78,3% cũ không có phép đo tương ứng trong mã]. |
+| **Kiểm thử tự động toàn kho** | 370 test ban đầu | **`1.970` test Pytest (`25` skip) + `96/96` test TypeScript/BFF** | TypeScript `tsc --noEmit` 0 lỗi, build sản xuất thành công. |
+| **Lỗi nguy hiểm lọt thân bản nháp (`lot_nguy_hiem`)** | Chính sách C: `45,9%` (`101/220`)<br>Chính sách D cũ: `24,1%` (`53/220`) | **Chính sách D mới: `11,8%` (`26/220`) — chặn `88,2%` (`194/220`)** | Đo trên 4 tập phát triển (300 ca, 2.789 phát biểu, so với bộ chấm tự động); đổi lại chặn thừa `8,0%` (C) → `10,0%` (D). Tập giữ kín `thach_thuc_v2` giữ `0,946` (`doi_chu_the`) & `0,871` (`cay-loi`). |
+| **Chặn lỗi nguy hiểm theo nhóm (`do_truyen_lan_loi_tung_tang`)** | Tổng tuyến: `75,9%` (`167/220`)<br>Nhiễu ASR: `53,7%` (`36/67`) | **Tổng tuyến: `88,2%` (`194/220`)** — Đổi chủ thể `96,5%`, Phương ngữ `93,3%`, Đính chính `84,0%`, Nhiễu ASR **`74,6%` (`50/67`)** | Trên cùng 4 tập thách thức phát triển (`docs/ket-qua/truyen-lan-loi-tung-tang.json`). |
+| **Tỷ lệ bỏ sót mệnh đề (`bo-sot-qwen3-4b.md`)** | Qwen3-4B chưa train: `43,1%` | **Qwen3-4B + QLoRA: `11,5%`** (Wilson 95%: `8,4%–15,6%`, 0 lỗi JSON) | Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề); lưu ý trọng số Qwen3-4B chạy trên GPU 12 GB. |
+| **Chuẩn hóa phương ngữ trên `ViDia2Std/test.csv`** | Lỗi từ gốc so với câu chuẩn: `30,1%` | **Đổi đúng `28,0%` (`1.192/4.264`), tổng phủ `37,1%`, lỗi từ giảm còn `21,9%` (`doi_thua: 44`)** | 1.603 câu phương ngữ 63 tỉnh; bảng có khai thác thêm từ `ViDia2Std/train.csv`, giữ nguyên từ y khoa chuẩn. |
+| **Phủ dược lý & Đối chiếu 4 bộ công khai khác** | Trước sửa chỉ nạp 33 thuốc cứng | **Nạp `158` hoạt chất (`ViMedAQA`: `87/500` mẫu bắt thuốc; `ViHealthQA`: `14/42` Q/A)** | `PhoNER_COVID19` (`1.000` câu): chỉ che được `10/847` (`1,2%`) nhãn vàng `NAME`/`PATIENT_ID` viết tắt/mã số không khung — ghi nhận làm hạn chế cần cải tiến. |
+| **Độ phong phú kho khuôn v2 (5.000 ca)** | v1: `20.190` câu duy nhất (lặp `76,92%`) | **v2: `45.835` câu duy nhất (lặp `47,37%`, ≥ 8 từ: `42,19%`)** | 657 khuôn thuộc 21 hệ cơ quan; Jaccard từ khóa Train–Test trung bình `5,87%`; 100% trích dẫn chuỗi con. |
 
 ---
 
 <a name="8-giá-trị-thực-tế"></a>
 ## 8. TẦM NHÌN VÀ GIÁ TRỊ THỰC TẾ MANG LẠI CHO NỀN Y TẾ VIỆT NAM
 
-Sự ra đời của **MediTrace Sentinel** mang lại giá trị thiết thực cho cả 3 đối tượng trong ngành y:
-
-1. **Đối với Bác sĩ:**
-   * Tiết kiệm từ **5 đến 7 phút gõ máy tính** cho mỗi ca khám. Với 60 ca khám mỗi ngày, bác sĩ tiết kiệm được từ 4 đến 5 tiếng lao động hành chính mệt mỏi.
-   * Giảm thiểu tối đa tình trạng kiệt sức (burnout), giúp bác sĩ có thêm thời gian để trò chuyện, giải thích cặn kẽ và đồng cảm với người bệnh.
-2. **Đối với Người bệnh:**
-   * Được cảm nhận sự chăm sóc chu đáo, tận tình từ bác sĩ thay vì phải nhìn bác sĩ cắm cúi gõ phím.
-   * Tính mạng được bảo vệ an toàn nhờ hệ thống tự động soi tương tác thuốc kỵ nhau và cảnh báo quá liều.
-   * Ra về với một tờ giấy dặn dò in sẵn bằng tiếng Việt bình dị, dễ hiểu, an tâm uống thuốc đúng cách.
-3. **Đối với Bệnh viện và Xã hội:**
-   * Đẩy nhanh tốc độ chuyển đổi số y tế và triển khai Bệnh án điện tử theo chủ trương của Chính phủ và Bộ Y tế.
-   * Nâng cao công suất khám chữa bệnh của phòng khám, giảm tải tình trạng ùn tắc tại các bệnh viện tuyến trên.
-   * Bảo đảm an toàn pháp lý tuyệt đối cho bệnh viện nhờ cơ chế khóa bằng chứng truy vết nguồn gốc và tuân thủ nghiêm ngặt Luật An toàn thông tin.
+1. **Đối với Bác sĩ:** Giảm thao tác gõ phím lặp lại, có công cụ kiểm tra tương tác thuốc, eGFR, 9 thang điểm lâm sàng, biện luận CLS BHYT và phát lại đúng câu nói gốc chỉ bằng 1 chạm — giúp tập trung hơn vào thăm khám và giải thích cho người bệnh *(chưa công bố số giờ tiết kiệm thực tế vì dự án chưa thực hiện thử nghiệm lâm sàng với bác sĩ ngoài đời)*.
+2. **Đối với Người bệnh:** Được lắng nghe trọn vẹn hơn, giảm nguy cơ bỏ sót dị ứng/tương tác thuốc nhờ chốt rà soát đa tầng, và nhận bản dặn dò tiếng Việt dễ hiểu kèm lịch uống thuốc rõ ràng.
+3. **Đối với Bệnh viện và Ngành Y tế:** Tuân thủ **Nghị định 13/2023/NĐ-CP** (chạy tại chỗ, không gửi lời thoại thô ra ngoài), sẵn sàng liên thông chuẩn **HL7 FHIR R4 / XML1–XML5** theo **QĐ 130/QĐ-BYT** & **TT 26/2025/TT-BYT**, và đảm bảo vết kiểm toán pháp lý WORM `SHA-256` minh bạch.
 
 ---
 
 > **THÔNG ĐIỆP KẾT LUẬN:**  
-> **MediTrace Sentinel** không phải là một công cụ AI tạo sinh viết văn giải trí. Đây là một **giải pháp công nghệ y tế số thực chiến, an toàn và chuyên sâu**, được thiết kế riêng để giải quyết nỗi đau có thật của các thầy thuốc Việt Nam, bảo vệ tính mạng người bệnh và nâng tầm nền y tế nước nhà.
+> **MediTrace Sentinel** không thay thế bác sĩ và không viết bệnh án kiểu "hộp đen". Đây là hệ thống trợ lý lâm sàng **lấy bằng chứng lời thoại làm gốc, lấy luật y khoa xác định làm rào chắn an toàn, và lấy quyết định duyệt cuối của thầy thuốc làm chuẩn mực pháp lý**.
