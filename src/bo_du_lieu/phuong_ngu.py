@@ -121,7 +121,6 @@ THAY_DUOC_MO_RONG = {
         ("tiêu chảy", "đi tháo"),
         ("sưng chân", "phù giò"),
         ("cộm mắt", "xốn mắt"),
-        ("đau vùng lưng dưới", "đau ngang hông"),
         ("nhanh", "mau lẹ"),
     ],
 }

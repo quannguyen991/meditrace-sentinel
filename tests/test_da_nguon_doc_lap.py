@@ -130,3 +130,33 @@ def test_chinh_sach_d_chan_nguoi_nha_ranh_gioi_tu_va_asr_ngoi_nhat():
     kq2 = gop.chay([p2], ht2)
     assert kq2["trang_thai_D"][1]["trang_thai"] == gop.CAN_XAC_NHAN
     assert "WRONG_SUBJECT" in {c.ma for c in kq2["theo_phat_bieu"][1]["tat_ca"]}
+
+
+# ─── Hồi quy rà soát 27/11 tối: các luật mới không được đổi nghĩa / chặn oan ───
+
+def test_mi_la_mi_mat_khong_doi_thanh_may():
+    # "mi" là mí mắt: đổi thành đại từ "mày" làm sai nghĩa lâm sàng
+    for cau in ("hai mi bị sưng đỏ", "mi đang sưng", "mi có mủ", "mi bị sụp", "mí mi không có gì"):
+        assert "mày" not in chuan_hoa.chuan_hoa(cau), cau
+    # Đại từ "mi" (miền Trung) trước động từ thường ngày vẫn được đổi
+    assert chuan_hoa.chuan_hoa("mi đi mô rứa") .startswith("mày đi")
+
+
+def test_dau_ngang_hong_khong_tu_doi_vi_tri():
+    # Hông (mạn sườn/hông) và thắt lưng là hai vị trí khác nhau — không đổi chắc chắn
+    assert "lưng dưới" not in chuan_hoa.chuan_hoa("đau ngang hông phải")
+
+
+def test_dose_mismatch_bo_qua_so_lieu_khong_phai_lieu():
+    ht = "Bệnh nhân: Tôi ho 3 ngày nay, có uống paracetamol."
+    p = _pb(1, "đang dùng paracetamol", [1], thuoc=None, trich_dan=["có uống paracetamol"])
+    kq = gop.chay([p], ht)
+    assert "DOSE_MISMATCH" not in {c.ma for c in kq["theo_phat_bieu"][1]["tat_ca"]}
+
+
+def test_viet_tat_dia_huyet_ap_khong_la_nhieu_asr():
+    ht = "Bác sĩ: Huyết áp SYS 140 DIA 90, chẩn đoán tăng huyết áp."
+    p = _pb(1, "tăng huyết áp, SYS 140 DIA 90", [1], nguoi_noi="bác sĩ", hanh_vi="nhận định",
+            trich_dan=["Huyết áp SYS 140 DIA 90"])
+    kq = gop.chay([p], ht)
+    assert not any(c.bo_phat_hien == "thuc_the:nhieu_dau_asr" for c in kq["theo_phat_bieu"][1]["tat_ca"])

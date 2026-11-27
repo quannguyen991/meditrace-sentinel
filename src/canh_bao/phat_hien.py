@@ -821,21 +821,25 @@ def thuc_the(ctx: NguCanh, p, loai_tt) -> List[CanhBao]:
                           f"{nhan} “{ten}” không xuất hiện ở lượt nào trong hội thoại.",
                           LOI_PHAT_HIEN, THAP, "thuc_the", loai_tt))
 
-    # 8b. Lượt dẫn có liều/số liệu thuốc nhưng mệnh đề thiếu trường `thuoc` và số liệu
+    # 8b. Lượt dẫn có LIỀU thuốc nhưng mệnh đề thiếu trường `thuoc` và liều.
+    # Chỉ tính số liệu họ "lieu" (mg, viên, ml…): "ho 3 ngày nay" không phải liều.
+    def _lieu(van):
+        return [s for s in so_lieu.tach(van) if s.ho == "lieu"]
     if (loai_tt in ("thuoc", "thuoc_nti") and not getattr(p, "thuoc", None)
             and _thuc_te(p) and not getattr(p, "phu_dinh", False)
-            and not so_lieu.tach(p.noi_dung)
-            and so_lieu.tach(ctx.van_dan(p))):
+            and not _lieu(p.noi_dung)
+            and _lieu(ctx.van_dan(p))):
         ra.append(tao(ctx, p, "DOSE_MISMATCH", dan, [ctx.luot[s][1] for s in dan[:1]],
                       "Lượt nói được dẫn có nêu liều lượng/số liệu thuốc nhưng mệnh đề thiếu trường thuốc có cấu trúc.",
                       NGHI_RUI_RO, TRUNG, "thuc_the:thieu_chi_tiet_thuoc", loai_tt))
 
     # 8c. Phát hiện âm tiết tiếng Việt mất dấu bắt buộc kiểu nhiễu ASR (chỉ tập từ không tồn tại ở dạng không dấu)
     if loai_tt in ("di_ung", "thuoc", "thuoc_nti", "chan_doan"):
-        loi_dau = re.findall(
-            r"(?<!\w)(chuc|nieu|nhiem|thieu|duong|khang|truoc|huyet|tieu|viem|benh|phoi|ruot|dia|vung|phai)(?!\w)",
-            _thuong(p.noi_dung),
-        )
+        # Bỏ qua chữ viết hoa toàn bộ: đó là viết tắt (vd "DIA" = huyết áp tâm trương)
+        loi_dau = [m.group(1).lower() for m in re.finditer(
+            r"(?i)(?<!\w)(chuc|nieu|nhiem|thieu|duong|khang|truoc|huyet|tieu|viem|benh|phoi|ruot|dia|vung|phai)(?!\w)",
+            str(p.noi_dung or ""),
+        ) if not m.group(1).isupper()]
         if loi_dau:
             ra.append(tao(ctx, p, "UNSUPPORTED_INFORMATION", dan, [ctx.luot[s][1] for s in dan[:1]],
                           f"Nội dung chứa âm tiết mất dấu nghi nhiễu ASR ({', '.join(dict.fromkeys(loi_dau))}).",

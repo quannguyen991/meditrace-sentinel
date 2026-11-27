@@ -167,7 +167,8 @@ BANG = [
     (_tu("tào tháo rượt"), 0, "tiêu chảy nhiều lần", CHAC, ""),
     (_tu("phù giò"), 0, "phù chân", CHAC, ""),
     (_tu("xốn mắt"), 0, "cộm ngứa mắt", CHAC, ""),
-    (_tu("đau ngang hông"), 0, "đau vùng lưng dưới", CHAC, ""),
+    (_tu("đau ngang hông"), 0, "đau vùng hông", CAN_HOI,
+     "hông và thắt lưng là hai vị trí khác nhau — hỏi chỗ đau cụ thể"),
     (_tu("ói mửa"), 0, "nôn", CHAC, ""),
     (_tu("mau lẹ"), 0, "nhanh", CHAC, ""),
     (_tu("mệ ngoại"), 0, "bà ngoại", CHAC, ""),
@@ -225,7 +226,9 @@ BANG = [
     (_tu("cụng"), 0, "cũng", CHAC, ""),
     (r"(?<!\w)(cấy)(?=\s+(?:ni|nớ|tê|chi|gì|bệnh|thuốc|viên|gói|chân|tay|đầu|bụng|mắt|lưng)\b)", 1, "cái", CHAC, ""),
     (r"(?<!\w)(?:nói|làm|mệt|đau|sốt|ngứa|nặng|nhiều|ít|khó|lâu|nhanh|chậm|rất|quá|hết sức|là)\s+(thiệt)(?!\w)", 1, "thật", CHAC, ""),
-    (r"(?<!\w)(mi)(?=\s+(?:nói|đi|làm|ăn|uống|bị|có|đau|sốt|ho|ngủ|biết|xem|hỏi|còn|đang|đã|sẽ|chưa|không|ơi)\b)", 1, "mày", CHAC, ""),
+    # "mi" còn là MÍ MẮT ("hai mi bị sưng", "mi đang sưng") — chỉ đổi trước động từ
+    # sinh hoạt; bỏ "bị/có/đau/đang/còn…" vì đó đúng là chỗ "mi" mang nghĩa mí mắt.
+    (r"(?<!\w)(?<!hai )(?<!mí )(?<!bờ )(?<!sụp )(?<!lông )(mi)(?=\s+(?:nói|đi|làm|ăn|uống|ngủ|biết|xem|hỏi|ơi)\b)", 1, "mày", CHAC, ""),
     (_tu("tau"), 0, "tao", CHAC, ""),
     (_tu("hắn"), 0, "nó", CHAC, ""),
     (_tu("hấn"), 0, "nó", CHAC, ""),
