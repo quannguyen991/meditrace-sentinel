@@ -6,8 +6,8 @@ Nguoi nha noi "4 ngay" roi benh nhan noi "2 ngay" — hay bac si noi "vay la 2
 ngay" — la HAI nguon, khong co can cu chon ben. Ke ca loi bac si cung khong tu
 dong dung hon loi nguoi benh.
 """
-from src import cap_nhat
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def pb(id_, nguoi_noi, moc, **kw):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Dung phieu duyet cum dan gian cho bac si: docs/dan-gian/phieu-duyet-cum-tu.docx.
-Doc thang tu `src.dan_gian` de phieu va ma khong lech nhau. Chay: python tools/phieu-duyet-dan-gian.py"""
+Doc thang tu `src.bo_du_lieu.dan_gian` de phieu va ma khong lech nhau. Chay: python tools/phieu-duyet-dan-gian.py"""
 import sys
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from docx.oxml import OxmlElement  # noqa: E402
 from docx.oxml.ns import qn  # noqa: E402
 from docx.shared import Mm, Pt  # noqa: E402
 
-from src import dan_gian  # noqa: E402
+from src.bo_du_lieu import dan_gian as dan_gian  # noqa: E402
 
 RA = Path(__file__).resolve().parents[1] / "docs" / "dan-gian" / "phieu-duyet-cum-tu.docx"
 PHONG = "Times New Roman"

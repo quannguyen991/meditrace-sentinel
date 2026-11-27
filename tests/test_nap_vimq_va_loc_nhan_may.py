@@ -2,8 +2,8 @@
 import json
 import unicodedata
 
-from src import loc_nhan_may as ln
-from src import nap_vimq as nv
+from src.bo_du_lieu import loc_nhan_may as ln
+from src.bo_du_lieu import nap_vimq as nv
 
 
 def _ghi(p, x):
@@ -91,7 +91,7 @@ def test_phu_thuc_the():
 
 
 def test_tong_hop_dem_giu_bo_va_phu():
-    from src.gan_nhan_truoc import tong_hop
+    from src.bo_du_lieu.gan_nhan_truoc import tong_hop
     mau = [{"id": "a", "input": "Bệnh nhân: tôi đau đầu", "thuc_the": [{"text": "đau đầu"}]},
            {"id": "b", "input": "Bệnh nhân: sốt", "thuc_the": [{"text": "sốt"}]},
            {"id": "c", "input": "Bệnh nhân: ho", "thuc_the": []}]

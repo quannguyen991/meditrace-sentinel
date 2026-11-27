@@ -28,7 +28,7 @@ from pathlib import Path
 
 GOC = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(GOC))
-from src import van_tay_bo  # noqa: E402
+from src.bo_du_lieu import van_tay_bo as van_tay_bo  # noqa: E402
 
 BO = ["viet_phat_trien", "thach_thuc_doi_chu_the_phat_trien",
       "thach_thuc_phuong_ngu_phat_trien", "thach_thuc_dinh_chinh_phat_trien",

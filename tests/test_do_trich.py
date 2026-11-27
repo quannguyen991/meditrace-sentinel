@@ -4,7 +4,7 @@
 Phep do nay quyet dinh ket luan cua ca thi nghiem huan luyen, nen no phai
 duoc test hai chieu: bao dung khi trich dung, bao sai khi trich sai.
 """
-from src import do_trich as dt
+from src.do_luong import do_trich as dt
 
 
 def md(noi_dung, chu_the="bệnh nhân"):

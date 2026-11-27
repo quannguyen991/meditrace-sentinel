@@ -1,5 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Phân tích Phân bố Độ dài và Mốc Audio Segments cho Bộ Dữ liệu V2 (5.000 ca).
+"""[Âm thanh]
+Làm gì   : Thống kê phân bố số lượt và thời lượng âm thanh trên cả tập ca v2 để kiểm tra bộ
+           dữ liệu có hợp lý không.
+Vào → Ra : danh sách ca hội thoại → BaoCaoPhanBoAudioV2: thống kê lượt, âm tiết, mốc thời
+           gian từng ca
+Đọc từ   : phan_tich_tap_ca_v2() chạy cho cả tập; mo_hinh_hoa_moc_thoi_gian_ca() mô hình một
+           ca
+Mục lục (các hàm/lớp chính):
+  phan_tich_tap_ca_v2()           Phân tích phân bố độ dài lượt và mốc trên tập ca V2
+  mo_hinh_hoa_moc_thoi_gian_ca()  Gán mốc thời gian mô phỏng cho từng lượt trong ca
+  dem_am_tiet_tieng_viet()        Đếm số âm tiết của một câu tiếng Việt
+  class BaoCaoPhanBoAudioV2       Báo cáo phân bố lượt và thời lượng trên cả tập ca
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Phân tích Phân bố Độ dài và Mốc Audio Segments cho Bộ Dữ liệu V2 (5.000 ca).
 
 Nhiệm vụ Phase 3 Thực thi (Trục 1):
 - Đo lường và thống kê định lượng phân bố độ dài lượt thoại, phân bố từ/âm tiết.
@@ -20,6 +34,8 @@ import unicodedata
 from typing import Any, Dict, List, Optional, Tuple
 
 
+# ═══ class ThongKeAudioCa — Thống kê âm thanh của một ca ══════════════════════════════
+# Số lượt, số từ, thời lượng và tỷ lệ lượt theo từng vai.
 @dataclass
 class ThongKeAudioCa:
     ca_id: int
@@ -34,6 +50,8 @@ class ThongKeAudioCa:
     ty_le_luot_nguoi_nha: float
 
 
+# ═══ class BaoCaoPhanBoAudioV2 — Báo cáo phân bố lượt và thời lượng trên cả tập ca ════
+# Gồm trung bình, nhỏ nhất, lớn nhất, P50, P95 và tỷ lệ theo vai.
 @dataclass
 class BaoCaoPhanBoAudioV2:
     tong_so_ca: int
@@ -66,12 +84,17 @@ class BaoCaoPhanBoAudioV2:
     ty_le_span_hop_le_100: float
 
 
+# ═══ dem_am_tiet_tieng_viet() — Đếm số âm tiết của một câu tiếng Việt ═════════════════
+# Mỗi từ tách bằng khoảng trắng tính một âm tiết; tối thiểu 1.
 def dem_am_tiet_tieng_viet(van_ban: str) -> int:
     """Đếm số âm tiết (từ đơn) chuẩn tiếng Việt."""
     tu = re.findall(r"[^\W\d_]+", unicodedata.normalize("NFC", van_ban or "").lower())
     return max(1, len(tu))
 
 
+# ═══ mo_hinh_hoa_moc_thoi_gian_ca() — Gán mốc thời gian mô phỏng cho từng lượt trong ca ═══
+# Dựa trên 4,2 âm tiết mỗi giây và khoảng lặng chuyển lượt; đây là ước tính, không đo từ
+# âm thanh thật.
 def mo_hinh_hoa_moc_thoi_gian_ca(
     cac_luot: List[Dict[str, Any]],
     toc_do_am_tiet_s: float = 4.2
@@ -117,6 +140,8 @@ def mo_hinh_hoa_moc_thoi_gian_ca(
     return timeline, tong_thoi_luong_s
 
 
+# ═══ phan_tich_tap_ca_v2() — Phân tích phân bố độ dài lượt và mốc trên tập ca V2 ══════
+# Dựng timeline mô phỏng cho mỗi ca rồi thống kê lượt, vai, thời lượng và mốc dẫn chứng.
 def phan_tich_tap_ca_v2(cac_ca: List[Dict[str, Any]]) -> BaoCaoPhanBoAudioV2:
     """Phân tích thống kê toàn diện độ dài và phân bố audio segments trên tập ca V2."""
     so_luot_list = []

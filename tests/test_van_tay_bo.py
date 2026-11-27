@@ -18,7 +18,7 @@ import json
 
 import pytest
 
-from src import van_tay_bo as vt
+from src.bo_du_lieu import van_tay_bo as vt
 
 
 def _ca(ma, van, benh="sốt siêu vi", dap_an=None):
@@ -157,11 +157,11 @@ def test_tach_tap_BAT_BUOC_co_the_he():
     phan biet duoc gi."""
     import subprocess
     import sys
-    r = subprocess.run([sys.executable, "-m", "src.tach_tap_viet", "--help"],
+    r = subprocess.run([sys.executable, "-m", "src.bo_du_lieu.chia_tap_theo_khuon", "--help"],
                        capture_output=True, text=True, encoding="utf-8",
                        errors="replace")
     assert "--the-he" in r.stdout
-    r2 = subprocess.run([sys.executable, "-m", "src.tach_tap_viet",
+    r2 = subprocess.run([sys.executable, "-m", "src.bo_du_lieu.chia_tap_theo_khuon",
                          "--nguon", "khong_co_tep_nay.jsonl"],
                         capture_output=True, text=True, encoding="utf-8",
                         errors="replace")

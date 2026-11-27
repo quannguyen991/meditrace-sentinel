@@ -10,7 +10,7 @@ o cho do la khai bao thieu.
 """
 import pytest
 
-from src import khai_ma_nguon as km
+from src.he_thong import khai_ma_nguon as km
 
 
 @pytest.fixture(scope="module")

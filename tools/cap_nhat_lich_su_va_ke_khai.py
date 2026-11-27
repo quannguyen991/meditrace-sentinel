@@ -29,7 +29,7 @@ def update_lich_su_cau_lenh():
 
 **14:20** — triển khai các module an toàn lâm sàng: dược lý ddi, đa bệnh lý và phân tích cận lâm sàng giúp tôi nhé
 
-  Tệp đã ghi: `src/duoc_ly_lam_sang.py`, `src/da_benh_ly.py`, `src/can_lam_sang.py`, `src/thang_diem_lam_sang.py`, `tests/test_duoc_ly_lam_sang.py`, `tests/test_da_benh_ly.py`, `tests/test_can_lam_sang.py`
+  Tệp đã ghi: `src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py`, `src/bo_du_lieu/sinh_ca_da_benh_ly.py`, `src/cong_cu_lam_sang/doi_soat_can_lam_sang.py`, `src/cong_cu_lam_sang/thang_diem_nguy_co.py`, `tests/test_duoc_ly_lam_sang.py`, `tests/test_da_benh_ly.py`, `tests/test_can_lam_sang.py`
   Qua commit `35e9355` — feat: bo sung duoc ly lam sang DDI, da benh ly va thang diem CDSS (7 tệp mã nguồn)
 
 
@@ -37,7 +37,7 @@ def update_lich_su_cau_lenh():
 
 **16:30** — làm phần tính lọc cầu thận egfr, tờ dặn dò bệnh nhân và bộ khử định danh pii theo nghị định 13 nhé
 
-  Tệp đã ghi: `src/hieu_chinh_lieu.py`, `src/dan_do_benh_nhan.py`, `src/khu_dinh_danh.py`, `src/fhir_exporter.py`, `src/dieu_phoi_ha_tang.py`, `tests/test_hieu_chinh_lieu.py`, `tests/test_dan_do_benh_nhan.py`, `tests/test_khu_dinh_danh.py`
+  Tệp đã ghi: `src/cong_cu_lam_sang/hieu_chinh_lieu.py`, `src/cong_cu_lam_sang/to_dan_do_benh_nhan.py`, `src/he_thong/khu_dinh_danh.py`, `src/cong_cu_lam_sang/xuat_fhir_r4.py`, `src/he_thong/dieu_phoi_cac_chot_an_toan.py`, `tests/test_hieu_chinh_lieu.py`, `tests/test_dan_do_benh_nhan.py`, `tests/test_khu_dinh_danh.py`
   Qua commit `35e9355` — feat: bo sung eGFR Cockcroft-Gault/CKD-EPI, fhir exporter va khu dinh danh PII (8 tệp mã nguồn)
 
 
@@ -45,7 +45,7 @@ def update_lich_su_cau_lenh():
 
 **09:15** — chạy toàn bộ 1.330 bài test, xuất bộ sơ đồ flow 4k và chuẩn bị cấu hình deploy lên vercel nhé
 
-  Tệp đã ghi: `src/guardrails.py`, `src/dieu_phoi_ha_tang.py`, `tools/tao_bo_anh_flow_meditrace.py`, `tests/test_dieu_phoi_ha_tang.py`
+  Tệp đã ghi: `src/he_thong/rao_chan_an_toan.py`, `src/he_thong/dieu_phoi_cac_chot_an_toan.py`, `tools/tao_bo_anh_flow_meditrace.py`, `tests/test_dieu_phoi_ha_tang.py`
   Qua commit `ce886d5` — feat: bo anh 7 master flow diagrams, duong ong 1.330 automated tests, ASR phonetic drug quarantine va ha tang lam sang toan dien (102 tệp mã nguồn)
   Qua commit `73b5a3b` — fix(auth): cho phep origin tu Vercel va Cloudflare tunnel trong middleware bao ve CSRF (1 tệp mã nguồn)
   Qua commit `d4c2fc7` — docs: tap ho so 6 bang thuc nghiem khoa hoc va doi chung chi tiet (Word va Markdown) (2 tệp mã nguồn)
@@ -60,7 +60,7 @@ def update_lich_su_cau_lenh():
 
 **10:30** — nạp 3 ca bệnh khó bẫy lâm sàng cho bgk kiểm thử, và sửa lỗi lệch mỏ neo svg trên giao diện khám bệnh nhé
 
-  Tệp đã ghi: `tools/them_3_ca_kho_bgk.js`, `src/dich_vu.py`, `web/src/components/VerificationView.tsx`, `web/src/components/NoteEditorView.tsx`
+  Tệp đã ghi: `tools/them_3_ca_kho_bgk.js`, `src/he_thong/dich_vu_http.py`, `web/src/components/VerificationView.tsx`, `web/src/components/NoteEditorView.tsx`
   Qua commit `c7e8ef4` — feat: nap 3 ca mau lam sang tieu chuan cho tai khoan BGK va khoi dong dich vu 8765 (1 tệp mã nguồn)
   Qua commit `0fab56d` — feat: cap nhat bo 3 ca mau do kho cao chua nhieu bay lam sang cho BGK (1 tệp mã nguồn)
   Qua commit `9ad4b85` — fix(ui): highlight unconfirmed propositions in red, parse markdown bold in notes, and connect dialogue turns with verification lines (3 tệp mã nguồn)
@@ -73,7 +73,7 @@ def update_lich_su_cau_lenh():
 
 **15:45** — hoàn thiện tích hợp tác tử gợi mở lâm sàng socrates vào bộ điều phối 8 chốt an toàn và bảng kiểm toán tiến trình ai với tờ dặn dò xuất viện cho thật chuẩn nhé
 
-  Tệp đã ghi: `src/dieu_phoi_ha_tang.py`, `src/tro_ly_lam_sang.py`, `web/src/components/NhatKyTienTrinhAIModal.tsx`, `web/src/components/ToDanDoBenhNhanModal.tsx`, `web/src/components/NoteEditorView.tsx`, `tools/preview_modal_ai_trace.html`, `tools/preview_modal_dan_do.html`
+  Tệp đã ghi: `src/he_thong/dieu_phoi_cac_chot_an_toan.py`, `src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py`, `web/src/components/NhatKyTienTrinhAIModal.tsx`, `web/src/components/ToDanDoBenhNhanModal.tsx`, `web/src/components/NoteEditorView.tsx`, `tools/preview_modal_ai_trace.html`, `tools/preview_modal_dan_do.html`
   Qua commit `26b50cb` — docs: chuan hoa ngon ngu ky thuat y te, loai bo an du hoan du va cap nhat 7 flow diagram (7 tệp mã nguồn)
   Qua commit `8226a6c` — docs: xuat file Word (.docx) bo so do Flow kien truc va quy trinh lam sang day du hinh anh 4K va bang thuyet minh (2 tệp mã nguồn)
 """
@@ -125,21 +125,21 @@ def update_ke_khai_ma_nguon():
     # 4. Bo sung loi nhac cuoi file
     if "triển khai các module an toàn lâm sàng" not in content:
         bottom_prompts = """
-**`src/dieu_phoi_ha_tang.py`**
+**`src/he_thong/dieu_phoi_cac_chot_an_toan.py`**
   - làm phần tính lọc cầu thận egfr, tờ dặn dò bệnh nhân và bộ khử định danh pii theo nghị định 13 nhé
   - chạy toàn bộ 1.330 bài test, xuất bộ sơ đồ flow 4k và chuẩn bị cấu hình deploy lên vercel nhé
   - hoàn thiện tích hợp tác tử gợi mở lâm sàng socrates vào bộ điều phối 8 chốt an toàn và bảng kiểm toán tiến trình ai với tờ dặn dò xuất viện cho thật chuẩn nhé
 
-**`src/duoc_ly_lam_sang.py`**
+**`src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py`**
   - triển khai các module an toàn lâm sàng: dược lý ddi, đa bệnh lý và phân tích cận lâm sàng giúp tôi nhé
 
-**`src/hieu_chinh_lieu.py`**
+**`src/cong_cu_lam_sang/hieu_chinh_lieu.py`**
   - làm phần tính lọc cầu thận egfr, tờ dặn dò bệnh nhân và bộ khử định danh pii theo nghị định 13 nhé
 
-**`src/khu_dinh_danh.py`**
+**`src/he_thong/khu_dinh_danh.py`**
   - làm phần tính lọc cầu thận egfr, tờ dặn dò bệnh nhân và bộ khử định danh pii theo nghị định 13 nhé
 
-**`src/tro_ly_lam_sang.py`**
+**`src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py`**
   - hoàn thiện tích hợp tác tử gợi mở lâm sàng socrates vào bộ điều phối 8 chốt an toàn và bảng kiểm toán tiến trình ai với tờ dặn dò xuất viện cho thật chuẩn nhé
 
 **`web/src/components/NhatKyTienTrinhAIModal.tsx`**

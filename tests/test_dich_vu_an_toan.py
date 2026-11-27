@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Hoi quy an toan cho src/dich_vu.py: ep kieu bien vao, duong may xa, xac thuc HTTP."""
+"""Hoi quy an toan cho src/he_thong/dich_vu_http.py: ep kieu bien vao, duong may xa, xac thuc HTTP."""
 import http.client
 import json
 import threading
@@ -8,8 +8,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
-from src import dich_vu
-from src.khu_dinh_danh import ClinicalDeidentifier
+from src.he_thong import dich_vu_http as dich_vu
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
 
 KHOA = "khoa-thu-noi-bo-123"
 

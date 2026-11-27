@@ -7,7 +7,7 @@ Tập: 4 bộ thử thách phát triển (`data/thach_thuc/`, đầu ra nhánh `
 Lệnh:
 
 ```
-python -m src.do_canh_bao --ra-json docs/ket-qua/canh-bao-moc-0.json
+python -m src.do_luong.do_canh_bao --ra-json docs/ket-qua/canh-bao-moc-0.json
 ```
 
 Phiên bản lớp cảnh báo: `canh-bao-2026-09-24b`. Số phát biểu còn hiệu lực: 2.789.

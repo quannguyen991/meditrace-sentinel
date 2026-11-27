@@ -20,7 +20,7 @@ Day la loi im lang thu SAU cung ho trong du an nay.
 """
 import json
 
-from src import train_baseline as tb
+from src.huan_luyen import huan_luyen_sft as tb
 
 
 def _mau(i):
@@ -75,7 +75,7 @@ def test_van_tay_ghi_duoc_ra_json():
 def test_ma_co_chot_tu_choi_khi_lech():
     """Chot phai NEM LOI chu khong phai in canh bao roi chay tiep."""
     import pathlib
-    t = (pathlib.Path("src") / "train_baseline.py").read_text(encoding="utf-8")
+    t = (pathlib.Path("src") / "huan_luyen" / "huan_luyen_sft.py").read_text(encoding="utf-8")
     assert "TU CHOI chay tiep" in t
     assert "raise SystemExit" in t
     # va phai chi ra cach sua, khong chi noi "khong duoc"

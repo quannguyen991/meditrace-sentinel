@@ -12,7 +12,7 @@ tri diem mu cua no la mot loi thiet ke, khong phai mot ket qua.
 
 Thuoc do nay do dung MOT thu: menh de co duoc gan cho DUNG NGUOI khong.
 """
-from src import thuoc_do_quy_gan as tdq
+from src.do_luong import thuoc_do_quy_gan as tdq
 
 DUNG = """TIỀN SỬ GIA ĐÌNH
 

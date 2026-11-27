@@ -82,24 +82,24 @@ if ((Test-Path $cu) -and -not (Test-Path $luu)) {
 
 # 1. Huan luyen khau trich tren the he 7.
 Chay-Lai "1-TRAIN-TRICH-TH7" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "trich", "--buoc", "400", "--do-dai", "$do_dai_trich") | Out-Null
 
 # 2. Trich + nhanh B, C tren tap phat trien va bon bo thach thuc.
 $adapter = "models/nen-qwen3-4b-trich/best_checkpoint"
 Chay-Lai "2a-TRICH-DEV" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
     "--tap", "viet_phat_trien", "--max-token", "3072", "--n", "60",
     "--adapter-trich", $adapter) | Out-Null
 foreach ($t in $cac_tap[1..4]) {
     Chay-Lai "2b-TRICH-$t" @(
-        "-m", "src.nhanh", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
         "--tap", $t, "--max-token", "3072", "--adapter-trich", $adapter) | Out-Null
 }
 
 # 3. Huan luyen nhanh A tren bo tu sinh the he 7.
 Chay-Lai "3-TRAIN-A-TH7" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "benh_an", "--buoc", "400", "--do-dai", "2048",
     "--tep-train", "viet_train.jsonl", "--tep-val", "viet_phat_trien.jsonl",
     "--hau-to=-viet7") | Out-Null   # LIEN mot token - xem chay-nhanh-A.ps1
@@ -107,11 +107,11 @@ Chay-Lai "3-TRAIN-A-TH7" @(
 # 4. Chay A tren cung cac tap.
 $adapter_a = "models/nen-qwen3-4b-viet7/best_checkpoint"
 Chay-Lai "4a-A-DEV" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--adapter", $adapter_a, "--tap", "viet_phat_trien", "--n", "60") | Out-Null
 foreach ($t in $cac_tap[1..4]) {
     Chay-Lai "4b-A-$t" @(
-        "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
         "--adapter", $adapter_a, "--tap", $t) | Out-Null
 }
 

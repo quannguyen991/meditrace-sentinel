@@ -6,7 +6,7 @@ chay dung. No la mot QUAN SAT ve chinh chi so: hoan doi hai chu the cho nhau
 gan nhu khong lam giam diem. Neu test nay hong, phan "phan tich them" cua
 du an phai xem lai.
 """
-from src import cham_diem
+from src.do_luong import cham_diem as cham_diem
 
 DUNG = "DỊ ỨNG\n\nMẹ dị ứng penicillin. Trẻ chưa ghi nhận dị ứng."
 HOAN_DOI = "DỊ ỨNG\n\nTrẻ dị ứng penicillin. Mẹ chưa ghi nhận dị ứng."

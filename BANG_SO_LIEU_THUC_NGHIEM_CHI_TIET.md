@@ -116,7 +116,7 @@ Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 m�
 * Độ biến thiên thực thể tổ hợp (Dynamic Entity Perturbation) và bao phủ phương ngữ 3 miền bảo đảm tính khái quát hóa bền vững trên thực tế lâm sàng cả nước.
 
 ### 4.4. Bảng tiến hóa độ lặp câu và độ đa dạng từ vựng (Bộ cũ v1 vs. Bộ Mở rộng v2 — 5.000 ca)
-Đo lường bằng công cụ toán học xác định `src/do_lap_cau.py` trên toàn bộ 5.000 ca:
+Đo lường bằng công cụ toán học xác định `src/do_luong/do_lap_cau.py` trên toàn bộ 5.000 ca:
 
 | Chỉ số đo lường thực nghiệm | Bộ cũ v1 (`mo_rong=False`) | Bộ mở rộng v2 (657 khuôn, seed 2611) | Mức độ cải thiện thực tế |
 | :--- | :---: | :---: | :---: |
@@ -142,15 +142,15 @@ Trả lời trực diện ý kiến phản biện của Giám khảo: *"5.000 m�
 | **Mức độ giảm thiểu bỏ sót** | — | **-96 mệnh đề** | **Giảm 31,6 điểm %** | P-value < 0.001 | 0 lỗi cú pháp |
 
 ### 4.6. Đo Lớp Cảnh báo bằng Cấy lỗi Nhân tạo & Ma trận Độc lập Train–Test 657 Khuôn (25–26/11/2026)
-Đo tự động bằng `src/do_cay_loi.py` (`docs/ket-qua/cay-loi.md`) và `src/kiem_nghiem_ngoai_khuon.py`:
+Đo tự động bằng `src/do_luong/do_cay_loi.py` (`docs/ket-qua/cay-loi.md`) và `src/do_luong/kiem_nghiem_ngoai_khuon.py`:
 
 | Phép đo kiểm chứng độc lập | Tập đánh giá / Quy mô | Kết quả đo tự động | Nguồn đối chứng |
 | :--- | :---: | :---: | :--- |
 | **Độ nhạy bắt 16 loại lỗi cơ bản (tập điều chỉnh)** | 400 ca (`viet_train_v2`) | `0,801` → **0,871** (báo nhầm giảm `8,98 → 7,11`/ca sạch) | `docs/ket-qua/cay-loi.md` |
 | **Độ nhạy bắt 16 loại lỗi cơ bản (tập giữ kín, chạy 1 lần)** | 240 ca (`thach_thuc_v2`) | **0,871** (giữ nguyên độ nhạy, không quá khớp) | `docs/ket-qua/cay-loi.md` |
 | **Độ nhạy bắt 14 loại lỗi khó (vòng 6)** | 400 ca (`viet_train_v2`) | `0,682` → **0,889** *(số cận lạc quan trên tập điều chỉnh)* | `docs/ket-qua/cay-loi.md` |
-| **Ma trận trùng lặp từ khóa triệu chứng Train – Test** | 515 khuôn Train × 70 khuôn Test | Giao tên khuôn = **0**; Jaccard TB = **0,0587** (`p95 = 0,1172`) | `src/kiem_nghiem_ngoai_khuon.py` |
-| **10 kịch bản bệnh hiếm ngoài kho 657 khuôn (tầng luật)** | 10 ca (`OOT_01..10`, 52 mệnh đề) | Đúng chủ thể **52/52**, chống nhầm người nhà **11/11**, bắt đính chính **10/10** | `src/kiem_nghiem_ngoai_khuon.py` |
+| **Ma trận trùng lặp từ khóa triệu chứng Train – Test** | 515 khuôn Train × 70 khuôn Test | Giao tên khuôn = **0**; Jaccard TB = **0,0587** (`p95 = 0,1172`) | `src/do_luong/kiem_nghiem_ngoai_khuon.py` |
+| **10 kịch bản bệnh hiếm ngoài kho 657 khuôn (tầng luật)** | 10 ca (`OOT_01..10`, 52 mệnh đề) | Đúng chủ thể **52/52**, chống nhầm người nhà **11/11**, bắt đính chính **10/10** | `src/do_luong/kiem_nghiem_ngoai_khuon.py` |
 | **Thử nghiệm ngoài nguồn thực tế (`ViMQ`)** | 200 câu người bệnh Việt Nam | Phủ thực thể **284/322 (88,2%)**, JSON hợp lệ **96,0%** | `docs/tien-do-21-11-2026.md` |
 
 ---

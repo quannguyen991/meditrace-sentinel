@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
-from src.ocr_lam_sang import boc_tach_phieu_cu
-from src.kiem_duyet_bhyt_va_bo_sot import tien_kiem_bhyt_tu_du_lieu
+from src.cong_cu_lam_sang.doc_phieu_xet_nghiem import boc_tach_phieu_cu
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import tien_kiem_bhyt_tu_du_lieu
 
 
 class TestOcrLamSangVaBhyt4KyTu(unittest.TestCase):

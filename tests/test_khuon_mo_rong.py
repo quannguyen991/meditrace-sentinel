@@ -3,9 +3,9 @@
 from collections import Counter
 import pytest
 
-from src import kiem_khuon as kk
-from src import ngu_lieu_viet as nl
-from src import khuon_mo_rong as kmr
+from src.bo_du_lieu import kiem_khuon as kk
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import khuon_mo_rong as kmr
 
 
 def test_lo_1_den_lo_8_du_400_khuon():

@@ -149,7 +149,7 @@ def build_docx():
     stages = [
         ("Giai đoạn 1 (05/09 – 06/09/2026): Khởi tạo Mô hình & Chuẩn hóa Thực nghiệm",
          "Khởi tạo bộ khung bake-off mô hình 4B. Phát hiện đối chứng lỗi nguy hiểm/vô hại lệch độ dài (D1), tiến hành chuẩn hóa nhóm đối chứng khớp 2 từ (0,1061 vs 0,1004). Chuyển toàn bộ script .ps1 sang thuần ASCII.",
-         "pytest tests/test_bo_chan_doan.py tests/test_tang_cuong.py -v\npython src/bakeoff.py --vong 3"),
+         "pytest tests/test_bo_chan_doan.py tests/test_tang_cuong.py -v\npython src/huan_luyen/chon_mo_hinh_bakeoff.py --vong 3"),
         ("Giai đoạn 2 (07/09 – 10/09/2026): Xây dựng Bộ Ngữ liệu 1.000 Ca Lâm sàng Việt Nam",
          "Loại bỏ triệt để dữ liệu dịch máy cũ (A9). Tự xây dựng 1.000 ca hội thoại lâm sàng Việt Nam có cấu trúc mỏ neo. Nâng từ 24 lên 60 khuôn bệnh, bổ sung bẫy đại từ họ hàng, bẫy mâu thuẫn và bổ sung.",
          "python tools/ve_bang_doi_chung_thuc_nghiem.py\npytest tests/test_khoa_bang_chung.py -v"),
@@ -164,7 +164,7 @@ def build_docx():
          "$env:ADMIN_PASSWORD = \"[REDACTED_SECURE_PASSPHRASE]\"\npytest tests/\n# ================= 1330 passed, 27 skipped in 120.35s =================\nvercel --prod --yes"),
         ("Giai đoạn 6 (18/10/2026): Nạp Bộ 3 Ca Bẫy BGK & Chuẩn hóa Xuất PDF A4",
          "Nạp 3 ca khám mẫu lâm sàng tiêu chuẩn cao vào database phục vụ Ban Giám Khảo đánh giá trực quan. Tối ưu hóa phông chữ, định dạng in ấn khổ A4 và bảo đảm tốc độ build dưới 400ms.",
-         "node tools/them_3_ca_kho_bgk.js\npython src/dich_vu.py --port 8765\ncd web; bun run build"),
+         "node tools/them_3_ca_kho_bgk.js\npython src/he_thong/dich_vu_http.py --port 8765\ncd web; bun run build"),
         ("Giai đoạn 7 (27/10/2026): Tác tử SOCRATES & Nâng cấp Giao diện Antigravity / JCI",
          "Móc Chốt 8 SOCRATES trực tiếp vào điều phối hạ tầng. Nâng cấp Bảng Kiểm Toán AI thành Dark Cybernetic Terminal hiển thị trực tiếp luồng bóc tách Qwen3-4B QLoRA và thiết kế Tờ Dặn Dò chuẩn quốc tế.",
          "pytest tests/test_dieu_phoi_ha_tang.py -v\ncd web; bun run build\n# ✓ built in 337ms (0 errors)")

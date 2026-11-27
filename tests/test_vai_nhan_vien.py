@@ -17,7 +17,8 @@ lan. Gia: tang bac si 98,6% -> 52,8%, diem gop -13,7.
 """
 import pytest
 
-from src import phat_bieu, sua_cuc_bo
+from src.duong_ong import b1_cau_truc_menh_de as phat_bieu
+from src.duong_ong import b6_sua_cuc_bo as sua_cuc_bo
 
 
 def _ps(chu_the, noi_dung="họng hơi đỏ", luot=2):

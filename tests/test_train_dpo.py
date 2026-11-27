@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Phan khong can GPU cua `src.train_dpo`: chon cap chia deu, mat na nhan, nap cap, loss."""
+"""Phan khong can GPU cua `src.huan_luyen.huan_luyen_dpo`: chon cap chia deu, mat na nhan, nap cap, loss."""
 import json
 import math
 
 import pytest
 
-from src import train_dpo as td
+from src.huan_luyen import huan_luyen_dpo as td
 from tests.test_train_baseline import TokGia
 
 

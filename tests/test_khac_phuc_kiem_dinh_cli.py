@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử hồi quy cho 4 điểm khắc phục sau kiểm định độc lập Claude CLI & OpenAI CLI."""
-from src.quet_an_toan_duoc_ly_v2 import QuetAnToanDuocLyV2
-from src.trich_xuat_thuc_the import HoiThoaiSubstringTrie
+from src.do_luong.quet_an_toan_duoc_ly_v2 import QuetAnToanDuocLyV2
+from src.duong_ong.b1_ep_dau_ra_json import HoiThoaiSubstringTrie
 from src.audio.asr.contextual_trie_600 import ContextualPrefixTrie600
 from src.audio.sim2real_v2 import danh_gia_sim2real_va_trie_600
 

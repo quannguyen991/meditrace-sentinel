@@ -16,7 +16,7 @@ export const TUOI_VIEC_TOI_DA_MS = 30 * 60_000;
  */
 const choLau = new Agent({ headersTimeout: 30 * 60_000, bodyTimeout: 30 * 60_000 });
 
-/** Tên header mang khoá nội bộ; dịch vụ Python (src/dich_vu.py) đòi header này ở mọi /api. */
+/** Tên header mang khoá nội bộ; dịch vụ Python (src/he_thong/dich_vu_http.py) đòi header này ở mọi /api. */
 export const HEADER_TOKEN_NOI_BO = "X-MediTrace-Internal-Token";
 
 /** Lỗi có thông điệp được phép đưa nguyên văn cho người dùng kể cả khi mã >= 500. */

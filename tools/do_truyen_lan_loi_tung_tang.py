@@ -14,9 +14,13 @@ from collections import Counter
 from pathlib import Path
 from typing import Dict
 
-from src import cham_he_thong, cong_rui_ro, do_canh_bao, du_lieu, duong_dan
+from src.do_luong import cham_he_thong as cham_he_thong
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.do_luong import do_canh_bao as do_canh_bao
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.he_thong import duong_dan as duong_dan
 from src.canh_bao import gop
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def do_tung_bo(thu_muc: Path | None = None, nhanh: str = "C_khoa") -> Dict[str, object]:

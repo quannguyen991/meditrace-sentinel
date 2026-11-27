@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử Động cơ Phân tích Quỹ đạo Lâm sàng Dọc (`src/quy_dao_lam_sang.py`)
-và tích hợp vào `src/dieu_phoi_ha_tang.py`."""
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
-from src.phat_bieu import PhatBieu
-from src.quy_dao_lam_sang import phan_tich_quy_dao_lam_sang
+"""Kiểm thử Động cơ Phân tích Quỹ đạo Lâm sàng Dọc (`src/cong_cu_lam_sang/quy_dao_nhieu_lan_kham.py`)
+và tích hợp vào `src/he_thong/dieu_phoi_cac_chot_an_toan.py`."""
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.cong_cu_lam_sang.quy_dao_nhieu_lan_kham import phan_tich_quy_dao_lam_sang
 
 
 def test_quy_dao_rong_hoac_thieu_du_lieu_khong_bao_gia():

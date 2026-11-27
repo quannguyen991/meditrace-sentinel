@@ -1,17 +1,31 @@
-"""Common output schema for every ASR provider, and the error contract.
+"""[Âm thanh › Chép lời]
+Làm gì   : Định nghĩa kiểu dữ liệu đầu ra chung của mọi bộ chép lời và lỗi chuẩn khi chép
+           thất bại.
+Đọc từ   : class ASRResult kết quả chép gồm các ASRSegment; class ASRError lỗi chuẩn
+Mục lục (các hàm/lớp chính):
+  class ASRResult   Kết quả chép lời chung của mọi nhà cung cấp
+  class ASRSegment  Một đoạn chép lời kèm độ tin và danh sách từ
+  class ASRWord     Một từ đã chép lời kèm mốc bắt đầu và kết thúc
+  class ASRError    Lỗi chép lời có mã ổn định và cờ thử lại được
+Dùng bởi : audio/asr/__init__, audio/asr/base, audio/asr/disagreement,
+           audio/asr/faster_whisper_provider, audio/asr/phowhisper_provider,
+           audio/asr/registry, audio/asr/sidecar_provider, audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Lược đồ đầu ra chung cho mọi nhà cung cấp ASR, và hợp đồng lỗi.
 
-Every provider returns an ``ASRResult``. The pipeline never reads provider
-specific fields, so providers can be swapped by configuration.
+Mọi nhà cung cấp trả về một ``ASRResult``. Đường ống không bao giờ đọc các trường
+riêng của nhà cung cấp, nên có thể hoán đổi nhà cung cấp bằng cấu hình.
 
-Three notions are kept apart on purpose (see docs/tai-lieu/thiet-ke-dau-vao-am-thanh.md):
+Ba khái niệm được cố ý tách riêng (xem docs/tai-lieu/thiet-ke-dau-vao-am-thanh.md):
 
-* ``asr_confidence``  how sure the recogniser is about the WORDS it heard.
-* clinical certainty  how sure the SPEAKER is about the fact (core MediTrace field
-                      ``do_chac_chan``) — never derived from audio.
-* evidence status     whether MediTrace has grounds to publish the claim (core gate).
+* ``asr_confidence``  bộ nhận dạng chắc đến đâu về các TỪ đã nghe.
+* độ chắc lâm sàng  NGƯỜI NÓI chắc đến đâu về dữ kiện (trường lõi MediTrace
+                      ``do_chac_chan``) — không bao giờ suy ra từ âm thanh.
+* trạng thái căn cứ   MediTrace có cơ sở để công bố mệnh đề hay không (chốt chặn lõi).
 
-``asr_confidence`` is ``None`` when the provider does not expose a meaningful
-number. It is never invented.
+``asr_confidence`` là ``None`` khi nhà cung cấp không cung cấp con số
+có ý nghĩa. Nó không bao giờ bị bịa.
 """
 
 from __future__ import annotations
@@ -34,7 +48,7 @@ ERROR_CODES = {
     "low_quality_audio": "Âm thanh quá nhỏ, bị méo hoặc quá ngắn.",
 }
 
-# Loi nao nguoi dung thu lai duoc (doi mang, doi may, ghi lai am thanh)
+# Lỗi nào người dùng thử lại được (đổi mạng, đổi máy, ghi lại âm thanh)
 _RECOVERABLE = {"audio_invalid": True, "audio_conversion_failed": True,
                 "phowhisper_load_failed": True, "phowhisper_inference_failed": True,
                 "asr_load_failed": True, "asr_inference_failed": True,
@@ -43,9 +57,11 @@ _RECOVERABLE = {"audio_invalid": True, "audio_conversion_failed": True,
                 "asr_disagreement": True, "low_quality_audio": True}
 
 
+# ═══ class ASRError — Lỗi chép lời có mã ổn định và cờ thử lại được ═══════════════════
+# str(lỗi) là mã; to_dict trả mã, thông báo tiếng Việt và recoverable.
 class ASRError(RuntimeError):
-    """Error with a stable code. ``str(err)`` is the code, so the existing pipeline
-    (which stores ``str(exc)`` as the error code) keeps working."""
+    """Lỗi có mã ổn định. ``str(err)`` là mã lỗi, nên đường ống hiện có
+    (lưu ``str(exc)`` làm mã lỗi) vẫn chạy được."""
 
     def __init__(self, code: str, detail: str = ""):
         super().__init__(code)
@@ -57,6 +73,7 @@ class ASRError(RuntimeError):
                 "recoverable": _RECOVERABLE.get(self.code, True)}
 
 
+# ═══ class ASRWord — Một từ đã chép lời kèm mốc bắt đầu và kết thúc ═══════════════════
 @dataclass
 class ASRWord:
     text: str
@@ -64,6 +81,8 @@ class ASRWord:
     end_time: Optional[float]
 
 
+# ═══ class ASRSegment — Một đoạn chép lời kèm độ tin và danh sách từ ══════════════════
+# asr_confidence chỉ là độ chắc của bộ nhận dạng về chữ, không phải độ chắc lâm sàng.
 @dataclass
 class ASRSegment:
     segment_id: str
@@ -74,6 +93,8 @@ class ASRSegment:
     words: list[ASRWord] = field(default_factory=list)
 
 
+# ═══ class ASRResult — Kết quả chép lời chung của mọi nhà cung cấp ════════════════════
+# Có as_legacy để đưa vào alignment.align; confidence là None nếu nhà cung cấp không có.
 @dataclass
 class ASRResult:
     provider: str
@@ -93,7 +114,7 @@ class ASRResult:
         return asdict(self)
 
     def as_legacy(self) -> dict[str, Any]:
-        """Shape understood by ``alignment.align`` (and by old callers)."""
+        """Dạng dữ liệu ``alignment.align`` hiểu được (và các bên gọi cũ dùng)."""
         return {
             "provider": self.provider, "model": self.model, "language": self.language,
             "timestamp_level": self.timestamp_level,

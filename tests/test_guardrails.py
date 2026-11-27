@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Test suite cho he thong Guardrails da tang trong src/guardrails.py."""
+"""Test suite cho he thong Guardrails da tang trong src/he_thong/rao_chan_an_toan.py."""
 import pytest
-from src import guardrails as gr
+from src.he_thong import rao_chan_an_toan as gr
 
 
 def test_guardrail_asr_phat_hien_am_vi_thuoc():

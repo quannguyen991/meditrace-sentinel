@@ -4,8 +4,8 @@ import re
 
 import pytest
 
-from src import kho_khuon
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import kho_khuon as kho_khuon
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 from tools import sinh_thach_thuc_v2 as v2
 
 SO = 4  # so ca moi bo trong phep thu (nho cho nhanh)

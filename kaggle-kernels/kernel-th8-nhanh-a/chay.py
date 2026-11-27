@@ -38,9 +38,9 @@ def goi_du_lieu() -> Path:
     /kaggle/input/<ten> nhu tai lieu cu. Tim de quy thi khong phu thuoc cach gan.
     """
     for src in sorted(VAO.glob("**/src")):
-        if (src / "nhanh.py").is_file():
+        if (src / "duong_ong" / "chay_duong_ong.py").is_file():
             return src.parent
-    raise SystemExit(f"khong thay dataset co src/nhanh.py trong {VAO}")
+    raise SystemExit(f"khong thay dataset co src/duong_ong/chay_duong_ong.py trong {VAO}")
 
 
 def chuan_bi() -> Path:
@@ -88,7 +88,7 @@ def main() -> None:
     if ma != 0:
         sys.exit("du lieu tren may khong phai the he " + THE_HE)
 
-    lenh = [sys.executable, "-m", "src.train_baseline", "--model", MO_HINH,
+    lenh = [sys.executable, "-m", "src.huan_luyen.huan_luyen_sft", "--model", MO_HINH,
             "--nhiem-vu", "benh_an", "--buoc", SO_BUOC,
             "--tep-train", TEP_TRAIN, "--tep-val", TEP_VAL]
     log = open(LAM / "log_train_nhanh_a.txt", "a", encoding="utf-8")

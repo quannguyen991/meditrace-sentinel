@@ -26,12 +26,12 @@ if str(GOC_DU_AN) not in sys.path:
     sys.path.insert(0, str(GOC_DU_AN))
 
 try:
-    from src.trich_xuat_thuc_the import HoiThoaiSubstringTrie
+    from src.duong_ong.b1_ep_dau_ra_json import HoiThoaiSubstringTrie
 except ImportError:
     HoiThoaiSubstringTrie = None
 
 try:
-    from src.khuon_mo_rong import DANH_SACH_KHUON_MO_RONG
+    from src.bo_du_lieu.khuon_mo_rong import DANH_SACH_KHUON_MO_RONG
     MAP_HE_CO_QUAN = {k["ten"]: k.get("he_co_quan", "Khác") for k in DANH_SACH_KHUON_MO_RONG}
 except ImportError:
     MAP_HE_CO_QUAN = {}

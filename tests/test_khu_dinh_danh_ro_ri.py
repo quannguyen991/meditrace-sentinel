@@ -8,7 +8,7 @@ import re
 
 import pytest
 
-from src.khu_dinh_danh import ClinicalDeidentifier as CD
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier as CD
 
 
 def _chu_so(s):

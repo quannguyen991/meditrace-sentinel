@@ -15,9 +15,14 @@ import json
 
 import pytest
 
-from src import bakeoff, cham_he_thong as cht, du_lieu_trich, khoa_bang_chung as kbc
-from src import ngu_lieu_viet as nl, phat_bieu as pb, sinh_benh_an
-from src import sinh_hoi_thoai_viet as sh
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
+from src.do_luong import cham_he_thong as cht
+from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
+from src.duong_ong import b4_kiem_can_cu as kbc
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.duong_ong import b1_cau_truc_menh_de as pb
+from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 @pytest.fixture(scope="module")
@@ -186,7 +191,7 @@ def test_khoa_khong_chan_lieu_dung():
 
 
 def test_khoa_khong_chan_oan_chi_tiet_thuoc_tren_dap_an_hoan_hao(bo):
-    from src.danh_gia_khoa import phat_bieu_tu_dap_an
+    from src.do_luong.danh_gia_khoa import phat_bieu_tu_dap_an
     dem = collections.Counter()
     for c in bo[:600]:
         ps = [p for p in phat_bieu_tu_dap_an(c) if p.thuoc]

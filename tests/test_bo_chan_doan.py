@@ -7,7 +7,7 @@ import re
 
 import pytest
 
-from src import sinh_bo_chan_doan as sb
+from src.bo_du_lieu import sinh_bo_chan_doan as sb
 
 BO = sb.sinh_bo(5, seed=1)
 

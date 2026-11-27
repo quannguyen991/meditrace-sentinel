@@ -12,7 +12,8 @@ can mot test chu khong the trong vao mat nguoi doc.
 """
 import json
 
-from src import du_lieu_trich, sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def _ca_co_bay(bay, so_thu=400, seed=42):
@@ -211,7 +212,7 @@ def test_MOI_quan_he_khai_trong_luoc_do_deu_co_vi_du():
     """Mot nhan khai ra ma khong co du lieu thi khong hoc duoc, khong do duoc,
     va bao cao noi ve no la noi qua."""
     from collections import Counter
-    from src import phat_bieu
+    from src.duong_ong import b1_cau_truc_menh_de as phat_bieu
     c = Counter(m["quan_he"] for x in sh.sinh_bo(600, seed=77)
                 for m in x["dap_an"])
     thieu = [q for q in phat_bieu.QUAN_HE if not c.get(q)]
@@ -220,7 +221,7 @@ def test_MOI_quan_he_khai_trong_luoc_do_deu_co_vi_du():
 
 def test_MOI_trang_thai_khai_trong_luoc_do_deu_co_vi_du():
     from collections import Counter
-    from src import phat_bieu
+    from src.duong_ong import b1_cau_truc_menh_de as phat_bieu
     c = Counter(m["trang_thai"] for x in sh.sinh_bo(600, seed=77)
                 for m in x["dap_an"])
     thieu = [t for t in phat_bieu.TRANG_THAI if not c.get(t)]
@@ -331,7 +332,7 @@ def test_muc_KHAM_va_CHAN_DOAN_la_hien_tai():
 def test_nhan_huan_luyen_DOC_tu_dap_an_khong_dong_cung():
     """`du_lieu_trich` tung dong cung truong nay thanh mac dinh."""
     import json
-    from src import du_lieu_trich
+    from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
     ca = sh.sinh_bo(6, seed=9)
     co_qua_khu = False
     for k in ca:

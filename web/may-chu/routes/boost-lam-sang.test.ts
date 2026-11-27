@@ -478,7 +478,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   mockPyServer.closeAllConnections?.();
   await new Promise<void>((resolve) => mockPyServer.close(() => resolve()));
 
-  // 7a. Fallback thực tế `src.kiem_duyet_bhyt_va_bo_sot --precheck` phát hiện quá liều Nhi khoa nhờ `thong_tin_benh_nhan`
+  // 7a. Fallback thực tế `src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot --precheck` phát hiện quá liều Nhi khoa nhờ `thong_tin_benh_nhan`
   const fbBhytRes = await fetch(`${baseUrl}/api/bhyt/precheck`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
@@ -495,7 +495,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const fbBhytBody: any = await fbBhytRes.json();
   assert.ok(Array.isArray(fbBhytBody.canh_bao_lieu_nhi_khoa) && fbBhytBody.canh_bao_lieu_nhi_khoa.length >= 1);
 
-  // 7b. Fallback thực tế `src.ocr_lam_sang --parse` khi thiếu `tuoi`: không bịa eGFR tuổi 50
+  // 7b. Fallback thực tế `src.cong_cu_lam_sang.doc_phieu_xet_nghiem --parse` khi thiếu `tuoi`: không bịa eGFR tuổi 50
   const fbOcrRes = await fetch(`${baseUrl}/api/ocr/phieu-cu`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
@@ -505,7 +505,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const fbOcrBody: any = await fbOcrRes.json();
   assert.equal(fbOcrBody.chi_so?.egfr, undefined, "không có tuổi thật thì tuyệt đối không tự tính eGFR giả định tuổi 50");
 
-  // 7c. Fallback thực tế `src.cam_doan_thu_thuat --check`
+  // 7c. Fallback thực tế `src.cong_cu_lam_sang.cam_doan_thu_thuat --check`
   const fbConsentRes = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
@@ -522,7 +522,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   assert.equal(fbConsentBody.du_6_muc_phap_ly, true);
   assert.equal(fbConsentBody.so_muc_dat, 6);
 
-  // 7d. Fallback thực tế `src.di_buong_noi_tru --diff`
+  // 7d. Fallback thực tế `src.cong_cu_lam_sang.di_buong_noi_tru --diff`
   const fbWardRes = await fetch(`${baseUrl}/api/inpatient/ward-round-diff`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },

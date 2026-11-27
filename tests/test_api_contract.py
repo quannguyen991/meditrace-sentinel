@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử khớp Schema Contract giữa Python (`src/api_contract.py`) và TypeScript (`web/src/types/api-contract.ts`)."""
+"""Kiểm thử khớp Schema Contract giữa Python (`src/he_thong/hop_dong_api.py`) và TypeScript (`web/src/types/api-contract.ts`)."""
 import re
 from pathlib import Path
 
-from src.api_contract import CONTRACT_SCHEMA, validate_contract_keys
-from src.kiem_duyet_bhyt_va_bo_sot import (
+from src.he_thong.hop_dong_api import CONTRACT_SCHEMA, validate_contract_keys
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import (
     ClinicalHarmWeightedEvaluator,
     tien_kiem_bhyt_tu_du_lieu,
 )
-from src.ocr_lam_sang import boc_tach_phieu_cu
+from src.cong_cu_lam_sang.doc_phieu_xet_nghiem import boc_tach_phieu_cu
 
 ROOT = Path(__file__).resolve().parent.parent
 TS_CONTRACT_PATH = ROOT / "web" / "src" / "types" / "api-contract.ts"

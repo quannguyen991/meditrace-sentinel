@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Khoang tin cay, so sanh theo cap, va hai hang rao.
 
-VI SAO CAN TEST. Tep `src/sai_so.py` sinh ra tu mot cau hoi tuong don gian —
+VI SAO CAN TEST. Tep `src/do_luong/khoang_tin_cay.py` sinh ra tu mot cau hoi tuong don gian —
 "them khoang tin cay vao bang so sanh" — va trong luc viet no lam lo ra hai
 loi nang hon ban than khoang tin cay. Test o day canh dung hai loi do.
 
@@ -17,7 +17,7 @@ import json
 
 import pytest
 
-from src import sai_so as ss
+from src.do_luong import khoang_tin_cay as ss
 
 
 def _tep(tmp_path, ban_ghi, ten):

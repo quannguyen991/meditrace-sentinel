@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Test cho buoc cham lai cac nhanh bang diem quy gan."""
-from src import cham_lai_bang_quy_gan as cl
+from src.do_luong import cham_lai_bang_quy_gan as cl
 
 THAM_CHIEU = "TIỀN SỬ GIA ĐÌNH\n\nMẹ dị ứng penicillin.\n\nDỊ ỨNG\n\nTrẻ chưa ghi nhận dị ứng."
 

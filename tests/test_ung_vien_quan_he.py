@@ -10,8 +10,8 @@ tra loi mot cau hoi bon lua chon tren mot cap ngan.
 """
 import pytest
 
-from src import ung_vien_quan_he as uv
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_sinh_cap_ung_vien_quan_he as uv
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def pb(id, noi_dung, chu_the_id=0, moc=None, phu_dinh=False,

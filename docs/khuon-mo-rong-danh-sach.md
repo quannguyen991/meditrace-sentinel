@@ -1,7 +1,7 @@
 # Danh mục 400 Khuôn Bệnh Mở rộng — Đợt 1 (201-400) & Đợt 2 (401-600)
 
 > **Cập nhật ngày 22/11/2026:** Đã hoàn thành Task F1-F5 mở rộng quy mô bộ dữ liệu MediTrace Sentinel lên **600 khuôn lâm sàng** (200 khuôn gốc + 400 khuôn mở rộng).
-> - **Lô 1 (50 khuôn, 201-250):** Đã hiện thực hóa 100% trong `src/khuon_mo_rong.py` kèm **ít nhất 6 biến thể lâm sàng đa dạng** cho mỗi mục khám, chẩn đoán, kế hoạch; `da_duyet = False`.
+> - **Lô 1 (50 khuôn, 201-250):** Đã hiện thực hóa 100% trong `src/bo_du_lieu/khuon_mo_rong.py` kèm **ít nhất 6 biến thể lâm sàng đa dạng** cho mỗi mục khám, chẩn đoán, kế hoạch; `da_duyet = False`.
 > - **Lô 2 - Lô 8 (350 khuôn, 251-600):** Đã hoàn tất brainstorm tên khoa học, phân nhóm tuổi, diễn tiến, hệ cơ quan và lý do lựa chọn lâm sàng, sẵn sàng cho Hội đồng Y khoa thẩm duyệt.
 > - **Chỉ số Đa dạng Hệ cơ quan:** Đạt **21 hệ cơ quan**, không hệ nào vượt quá **10.83%** (dưới trần quy định 12.0%).
 
@@ -9,7 +9,7 @@
 
 ## PHẦN 1: LÔ 1 (ĐỢT 1: KHUÔN 201–250) — ĐÃ HIỆN THỰC HÓA 100%
 
-*Toàn bộ 50 khuôn dưới đây đã được lập trình đầy đủ trong `src/khuon_mo_rong.py` với cấu trúc chuẩn và 6 biến thể lâm sàng mỗi mục:*
+*Toàn bộ 50 khuôn dưới đây đã được lập trình đầy đủ trong `src/bo_du_lieu/khuon_mo_rong.py` với cấu trúc chuẩn và 6 biến thể lâm sàng mỗi mục:*
 
 | # | Tên khuôn | Nhóm | Diễn tiến | Hệ cơ quan | Tình trạng |
 |---|---|---|---|---|---|
@@ -69,7 +69,7 @@
 ## PHẦN 2: LÔ 2–4 (ĐỢT 1: KHUÔN 251–400) — ĐÃ BRAINSTORM & ĐỊNH HỆ CƠ QUAN
 
 ### Lô 2 (Khuôn 251–300): Nhi khoa, Sơ sinh, Di truyền nhi & Rối loạn chuyển hoá bẩm sinh
-- Bao gồm 50 bệnh lý nhi khoa thực chứng: `lồng ruột cấp ở nhũ nhi`, `teo đường mật bẩm sinh`, `suy giáp bẩm sinh`, `tăng sản thượng thận bẩm sinh`, `còi xương do thiếu vitamin D`, `bệnh celiac ở trẻ em`, `xuất huyết giảm tiểu cầu miễn dịch nhi`, `viêm màng não mủ ở trẻ em`, `hẹp phì đại môn vị ở trẻ nhũ nhi`, `hội chứng thận hư tiên phát ở trẻ em`, `viêm mao mạch dị ứng Schonlein-Henoch ở trẻ`, `hội chứng Down`, `tự kỷ ở trẻ em`, `viêm khớp vô căn thiếu niên`, `tinh hoàn ẩn bẩm sinh`, `lỗ tiểu lệch thấp hypospadias`, `thiếu men G6PD gây tán huyết cấp ở trẻ`, `suy dinh dưỡng thể phù Kwashiorkor`, v.v. (Xem chi tiết tại `DANH_SACH_UNG_VIEN_350` trong `src/khuon_mo_rong.py`).
+- Bao gồm 50 bệnh lý nhi khoa thực chứng: `lồng ruột cấp ở nhũ nhi`, `teo đường mật bẩm sinh`, `suy giáp bẩm sinh`, `tăng sản thượng thận bẩm sinh`, `còi xương do thiếu vitamin D`, `bệnh celiac ở trẻ em`, `xuất huyết giảm tiểu cầu miễn dịch nhi`, `viêm màng não mủ ở trẻ em`, `hẹp phì đại môn vị ở trẻ nhũ nhi`, `hội chứng thận hư tiên phát ở trẻ em`, `viêm mao mạch dị ứng Schonlein-Henoch ở trẻ`, `hội chứng Down`, `tự kỷ ở trẻ em`, `viêm khớp vô căn thiếu niên`, `tinh hoàn ẩn bẩm sinh`, `lỗ tiểu lệch thấp hypospadias`, `thiếu men G6PD gây tán huyết cấp ở trẻ`, `suy dinh dưỡng thể phù Kwashiorkor`, v.v. (Xem chi tiết tại `DANH_SACH_UNG_VIEN_350` trong `src/bo_du_lieu/khuon_mo_rong.py`).
 
 ### Lô 3 (Khuôn 301–350): Cơ xương khớp, Thần kinh cơ & Chấn thương chỉnh hình ngoại trú
 - Bao gồm 50 bệnh lý: `viêm gân lồi cầu trong xương cánh tay (golf elbow)`, `viêm bao gân De Quervain`, `rách chóp xoay khớp vai`, `hoại tử vô mạch chỏm xương đùi`, `hội chứng dải chậu chày`, `biến dạng ngón chân cái vẹo ngoài Hallux valgus`, `rách sụn chêm khớp gối`, `gãy kín xương đòn do ngã`, `hội chứng cơ hình lê chèn ép thần kinh tọa`, `liệt dây thần kinh quay gây bàn tay rủ`, `nhược cơ thể mắt`, `xơ cứng rải rác thể tái phát thuyên giảm`, `viêm khớp vảy nến`, `hội chứng Sjogren`, `bệnh Still người lớn`, `giả gout`, `hẹp ống sống thắt lưng thoái hóa`, v.v.

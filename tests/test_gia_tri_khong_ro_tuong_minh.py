@@ -2,8 +2,8 @@
 """Gia tri "khong ro" phai thanh trang thai tuong minh, khong ngam dinh thanh gia tri an toan."""
 import pytest
 
-from src.fhir_exporter import FHIRExporter
-from src.kiem_duyet_bhyt_va_bo_sot import _suy_nguoi_noi, _suy_trang_thai
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import _suy_nguoi_noi, _suy_trang_thai
 
 
 def _di_ung(b):

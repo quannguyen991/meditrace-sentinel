@@ -24,12 +24,12 @@ from pathlib import Path
 GOC = Path(__file__).resolve().parents[1]
 DICH = GOC / "data" / "tri_thuc_thuoc.json"
 
-N_AHO = "src/aho_corasick_duoc_thu.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang)"
-N_NGUOI_LON = "src/duoc_ly_lam_sang.py LIEU_TOI_DA_NGAY và src/guardrails.py LIEU_TRAN (không ghi nguồn)"
-N_TRE_EM = "src/kiem_duyet_bhyt_va_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn)"
-N_NTI = "src/cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn)"
+N_AHO = "src/cong_cu_lam_sang/tra_duoc_thu_aho_corasick.py (bảng ghi “Dược thư Quốc gia Việt Nam 2022”, không ghi số trang)"
+N_NGUOI_LON = "src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py LIEU_TOI_DA_NGAY và src/he_thong/rao_chan_an_toan.py LIEU_TRAN (không ghi nguồn)"
+N_TRE_EM = "src/cong_cu_lam_sang/tien_kiem_bhyt_va_khoi_phuc_bo_sot.py LIEU_TRAN_NHI_KHOA_MG_KG_NGAY (không ghi nguồn)"
+N_NTI = "src/duong_ong/b5_xep_cho_cong_rui_ro.py THUOC_KHOANG_DIEU_TRI_HEP (không ghi nguồn)"
 N_KHUON = "tên hoạt chất trong kế hoạch điều trị của khuôn bệnh (src/khuon_*.py, ngu_lieu_viet.py); không kèm ngưỡng"
-N_TEN = "src/thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng"
+N_TEN = "src/duong_ong/b2_gom_nguoi_thuc_the.py TU_DIEN_THUOC hoặc danh sách tên của tầng 4.5 cũ; không kèm ngưỡng"
 
 # Tieng Viet bo 'e' cuoi; xu ly chung trong tri_thuc_thuoc._khoa. Day chi la ten THAT SU khac.
 TEN_KHAC = {
@@ -68,9 +68,12 @@ def _khoa(t):
 
 
 def thu_thap():
-    from src import cong_rui_ro, kho_khuon, kiem_duyet_bhyt_va_bo_sot as kd, thuc_the
-    from src.aho_corasick_duoc_thu import CO_SO_DU_LIEU_DUOC_THU_2022
-    from src.duoc_ly_lam_sang import LIEU_TOI_DA_NGAY
+    from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+    from src.bo_du_lieu import kho_khuon as kho_khuon
+    from src.cong_cu_lam_sang import tien_kiem_bhyt_va_khoi_phuc_bo_sot as kd
+    from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
+    from src.cong_cu_lam_sang.tra_duoc_thu_aho_corasick import CO_SO_DU_LIEU_DUOC_THU_2022
+    from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import LIEU_TOI_DA_NGAY
 
     muc = {}  # khoa hoat chat -> dict
 

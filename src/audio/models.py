@@ -1,4 +1,16 @@
-"""Data contracts for the audio intake pipeline."""
+"""[Âm thanh]
+Làm gì   : Khai báo các kiểu dữ liệu của một phiên âm thanh: trạng thái, vai người nói, đoạn
+           lời.
+Đọc từ   : class TranscriptSegment một đoạn lời; new_session() tạo phiên mới
+Mục lục (các hàm/lớp chính):
+  class TranscriptSegment  Một lượt nói trong lời thoại kèm mốc và nguồn chép
+  class SessionStatus      Các trạng thái của một phiên âm thanh
+  class SpeakerRole        Các vai người nói được phép gán
+  new_session()            Tạo bản ghi phiên âm thanh mới ở trạng thái created
+Dùng bởi : audio/__init__, audio/alignment, audio/pipeline, audio/storage
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Hợp đồng dữ liệu cho đường ống tiếp nhận âm thanh."""
 
 from __future__ import annotations
 
@@ -8,10 +20,13 @@ from enum import Enum
 from typing import Any, Optional
 
 
+# ═══ now_iso() — Lấy thời điểm hiện tại theo UTC dạng ISO ═════════════════════════════
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+# ═══ class SessionStatus — Các trạng thái của một phiên âm thanh ══════════════════════
+# Từ created đến ready_for_meditrace hoặc failed.
 class SessionStatus(str, Enum):
     CREATED = "created"
     RECORDING = "recording"
@@ -24,6 +39,8 @@ class SessionStatus(str, Enum):
     FAILED = "failed"
 
 
+# ═══ class SpeakerRole — Các vai người nói được phép gán ══════════════════════════════
+# Bác sĩ, điều dưỡng, bệnh nhân, người nhà, khác, chưa rõ.
 class SpeakerRole(str, Enum):
     DOCTOR = "doctor"
     NURSE = "nurse"
@@ -33,6 +50,8 @@ class SpeakerRole(str, Enum):
     UNKNOWN = "unknown"
 
 
+# ═══ class TranscriptSegment — Một lượt nói trong lời thoại kèm mốc và nguồn chép ═════
+# Giữ chữ gốc, chữ đã sửa, độ tin, cờ cần nghe lại và các ứng viên chép lời.
 @dataclass
 class TranscriptSegment:
     segment_id: str
@@ -49,7 +68,7 @@ class TranscriptSegment:
     original_asr_text: Optional[str] = None
     edited_at: Optional[str] = None
     edited_by: Optional[str] = None
-    # Them 22/09/2026 — nguon goc ban chep va canh bao hai ASR bat dong.
+    # Thêm 22/09/2026 — nguồn gốc bản chép và cảnh báo hai ASR bất đồng.
     asr_provider: Optional[str] = None
     asr_model: Optional[str] = None
     asr_review_required: bool = False
@@ -65,6 +84,7 @@ class TranscriptSegment:
         return cls(**value)
 
 
+# ═══ new_session() — Tạo bản ghi phiên âm thanh mới ở trạng thái created ══════════════
 def new_session(session_id: str) -> dict[str, Any]:
     stamp = now_iso()
     return {

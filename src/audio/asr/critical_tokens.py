@@ -1,20 +1,32 @@
-"""Critical clinical tokens in a Vietnamese transcript.
+"""[Âm thanh › Chép lời]
+Làm gì   : Lấy ra các từ lâm sàng dễ sai nghĩa (thuốc, liều, phủ định, ai) từ bản chép để so
+           hai bản chép với nhau.
+Vào → Ra : văn bản chép lời → tập từ quan trọng; hai tập → danh sách điểm khác nhau
+Đọc từ   : trich() rút từ quan trọng từ một bản; khac_nhau() so hai bản
+Mục lục (các hàm/lớp chính):
+  trich()      Trích từ khoá lâm sàng quan trọng từ một đoạn chữ
+  khac_nhau()  Liệt kê loại từ khoá mà hai bản trích khác nhau
+  chuan_hoa()  Chuẩn hoá chữ để so từ khoá lâm sàng
+Dùng bởi : audio/asr/bench_metrics, audio/asr/disagreement
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Các từ khoá lâm sàng trọng yếu trong bản chép lời tiếng Việt.
 
-Used ONLY to compare two transcripts (ASR disagreement, benchmark scoring). It never
-rewrites the transcript: the text MediTrace receives stays what the recogniser heard.
+CHỈ dùng để so sánh hai bản chép lời (bất đồng ASR, chấm điểm benchmark). Nó không bao giờ
+viết lại bản chép lời: văn bản MediTrace nhận vẫn là những gì bộ nhận dạng đã nghe.
 
-Categories:
-    thuoc        drug names (expanded Vietnamese clinical lexicon)
-    lieu         (value, unit) pairs: 5 mg, 500 mg, 10 ml, 2 nhát, 1 ống, 10 ui ...
-    tan_suat     doses per day: "ngày 2 lần" -> 2
-    thoi_gian    durations and anchors: (1, "ngày"), (10, "ngày"), "hôm qua" ...
-    phu_dinh     negation words: không, chưa, chưa từng, chẳng
-    trang_thai   medication state: đang dùng, đã ngừng, mới bắt đầu
-    nguoi        who: bệnh nhân, bố, mẹ, ông, bà, vợ, chồng, con, cháu ...
-    muc_do_dau   pain descriptors: dữ dội, âm ỉ, quặn thắt, nhói buốt, nóng rát ...
+Các nhóm:
+    thuoc        tên thuốc (bộ từ vựng lâm sàng tiếng Việt đã mở rộng)
+    lieu         cặp (giá trị, đơn vị): 5 mg, 500 mg, 10 ml, 2 nhát, 1 ống, 10 ui ...
+    tan_suat     số lần dùng mỗi ngày: "ngày 2 lần" -> 2
+    thoi_gian    khoảng thời gian và mốc: (1, "ngày"), (10, "ngày"), "hôm qua" ...
+    phu_dinh     từ phủ định: không, chưa, chưa từng, chẳng
+    trang_thai   trạng thái dùng thuốc: đang dùng, đã ngừng, mới bắt đầu
+    nguoi        ai: bệnh nhân, bố, mẹ, ông, bà, vợ, chồng, con, cháu ...
+    muc_do_dau   từ tả cơn đau: dữ dội, âm ỉ, quặn thắt, nhói buốt, nóng rát ...
 
-Number words are parsed to integers so that "năm trăm mi li gam" and "500 mg" compare
-equal, while "5 mg" and "50 mg" do not.
+Số viết bằng chữ được đổi ra số nguyên, để "năm trăm mi li gam" và "500 mg" được coi là
+bằng nhau, còn "5 mg" và "50 mg" thì không.
 """
 
 from __future__ import annotations
@@ -145,8 +157,10 @@ _MUC_DO_DAU = {
 }
 
 
+# ═══ chuan_hoa() — Chuẩn hoá chữ để so từ khoá lâm sàng ═══════════════════════════════
+# Chữ thường, gộp đơn vị (mi li gam thành mg), tách số khỏi đơn vị, bỏ dấu câu.
 def chuan_hoa(text: str) -> str:
-    """Chu thuong, NFC, quy chuan don vi ghep, don vi dac thu, tach so va bo dau cau."""
+    """Chữ thường, NFC, quy chuẩn đơn vị ghép, đơn vị đặc thù, tách số và bỏ dấu câu."""
     t = unicodedata.normalize("NFC", (text or "").lower())
 
     # Quy chuẩn đơn vị phức và tiếng Việt viết rời
@@ -167,19 +181,21 @@ def chuan_hoa(text: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+# ─── _doc_so() — Đọc số viết bằng chữ tiếng Việt hoặc chữ số ──────────────────────────
+# Trả giá trị và vị trí sau số, hoặc None nếu không phải số.
 def _doc_so(w: list[str], i: int) -> Optional[tuple[int, int]]:
-    """Doc mot so bat dau tai w[i] -> (gia tri, vi tri sau so) hoac None."""
+    """Đọc một số bắt đầu tại w[i] -> (giá trị, vị trí sau số) hoặc None."""
     if i >= len(w):
         return None
     if w[i].isdigit():
         return int(w[i]), i + 1
     tong, j = 0, i
-    # hang tram: <so> tram [linh/le <so> | chuc]
+    # hàng trăm: <so> trăm [linh/lẻ <so> | chục]
     if j + 1 < len(w) and w[j] in _SO and w[j + 1] == "trăm":
         tong, j = _SO[w[j]] * 100, j + 2
         if j + 1 < len(w) and w[j] in ("linh", "lẻ") and w[j + 1] in _SO:
             return tong + _SO[w[j + 1]], j + 2
-    # hang chuc
+    # hàng chục
     if j < len(w) and w[j] == "mười":
         tong += 10
         j += 1
@@ -199,8 +215,11 @@ def _doc_so(w: list[str], i: int) -> Optional[tuple[int, int]]:
     return (tong, j) if j > i else None
 
 
+# ═══ trich() — Trích từ khoá lâm sàng quan trọng từ một đoạn chữ ══════════════════════
+# Gồm thuốc, liều, tần suất, thời gian, phủ định, trạng thái dùng thuốc, người nói đến
+# và mức độ đau.
 def trich(text: str) -> dict[str, Any]:
-    """-> cac tap tu khoa quan trong trong mot doan chu."""
+    """-> các tập từ khoá quan trọng trong một đoạn chữ."""
     t = chuan_hoa(text)
     w = t.split()
     ra: dict[str, Any] = {
@@ -222,7 +241,7 @@ def trich(text: str) -> dict[str, Any]:
     # Bắt liều dùng và tần suất
     i = 0
     while i < len(w):
-        # tan suat: "ngay <so> lan"
+        # tần suất: "ngày <so> lần"
         if w[i] == "ngày" and (s := _doc_so(w, i + 1)) and s[1] < len(w) and w[s[1]] == "lần":
             ra["tan_suat"].add(s[0])
             i = s[1] + 1
@@ -275,7 +294,7 @@ def trich(text: str) -> dict[str, Any]:
     return ra
 
 
-# Loai -> ma ly do khi hai ban chep khac nhau
+# Loại -> mã lý do khi hai bản chép khác nhau
 LY_DO = {
     "thuoc": "drug_name_disagreement",
     "lieu": "dosage_disagreement",
@@ -288,6 +307,8 @@ LY_DO = {
 }
 
 
+# ═══ khac_nhau() — Liệt kê loại từ khoá mà hai bản trích khác nhau ════════════════════
+# Dùng để phát hiện bất đồng giữa hai bản chép lời.
 def khac_nhau(a: dict[str, Any], b: dict[str, Any]) -> list[str]:
-    """-> danh sach loai tu khoa quan trong ma hai ban trich KHAC nhau."""
+    """-> danh sách loại từ khoá quan trọng mà hai bản trích KHÁC nhau."""
     return [k for k in LY_DO if a[k] != b[k]]

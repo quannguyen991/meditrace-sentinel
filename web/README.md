@@ -28,7 +28,7 @@ Bản do AI Studio dựng ban đầu gọi thẳng Gemini cho mọi việc. Ph�
   `D:\Claude\.secrets\`, không nằm trong mã.
 
 ```
-Giao diện (React)  →  server.ts (chuyển tiếp)  →  python -m src.dich_vu  →  MediTrace
+Giao diện (React)  →  server.ts (chuyển tiếp)  →  python -m src.he_thong.dich_vu_http  →  MediTrace
    npm run dev            cổng 3000/3100              cổng 8765            (D:\Claude\meditrace-core)
 ```
 
@@ -37,7 +37,7 @@ Giao diện (React)  →  server.ts (chuyển tiếp)  →  python -m src.dich_v
 1. Bật dịch vụ MediTrace (thư mục `D:\Claude\meditrace-core`):
 
    ```
-   D:\meditrace-venv-lap\Scripts\python -m src.dich_vu --cong 8765
+   D:\meditrace-venv-lap\Scripts\python -m src.he_thong.dich_vu_http --cong 8765
    ```
 
    Thêm `--khong-mo-hinh` nếu GPU đang bận: khi đó chỉ dùng được ca đã chạy trước và các ca

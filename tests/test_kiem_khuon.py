@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Test bo kiem khuon benh (src/kiem_khuon.py). Moi luat co mot ca loi co y."""
-from src import kiem_khuon as kk
-from src import ngu_lieu_viet as nl
+"""Test bo kiem khuon benh (src/bo_du_lieu/kiem_khuon.py). Moi luat co mot ca loi co y."""
+from src.bo_du_lieu import kiem_khuon as kk
+from src.bo_du_lieu import ngu_lieu_viet as nl
 
 
 def _khuon(**sua):

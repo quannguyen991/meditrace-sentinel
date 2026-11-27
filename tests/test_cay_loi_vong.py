@@ -2,7 +2,7 @@
 """Phep thu cho cac vong sua luat tu do cay loi (plan 2026-11-25-cay-loi-do-canh-bao, Task 5).
 Moi phep thu dung tu mot ca lot that trong tap dieu chinh (ghi id ca)."""
 from src.canh_bao import gop
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def _p(id_, noi_dung, luot, trich, **kw):
@@ -144,7 +144,7 @@ def test_phu_dinh_kieu_da_do_hoac_thuoc_em_khong_bao():
 
 
 # ---- Vong 5: doan chua ghi bi che (v2mr_1014, v2mr_0244: di ung nguoi nha; v2mr_0581: thuoc dinh chinh)
-from src import khoa_bang_chung as kbc  # noqa: E402
+from src.duong_ong import b4_kiem_can_cu as kbc  # noqa: E402
 
 
 def _chua_ghi(ps, hoi):

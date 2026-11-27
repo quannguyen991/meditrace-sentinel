@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Do dinh VRAM cua MOT buoc tien + lui khi huan luyen khau trich.
 
-Dung de kiem loss theo doan (src/loss_theo_doan.py) truoc khi huan luyen that:
+Dung de kiem loss theo doan (src/huan_luyen/loss_theo_doan.py) truoc khi huan luyen that:
   - o do dai ngan, loss theo doan phai BANG loss goc (lech duoi 0,1%);
   - o 4.096 token, dinh VRAM cua tien trinh phai <= 8,9 GiB (= 10,8 GiB gioi han
     90% tru 1,9 GiB ma bge-m3 va hien thi dang chiem).
@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import duong_dan  # noqa: E402
+from src.he_thong import duong_dan as duong_dan  # noqa: E402
 
 
 def do_vram(model_ten: str, do_dai: int, kich_thuoc_doan: int | None,
@@ -34,8 +34,8 @@ def do_vram(model_ten: str, do_dai: int, kich_thuoc_doan: int | None,
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-    from src.loss_theo_doan import bo_mat_na_day_du, cross_entropy_theo_doan
-    from src.train_baseline import TapLamSang, gom_lo
+    from src.huan_luyen.loss_theo_doan import bo_mat_na_day_du, cross_entropy_theo_doan
+    from src.huan_luyen.huan_luyen_sft import TapLamSang, gom_lo
 
     if phan_vram:
         torch.cuda.set_per_process_memory_fraction(phan_vram, 0)

@@ -16,7 +16,7 @@
 # dai nhat ~270 token, lan chay A cu dai nhat 226 token, khong ca nao cham tran.
 #
 # CHAM: A viet van xuoi nen KHONG cham bang bo cham muc menh de. Cham bang
-# `src.cham_lai_bang_quy_gan`, cung thuoc do quy gan ap cho phan van ban cua moi nhanh.
+# `src.do_luong.cham_lai_bang_quy_gan`, cung thuoc do quy gan ap cho phan van ban cua moi nhanh.
 #
 import json
 import os
@@ -39,9 +39,9 @@ PHAN = {
 
 def goi_du_lieu() -> Path:
     for src in sorted(VAO.glob("**/src")):
-        if (src / "nhanh.py").is_file() and (src.parent / "data").is_dir():
+        if (src / "duong_ong" / "chay_duong_ong.py").is_file() and (src.parent / "data").is_dir():
             return src.parent
-    raise SystemExit(f"khong thay dataset co src/nhanh.py trong {VAO}")
+    raise SystemExit(f"khong thay dataset co src/duong_ong/chay_duong_ong.py trong {VAO}")
 
 
 def tim_adapter() -> Path:
@@ -74,10 +74,10 @@ def chuoi_lenh(tap_list, adapter):
     """Mot card: A cho moi bo, roi A+ cho moi bo."""
     lenh = []
     for tap in tap_list:
-        lenh.append([sys.executable, "-m", "src.nhanh", "--nhanh", "A",
+        lenh.append([sys.executable, "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A",
                      "--model", MO_HINH, "--adapter", adapter, "--tap", tap])
     for tap in tap_list:
-        lenh.append([sys.executable, "-m", "src.nhanh", "--nhanh", "A+",
+        lenh.append([sys.executable, "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A+",
                      "--model", MO_HINH, "--adapter", adapter, "--tap", tap,
                      "--tu", f"ra_A_{tap}.jsonl"])
     return lenh

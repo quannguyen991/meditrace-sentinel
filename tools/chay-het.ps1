@@ -40,20 +40,20 @@ function Chay-Lai {
 }
 
 $ok1 = Chay-Lai "1-SAU-NHANH" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
     "C", "C_ghi_de", "D", "--model", $mo_hinh, "--tap", "phat_trien",
     "--max-token", "3072")
 
 $ok2 = Chay-Lai "2-TRAIN-NEN" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh, "--buoc", "200")
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh, "--buoc", "200")
 
 if ($ok2) {
     $ok3 = Chay-Lai "3-NHANH-A" @(
-        "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
         "--adapter", $adapter, "--tap", "phat_trien")
     if ($ok3) {
         Chay-Lai "4-NHANH-A-CONG" @(
-            "-m", "src.nhanh", "--nhanh", "A+", "--model", $mo_hinh,
+            "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A+", "--model", $mo_hinh,
             "--adapter", $adapter, "--tap", "phat_trien") | Out-Null
     }
 }

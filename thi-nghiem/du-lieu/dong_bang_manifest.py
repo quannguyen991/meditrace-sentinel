@@ -16,7 +16,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.stdout.reconfigure(encoding="utf-8")
 
-from src import ngu_lieu_viet as nl, sinh_hoi_thoai_viet as sh, tach_tap_viet as tv  # noqa: E402
+from src.bo_du_lieu import ngu_lieu_viet as nl  # noqa: E402
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tv
 
 
 def main():

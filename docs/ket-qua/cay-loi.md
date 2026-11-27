@@ -14,8 +14,8 @@ hình ngôn ngữ, không cần GPU. Đăng ký trước: `docs/dang-ky-truoc-bo
 Lệnh chạy:
 
 ```
-python -m src.do_cay_loi --tap dieu_chinh --ra-json …
-python -m src.do_cay_loi --tap giu_kin --toi-da-khoa-luat --ra-json …
+python -m src.do_luong.do_cay_loi --tap dieu_chinh --ra-json …
+python -m src.do_luong.do_cay_loi --tap giu_kin --toi-da-khoa-luat --ra-json …
 ```
 
 ## Tập điều chỉnh (400 ca từ `viet_train_v2`, được nhìn và được sửa luật)
@@ -121,7 +121,7 @@ Không mã nào đạt. Mình chỉ ghi khuyến nghị, không sửa `loai.py`.
 `tools/cay_loi_kho.py` thêm 14 loại lỗi tinh vi. Lỗi được cấy thẳng vào đáp án; **lời trích dẫn giữ nguyên**, nên
 nhìn qua vẫn thấy hợp lý.
 
-**Phép đo:** `python -m src.do_cay_loi --tap dieu_chinh --kho`, trên 400 ca điều chỉnh, luật đã khoá. Bắt đúng nhóm:
+**Phép đo:** `python -m src.do_luong.do_cay_loi --tap dieu_chinh --kho`, trên 400 ca điều chỉnh, luật đã khoá. Bắt đúng nhóm:
 
 | Loại lỗi khó | Ví dụ | n | Luật bắt đúng |
 |---|---|---:|---:|

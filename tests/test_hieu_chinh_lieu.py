@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử tự động cho Động cơ Hiệu chỉnh Liều Thuốc theo Chức năng Thận & Gan (src/hieu_chinh_lieu.py)."""
+"""Kiểm thử tự động cho Động cơ Hiệu chỉnh Liều Thuốc theo Chức năng Thận & Gan (src/cong_cu_lam_sang/hieu_chinh_lieu.py)."""
 
 import pytest
-from src.hieu_chinh_lieu import (
+from src.cong_cu_lam_sang.hieu_chinh_lieu import (
     tinh_crcl,
     chuyen_umol_sang_mg_dl,
     phan_do_suy_than,
@@ -104,7 +104,7 @@ def test_canh_bao_suy_gan_paracetamol_va_nsaid():
 
 def test_tinh_egfr_ckd_epi_2021_race_free():
     """Kiểm tra độ chính xác của công thức KDIGO CKD-EPI 2021 (loại bỏ chủng tộc)."""
-    from src.hieu_chinh_lieu import tinh_egfr_ckd_epi_2021
+    from src.cong_cu_lam_sang.hieu_chinh_lieu import tinh_egfr_ckd_epi_2021
     
     # Nữ 60 tuổi, Creatinine 1.0 mg/dL: eGFR xấp xỉ 65.6 mL/phút/1.73m2
     egfr_nu = tinh_egfr_ckd_epi_2021(creatinine_mg_dl=1.0, tuoi=60, la_nu=True)
@@ -158,7 +158,7 @@ def test_nonetype_guards_an_toan_tuyet_doi():
 
 def test_chot_chan_nhi_khoa_bedside_schwartz():
     """Ràng buộc lâm sàng: Bệnh nhân < 18 tuổi không dùng CKD-EPI, chuyển sang Bedside Schwartz."""
-    from src.hieu_chinh_lieu import tinh_egfr_bedside_schwartz_nhi_khoa
+    from src.cong_cu_lam_sang.hieu_chinh_lieu import tinh_egfr_bedside_schwartz_nhi_khoa
 
     # Trẻ em 10 tuổi, cao 130 cm, Creatinine 0.6 mg/dL
     # eGFR = (0.413 * 130) / 0.6 = 89.5 mL/phút/1.73m2

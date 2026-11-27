@@ -14,7 +14,7 @@ Ca hai lan hong duoi day deu la loi that, da xay ra trong ban dau:
      "giam 100% loi" — dung cai bay ke hoach ghi la bay lon nhat cua du an:
      GIAM LOI BANG CACH VIET IT DI.
 """
-from src.duong_danh_doi import _bao_cao
+from src.do_luong.duong_danh_doi import _bao_cao
 
 
 def diem(nguong, ty_le, sai, sai_nn, bo_sot, bo_sot_nn=None):

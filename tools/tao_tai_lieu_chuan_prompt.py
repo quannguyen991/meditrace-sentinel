@@ -76,18 +76,18 @@ def build_full_system_diary():
     md.append("| `web/` (Giao diện Doctor-in-the-Loop) | 51 tệp | Bàn làm việc SOAP, Terminal viễn thám AI Dark Console, Tờ dặn dò A4 chuẩn quốc tế | Production Ready |\n")
 
     author_files = [
-        ("src/sinh_hoi_thoai_viet.py", "src/", 19, "Biên soạn kịch bản và gài bẫy lâm sàng: bệnh nhân tự sửa lời, câu hỏi giả định và vai người nhà"),
-        ("src/thuc_the.py", "src/", 2, "Bổ sung luật nhận diện đại từ tự xưng phương ngữ Nam Bộ 'tui' tương đương 'tôi'"),
-        ("src/duoc_ly_lam_sang.py", "src/", 5, "Thiết kế Chốt 5 DDI: Tra cứu tương tác nguy cơ cao (Clopidogrel + Omeprazole) và cảnh báo quá liều"),
-        ("src/hieu_chinh_lieu.py", "src/", 3, "Hiện thực hóa công thức tính eGFR và thuật toán cảnh báo giảm liều suy thận cho Metformin"),
-        ("src/khu_dinh_danh.py", "src/", 3, "Xây dựng thuật toán khử định danh PII 2 chiều tuân thủ Nghị định 13/2023/NĐ-CP"),
-        ("src/dieu_phoi_ha_tang.py", "src/", 6, "Thiết kế kiến trúc điều phối Orchestrator kết nối liên hoàn toàn bộ 8 chốt phòng vệ an toàn"),
-        ("src/can_lam_sang.py", "src/", 4, "Tích hợp bảng giá trị tham chiếu cận lâm sàng (Troponin I, men gan, Creatinine)"),
-        ("src/thang_diem_lam_sang.py", "src/", 4, "Xây dựng 9 thang điểm nguy cơ CDSS (CHA2DS2-VASc, HAS-BLED, Wells...) hỗ trợ bác sĩ"),
-        ("src/tro_ly_lam_sang.py", "src/", 3, "Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng cần thiết"),
-        ("src/dan_do_benh_nhan.py", "src/", 4, "Xây dựng bộ sinh tờ dặn dò bình dân chia 4 khung giờ sáng/trưa/chiều/tối chuẩn y khoa"),
-        ("src/guardrails.py", "src/", 4, "Xây dựng 5 tầng rào chắn độc lập chặn đứng lỗi ảo giác và sai sót y tế"),
-        ("src/fhir_exporter.py", "src/", 3, "Chuẩn hóa gói dữ liệu xuất viện HL7 FHIR R4 Bundle tích hợp bệnh viện"),
+        ("src/bo_du_lieu/sinh_hoi_thoai_viet.py", "src/", 19, "Biên soạn kịch bản và gài bẫy lâm sàng: bệnh nhân tự sửa lời, câu hỏi giả định và vai người nhà"),
+        ("src/duong_ong/b2_gom_nguoi_thuc_the.py", "src/", 2, "Bổ sung luật nhận diện đại từ tự xưng phương ngữ Nam Bộ 'tui' tương đương 'tôi'"),
+        ("src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py", "src/", 5, "Thiết kế Chốt 5 DDI: Tra cứu tương tác nguy cơ cao (Clopidogrel + Omeprazole) và cảnh báo quá liều"),
+        ("src/cong_cu_lam_sang/hieu_chinh_lieu.py", "src/", 3, "Hiện thực hóa công thức tính eGFR và thuật toán cảnh báo giảm liều suy thận cho Metformin"),
+        ("src/he_thong/khu_dinh_danh.py", "src/", 3, "Xây dựng thuật toán khử định danh PII 2 chiều tuân thủ Nghị định 13/2023/NĐ-CP"),
+        ("src/he_thong/dieu_phoi_cac_chot_an_toan.py", "src/", 6, "Thiết kế kiến trúc điều phối Orchestrator kết nối liên hoàn toàn bộ 8 chốt phòng vệ an toàn"),
+        ("src/cong_cu_lam_sang/doi_soat_can_lam_sang.py", "src/", 4, "Tích hợp bảng giá trị tham chiếu cận lâm sàng (Troponin I, men gan, Creatinine)"),
+        ("src/cong_cu_lam_sang/thang_diem_nguy_co.py", "src/", 4, "Xây dựng 9 thang điểm nguy cơ CDSS (CHA2DS2-VASc, HAS-BLED, Wells...) hỗ trợ bác sĩ"),
+        ("src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py", "src/", 3, "Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng cần thiết"),
+        ("src/cong_cu_lam_sang/to_dan_do_benh_nhan.py", "src/", 4, "Xây dựng bộ sinh tờ dặn dò bình dân chia 4 khung giờ sáng/trưa/chiều/tối chuẩn y khoa"),
+        ("src/he_thong/rao_chan_an_toan.py", "src/", 4, "Xây dựng 5 tầng rào chắn độc lập chặn đứng lỗi ảo giác và sai sót y tế"),
+        ("src/cong_cu_lam_sang/xuat_fhir_r4.py", "src/", 3, "Chuẩn hóa gói dữ liệu xuất viện HL7 FHIR R4 Bundle tích hợp bệnh viện"),
         ("tests/test_audio_clinical_tokens.py", "tests/", 1, "Kiểm thử bộ trích xuất và bảo toàn thực thể lâm sàng trọng yếu"),
         ("tests/test_chuan_hoa.py", "tests/", 1, "Xây dựng bộ kiểm thử quy đổi từ điển phương ngữ lâm sàng 3 miền"),
         ("tests/test_hoi_lai.py", "tests/", 1, "Xây dựng bộ test kiểm tra xung đột phát ngôn giữa bệnh nhân và người nhà"),
@@ -163,7 +163,7 @@ def build_full_system_diary():
     oct_entries = [
         ("15/10/2026",
          """14:20 — triển khai các module an toàn lâm sàng, dược lý và cận lâm sàng
-Tệp đã ghi: src/duoc_ly_lam_sang.py, src/da_benh_ly.py, src/can_lam_sang.py, src/thang_diem_lam_sang.py, tests/test_duoc_ly_lam_sang.py, tests/test_da_benh_ly.py, tests/test_can_lam_sang.py
+Tệp đã ghi: src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py, src/bo_du_lieu/sinh_ca_da_benh_ly.py, src/cong_cu_lam_sang/doi_soat_can_lam_sang.py, src/cong_cu_lam_sang/thang_diem_nguy_co.py, tests/test_duoc_ly_lam_sang.py, tests/test_da_benh_ly.py, tests/test_can_lam_sang.py
 Câu lệnh thực thi:
 pytest tests/test_duoc_ly_lam_sang.py tests/test_da_benh_ly.py tests/test_can_lam_sang.py -v
 Kết quả: 346 passed in 4.12s
@@ -178,7 +178,7 @@ Trạng thái: Đã sửa"""),
 
         ("16/10/2026",
          """16:30 — làm phần lọc cầu thận, tờ dặn dò bệnh nhân và khử định danh PII theo nghị định 13
-Tệp đã ghi: src/hieu_chinh_lieu.py, src/dan_do_benh_nhan.py, src/khu_dinh_danh.py, src/fhir_exporter.py, src/dieu_phoi_ha_tang.py, tests/test_hieu_chinh_lieu.py, tests/test_dan_do_benh_nhan.py, tests/test_khu_dinh_danh.py
+Tệp đã ghi: src/cong_cu_lam_sang/hieu_chinh_lieu.py, src/cong_cu_lam_sang/to_dan_do_benh_nhan.py, src/he_thong/khu_dinh_danh.py, src/cong_cu_lam_sang/xuat_fhir_r4.py, src/he_thong/dieu_phoi_cac_chot_an_toan.py, tests/test_hieu_chinh_lieu.py, tests/test_dan_do_benh_nhan.py, tests/test_khu_dinh_danh.py
 Câu lệnh thực thi:
 pytest tests/test_hieu_chinh_lieu.py tests/test_dan_do_benh_nhan.py tests/test_khu_dinh_danh.py -v
 Kết quả: 201 passed in 2.35s
@@ -197,7 +197,7 @@ Trạng thái: Đã sửa"""),
 
         ("17/10/2026",
          """09:15 — chạy toàn bộ 1330 bài test, vẽ bộ sơ đồ flow 4k và chuẩn bị deploy
-Tệp đã ghi: src/guardrails.py, src/dieu_phoi_ha_tang.py, tools/tao_bo_anh_flow_meditrace.py, 103 test files
+Tệp đã ghi: src/he_thong/rao_chan_an_toan.py, src/he_thong/dieu_phoi_cac_chot_an_toan.py, tools/tao_bo_anh_flow_meditrace.py, 103 test files
 Câu lệnh thực thi:
 pytest tests/
 Kết quả: 1.330 passed, 27 skipped in 120.35s (100% pass)
@@ -216,9 +216,9 @@ Trạng thái: Đã sửa"""),
 
         ("18/10/2026",
          """10:30 — nạp 3 ca khó cho BGK kiểm thử, fix giao diện khám bệnh
-Tệp đã ghi: tools/them_3_ca_kho_bgk.js, src/dich_vu.py, web/src/components/VerificationView.tsx, web/src/components/NoteEditorView.tsx
+Tệp đã ghi: tools/them_3_ca_kho_bgk.js, src/he_thong/dich_vu_http.py, web/src/components/VerificationView.tsx, web/src/components/NoteEditorView.tsx
 Câu lệnh thực thi:
-python src/dich_vu.py --port 8765
+python src/he_thong/dich_vu_http.py --port 8765
 node tools/them_3_ca_kho_bgk.js
 cd web; bun run build (built in 380ms)
 Qua commit 0fab56d — feat: cap nhat bo 3 ca mau do kho cao chua nhieu bay lam sang cho BGK
@@ -233,7 +233,7 @@ Trạng thái: Đã sửa (Sẵn sàng trình diễn)"""),
 
         ("27/10/2026",
          """13:20 — móc nối tác tử socrates vào orchestrator và làm lại toàn bộ giao diện bảng kiểm toán AI console và tờ dặn dò xuất viện
-Tệp đã ghi: src/dieu_phoi_ha_tang.py, src/tro_ly_lam_sang.py, web/src/components/NhatKyTienTrinhAIModal.tsx, web/src/components/ToDanDoBenhNhanModal.tsx, web/src/components/NoteEditorView.tsx, tools/preview_modal_ai_trace.html, tools/preview_modal_dan_do.html
+Tệp đã ghi: src/he_thong/dieu_phoi_cac_chot_an_toan.py, src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py, web/src/components/NhatKyTienTrinhAIModal.tsx, web/src/components/ToDanDoBenhNhanModal.tsx, web/src/components/NoteEditorView.tsx, tools/preview_modal_ai_trace.html, tools/preview_modal_dan_do.html
 Câu lệnh thực thi:
 pytest tests/test_dieu_phoi_ha_tang.py -v
 Kết quả: 3 passed in 0.22s (Bao phủ đủ 8 chốt an toàn liên hoàn)
@@ -242,7 +242,7 @@ Kết quả: built in 337ms (0 lỗi TypeScript/linter)
 python tools/check_text_nhay_cam.py (0 vi phạm, sạch 100%)
 Chụp ảnh màn hình độ phân giải cao bằng Chrome Headless""",
          """I6 — Tác tử gợi mở SOCRATES chưa được kích hoạt tự động trong luồng chính
-Dấu hiệu cụ thể: Module ActiveClinicalClarificationAgent (src/tro_ly_lam_sang.py) đã được viết nhưng chưa được gọi trong hàm xu_ly_ca_kham của src/dieu_phoi_ha_tang.py.
+Dấu hiệu cụ thể: Module ActiveClinicalClarificationAgent (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py) đã được viết nhưng chưa được gọi trong hàm xu_ly_ca_kham của src/he_thong/dieu_phoi_cac_chot_an_toan.py.
 Xử lý được ghi nhận: Tích hợp SOCRATES làm Chốt 8 trong MediTracePipelineOrchestrator, chủ động nhắc bác sĩ chỉ định thêm cận lâm sàng cần thiết (ECG, men tim).
 Căn cứ kiểm chứng trong nguồn: tests/test_dieu_phoi_ha_tang.py cập nhật kỳ vọng 8 chốt an toàn; 3/3 passed.
 Trạng thái: Đã sửa

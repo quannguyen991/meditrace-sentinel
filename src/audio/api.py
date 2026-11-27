@@ -1,4 +1,16 @@
-"""Small dependency-free HTTP API and review UI for the audio intake MVP."""
+"""[Âm thanh]
+Làm gì   : Mở máy chủ HTTP nhỏ để tải ghi âm lên, xử lý và cho bác sĩ duyệt, sửa lời thoại
+           trên trình duyệt.
+Vào → Ra : yêu cầu HTTP (tải âm thanh, lấy phiên, sửa đoạn) → JSON trạng thái phiên và trang
+           duyệt
+Đọc từ   : class Handler xử lý do_GET, do_POST, do_PATCH; main() khởi động máy chủ
+Mục lục (các hàm/lớp chính):
+  class Handler  Máy chủ HTTP nhỏ để nhận âm thanh và duyệt lời
+  main()         Khởi động máy chủ HTTP của phiên âm thanh
+Gọi tới  : audio/pipeline, audio/storage
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+API HTTP nhỏ không phụ thuộc thư viện ngoài và giao diện duyệt cho bản MVP tiếp nhận âm thanh."""
 
 from __future__ import annotations
 
@@ -29,6 +41,9 @@ function render(items){$('player').src='/sessions/'+sid+'/audio';$('transcript')
 </script></html>'''
 
 
+# ═══ class Handler — Máy chủ HTTP nhỏ để nhận âm thanh và duyệt lời ═══════════════════
+# Có đường dẫn tạo phiên, tải âm thanh, xử lý nền, sửa đoạn, gán vai người nói và lấy
+# đầu vào MediTrace.
 class Handler(BaseHTTPRequestHandler):
     pipeline: AudioPipeline
     store: SessionStore
@@ -87,6 +102,8 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_): pass
 
 
+# ═══ main() — Khởi động máy chủ HTTP của phiên âm thanh ═══════════════════════════════
+# Đọc cổng, địa chỉ và thư mục dữ liệu từ dòng lệnh.
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--host",default="127.0.0.1"); parser.add_argument("--port",type=int,default=8765); parser.add_argument("--data-dir",default="data/audio"); args=parser.parse_args()
     store=SessionStore(args.data_dir); Handler.store=store; Handler.pipeline=AudioPipeline(store); server=ThreadingHTTPServer((args.host,args.port),Handler); print(f"MediTrace Audio Intake: http://{args.host}:{args.port}"); server.serve_forever()

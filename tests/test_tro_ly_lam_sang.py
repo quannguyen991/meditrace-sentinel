@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử unit test cho Trợ lý Gợi ý Câu hỏi Lâm sàng Thông minh."""
 
-from src.tro_ly_lam_sang import ActiveClinicalClarificationAgent
+from src.cong_cu_lam_sang.goi_y_cau_hoi_socrates import ActiveClinicalClarificationAgent
 
 
 def test_phat_hien_khoang_trong_dau_bung():

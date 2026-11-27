@@ -4,7 +4,7 @@
 # MUC DICH. Tra loi cau hoi manh nhat chong lai du an: "mo hinh to hon la het loi
 # chu gi, dau can co che cua em". Bake-off 06/09 co cham vao cau nay nhung chi 8 hoi
 # thoai, tren bo VAIC da bo, va cham bang mat. Lan nay: 300 ca, 4 bo thach thuc the
-# he 8, cham bang src/cham_he_thong.py — dung bo cham nhu cac nhanh khac.
+# he 8, cham bang src/do_luong/cham_he_thong.py — dung bo cham nhu cac nhanh khac.
 #
 # CACH GIU CHO CONG BANG. Moi khau giong het kernel-th8-a/b:
 #   cung 4 bo thach thuc, cung luoc do JSON, cung ep JSON bang lm-format-enforcer,
@@ -41,9 +41,9 @@ def goi_du_lieu() -> Path:
     /kaggle/input/<ten> nhu tai lieu cu. Tim de quy thi khong phu thuoc cach gan.
     """
     for src in sorted(VAO.glob("**/src")):
-        if (src / "nhanh.py").is_file():
+        if (src / "duong_ong" / "chay_duong_ong.py").is_file():
             return src.parent
-    raise SystemExit(f"khong thay dataset co src/nhanh.py trong {VAO}")
+    raise SystemExit(f"khong thay dataset co src/duong_ong/chay_duong_ong.py trong {VAO}")
 
 
 def chuan_bi() -> Path:
@@ -89,7 +89,7 @@ def main() -> None:
         sys.exit("du lieu tren may khong phai the he " + THE_HE)
 
     def khoi_dong(card, tap):
-        lenh = [sys.executable, "-m", "src.nhanh", "--nhanh", *NHANH,
+        lenh = [sys.executable, "-m", "src.duong_ong.chay_duong_ong", "--nhanh", *NHANH,
                 "--model", MO_HINH, "--tap", tap, "--max-token", MAX_TOKEN]
         if SO_CA:
             lenh += ["--n", SO_CA]

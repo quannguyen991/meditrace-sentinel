@@ -5,8 +5,8 @@ Hai test dau lay tu ke hoach (Task 17 buoc 1). Cai quan trong nhat la
 `test_sua_khong_lam_hong_cau_dung`: mot co che sua tu dong lam hong cau von
 dung thi te hon la khong sua gi.
 """
-from src import sua_cuc_bo
-from src.sinh_benh_an import MUC_NGUOI_KHAC
+from src.duong_ong import b6_sua_cuc_bo as sua_cuc_bo
+from src.duong_ong.b5_viet_ban_nhap import MUC_NGUOI_KHAC
 
 
 def pb(noi_dung, chu_the_id=0, **kw):
@@ -134,7 +134,7 @@ def test_tren_ban_nhap_do_sinh_benh_an_sinh_ra_thi_gan_nhu_khong_sua_gi():
     tren dau ra cua C khong tao ra chenh lech. Gia tri cua no nam o ban nhap
     do MO HINH viet.
     """
-    from src import sinh_benh_an
+    from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
     bang = [pb("ho khan", id=1), pb("dị ứng penicillin", id=2, chu_the_id=1)]
     van, _ = sinh_benh_an.sinh(bang, ten_chu_the={1: "mẹ"})
     ket = sua_cuc_bo.sua(van, bang, ten_chu_the={1: "mẹ"})

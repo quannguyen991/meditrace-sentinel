@@ -5,7 +5,7 @@ Truoc day phep kiem chuoi con tho chay truoc nhanh ranh gioi so nen
 """
 import pytest
 
-from src.khoa_bang_chung import _chuan_trich, _khop_chi_tiet_thuoc
+from src.duong_ong.b4_kiem_can_cu import _chuan_trich, _khop_chi_tiet_thuoc
 
 
 def _khop(ct, van):

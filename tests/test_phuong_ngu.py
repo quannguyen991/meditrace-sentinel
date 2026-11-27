@@ -23,8 +23,8 @@ import random
 
 import pytest
 
-from src import phuong_ngu as pn
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import phuong_ngu as pn
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def _rng():
@@ -162,7 +162,7 @@ def test_giu_nguyen_khop_chuan_hoa():
     "sot, chac chan". Hai bang lech nhau ma khong gi bao, va phep cham tinh dau ra
     chep nguyen van la sai. Them mot cum can hoi vao THAY_DUOC ma quen GIU_NGUYEN
     (hay nguoc lai) thi test nay do."""
-    from src import chuan_hoa as ch
+    from src.duong_ong import b0_chuan_hoa_phuong_ngu as ch
     for cac in pn.THAY_DUOC.values():
         for _chuan, dia_phuong in cac:
             muc = {c.muc_tin for c in ch.phan_tich(dia_phuong)}

@@ -3,11 +3,11 @@
 import re
 import pytest
 
-from src import kiem_khuon as kk
-from src import ngu_lieu_viet as nl
-from src import khuon_mo_rong as kmr
-from src import khuon_lo_4 as kl4
-from src import dan_gian
+from src.bo_du_lieu import kiem_khuon as kk
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import khuon_mo_rong as kmr
+from src.bo_du_lieu import khuon_lo_4 as kl4
+from src.bo_du_lieu import dan_gian as dan_gian
 
 
 def test_lo_4_du_50_khuon():
@@ -83,6 +83,6 @@ def test_khong_trung_lap_voi_300_khuon_cu():
 def test_tuyet_doi_khong_chua_tu_cam_va_om_lo_4():
     import inspect
     raw_code = inspect.getsource(kl4)
-    assert "ốm" not in raw_code.lower(), "Tep src/khuon_lo_4.py chua chuoi con 'om'"
+    assert "ốm" not in raw_code.lower(), "Tep src/bo_du_lieu/khuon_lo_4.py chua chuoi con 'om'"
     mau = re.compile("|".join(re.escape(m.dan_gian) for m in dan_gian.BANG if m.loai == dan_gian.MO_HO), re.I)
-    assert not mau.search(raw_code), f"Tep src/khuon_lo_4.py chua cum mo ho: {mau.search(raw_code).group(0)}"
+    assert not mau.search(raw_code), f"Tep src/bo_du_lieu/khuon_lo_4.py chua cum mo ho: {mau.search(raw_code).group(0)}"

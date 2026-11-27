@@ -1,4 +1,22 @@
-"""Orchestration for an audio session."""
+"""[Âm thanh]
+Làm gì   : Điều phối một phiên âm thanh từ ghi âm đến lời thoại chờ duyệt, qua các bước
+           chuyển định dạng, chép, tách người nói, căn khớp.
+Vào → Ra : dữ liệu ghi âm của một phiên → phiên đã chép lời, gán người nói, ở trạng thái chờ
+           duyệt
+Đọc từ   : class AudioPipeline điều phối cả phiên; goi_y_vai_nguoi_noi() gợi ý vai bác sĩ
+           hay bệnh nhân
+Mục lục (các hàm/lớp chính):
+  class AudioPipeline          Điều phối một phiên âm thanh từ ghi âm đến lời thoại
+  goi_y_vai_nguoi_noi()        Gợi ý vai người nói theo mẫu câu trong lời thoại
+  khop_mau_giong_bac_si()      So đoạn âm thanh với mẫu giọng bác sĩ bằng cosine
+  trich_dac_trung_giong_nhe()  Trích vector 8 chiều đặc trưng giọng nói nhẹ
+Gọi tới  : audio/adapter, audio/alignment, audio/asr/disagreement, audio/asr/registry,
+           audio/asr/schemas, audio/asr/sidecar_provider, audio/config, audio/models … (tổng
+           12 tệp)
+Dùng bởi : audio/api, he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Điều phối một phiên âm thanh."""
 
 from __future__ import annotations
 
@@ -20,9 +38,11 @@ from .providers import EnergyVADProvider, JsonDiarizationProvider, SingleSpeaker
 from .storage import SessionStore
 
 
+# ─── _bo_tach_mac_dinh() — Chọn bộ tách người nói theo cấu hình ───────────────────────
+# Cấu hình pyannote sai thì lùi về một người nói, ghi lý do, không làm hỏng chép lời.
 def _bo_tach_mac_dinh(settings: AudioSettings):
-    """Bo tach nguoi noi theo cau hinh. Cau hinh pyannote sai thi van chay duoc (lui ve
-    mot nguoi noi o buoc process, co ghi ly do), khong lam hong viec chep loi."""
+    """Bộ tách người nói theo cấu hình. Cấu hình pyannote sai thì vẫn chạy được (lùi về
+    một người nói ở bước process, có ghi lý do), không làm hỏng việc chép lời."""
     if settings.diarization_provider == "pyannote":
         from .pyannote_provider import LoiTachNguoiNoi, PyannoteDiarizationProvider
         try:
@@ -32,8 +52,10 @@ def _bo_tach_mac_dinh(settings: AudioSettings):
     return JsonDiarizationProvider()
 
 
+# ─── class _TachLoiCauHinh — Bộ tách giữ chỗ khi thiếu cấu hình pyannote ──────────────
+# Mỗi lần gọi đều báo lỗi để pipeline lùi về một người nói.
 class _TachLoiCauHinh:
-    """Giu cho: cau hinh pyannote thieu. Moi lan goi deu bao loi de pipeline lui ve."""
+    """Giữ chỗ: cấu hình pyannote thiếu. Mỗi lần gọi đều báo lỗi để pipeline lùi về."""
 
     tach_that = True
     ten = "pyannote"
@@ -45,6 +67,9 @@ class _TachLoiCauHinh:
         raise RuntimeError(self.ma)
 
 
+# ═══ goi_y_vai_nguoi_noi() — Gợi ý vai người nói theo mẫu câu trong lời thoại ═════════
+# Chỉ gắn suggested_role và lý do; không ghi đè speaker_role, bác sĩ vẫn là người xác
+# nhận.
 def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Gợi ý vai người nói tự động ('doctor' / 'patient' / 'family_member') khi diarization lùi về 1 người nói.
     Không ghi đè `speaker_role` (giữ nguyên để bác sĩ xác nhận), chỉ gắn `suggested_role`.
@@ -92,6 +117,8 @@ def goi_y_vai_nguoi_noi(transcript: list[dict[str, Any]]) -> list[dict[str, Any]
     return transcript
 
 
+# ═══ trich_dac_trung_giong_nhe() — Trích vector 8 chiều đặc trưng giọng nói nhẹ ═══════
+# Dùng numpy và wave: cao độ f0, phổ, tỷ lệ qua điểm không, tương phản dải năng lượng.
 def trich_dac_trung_giong_nhe(
     wav_path: Path,
     start_s: float = 0.0,
@@ -204,6 +231,8 @@ def trich_dac_trung_giong_nhe(
     return [round(float(v), 6) for v in vec]
 
 
+# ═══ khop_mau_giong_bac_si() — So đoạn âm thanh với mẫu giọng bác sĩ bằng cosine ══════
+# Cosine từ 0,92 trở lên chỉ gợi ý vai doctor, không tự gán vai.
 def khop_mau_giong_bac_si(
     transcript: list[dict[str, Any]],
     wav_path: Path,
@@ -241,6 +270,9 @@ def khop_mau_giong_bac_si(
     return transcript
 
 
+# ═══ class AudioPipeline — Điều phối một phiên âm thanh từ ghi âm đến lời thoại ═══════
+# Chuyển WAV, tách tiếng nói và người nói, chép lời, căn chỉnh, gợi ý vai; hỗ trợ sửa
+# đoạn, gán vai và xuất đầu vào MediTrace.
 class AudioPipeline:
     def __init__(self, store: SessionStore, asr=None, preprocessor=None, vad=None, diarization=None, settings=None):
         self.store = store
@@ -251,12 +283,12 @@ class AudioPipeline:
         self.diarization = diarization or _bo_tach_mac_dinh(self.settings)
 
     def _tach_nguoi_noi(self, session_id: str, processed: Path, speech: list[dict[str, Any]], bat: bool = True):
-        """-> (cac doan nguoi noi, thong tin). Bo tach that loi thi lui ve MOT nguoi noi.
+        """-> (các đoạn người nói, thông tin). Bộ tách thật lỗi thì lùi về MỘT người nói.
 
-        Thong tin luu vao phien (`tach_nguoi_noi`) de giao dien noi ro may da tach hay chua,
-        va vi sao chua. Khong bao gio doan vai; chi co speaker_1, speaker_2...
-        `bat=False`: nguoi goi biet chi co mot nguoi noi (vd cau hoi ghi bang micro), bo qua
-        bo tach that cho nhanh.
+        Thông tin lưu vào phiên (`tach_nguoi_noi`) để giao diện nói rõ máy đã tách hay chưa,
+        và vì sao chưa. Không bao giờ đoán vai; chỉ có speaker_1, speaker_2...
+        `bat=False`: người gọi biết chỉ có một người nói (vd câu hỏi ghi bằng micro), bỏ qua
+        bộ tách thật cho nhanh.
         """
         that = bool(getattr(self.diarization, "tach_that", False))
         if that and not bat:
@@ -332,9 +364,9 @@ class AudioPipeline:
             self.store.update(session_id, status=SessionStatus.TRANSCRIBING.value)
             asr_result, asr_info = self._run_asr(session_id, processed, raw)
             doan = align(session_id, asr_result, diarization)
-            # Chi gop luot khi da tach THAT ra tu hai nguoi noi tro len. Mot nguoi noi (hoac may
-            # tach khong phan biet duoc hai giong) ma gop thi ca cuoc kham thanh mot dong, nguoi
-            # dung khong gan vai tung dong duoc nua; giu cac dong cat theo khoang lang.
+            # Chỉ gộp lượt khi đã tách THẬT ra từ hai người nói trở lên. Một người nói (hoặc máy
+            # tách không phân biệt được hai giọng) mà gộp thì cả cuộc khám thành một dòng, người
+            # dùng không gán vai từng dòng được nữa; giữ các dòng cắt theo khoảng lặng.
             if (tach_info.get("tach_that") and (tach_info.get("so_nguoi_noi") or 0) >= 2
                     and self.settings.gop_luot_cung_nguoi_noi):
                 doan = gop_lien_tiep(doan)
@@ -361,10 +393,10 @@ class AudioPipeline:
 
     # -- ASR ----------------------------------------------------------------
     def _run_asr(self, session_id: str, processed: Path, raw: Path):
-        """Chay ASR. Nha cung cap tiem vao (phep thu) co the tra dict kieu cu.
+        """Chạy ASR. Nhà cung cấp tiêm vào (phép thử) có thể trả dict kiểu cũ.
 
-        Log: provider, model, thiet bi, thoi gian xu ly, thoi luong am thanh, trang
-        thai. KHONG log noi dung ban chep.
+        Log: provider, model, thiết bị, thời gian xử lý, thời lượng âm thanh, trạng
+        thái. KHÔNG log nội dung bản chép.
         """
         t0 = time.time()
         info: dict[str, Any] = {"fallback": False}
@@ -393,8 +425,8 @@ class AudioPipeline:
         return asr_dict, info
 
     def _flag_disagreements(self, session_id, processed, raw, transcript, asr_info) -> None:
-        """Neu cau hinh ASR_COMPARE_PROVIDER: chay ASR thu hai, danh dau doan bat dong
-        o tu khoa quan trong. Khong tu chon ben nao."""
+        """Nếu cấu hình ASR_COMPARE_PROVIDER: chạy ASR thứ hai, đánh dấu đoạn bất đồng
+        ở từ khoá quan trọng. Không tự chọn bên nào."""
         name = self.settings.asr_compare_provider
         primary = asr_info.get("result")
         if not name or not isinstance(primary, ASRResult):
@@ -437,7 +469,7 @@ class AudioPipeline:
             if segment["segment_id"] == segment_id:
                 if not text.strip():
                     raise ValueError("transcript_incomplete")
-                # Nguoi duyet sua = nguoi duyet da quyet, ke ca khi hai ASR bat dong.
+                # Người duyệt sửa = người duyệt đã quyết, kể cả khi hai ASR bất đồng.
                 segment.update({"edited": True, "original_asr_text": segment.get("original_asr_text") or segment["text_original"], "text_original": text, "edited_at": now_iso(), "edited_by": edited_by,
                                 "reviewed": True, "asr_review_required": False})
                 break
@@ -461,7 +493,7 @@ class AudioPipeline:
         return items
 
     def confirm_segment(self, session_id: str, segment_id: str, reviewed_by: str = "user") -> list[dict[str, Any]]:
-        """Nguoi duyet nghe lai va giu nguyen ban chep hien tai."""
+        """Người duyệt nghe lại và giữ nguyên bản chép hiện tại."""
         items = self.transcript(session_id)
         for segment in items:
             if segment["segment_id"] == segment_id:
@@ -476,7 +508,7 @@ class AudioPipeline:
 
     def meditrace_input(self, session_id: str) -> dict[str, Any]:
         items = self.transcript(session_id)
-        # Chan cung: khong gui sang loi khi con vai chua ro hoac hai ASR bat dong chua duyet.
+        # Chặn cứng: không gửi sang lõi khi còn vai chưa rõ hoặc hai ASR bất đồng chưa duyệt.
         if any(s.get("speaker_role", "unknown") == SpeakerRole.UNKNOWN.value for s in items):
             raise ValueError("speaker_unknown")
         if any(s.get("asr_review_required") for s in items):

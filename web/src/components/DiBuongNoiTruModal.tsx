@@ -139,7 +139,7 @@ export function soSanhDienBienNoiTruDeterministic(params: {
   });
 
   if (serverDiff && typeof serverDiff === "object") {
-    // 1. Hỗ trợ định dạng chính thức từ `src/di_buong_noi_tru.py`
+    // 1. Hỗ trợ định dạng chính thức từ `src/cong_cu_lam_sang/di_buong_noi_tru.py`
     if (
       Array.isArray(serverDiff.trieu_chung_giam_hoac_het) ||
       Array.isArray(serverDiff.trieu_chung_moi_phat_sinh) ||

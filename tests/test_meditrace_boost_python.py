@@ -16,7 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from src import bakeoff, dich_vu, nhanh
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
+from src.he_thong import dich_vu_http as dich_vu
+from src.duong_ong import chay_duong_ong as nhanh
 from src.audio.asr import phowhisper_provider as pw
 from src.audio.asr.contextual_trie_600 import ContextualPrefixTrie600, tao_trie_600_mac_dinh
 from src.audio.pipeline import (
@@ -24,17 +26,17 @@ from src.audio.pipeline import (
     khop_mau_giong_bac_si,
     trich_dac_trung_giong_nhe,
 )
-from src.cam_doan_thu_thuat import co_dau_hieu_thu_thuat, kiem_chung_cam_doan_thu_thuat
-from src.di_buong_noi_tru import tong_hop_to_dieu_tri_noi_tru
-from src.kiem_duyet_bhyt_va_bo_sot import (
+from src.cong_cu_lam_sang.cam_doan_thu_thuat import co_dau_hieu_thu_thuat, kiem_chung_cam_doan_thu_thuat
+from src.cong_cu_lam_sang.di_buong_noi_tru import tong_hop_to_dieu_tri_noi_tru
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import (
     BHYTXmlPreChecker,
     QUY_TAC_CHI_DINH_CLS_BHYT,
     doi_soat_da_don_va_don_quoc_gia,
     tien_kiem_bhyt_tu_du_lieu,
     xuat_goi_xml_1_5_qd130,
 )
-from src.ocr_lam_sang import boc_tach_phieu_cu
-from src.phat_bieu import PhatBieu
+from src.cong_cu_lam_sang.doc_phieu_xet_nghiem import boc_tach_phieu_cu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def _tao_wav_giong_gia(path: Path, f0_hz: float, duration_s: float = 2.0, amp: float = 0.4, sr: int = 16000) -> Path:
@@ -572,7 +574,7 @@ def test_http_endpoints_va_cli_boost_8_10_12(monkeypatch):
 
     # 5. CLI `--check` và `--diff`
     p_check = subprocess.run(
-        [sys.executable, "-m", "src.cam_doan_thu_thuat", "--check"],
+        [sys.executable, "-m", "src.cong_cu_lam_sang.cam_doan_thu_thuat", "--check"],
         input=json.dumps({"hoi_thoai": "Bác sĩ: Cần sinh thiết hạch.\nBệnh nhân: Tôi chưa đồng ý."}).encode("utf-8"),
         capture_output=True,
         check=True,
@@ -581,7 +583,7 @@ def test_http_endpoints_va_cli_boost_8_10_12(monkeypatch):
     assert out_check["nguoi_benh_tu_choi_hoac_hoan"] is True
 
     p_diff = subprocess.run(
-        [sys.executable, "-m", "src.di_buong_noi_tru", "--diff"],
+        [sys.executable, "-m", "src.cong_cu_lam_sang.di_buong_noi_tru", "--diff"],
         input=json.dumps({
             "phat_bieu_hom_qua": [{"noi_dung": "khó thở", "bang_chung": [1]}],
             "phat_bieu_hom_nay": [{"noi_dung": "đỡ khó thở", "bang_chung": [2]}],

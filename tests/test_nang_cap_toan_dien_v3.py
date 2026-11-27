@@ -1,28 +1,32 @@
 # -*- coding: utf-8 -*-
 """Bộ kiểm thử toàn diện cho Gói Nâng cấp v3 (Deep Research & Code-Level Fixes):
-1. Vá lỗi gộp nhầm 'bố em' vào người bệnh & Liên kết mở rộng Bệnh/Xét nghiệm (`src/thuc_the.py`).
-2. Vá lỗi lệch phân phối Train-Inference & Giải mã 2 tầng (`src/bakeoff.py`).
-3. Đính chính có đồng thuận chéo giữa người nhà và bệnh nhân (`src/cap_nhat.py`).
-4. Chuẩn hóa số viết bằng chữ & phân số tiếng Việt cho Khóa K6 (`src/khoa_bang_chung.py`).
-5. Khử định danh tên riêng sau danh xưng tiếng Việt (`src/khu_dinh_danh.py`).
+1. Vá lỗi gộp nhầm 'bố em' vào người bệnh & Liên kết mở rộng Bệnh/Xét nghiệm (`src/duong_ong/b2_gom_nguoi_thuc_the.py`).
+2. Vá lỗi lệch phân phối Train-Inference & Giải mã 2 tầng (`src/huan_luyen/chon_mo_hinh_bakeoff.py`).
+3. Đính chính có đồng thuận chéo giữa người nhà và bệnh nhân (`src/duong_ong/b3_cap_nhat_trang_thai.py`).
+4. Chuẩn hóa số viết bằng chữ & phân số tiếng Việt cho Khóa K6 (`src/duong_ong/b4_kiem_can_cu.py`).
+5. Khử định danh tên riêng sau danh xưng tiếng Việt (`src/he_thong/khu_dinh_danh.py`).
 6. Tầng 4.5 Khôi phục bỏ sót chủ động, Cổng Tiền kiểm BHYT XML 130/4750 & ICD-10,
    Liều Nhi khoa mg/kg, Đa thuốc Đông-Tây y, Thước đo CHWER & Truy ngược lỗi đa vòng
-   (`src/kiem_duyet_bhyt_va_bo_sot.py` & `src/dich_vu.py`).
+   (`src/cong_cu_lam_sang/tien_kiem_bhyt_va_khoi_phuc_bo_sot.py` & `src/he_thong/dich_vu_http.py`).
 """
 import pytest
 
-from src import bakeoff, cap_nhat, dich_vu, khoa_bang_chung, thuc_the
-from src.khu_dinh_danh import ClinicalDeidentifier
-from src.kiem_duyet_bhyt_va_bo_sot import (
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.he_thong import dich_vu_http as dich_vu
+from src.duong_ong import b4_kiem_can_cu as khoa_bang_chung
+from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import (
     ActiveOmissionRecoveryEngine,
     BHYTXmlPreChecker,
     ClinicalHarmWeightedEvaluator,
 )
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 # ---------------------------------------------------------------------------
-# 1. TEST VÁ LỖI "BỐ EM" & LIÊN KẾT THỰC THỂ MỞ RỘNG (`src/thuc_the.py`)
+# 1. TEST VÁ LỖI "BỐ EM" & LIÊN KẾT THỰC THỂ MỞ RỘNG (`src/duong_ong/b2_gom_nguoi_thuc_the.py`)
 # ---------------------------------------------------------------------------
 def test_bo_em_tien_su_gia_dinh_KHONG_gop_nham_vao_benh_nhan():
     """Kịch bản thực tế nêu trong README.md (dòng 60-67 & 156):
@@ -61,7 +65,7 @@ def test_lien_ket_mo_rong_gom_dong_nghia_benh_va_xet_nghiem():
 
 
 # ---------------------------------------------------------------------------
-# 2. TEST KHỚP PHÂN PHỐI TRAIN-INFERENCE & GIẢI MÃ 2 TẦNG (`src/bakeoff.py`)
+# 2. TEST KHỚP PHÂN PHỐI TRAIN-INFERENCE & GIẢI MÃ 2 TẦNG (`src/huan_luyen/chon_mo_hinh_bakeoff.py`)
 # ---------------------------------------------------------------------------
 def test_bakeoff_khop_prompt_khi_co_adapter(monkeypatch):
     from tests.test_bakeoff import _cai_torch_gia, _InpGia
@@ -103,7 +107,7 @@ def test_bakeoff_khop_prompt_khi_co_adapter(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# 3. TEST ĐÍNH CHÍNH ĐỒNG THUẬN CHÉO (`src/cap_nhat.py`)
+# 3. TEST ĐÍNH CHÍNH ĐỒNG THUẬN CHÉO (`src/duong_ong/b3_cap_nhat_trang_thai.py`)
 # ---------------------------------------------------------------------------
 def test_dinh_chinh_cheo_duoc_chap_nhan_khi_benh_nhan_xac_nhan_ngay_luot_sau():
     ht = (
@@ -123,7 +127,7 @@ def test_dinh_chinh_cheo_duoc_chap_nhan_khi_benh_nhan_xac_nhan_ngay_luot_sau():
 
 
 # ---------------------------------------------------------------------------
-# 4. TEST CHUẨN HÓA SỐ VIẾT BẰNG CHỮ & PHÂN SỐ Ở KHÓA K6 (`src/khoa_bang_chung.py`)
+# 4. TEST CHUẨN HÓA SỐ VIẾT BẰNG CHỮ & PHÂN SỐ Ở KHÓA K6 (`src/duong_ong/b4_kiem_can_cu.py`)
 # ---------------------------------------------------------------------------
 def test_khoa_k6_chap_nhan_so_viet_bang_chu_va_phan_so_nhung_chan_sai_so():
     ht = "1. Bệnh nhân: Sáng nào tôi cũng uống nửa viên Amlodipin năm mi li gam và một viên rưỡi Metformin 500mg."
@@ -151,7 +155,7 @@ def test_khoa_k6_chap_nhan_so_viet_bang_chu_va_phan_so_nhung_chan_sai_so():
 
 
 # ---------------------------------------------------------------------------
-# 5. TEST KHỬ ĐỊNH DANH HỌ TÊN SAU DANH XƯNG (`src/khu_dinh_danh.py`)
+# 5. TEST KHỬ ĐỊNH DANH HỌ TÊN SAU DANH XƯNG (`src/he_thong/khu_dinh_danh.py`)
 # ---------------------------------------------------------------------------
 def test_khu_dinh_danh_bat_ten_rieng_sau_danh_xung_khong_can_tien_to_ten_la():
     vb = "Bác sĩ: Chào bác Nguyễn Văn An, mời chị Trần Thị Bích ngồi chờ đo huyết áp."
@@ -258,7 +262,7 @@ def test_dich_vu_tich_hop_lam_sang_nang_cao_va_kiem_ma_phien():
 
 
 def test_kiem_thu_dot_bien_lam_sang_bat_giu_100_phan_tram():
-    from src.kiem_thu_dot_bien import ClinicalMutationTester
+    from src.do_luong.kiem_thu_dot_bien import ClinicalMutationTester
 
     kq = ClinicalMutationTester.chay_kiem_thu_dot_bien()
     assert kq["tong_so_ho_dot_bien"] == 5

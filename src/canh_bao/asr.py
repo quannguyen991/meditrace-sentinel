@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Canh bao CHEP AM — loi TRUOC khau mo hinh, tach rieng (dac ta muc 34).
+"""[Lớp cảnh báo]
+Làm gì   : Cảnh báo dòng bản nháp có thể sai vì lỗi chép giọng nói, tách riêng do xảy ra
+           trước bước mô hình.
+Vào → Ra : bản nháp + thông tin chép lời từng dòng → danh sách CanhBao về dòng nghi chép sai
+Đọc từ   : canh_bao() sinh cảnh báo lỗi chép giọng nói cho từng dòng
+Mục lục (các hàm/lớp chính):
+  canh_bao()  Cảnh báo chép âm: người nói chưa chắc, độ tin cậy thấp
+Gọi tới  : canh_bao/loai, canh_bao/phat_hien, canh_bao/so_lieu
+Dùng bởi : canh_bao/gop
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Cảnh báo CHÉP ÂM — lỗi TRƯỚC khâu mô hình, tách riêng (đặc tả mục 34).
 
-Chi sinh khi loi thoai den tu `src.audio` va co thong tin do tin cay theo luot.
-Bo du lieu hien tai la van ban sach: khong co meta_asr thi khong co canh bao nao
-o day, va khong bao gio tinh cac canh bao nay la loi cua mo hinh sinh.
-Nhom ASR_UPSTREAM khong doi trang thai (xem `CanhBao.anh_huong_trang_thai`).
+Chỉ sinh khi lời thoại đến từ `src.audio` và có thông tin độ tin cậy theo lượt.
+Bộ dữ liệu hiện tại là văn bản sạch: không có meta_asr thì không có cảnh báo nào
+ở đây, và không bao giờ tính các cảnh báo này là lỗi của mô hình sinh.
+Nhóm ASR_UPSTREAM không đổi trạng thái (xem `CanhBao.anh_huong_trang_thai`).
 """
 import re
 from typing import Dict, List
@@ -16,6 +27,9 @@ NGUONG_TIN_CAY = 0.6
 _PHU_DINH = re.compile(r"(?<!\w)(không|chưa|chẳng|chả)(?!\w)")
 
 
+# ═══ canh_bao() — Cảnh báo chép âm: người nói chưa chắc, độ tin cậy thấp ══════════════
+# Chỉ chạy khi có siêu dữ liệu chép âm theo lượt; độ tin cậy dưới 0,6 thì phân loại
+# thuốc, số, phủ định hoặc chung.
 def canh_bao(ctx, ps, meta_asr: Dict[int, dict], loai_theo_id) -> List[CanhBao]:
     from src.canh_bao.phat_hien import _ten_thuoc, _thuong
     ra = []

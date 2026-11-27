@@ -1,29 +1,38 @@
-"""Environment configuration for audio processing.
+"""[Âm thanh]
+Làm gì   : Đọc các tuỳ chọn xử lý âm thanh từ biến môi trường vào một đối tượng cấu hình.
+Vào → Ra : biến môi trường → AudioSettings: bộ chép, thiết bị, thư mục lưu, các cờ bật tắt
+Đọc từ   : class AudioSettings chứa toàn bộ tuỳ chọn và giá trị mặc định
+Mục lục (các hàm/lớp chính):
+  class AudioSettings  Cấu hình xử lý âm thanh lấy từ biến môi trường
+Dùng bởi : audio/pipeline, he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Cấu hình môi trường cho xử lý âm thanh.
 
-    PROCESSING_MODE=local            local | external (external providers refused in local)
+    PROCESSING_MODE=local            local | external (nhà cung cấp ngoài bị từ chối ở chế độ local)
     ASR_PROVIDER=phowhisper          phowhisper | faster_whisper | sidecar | auto
-    ASR_MODEL=vinai/PhoWhisper-small (or "small", "medium" for PhoWhisper)
-    ASR_DEVICE=cuda                  cuda | cpu (empty = auto)
-    ASR_REVISION=                    Hugging Face commit; empty = pinned default
-    ALLOW_ASR_FALLBACK=false         only then may a failing provider be replaced
-    ASR_FALLBACK_PROVIDER=           e.g. faster_whisper
+    ASR_MODEL=vinai/PhoWhisper-small (hoặc "small", "medium" cho PhoWhisper)
+    ASR_DEVICE=cuda                  cuda | cpu (để trống = tự động)
+    ASR_REVISION=                    commit Hugging Face; để trống = mặc định đã ghim
+    ALLOW_ASR_FALLBACK=false         chỉ khi đó mới được thay nhà cung cấp bị lỗi
+    ASR_FALLBACK_PROVIDER=           ví dụ faster_whisper
     ASR_FALLBACK_MODEL=
-    ASR_COMPARE_PROVIDER=            run a second provider and flag disagreements
+    ASR_COMPARE_PROVIDER=            chạy nhà cung cấp thứ hai và đánh dấu bất đồng
     ASR_COMPARE_MODEL=
 
-    DIARIZATION_PROVIDER=mot_nguoi   mot_nguoi (ca ban ghi mot nguoi noi) | pyannote
-    PYANNOTE_PYTHON=                 python cua MOI TRUONG RIENG co pyannote.audio
+    DIARIZATION_PROVIDER=mot_nguoi   mot_nguoi (cả bản ghi một người nói) | pyannote
+    PYANNOTE_PYTHON=                 python của MÔI TRƯỜNG RIÊNG có pyannote.audio
     PYANNOTE_MODEL=pyannote/speaker-diarization-3.1
-    PYANNOTE_TOKEN_FILE=             tep chua khoa Hugging Face (chi can khi tai mo hinh lan dau)
+    PYANNOTE_TOKEN_FILE=             tệp chứa khoá Hugging Face (chỉ cần khi tải mô hình lần đầu)
     PYANNOTE_DEVICE=cpu              cpu | cuda
-    PYANNOTE_RAM_GB=3                tran RAM rieng cua tien trinh pyannote
-    PYANNOTE_TONG_RAM_GB=9.5         tran RAM dich vu + pyannote (HoaiDuc: 10 GB cho ca du an)
+    PYANNOTE_RAM_GB=3                trần RAM riêng của tiến trình pyannote
+    PYANNOTE_TONG_RAM_GB=9.5         trần RAM dịch vụ + pyannote (HoaiDuc: 10 GB cho cả dự án)
     PYANNOTE_TIMEOUT_S=1200
-    PYANNOTE_MIN_SPEAKERS= / PYANNOTE_MAX_SPEAKERS=   neu biet truoc so nguoi noi
-    PYANNOTE_HF_HOME=                thu muc bo nho dem Hugging Face cua moi truong pyannote
-    GOP_LUOT_CUNG_NGUOI_NOI=true     tach that roi thi gop cac doan lien tiep cung nguoi noi
+    PYANNOTE_MIN_SPEAKERS= / PYANNOTE_MAX_SPEAKERS=   nếu biết trước số người nói
+    PYANNOTE_HF_HOME=                thư mục bộ nhớ đệm Hugging Face của môi trường pyannote
+    GOP_LUOT_CUNG_NGUOI_NOI=true     tách thật rồi thì gộp các đoạn liên tiếp cùng người nói
 
-Legacy names WHISPER_MODEL / WHISPER_DEVICE are still read for ``auto``.
+Tên cũ WHISPER_MODEL / WHISPER_DEVICE vẫn được đọc cho chế độ ``auto``.
 """
 
 from __future__ import annotations
@@ -33,20 +42,25 @@ from dataclasses import dataclass
 from typing import Optional
 
 
+# ─── _bool() — Đọc chuỗi môi trường thành giá trị đúng sai ────────────────────────────
 def _bool(v: Optional[str]) -> bool:
     return str(v or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+# ─── _opt() — Đọc biến môi trường, rỗng thì trả None ──────────────────────────────────
 def _opt(name: str) -> Optional[str]:
     v = os.getenv(name, "").strip()
     return v or None
 
 
+# ─── _so() — Đọc biến môi trường thành số ─────────────────────────────────────────────
 def _so(name: str, mac_dinh=None, kieu=float):
     v = os.getenv(name, "").strip()
     return kieu(v) if v else mac_dinh
 
 
+# ═══ class AudioSettings — Cấu hình xử lý âm thanh lấy từ biến môi trường ═════════════
+# from_env kiểm tra chế độ xử lý và nhà cung cấp tách người nói; sai thì báo lỗi.
 @dataclass(frozen=True)
 class AudioSettings:
     processing_mode: str = "local"

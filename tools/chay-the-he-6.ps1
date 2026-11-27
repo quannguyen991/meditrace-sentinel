@@ -91,14 +91,14 @@ if ((Test-Path $cu) -and -not (Test-Path $luu)) {
 
 # 1. Huan luyen khau trich tren the he 6.
 Chay-Lai "1-TRAIN-TRICH-TH6" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "trich", "--buoc", "400", "--do-dai", "$do_dai_trich") | Out-Null
 
 # 2. Trich + nhanh B, C tren tap phat trien va ba bo thach thuc. Tep dem trich
 #    (trich_<tap>_3072_hl.jsonl) la dau vao cua moi tang hau xu ly.
 $adapter = "models/nen-qwen3-4b-trich/best_checkpoint"
 Chay-Lai "2a-TRICH-DEV" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
     "--tap", "viet_phat_trien", "--max-token", "3072", "--n", "60",
     "--adapter-trich", $adapter) | Out-Null
 foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
@@ -106,7 +106,7 @@ foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
                  "thach_thuc_dinh_chinh_phat_trien",
                  "thach_thuc_nhieu_asr_phat_trien")) {
     Chay-Lai "2b-TRICH-$t" @(
-        "-m", "src.nhanh", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C", "C_khoa", "C_khoa_hoi", "--model", $mo_hinh,
         "--tap", $t, "--max-token", "3072", "--adapter-trich", $adapter) | Out-Null
 }
 
@@ -114,7 +114,7 @@ foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
 #    tham chieu (truong output cua viet_train.jsonl). 2048 du cho A: do bang
 #    tokenizer ngay 11/09/2026, khong loai mau nao (3.759/3.759 train).
 Chay-Lai "3-TRAIN-A-TH6" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "benh_an", "--buoc", "400", "--do-dai", "2048",
     "--tep-train", "viet_train.jsonl", "--tep-val", "viet_phat_trien.jsonl",
     "--hau-to=-viet6") | Out-Null   # LIEN mot token: argparse thay "-viet6"
@@ -123,14 +123,14 @@ Chay-Lai "3-TRAIN-A-TH6" @(
 # 4. Chay A tren cung cac tap.
 $adapter_a = "models/nen-qwen3-4b-viet6/best_checkpoint"
 Chay-Lai "4a-A-DEV" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--adapter", $adapter_a, "--tap", "viet_phat_trien", "--n", "60") | Out-Null
 foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
                  "thach_thuc_phuong_ngu_phat_trien",
                  "thach_thuc_dinh_chinh_phat_trien",
                  "thach_thuc_nhieu_asr_phat_trien")) {
     Chay-Lai "4b-A-$t" @(
-        "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
         "--adapter", $adapter_a, "--tap", $t) | Out-Null
 }
 
@@ -140,7 +140,7 @@ foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
 # trong khi no chi phuc vu phep do phuong ngu NGOAI BANG - khong dung toi ket qua
 # chinh nao. Chay rieng khi can:
 #
-#   & $py -m src.nhanh --nhanh B C C_khoa C_khoa_hoi --model $mo_hinh `
+#   & $py -m src.duong_ong.chay_duong_ong --nhanh B C C_khoa C_khoa_hoi --model $mo_hinh `
 #         --tap gpt500_phuong_ngu --max-token 3072 --adapter-trich $adapter
 #
 # NHO: bo nay do GPT sinh, CHI DE DO, khong bao gio huan luyen

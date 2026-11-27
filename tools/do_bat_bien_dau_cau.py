@@ -15,9 +15,10 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from src import du_lieu, nhieu_asr
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.bo_du_lieu import nhieu_asr as nhieu_asr
 from src.canh_bao import gop
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def bo_dau(van: str) -> str:
@@ -73,7 +74,7 @@ def main(argv=None):
     ap.add_argument("--nhanh", default="C_khoa")
     ap.add_argument("--ra-json", default=None)
     a = ap.parse_args(argv)
-    from src.do_canh_bao import cac_tap
+    from src.do_luong.do_canh_bao import cac_tap
     T = Path(a.thu_muc)
     ra_list = [r for tap in cac_tap(T, a.nhanh) for r in du_lieu.nap_mau(T / f"ra_{a.nhanh}_{tap}.jsonl")]
     kq = do([], ra_list)

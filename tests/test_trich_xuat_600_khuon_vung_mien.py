@@ -10,10 +10,10 @@ Kiểm chứng:
 """
 import pytest
 
-from src.bo_kiem_tra import KiemTraTungBuocToanDien
-from src.may_trang_thai_hoi_thoai import BoGiaiQuyetProDrop, MayTrangThaiHoiThoai, TrangThaiFSM
-from src.phat_bieu import PhatBieu
-from src.trich_xuat_thuc_the import (
+from src.huan_luyen.ham_thuong_rlvr import KiemTraTungBuocToanDien
+from src.duong_ong.b2_bu_chu_ngu_tinh_luoc import BoGiaiQuyetProDrop, MayTrangThaiHoiThoai, TrangThaiFSM
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.duong_ong.b1_ep_dau_ra_json import (
     DANH_SACH_18_HE_CO_QUAN,
     HoiThoaiSubstringTrie,
     LuotThoaiL1,

@@ -2,7 +2,7 @@
 """Bộ kiểm thử toàn diện kiểm toán tầng Python (P0 Fixes + Cấu trúc Pha 1–3).
 
 Bao phủ:
-1. Khử định danh PII/PHI (`src/khu_dinh_danh.py`): không nuốt triệu chứng sau tên người, ranh giới từ Unicode cho tên ngắn ("An").
+1. Khử định danh PII/PHI (`src/he_thong/khu_dinh_danh.py`): không nuốt triệu chứng sau tên người, ranh giới từ Unicode cho tên ngắn ("An").
 2. Tiền kiểm BHYT, HL7 FHIR R4, Cận lâm sàng & Thang điểm (`kiem_duyet_bhyt_va_bo_sot`, `fhir_exporter`, `can_lam_sang`, `thang_diem_lam_sang`).
 3. Điều phối hạ tầng, Guardrails, Luồng âm thanh (`SpeakerRole.NURSE` / `OTHER`), `hoi_lai`, `nhanh` (`C_khoa_v2`).
 4. Tối ưu khởi động `GET /api/suc-khoe` (< 100ms, không nạp `scipy`/`cham_he_thong`/`torch`, không quét đĩa `dem`, không làm bẩn `_pipe`),
@@ -21,9 +21,14 @@ import time
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from src import cap_nhat, dich_vu, hoi_lai, nhanh, phat_bieu, thuc_the
-from src.aho_corasick_duoc_thu import BoTraCuuDuocThuAhoCorasick
-from src.api_contract import validate_contract_keys
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.he_thong import dich_vu_http as dich_vu
+from src.duong_ong import b6_goi_y_hoi_lai as hoi_lai
+from src.duong_ong import chay_duong_ong as nhanh
+from src.duong_ong import b1_cau_truc_menh_de as phat_bieu
+from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
+from src.cong_cu_lam_sang.tra_duoc_thu_aho_corasick import BoTraCuuDuocThuAhoCorasick
+from src.he_thong.hop_dong_api import validate_contract_keys
 from src.audio.adapter import to_meditrace
 from src.audio.asr import faster_whisper_provider, phowhisper_provider
 from src.audio.asr.contextual_trie_600 import (
@@ -35,24 +40,24 @@ from src.audio.asr.contextual_trie_600 import (
 from src.audio.models import SpeakerRole
 from src.audio.pipeline import AudioPipeline
 from src.audio.storage import SessionStore
-from src.can_lam_sang import ParaclinicalCorrelator
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator, _trich_danh_sach_thuoc_hop_le
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine
-from src.fhir_exporter import FHIRExporter
-from src.guardrails import ASRQualityGuardrail, SpeakerConsistencyGuardrail
-from src.hieu_chinh_lieu import kiem_tra_hieu_chinh_lieu
-from src.khu_dinh_danh import ClinicalDeidentifier
-from src.kiem_duyet_bhyt_va_bo_sot import (
+from src.cong_cu_lam_sang.doi_soat_can_lam_sang import ParaclinicalCorrelator
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator, _trich_danh_sach_thuoc_hop_le
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
+from src.he_thong.rao_chan_an_toan import ASRQualityGuardrail, SpeakerConsistencyGuardrail
+from src.cong_cu_lam_sang.hieu_chinh_lieu import kiem_tra_hieu_chinh_lieu
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import (
     BHYTXmlPreChecker,
     tien_kiem_bhyt_tu_du_lieu,
     xuat_goi_xml_1_5_qd130,
 )
-from src.phat_bieu import PhatBieu
-from src.thang_diem_lam_sang import ClinicalRiskScoringEngine
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.cong_cu_lam_sang.thang_diem_nguy_co import ClinicalRiskScoringEngine
 
 
 # ==============================================================================
-# 1. KHỬ ĐỊNH DANH (`src/khu_dinh_danh.py`)
+# 1. KHỬ ĐỊNH DANH (`src/he_thong/khu_dinh_danh.py`)
 # ==============================================================================
 def test_p0_khu_dinh_danh_khong_nuot_trieu_chung_sau_ho_ten():
     cau = "Tôi tên là Nguyễn Văn An năm nay bốn mươi tuổi bị đau ngực khó thở"
@@ -399,7 +404,7 @@ def test_p1_cold_start_suc_khoe_duoi_100ms_khong_nap_scipy_torch_hay_quet_dia():
     code = r"""
 import http.client, json, sys, threading, time
 from http.server import ThreadingHTTPServer
-from src import dich_vu
+from src.he_thong import dich_vu_http as dich_vu
 
 dich_vu.May.loi = dich_vu.Loi(cho_nap_mo_hinh=False)
 dich_vu.May.am = dich_vu.AmThanh()
@@ -425,7 +430,7 @@ print(json.dumps({
     "status": resp.status,
     "elapsed_ms": elapsed_ms,
     "scipy_loaded": "scipy" in sys.modules,
-    "cham_he_thong_loaded": "src.cham_he_thong" in sys.modules,
+    "cham_he_thong_loaded": "src.do_luong.cham_he_thong" in sys.modules,
     "torch_loaded": "torch" in sys.modules,
     "dem_is_none": dich_vu.May.loi._dem is None,
     "pipe_is_none": dich_vu.May.am._pipe is None,

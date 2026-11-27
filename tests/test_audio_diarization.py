@@ -19,7 +19,7 @@ from src.audio.models import TranscriptSegment
 from src.audio.pipeline import AudioPipeline
 from src.audio.pyannote_provider import LoiTachNguoiNoi, PyannoteDiarizationProvider
 from src.audio.storage import SessionStore
-from src.dich_vu import ghi_chu_tach
+from src.he_thong.dich_vu_http import ghi_chu_tach
 
 
 def _doan(i, spk, a, b, chu, tin=0.9):
@@ -340,7 +340,7 @@ def _co(**kw):
 def test_co_dong_lenh_cua_hoaiduc_dat_duoc_bien_moi_truong(monkeypatch):
     # 25/09: dong nay lam dich vu tren HoaiDuc hong khi khoi dong (thieu `import os`), vi HoaiDuc
     # chay voi --tran-ram-gb 8.5. Goi dung duong mac dinh (os.environ) de bat lai loi do.
-    from src.dich_vu import dat_bien_tach_nguoi_noi
+    from src.he_thong.dich_vu_http import dat_bien_tach_nguoi_noi
     monkeypatch.delenv("PYANNOTE_TONG_RAM_GB", raising=False)
     monkeypatch.delenv("DIARIZATION_PROVIDER", raising=False)
     dat_bien_tach_nguoi_noi(_co(tran_ram_gb=8.5, tach_nguoi_noi="pyannote"))
@@ -349,7 +349,7 @@ def test_co_dong_lenh_cua_hoaiduc_dat_duoc_bien_moi_truong(monkeypatch):
 
 
 def test_co_dong_lenh_khong_de_len_tran_ram_da_dat_tay():
-    from src.dich_vu import dat_bien_tach_nguoi_noi
+    from src.he_thong.dich_vu_http import dat_bien_tach_nguoi_noi
     env = {"PYANNOTE_TONG_RAM_GB": "7"}
     dat_bien_tach_nguoi_noi(_co(tran_ram_gb=8.5, pyannote_khoa="D:/khoa.key"), env)
     assert env == {"PYANNOTE_TONG_RAM_GB": "7", "PYANNOTE_TOKEN_FILE": "D:/khoa.key"}

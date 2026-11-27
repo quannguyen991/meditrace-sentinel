@@ -4,7 +4,7 @@
 Dieu kien cong bang la cai chan viec "cai thien" bang cach viet it di. Neu no
 khong bao thang duoc thi no vo dung — nen o day co test cho ca hai chieu.
 """
-from src import do_dac
+from src.do_luong import do_dac as do_dac
 
 
 def kq(du_doan, tham_chieu, **kw):

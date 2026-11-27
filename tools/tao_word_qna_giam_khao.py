@@ -358,9 +358,9 @@ def tao_word_qna():
         "Câu 6: Người Việt Nam khi đi khám nói năng lộn xộn, hay nuốt chủ ngữ, xưng hô 'con/cháu/ông nhà', dùng từ địa phương ('trúng gió', 'xót ruột'). Làm sao hệ thống của bạn xử lý được?",
         [
             "Đây chính là 'vũ khí bản địa hóa' của MediTrace mà các mô hình nước ngoài không thể có:",
-            "1. **Tầng 2 (Gom nhóm chủ thể - src/thuc_the.py):** Bộ luật ngữ pháp xử lý đại từ xưng hô Việt Nam. Phân biệt rõ: người mẹ nói *'Cháu nhà em bị sốt'* thì chủ thể bệnh là 'con' (id=1), không phải người mẹ (id=0).",
+            "1. **Tầng 2 (Gom nhóm chủ thể - src/duong_ong/b2_gom_nguoi_thuc_the.py):** Bộ luật ngữ pháp xử lý đại từ xưng hô Việt Nam. Phân biệt rõ: người mẹ nói *'Cháu nhà em bị sốt'* thì chủ thể bệnh là 'con' (id=1), không phải người mẹ (id=0).",
             "2. **Xử lý câu nuốt chủ ngữ:** Khi bệnh nhân nói *'Sốt 2 hôm nay rồi'*, ngữ cảnh lượt thoại được đối chiếu với vai người nói (Speaker Role). Nếu là bệnh nhân nói về bản thân thì tự động gán chủ thể 0.",
-            "3. **Động cơ phương ngữ 3 miền (src/phuong_ngu_lam_sang.py):** Bộ từ điển hơn 60 thuật ngữ dân gian (Bắc - Trung - Nam) quy đổi về chuẩn y khoa: *'trúng gió'* -> liệt dây VII ngoại biên / cảm mạo; *'xót ruột/cồn cào'* -> viêm loét dạ dày; *'nấc cục'* -> nấc cụt.",
+            "3. **Động cơ phương ngữ 3 miền (src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py):** Bộ từ điển hơn 60 thuật ngữ dân gian (Bắc - Trung - Nam) quy đổi về chuẩn y khoa: *'trúng gió'* -> liệt dây VII ngoại biên / cảm mạo; *'xót ruột/cồn cào'* -> viêm loét dạ dày; *'nấc cục'* -> nấc cụt.",
             "4. **Từ điển âm vị thuốc Tây:** Bệnh nhân đọc tên thuốc dân gian: *'a móc'* -> *Amoxicillin*; *'ô mê'* -> *Omeprazole*."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
@@ -383,7 +383,7 @@ def tao_word_qna():
             "• **Tầng 0 (ASR):** PhoWhisper (fine-tuned nhận dạng tiếng nói tiếng Việt) + PyAnnote Diarization (tách giọng người nói).",
             "• **Tầng 1 (Bóc tách thông tin):** Mô hình nguồn mở Qwen3-4B chạy kèm adapter huấn luyện QLoRA 4-bit (chạy ngay trên GPU máy trạm phòng khám).",
             "• **Tầng 2 đến Tầng 5 (Xử lý & Kiểm chứng):** 100% viết bằng Python thuật toán xác định (Deterministic Rule-Based, Máy trạng thái hữu hạn FSM, Bảng tra Dược thư Quốc gia, Template Engine).",
-            "• **Giao diện Web:** React 19 + TypeScript + TailwindCSS, giao tiếp với backend qua REST API nội bộ (src/dich_vu.py)."
+            "• **Giao diện Web:** React 19 + TypeScript + TailwindCSS, giao tiếp với backend qua REST API nội bộ (src/he_thong/dich_vu_http.py)."
         ],
         mau_vien=HEX_SAFE, badge_text="Dễ"
     )
@@ -419,7 +419,7 @@ def tao_word_qna():
         doc, "q10",
         "Câu 10: Cơ chế Khóa bằng chứng K1–K7 ở Tầng 4 hoạt động cụ thể như thế nào để chặn Hallucination?",
         [
-            "Mỗi mệnh đề được AI trích ra ở Tầng 1 bắt buộc phải có trường `trich_dan` (chuỗi trích dẫn nguyên văn) và `bang_chung` (lượt thoại [Ti]). Cổng khóa tại `src/khoa_bang_chung.py` thực thi 7 chốt chặn:",
+            "Mỗi mệnh đề được AI trích ra ở Tầng 1 bắt buộc phải có trường `trich_dan` (chuỗi trích dẫn nguyên văn) và `bang_chung` (lượt thoại [Ti]). Cổng khóa tại `src/duong_ong/b4_kiem_can_cu.py` thực thi 7 chốt chặn:",
             "• **K1 (Nguồn gốc nguyên văn):** Dò trực tiếp xâu ký tự `trich_dan` vào lượt thoại [Ti]. Nếu không có trong lượt thoại -> Bị CHẶN lập tức (`trich_khong_co`), đánh dấu Hallucination.",
             "• **K2 (Khớp nội dung):** Quét tỷ lệ trùng lặp từ ngữ lâm sàng cốt lõi.",
             "• **K3 (Khớp chủ thể):** Đối chiếu từ chỉ người trong lượt thoại với vai người được gán.",
@@ -455,7 +455,7 @@ def tao_word_qna():
         [
             "Dự án giải quyết triệt để vấn đề này qua 3 kỹ thuật khoa học:",
             "1. **Chia tách theo khuôn bệnh độc lập (Template-Disjoint Split):** 200 khuôn ca bệnh được chia thành tập Train, Dev, Test riêng biệt. Tập Test gồm những khuôn bệnh mà mô hình **chưa bao giờ nhìn thấy trong lúc huấn luyện**.",
-            "2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Bộ dữ liệu thế hệ v2 mở rộng đạt **45.835 câu duy nhất** (+127% so với v1), tỷ lệ lặp câu giảm mạnh từ 76,92% xuống **47,37%** (câu >= 8 từ: 42,19%), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%), triệt tiêu 100% câu hỏi máy móc của bác sĩ. [ĐÃ RÚT: con số 78.3% cũ không có phép đo tương ứng trong mã; hiện dùng công cụ toán học chính xác `src/do_lap_cau.py`].",
+            "2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Bộ dữ liệu thế hệ v2 mở rộng đạt **45.835 câu duy nhất** (+127% so với v1), tỷ lệ lặp câu giảm mạnh từ 76,92% xuống **47,37%** (câu >= 8 từ: 42,19%), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%), triệt tiêu 100% câu hỏi máy móc của bác sĩ. [ĐÃ RÚT: con số 78.3% cũ không có phép đo tương ứng trong mã; hiện dùng công cụ toán học chính xác `src/do_luong/do_lap_cau.py`].",
             "3. **Bộ dữ liệu Thử thách Cặp đôi (Adversarial Contrastive Pairs):** Tạo 300 ca thử thách theo cặp chỉ khác nhau đúng một yếu tố ranh giới (đổi người mang dị ứng, người nói tự đính chính sau 5 câu, chèn tiếng ồn ASR, phương ngữ 3 miền). Kết quả nhánh C của MediTrace vượt trội hoàn toàn so với nhánh A (AI thông thường) với F1 tăng từ 66.1% lên **70.8%** và SER giảm từ 45.4% xuống **36.9%**."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"

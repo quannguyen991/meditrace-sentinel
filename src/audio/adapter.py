@@ -1,11 +1,22 @@
-"""Adapter from reviewed audio transcript to the existing MediTrace input.
+"""[Âm thanh]
+Làm gì   : Đổi bản chép lời đã được duyệt sang dạng hội thoại mà đường ống dựng bản nháp đọc
+           được.
+Vào → Ra : danh sách đoạn lời đã duyệt (người nói, chữ) → dict hội thoại cho đường ống
+           MediTrace
+Đọc từ   : to_meditrace() là hàm duy nhất của tệp
+Mục lục (các hàm/lớp chính):
+  to_meditrace()  Đổi lời thoại đã duyệt thành đầu vào cho lõi MediTrace
+Dùng bởi : audio/pipeline, he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Bộ chuyển đổi từ bản chép lời âm thanh đã duyệt sang đầu vào MediTrace hiện có.
 
-The MediTrace core reads one string ``input`` with one turn per line, e.g.
-``Bác sĩ: Cô ho bao lâu rồi?``. This adapter produces that string plus the turn
-list, and keeps the audio metadata SEPARATE so the core schema is untouched.
+Lõi MediTrace đọc một chuỗi ``input`` với mỗi lượt một dòng, ví dụ
+``Bác sĩ: Cô ho bao lâu rồi?``. Bộ chuyển đổi này tạo ra chuỗi đó kèm danh sách
+lượt, và giữ siêu dữ liệu âm thanh TÁCH RIÊNG để lược đồ lõi không bị đụng tới.
 
-Text used: ``text_original`` — what the recogniser heard, or what the reviewer typed
-when editing. ``text_normalized`` is never sent to the core.
+Văn bản dùng: ``text_original`` — những gì bộ nhận dạng đã nghe, hoặc những gì người duyệt đã gõ
+khi chỉnh sửa. ``text_normalized`` không bao giờ được gửi vào lõi.
 """
 
 from __future__ import annotations
@@ -25,7 +36,7 @@ ROLE_TO_CORE = {
     "người nhà": "nguoi_nha",
     "người khác": "nguoi_khac",
 }
-# Nhan vai trong chuoi `input` cua bo du lieu MediTrace
+# Nhãn vai trong chuỗi `input` của bộ dữ liệu MediTrace
 ROLE_LABEL = {
     "doctor": "Bác sĩ",
     "nurse": "Điều dưỡng",
@@ -40,11 +51,14 @@ ROLE_LABEL = {
 }
 
 
+# ═══ to_meditrace() — Đổi lời thoại đã duyệt thành đầu vào cho lõi MediTrace ══════════
+# Trả chuỗi input mỗi lượt một dòng, danh sách lượt và siêu dữ liệu âm thanh riêng.
+# strict=True từ chối đoạn còn vai unknown.
 def to_meditrace(segments: list[dict[str, Any]], strict: bool = False) -> dict[str, Any]:
     """-> {"input": str, "turns": [...], "metadata": [...]}.
 
-    ``strict=True`` refuses any segment whose role is still ``unknown``: the core
-    must never guess who spoke.
+    ``strict=True`` từ chối mọi đoạn mà vai vẫn là ``unknown``: lõi
+    không bao giờ được đoán ai đã nói.
     """
     turns, metadata, lines = [], [], []
     for index, segment in enumerate(segments, 1):

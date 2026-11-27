@@ -5,8 +5,8 @@ Trong tam theo ke hoach (Task 16 buoc 1): bo sung KHI CO bang chung, va
 KHONG bo sung khi khong co. Cai thu hai quan trong hon — mot co che "bo sung"
 khong co chan se tu bia ra muc kham.
 """
-from src import kiem_day_du as kdd
-from src import sinh_benh_an as sba
+from src.duong_ong import b4_kiem_day_du as kdd
+from src.duong_ong import b5_viet_ban_nhap as sba
 
 
 def pb(noi_dung, id=1, chu_the_id=0, **kw):

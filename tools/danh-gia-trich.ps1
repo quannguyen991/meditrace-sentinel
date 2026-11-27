@@ -48,19 +48,19 @@ function Chay-Lai {
 
 # 1. Hoi thoai that, co adapter. Chay ca sau nhanh tu MOT lan trich.
 Chay-Lai "1-THAT-CO-ADAPTER" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
     "C", "C_ghi_de", "D", "--model", $mo_hinh, "--tap", "phat_trien",
     "--max-token", "3072", "--adapter-trich", $adapter) | Out-Null
 
 # 2. Tap giu lai (4 khuon chua thay), co adapter.
 Chay-Lai "2-GIU-LAI-CO-ADAPTER" @(
-    "-m", "src.nhanh", "--nhanh", "C", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "C", "--model", $mo_hinh,
     "--tap", "hv_giu_lai", "--max-token", "3072",
     "--adapter-trich", $adapter) | Out-Null
 
 # 3. Tap giu lai, KHONG adapter - moc so sanh.
 Chay-Lai "3-GIU-LAI-KHONG-ADAPTER" @(
-    "-m", "src.nhanh", "--nhanh", "C", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "C", "--model", $mo_hinh,
     "--tap", "hv_giu_lai", "--max-token", "3072") | Out-Null
 
 Write-Output ""

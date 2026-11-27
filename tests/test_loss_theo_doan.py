@@ -7,7 +7,7 @@ import pytest
 torch = pytest.importorskip("torch")
 import torch.nn.functional as F  # noqa: E402
 
-from src.loss_theo_doan import (bo_mat_na_day_du,  # noqa: E402
+from src.huan_luyen.loss_theo_doan import (bo_mat_na_day_du,  # noqa: E402
                                 cross_entropy_theo_doan,
                                 tao_trainer_loss_theo_doan)
 

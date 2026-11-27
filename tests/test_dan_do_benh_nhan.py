@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử tự động cho Trình Sinh Bản Hướng Dẫn & Dặn Dò Người Bệnh (src/dan_do_benh_nhan.py)."""
+"""Kiểm thử tự động cho Trình Sinh Bản Hướng Dẫn & Dặn Dò Người Bệnh (src/cong_cu_lam_sang/to_dan_do_benh_nhan.py)."""
 
 import pytest
-from src.dan_do_benh_nhan import (
+from src.cong_cu_lam_sang.to_dan_do_benh_nhan import (
     phan_loai_lich_uong_thuoc,
     sinh_ban_dan_do_benh_nhan,
     dinh_dang_van_ban_dan_do

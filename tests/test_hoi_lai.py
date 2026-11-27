@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tang hoi lai: it cau hoi, dung cho nguy hiem, mot cau giai quyet nhieu cho."""
-from src import cap_nhat
-from src import cong_rui_ro as cr
-from src import hoi_lai
-from src import khoa_bang_chung as kbc
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cr
+from src.duong_ong import b6_goi_y_hoi_lai as hoi_lai
+from src.duong_ong import b4_kiem_can_cu as kbc
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = ("Bác sĩ: Anh sốt mấy hôm rồi?\n"
       "Người nhà: Dạ, ông ấy sốt bốn ngày rồi ạ.\n"

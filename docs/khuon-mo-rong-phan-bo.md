@@ -51,12 +51,12 @@ Trần giới hạn cho phép: $\le 12.0\%$ (tương đương tối đa **72 khu
 
 ## 3. Phân tích Chi tiết Từng Đợt & Tính Bất biến
 
-### 3.1. Đợt 0 (200 khuôn gốc trong `src/ngu_lieu_viet.py`)
+### 3.1. Đợt 0 (200 khuôn gốc trong `src/bo_du_lieu/ngu_lieu_viet.py`)
 - Giữ nguyên 100% từng bit mã nguồn, băm vàng SHA-256 `test_bo_sinh_goc_khong_doi.py` bất biến.
-- Hệ cơ quan được gán qua bảng ánh xạ `HE_CO_QUAN_200_CU` trong `src/khuon_mo_rong.py`, không sửa file gốc.
+- Hệ cơ quan được gán qua bảng ánh xạ `HE_CO_QUAN_200_CU` trong `src/bo_du_lieu/khuon_mo_rong.py`, không sửa file gốc.
 - Hệ lớn nhất: `tiêu hoá` chiếm 21/200 (10.50%).
 
-### 3.2. Đợt 1 - Lô 1 (50 khuôn mới đầu tiên trong `src/khuon_mo_rong.py`)
+### 3.2. Đợt 1 - Lô 1 (50 khuôn mới đầu tiên trong `src/bo_du_lieu/khuon_mo_rong.py`)
 - Bổ sung 50 khuôn đã duyệt tên từ `docs/khuon-mo-rong-danh-sach.md`.
 - Hiện thực hóa 100% với cấu trúc lâm sàng chuẩn mực, **mỗi khuôn có đủ ít nhất 6 cách diễn đạt đa dạng** cho `kham`, `chan_doan`, `ke_hoach` (tổng cộng $50 \times 18 = 900$ biến thể lâm sàng viết tay).
 - Giảm tỷ lệ hệ lớn nhất xuống **10.40%** (26/250 khuôn), tuân thủ nghiêm ngặt quy tắc "mỗi đợt mới phải giảm hoặc giữ nguyên tỷ lệ hệ lớn nhất".

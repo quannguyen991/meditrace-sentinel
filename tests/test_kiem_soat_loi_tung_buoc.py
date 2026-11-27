@@ -15,10 +15,10 @@ Chứng minh toán học và thực nghiệm:
 """
 import pytest
 
-from src.bo_kiem_tra import KiemTraTungBuocToanDien
-from src.may_trang_thai_hoi_thoai import MayTrangThaiHoiThoai, TrangThaiFSM, kiem_tra_l2_sang_l3
-from src.phat_bieu import PhatBieu
-from src.trich_xuat_thuc_the import LuotThoaiL1, kiem_tra_l1_sang_l2, xu_ly_dau_ra_mo_hinh
+from src.huan_luyen.ham_thuong_rlvr import KiemTraTungBuocToanDien
+from src.duong_ong.b2_bu_chu_ngu_tinh_luoc import MayTrangThaiHoiThoai, TrangThaiFSM, kiem_tra_l2_sang_l3
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.duong_ong.b1_ep_dau_ra_json import LuotThoaiL1, kiem_tra_l1_sang_l2, xu_ly_dau_ra_mo_hinh
 
 
 def test_buoc_1_chan_khi_asr_phan_vai_mo_ho_hoac_do_tin_cay_thap():

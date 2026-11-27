@@ -4,9 +4,9 @@
 Cau noi nay de sai am tham: no nam giua hai phan da co test, nen loi o day
 khong lam do test nao khac ma van lam hong ket qua cuoi.
 """
-from src import phat_bieu as pb
-from src import thuc_the
-from src.sinh_benh_an import MUC_NGUOI_KHAC
+from src.duong_ong import b1_cau_truc_menh_de as pb
+from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
+from src.duong_ong.b5_viet_ban_nhap import MUC_NGUOI_KHAC
 
 
 def js(noi_dung, chu_the="trẻ", luot=None, **kw):
@@ -116,7 +116,8 @@ def test_id_lien_tuc_theo_chi_so_goc_ke_ca_khi_co_ban_hong():
 # ----------------------------------------------------------- chay het duong
 
 def test_chay_het_duong_tu_JSON_den_benh_an():
-    from src import cap_nhat, sinh_benh_an
+    from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+    from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
     ht = ("Bác sĩ: Nhà mình có ai dị ứng thuốc không ạ?\n"
           "Người nhà: Tôi dị ứng penicillin, còn cháu chưa thấy bị bao giờ.")
     bang = pb.bang_ten_tu_thuc_the(thuc_the.lien_ket(ht))

@@ -9,9 +9,9 @@ Test o day KHONG dung mo hinh. Ba thu duoc kiem:
 """
 import pytest
 
-from src import phan_quan_he as pq
-from src import ung_vien_quan_he as uv
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_phan_xu_quan_he as pq
+from src.duong_ong import b3_sinh_cap_ung_vien_quan_he as uv
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def _pb(id, noi_dung, bang_chung, moc=None, chu_the_id=1, **kw):

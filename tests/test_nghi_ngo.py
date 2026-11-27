@@ -14,8 +14,8 @@ khong co nhom nao bat duoc no, nen mot nua thach thuc 3 khong co phep do.
 """
 import pytest
 
-from src import do_van_xuoi as dv
-from src import sinh_bo_chan_doan as sb
+from src.do_luong import do_van_xuoi as dv
+from src.bo_du_lieu import sinh_bo_chan_doan as sb
 
 
 @pytest.fixture(scope="module")

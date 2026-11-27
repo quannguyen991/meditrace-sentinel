@@ -4,7 +4,7 @@
 Hai luat duoi day la LY DO buoc nay viet bang ma chu khong bang mo hinh.
 Neu chung khong duoc test thi khong co gi giu chung.
 """
-from src import sinh_benh_an as sba
+from src.duong_ong import b5_viet_ban_nhap as sba
 
 
 def pb(noi_dung, chu_the_id=0, **kw):
@@ -170,7 +170,7 @@ def test_tach_muc_phu_ra_khoi_benh_an():
 
 def test_muc_phu_lam_bo_cham_dem_them_mot_muc_KHONG_co_trong_tham_chieu():
     """Ly do `tach_muc_phu` ton tai — kiem bang chinh bo cham goc."""
-    from src import cham_diem
+    from src.do_luong import cham_diem as cham_diem
 
     ra, _ = sba.sinh([pb("ho khan", id=1),
                       pb("khó thở", id=2, tinh_huong="giả định")])
@@ -188,7 +188,7 @@ def test_khong_co_muc_phu_thi_tra_nguyen_van():
 def test_cac_muc_con_lai_deu_duoc_bo_cham_nhan_ra():
     """Neu bo cham khong nhan ra muc nao thi Section F1 bang 0 vi mot ly do
     hinh thuc, khong phai vi noi dung."""
-    from src import cham_diem
+    from src.do_luong import cham_diem as cham_diem
     for muc in sba.THU_TU_MUC:
         assert muc in cham_diem.cac_muc(muc + "\n\nnội dung."), muc
 

@@ -3,10 +3,11 @@
 import json
 from pathlib import Path
 
-from src import cong_rui_ro, duong_dan
-from src.ca_mau_bgk import doc_ca_demo
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.he_thong import duong_dan as duong_dan
+from src.bo_du_lieu.ca_mau_bgk import doc_ca_demo
 from src.canh_bao.loai import LOAI, LOAI_NANG, muc_do, CAO
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def test_a1_demo_hai_benh_nhan_tach_nguoi_khac_khoi_tien_su_gia_dinh():

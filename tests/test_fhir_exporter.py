@@ -2,7 +2,7 @@
 """Test suite cho Trụ cột 2: Chuẩn hóa Xuất bản Bệnh án Quốc tế HL7 FHIR trong tests/test_fhir_exporter.py."""
 import json
 import pytest
-from src.fhir_exporter import FHIRExporter
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
 
 
 def test_tao_fhir_bundle_day_du_resources():

@@ -2,7 +2,7 @@
 """Loi KHO cay thang vao DAP AN (dict) — tinh vi, gan dung, de lot qua mat va qua luat.
 
 Hai cong dung:
-  1. Do do kho: lop canh bao bat duoc bao nhieu loi kho (`src.do_cay_loi --kho`).
+  1. Do do kho: lop canh bao bat duoc bao nhieu loi kho (`src.do_luong.do_cay_loi --kho`).
   2. Du lieu huan luyen sau nay: cap (ban dung, ban co loi kho) cung dinh dang `du_lieu_trich`
      — dung cho DPO (chosen/rejected) hoac day mot bo kiem tra tim loi.
 
@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from src import tri_thuc_thuoc
+from src.cong_cu_lam_sang import tri_thuc_thuoc as tri_thuc_thuoc
 
 GOC = Path(__file__).resolve().parents[1]
 
@@ -259,8 +259,8 @@ def cay_nhieu(ca: dict, rng: random.Random, so_loi: int = 2, loai=LOAI_KHO):
 
 def _chi_so_ra(ca, i):
     """Chi so dap an -> chi so trong `phat_bieu` cua dau ra huan luyen (du_lieu_trich bo dong khong luot)."""
-    from src import bakeoff
-    from src.du_lieu_trich import ban_lap_ly_do_kham
+    from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
+    from src.bo_du_lieu.du_lieu_huan_luyen_trich import ban_lap_ly_do_kham
     _ds, so_luot = bakeoff.danh_so_luot(ca["input"])
     lap = ban_lap_ly_do_kham(ca["dap_an"])
     giu = [j for j, m in enumerate(ca["dap_an"]) if j not in lap and any(1 <= n <= so_luot for n in m.get("luot") or [])]
@@ -270,7 +270,7 @@ def _chi_so_ra(ca, i):
 def xuat_cap(ca: dict, rng: random.Random, so_loi: int = 1) -> Optional[dict]:
     """-> {"id", "chosen", "rejected", "loi": [...]} — chosen/rejected la chuoi JSON dau ra huan luyen
     (`du_lieu_trich.doi_mot_ca`). Loi nhac (prompt) lay tu `data/trich_train_v2.jsonl` theo `id`."""
-    from src.du_lieu_trich import doi_mot_ca
+    from src.bo_du_lieu.du_lieu_huan_luyen_trich import doi_mot_ca
     r = cay_nhieu(ca, rng, so_loi) if so_loi > 1 else None
     if r is None:
         for l in rng.sample(LOAI_KHO, len(LOAI_KHO)):

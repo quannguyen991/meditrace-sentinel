@@ -23,10 +23,10 @@ import collections
 
 import pytest
 
-from src import do_tang_quy_gan
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src import tach_tap_viet as tt
+from src.do_luong import do_tang_quy_gan as do_tang_quy_gan
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tt
 
 TAP = ("train", "phat_trien", "kiem_tra_cuoi")
 BANG = {"moi_tuoi": nl.TIEN_SU_GIA_DINH_MOI_TUOI,

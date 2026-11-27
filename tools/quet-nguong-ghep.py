@@ -25,16 +25,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import du_lieu  # noqa: E402
+from src.bo_du_lieu import nap_du_lieu as du_lieu  # noqa: E402
 
 NGUONG = (0.4, 0.5, 0.6, 0.7, 0.8)
 
 
 def do_mot(thu_muc: Path, tap: str, nhanh: str, nguong: float):
     """-> (so menh de sai chu the, so menh de ghep duoc) o nguong da cho."""
-    from src import do_trich
+    from src.do_luong import do_trich as do_trich
     do_trich.NGUONG_GHEP = nguong
-    import src.cham_he_thong as ch
+    from src.do_luong import cham_he_thong as ch
     importlib.reload(ch)
     ch.NGUONG_GHEP = nguong
 

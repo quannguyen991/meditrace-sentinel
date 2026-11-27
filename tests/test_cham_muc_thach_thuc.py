@@ -6,7 +6,7 @@ Hai dieu phai giu, va ca hai deu co ca that dung sau:
   2. SAI LECH KHONG LIEN QUAN khong duoc keo ca xuong ("met" vs "met moi") —
      neu khong phep do nay chi do "viet giong khuon".
 """
-from src import cham_muc_thach_thuc as cm
+from src.do_luong import cham_muc_thach_thuc as cm
 
 
 THAM_CHIEU_BAN_A = """LÝ DO KHÁM BỆNH

@@ -1,22 +1,34 @@
 # -*- coding: utf-8 -*-
-"""Tach nguoi noi bang pyannote, chay trong MOI TRUONG PYTHON RIENG qua subprocess.
+"""[Âm thanh]
+Làm gì   : Tách người nói bằng pyannote bằng cách gọi tiến trình con trong môi trường Python
+           riêng, có giới hạn bộ nhớ.
+Vào → Ra : tệp WAV → danh sách đoạn (đầu, cuối, nhãn người nói); lỗi thì báo LoiTachNguoiNoi
+Đọc từ   : class PyannoteDiarizationProvider tách người nói qua tiến trình con; class
+           LoiTachNguoiNoi lỗi tách
+Mục lục (các hàm/lớp chính):
+  class PyannoteDiarizationProvider  Tách người nói bằng pyannote trong môi trường riêng
+  class LoiTachNguoiNoi              Lỗi tách người nói có mã ngắn để pipeline lùi về
+Dùng bởi : audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Tách người nói bằng pyannote, chạy trong MÔI TRƯỜNG PYTHON RIÊNG qua subprocess.
 
-VI SAO MOI TRUONG RIENG. pyannote.audio can torch, lightning, speechbrain... theo phien ban
-cua no. Moi truong cua dich vu la moi truong da khoa trong ban dang ky truoc (transformers
-4.57.6, peft 0.20.0, bitsandbytes 0.50.2); cai pyannote vao do co the doi goi phu thuoc va
-lam doi ket qua da do. Vi vay dich vu goi `pyannote_chay.py` bang python cua moi truong rieng
-(bien PYANNOTE_PYTHON), doc ket qua JSON.
+VÌ SAO MÔI TRƯỜNG RIÊNG. pyannote.audio cần torch, lightning, speechbrain... theo phiên bản
+của nó. Môi trường của dịch vụ là môi trường đã khoá trong bản đăng ký trước (transformers
+4.57.6, peft 0.20.0, bitsandbytes 0.50.2); cài pyannote vào đó có thể đổi gói phụ thuộc và
+làm đổi kết quả đã đo. Vì vậy dịch vụ gọi `pyannote_chay.py` bằng python của môi trường riêng
+(biến PYANNOTE_PYTHON), đọc kết quả JSON.
 
-VI SAO CO TRAN RAM. Tren HoaiDuc, toan bo phan mem cua du an chi duoc dung 10 GB RAM. Tien
-trinh con bi do moi 0,5 s: vuot tran rieng (PYANNOTE_RAM_GB) hoac tong RAM cua dich vu cong
-tien trinh con vuot PYANNOTE_TONG_RAM_GB thi bi giet.
+VÌ SAO CÓ TRẦN RAM. Trên HoaiDuc, toàn bộ phần mềm của dự án chỉ được dùng 10 GB RAM. Tiến
+trình con bị đo mỗi 0,5 s: vượt trần riêng (PYANNOTE_RAM_GB) hoặc tổng RAM của dịch vụ cộng
+tiến trình con vượt PYANNOTE_TONG_RAM_GB thì bị giết.
 
-KHONG DOAN VAI. Ket qua chi co speaker_1, speaker_2... Vai bac si / benh nhan / nguoi nha
-van do nguoi dung gan.
+KHÔNG ĐOÁN VAI. Kết quả chỉ có speaker_1, speaker_2... Vai bác sĩ / bệnh nhân / người nhà
+vẫn do người dùng gán.
 
-Khoa Hugging Face doc tu tep (PYANNOTE_TOKEN_FILE) va chuyen qua bien moi truong HF_TOKEN,
-khong qua dong lenh, khong ghi vao nhat ky. Khong co tep khoa thi chay voi HF_HUB_OFFLINE=1:
-chi dung mo hinh da co trong bo nho dem.
+Khoá Hugging Face đọc từ tệp (PYANNOTE_TOKEN_FILE) và chuyển qua biến môi trường HF_TOKEN,
+không qua dòng lệnh, không ghi vào nhật ký. Không có tệp khoá thì chạy với HF_HUB_OFFLINE=1:
+chỉ dùng mô hình đã có trong bộ nhớ đệm.
 """
 from __future__ import annotations
 
@@ -31,12 +43,14 @@ TEP_CHAY = Path(__file__).resolve().with_name("pyannote_chay.py")
 MO_HINH_MAC_DINH = "pyannote/speaker-diarization-3.1"
 
 
+# ═══ class LoiTachNguoiNoi — Lỗi tách người nói có mã ngắn để pipeline lùi về ═════════
 class LoiTachNguoiNoi(RuntimeError):
-    """Ma loi ngan (str(exc)) de pipeline ghi nhat ky va lui ve mot nguoi noi."""
+    """Mã lỗi ngắn (str(exc)) để pipeline ghi nhật ký và lùi về một người nói."""
 
 
+# ─── _rss() — Đo RAM vật lý của tiến trình và các tiến trình con ──────────────────────
 def _rss(p) -> int:
-    """RAM vat ly cua tien trinh va moi tien trinh con cua no (byte)."""
+    """RAM vật lý của tiến trình và mọi tiến trình con của nó (byte)."""
     import psutil
     tong = 0
     try:
@@ -51,6 +65,7 @@ def _rss(p) -> int:
     return tong
 
 
+# ─── _giet_ca_cay() — Kết thúc tiến trình và toàn bộ tiến trình con ───────────────────
 def _giet_ca_cay(p) -> None:
     import psutil
     try:
@@ -64,8 +79,11 @@ def _giet_ca_cay(p) -> None:
             pass
 
 
+# ═══ class PyannoteDiarizationProvider — Tách người nói bằng pyannote trong môi trường riêng ═══
+# Chạy qua subprocess, giám sát RAM và thời gian, quá ngưỡng thì dừng; chỉ ra speaker_1,
+# speaker_2, không đoán vai.
 class PyannoteDiarizationProvider:
-    """Nha cung cap tach nguoi noi that. `tach_that = True` bao pipeline gop luot lien tiep."""
+    """Nhà cung cấp tách người nói thật. `tach_that = True` báo pipeline gộp lượt liên tiếp."""
 
     tach_that = True
     ten = "pyannote"
@@ -97,7 +115,7 @@ class PyannoteDiarizationProvider:
                    s.pyannote_timeout_s, s.pyannote_min_speakers, s.pyannote_max_speakers,
                    s.pyannote_hf_home)
 
-    # -- dung lenh (tach rieng de phep thu kiem khoa KHONG nam trong dong lenh) --------
+    # -- dựng lệnh (tách riêng để phép thử kiểm khoá KHÔNG nằm trong dòng lệnh) --------
     def lenh(self, wav: Path, ra: Path) -> list[str]:
         cmd = [self.python_exe, self.script, "--vao", str(wav), "--ra", str(ra),
                "--mo-hinh", self.model, "--thiet-bi", self.device]
@@ -118,9 +136,9 @@ class PyannoteDiarizationProvider:
         else:
             env["HF_HUB_OFFLINE"] = "1"
         if self.hf_home:
-            # pyannote 3.x KHONG luu mo hinh theo HF_HOME ma theo PYANNOTE_CACHE (mac dinh
-            # ~/.cache/torch/pyannote). Dat ca hai vao cung <hf_home>/hub de mot thu muc chua du
-            # mo hinh: chay khong mang va chep sang may khac chi can chep thu muc nay.
+            # pyannote 3.x KHÔNG lưu mô hình theo HF_HOME mà theo PYANNOTE_CACHE (mặc định
+            # ~/.cache/torch/pyannote). Đặt cả hai vào cùng <hf_home>/hub để một thư mục chứa đủ
+            # mô hình: chạy không mạng và chép sang máy khác chỉ cần chép thư mục này.
             env["HF_HOME"] = self.hf_home
             env["PYANNOTE_CACHE"] = str(Path(self.hf_home) / "hub")
         env["PYTHONUTF8"] = "1"
@@ -144,7 +162,7 @@ class PyannoteDiarizationProvider:
                                     stdout=log, stderr=log)
             try:
                 p = psutil.Process(proc.pid)
-            except psutil.NoSuchProcess:  # thoat ngay (vd loi nap), khong can do RAM
+            except psutil.NoSuchProcess:  # thoát ngay (vd lỗi nạp), không cần đo RAM
                 p = None
             cha = psutil.Process(os.getpid())
             while p is not None and proc.poll() is None:
@@ -180,7 +198,7 @@ class PyannoteDiarizationProvider:
 
     @staticmethod
     def _ma_loi(nhat_ky: Path, ma_thoat: int) -> str:
-        """Lay ma loi tu dong JSON cuoi cua nhat ky; khong co thi dung ma thoat."""
+        """Lấy mã lỗi từ dòng JSON cuối của nhật ký; không có thì dùng mã thoát."""
         try:
             dong = [d for d in nhat_ky.read_text(encoding="utf-8", errors="replace").splitlines()
                     if d.strip().startswith("{")]

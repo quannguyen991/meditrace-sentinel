@@ -17,7 +17,7 @@ khong phai hai cach goi cua mot thu.
 """
 import pytest
 
-from src import doi_chung_tam_thuong as dc
+from src.do_luong import doi_chung_tam_thuong as dc
 
 HOI_THOAI = "\n".join([
     "Bác sĩ: Cháu bị sao ạ?",

@@ -1,15 +1,25 @@
-"""faster-whisper (CTranslate2) — baseline provider.
+"""[Âm thanh › Chép lời]
+Làm gì   : Chép lời bằng faster-whisper làm mốc so sánh với bộ chép chính.
+Vào → Ra : tệp WAV 16 kHz mono → ASRResult: các đoạn chữ kèm mốc thời gian
+Đọc từ   : class FasterWhisperProvider chép lời bằng faster-whisper
+Mục lục (các hàm/lớp chính):
+  class FasterWhisperProvider  Nhà cung cấp chép lời faster-whisper chạy tại chỗ
+Gọi tới  : audio/asr/base, audio/asr/contextual_trie_600, audio/asr/schemas
+Dùng bởi : audio/asr/registry, audio/providers
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+faster-whisper (CTranslate2) — nhà cung cấp đối chứng.
 
-Default model ``small`` (OpenAI Whisper small, MIT licence) for a like-for-like size
-comparison with PhoWhisper-small.
+Mô hình mặc định ``small`` (OpenAI Whisper small, giấy phép MIT) để so sánh cùng cỡ
+với PhoWhisper-small.
 
-Settings chosen against known Whisper failure modes:
-* ``vad_filter=True``          Whisper invents sentences on silence.
-* ``condition_on_previous_text=False``  avoids repetition loops.
-* ``temperature=0``            deterministic decoding.
+Các thiết lập chọn theo các kiểu lỗi Whisper đã biết:
+* ``vad_filter=True``          Whisper bịa câu khi gặp khoảng lặng.
+* ``condition_on_previous_text=False``  tránh vòng lặp lặp lại.
+* ``temperature=0``            giải mã tất định.
 
-``asr_confidence`` = exp(avg_logprob) of the segment, i.e. the geometric mean token
-probability. It measures how sure the recogniser is about the words — nothing more.
+``asr_confidence`` = exp(avg_logprob) của đoạn, tức trung bình nhân xác suất
+của token. Nó đo mức độ bộ nhận dạng chắc về các từ — không hơn.
 """
 
 from __future__ import annotations
@@ -29,6 +39,9 @@ _CACHE_LOCK = threading.Lock()
 _INFER_LOCK = threading.Lock()
 
 
+# ═══ class FasterWhisperProvider — Nhà cung cấp chép lời faster-whisper chạy tại chỗ ═══
+# Giải mã tiếng Việt tất định, có lọc tiếng lặng và hotwords; asr_confidence là
+# exp(avg_logprob) của đoạn.
 class FasterWhisperProvider(ASRProvider):
     name = "faster_whisper"
     external = False

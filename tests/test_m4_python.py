@@ -3,9 +3,9 @@
 import json
 import pytest
 
-from src.lis_hl7_oru import phan_tich_lis_dau_vao
+from src.cong_cu_lam_sang.nap_ket_qua_lis_hl7 import phan_tich_lis_dau_vao
 from src.audio.asr.contextual_trie_600 import ContextualPrefixTrie600, tao_trie_logits_processor
-from src.dieu_phoi_ha_tang import tai_kiem_tra_nhanh
+from src.he_thong.dieu_phoi_cac_chot_an_toan import tai_kiem_tra_nhanh
 
 
 def test_lis_hl7_oru_r01_parsing():

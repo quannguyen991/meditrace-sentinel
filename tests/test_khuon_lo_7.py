@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử chuyên biệt cho src/khuon_lo_7.py (Lô 7: 50 khuôn bệnh, candidate 501-550)."""
+"""Kiểm thử chuyên biệt cho src/bo_du_lieu/khuon_lo_7.py (Lô 7: 50 khuôn bệnh, candidate 501-550)."""
 import json
 import unicodedata
 import pytest
 
-from src.khuon_lo_7 import BENH_LO_7, GIOI_TINH_LO_7
-from src.khuon_mo_rong import DANH_SACH_UNG_VIEN_CON_LAI, BENH_MO_RONG
-from src import ngu_lieu_viet as nl
-from src import kiem_khuon as kk
+from src.bo_du_lieu.khuon_lo_7 import BENH_LO_7, GIOI_TINH_LO_7
+from src.bo_du_lieu.khuon_mo_rong import DANH_SACH_UNG_VIEN_CON_LAI, BENH_MO_RONG
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import kiem_khuon as kk
 
 
 def test_lo_7_so_luong_va_khop_ung_vien():

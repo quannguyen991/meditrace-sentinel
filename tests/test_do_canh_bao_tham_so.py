@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src import do_canh_bao
+from src.do_luong import do_canh_bao as do_canh_bao
 
 GOC = Path(__file__).resolve().parents[1] / "data" / "thach_thuc"
 TAP = "thach_thuc_dinh_chinh_phat_trien"

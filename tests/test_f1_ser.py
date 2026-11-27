@@ -9,7 +9,7 @@ from collections import Counter
 
 import pytest
 
-from src import cham_he_thong as ch
+from src.do_luong import cham_he_thong as ch
 
 
 def _dem(so_than, so_dap_an, so_dung, so_ghep, chen, bo_sot):

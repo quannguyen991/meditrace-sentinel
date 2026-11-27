@@ -126,19 +126,19 @@ Câu trả lời: **Trong y tế, dùng ChatGPT để viết hồ sơ bệnh án
 
 Nhằm đáp ứng trọn vẹn 5 ý kiến đóng góp của Ban Giám khảo và giải quyết triệt để các bài toán an toàn lâm sàng, hệ thống đã được nâng cấp toàn diện 14 tính năng:
 
-### 1. Hệ thống 5 chốt kiểm tra tự động đa tầng (Guardrails) — `src/guardrails.py`
+### 1. Hệ thống 5 chốt kiểm tra tự động đa tầng (Guardrails) — `src/he_thong/rao_chan_an_toan.py`
 * **Vấn đề giải quyết:** Trước đây, lỗi sai ở khâu nghe âm thanh (ví dụ nghe nhầm tên thuốc) sẽ bị các khâu sau chép lại theo dây chuyền.
 * **Cách giải quyết:** Đặt 5 chốt chặn độc lập: Chốt 1 kiểm tra âm thanh và vòng lặp ASR; Chốt 2 kiểm tra nhất quán người nói; Chốt 3 kiểm tra đính chính và câu giả định; Chốt 4 đối soát trích dẫn và chống ảo giác số liệu; Chốt 5 định tuyến an toàn "bắt nhầm còn hơn bỏ sót".
 
-### 2. Bộ kiểm tra an toàn thuốc & Cảnh báo tương tác thuốc (DDI) — `src/duoc_ly_lam_sang.py`
+### 2. Bộ kiểm tra an toàn thuốc & Cảnh báo tương tác thuốc (DDI) — `src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py`
 * **Vấn đề giải quyết:** Bác sĩ bận rộn dễ kê trùng các cặp thuốc kỵ nhau gây tai biến nghiêm trọng (ví dụ Clopidogrel uống chung với Omeprazole làm mất tác dụng chống đông gây tái phát nhồi máu cơ tim, Warfarin uống chung với Ibuprofen gây xuất huyết dạ dày ồ ạt).
 * **Cách giải quyết:** Tự động đối chiếu đơn thuốc với cơ sở dữ liệu Dược thư Quốc gia Việt Nam, phát hiện tương tác thuốc đa hoạt chất và kiểm soát liều trần an toàn (ví dụ Paracetamol không quá 4000mg/ngày).
 
-### 3. Tự động chỉnh liều thuốc cho bệnh nhân suy gan, suy thận — `src/hieu_chinh_lieu.py`
+### 3. Tự động chỉnh liều thuốc cho bệnh nhân suy gan, suy thận — `src/cong_cu_lam_sang/hieu_chinh_lieu.py`
 * **Vấn đề giải quyết:** Người cao tuổi, người suy thận nếu uống liều thuốc như người bình thường sẽ bị ngộ độc do thuốc không đào thải được. Bác sĩ thường không có thời gian ngồi bấm máy tính tính độ lọc thận cho từng người.
 * **Cách giải quyết:** Tự động đọc chỉ số Creatinine máu, áp dụng công thức Cockcroft-Gault tính độ lọc cầu thận (eGFR), tự động đưa ra khuyến cáo giảm 50% liều hoặc chống chỉ định dùng thuốc.
 
-### 4. Tự động tính 9 thang điểm nguy cơ & mức độ nặng lâm sàng — `src/thang_diem_lam_sang.py`
+### 4. Tự động tính 9 thang điểm nguy cơ & mức độ nặng lâm sàng — `src/cong_cu_lam_sang/thang_diem_nguy_co.py`
 * **Vấn đề giải quyết:** Các bảng điểm đánh giá nguy cơ rất phức tạp, bác sĩ khó nhớ hết từng thang điểm trong lúc khám đông.
 * **Cách giải quyết:** Tự động trích xuất các triệu chứng và tính điểm chuẩn xác cho 9 tình huống:
   1. **GCS:** Đo mức độ hôn mê và chấn thương sọ não (3–15 điểm).
@@ -151,35 +151,35 @@ Nhằm đáp ứng trọn vẹn 5 ý kiến đóng góp của Ban Giám khảo v
   8. **Child-Pugh:** Đánh giá mức độ xơ gan mất bù (A, B, C).
   9. **BMI:** Đánh giá thể trạng thừa cân/béo phì chuẩn Châu Á.
 
-### 5. Báo động đỏ cận lâm sàng & Phát hiện mâu thuẫn — `src/can_lam_sang.py`
+### 5. Báo động đỏ cận lâm sàng & Phát hiện mâu thuẫn — `src/cong_cu_lam_sang/doi_soat_can_lam_sang.py`
 * **Vấn đề giải quyết:** Kết quả xét nghiệm in ra giấy thường bị để lẫn trong tập hồ sơ dày, bác sĩ bận có thể chưa kịp đọc ngay, làm trễ "giờ vàng" cấp cứu.
 * **Cách giải quyết:** Tự động quét kết quả xét nghiệm, nếu chạm ngưỡng nguy hiểm đến tính mạng (men tim Troponin tăng vọt, Kali máu quá cao gây ngừng tim) thì lập tức nhấp nháy báo động đỏ. Đồng thời phát hiện mâu thuẫn giữa lời nói bệnh nhân và kết quả xét nghiệm.
 
-### 6. Trợ lý gợi ý câu hỏi lâm sàng thông minh (SOCRATES) — `src/tro_ly_lam_sang.py`
+### 6. Trợ lý gợi ý câu hỏi lâm sàng thông minh (SOCRATES) — `src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py`
 * **Vấn đề giải quyết:** Trong 3 phút khám, bác sĩ rất dễ quên khai thác kỹ các đặc tính của triệu chứng đau (vị trí cụ thể, hướng lan, mức độ dữ dội, yếu tố tăng giảm).
 * **Cách giải quyết:** Tự động phát hiện khoảng trống thông tin theo chuẩn y khoa SOCRATES, hiển thị sẵn các nút gợi ý câu hỏi trên màn hình để bác sĩ chỉ cần liếc mắt là nhớ hỏi ngay.
 
-### 7. Tự động khử định danh bảo mật thông tin người bệnh — `src/khu_dinh_danh.py`
+### 7. Tự động khử định danh bảo mật thông tin người bệnh — `src/he_thong/khu_dinh_danh.py`
 * **Vấn đề giải quyết:** Nguy cơ rò rỉ thông tin đời tư bệnh nhân vi phạm pháp luật và đạo đức y tế.
 * **Cách giải quyết:** Tự động tìm và thay thế tên thật, số điện thoại, số CCCD, số thẻ BHYT, địa chỉ nhà thành các mã an toàn dạng `[BENH_NHAN_1]`, `[SDT_1]`. Chỉ bác sĩ tại phòng khám mới có chìa khóa giải mã nhìn lại tên thật.
 
-### 8. Xuất dữ liệu hồ sơ theo chuẩn quốc tế HL7 FHIR R4 — `src/fhir_exporter.py`
+### 8. Xuất dữ liệu hồ sơ theo chuẩn quốc tế HL7 FHIR R4 — `src/cong_cu_lam_sang/xuat_fhir_r4.py`
 * **Vấn đề giải quyết:** Các phần mềm bệnh viện (HIS/EMR) không nói chuyện được với nhau, dữ liệu bị phân mảnh thành từng ốc đảo.
 * **Cách giải quyết:** Xuất dữ liệu theo đúng chuẩn trao đổi y tế quốc tế HL7 FHIR R4 (Resources: Patient, Encounter, Condition, Observation, MedicationRequest), cắm thẳng vào hệ thống máy chủ của mọi bệnh viện mà không cần lập trình lại.
 
-### 9. Trình tự động sinh bản hướng dẫn & dặn dò người bệnh ngôn ngữ đời thường — `src/dan_do_benh_nhan.py`
+### 9. Trình tự động sinh bản hướng dẫn & dặn dò người bệnh ngôn ngữ đời thường — `src/cong_cu_lam_sang/to_dan_do_benh_nhan.py`
 * **Vấn đề giải quyết:** Đơn thuốc của bác sĩ thường viết bằng thuật ngữ chuyên ngành khó hiểu (ví dụ: *"u.s.a"*, *"b.i.d"*), người bệnh về nhà không biết uống thuốc lúc nào, dễ uống sai giờ hoặc hoang mang.
 * **Cách giải quyết:** Tự động dịch bệnh án thành bản in dặn dò bình dị, chia lịch uống thuốc rõ ràng theo 4 khung giờ: Sáng – Trưa – Chiều – Tối (ghi rõ trước/sau ăn no), kèm chế độ ăn kiêng và danh mục "Dấu hiệu đỏ nguy hiểm" hướng dẫn đi viện cấp cứu ngay.
 
-### 10. Động cơ nhận diện phương ngữ lâm sàng 3 miền — `src/phuong_ngu_lam_sang.py`
+### 10. Động cơ nhận diện phương ngữ lâm sàng 3 miền — `src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py`
 * **Vấn đề giải quyết:** Người bệnh các vùng quê hay dùng từ địa phương (như *"trúng gió"*, *"xót ruột"*, *"mệt trong người"*, *"nấc cục"*), AI thông thường không hiểu hoặc chép sai.
 * **Cách giải quyết:** Xây dựng từ điển phương ngữ lâm sàng 3 miền Bắc – Trung – Nam với hơn 60 thuật ngữ dân gian và từ điển âm vị thuốc Tây, giúp máy hiểu chính xác lời kể của bà con trên khắp cả nước.
 
-### 11. Đánh giá tương thích phần cứng & Kiểm soát tràn bộ nhớ — `src/dieu_phoi_ha_tang.py`
+### 11. Đánh giá tương thích phần cứng & Kiểm soát tràn bộ nhớ — `src/he_thong/dieu_phoi_cac_chot_an_toan.py`
 * **Vấn đề giải quyết:** Máy tính tại các phòng khám Việt Nam thường có cấu hình vừa phải, card đồ họa yếu, nếu nạp mô hình lớn sẽ bị treo máy hoặc tràn RAM.
 * **Cách giải quyết:** Tự động đo bộ nhớ VRAM, tự động dọn rác bộ nhớ đệm (garbage collection) và cho phép chuyển cuộc gọi sang máy chủ nội bộ qua đường hầm an toàn khi máy trạm quá tải.
 
-### 12. Bảng tổng hợp đa bệnh lý kết hợp (Multimorbidity Matrix) — `src/da_benh_ly.py`
+### 12. Bảng tổng hợp đa bệnh lý kết hợp (Multimorbidity Matrix) — `src/cong_cu_lam_sang/da_benh_ly.py`
 * **Vấn đề giải quyết:** Bệnh nhân thực tế ít khi chỉ mắc 1 bệnh đơn lẻ mà thường kết hợp 1 bệnh cấp tính (như viêm phổi) trên nền bệnh mạn tính (tiểu đường, tăng huyết áp).
 * **Cách giải quyết:** Xây dựng ma trận đa bệnh lý, ghép các bệnh nền vào diễn biến ca khám, giúp dữ liệu huấn luyện và kiểm thử phản ánh đúng 100% độ phức tạp của đời thực.
 
@@ -187,7 +187,7 @@ Nhằm đáp ứng trọn vẹn 5 ý kiến đóng góp của Ban Giám khảo v
 * **Vấn đề giải quyết:** Nếu kiểm tra quá gắt gao thì sẽ vô tình vứt bỏ những lời nói lấp lửng của bệnh nhân về dị ứng thuốc hoặc tiền sử bệnh tim.
 * **Cách giải quyết:** Mọi thông tin nguy cấp (dị ứng, thuốc nguy hiểm) dù có chút nghi ngờ cũng **không bao giờ bị âm thầm xóa bỏ**, mà được đưa vào mục riêng *"Cần bác sĩ xác nhận"* kèm cờ đỏ cảnh báo để bác sĩ tự tay quyết định.
 
-### 14. Mở rộng kho ngữ liệu lên 657 khuôn ca bệnh lâm sàng (21 hệ cơ quan) — `src/kho_khuon.py`
+### 14. Mở rộng kho ngữ liệu lên 657 khuôn ca bệnh lâm sàng (21 hệ cơ quan) — `src/bo_du_lieu/kho_khuon.py`
 * **Vấn đề giải quyết:** Tránh hiện tượng mô hình học vẹt dữ liệu do số lượng khuôn mẫu ít và kiểm soát nghiêm ngặt tính độc lập giữa tập huấn luyện và kiểm thử.
 * **Cách giải quyết:** Mở rộng lên **657 khuôn ca bệnh trên 21 hệ cơ quan** (`515` khuôn Train / `72` khuôn Dev / `70` khuôn Test tách rời tuyệt đối, `0` khuôn giao nhau, Jaccard từ khóa triệu chứng trung bình giữa Train và Test chỉ `5,87%`), sinh 5.000 ca v2 mở rộng đạt `45.835` câu duy nhất (+127% so với v1).
 

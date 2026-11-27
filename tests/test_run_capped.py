@@ -12,7 +12,7 @@ _spec.loader.exec_module(run_capped)
 
 def test_mac_dinh_074_va_doi_so_sau_gach_gach_di_nguyen():
     phan, mo_dun, doi = run_capped.tach_doi_so(["--", "--model", "Qwen/Qwen3-4B", "--do-dai", "4096"])
-    assert phan == 0.74 and mo_dun == "src.train_baseline"
+    assert phan == 0.74 and mo_dun == "src.huan_luyen.huan_luyen_sft"
     assert doi == ["--model", "Qwen/Qwen3-4B", "--do-dai", "4096"]
 
 
@@ -22,8 +22,8 @@ def test_doc_phan_vram():
 
 
 def test_chon_mo_dun():
-    _p, mo_dun, doi = run_capped.tach_doi_so(["--mo-dun", "src.nhanh", "--", "--nhanh", "B"])
-    assert mo_dun == "src.nhanh" and doi == ["--nhanh", "B"]
+    _p, mo_dun, doi = run_capped.tach_doi_so(["--mo-dun", "src.duong_ong.chay_duong_ong", "--", "--nhanh", "B"])
+    assert mo_dun == "src.duong_ong.chay_duong_ong" and doi == ["--nhanh", "B"]
 
 
 @pytest.mark.parametrize("v", ["0", "1.5", "-0.1"])

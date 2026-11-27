@@ -7,8 +7,9 @@ kiem tung khac biet mot, tren cung mot dau ra mo hinh gia.
 """
 import pytest
 
-from src import bakeoff, nhanh
-from src.sinh_benh_an import MUC_NGUOI_KHAC
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
+from src.duong_ong import chay_duong_ong as nhanh
+from src.duong_ong.b5_viet_ban_nhap import MUC_NGUOI_KHAC
 
 HT_DIEN_BIEN = ("Bác sĩ: Cháu còn nôn không chị?\n"
                 "Người nhà: Hôm qua cháu nôn, hôm nay thì hết rồi ạ.")
@@ -266,7 +267,7 @@ def test_luat_chuoi_tho_cua_B_da_du_khi_chu_the_ghi_ro_vai():
     duoc tren cac mau co chu the la DAI TU. Neu bao cao noi lien ket lam nen
     chenh lech C - B thi phai kem ty le mau thuoc loai do.
     """
-    from src import phat_bieu
+    from src.duong_ong import b1_cau_truc_menh_de as phat_bieu
     ra, _ = phat_bieu.tu_json([{"chu_the": "người nhà", "noi_dung": "dị ứng",
                                 "luot_thoai": [1]}])
     assert ra[0].chu_the_id != 0

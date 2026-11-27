@@ -15,7 +15,7 @@ ma DAN SAI luot thoai, va khong phep do nao cua du an bat duoc — trong khi
 """
 import pytest
 
-from src import do_trich as dt
+from src.do_luong import do_trich as dt
 
 
 def _cap(luot_that, luot_doan, noi_dung="sốt"):

@@ -1,8 +1,20 @@
-"""Thuoc do cho benchmark ASR: WER va ty le sai tu khoa lam sang.
+"""[Âm thanh › Chép lời]
+Làm gì   : Đo chất lượng chép lời bằng tỷ lệ sai từ và tỷ lệ sai từ khoá lâm sàng để so các
+           bộ chép.
+Vào → Ra : câu chuẩn + câu bộ chép đưa ra → WER, tỷ lệ sai từ khoá lâm sàng, bảng tổng hợp
+Đọc từ   : wer() tính tỷ lệ sai từ; sai_tu_khoa() đếm lỗi ở từ lâm sàng
+Mục lục (các hàm/lớp chính):
+  wer()          Tính WER trên danh sách câu chuẩn và câu nhận dạng
+  sai_tu_khoa()  So từ khoá lâm sàng quan trọng giữa hai câu
+  tong_hop()     Tổng hợp WER và lỗi từ khoá cho cả bộ câu
+Gọi tới  : audio/asr/critical_tokens
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Thước đo cho benchmark ASR: WER và tỷ lệ sai từ khoá lâm sàng.
 
-Ca ban chep chuan va ban nhan dang deu qua cung mot buoc chuan hoa truoc khi do:
-chu thuong, bo dau cau, "mi li gam" -> "mg", so doc bang chu -> chu so. Buoc nay chi
-dung de DO; no khong bao gio sua ban chep dua vao MediTrace.
+Cả bản chép chuẩn và bản nhận dạng đều qua cùng một bước chuẩn hoá trước khi đo:
+chữ thường, bỏ dấu câu, "mi li gam" -> "mg", số đọc bằng chữ -> chữ số. Bước này chỉ
+dùng để ĐO; nó không bao giờ sửa bản chép đưa vào MediTrace.
 """
 from __future__ import annotations
 
@@ -13,6 +25,9 @@ from . import critical_tokens as ct
 LOAI = ("thuoc", "lieu", "tan_suat", "thoi_gian", "phu_dinh", "trang_thai", "nguoi", "muc_do_dau")
 
 
+# ═══ chuan_hoa_do() — Chuẩn hoá chữ trước khi đo lỗi chép lời ═════════════════════════
+# Chữ thường, bỏ dấu câu, mi li gam thành mg, số đọc bằng chữ thành chữ số. Chỉ để đo,
+# không sửa bản chép.
 def chuan_hoa_do(text: str) -> list[str]:
     w = ct.chuan_hoa(text).split()
     ra, i = [], 0
@@ -27,6 +42,7 @@ def chuan_hoa_do(text: str) -> list[str]:
     return ra
 
 
+# ═══ khoang_cach_tu() — Tính khoảng cách chỉnh sửa giữa hai chuỗi từ ══════════════════
 def khoang_cach_tu(a: list[str], b: list[str]) -> int:
     d = list(range(len(b) + 1))
     for i, x in enumerate(a, 1):
@@ -36,6 +52,8 @@ def khoang_cach_tu(a: list[str], b: list[str]) -> int:
     return d[len(b)]
 
 
+# ═══ wer() — Tính WER trên danh sách câu chuẩn và câu nhận dạng ═══════════════════════
+# Cộng số từ sai trên tổng số từ của câu chuẩn sau khi chuẩn hoá.
 def wer(refs: list[str], hyps: list[str]) -> float:
     loi = tong = 0
     for r, h in zip(refs, hyps):
@@ -45,8 +63,10 @@ def wer(refs: list[str], hyps: list[str]) -> float:
     return loi / max(tong, 1)
 
 
+# ═══ sai_tu_khoa() — So từ khoá lâm sàng quan trọng giữa hai câu ══════════════════════
+# Mỗi loại trả dung, sai, them hoặc None (cả hai đều không có).
 def sai_tu_khoa(ref: str, hyp: str) -> dict[str, Any]:
-    """-> {loai: 'dung'|'sai'|'them'|None}. None = ca hai deu khong co loai do."""
+    """-> {loai: 'dung'|'sai'|'them'|None}. None = cả hai đều không có loại đó."""
     a, b = ct.trich(ref), ct.trich(hyp)
     ra = {}
     for k in LOAI:
@@ -59,8 +79,10 @@ def sai_tu_khoa(ref: str, hyp: str) -> dict[str, Any]:
     return ra
 
 
+# ═══ tong_hop() — Tổng hợp WER và lỗi từ khoá cho cả bộ câu ═══════════════════════════
+# Trả WER, tỷ lệ câu sai từ khoá, lỗi theo loại và kết quả các cặp câu tối thiểu.
 def tong_hop(muc: list[dict], hyps: dict[str, str]) -> dict[str, Any]:
-    """muc: [{id, van_ban, cap?}], hyps: {id: chu nhan dang}."""
+    """muc: [{id, van_ban, cap?}], hyps: {id: chữ nhận dạng}."""
     refs = [m["van_ban"] for m in muc]
     hs = [hyps.get(m["id"], "") for m in muc]
     theo_loai = {k: {"co": 0, "sai": 0, "them": 0} for k in LOAI}
@@ -80,8 +102,8 @@ def tong_hop(muc: list[dict], hyps: dict[str, str]) -> dict[str, Any]:
     for m in muc:
         if m.get("cap"):
             cap.setdefault(m["cap"], []).append(m["id"])
-    # Mot cap dat khi LOAI THONG TIN PHAN BIET hai cau (vd lieu 5 mg / 50 mg) dung o ca hai
-    # cau. Loi o loai khac (vd ten thuoc) khong lam truot cap; no da duoc dem o theo_loai.
+    # Một cặp đạt khi LOẠI THÔNG TIN PHÂN BIỆT hai câu (vd liều 5 mg / 50 mg) đúng ở cả hai
+    # câu. Lỗi ở loại khác (vd tên thuốc) không làm trượt cặp; nó đã được đếm ở theo_loai.
     van = {m["id"]: m["van_ban"] for m in muc}
     cap_dat = []
     for c, ids in cap.items():

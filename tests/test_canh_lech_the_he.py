@@ -7,7 +7,7 @@ binh thuong, in ra mot bang so dep, va bang so do sai. Xem `canh_bo_lech_the_he`
 """
 import pytest
 
-from src import cham_he_thong
+from src.do_luong import cham_he_thong as cham_he_thong
 
 
 def _ca(i, van):

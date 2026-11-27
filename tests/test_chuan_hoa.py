@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tang 1: hieu phuong ngu nhung giu nguyen van, va KHONG chon ho nghia khi mo ho."""
-from src import chuan_hoa as ch
-from src import doan_van
+from src.duong_ong import b0_chuan_hoa_phuong_ngu as ch
+from src.duong_ong import b0_cat_doan_van as doan_van
 
 
 def test_doi_nghia_nhung_giu_duoc_vi_tri_nguyen_van():
@@ -54,7 +54,7 @@ def test_ME_la_CAN_HOI():
 def test_biet_MOI_tu_phuong_ngu_bo_sinh_dung():
     """Vong tron phai noi ro (xem docstring `chuan_hoa`): tang nay biet truoc moi
     tu ma bo sinh thay, nen phep thu cap phuong ngu khong do duoc tu LA."""
-    from src import phuong_ngu
+    from src.bo_du_lieu import phuong_ngu as phuong_ngu
     for vung, cap in phuong_ngu.THAY_DUOC.items():
         for _chuan, dia_phuong in cap:
             assert ch.phan_tich(dia_phuong), (vung, dia_phuong)

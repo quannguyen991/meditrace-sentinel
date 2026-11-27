@@ -9,9 +9,9 @@ Ba viec tep nay chot:
   3. Bang tu chon tu VAI NGUOI NHA cua bo sinh, khong chon bang cach nhin tap danh
      gia. Mot bang tu chon tu chinh tap danh gia cho ra con so cao gia.
 """
-from src import context_vi as cv
-from src import doi_chung_tam_thuong as dc
-from src import ngu_lieu_viet as nl
+from src.do_luong import doi_chung_context_vi as cv
+from src.do_luong import doi_chung_tam_thuong as dc
+from src.bo_du_lieu import ngu_lieu_viet as nl
 
 
 def test_tu_chi_nguoi_nha_doi_chu_the():

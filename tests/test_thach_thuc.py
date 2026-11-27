@@ -6,8 +6,8 @@ vi mot ly do khong lien quan — va con so "doi dung ca hai" mat nghia.
 """
 import pytest
 
-from src import sinh_hoi_thoai_viet as sh
-from src import thach_thuc as tt
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import sinh_bo_thach_thuc as tt
 
 
 @pytest.fixture(scope="module")
@@ -71,7 +71,7 @@ def test_phuong_ngu_hai_ban_chi_khac_noi_dung_o_cum_GIU_NGUYEN():
     khong thi `_so_cap_phuong_ngu` dang che mot khac biet khac.
 
     Cap 0 cua hat 42 (mien Nam) la cap that trong bo phat trien co cum nay."""
-    from src import phuong_ngu as pn
+    from src.bo_du_lieu import phuong_ngu as pn
     a, b = tt.cap_phuong_ngu("phat_trien", 1, seed=3)
     khac = [(x["noi_dung"], y["noi_dung"])
             for x, y in zip(tt.bo_trich_dan(a["dap_an"]), tt.bo_trich_dan(b["dap_an"]))

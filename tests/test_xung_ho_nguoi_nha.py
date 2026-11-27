@@ -11,8 +11,8 @@ import re
 
 import pytest
 
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 # Cach NGUOI NHA goi benh nhan, tu goc nhin cua ho — bac si khong bao gio noi.
 SO_HUU_NGUOI_NHA = re.compile(

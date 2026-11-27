@@ -6,9 +6,9 @@ import random
 import re
 import pytest
 
-from src import bien_the_cau as btc
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as shv
+from src.bo_du_lieu import bien_the_cau as btc
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as shv
 
 
 # Tu lay / cum lap hop le trong tieng Viet lam sang, khong phai loi ghep cau

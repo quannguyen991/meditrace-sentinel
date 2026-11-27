@@ -3,13 +3,13 @@
 `tai_kiem_tra_nhanh` (<50ms) và phân tầng cảnh báo 3 mức chống mệt mỏi cảnh báo."""
 import time
 
-from src import cong_rui_ro
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
 from src.canh_bao import gop
 from src.canh_bao.loai import CAN_XEM, CAO, LOI_PHAT_HIEN, NGHI_RUI_RO, THAP, CanhBao
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator, tai_kiem_tra_nhanh
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine
-from src.ep_kieu_dau_vao import chuan_hoa_thong_tin_benh_nhan
-from src.phat_bieu import PhatBieu
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator, tai_kiem_tra_nhanh
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine
+from src.he_thong.ep_kieu_dau_vao import chuan_hoa_thong_tin_benh_nhan
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def test_co_thai_chuan_hoa_xuyen_cac_tang():

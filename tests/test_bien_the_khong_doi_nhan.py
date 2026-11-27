@@ -8,7 +8,7 @@ Bao dam rang khi mo rong bien the cau:
   3. Kiem tra ca tren bo sinh goc (mo_rong=False) va bo sinh mo rong (mo_rong=True).
 """
 import pytest
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 CAC_KHOA_CHUAN = [
     "chu_the", "noi_dung", "muc", "moc_thoi_gian", "phu_dinh", "tinh_huong",

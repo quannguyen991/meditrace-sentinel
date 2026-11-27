@@ -6,7 +6,8 @@
 
 Cau "benh an luon giu nguyen" la sai, va test nay chan dung cho do.
 """
-from src import sinh_bo_chan_doan, tang_cuong
+from src.bo_du_lieu import sinh_bo_chan_doan as sinh_bo_chan_doan
+from src.bo_du_lieu import tang_cuong as tang_cuong
 
 MAU = {
     "id": "t1",

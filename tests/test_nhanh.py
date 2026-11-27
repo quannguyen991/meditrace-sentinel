@@ -14,7 +14,7 @@ import json
 import pathlib
 import tempfile
 
-from src import nhanh
+from src.duong_ong import chay_duong_ong as nhanh
 
 
 class MoHinhGia:

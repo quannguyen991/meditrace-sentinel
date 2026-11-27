@@ -1,8 +1,8 @@
 /**
- * Schema Contract chính thức giữa Python Core API (`src/api_contract.py`)
+ * Schema Contract chính thức giữa Python Core API (`src/he_thong/hop_dong_api.py`)
  * và Node/TypeScript BFF + Frontend (`web/server.ts`, `web/may-chu/routes/*`).
  *
- * Mọi thay đổi trường trả về cần cập nhật đồng bộ với `src/api_contract.py`.
+ * Mọi thay đổi trường trả về cần cập nhật đồng bộ với `src/he_thong/hop_dong_api.py`.
  */
 
 export interface PyAsrInfo {

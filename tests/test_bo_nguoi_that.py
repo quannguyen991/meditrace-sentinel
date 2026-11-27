@@ -14,7 +14,7 @@ tu doan bu o day la bia thong tin lam sang.
 """
 import pytest
 
-from src import bo_nguoi_that as bnt
+from src.bo_du_lieu import nap_bo_nguoi_that as bnt
 
 DU = """# HT-001
 
@@ -186,7 +186,7 @@ def test_khoi_mau_trong_tai_lieu_KHONG_chep_nguyen_van():
     benh nhan. Khoi mau phai lam dung luat no day."""
     import re
     from pathlib import Path
-    from src import thuoc_do_quy_gan as t
+    from src.do_luong import thuoc_do_quy_gan as t
     if not Path("docs/bo-nguoi-that.md").exists():
         pytest.skip("can docs/bo-nguoi-that.md (khong co trong ban ma nguon day len GitHub)")
     van = Path("docs/bo-nguoi-that.md").read_text(encoding="utf-8")

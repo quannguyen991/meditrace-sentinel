@@ -8,7 +8,7 @@ const TOI_DA_CSV_DUOC_THU_BYTES = 500 * 1024; // 500 KB
 export function dangKyBoostLamSangRoutes(app: express.Express) {
   /**
    * Boost 8 — Kiểm định Cam đoan Thủ thuật xâm lấn (Informed Consent Checklist & WORM Stamping):
-   * Ưu tiên gọi dịch vụ Python `/api/cam-doan-thu-thuat`, fallback sang `src.cam_doan_thu_thuat --check`
+   * Ưu tiên gọi dịch vụ Python `/api/cam-doan-thu-thuat`, fallback sang `src.cong_cu_lam_sang.cam_doan_thu_thuat --check`
    * khi dịch vụ tại chỗ đang tắt (`dich_vu_tat`). Hỗ trợ đóng dấu băm SHA-256 `consentHash` và ghi nhật ký.
    */
   app.post("/api/clinical/informed-consent", async (req, res) => {
@@ -62,7 +62,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         });
       } catch (err: any) {
         if (err?.code !== "dich_vu_tat") throw err;
-        kq = await chayPythonJson("src.cam_doan_thu_thuat", ["--check"], payload);
+        kq = await chayPythonJson("src.cong_cu_lam_sang.cam_doan_thu_thuat", ["--check"], payload);
       }
 
       if (stampWorm === true && cleanSessionId) {
@@ -115,7 +115,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
 
   /**
    * Boost 10 — Đi buồng Nội trú & So sánh Diễn biến Tờ điều trị (Inpatient Ward-Round Diff):
-   * Ưu tiên gọi `/api/noi-tru/to-dieu-tri`, fallback sang `src.di_buong_noi_tru --diff` khi dịch vụ tắt.
+   * Ưu tiên gọi `/api/noi-tru/to-dieu-tri`, fallback sang `src.cong_cu_lam_sang.di_buong_noi_tru --diff` khi dịch vụ tắt.
    */
   app.post("/api/inpatient/ward-round-diff", async (req, res) => {
     try {
@@ -162,7 +162,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         });
       } catch (err: any) {
         if (err?.code !== "dich_vu_tat") throw err;
-        kq = await chayPythonJson("src.di_buong_noi_tru", ["--diff"], payload);
+        kq = await chayPythonJson("src.cong_cu_lam_sang.di_buong_noi_tru", ["--diff"], payload);
       }
 
       res.json(kq);
@@ -244,7 +244,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         });
       } catch (err: any) {
         if (err?.code !== "dich_vu_tat" && err?.status !== 404 && err?.code !== "khong_co_duong") throw err;
-        kq = await chayPythonJson("src.dieu_phoi_ha_tang", ["--tai-kiem-tra"], payload);
+        kq = await chayPythonJson("src.he_thong.dieu_phoi_cac_chot_an_toan", ["--tai-kiem-tra"], payload);
       }
 
       res.json(kq);
@@ -277,7 +277,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         });
       } catch (err: any) {
         if (err?.code !== "dich_vu_tat" && err?.status !== 404 && err?.code !== "khong_co_duong") throw err;
-        kq = await chayPythonJson("src.lis_hl7_oru", ["--parse"], payload);
+        kq = await chayPythonJson("src.cong_cu_lam_sang.nap_ket_qua_lis_hl7", ["--parse"], payload);
       }
 
       res.json(kq);

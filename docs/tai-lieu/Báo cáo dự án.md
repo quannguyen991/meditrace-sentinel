@@ -199,31 +199,31 @@ Hai thông tin được ghép với nhau khi mức giống nhau về từ ngữ 
 
 ## 3.9. Giai đoạn nâng cấp kỹ thuật (nghiệm thu ngày 18/10/2026): Kiến trúc 8 Chốt An toàn Lâm sàng liên hoàn (Clinical Guardrails)
 
-Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/dieu_phoi_ha_tang.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
-• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
-• Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
-• Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
-• Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/thang_diem_lam_sang.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
-• Chốt 5 — Cảnh báo tương tác thuốc nguy cơ cao DDI Black-box (src/duoc_ly_lam_sang.py): Tra cứu ma trận tương tác chống chỉ định nguy hiểm theo dược thư quốc gia và FDA. Điển hình là cặp phối hợp Clopidogrel + Omeprazole (chất ức chế CYP2C19 làm giảm hoạt tính Clopidogrel, gây nguy cơ tắc stent mạch vành tái phát); hệ thống tự động phát hiện, đưa cảnh báo đỏ lên đầu bản nháp và khuyến cáo thay thế bằng Pantoprazole/Esomeprazole.
-• Chốt 6 — Hiệu chỉnh liều thuốc theo độ lọc cầu thận eGFR (src/hieu_chinh_lieu.py): Đối soát chức năng lọc thận với danh mục thuốc đào thải qua thận, tự động cảnh báo giảm liều hoặc đình chỉ sử dụng (ví dụ đình chỉ Metformin khi eGFR < 30 mL/min/1.73m2 và giảm liều khi eGFR từ 30-44 mL/min/1.73m2 để phòng ngừa nhiễm toan lactic).
-• Chốt 7 — Kiểm soát xung đột đa bệnh lý mạn tính (src/da_benh_ly.py): Xử lý tương tác bệnh học phức hợp trên bệnh nhân cao tuổi mắc đồng thời suy tim, đái tháo đường và bệnh thận mạn (ngăn chặn kê đơn NSAID gây suy thận cấp trên nền suy tim).
-• Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/tro_ly_lam_sang.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ.
+Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/he_thong/dieu_phoi_cac_chot_an_toan.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
+• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/he_thong/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
+• Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/bo_du_lieu/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
+• Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/cong_cu_lam_sang/doi_soat_can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
+• Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/cong_cu_lam_sang/thang_diem_nguy_co.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
+• Chốt 5 — Cảnh báo tương tác thuốc nguy cơ cao DDI Black-box (src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py): Tra cứu ma trận tương tác chống chỉ định nguy hiểm theo dược thư quốc gia và FDA. Điển hình là cặp phối hợp Clopidogrel + Omeprazole (chất ức chế CYP2C19 làm giảm hoạt tính Clopidogrel, gây nguy cơ tắc stent mạch vành tái phát); hệ thống tự động phát hiện, đưa cảnh báo đỏ lên đầu bản nháp và khuyến cáo thay thế bằng Pantoprazole/Esomeprazole.
+• Chốt 6 — Hiệu chỉnh liều thuốc theo độ lọc cầu thận eGFR (src/cong_cu_lam_sang/hieu_chinh_lieu.py): Đối soát chức năng lọc thận với danh mục thuốc đào thải qua thận, tự động cảnh báo giảm liều hoặc đình chỉ sử dụng (ví dụ đình chỉ Metformin khi eGFR < 30 mL/min/1.73m2 và giảm liều khi eGFR từ 30-44 mL/min/1.73m2 để phòng ngừa nhiễm toan lactic).
+• Chốt 7 — Kiểm soát xung đột đa bệnh lý mạn tính (src/cong_cu_lam_sang/da_benh_ly.py): Xử lý tương tác bệnh học phức hợp trên bệnh nhân cao tuổi mắc đồng thời suy tim, đái tháo đường và bệnh thận mạn (ngăn chặn kê đơn NSAID gây suy thận cấp trên nền suy tim).
+• Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ.
 
 | Chốt | Tên thành phần | Mô-đun phụ trách | Cơ chế kỹ thuật | Quy chuẩn đối chiếu |
 | :--- | :--- | :--- | :--- | :--- |
-| Chốt 1 | Khử định danh PII/PHI | src/khu_dinh_danh.py | Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều | Nghị định 13/2023/NĐ-CP |
-| Chốt 2 | Kiểm khuôn bệnh án SOAP | src/kiem_khuon.py | Kiểm tra tính toàn vẹn 4 phần Subjective-Objective-Assessment-Plan | Chuẩn cấu trúc SOAP quốc tế |
-| Chốt 3 | Cảnh báo cận lâm sàng | src/can_lam_sang.py | Phát hiện chỉ số sinh hóa, huyết học, điện giải vượt ngưỡng | Khoảng tham chiếu sinh lý Bộ Y tế |
-| Chốt 4 | Thang điểm lâm sàng CDSS | src/thang_diem_lam_sang.py | Tính điểm eGFR, Cockcroft-Gault, CHA2DS2-VASc, HAS-BLED | Hướng dẫn ESC / KDIGO |
-| Chốt 5 | Tương tác thuốc DDI Black-box | src/duoc_ly_lam_sang.py | Chặn tương tác mức 1 (Clopidogrel + Omeprazole), đề xuất đổi thuốc | FDA Black-box Warning & Dược thư QG |
-| Chốt 6 | Hiệu chỉnh liều suy thận | src/hieu_chinh_lieu.py | Giảm liều hoặc đình chỉ Metformin khi eGFR < 45 / < 30 | Khuyến cáo KDIGO 2023 & ADA 2024 |
-| Chốt 7 | Đa bệnh lý mạn tính | src/da_benh_ly.py | Ngăn chặn xung đột thuốc - bệnh (NSAID trên suy tim/suy thận) | Phác đồ điều trị Bộ Y tế |
-| Chốt 8 | Tác tử lâm sàng SOCRATES | src/tro_ly_lam_sang.py | Chủ động phát hiện thiếu tính chất đau/bệnh sử, gợi mở câu hỏi | Quy trình khai thác triệu chứng SOCRATES |
+| Chốt 1 | Khử định danh PII/PHI | src/he_thong/khu_dinh_danh.py | Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều | Nghị định 13/2023/NĐ-CP |
+| Chốt 2 | Kiểm khuôn bệnh án SOAP | src/bo_du_lieu/kiem_khuon.py | Kiểm tra tính toàn vẹn 4 phần Subjective-Objective-Assessment-Plan | Chuẩn cấu trúc SOAP quốc tế |
+| Chốt 3 | Cảnh báo cận lâm sàng | src/cong_cu_lam_sang/doi_soat_can_lam_sang.py | Phát hiện chỉ số sinh hóa, huyết học, điện giải vượt ngưỡng | Khoảng tham chiếu sinh lý Bộ Y tế |
+| Chốt 4 | Thang điểm lâm sàng CDSS | src/cong_cu_lam_sang/thang_diem_nguy_co.py | Tính điểm eGFR, Cockcroft-Gault, CHA2DS2-VASc, HAS-BLED | Hướng dẫn ESC / KDIGO |
+| Chốt 5 | Tương tác thuốc DDI Black-box | src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py | Chặn tương tác mức 1 (Clopidogrel + Omeprazole), đề xuất đổi thuốc | FDA Black-box Warning & Dược thư QG |
+| Chốt 6 | Hiệu chỉnh liều suy thận | src/cong_cu_lam_sang/hieu_chinh_lieu.py | Giảm liều hoặc đình chỉ Metformin khi eGFR < 45 / < 30 | Khuyến cáo KDIGO 2023 & ADA 2024 |
+| Chốt 7 | Đa bệnh lý mạn tính | src/cong_cu_lam_sang/da_benh_ly.py | Ngăn chặn xung đột thuốc - bệnh (NSAID trên suy tim/suy thận) | Phác đồ điều trị Bộ Y tế |
+| Chốt 8 | Tác tử lâm sàng SOCRATES | src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py | Chủ động phát hiện thiếu tính chất đau/bệnh sử, gợi mở câu hỏi | Quy trình khai thác triệu chứng SOCRATES |
 
 
 ## 3.10. Chuẩn hóa liên thông dữ liệu y tế quốc tế HL7 FHIR R4
 
-Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/fhir_exporter.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
+Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/cong_cu_lam_sang/xuat_fhir_r4.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
 • Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng bảo mật theo Nghị định 13.
 • Encounter: Định danh phiên khám, thời gian thực hiện và tài khoản bác sĩ chủ trì.
 • Condition: Danh mục mã hóa bệnh lý chẩn đoán theo danh pháp quốc tế ICD-10.
@@ -234,20 +234,20 @@ Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và 
 ## 3.11. Tờ dặn dò người bệnh xuất viện chuẩn quốc tế (JCI) và Bảng kiểm toán tiến trình AI
 
 Mở rộng trải nghiệm lâm sàng từ góc độ an toàn người bệnh và giám sát thuật toán, hệ thống hoàn thiện hai giao diện ứng dụng:
-1. Tờ dặn dò người bệnh xuất viện (src/dan_do_benh_nhan.py & ToDanDoBenhNhanModal.tsx): Thiết kế bảng ma trận chia 4 khung giờ (Sáng - Trưa - Chiều - Tối) kèm hướng dẫn uống trước/sau ăn; tích hợp Khung cảnh báo dấu hiệu nguy hiểm (Red Flags Alert) hướng dẫn người bệnh quay lại cấp cứu ngay khi có triệu chứng trở nặng; niêm phong số hóa bằng mã băm SHA-256 bảo đảm tính toàn vẹn.
+1. Tờ dặn dò người bệnh xuất viện (src/cong_cu_lam_sang/to_dan_do_benh_nhan.py & ToDanDoBenhNhanModal.tsx): Thiết kế bảng ma trận chia 4 khung giờ (Sáng - Trưa - Chiều - Tối) kèm hướng dẫn uống trước/sau ăn; tích hợp Khung cảnh báo dấu hiệu nguy hiểm (Red Flags Alert) hướng dẫn người bệnh quay lại cấp cứu ngay khi có triệu chứng trở nặng; niêm phong số hóa bằng mã băm SHA-256 bảo đảm tính toàn vẹn.
 2. Bảng kiểm toán tiến trình AI (NhatKyTienTrinhAIModal.tsx): Thiết kế giao diện Terminal kỹ thuật cao hiển thị độ trễ suy luận (đạt 379.4 ms trên ca khám mẫu), trực quan hóa chi tiết luồng bóc tách 5 mệnh đề [P1..P5] từ 8 lượt thoại nguồn [T1..T8] của mô hình Qwen3-4B QLoRA và trạng thái kiểm duyệt của 8 chốt phòng vệ trước khi bác sĩ ký số xuất bản.
 
-Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/dieu_phoi_ha_tang.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
-• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
-• Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
-• Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
-• Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/thang_diem_lam_sang.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
-• Chốt 5 — Cảnh báo tương tác thuốc nguy cơ cao DDI Black-box (src/duoc_ly_lam_sang.py): Tra cứu ma trận tương tác chống chỉ định nguy hiểm theo dược thư quốc gia và FDA. Điển hình là cặp phối hợp Clopidogrel + Omeprazole (chất ức chế CYP2C19 làm giảm hoạt tính Clopidogrel, gây nguy cơ tắc stent mạch vành tái phát); hệ thống tự động phát hiện, đưa cảnh báo đỏ lên đầu bản nháp và khuyến cáo thay thế bằng Pantoprazole/Esomeprazole.
-• Chốt 6 — Hiệu chỉnh liều thuốc theo độ lọc cầu thận eGFR (src/hieu_chinh_lieu.py): Đối soát chức năng lọc thận với danh mục thuốc đào thải qua thận, tự động cảnh báo giảm liều hoặc đình chỉ sử dụng (ví dụ đình chỉ Metformin khi eGFR < 30 mL/min/1.73m2 và giảm liều khi eGFR từ 30-44 mL/min/1.73m2 để phòng ngừa nhiễm toan lactic).
-• Chốt 7 — Kiểm soát xung đột đa bệnh lý mạn tính (src/da_benh_ly.py): Xử lý tương tác bệnh học phức hợp trên bệnh nhân cao tuổi mắc đồng thời suy tim, đái tháo đường và bệnh thận mạn (ngăn chặn kê đơn NSAID gây suy thận cấp trên nền suy tim).
-• Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/tro_ly_lam_sang.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ.
+Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/he_thong/dieu_phoi_cac_chot_an_toan.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
+• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/he_thong/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
+• Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/bo_du_lieu/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
+• Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/cong_cu_lam_sang/doi_soat_can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
+• Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/cong_cu_lam_sang/thang_diem_nguy_co.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
+• Chốt 5 — Cảnh báo tương tác thuốc nguy cơ cao DDI Black-box (src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py): Tra cứu ma trận tương tác chống chỉ định nguy hiểm theo dược thư quốc gia và FDA. Điển hình là cặp phối hợp Clopidogrel + Omeprazole (chất ức chế CYP2C19 làm giảm hoạt tính Clopidogrel, gây nguy cơ tắc stent mạch vành tái phát); hệ thống tự động phát hiện, đưa cảnh báo đỏ lên đầu bản nháp và khuyến cáo thay thế bằng Pantoprazole/Esomeprazole.
+• Chốt 6 — Hiệu chỉnh liều thuốc theo độ lọc cầu thận eGFR (src/cong_cu_lam_sang/hieu_chinh_lieu.py): Đối soát chức năng lọc thận với danh mục thuốc đào thải qua thận, tự động cảnh báo giảm liều hoặc đình chỉ sử dụng (ví dụ đình chỉ Metformin khi eGFR < 30 mL/min/1.73m2 và giảm liều khi eGFR từ 30-44 mL/min/1.73m2 để phòng ngừa nhiễm toan lactic).
+• Chốt 7 — Kiểm soát xung đột đa bệnh lý mạn tính (src/cong_cu_lam_sang/da_benh_ly.py): Xử lý tương tác bệnh học phức hợp trên bệnh nhân cao tuổi mắc đồng thời suy tim, đái tháo đường và bệnh thận mạn (ngăn chặn kê đơn NSAID gây suy thận cấp trên nền suy tim).
+• Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ.
 
-Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/fhir_exporter.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
+Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/cong_cu_lam_sang/xuat_fhir_r4.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
 • Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng bảo mật theo Nghị định 13.
 • Encounter: Định danh phiên khám, thời gian thực hiện và tài khoản bác sĩ chủ trì.
 • Condition: Danh mục mã hóa bệnh lý chẩn đoán theo danh pháp quốc tế ICD-10.
@@ -255,7 +255,7 @@ Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và 
 • MedicationRequest: Y lệnh thuốc điện tử đầy đủ tên hoạt chất, biệt dược, liều dùng, đường dùng và cảnh báo dược lâm sàng.
 
 Mở rộng trải nghiệm lâm sàng từ góc độ an toàn người bệnh và giám sát thuật toán, hệ thống hoàn thiện hai giao diện ứng dụng:
-1. Tờ dặn dò người bệnh xuất viện (src/dan_do_benh_nhan.py & ToDanDoBenhNhanModal.tsx): Thiết kế bảng ma trận chia 4 khung giờ (Sáng - Trưa - Chiều - Tối) kèm hướng dẫn uống trước/sau ăn; tích hợp Khung cảnh báo dấu hiệu nguy hiểm (Red Flags Alert) hướng dẫn người bệnh quay lại cấp cứu ngay khi có triệu chứng trở nặng; niêm phong số hóa bằng mã băm SHA-256 bảo đảm tính toàn vẹn.
+1. Tờ dặn dò người bệnh xuất viện (src/cong_cu_lam_sang/to_dan_do_benh_nhan.py & ToDanDoBenhNhanModal.tsx): Thiết kế bảng ma trận chia 4 khung giờ (Sáng - Trưa - Chiều - Tối) kèm hướng dẫn uống trước/sau ăn; tích hợp Khung cảnh báo dấu hiệu nguy hiểm (Red Flags Alert) hướng dẫn người bệnh quay lại cấp cứu ngay khi có triệu chứng trở nặng; niêm phong số hóa bằng mã băm SHA-256 bảo đảm tính toàn vẹn.
 2. Bảng kiểm toán tiến trình AI (NhatKyTienTrinhAIModal.tsx): Thiết kế giao diện Terminal kỹ thuật cao hiển thị độ trễ suy luận (đạt 379.4 ms trên ca khám mẫu), trực quan hóa chi tiết luồng bóc tách 5 mệnh đề [P1..P5] từ 8 lượt thoại nguồn [T1..T8] của mô hình Qwen3-4B QLoRA và trạng thái kiểm duyệt của 8 chốt phòng vệ trước khi bác sĩ ký số xuất bản.
 
 
@@ -350,7 +350,7 @@ Phép thử phụ “lời nói dân dã” 60 ca cho F1 lần lượt 84,9; 87,
 
 ## 4.7. Các phần chưa có đủ kết quả
 
-Trong các thử nghiệm ban đầu (tháng 09/2026), bước câu hỏi làm rõ chưa kích hoạt nên chưa đo được đầy đủ lợi ích. Đến đợt nâng cấp toàn diện tháng 10/2026, cơ chế này đã được hoàn thiện thành Chốt 8 SOCRATES (src/tro_ly_lam_sang.py), kích hoạt thành công trên các ca bệnh phức tạp và được kiểm chứng thực tế tại mục 4.8 dưới đây.
+Trong các thử nghiệm ban đầu (tháng 09/2026), bước câu hỏi làm rõ chưa kích hoạt nên chưa đo được đầy đủ lợi ích. Đến đợt nâng cấp toàn diện tháng 10/2026, cơ chế này đã được hoàn thiện thành Chốt 8 SOCRATES (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py), kích hoạt thành công trên các ca bệnh phức tạp và được kiểm chứng thực tế tại mục 4.8 dưới đây.
 
 
 ## 4.8. Kết quả nghiệm thu thực nghiệm đợt nâng cấp ngày 18/10/2026

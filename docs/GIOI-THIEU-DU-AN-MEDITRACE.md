@@ -36,11 +36,11 @@ Kiến trúc năm tầng được mô tả trong `HANDOVER.md`. Bảng dưới �
 | Tầng | Việc làm | Tệp chính | Trạng thái |
 |---|---|---|---|
 | 0 | Chuyển âm thanh thành lượt thoại có mốc thời gian và người nói | `src/audio/pipeline.py`, `alignment.py`, `pyannote_provider.py` | Chạy được; tách người nói bằng pyannote cần khoá Hugging Face |
-| 1 | Bóc mẩu tin nguyên tử, có trích dẫn | `src/nhanh.py`, `phat_bieu.py`, `bakeoff.py` | Chạy được với mô hình; trọng số adapter không có trong repo |
-| 2 | Gom chủ thể: bác sĩ, bệnh nhân, người nhà | `src/thuc_the.py`, `phan_quan_he.py` | Có |
-| 3 | Máy trạng thái đính chính: lời sửa thay thế lời cũ | `src/cap_nhat.py` | Có |
-| 4 | Khóa bằng chứng K1–K7, cổng rủi ro, cách ly | `src/khoa_bang_chung.py`, `cong_rui_ro.py`, `canh_bao/` | Có |
-| 5 | Ghép bệnh án theo mục, không dùng LLM | `src/sinh_benh_an.py` | Có |
+| 1 | Bóc mẩu tin nguyên tử, có trích dẫn | `src/duong_ong/chay_duong_ong.py`, `phat_bieu.py`, `bakeoff.py` | Chạy được với mô hình; trọng số adapter không có trong repo |
+| 2 | Gom chủ thể: bác sĩ, bệnh nhân, người nhà | `src/duong_ong/b2_gom_nguoi_thuc_the.py`, `phan_quan_he.py` | Có |
+| 3 | Máy trạng thái đính chính: lời sửa thay thế lời cũ | `src/duong_ong/b3_cap_nhat_trang_thai.py` | Có |
+| 4 | Khóa bằng chứng K1–K7, cổng rủi ro, cách ly | `src/duong_ong/b4_kiem_can_cu.py`, `cong_rui_ro.py`, `canh_bao/` | Có |
+| 5 | Ghép bệnh án theo mục, không dùng LLM | `src/duong_ong/b5_viet_ban_nhap.py` | Có |
 
 ## 5. Các tệp và thư mục
 
@@ -59,10 +59,10 @@ Các tệp gốc quan trọng: `README.md` (giới thiệu ngắn cho người �
 Trình duyệt ──> web/server.ts (Express, cổng 3000)
                     │  gọi qua MEDITRACE_API
                     ▼
-              src/dich_vu.py (HTTP, cổng 8765)
+              src/he_thong/dich_vu_http.py (HTTP, cổng 8765)
                     │  bộ đệm ca đã chạy sẵn, hoặc mô hình cục bộ
                     ▼
-              src/nhanh.py -> khóa bằng chứng -> sinh bệnh án
+              src/duong_ong/chay_duong_ong.py -> khóa bằng chứng -> sinh bệnh án
 ```
 
 - Các endpoint của `dich_vu.py`: `/api/suc-khoe`, `/api/ca-mau`, `/api/chep-am`, `/api/gan-vai`, `/api/ho-so`, `/api/phien/`.
@@ -72,10 +72,10 @@ Trình duyệt ──> web/server.ts (Express, cổng 3000)
 
 ## 7. Dữ liệu và cách tạo
 
-- Hội thoại được sinh từ **200 khuôn ca bệnh** trong `src/ngu_lieu_viet.py` (`BENH`). Đếm trực tiếp ngày 18/11/2026: 200 tên khuôn duy nhất. Bản trước của tài liệu này ghi 100 khuôn là sai; đã sửa.
+- Hội thoại được sinh từ **200 khuôn ca bệnh** trong `src/bo_du_lieu/ngu_lieu_viet.py` (`BENH`). Đếm trực tiếp ngày 18/11/2026: 200 tên khuôn duy nhất. Bản trước của tài liệu này ghi 100 khuôn là sai; đã sửa.
 - Phần khuôn do AI viết (thêm ngày 10/09 và 11/09) **chưa có bác sĩ duyệt**. Toàn bộ 200 khuôn hiện chưa duyệt (`DA_DUYET_BAC_SI` rỗng).
-- Chia tập theo khuôn bằng băm tên: 13 khuôn phát triển, 12 khuôn kiểm tra cuối, phần còn lại để huấn luyện (`src/tach_tap_viet.py`). Chia theo khuôn để tránh rò rỉ giữa các tập.
-- `src/kiem_khuon.py` kiểm từng khuôn: trường dữ liệu, nhãn giới, từ khóa tuổi, chẩn đoán có nhắc tên bệnh, và trùng triệu chứng giữa các khuôn. Trên 200 khuôn hiện tại (đo 18/11/2026): 0 lỗi, 25 cảnh báo, 18 cặp trùng triệu chứng từ 50% trở lên.
+- Chia tập theo khuôn bằng băm tên: 13 khuôn phát triển, 12 khuôn kiểm tra cuối, phần còn lại để huấn luyện (`src/bo_du_lieu/chia_tap_theo_khuon.py`). Chia theo khuôn để tránh rò rỉ giữa các tập.
+- `src/bo_du_lieu/kiem_khuon.py` kiểm từng khuôn: trường dữ liệu, nhãn giới, từ khóa tuổi, chẩn đoán có nhắc tên bệnh, và trùng triệu chứng giữa các khuôn. Trên 200 khuôn hiện tại (đo 18/11/2026): 0 lỗi, 25 cảnh báo, 18 cặp trùng triệu chứng từ 50% trở lên.
 - **Phát hiện khi đọc lại:** quy tắc giới theo `CHI_NU`/`CHI_NAM` không khớp khuôn nào. Quy tắc đang chạy là `GIOI_THEO_KHUON`, chỉ gắn nhãn cho 4 khuôn.
 
 ## 8. Số liệu: cái nào đo được, cái nào chưa
@@ -103,8 +103,8 @@ Trình duyệt ──> web/server.ts (Express, cổng 3000)
 - Tám module lâm sàng (tương tác thuốc, hiệu chỉnh liều theo thận, 9 thang điểm, cận lâm sàng nguy kịch, khử định danh, xuất FHIR R4, dặn dò bệnh nhân, phương ngữ) có tệp kiểm riêng.
 
 **Chưa nối vào luồng chạy:**
-- Tám module lâm sàng trên chỉ được `src/dieu_phoi_ha_tang.py` import, và module đó không có ai gọi. Do đó bản nháp trên web không chạy qua tương tác thuốc, hiệu chỉnh liều hay thang điểm.
-- `src/da_benh_ly.py` và `src/dieu_phoi_ha_tang.py` không có nơi gọi.
+- Tám module lâm sàng trên chỉ được `src/he_thong/dieu_phoi_cac_chot_an_toan.py` import, và module đó không có ai gọi. Do đó bản nháp trên web không chạy qua tương tác thuốc, hiệu chỉnh liều hay thang điểm.
+- `src/cong_cu_lam_sang/da_benh_ly.py` và `src/he_thong/dieu_phoi_cac_chot_an_toan.py` không có nơi gọi.
 
 **Chưa có, cần thứ bên ngoài:**
 - Trọng số QLoRA (`models/` trống).
@@ -125,10 +125,10 @@ Trình duyệt ──> web/server.ts (Express, cổng 3000)
 
 ```bash
 # Dịch vụ Python (cổng 8765)
-python -m src.dich_vu --cong 8765
+python -m src.he_thong.dich_vu_http --cong 8765
 
 # Bộ kiểm khuôn
-python -m src.kiem_khuon
+python -m src.bo_du_lieu.kiem_khuon
 
 # Test không cần mô hình âm thanh
 python -m pytest -q -k "not audio"

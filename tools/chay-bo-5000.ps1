@@ -62,32 +62,32 @@ function Chay-Lai {
 #    3.773 ca train. 400 buoc x tich luy 16 = 6.400 mau = khoang 1,7 vong.
 #    Day la buoc tra loi cau hoi 1 va 2.
 Chay-Lai "1-TRAIN-TRICH-5000" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "trich", "--buoc", "400", "--do-dai", "2048") | Out-Null
 
 # 2. Chay cac nhanh trung gian voi adapter trich moi.
 #    Them ba nhanh quan he - chung chi co nghia khi adapter da biet danh dau
 #    quan he, nen phai chay SAU buoc 1.
 Chay-Lai "2-CAC-NHANH" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
     "C", "C_ghi_de", "D", "C_quan_he_luat", "C_quan_he", "D_quan_he",
     "--model", $mo_hinh, "--tap", $tap, "--max-token", "3072", "--n", "60",
     "--adapter-trich", "models/nen-qwen3-4b-trich/best_checkpoint") | Out-Null
 
 # 3. Do chat luong phat hien quan he. Khong can GPU, chay nhanh.
 Chay-Lai "3-DO-QUAN-HE" @(
-    "-m", "src.do_quan_he", "--tap", $tap, "--adapter-trich") | Out-Null
+    "-m", "src.do_luong.do_quan_he", "--tap", $tap, "--adapter-trich") | Out-Null
 
 # 4. Hai moc sinh thang. CHAY A NEN TRUOC:
 #    neu buoc sau hong thi van con cot doi chung cong bang nhat.
 #    Ten tep nay da kem hau to `_nen` nen KHONG de len nhau nua
 #    (xem nhanh.ten_ket_qua).
 Chay-Lai "4a-NHANH-A-NEN" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--tap", $tap, "--n", "60") | Out-Null
 
 Chay-Lai "4b-NHANH-A" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--adapter", "models/nen-qwen3-4b/best_checkpoint",
     "--tap", $tap, "--n", "60") | Out-Null
 

@@ -4,7 +4,7 @@
 Cai phai giu: E khong duoc AM THAM lam hong ban nhap tot. `ty_le_giu` la con
 so chan viec do, va no phai dem dung.
 """
-from src import nhanh_e
+from src.duong_ong import chay_nhanh_e as nhanh_e
 
 
 def a(ma, van):

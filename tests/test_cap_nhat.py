@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from src import cap_nhat
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 ME, TRE = 1, 2
 

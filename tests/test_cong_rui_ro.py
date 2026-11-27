@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Cong rui ro: DANH DAU va XEP THU TU, khong tu chan."""
-from src import cong_rui_ro as cr
-from src import khoa_bang_chung as kbc
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cr
+from src.duong_ong import b4_kiem_can_cu as kbc
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = ("Bác sĩ: Cháu có dị ứng thuốc gì không?\n"
       "Người nhà: Dạ, dị ứng penicillin ạ.\n"

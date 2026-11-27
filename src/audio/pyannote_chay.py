@@ -1,31 +1,41 @@
 # -*- coding: utf-8 -*-
-"""Chay pyannote tach nguoi noi tren MOT tep WAV, ghi ket qua ra JSON.
+"""[Âm thanh]
+Làm gì   : Chạy pyannote trên một tệp WAV trong môi trường riêng và ghi kết quả tách người
+           nói ra tệp JSON.
+Vào → Ra : đường dẫn WAV + đường dẫn JSON đầu ra → tệp JSON các đoạn kèm nhãn người nói
+Đọc từ   : main() là toàn bộ luồng chạy; cho_phep_lop_trong_checkpoint() cho tải mô hình
+Mục lục (các hàm/lớp chính):
+  main()                           Chạy pyannote tách người nói trên một tệp WAV, ghi JSON
+  cho_phep_lop_trong_checkpoint()  Cho phép đúng bốn lớp mà checkpoint pyannote cần
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Chạy pyannote tách người nói trên MỘT tệp WAV, ghi kết quả ra JSON.
 
-TEP NAY CHAY TRONG MOI TRUONG PYTHON RIENG (vd D:/pyannote-venv), KHONG trong moi truong
-cua duong ong duoc do. Ly do: pyannote.audio keo theo torch, lightning, speechbrain... voi
-phien ban rieng; cai chung se lam doi moi truong da khoa trong ban dang ky truoc
-(transformers 4.57.6, peft 0.20.0, bitsandbytes 0.50.2). Vi vay tep nay KHONG import gi
-tu `src`, chi dung thu vien chuan + pyannote + soundfile.
+TỆP NÀY CHẠY TRONG MÔI TRƯỜNG PYTHON RIÊNG (vd D:/pyannote-venv), KHÔNG trong môi trường
+của đường ống được đo. Lý do: pyannote.audio kéo theo torch, lightning, speechbrain... với
+phiên bản riêng; cài chúng sẽ làm đổi môi trường đã khoá trong bản đăng ký trước
+(transformers 4.57.6, peft 0.20.0, bitsandbytes 0.50.2). Vì vậy tệp này KHÔNG import gì
+từ `src`, chỉ dùng thư viện chuẩn + pyannote + soundfile.
 
-Duoc goi boi `src/audio/pyannote_provider.py` qua subprocess:
+Được gọi bởi `src/audio/pyannote_provider.py` qua subprocess:
 
-    <python cua moi truong pyannote> pyannote_chay.py --vao processed.wav --ra pyannote.json
+    <python của môi trường pyannote> pyannote_chay.py --vao processed.wav --ra pyannote.json
         [--mo-hinh pyannote/speaker-diarization-3.1] [--thiet-bi cpu|cuda]
         [--it-nhat N] [--nhieu-nhat N]
 
-Khoa Hugging Face (mo hinh bi khoa, phai dong y dieu khoan) doc tu bien moi truong HF_TOKEN,
-KHONG nhan qua dong lenh (dong lenh hien trong danh sach tien trinh). Khi da tai mo hinh ve
-bo nho dem, chay voi HF_HUB_OFFLINE=1 va khong can khoa.
+Khoá Hugging Face (mô hình bị khoá, phải đồng ý điều khoản) đọc từ biến môi trường HF_TOKEN,
+KHÔNG nhận qua dòng lệnh (dòng lệnh hiện trong danh sách tiến trình). Khi đã tải mô hình về
+bộ nhớ đệm, chạy với HF_HUB_OFFLINE=1 và không cần khoá.
 
 Ra (JSON):
     {"segments": [{"speaker_id": "speaker_1", "start": 0.52, "end": 3.1}, ...],
      "so_nguoi_noi": 2, "mo_hinh": ..., "pyannote": "3.4.0", "torch": ..., "thiet_bi": "cpu",
      "giay": 12.3}
-Nhan nguoi noi danh lai theo thu tu XUAT HIEN DAU TIEN: speaker_1 la nguoi noi truoc.
-Khong gan vai (bac si, benh nhan...). Vai do nguoi dung gan.
+Nhãn người nói đánh lại theo thứ tự XUẤT HIỆN ĐẦU TIÊN: speaker_1 là người nói trước.
+Không gán vai (bác sĩ, bệnh nhân...). Vai do người dùng gán.
 
-Ma thoat: 0 xong; 2 khong nap duoc mo hinh (chua co khoa / chua dong y dieu khoan / khong
-co ban trong bo nho dem); 3 loi khac. Dong cuoi cua stderr la JSON {"loi": ma, "chi_tiet": ...}.
+Mã thoát: 0 xong; 2 không nạp được mô hình (chưa có khoá / chưa đồng ý điều khoản / không
+có bản trong bộ nhớ đệm); 3 lỗi khác. Dòng cuối của stderr là JSON {"loi": ma, "chi_tiet": ...}.
 """
 import argparse
 import json
@@ -35,25 +45,31 @@ import time
 import warnings
 
 
+# ─── _bao_loi() — In lỗi JSON ra stderr rồi thoát ─────────────────────────────────────
 def _bao_loi(ma, chi_tiet, thoat):
     print(json.dumps({"loi": ma, "chi_tiet": str(chi_tiet)[:500]}, ensure_ascii=False), file=sys.stderr)
     sys.exit(thoat)
 
 
+# ═══ cho_phep_lop_trong_checkpoint() — Cho phép đúng bốn lớp mà checkpoint pyannote cần ═══
+# Không tắt weights_only để tránh chạy mã tuỳ ý khi nạp.
 def cho_phep_lop_trong_checkpoint():
-    """torch >= 2.6 nap checkpoint voi weights_only=True: chi dung lai cac lop trong danh sach
-    cho phep. Checkpoint cua pyannote 3.x luu kem bon lop Python (da liet ke bang pickletools
-    tren pytorch_model.bin cua wespeaker-voxceleb-resnet34-LM, 25/09/2026): TorchVersion va
-    dac ta tac vu Specifications, Problem, Resolution. Them DUNG bon lop do; KHONG tat
-    weights_only, vi tat thi mot checkpoint bat ky co the chay ma tuy y khi nap."""
+    """torch >= 2.6 nạp checkpoint với weights_only=True: chỉ dùng lại các lớp trong danh sách
+    cho phép. Checkpoint của pyannote 3.x lưu kèm bốn lớp Python (đã liệt kê bằng pickletools
+    trên pytorch_model.bin của wespeaker-voxceleb-resnet34-LM, 25/09/2026): TorchVersion và
+    đặc tả tác vụ Specifications, Problem, Resolution. Thêm ĐÚNG bốn lớp đó; KHÔNG tắt
+    weights_only, vì tắt thì một checkpoint bất kỳ có thể chạy mã tùy ý khi nạp."""
     import torch
-    if not hasattr(torch.serialization, "add_safe_globals"):   # torch < 2.4: khong can
+    if not hasattr(torch.serialization, "add_safe_globals"):   # torch < 2.4: không cần
         return
     from torch.torch_version import TorchVersion
     from pyannote.audio.core.task import Problem, Resolution, Specifications
     torch.serialization.add_safe_globals([TorchVersion, Specifications, Problem, Resolution])
 
 
+# ═══ main() — Chạy pyannote tách người nói trên một tệp WAV, ghi JSON ═════════════════
+# Chạy trong môi trường Python riêng; nhãn đánh lại theo thứ tự xuất hiện, không gán
+# vai.
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--vao", required=True)
@@ -72,7 +88,7 @@ def main():
         import torch
         import pyannote.audio
         from pyannote.audio import Pipeline
-    except Exception as exc:  # moi truong chua cai du
+    except Exception as exc:  # môi trường chưa cài đủ
         _bao_loi("pyannote_chua_cai", exc, 3)
 
     token = os.environ.get("HF_TOKEN") or None
@@ -81,15 +97,15 @@ def main():
         pipeline = Pipeline.from_pretrained(a.mo_hinh, use_auth_token=token)
     except Exception as exc:
         _bao_loi("mo_hinh_khong_nap_duoc", exc, 2)
-    if pipeline is None:  # pyannote tra None khi mo hinh bi khoa ma khong co quyen
+    if pipeline is None:  # pyannote trả None khi mô hình bị khoá mà không có quyền
         _bao_loi("mo_hinh_khong_nap_duoc", "Pipeline.from_pretrained tra None (mo hinh bi khoa?)", 2)
     if a.thiet_bi == "cuda":
         pipeline.to(torch.device("cuda"))
 
     try:
-        # Doc vao bo nho (soundfile), khong de pyannote tu giai ma tep.
+        # Đọc vào bộ nhớ (soundfile), không để pyannote tự giải mã tệp.
         x, sr = sf.read(a.vao, dtype="float32", always_2d=True)
-        waveform = torch.from_numpy(np.ascontiguousarray(x.T))  # (kenh, mau)
+        waveform = torch.from_numpy(np.ascontiguousarray(x.T))  # (kênh, mẫu)
         if waveform.shape[0] > 1:
             waveform = waveform.mean(dim=0, keepdim=True)
         tham_so = {}

@@ -1,5 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Sim2Real Physical Acoustic Simulation Engine cho Bộ Dữ liệu Hội thoại Lâm sàng V2.
+"""[Âm thanh]
+Làm gì   : Mô phỏng nhiễu, vọng, mất gói trên chữ để thử độ bền chép lời với bộ dữ liệu v2;
+           là mô phỏng, không phải đo ASR thật.
+Vào → Ra : ca hội thoại + cấu hình âm học → KetQuaDanhGiaASRV2: WER, đường cong độ bền, chỉ
+           số mệt cảnh báo
+Đọc từ   : class Sim2RealV2Engine tạo nhiễu; danh_gia_sim2real_va_trie_600() chạy đánh giá
+Mục lục (các hàm/lớp chính):
+  class Sim2RealV2Engine            Bộ mô phỏng âm thanh phòng khám thực tế
+  class CauHinhAmHocV2              Cấu hình mô phỏng âm học phòng khám
+  danh_gia_sim2real_va_trie_600()   Mô phỏng Monte Carlo cây tiền tố trên kênh suy hao
+  do_duong_cong_do_ben_nhieu_asr()  Đo đường cong WER và CHWER theo các mức SNR
+  tinh_chi_so_alert_fatigue()       Tính chỉ số mỏi cảnh báo trên các ca
+Gọi tới  : he_thong/rao_chan_an_toan
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Sim2Real Physical Acoustic Simulation Engine cho Bộ Dữ liệu Hội thoại Lâm sàng V2.
 
 Nhiệm vụ Phase 3 (Trục 1):
 - Kết hợp bộ dữ liệu V2 (đa phương ngữ Bắc/Trung/Nam, mở rộng câu, đa tầng) với mô phỏng âm học phòng khám thực tế.
@@ -31,6 +46,8 @@ import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
+# ═══ class CauHinhAmHocV2 — Cấu hình mô phỏng âm học phòng khám ═══════════════════════
+# Gồm kích thước phòng, RT60, mức SNR, tỷ lệ rớt gói và vùng miền.
 @dataclass
 class CauHinhAmHocV2:
     sample_rate: int = 16000
@@ -38,9 +55,12 @@ class CauHinhAmHocV2:
     rt60_giay: float = 0.45
     muc_snr_db: float = 15.0       # 5.0 (ồn nặng), 15.0 (trung bình), 25.0 (yên tĩnh)
     ty_le_rot_goi_opus: float = 0.02
-    vung_mien: str = "bac"         # "bac" | "trung" | "nam"
+    vung_mien: str = "bac"         # "bắc" | "trung" | "nam"
 
 
+# ═══ class Sim2RealV2Engine — Bộ mô phỏng âm thanh phòng khám thực tế ═════════════════
+# Áp tiếng vang phòng, trộn tạp âm theo SNR và rớt gói mạng telehealth lên tín hiệu
+# sạch.
 class Sim2RealV2Engine:
     """Động cơ mô phỏng âm thanh phòng khám thực tế cho hội thoại V2."""
 
@@ -134,13 +154,13 @@ class Sim2RealV2Engine:
 
     def mo_phong_rot_goi_telehealth(self, tin_hieu: np.ndarray, loss_rate: float = 0.02) -> np.ndarray:
         """Mô phỏng nén khung 20ms và rớt gói mạng Gilbert-Elliott Markov."""
-        frame_len = int(0.020 * self.sr)  # 20ms = 320 samples
+        frame_len = int(0.020 * self.sr)  # 20 ms = 320 mẫu
         n_frames = len(tin_hieu) // frame_len
         dau_ra = np.copy(tin_hieu)
 
-        state = 0  # 0: Good, 1: Drop
+        state = 0  # 0: tốt, 1: rơi gói
         p_01 = loss_rate
-        p_10 = 0.35  # Mean burst drop ~ 3 frames
+        p_10 = 0.35  # Số khung rơi liên tiếp trung bình ~ 3 khung
         for f in range(n_frames):
             if state == 0:
                 if np.random.rand() < p_01:
@@ -151,7 +171,7 @@ class Sim2RealV2Engine:
 
             if state == 1:
                 start = f * frame_len
-                dau_ra[start:start + frame_len] *= 0.05  # Packet Loss Concealment (PLC) attenuation
+                dau_ra[start:start + frame_len] *= 0.05  # Suy giảm của bù mất gói (PLC)
 
         return dau_ra.astype(np.float32)
 
@@ -190,6 +210,8 @@ class Sim2RealV2Engine:
 # BỘ CÔNG CỤ ĐÁNH GIÁ THỰC NGHIỆM TẦNG 0 CHO BỘ V2
 # ==============================================================================
 
+# ═══ class KetQuaDanhGiaASRV2 — Kết quả đánh giá mô phỏng ASR trên bộ V2 ══════════════
+# Có cờ la_mo_phong=True: số liệu là mô phỏng, không phải đo ASR thật.
 @dataclass
 class KetQuaDanhGiaASRV2:
     tong_so_ca: int
@@ -205,6 +227,8 @@ class KetQuaDanhGiaASRV2:
     ghi_chu_mo_phong: str = "Số liệu CER/Recall trong hàm này là kết quả mô phỏng Monte Carlo, không phải phép đo ASR thực tế."
 
 
+# ═══ danh_gia_sim2real_va_trie_600() — Mô phỏng Monte Carlo cây tiền tố trên kênh suy hao ═══
+# Chỉ là kịch bản giả định, không phải phép đo mô hình thật; CER ghi cứng trong mã.
 def danh_gia_sim2real_va_trie_600(
     danh_sach_ca_v2: List[Dict[str, Any]],
     trie_600: Any,
@@ -266,6 +290,7 @@ def danh_gia_sim2real_va_trie_600(
     )
 
 
+# ─── _tinh_wer() — Tính WER theo khoảng cách Levenshtein trên từ ──────────────────────
 def _tinh_wer(ref: str, hyp: str) -> float:
     """Tính Word Error Rate (WER) bằng khoảng cách Levenshtein theo từ."""
     r_words = chuan_hoa_van_ban_asr(ref).split()
@@ -286,16 +311,19 @@ def _tinh_wer(ref: str, hyp: str) -> float:
     return round(dp[-1] / len(r_words), 4)
 
 
+# ═══ chuan_hoa_van_ban_asr() — Chuẩn hoá văn bản chép lời: chữ thường, bỏ dấu câu ═════
 def chuan_hoa_van_ban_asr(text: str) -> str:
     s = unicodedata.normalize("NFC", text or "").lower()
     s = re.sub(r"[^\w\s]", " ", s)
     return " ".join(s.split())
 
 
+# ─── _tinh_chwer_asr() — Tính lỗi chép lời có trọng số lâm sàng (CHWER) ───────────────
+# Từ thuốc, phủ định và đơn vị tính trọng số 3, từ thường trọng số 1.
 def _tinh_chwer_asr(ref: str, hyp: str) -> float:
     """Tính Clinical Harm-Weighted Error Rate (CHWER) trên văn bản ASR:
     từ khóa lâm sàng/thuốc/phủ định có trọng số 3.0, từ thường có trọng số 1.0."""
-    from src.guardrails import DUOC_THU_QUOC_GIA
+    from src.he_thong.rao_chan_an_toan import DUOC_THU_QUOC_GIA
 
     tu_trong_yeu = DUOC_THU_QUOC_GIA | {
         "không", "chưa", "ngừng", "ngưng", "dị", "ứng", "mg", "ml", "mmol", "umol",
@@ -316,6 +344,8 @@ def _tinh_chwer_asr(ref: str, hyp: str) -> float:
     return round(loi_w / max(1e-9, tong_w), 4)
 
 
+# ═══ do_duong_cong_do_ben_nhieu_asr() — Đo đường cong WER và CHWER theo các mức SNR ═══
+# Lấy kết quả nhận dạng thật có sẵn hoặc chạy asr_fn trên âm thanh đã suy hao.
 def do_duong_cong_do_ben_nhieu_asr(
     danh_sach_mau: List[Dict[str, Any]],
     asr_fn: Optional[Callable[[np.ndarray, int], str]] = None,
@@ -362,6 +392,8 @@ def do_duong_cong_do_ben_nhieu_asr(
     return ket_qua
 
 
+# ═══ tinh_chi_so_alert_fatigue() — Tính chỉ số mỏi cảnh báo trên các ca ═══════════════
+# Gồm tỷ lệ mệnh đề cần xác nhận, tỷ lệ bỏ qua cảnh báo và PPV.
 def tinh_chi_so_alert_fatigue(danh_sach_ket_qua_ca: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Đo chỉ số Alert Fatigue: tỷ lệ mệnh đề CẦN XÁC NHẬN, Override Rate và PPV cảnh báo."""
     tong_menh_de = 0

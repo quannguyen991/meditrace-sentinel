@@ -34,7 +34,7 @@ function Chay-Lai {
 # 1. Huan luyen nhanh A: hoi thoai -> ban tham chieu (truong `output`).
 #    2048 du cho A - do bang tokenizer 11/09/2026, khong loai mau nao.
 Chay-Lai "A1-TRAIN" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "benh_an", "--buoc", "400", "--do-dai", "2048",
     "--tep-train", "viet_train.jsonl", "--tep-val", "viet_phat_trien.jsonl",
     "--hau-to=-viet6") | Out-Null
@@ -42,14 +42,14 @@ Chay-Lai "A1-TRAIN" @(
 # 2. Chay A tren cung nam tap ma duong ong da chay.
 $adapter_a = "models/nen-qwen3-4b-viet6/best_checkpoint"
 Chay-Lai "A2-DEV" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--adapter", $adapter_a, "--tap", "viet_phat_trien", "--n", "60") | Out-Null
 foreach ($t in @("thach_thuc_doi_chu_the_phat_trien",
                  "thach_thuc_phuong_ngu_phat_trien",
                  "thach_thuc_dinh_chinh_phat_trien",
                  "thach_thuc_nhieu_asr_phat_trien")) {
     Chay-Lai "A3-$t" @(
-        "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+        "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
         "--adapter", $adapter_a, "--tap", $t) | Out-Null
 }
 

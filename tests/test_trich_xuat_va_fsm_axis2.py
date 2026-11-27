@@ -3,21 +3,21 @@
 import json
 import pytest
 
-from src.bo_kiem_tra import (
+from src.huan_luyen.ham_thuong_rlvr import (
     tinh_thuong_rlvr_cho_ca,
     tinh_loi_the_grpo,
     tao_cap_du_lieu_dapo,
     TRONG_SO_RLVR,
 )
-from src.may_trang_thai_hoi_thoai import (
+from src.duong_ong.b2_bu_chu_ngu_tinh_luoc import (
     BoGiaiQuyetProDrop,
     MayTrangThaiHoiThoai,
     QuanHeHoiThoai,
     TrangThaiFSM,
     ap_dung_may_trang_thai,
 )
-from src.phat_bieu import PhatBieu
-from src.trich_xuat_thuc_the import (
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.duong_ong.b1_ep_dau_ra_json import (
     HoiThoaiSubstringTrie,
     SCHEMA_TRICH_XUAT_DANH_SACH,
     tao_gbnf_cho_trich_xuat,

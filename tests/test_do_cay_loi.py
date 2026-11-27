@@ -6,7 +6,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-from src import do_cay_loi
+from src.do_luong import do_cay_loi as do_cay_loi
 from src.canh_bao import gop
 from src.canh_bao.loai import LOAI
 from tests.test_cay_loi import CA

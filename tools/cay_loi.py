@@ -14,9 +14,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from src import cong_rui_ro, tri_thuc_thuoc
-from src.danh_gia_khoa import vao_than
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.cong_cu_lam_sang import tri_thuc_thuoc as tri_thuc_thuoc
+from src.do_luong.danh_gia_khoa import vao_than
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 GOC = Path(__file__).resolve().parents[1]
 TEP_IDS = GOC / "data" / "cay_loi" / "tap_dieu_chinh_ids.json"

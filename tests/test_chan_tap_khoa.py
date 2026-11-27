@@ -10,7 +10,7 @@ import pathlib
 
 import pytest
 
-from src import du_lieu
+from src.bo_du_lieu import nap_du_lieu as du_lieu
 
 
 @pytest.mark.parametrize("ten", [
@@ -47,7 +47,7 @@ def test_MOI_script_nhan_tap_deu_goi_chot():
     mot lan roi."""
     goc = pathlib.Path(__file__).resolve().parent.parent / "src"
     thieu = []
-    for p in sorted(goc.glob("*.py")):
+    for p in sorted(goc.rglob("*.py")):
         van = p.read_text(encoding="utf-8")
         if 'add_argument("--tap"' in van and "chan_tap_khoa(" not in van:
             thieu.append(p.name)

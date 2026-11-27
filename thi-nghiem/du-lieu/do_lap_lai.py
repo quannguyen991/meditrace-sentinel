@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.stdout.reconfigure(encoding="utf-8")
 
-from src import sinh_hoi_thoai_viet as sh  # noqa: E402
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh  # noqa: E402
 
 
 def ngram(s: str, n: int = 3):

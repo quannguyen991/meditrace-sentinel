@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-from src import dich_vu
+from src.he_thong import dich_vu_http as dich_vu
 
 
 @pytest.fixture(scope="module")

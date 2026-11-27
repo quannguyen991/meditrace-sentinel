@@ -12,13 +12,13 @@ Minh chứng kiểm thử theo yêu cầu của Ban Giám Khảo (VẤN ĐỀ 1)
 import json
 import pytest
 
-from src.phat_bieu import PhatBieu
-from src.khoa_bang_chung import khoa_ca, ly_do_chan
-from src import cong_rui_ro
-from src import sinh_benh_an
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine as CPE
-from src.fhir_exporter import FHIRExporter
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.duong_ong.b4_kiem_can_cu import khoa_ca, ly_do_chan
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine as CPE
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator
 
 
 def test_demo_tinh_huong_bac_si_nguoi_nha_benh_nhi():

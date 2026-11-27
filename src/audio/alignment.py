@@ -1,17 +1,30 @@
-"""Align ASR spans and diarization spans without changing transcript text.
+"""[Âm thanh]
+Làm gì   : Gán người nói cho từng đoạn chép lời bằng cách đối chiếu mốc thời gian, không đổi
+           chữ đã chép.
+Vào → Ra : đoạn chép lời + đoạn người nói → các lượt thoại có nhãn người nói, đã gộp đoạn
+           liền nhau
+Đọc từ   : align() ghép chữ với người nói theo độ chồng lấn; gop_lien_tiep() gộp lượt
+Mục lục (các hàm/lớp chính):
+  align()          Ghép chép lời với tách người nói thành các đoạn
+  gop_lien_tiep()  Gộp các đoạn liền nhau cùng người nói thành một lượt
+Gọi tới  : audio/models
+Dùng bởi : audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Căn chỉnh khoảng ASR với khoảng tách người nói mà không đổi văn bản bản chép lời.
 
-Two modes:
+Hai chế độ:
 
-* word timestamps available: each WORD goes to the speaker whose span overlaps it
-  most; a segment is cut where the speaker changes. Words keep their spelling.
-* segment timestamps only: the whole segment goes to the speaker with the largest
-  overlap (previous behaviour).
+* có mốc thời gian theo từ: mỗi TỪ thuộc về người nói có khoảng trùng với nó
+  nhiều nhất; đoạn bị cắt tại chỗ người nói đổi. Từ giữ nguyên chính tả.
+* chỉ có mốc thời gian theo đoạn: cả đoạn thuộc về người nói có phần trùng
+  lớn nhất (hành vi trước đây).
 
-Speaker ROLES are never set here: every segment leaves as ``unknown``. Only the human
-review step (``AudioPipeline.map_speakers``) turns speaker_1 into doctor/patient/…
+VAI của người nói không bao giờ được đặt ở đây: mọi đoạn đều ra là ``unknown``. Chỉ bước duyệt
+của con người (``AudioPipeline.map_speakers``) mới đổi speaker_1 thành bác sĩ/bệnh nhân/…
 
-Accepts the legacy dict ``{"segments": [{"start", "end", "text", "confidence"}]}`` and
-``ASRResult.as_legacy()`` (which adds ``provider``, ``model`` and ``words``).
+Nhận dict cũ ``{"segments": [{"start", "end", "text", "confidence"}]}`` và
+``ASRResult.as_legacy()`` (có thêm ``provider``, ``model`` và ``words``).
 """
 
 from __future__ import annotations
@@ -21,27 +34,30 @@ from typing import Any, Optional
 from .models import SpeakerRole, TranscriptSegment
 
 
+# ─── _overlap() — Tính độ chồng lấn giữa hai khoảng thời gian ─────────────────────────
 def _overlap(a0, a1, b0, b1) -> float:
     if None in (a0, a1, b0, b1):
         return 0.0
     return max(0.0, min(float(a1), float(b1)) - max(float(a0), float(b0)))
 
 
-# Tu nam lot khe giua hai doan cua bo tach nguoi noi (khong trung doan nao) thi gan cho
-# doan GAN NHAT, neu cach khong qua chung nay giay. Xa hon thi de "unknown".
+# Từ nằm lọt khe giữa hai đoạn của bộ tách người nói (không trùng đoạn nào) thì gán cho
+# đoạn GẦN NHẤT, nếu cách không quá chừng này giây. Xa hơn thì để "unknown".
 KHE_TOI_DA = 1.0
 
-# PhoWhisper chi cho moc BAT DAU cua tu (DTW); moc ket thuc la moc bat dau cua tu sau
-# (toi da +1,2 s), nen tu cuoi mot luot keo dai sang khoang lang, co khi sang ca luot cua
-# nguoi ke tiep. Gan nguoi noi theo chung nay giay DAU cua tu (mot am tiet ~0,15-0,35 s).
+# PhoWhisper chỉ cho mốc BẮT ĐẦU của từ (DTW); mốc kết thúc là mốc bắt đầu của từ sau
+# (tối đa +1,2 s), nên từ cuối một lượt kéo dài sang khoảng lặng, có khi sang cả lượt của
+# người kế tiếp. Gán người nói theo chừng này giây ĐẦU của từ (một âm tiết ~0,15-0,35 s).
 DO_DAI_GAN = 0.3
 
-# Hai tu roi vao hai khoang co tieng noi cach nhau >= chung nay giay thi cat dong, ke ca khi
-# cung nguoi noi. Khi khong tach nguoi noi, day la cho duy nhat cat dong theo khoang lang:
-# quy tac "khoang lang > 0,8 s" cua bo chep loi gan nhu khong chay vi moc ket thuc la uoc.
+# Hai từ rơi vào hai khoảng có tiếng nói cách nhau >= chừng này giây thì cắt dòng, kể cả khi
+# cùng người nói. Khi không tách người nói, đây là chỗ duy nhất cắt dòng theo khoảng lặng:
+# quy tắc "khoảng lặng > 0,8 s" của bộ chép lời gần như không chạy vì mốc kết thúc là ước.
 KHE_CAT_DOAN = 0.6
 
 
+# ─── _span_for() — Tìm khoảng người nói trùng nhiều nhất với một mốc ──────────────────
+# Không trùng thì lấy khoảng gần nhất trong KHE_TOI_DA giây; xa hơn trả None.
 def _span_for(start, end, diarization: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
     best, best_ov = None, 0.0
     for d in diarization:
@@ -60,13 +76,16 @@ def _span_for(start, end, diarization: list[dict[str, Any]]) -> Optional[dict[st
     return best
 
 
+# ─── _speaker_for() — Lấy mã người nói cho một mốc thời gian ──────────────────────────
+# Không tìm được khoảng nào thì trả unknown.
 def _speaker_for(start, end, diarization: list[dict[str, Any]]) -> str:
     best = _span_for(start, end, diarization)
     return str(best.get("speaker_id", "unknown")) if best else "unknown"
 
 
+# ─── _cach_lang() — Kiểm tra hai khoảng nói có đủ lặng để cắt dòng ────────────────────
 def _cach_lang(truoc: Optional[dict], sau: Optional[dict]) -> bool:
-    """Hai khoang co tieng noi khac nhau, cach nhau mot khoang lang du dai de cat dong."""
+    """Hai khoảng có tiếng nói khác nhau, cách nhau một khoảng lặng đủ dài để cắt dòng."""
     if truoc is None or sau is None or truoc is sau:
         return False
     try:
@@ -75,6 +94,7 @@ def _cach_lang(truoc: Optional[dict], sau: Optional[dict]) -> bool:
         return False
 
 
+# ─── _get() — Lấy giá trị đầu tiên khác rỗng theo danh sách khoá ──────────────────────
 def _get(raw: dict, *keys, default=None):
     for k in keys:
         if raw.get(k) is not None:
@@ -82,6 +102,9 @@ def _get(raw: dict, *keys, default=None):
     return default
 
 
+# ═══ align() — Ghép chép lời với tách người nói thành các đoạn ════════════════════════
+# Có mốc từng từ thì mỗi từ về người nói trùng nhiều nhất; không thì cả đoạn. Vai luôn
+# là unknown, chữ giữ nguyên.
 def align(session_id: str, asr: dict[str, Any], diarization: list[dict[str, Any]]) -> list[TranscriptSegment]:
     provider: Optional[str] = asr.get("provider")
     model: Optional[str] = asr.get("model")
@@ -97,8 +120,8 @@ def align(session_id: str, asr: dict[str, Any], diarization: list[dict[str, Any]
         if not timed:
             pieces.append((_speaker_for(start, end, diarization), start, end, text, conf))
             continue
-        # Cat theo nguoi noi tung tu, va o khoang lang dai giua hai khoang co tieng noi.
-        # Chu ghep lai tu chinh cac tu cua mo hinh.
+        # Cắt theo người nói từng từ, và ở khoảng lặng dài giữa hai khoảng có tiếng nói.
+        # Chữ ghép lại từ chính các từ của mô hình.
         cur_spk, cur_span, cur = None, None, []
         for w in words:
             ws, we = _get(w, "start_time", "start"), _get(w, "end_time", "end")
@@ -131,17 +154,20 @@ def align(session_id: str, asr: dict[str, Any], diarization: list[dict[str, Any]
     return result
 
 
+# ═══ gop_lien_tiep() — Gộp các đoạn liền nhau cùng người nói thành một lượt ═══════════
+# Độ tin gộp lấy mức thấp nhất. Chỉ dùng khi đã tách thật từ hai người nói trở lên;
+# unknown không gộp.
 def gop_lien_tiep(doan: list[TranscriptSegment]) -> list[TranscriptSegment]:
-    """Gop cac doan LIEN TIEP cung nguoi noi thanh MOT luot.
+    """Gộp các đoạn LIÊN TIẾP cùng người nói thành MỘT lượt.
 
-    Mot luot thoai la mot lan mot nguoi noi, tu luc bat dau den luc nguoi khac noi. `align`
-    cat dong o khoang lang dai (KHE_CAT_DOAN) va bo tach co the chia mot nguoi thanh nhieu
-    khoang, nen mot nguoi ngung giua chung bi chia thanh nhieu dong. CHI dung khi da tach
-    that ra tu hai nguoi noi tro len; neu ca ban ghi la mot nguoi noi thi ham nay se gop het
-    thanh mot dong.
+    Một lượt thoại là một lần một người nói, từ lúc bắt đầu đến lúc người khác nói. `align`
+    cắt dòng ở khoảng lặng dài (KHE_CAT_DOAN) và bộ tách có thể chia một người thành nhiều
+    khoảng, nên một người ngưng giữa chừng bị chia thành nhiều dòng. CHỈ dùng khi đã tách
+    thật ra từ hai người nói trở lên; nếu cả bản ghi là một người nói thì hàm này sẽ gộp hết
+    thành một dòng.
 
-    Do tin gop = do tin THAP NHAT (canh bao dua tren nguong 0,6 khong duoc mat vi gop).
-    Doan co speaker_id "unknown" khong gop voi doan nao.
+    Độ tin gộp = độ tin THẤP NHẤT (cảnh báo dựa trên ngưỡng 0,6 không được mất vì gộp).
+    Đoạn có speaker_id "unknown" không gộp với đoạn nào.
     """
     ra: list[TranscriptSegment] = []
     for d in doan:

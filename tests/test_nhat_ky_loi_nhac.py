@@ -16,7 +16,7 @@ import json
 
 import pytest
 
-from src import nhat_ky_loi_nhac as nk
+from src.he_thong import nhat_ky_loi_nhac as nk
 
 
 def _phien(tmp_path, ban_ghi, ten="phien.jsonl"):

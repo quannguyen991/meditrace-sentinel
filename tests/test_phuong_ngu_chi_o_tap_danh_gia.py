@@ -7,7 +7,7 @@ ngu thuong mai o bat ky khau nao, ke ca sinh du lieu huan luyen. Xem
 """
 import random
 
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def _ca(ma, seed, tap, mien):

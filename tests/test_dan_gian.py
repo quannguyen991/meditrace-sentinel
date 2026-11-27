@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Bat bien cua bo thu thach dan gian (src/dan_gian.py, thach_thuc.cap_dan_gian)."""
+"""Bat bien cua bo thu thach dan gian (src/bo_du_lieu/dan_gian.py, thach_thuc.cap_dan_gian)."""
 import json
 import re
 
 import pytest
 
-from src import chuan_hoa, dan_gian, duong_dan, thach_thuc
+from src.duong_ong import b0_chuan_hoa_phuong_ngu as chuan_hoa
+from src.bo_du_lieu import dan_gian as dan_gian
+from src.he_thong import duong_dan as duong_dan
+from src.bo_du_lieu import sinh_bo_thach_thuc as thach_thuc
 
 
 @pytest.fixture(scope="module")

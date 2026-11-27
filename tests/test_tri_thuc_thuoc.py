@@ -4,7 +4,8 @@ import json
 import re
 from pathlib import Path
 
-from src import kho_khuon, tri_thuc_thuoc as ttt
+from src.bo_du_lieu import kho_khuon as kho_khuon
+from src.cong_cu_lam_sang import tri_thuc_thuoc as ttt
 
 GOC = Path(__file__).resolve().parents[1]
 TEN_NHOM_KHONG_PHAI_THUOC = {"statin", "cephalosporin", "fluoroquinolone", "thiazide", "triptan",

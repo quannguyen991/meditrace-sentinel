@@ -23,8 +23,8 @@ import re
 
 import pytest
 
-from src import loi_dan_thuong as ldt
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import loi_dan_thuong as ldt
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def _rng():
@@ -209,13 +209,13 @@ def test_do_phu_tren_TAP_TRAIN_du_cao():
 
 @pytest.fixture(scope="module")
 def chia_5000():
-    from src import tach_tap_viet as tt
+    from src.bo_du_lieu import chia_tap_theo_khuon as tt
     tr, pt, _kt, _ = tt.chia(sh.sinh_bo(5000, seed=42))
     return tr, pt
 
 
 def _khoa_trong(ds):
-    from src import sai_so
+    from src.do_luong import khoang_tin_cay as sai_so
     co = set()
     for x in ds:
         vai = sai_so.nguoi_noi_tung_luot(x)
@@ -239,7 +239,7 @@ def test_MOI_khoa_thuoc_TU_VUNG_TRAIN(chia_5000):
 
 
 def _phu100(ds):
-    from src import thuoc_do_quy_gan as t
+    from src.do_luong import thuoc_do_quy_gan as t
     p = []
     for r in ds:
         thoai = t._tu_noi_dung(r["input"])

@@ -12,9 +12,9 @@ from tools.lo7_part3 import PART3_DATA
 from tools.lo7_part4 import PART4_DATA
 from tools.lo7_part5 import PART5_DATA
 
-from src.khuon_mo_rong import DANH_SACH_UNG_VIEN_CON_LAI, BENH_MO_RONG
-from src import ngu_lieu_viet as nl
-from src import kiem_khuon as kk
+from src.bo_du_lieu.khuon_mo_rong import DANH_SACH_UNG_VIEN_CON_LAI, BENH_MO_RONG
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import kiem_khuon as kk
 
 ALL_50 = PART1_DATA + PART2_DATA + PART3_DATA + PART4_DATA + PART5_DATA
 assert len(ALL_50) == 50, f"Expected 50 templates, got {len(ALL_50)}"
@@ -96,7 +96,7 @@ for ten_7, tokens_7 in tu_lo_7.items():
 assert not cap_trung_cheo, f"Có cặp trùng lặp chéo >= 20%: {cap_trung_cheo}"
 print(f"✓ Kiểm tra chéo {len(tu_lo_7)} khuôn Lô 7 với {len(tu_da_co)} khuôn hiện có: 0 CẶP TRÙNG LẶP >= 20%!")
 
-# 7. Xuất file src/khuon_lo_7.py
+# 7. Xuất file src/bo_du_lieu/khuon_lo_7.py
 content = f'''# -*- coding: utf-8 -*-
 """Lô 7 Khuôn Bệnh Lâm Sàng (Khuôn 501 - 550) cho MediTrace Sentinel V2.
 
@@ -113,7 +113,7 @@ GIOI_TINH_LO_7: Dict[str, str] = {json.dumps(GIOI_TINH_LO_7, ensure_ascii=False,
 BENH_LO_7: List[Dict[str, Any]] = {pprint.pformat(ALL_50, width=100, compact=False, sort_dicts=True)}
 '''
 
-with open("src/khuon_lo_7.py", "w", encoding="utf-8") as f:
+with open("src/bo_du_lieu/khuon_lo_7.py", "w", encoding="utf-8") as f:
     f.write(content)
 
-print(f"✓ Đã ghi thành công src/khuon_lo_7.py ({len(ALL_50)} khuôn)!")
+print(f"✓ Đã ghi thành công src/bo_du_lieu/khuon_lo_7.py ({len(ALL_50)} khuôn)!")

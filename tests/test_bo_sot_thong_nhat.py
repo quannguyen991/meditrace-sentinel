@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Mot bo bo sot duy nhat (src/canh_bao/bo_sot.py), thay hai bo cu chay song song."""
-from src import khoa_bang_chung
+from src.duong_ong import b4_kiem_can_cu as khoa_bang_chung
 from src.canh_bao import bo_sot
 from src.canh_bao.phat_hien import NguCanh
-from src.kiem_duyet_bhyt_va_bo_sot import ActiveOmissionRecoveryEngine
-from src.phat_bieu import PhatBieu
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import ActiveOmissionRecoveryEngine
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = ("Bác sĩ: Chị có dị ứng gì không?\n"
       "Bệnh nhân: Em không dị ứng thức ăn.\n"

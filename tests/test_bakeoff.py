@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Test phan KHONG can mo hinh cua bake-off: danh so luot va phan tich JSON."""
-from src import bakeoff
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
 
 
 def test_danh_so_luot():
@@ -59,7 +59,7 @@ def test_huong_dan_noi_ro_tuoi_la_cua_benh_nhan():
 
 
 def test_vi_du_5_day_dung_ca_tuoi_do_nguoi_nha_noi():
-    from src.vi_du_mau import VI_DU
+    from src.duong_ong.b1_vi_du_mau_loi_nhac import VI_DU
     assert "Ví dụ 5" in VI_DU
     khoi = VI_DU.split("Ví dụ 5")[1]
     assert '"chu_the": "trẻ", "noi_dung": "ba tuổi"' in khoi
@@ -70,7 +70,7 @@ def test_moi_vi_du_deu_co_JSON_hop_le():
     """Vi du sai cu phap thi mo hinh hoc theo cai sai do."""
     import json
     import re
-    from src.vi_du_mau import VI_DU
+    from src.duong_ong.b1_vi_du_mau_loi_nhac import VI_DU
     khoi = re.findall(r'\{"phat_bieu":.*?\n\]\}', VI_DU, re.S)
     assert len(khoi) == 5, f"tim thay {len(khoi)} khoi JSON, mong doi 5"
     for k in khoi:
@@ -86,7 +86,7 @@ def test_moi_vi_du_deu_dung_luoc_do_dang_dung():
     do va bo ep JSON se chan — mat mot ban ghi ma khong ro vi sao."""
     import json
     import re
-    from src.vi_du_mau import VI_DU
+    from src.duong_ong.b1_vi_du_mau_loi_nhac import VI_DU
     cho_phep = set(bakeoff.LUOC_DO["properties"]["phat_bieu"]["items"]["properties"])
     for k in re.findall(r'\{"phat_bieu":.*?\n\]\}', VI_DU, re.S):
         for p in json.loads(k)["phat_bieu"]:

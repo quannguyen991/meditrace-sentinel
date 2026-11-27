@@ -92,7 +92,7 @@ if ($LASTEXITCODE -ne 0) { Moc "DUNG: du lieu khong phai the he 8"; exit 1 }
 # 5. Train khau trich the he 8. Xong thi ghi MOC de phien Claude biet day adapter
 #    len Kaggle cho buoc sinh.
 Chay-Lai "5-TRAIN-TRICH-TH8" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "trich", "--buoc", "400", "--do-dai", "3072") | Out-Null
 if (Test-Path "$goc\models\nen-qwen3-4b-trich\best_checkpoint") {
     New-Item -ItemType File -Force "$goc\logs\moc-trich-the-he-8-xong" | Out-Null
@@ -100,7 +100,7 @@ if (Test-Path "$goc\models\nen-qwen3-4b-trich\best_checkpoint") {
 
 # 6. Train nhanh A the he 8 (buoc sinh cua A cung chay tren Kaggle).
 Chay-Lai "6-TRAIN-A-TH8" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "benh_an", "--buoc", "400", "--do-dai", "2048",
     "--tep-train", "viet_train.jsonl", "--tep-val", "viet_phat_trien.jsonl",
     "--hau-to=-viet8") | Out-Null

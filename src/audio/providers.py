@@ -1,4 +1,22 @@
-"""Provider interfaces and local MVP providers."""
+"""[Âm thanh]
+Làm gì   : Khai báo giao diện bộ chép lời và bộ tách người nói, kèm các bản đơn giản chạy
+           tại chỗ cho demo.
+Vào → Ra : đường dẫn WAV (và đoạn có tiếng) → đoạn chép lời hoặc đoạn gán người nói dạng
+           dict
+Đọc từ   : class ASRProvider và DiarizationProvider là giao diện; JsonSidecarASRProvider đọc
+           JSON
+Mục lục (các hàm/lớp chính):
+  class EnergyVADProvider                 Phát hiện đoạn có tiếng nói theo năng lượng
+  class SingleSpeakerDiarizationProvider  Tách người nói an toàn: mọi đoạn là speaker_1
+  class JsonDiarizationProvider           Tách người nói đọc từ diarization.json nếu có
+  class JsonSidecarASRProvider            Nhà cung cấp chép lời đọc tệp JSON cạnh WAV
+  class ASRProvider                       Giao diện chép lời kiểu cũ (Protocol)
+  class DiarizationProvider               Giao diện tách người nói (Protocol)
+Gọi tới  : audio/asr/faster_whisper_provider
+Dùng bởi : audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Giao diện nhà cung cấp và các nhà cung cấp MVP cục bộ."""
 
 from __future__ import annotations
 
@@ -11,6 +29,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 
+# ═══ class ASRSegment — Một đoạn chép lời kiểu cũ: mốc, chữ, độ tin ═══════════════════
 @dataclass
 class ASRSegment:
     start: float
@@ -19,19 +38,24 @@ class ASRSegment:
     confidence: float | None = None
 
 
+# ═══ class ASRProvider — Giao diện chép lời kiểu cũ (Protocol) ════════════════════════
 class ASRProvider(Protocol):
     def transcribe(self, audio_path: str | Path) -> dict[str, Any]: ...
 
 
+# ═══ class DiarizationProvider — Giao diện tách người nói (Protocol) ══════════════════
+# Nhận tệp âm thanh và các đoạn có tiếng nói, trả các khoảng theo người nói.
 class DiarizationProvider(Protocol):
     def diarize(self, audio_path: str | Path, speech_segments: list[dict[str, float]]) -> list[dict[str, Any]]: ...
 
 
+# ═══ class JsonSidecarASRProvider — Nhà cung cấp chép lời đọc tệp JSON cạnh WAV ═══════
+# Dùng cho demo và kiểm thử ngoại tuyến; thiếu hoặc sai tệp thì báo lỗi.
 class JsonSidecarASRProvider:
-    """Deterministic local provider for review, demos, and offline tests.
+    """Nhà cung cấp cục bộ tất định cho duyệt, demo và kiểm thử ngoại tuyến.
 
-    A file named ``processed.json`` next to the WAV contains either a list of
-    segments or ``{"language":"vi", "segments":[...]}``.
+    Một tệp tên ``processed.json`` cạnh tệp WAV chứa danh sách các
+    đoạn hoặc ``{"language":"vi", "segments":[...]}``.
     """
 
     def __init__(self, sidecar_path: str | Path | None = None):
@@ -47,11 +71,13 @@ class JsonSidecarASRProvider:
         return {"language": payload.get("language", "vi"), "segments": payload["segments"]}
 
 
-# Lop cu (Codex) da thay bang src/audio/asr/faster_whisper_provider.py (22/09/2026).
-# Giu ten cu de ma goi cu khong gay.
+# Lớp cũ (Codex) đã thay bằng src/audio/asr/faster_whisper_provider.py (22/09/2026).
+# Giữ tên cũ để mã gọi cũ không gãy.
 from .asr.faster_whisper_provider import FasterWhisperProvider as FasterWhisperASRProvider  # noqa: E402
 
 
+# ═══ class EnergyVADProvider — Phát hiện đoạn có tiếng nói theo năng lượng ════════════
+# Chia khung 30 ms, khung có RMS từ ngưỡng 450 trở lên là có tiếng; cần WAV 16 kHz mono.
 class EnergyVADProvider:
     def __init__(self, frame_ms: int = 30, threshold: int = 450):
         self.frame_ms, self.threshold = frame_ms, threshold
@@ -82,13 +108,17 @@ class EnergyVADProvider:
         return [{"start": round(a, 3), "end": round(b, 3)} for a, b in active]
 
 
+# ═══ class SingleSpeakerDiarizationProvider — Tách người nói an toàn: mọi đoạn là speaker_1 ═══
+# Không bao giờ gán bác sĩ hay bệnh nhân.
 class SingleSpeakerDiarizationProvider:
-    """Safe baseline: labels speech as speaker_1, never as doctor/patient."""
+    """Mức nền an toàn: gán lời nói là speaker_1, không bao giờ là bác sĩ/bệnh nhân."""
 
     def diarize(self, audio_path: str | Path, speech_segments: list[dict[str, float]]) -> list[dict[str, Any]]:
         return [{"speaker_id": "speaker_1", "start": s["start"], "end": s["end"]} for s in speech_segments]
 
 
+# ═══ class JsonDiarizationProvider — Tách người nói đọc từ diarization.json nếu có ════
+# Không có tệp thì lùi về một người nói.
 class JsonDiarizationProvider:
     def __init__(self):
         self.last_info: dict[str, Any] = {}

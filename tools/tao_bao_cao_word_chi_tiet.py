@@ -482,7 +482,7 @@ def tao_tai_lieu_word():
 
     them_doan_van(doc,
         "Lỗi hoán đổi chủ thể (Wrong-Subject Error) là nguyên nhân hàng đầu gây sai lệch chẩn đoán trong các hệ thống ghi chép tự động. "
-        "Tầng 2 thiết lập một thuật toán dựa trên luật xác định (Deterministic Algorithm) trong src/cham_chu_the.py để phân giải "
+        "Tầng 2 thiết lập một thuật toán dựa trên luật xác định (Deterministic Algorithm) trong src/do_luong/cham_chu_the.py để phân giải "
         "đại từ xưng hô tiếng Việt và cấu trúc vai trò của người nói.")
 
     them_tieu_de_2(doc, "5.1 Bốn cấp độ phân giải chủ thể lâm sàng")
@@ -516,7 +516,7 @@ def tao_tai_lieu_word():
     them_tieu_de_2(doc, "6.1 Bốn quan hệ trạng thái lâm sàng")
     them_doan_van(doc,
         "Giữa một mệnh đề mới p_new xuất hiện tại lượt thoại T_j và một mệnh đề hiện hữu p_old tại lượt thoại T_i (với j > i), "
-        "thuật toán phân loại quan hệ trong src/phan_quan_he.py xác định 1 trong 4 trạng thái:\n\n"
+        "thuật toán phân loại quan hệ trong src/duong_ong/b3_phan_xu_quan_he.py xác định 1 trong 4 trạng thái:\n\n"
         "• Bổ sung (Additive): p_new cung cấp thêm thông tin mới không xung đột (ví dụ: 'sốt' bổ sung thêm 'ho có đờm'). "
         "Cả hai mệnh đề giữ trạng thái 'còn hiệu lực' (Active).\n\n"
         "• Đính chính / Thay thế (Correction / Superseded): p_new sửa đổi trực tiếp giá trị của p_old (ví dụ: 'sốt 39 độ' -> 'nhầm, sốt 38.5 độ'). "
@@ -535,7 +535,7 @@ def tao_tai_lieu_word():
     them_tieu_de_1(doc, "7. TẦNG 4: BỘ KIỂM ĐỊNH KHÓA BẰNG CHỨNG 7 CỔNG XÁC ĐỊNH (K1 ĐẾN K7)")
 
     them_doan_van(doc,
-        "Tầng 4 là cơ chế kiểm soát an toàn nghiêm ngặt nhất của hệ thống, được cài đặt trong module src/khoa_bang_chung.py. "
+        "Tầng 4 là cơ chế kiểm soát an toàn nghiêm ngặt nhất của hệ thống, được cài đặt trong module src/duong_ong/b4_kiem_can_cu.py. "
         "Mỗi mệnh đề trước khi được đưa vào xuất bản phải vượt qua 7 cổng kiểm định quy tắc logic độc lập (K1 đến K7).")
 
     them_tieu_de_2(doc, "7.1 Chi tiết logic kiểm tra của 7 Cổng K1 - K7")
@@ -614,7 +614,7 @@ def tao_tai_lieu_word():
     them_tieu_de_2(doc, "8.2 Phân hệ Gợi ý hỏi lại thông minh (Active Clarification Query)")
     them_doan_van(doc,
         "Khi Tầng 3 và Tầng 4 phát hiện mâu thuẫn trực tiếp giữa lời kể của người nhà và bệnh nhân mà chưa thể phân giải, "
-        "module src/hoi_lai.py tự động sinh ra tối đa 3 câu hỏi lâm sàng trọng tâm (ví dụ: 'Bác sĩ cần xác nhận lại: Nhiệt độ sốt cao nhất là 38.5 hay 39 độ?'). "
+        "module src/duong_ong/b6_goi_y_hoi_lai.py tự động sinh ra tối đa 3 câu hỏi lâm sàng trọng tâm (ví dụ: 'Bác sĩ cần xác nhận lại: Nhiệt độ sốt cao nhất là 38.5 hay 39 độ?'). "
         "Bác sĩ có thể sử dụng câu hỏi này để hỏi lại người bệnh ngay trong buổi khám.")
 
     # ========================== MỤC 9: HỆ THỐNG GUARDRAILS 5 TẦNG & CÁC NÂNG CẤP V2.5 ==========================
@@ -644,7 +644,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.2 Động cơ Dược lý Lâm sàng Nâng cao & Cảnh báo Tương tác DDI (Trụ cột 1)")
     them_doan_van(doc,
-        "Module src/duoc_ly_lam_sang.py tích hợp cơ sở tri thức Dược lý học lâm sàng chuyên sâu:\n"
+        "Module src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py tích hợp cơ sở tri thức Dược lý học lâm sàng chuyên sâu:\n"
         "• Ma trận Tương tác Thuốc Nguy hiểm (Drug-Drug Interactions - DDI): Tự động phát hiện các cặp phối hợp thuốc tối kỵ: "
         "Statin + Fibrate (nguy cơ tiêu cơ vân cấp), Warfarin/Aspirin + NSAID (nguy cơ xuất huyết tiêu hóa ồ ạt), "
         "ACEI + Spironolactone (nguy cơ tăng kali máu loạn nhịp tim), v.v.\n"
@@ -654,7 +654,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.3 Chuẩn hóa Xuất bản Bệnh án Quốc tế HL7 FHIR R4 Bundle Resource (Trụ cột 2)")
     them_doan_van(doc,
-        "Module src/fhir_exporter.py chuyển đổi toàn bộ bệnh án và thực thể lâm sàng thành HL7 FHIR R4 Document Bundle chuẩn y tế quốc tế, "
+        "Module src/cong_cu_lam_sang/xuat_fhir_r4.py chuyển đổi toàn bộ bệnh án và thực thể lâm sàng thành HL7 FHIR R4 Document Bundle chuẩn y tế quốc tế, "
         "sẵn sàng kết nối với hệ thống HIS/EMR của các bệnh viện đa khoa lớn. Cấu trúc Bundle bao gồm:\n"
         "• Patient: Định danh bệnh nhân, tuổi, giới tính, mã hồ sơ y tế.\n"
         "• Condition: Mã hóa chẩn đoán xác định và tiền sử bệnh lý theo bảng mã ICD-10.\n"
@@ -665,24 +665,24 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.4 Động cơ Đa Bệnh lý (Comorbidity) & Mở rộng 200 Khuôn Bệnh Học (Trụ cột 3)")
     them_doan_van(doc,
-        "• Nâng cấp Quy mô Dữ liệu: Mở rộng từ 100 lên 200 khuôn bệnh học chuẩn hóa ICD-10 tại src/ngu_lieu_viet.py, "
-        "bao phủ toàn diện 10 chuyên khoa nội/ngoại trú trọng điểm. Kiểm định cấu trúc bằng src/kiem_khuon.py xác nhận: 200 khuôn — 0 lỗi chặn.\n"
+        "• Nâng cấp Quy mô Dữ liệu: Mở rộng từ 100 lên 200 khuôn bệnh học chuẩn hóa ICD-10 tại src/bo_du_lieu/ngu_lieu_viet.py, "
+        "bao phủ toàn diện 10 chuyên khoa nội/ngoại trú trọng điểm. Kiểm định cấu trúc bằng src/bo_du_lieu/kiem_khuon.py xác nhận: 200 khuôn — 0 lỗi chặn.\n"
         "• Đo lường Độ dị biệt Thực nghiệm: Thử nghiệm đo khoảng cách Jaccard Dissimilarity giữa các cặp khuôn đạt trung bình 0.7827, "
         "chứng minh bộ ngữ liệu có tính phân tán cao, đa dạng triệu chứng tự nhiên và không trùng lặp giả tạo.\n"
-        "• Động cơ Đa bệnh lý (src/da_benh_ly.py): Cho phép mô phỏng thực tế khám chữa bệnh phức tạp tại Việt Nam bằng cách kết hợp linh hoạt "
+        "• Động cơ Đa bệnh lý (src/bo_du_lieu/sinh_ca_da_benh_ly.py): Cho phép mô phỏng thực tế khám chữa bệnh phức tạp tại Việt Nam bằng cách kết hợp linh hoạt "
         "một bệnh cảnh cấp tính mới phát (như Viêm phổi, Xuất huyết tiêu hóa) trên nền các bệnh mạn tính phối hợp (Tăng huyết áp, Đái tháo đường típ 2, COPD).")
 
     them_tieu_de_2(doc, "9.5 Module Khử nhận dạng Thông tin Cá nhân Y tế (Clinical PII/PHI De-identification)")
     them_doan_van(doc,
         "Nhằm tuân thủ tuyệt đối Luật Khám bệnh, chữa bệnh 2023 (Điều 10, Điều 32), Nghị định 13/2023/NĐ-CP và tiêu chuẩn HIPAA / GDPR, "
-        "module src/khu_dinh_danh.py tự động phát hiện và ẩn danh 7 nhóm thực thể nhạy cảm:\n"
+        "module src/he_thong/khu_dinh_danh.py tự động phát hiện và ẩn danh 7 nhóm thực thể nhạy cảm:\n"
         "Họ tên bệnh nhân/thân nhân, Số điện thoại di động, Số CCCD/CMND, Số thẻ BHYT (chuẩn 15 ký tự), Địa chỉ cư trú chi tiết, Ngày sinh và Email.\n"
         "Cơ chế Ẩn danh 2 chiều (Reversible Tokenization): Thay thế bằng các mã an toàn ([BENH_NHAN], [SDT_1], [BHYT_1]) trước khi xử lý qua AI, "
         "và cho phép bác sĩ có thẩm quyền giải mã lại đúng bệnh nhân tại phòng khám mà không để lộ dữ liệu cá nhân ra môi trường bên ngoài.")
 
     them_tieu_de_2(doc, "9.6 Trợ lý Gợi ý Câu hỏi Lâm sàng Thông minh (Active Clinical Clarification Agent)")
     them_doan_van(doc,
-        "Module src/tro_ly_lam_sang.py chủ động rà soát hội thoại theo chuẩn đánh giá lâm sàng quốc tế SOCRATES để phát hiện các khoảng trống thông tin (Information Gaps):\n"
+        "Module src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py chủ động rà soát hội thoại theo chuẩn đánh giá lâm sàng quốc tế SOCRATES để phát hiện các khoảng trống thông tin (Information Gaps):\n"
         "• Triệu chứng đau: Tự động cảnh báo nếu bệnh nhân khai đau bụng nhưng thiếu vị trí giải phẫu (thượng vị, hố chậu phải...) hoặc tính chất đau (quặn hay âm ỉ).\n"
         "• Triệu chứng sốt & hô hấp: Phát hiện thiếu nhiệt độ đo cụ thể, thiếu khai thác cơn rét run hay tính chất đờm.\n"
         "• Dùng thuốc & Cơ địa: Phát hiện khai tên thuốc nhưng thiếu liều/hàm lượng, cảnh báo phụ nữ trong độ tuổi sinh sản chưa được khai thác tình trạng thai kỳ.\n"
@@ -690,7 +690,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.7 Hạ tầng Điều phối E2E Orchestrator, Chữ ký băm SHA-256 & Bàn làm việc Bác sĩ Copilot")
     them_doan_van(doc,
-        "• Pipeline Orchestrator (src/dieu_phoi_ha_tang.py): Điều phối toàn bộ luồng xử lý từ audio gỡ băng, guardrails, khóa căn cứ, kiểm duyệt dược lý đến xuất bản FHIR.\n"
+        "• Pipeline Orchestrator (src/he_thong/dieu_phoi_cac_chot_an_toan.py): Điều phối toàn bộ luồng xử lý từ audio gỡ băng, guardrails, khóa căn cứ, kiểm duyệt dược lý đến xuất bản FHIR.\n"
         "• Tamper-evident Audit Trail: Tự động tính toán mã băm SHA-256 để đối chiếu nội dung cho toàn bộ hồ sơ bệnh án và lịch sử kiểm soát. "
         "Việc phát hiện thay đổi cần có bản hash đã lưu ở nơi tin cậy và bước xác minh; hash đơn lẻ không ngăn sửa đổi.\n"
         "• Giao diện Web Bác sĩ Copilot Dashboard (src/giao_dien_copilot.html): Thiết kế 3 cột chuyên nghiệp: "
@@ -699,7 +699,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.8 Động cơ Thang điểm Nguy cơ Lâm sàng Quốc tế (Clinical Risk Scoring Engines)")
     them_doan_van(doc,
-        "Module src/thang_diem_lam_sang.py tích hợp 4 thang điểm lượng giá nguy cơ lâm sàng chuẩn quốc tế giúp hỗ trợ quyết định điều trị (CDSS):\n"
+        "Module src/cong_cu_lam_sang/thang_diem_nguy_co.py tích hợp 4 thang điểm lượng giá nguy cơ lâm sàng chuẩn quốc tế giúp hỗ trợ quyết định điều trị (CDSS):\n"
         "• CURB-65 (Viêm phổi cộng đồng): Đánh giá 5 yếu tố Confusion (Lú lẫn), Urea > 7 mmol/L, Respiratory rate >= 30, Blood pressure (Huyết áp tụt) và Tuổi >= 65, "
         "tự động phân tầng điều trị ngoại trú, nội trú hoặc chuyển Hồi sức tích cực (ICU).\n"
         "• CHA2DS2-VASc (Nguy cơ Đột quỵ trong Rung nhĩ): Tự động tính điểm nguy cơ tắc mạch dựa trên Suy tim, Tăng huyết áp, Tuổi, Đái tháo đường, Đột quỵ/TIA, Bệnh mạch máu và Giới tính, "
@@ -710,7 +710,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.9 Module Đối soát Cận lâm sàng & Tương quan Lâm sàng - Xét nghiệm (Clinical-Paraclinical Correlator)")
     them_doan_van(doc,
-        "Module src/can_lam_sang.py thiết lập cầu nối phân tích tương quan giữa dữ liệu cận lâm sàng (Xét nghiệm máu, Nước tiểu, Chẩn đoán hình ảnh) "
+        "Module src/cong_cu_lam_sang/doi_soat_can_lam_sang.py thiết lập cầu nối phân tích tương quan giữa dữ liệu cận lâm sàng (Xét nghiệm máu, Nước tiểu, Chẩn đoán hình ảnh) "
         "với nội dung lời kể lâm sàng trong hội thoại:\n"
         "• Cảnh báo Giá trị Nguy kịch (Panic / Critical Values): Tự động bắt giữ ngay lập tức các chỉ số đe dọa tính mạng: Kali máu tăng cao (> 6.0 mmol/L - nguy cơ rung thất ngừng tim), "
         "Troponin I/T tăng vọt (> 0.04 ng/mL - gợi ý Nhồi máu cơ tim cấp), Bạch cầu tăng rất cao (> 20.0 G/L - cảnh báo Nhiễm khuẩn huyết), Hemoglobin tụt sâu (< 70 g/L - chỉ định truyền máu khẩn).\n"
@@ -720,7 +720,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.10 Động cơ Tự động Hiệu chỉnh Liều theo Thận / Gan & Tương tác Thực phẩm (CDSS Pharmacokinetics)")
     them_doan_van(doc,
-        "Module src/hieu_chinh_lieu.py tích hợp công thức Cockcroft-Gault và phân tầng suy thận KDIGO để bảo vệ an toàn dược lý chuyên sâu:\n"
+        "Module src/cong_cu_lam_sang/hieu_chinh_lieu.py tích hợp công thức Cockcroft-Gault và phân tầng suy thận KDIGO để bảo vệ an toàn dược lý chuyên sâu:\n"
         "• Hiệu chỉnh Liều theo Thận: Tự động tính CrCl và eGFR, cảnh báo chống chỉ định tuyệt đối Metformin/Dabigatran khi eGFR < 30 mL/phút "
         "nhằm ngăn ngừa biến chứng toan lactic hoặc xuất huyết tử vong; tự động giảm 50% liều Ciprofloxacin/Levofloxacin và Enoxaparin.\n"
         "• Hiệu chỉnh Liều theo Gan: Cảnh báo giảm trần liều Paracetamol (<= 2.000 mg/ngày) và chống chỉ định NSAID khi men gan AST/ALT tăng cao "
@@ -730,7 +730,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.11 Trình Tự động Sinh Bản Hướng dẫn & Dặn dò Người Bệnh Ngôn ngữ Đời thường (Patient Aftercare Guide)")
     them_doan_van(doc,
-        "Module src/dan_do_benh_nhan.py chuyển hóa toàn bộ thuật ngữ chuyên môn phức tạp của bệnh án SOAP và đơn thuốc thành bản hướng dẫn "
+        "Module src/cong_cu_lam_sang/to_dan_do_benh_nhan.py chuyển hóa toàn bộ thuật ngữ chuyên môn phức tạp của bệnh án SOAP và đơn thuốc thành bản hướng dẫn "
         "thân thiện, bình dị và dễ hiểu giúp người bệnh và thân nhân tuân thủ điều trị tối đa:\n"
         "• Giải thích bệnh học dễ hiểu: Xua tan lo âu bằng ngôn từ đời thường (Ví dụ giải thích rõ Viêm phế quản cấp, Tăng huyết áp, Đái tháo đường).\n"
         "• Lập lịch uống thuốc phân tách 4 khung giờ: Sáng, Trưa, Chiều/Tối, Trước khi ngủ kèm chỉ dẫn uống trước hay sau bữa ăn rõ ràng.\n"

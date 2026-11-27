@@ -1,12 +1,28 @@
-"""ASR provider registry: pick a provider by configuration, never by code edits.
+"""[Âm thanh › Chép lời]
+Làm gì   : Chọn bộ chép lời theo tên trong cấu hình để đổi nhà cung cấp mà không sửa mã.
+Vào → Ra : tên nhà cung cấp hoặc cài đặt + đường dẫn WAV → ASRProvider hoặc (ASRResult,
+           thông tin chạy)
+Đọc từ   : from_settings() dựng bộ chép theo cấu hình; transcribe() chạy chép và so bộ phụ
+Mục lục (các hàm/lớp chính):
+  create()         Tạo nhà cung cấp chép lời theo tên cấu hình
+  from_settings()  Tạo nhà cung cấp chép lời từ AudioSettings
+  transcribe()     Chép lời bằng nhà cung cấp chính, dự phòng nếu cho phép
+  register()       Đăng ký thêm một nhà cung cấp chép lời mới
+  names()          Liệt kê tên các nhà cung cấp chép lời đã đăng ký
+Gọi tới  : audio/asr/base, audio/asr/faster_whisper_provider, audio/asr/phowhisper_provider,
+           audio/asr/schemas, audio/asr/sidecar_provider
+Dùng bởi : audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Sổ đăng ký nhà cung cấp ASR: chọn nhà cung cấp bằng cấu hình, không bao giờ bằng sửa mã.
 
     ASR_PROVIDER=phowhisper      ASR_MODEL=vinai/PhoWhisper-medium   ASR_DEVICE=cuda
     ASR_PROVIDER=faster_whisper  ASR_MODEL=small
     ASR_PROVIDER=sidecar
 
-Local-first: in PROCESSING_MODE=local a provider with ``external = True`` is refused.
-Fallback: a failing provider is replaced ONLY if ALLOW_ASR_FALLBACK=true, and only by
-the provider named in ASR_FALLBACK_PROVIDER — never silently by a cloud service.
+Ưu tiên cục bộ: ở PROCESSING_MODE=local, nhà cung cấp có ``external = True`` bị từ chối.
+Dự phòng: nhà cung cấp lỗi chỉ được thay NẾU ALLOW_ASR_FALLBACK=true, và chỉ bằng
+nhà cung cấp nêu trong ASR_FALLBACK_PROVIDER — không bao giờ âm thầm chuyển sang dịch vụ đám mây.
 """
 
 from __future__ import annotations
@@ -28,15 +44,20 @@ _REGISTRY: dict[str, Callable[..., ASRProvider]] = {
 _SIZES = ("tiny", "base", "small", "medium", "large")
 
 
+# ═══ register() — Đăng ký thêm một nhà cung cấp chép lời mới ══════════════════════════
+# Không cần sửa pipeline.
 def register(name: str, factory: Callable[..., ASRProvider]) -> None:
-    """Them nha cung cap moi (FutureASRProvider) ma khong sua pipeline."""
+    """Thêm nhà cung cấp mới (FutureASRProvider) mà không sửa pipeline."""
     _REGISTRY[name] = factory
 
 
+# ═══ names() — Liệt kê tên các nhà cung cấp chép lời đã đăng ký ═══════════════════════
 def names() -> list[str]:
     return sorted(_REGISTRY)
 
 
+# ═══ create() — Tạo nhà cung cấp chép lời theo tên cấu hình ═══════════════════════════
+# Ở chế độ local từ chối nhà cung cấp gửi âm thanh ra ngoài.
 def create(name: str, model: Optional[str] = None, device: Optional[str] = None,
            revision: Optional[str] = None, processing_mode: str = "local") -> ASRProvider:
     if name not in _REGISTRY:
@@ -60,14 +81,18 @@ def create(name: str, model: Optional[str] = None, device: Optional[str] = None,
     return prov
 
 
+# ═══ from_settings() — Tạo nhà cung cấp chép lời từ AudioSettings ═════════════════════
 def from_settings(s) -> ASRProvider:
     return create(s.asr_provider, s.asr_model, s.asr_device, s.asr_revision, s.processing_mode)
 
 
+# ═══ transcribe() — Chép lời bằng nhà cung cấp chính, dự phòng nếu cho phép ═══════════
+# Chỉ chuyển sang nhà cung cấp dự phòng khi ALLOW_ASR_FALLBACK bật; trả kết quả kèm
+# thông tin đã dùng bên nào.
 def transcribe(settings, audio_path, primary: Optional[ASRProvider] = None) -> tuple[ASRResult, dict]:
-    """Chay nha cung cap chinh; loi thi chi du phong khi cau hinh cho phep.
+    """Chạy nhà cung cấp chính; lỗi thì chỉ dự phòng khi cấu hình cho phép.
 
-    -> (ket qua, thong tin: provider da dung, co du phong khong, loi goc neu co).
+    -> (kết quả, thông tin: provider đã dùng, có dự phòng không, lỗi gốc nếu có).
     """
     prov = primary or from_settings(settings)
     try:

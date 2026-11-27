@@ -6,7 +6,7 @@ Neu bo sinh nhieu sai thi ca ket luan sai theo — nen no phai co test rieng,
 GIONG NHU phep cham da phai co test rieng o Task 10 (hai lan phep cham tu bia
 ra loi roi bao cao chinh cai loi do).
 """
-from src import chung_chi_thuoc_do as cc
+from src.do_luong import chung_chi_thuoc_do as cc
 
 # Ban thu phai du GIAU de tao duoc nhom doi chung. Ban dau chi co
 # "Tre ho ba ngay." / "Me bi hen phe quan." — trong ca ban chi co dung MOT tu

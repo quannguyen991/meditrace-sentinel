@@ -2,8 +2,8 @@
 """Bo 500 GPT: chuyen doi dung, cham dung — va CHI de do (xem test_chan_du_lieu_gpt)."""
 import pytest
 
-from src import bo_gpt500 as g
-from src import thuc_the
+from src.bo_du_lieu import nap_bo_gpt500 as g
+from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
 
 
 @pytest.fixture(scope="module")

@@ -14,9 +14,9 @@ import random
 import re
 import statistics
 
-from src import phuong_ngu
-from src import sinh_hoi_thoai_viet as sh
-from src.phat_bieu import HANH_VI
+from src.bo_du_lieu import phuong_ngu as phuong_ngu
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.duong_ong.b1_cau_truc_menh_de import HANH_VI
 
 
 def bo(n=160, seed=7):
@@ -94,7 +94,7 @@ def test_di_ung_cua_nguoi_nha_khong_thanh_di_ung_cua_benh_nhan():
 
 def _ve_chuan(cum):
     """Doi cac tu phuong ngu trong `cum` ve dang chuan cua ban tham chieu."""
-    from src import phuong_ngu as _pn
+    from src.bo_du_lieu import phuong_ngu as _pn
 
     for _vung, cap in _pn.THAY_DUOC.items():
         for chuan, dia_phuong in cap:
@@ -254,7 +254,7 @@ def test_xa_giao_KHONG_sinh_menh_de():
 
     Neu mot ngay nao do no sinh, dap an dai them ma khong ai co y do, va ban
     tham chieu se doi theo mot cach khong ai nhin thay."""
-    from src import ngu_lieu_viet as nl
+    from src.bo_du_lieu import ngu_lieu_viet as nl
 
     cac_cau = {d.strip() for cap in nl.XA_GIAO for d in cap}
     for m in bo(120):
@@ -617,7 +617,7 @@ def test_TAT_phuong_ngu_KHONG_doi_phan_noi_dung():
 
     So qua `thach_thuc._so_cap_phuong_ngu`: tu 24/09/2026 ban co phuong ngu ghi
     "nong ham hap" dung loi nguoi noi (`phuong_ngu.GIU_NGUYEN`), ban kia ghi "sot"."""
-    from src.thach_thuc import _so_cap_phuong_ngu as _bo_trich
+    from src.bo_du_lieu.sinh_bo_thach_thuc import _so_cap_phuong_ngu as _bo_trich
     doi_it_nhat_mot = 0
     # Khuon PHAT TRIEN: tu 11/09/2026 khuon train khong nhan tu phuong ngu nao
     # (`PHUONG_NGU_TRONG_TRAIN`), nen rut khuon ngau nhien thi gan het cap giong.

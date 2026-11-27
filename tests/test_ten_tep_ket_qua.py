@@ -20,8 +20,8 @@ import pathlib
 
 import pytest
 
-from src import cham_lai_bang_quy_gan as cl
-from src import nhanh
+from src.do_luong import cham_lai_bang_quy_gan as cl
+from src.duong_ong import chay_duong_ong as nhanh
 
 
 # ------------------------------------------------- ham dat ten, kiem truc tiep
@@ -73,6 +73,6 @@ def test_tep_dem_trich_kem_max_token_va_adapter():
     """Ket qua trich o 1536 va o 3072 la hai thu khac nhau; cua mo hinh nen va
     mo hinh da huan luyen cung vay. Tron chung mot tep thi lan sau dung lai ban
     cu ma khong ai biet."""
-    t = (pathlib.Path("src") / "nhanh.py").read_text(encoding="utf-8")
+    t = (pathlib.Path("src") / "duong_ong" / "chay_duong_ong.py").read_text(encoding="utf-8")
     assert 'hau = "_hl" if a.adapter_trich else ""' in t
     assert 'f"trich_{a.tap}_{a.max_token}{hau}.jsonl"' in t

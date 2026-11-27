@@ -13,8 +13,8 @@ thach thuc khong do duoc thi khong duoc bao cao nhu da giai.
 """
 import pytest
 
-from src import do_van_xuoi as dv
-from src import sinh_bo_chan_doan as sb
+from src.do_luong import do_van_xuoi as dv
+from src.bo_du_lieu import sinh_bo_chan_doan as sb
 
 
 @pytest.fixture(scope="module")

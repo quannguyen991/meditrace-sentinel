@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử tự động cho Gói Chăm sóc Người bệnh QR (src/ho_so_benh_nhan_qr.py) và nâng cấp an toàn lịch uống thuốc."""
+"""Kiểm thử tự động cho Gói Chăm sóc Người bệnh QR (src/cong_cu_lam_sang/ho_so_benh_nhan_qr.py) và nâng cấp an toàn lịch uống thuốc."""
 
 import json
 import re
 import subprocess
 import sys
 
-from src.dan_do_benh_nhan import (
+from src.cong_cu_lam_sang.to_dan_do_benh_nhan import (
     CHE_DO_AN_UONG_BENH,
     GIAI_THICH_BENH_LY,
     phan_loai_lich_uong_thuoc,
     sinh_ban_dan_do_benh_nhan,
 )
-from src.ho_so_benh_nhan_qr import (
+from src.cong_cu_lam_sang.ho_so_benh_nhan_qr import (
     tao_goi_cham_soc_benh_nhan,
     xac_thuc_chu_ky_goi,
 )
@@ -120,7 +120,7 @@ def test_cli_build_tu_stdin():
         "danh_sach_thuoc": ["Ciprofloxacin 500mg ngày 2 lần sau ăn"],
     }
     proc = subprocess.run(
-        [sys.executable, "-m", "src.ho_so_benh_nhan_qr", "--build", "--secret", "cli-key"],
+        [sys.executable, "-m", "src.cong_cu_lam_sang.ho_so_benh_nhan_qr", "--build", "--secret", "cli-key"],
         input=json.dumps(payload, ensure_ascii=False),
         text=True,
         capture_output=True,

@@ -22,8 +22,10 @@ from pathlib import Path
 GOC = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(GOC))
 
-from src import cham_he_thong, du_lieu, khoa_bang_chung  # noqa: E402
-from src.cham_he_thong import CHI_TIET_THUOC_CHAM, _nd, dap_an, ghep_menh_de  # noqa: E402
+from src.do_luong import cham_he_thong as cham_he_thong  # noqa: E402
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.duong_ong import b4_kiem_can_cu as khoa_bang_chung
+from src.do_luong.cham_he_thong import CHI_TIET_THUOC_CHAM, _nd, dap_an, ghep_menh_de  # noqa: E402
 
 
 def nap(thu_muc, tap, nhanh):
@@ -119,7 +121,7 @@ def soi_cap(goc, kq, nhanh):
 
 def ly_do_hong(ca, r):
     """None neu ban nay dung. Nguoc lai tra chuoi ly do."""
-    from src.cham_he_thong import (_con_hieu_luc, _la_bn_gold, _muc, _than_khang_dinh_di_ung_bn,
+    from src.do_luong.cham_he_thong import (_con_hieu_luc, _la_bn_gold, _muc, _than_khang_dinh_di_ung_bn,
                                    dung_nguoi, do_giong, NGUONG_GHEP)
     if r is None:
         return "khong co ket qua"

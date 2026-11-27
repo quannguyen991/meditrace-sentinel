@@ -5,8 +5,8 @@ Phep do nay khong dung thuoc do nao — dap an biet truoc. Nhung chinh vi the
 no phai duoc test hai chieu: bao DAT khi ban dung, bao HONG khi ban sai. Mot
 phep kiem khong bao gio bao sai thi vo dung.
 """
-from src import do_van_xuoi as dvx
-from src import sinh_bo_chan_doan as sb
+from src.do_luong import do_van_xuoi as dvx
+from src.bo_du_lieu import sinh_bo_chan_doan as sb
 
 BO = sb.sinh_bo(3, seed=1)
 

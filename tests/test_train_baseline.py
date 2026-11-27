@@ -15,7 +15,7 @@ import json
 
 import pytest
 
-from src import train_baseline as tb
+from src.huan_luyen import huan_luyen_sft as tb
 
 
 class TokGia:
@@ -131,7 +131,7 @@ def test_loi_nhac_he_thong_la_CUA_MINH_khong_chep_cua_cuoc_thi():
     Test nay giu cho no khong bi chep lai. Doc tep goc neu con tren may; may
     nao khong co tep do thi bo qua phan doi chieu, nhung van kiem noi dung.
     """
-    from src import duong_dan
+    from src.he_thong import duong_dan as duong_dan
     s = tb.LOI_NHAC_HE_THONG
 
     goc = duong_dan.GOC_VAIC / "train.py"

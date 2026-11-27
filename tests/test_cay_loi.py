@@ -4,7 +4,7 @@ import random
 
 import pytest
 
-from src.danh_gia_khoa import phat_bieu_tu_dap_an
+from src.do_luong.danh_gia_khoa import phat_bieu_tu_dap_an
 from tools import cay_loi
 
 HOI = "\n".join([
@@ -82,7 +82,7 @@ def test_doi_chu_the():
 
 
 def test_dao_phu_dinh_doi_phu_dinh_co_hieu_luc():
-    from src.cham_he_thong import _phu_dinh_that
+    from src.do_luong.cham_he_thong import _phu_dinh_that
     for hat in range(20):
         moi, c = _cay("dao_phu_dinh", hat)
         p, goc = _theo_id(moi)[c.phat_bieu_id], _theo_id(_ps())[c.phat_bieu_id]

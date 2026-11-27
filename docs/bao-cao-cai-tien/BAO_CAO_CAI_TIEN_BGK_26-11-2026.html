@@ -73,7 +73,7 @@
 <td>
 • Bản cũ bị đính chính vẫn bị giữ: <b>11,48% → 0,80%</b> (bộ đính chính 60 ca).<br>
 • Ghi nhầm người ở bộ đổi chủ thể: <b>22,0% → 17,9%</b>.<br>
-• Ca mẫu hai bệnh nhân: dị ứng và triệu chứng của người thứ hai bị chặn khỏi hồ sơ anh Minh (đầu ra thật ở mục 2.3). Ca này cũng lộ một lỗi còn tồn tại.</td></tr>
+• Ca mẫu hai bệnh nhân: bệnh, thuốc, dị ứng và triệu chứng của người thứ hai đều bị chặn khỏi hồ sơ anh Minh và nằm ở mục Cần xác nhận (đầu ra thật ở mục 2.3).</td></tr>
 <tr><td><span class="tag req">YC 3</span><br><b>Kiểm tra tính độc lập của bộ dữ liệu</b></td>
 <td>
 • Mở rộng từ 200 lên 657 khuôn ca bệnh (21 hệ cơ quan), sinh lại 5.000 ca (bộ v2).<br>
@@ -83,6 +83,7 @@
 <td>
 • Tên khuôn chung giữa train và kiểm tra: <b>0</b>.<br>
 • Câu của tập phát triển trùng nguyên văn một câu trong train: <b>63,8% (v1) → 46,8% (v2)</b>.<br>
+• Bỏ sót tính riêng trên lượt nói <b>không trùng</b> với train: <b>14,0%</b> (v1); trên lượt trùng: 0/47.<br>
 • Tỷ lệ câu lặp trong toàn bộ: <b>76,92% → 47,37%</b> (mục tiêu 30% chưa đạt).<br>
 • Tập kiểm tra cuối (524 ca) <b>chưa mở</b>, để dành cho lần đo cuối.</td></tr>
 </tbody>
@@ -114,7 +115,7 @@
 <tr><td>Truy vết âm thanh</td><td>Mỗi lượt lưu mốc giây đầu/cuối; nút “Nghe lại” phát đúng đoạn (đệm ±0,5 giây); API từ chối dựng nháp (mã 409) khi còn lượt chưa gán vai.</td><td>YC 2</td></tr>
 <tr><td>Ca mẫu nhiều người nói</td><td><code>src/ca_mau_bgk.py</code>: bác sĩ–mẹ–bệnh nhi; hai bệnh nhân cùng phòng; bác sĩ–cụ ông–con gái.</td><td>YC 2</td></tr>
 <tr><td>Hàng đợi việc nền</td><td>Việc dựng nháp lưu trong SQLite, chạy lại sau khi máy chủ khởi động lại (tối đa 2 lần), không mất yêu cầu đang chờ.</td><td>Vận hành</td></tr>
-<tr><td>Kiểm thử</td><td>Bộ phép thử Python: 1.959 đạt, 0 lỗi (26/11).</td><td>Cả ba</td></tr>
+<tr><td>Kiểm thử</td><td>Bộ phép thử Python: 1.962 đạt, 0 lỗi (26/11).</td><td>Cả ba</td></tr>
 </tbody>
 </table>
 
@@ -168,7 +169,7 @@
 </tbody>
 </table>
 <div class="box warn">
-<p><b>Đọc kết quả.</b> Huấn luyện làm bỏ sót giảm khoảng 3,7 lần so với mô hình gốc. Adapter v3 không tốt hơn adapter v1 (chênh 7 mệnh đề, khoảng tin cậy chồng nhau). Có ba khả năng chưa tách được: (1) v3 mới qua 0,82 lượt dữ liệu; (2) 30 ca này sinh từ bộ v1, cùng phân phối với dữ liệu huấn luyện của v1; (3) dao động ngẫu nhiên khi chỉ có 30 ca. Khoảng Wilson coi các mệnh đề là độc lập nên còn hẹp hơn thực tế. Hệ thống tiếp tục dùng adapter v1.</p>
+<p><b>Đọc kết quả.</b> Huấn luyện làm bỏ sót giảm khoảng 3,7 lần so với mô hình gốc. Adapter v3 không tốt hơn adapter v1 (chênh 7 mệnh đề, khoảng tin cậy chồng nhau). Có ba khả năng chưa tách được: (1) v3 mới qua 0,82 lượt dữ liệu; (2) 30 ca này sinh từ bộ v1, cùng phân phối với dữ liệu huấn luyện của v1; (3) dao động ngẫu nhiên khi chỉ có 30 ca. Khoảng Wilson coi các mệnh đề là độc lập nên còn hẹp hơn thực tế. Hệ thống tiếp tục dùng adapter v1. Tính riêng trên lượt nói không trùng nguyên văn với train, bỏ sót là 14,0% (v1) và 15,0% (v3); xem mục 3.3.</p>
 </div>
 
 <h3>1.4. Đánh đổi giữa lỗi nghiêm trọng và bỏ sót</h3>
@@ -253,9 +254,9 @@
 <h3>2.3. Demo: hai bệnh nhân cùng trao đổi với bác sĩ (đầu ra thật của đường ống)</h3>
 <p class="sub">Ca <code>demo_hai_benh_nhan</code>, nhánh <code>C_khoa_hoi</code>, chạy lại ngày 26/11. Phần trích mệnh đề của ca mẫu được viết sẵn (để chạy không cần GPU, và để cố ý đưa vào lỗi gán nhầm), các bước 2–5 chạy thật bằng mã.</p>
 <div class="draft">[T2] Bệnh nhân (anh Minh): … tôi đau tức vùng thượng vị âm ỉ 5 hôm nay, hay ợ chua nóng rát sau ăn.
-[T3] Người thứ hai: … tôi là bệnh nhân sổ kế tiếp, tôi bị đái tháo đường đang uống metformin 500mg …
+[T3] Người khác: … tôi là bệnh nhân sổ kế tiếp, tôi bị đái tháo đường đang uống metformin 500mg …
 [T5] Bệnh nhân (anh Minh): Dạ tôi không dị ứng thuốc gì cả, chỉ có thói quen uống cà phê đặc buổi sáng.
-[T6] Người thứ hai: Còn tôi thì bị dị ứng cefuroxim phát ban đỏ khắp người … với lại đêm qua còn nôn hai lần nữa.
+[T6] Người khác: Còn tôi thì bị dị ứng cefuroxim phát ban đỏ khắp người … với lại đêm qua còn nôn hai lần nữa.
 [T7] Bác sĩ: … Khám anh Minh thấy ấn đau nhẹ thượng vị, bụng mềm, theo dõi viêm dạ dày trào ngược.</div>
 <table>
 <thead><tr><th>Mệnh đề (bước trích ghi chủ thể)</th><th>Kiểm căn cứ</th><th>Vị trí trong bản nháp</th></tr></thead>
@@ -265,11 +266,12 @@
 <tr><td>Dị ứng cefuroxim — trích ghi nhầm là <b>bệnh nhân</b> [T6]</td><td><b>K3 chặn</b>: đoạn dẫn nói về chính người kể</td><td><b>Cần xác nhận</b>, cảnh báo <code>WRONG_SUBJECT</code> mức cao</td></tr>
 <tr><td>Đêm qua nôn hai lần — trích ghi nhầm là <b>bệnh nhân</b> [T6]</td><td><b>K3 chặn</b></td><td><b>Cần xác nhận</b></td></tr>
 <tr><td>Theo dõi viêm dạ dày trào ngược [T7]</td><td><b>K4 chặn</b>: câu gốc chỉ nghi ngờ</td><td><b>Cần xác nhận</b></td></tr>
-<tr><td>Đái tháo đường, metformin 500mg (người thứ hai) [T3]</td><td>Qua</td><td>Tiền sử gia đình và xã hội, ghi là “<b>vợ</b>”</td></tr>
+<tr><td>Đái tháo đường, metformin 500mg — người nói và chủ thể là <b>người khác</b> [T3]</td><td>Qua</td><td><b>Cần xác nhận</b>: “thông tin của người khác, không phải bệnh nhân hay người nhà”</td></tr>
 </tbody>
 </table>
 <p>Câu hỏi làm rõ hệ thống sinh ra: “Các biểu hiện gồm: ‘dị ứng cefuroxim phát ban đỏ’, ‘đêm qua nôn hai lần’ là của bệnh nhân hay của người nhà ạ?” và “‘Theo dõi viêm dạ dày trào ngược’ đã được chẩn đoán/xác nhận chắc chắn hay mới là nghi ngờ ạ?”.</p>
-<div class="box warn"><p><b>Lỗi còn tồn tại, lộ ra từ chính ca mẫu này.</b> (1) Bệnh của người bệnh thứ hai được ghi vào mục tiền sử gia đình của anh Minh với nhãn “vợ”, vì hệ thống chỉ có hai loại người là bệnh nhân và người nhà; chưa có loại “người không liên quan”. Thông tin này không vào bệnh sử hay đơn thuốc của anh Minh, nhưng vẫn sai mục. (2) Thói quen uống cà phê đặc buổi sáng [T5] không được ghi; tầng cảnh báo có đánh dấu đoạn này là chưa ghi. Hai lỗi được ghi vào danh sách việc tiếp theo.</p></div>
+<div class="box ok"><p><b>Lỗi đã sửa ngày 26/11.</b> Bản chạy đầu ghi bệnh của người bệnh thứ hai vào mục tiền sử gia đình của anh Minh với nhãn “vợ”, vì hệ thống chỉ phân biệt bệnh nhân và người nhà. Đã thêm luật: khi người nói hoặc chủ thể là “người khác” (không phải bệnh nhân, người nhà hay nhân viên y tế), thông tin chuyển sang Cần xác nhận thay vì tiền sử gia đình (<code>src/sinh_benh_an.py</code>, phép thử <code>tests/test_nguoi_khac_khong_vao_tien_su_gia_dinh.py</code>). Lời người nhà kể bệnh của bố mẹ vẫn vào tiền sử gia đình như cũ.</p>
+<p><b>Còn tồn tại:</b> thói quen uống cà phê đặc buổi sáng [T5] không được ghi; tầng cảnh báo có đánh dấu đoạn này là chưa ghi.</p></div>
 <p>Hai ca mẫu còn lại: <b>bác sĩ – mẹ – bệnh nhi 6 tuổi</b> (mẹ kể sốt 4 ngày, bé đính chính “mới sốt từ chiều hôm qua”; mẹ dị ứng penicillin còn bé chưa ghi nhận dị ứng; lời dặn “nếu đêm nay sốt trên 39 độ…” giữ ở Cần xác nhận) và <b>bác sĩ – cụ ông – con gái</b> (mục 1.7). Ba ca được kiểm tự động trong <code>tests/test_demo_bac_si_nguoi_nha.py</code>.</p>
 
 <h3>2.4. Truy vết về văn bản và âm thanh gốc</h3>
@@ -331,6 +333,17 @@
 </tbody>
 </table>
 <div class="box warn"><p><b>Nguy cơ trùng lặp ngữ nghĩa mà Ban Giám khảo nêu là có thật.</b> Dù khuôn bệnh tách rời hoàn toàn, gần một nửa số câu của tập phát triển v2 vẫn xuất hiện nguyên văn trong train. Phần lớn là câu chào hỏi, câu đáp ngắn và các câu hỏi khai thác chung của bác sĩ, vốn lặp lại giữa mọi ca khám. Vì vậy chia theo khuôn mới chỉ bảo đảm <b>bệnh</b> là mới, chưa bảo đảm <b>cách nói</b> là mới. Đây là lý do cần thêm hội thoại thật (mục 3.5) để đo khả năng tổng quát.</p></div>
+<p><b>Bỏ sót tách theo câu trùng / không trùng.</b> Với 30 ca đo bỏ sót, mỗi mệnh đề đáp án được xếp vào nhóm “trùng” nếu mọi lượt dẫn của nó xuất hiện nguyên văn trong tập huấn luyện của chính mô hình đó, ngược lại là “không trùng” (<code>tools/do_bo_sot_theo_trung_lap.py</code>).</p>
+<table>
+<thead><tr><th>Mô hình</th><th>Nhóm lượt dẫn</th><th class="n">Mệnh đề</th><th class="n">Bỏ sót</th><th class="n">Tỷ lệ</th><th class="n">Khoảng 95%</th></tr></thead>
+<tbody>
+<tr><td>Adapter v1</td><td>Trùng với train v1</td><td class="n">47</td><td class="n">0</td><td class="n">0,0%</td><td class="n">0,0–7,6%</td></tr>
+<tr><td>Adapter v1</td><td>Không trùng</td><td class="n">257</td><td class="n">36</td><td class="n"><b>14,0%</b></td><td class="n">10,3–18,8%</td></tr>
+<tr><td>Adapter v3</td><td>Trùng với train v2</td><td class="n">18</td><td class="n">0</td><td class="n">0,0%</td><td class="n">0,0–17,6%</td></tr>
+<tr><td>Adapter v3</td><td>Không trùng</td><td class="n">286</td><td class="n">43</td><td class="n"><b>15,0%</b></td><td class="n">11,4–19,6%</td></tr>
+</tbody>
+</table>
+<p>Toàn bộ mệnh đề bị sót nằm ở lượt nói mô hình chưa từng thấy nguyên văn. Vì vậy con số đại diện cho khả năng tổng quát là <b>14–15%</b>, không phải 11,8%. Phần lớn lượt mang thông tin lâm sàng không trùng với train (257/304), nên trùng lặp chủ yếu nằm ở câu chào hỏi và câu đáp ngắn, không ở câu chứa triệu chứng.</p>
 
 <h3>3.4. Độ lặp câu trong toàn bộ dữ liệu</h3>
 <table>
@@ -368,7 +381,7 @@
 <tr><td>Adapter v3 chưa tốt hơn v1; chỉ đo 30 ca</td><td>Đo trên toàn bộ 551 ca phát triển v2; huấn luyện v3 đủ một lượt dữ liệu; so v1/v3/DPO trên cùng tập</td></tr>
 <tr><td>Lỗi nguy hiểm lọt vào thân bản nháp 42,9–45,2%</td><td>Đo lại trên đầu ra adapter mới; bổ sung luật cho nhóm thuốc (chỉ 11% lỗi sai thuốc có cảnh báo đúng loại)</td></tr>
 <tr><td>Cảnh báo bỏ sót chỉ phủ 12,5%</td><td>Sửa cách tìm đoạn chưa ghi trong lượt đã có mệnh đề khác dẫn</td></tr>
-<tr><td>Chưa có loại người “không liên quan” (ca hai bệnh nhân)</td><td>Thêm loại chủ thể này; đưa thông tin của họ sang Cần xác nhận thay vì tiền sử gia đình</td></tr>
+<tr><td>Vai “người khác” phụ thuộc bước gán vai người nói; nếu gán nhầm thành người nhà thì thông tin vẫn vào tiền sử gia đình</td><td>Thêm câu hỏi xác nhận vai khi người nói tự xưng “bệnh nhân”, “sổ kế tiếp”</td></tr>
 <tr><td>Gần nửa câu tập phát triển trùng nguyên văn với train</td><td>Đa dạng hoá câu chào hỏi và câu đáp ngắn; báo riêng kết quả trên câu không trùng</td></tr>
 <tr><td>Tri thức thuốc và 457 khuôn mới chưa được bác sĩ duyệt</td><td>Nhờ bác sĩ duyệt trước khi bật mức “ổn định”</td></tr>
 <tr><td>Chưa thử với bác sĩ thật</td><td>Thử có hướng dẫn với bác sĩ, đo thời gian duyệt và số lần sửa</td></tr>
@@ -384,9 +397,10 @@
 <tr><td>Lỗi thật trên bộ thử thách</td><td><code>python -m src.do_canh_bao</code> · <code>docs/ket-qua/canh-bao-moc-0.md</code></td></tr>
 <tr><td>Độ lặp câu</td><td><code>python -m src.do_lap_cau data/hoi_thoai_viet_v2_mo_rong.jsonl [--do-dai-tu 8]</code></td></tr>
 <tr><td>Jaccard khuôn, 10 kịch bản ngoài khuôn</td><td><code>src/kiem_nghiem_ngoai_khuon.py</code> (<code>tinh_ma_tran_trung_lap_train_test</code>, <code>chay_kiem_nghiem_ngoai_khuon</code>)</td></tr>
+<tr><td>Bỏ sót theo câu trùng/không trùng</td><td><code>python -m tools.do_bo_sot_theo_trung_lap --dap-an data/viet_phat_trien.jsonl "v1=&lt;trích v1&gt;:data/viet_train.jsonl" "v3=&lt;trích v3&gt;:data/viet_train_v2.jsonl"</code></td></tr>
 <tr><td>Ca mẫu</td><td><code>src/ca_mau_bgk.py</code> · <code>tests/test_demo_bac_si_nguoi_nha.py</code></td></tr>
 <tr><td>DPO</td><td><code>src/train_dpo.py</code> · <code>docs/ket-qua/dpo-v3.md</code></td></tr>
-<tr><td>Kiểm thử Python</td><td id="pytest-line"><code>python -m pytest tests</code> — chạy 26/11: 1.959 đạt, 0 lỗi, 25 bỏ qua (cần GPU/mô hình)</td></tr>
+<tr><td>Kiểm thử Python</td><td id="pytest-line"><code>python -m pytest tests</code> — chạy 26/11: 1.962 đạt, 0 lỗi, 25 bỏ qua (cần GPU/mô hình)</td></tr>
 </tbody>
 </table>
 

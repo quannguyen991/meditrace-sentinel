@@ -3,8 +3,8 @@
 gioi tinh theo tu nguyen ven, doxycycline, benh gan nen khong bia so lieu."""
 import pytest
 
-from src.hieu_chinh_lieu import QUY_TAC_THAN, _tap_goc_thuoc_tu_danh_sach, kiem_tra_hieu_chinh_lieu
-from src.ocr_lam_sang import boc_tach_phieu_cu
+from src.cong_cu_lam_sang.hieu_chinh_lieu import QUY_TAC_THAN, _tap_goc_thuoc_tu_danh_sach, kiem_tra_hieu_chinh_lieu
+from src.cong_cu_lam_sang.doc_phieu_xet_nghiem import boc_tach_phieu_cu
 
 
 # ---------------------------------------------------------------- CrCl vs eGFR

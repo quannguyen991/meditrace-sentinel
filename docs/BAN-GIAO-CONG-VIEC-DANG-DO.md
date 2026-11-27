@@ -31,7 +31,7 @@ Câu trả lời trong `Q_AND_A_BAN_GIAM_KHAO.md` đã được đồng bộ v�
 
 ## 3. Huấn luyện trích xuất: cấu hình và trạng thái
 
-**Lệnh gốc (từ `src/train_baseline.py`):**
+**Lệnh gốc (từ `src/huan_luyen/huan_luyen_sft.py`):**
 `--model Qwen/Qwen3-4B --nhiem-vu trich --do-dai 4096 --hau-to=-v2`
 QLoRA 4-bit nf4, LoRA r=16, alpha=32; batch 1, gradient accumulation 16; learning rate 2e-4; gradient checkpointing bật; lưu và đánh giá mỗi 50 bước; giữ tối đa 2 checkpoint.
 
@@ -108,7 +108,7 @@ Log cũ `train-4b.log` và `safe-stop.log` vẫn giữ lại để tham khảo.
 - [ ] Cập nhật địa chỉ HoaiĐức mới `100.108.54.12` ở các nơi còn ghi địa chỉ cũ (`BAN-GIAO-ANTIGRAVITY.md`, ghi chú, lệnh `ssh`/`scp`/đường hầm 8766).
 
 **C. Huấn luyện và đánh giá (tôi thực hiện, sau A)**
-- [ ] Sửa `MODEL_CHINH` trong `src/duong_dan.py` từ `Qwen/Qwen3-8B` thành `Qwen/Qwen3-4B` và ghi lý do vào phần phương pháp (mọi lần chạy thật đều dùng 4B; Qwen3-8B chưa huấn luyện kém 4B đã huấn luyện, xem mục 7). Chờ chủ đề tài đồng ý.
+- [ ] Sửa `MODEL_CHINH` trong `src/he_thong/duong_dan.py` từ `Qwen/Qwen3-8B` thành `Qwen/Qwen3-4B` và ghi lý do vào phần phương pháp (mọi lần chạy thật đều dùng 4B; Qwen3-8B chưa huấn luyện kém 4B đã huấn luyện, xem mục 7). Chờ chủ đề tài đồng ý.
 - [ ] Sửa `run_capped.py` theo ngân sách VRAM thực tế (90%).
 - [ ] Sửa loss theo đoạn (nếu D-A), kiểm tra VRAM trên một batch, so sánh loss với bản gốc.
 - [ ] Resume từ checkpoint-100 đến 200 bước; lưu checkpoint-150 và 200.

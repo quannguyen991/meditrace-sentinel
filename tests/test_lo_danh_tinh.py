@@ -9,7 +9,7 @@ import random
 
 import pytest
 
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 KHONG_DICH_DANH = {"bệnh nhân", "người nhà"}
 

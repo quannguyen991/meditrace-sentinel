@@ -22,7 +22,7 @@ Day la loi im lang thu BA cung ho trong du an nay:
 """
 import pytest
 
-from src import bakeoff
+from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
 
 
 def _ca(id, so_luot):
@@ -114,7 +114,7 @@ def test_chay_tiep_bo_ban_ghi_lech_so_luot(tmp_path, capsys):
         goi["da_co"] = dict(da_co)
         return kq
 
-    import src.bakeoff as bk
+    from src.huan_luyen import chon_mo_hinh_bakeoff as bk
     that = bk._vong_trich
     bk._vong_trich = _gia
     try:
@@ -137,7 +137,7 @@ def test_chay_tiep_giu_ban_ghi_khop(tmp_path):
         goi["da_co"] = dict(da_co)
         return kq
 
-    import src.bakeoff as bk
+    from src.huan_luyen import chon_mo_hinh_bakeoff as bk
     that = bk._vong_trich
     bk._vong_trich = _gia
     try:

@@ -34,7 +34,7 @@ MAX_TOKEN = 3072
 
 def goi():
     for src in sorted(VAO.glob("**/src")):
-        if (src / "bakeoff.py").is_file():
+        if (src / "huan_luyen" / "chon_mo_hinh_bakeoff.py").is_file():
             return src.parent
     sys.exit("khong thay dataset")
 
@@ -48,7 +48,7 @@ CA = [json.loads(x) for x in open(GOC / "data" / "thach_thuc_phuong_ngu_phat_tri
 
 def prompt_cua(tok, m):
     # Giong het bakeoff._vong_trich voi vi_du=True (nhanh.py goi mac dinh).
-    from src.bakeoff import HUONG_DAN, VI_DU, danh_so_luot
+    from src.huan_luyen.chon_mo_hinh_bakeoff import HUONG_DAN, VI_DU, danh_so_luot
     danh_so, _ = danh_so_luot(m["input"])
     loi_nhac = HUONG_DAN + f"\n\n{VI_DU}\n\nBây giờ đến lượt bạn."
     msgs = [{"role": "user", "content": f"{loi_nhac}\n\nHội thoại:\n{danh_so}"}]
@@ -91,7 +91,7 @@ def chay_hf(ten, card, nf4, ep):
     nap = time.time() - t0
     prefix_fn = None
     if ep:
-        from src.bakeoff import _ep_json
+        from src.huan_luyen.chon_mo_hinh_bakeoff import _ep_json
         prefix_fn = _ep_json(tok)
         if prefix_fn is None:
             return {"cau_hinh": ten, "loi": "khong nap duoc lm-format-enforcer"}

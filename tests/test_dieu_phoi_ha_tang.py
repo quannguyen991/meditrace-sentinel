@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Test suite cho Trụ cột 4: Hạ tầng Điều phối Luồng Toàn diện trong tests/test_dieu_phoi_ha_tang.py."""
 import pytest
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
-from src.phat_bieu import PhatBieu
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def test_dieu_phoi_luong_toan_dien_end_to_end():

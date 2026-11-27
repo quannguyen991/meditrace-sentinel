@@ -2,11 +2,11 @@
 """Bo sot trong cap hoi-dap: "BS: Chị có dị ứng thuốc gì không?" / "BN: Dạ có ạ." ma khong
 menh de nao dan toi cau tra loi. `doan_chua_ghi` khong thay cap nay (bo cau hoi, va cau
 tra loi khong co tu noi dung)."""
-from src import khoa_bang_chung as kbc
+from src.duong_ong import b4_kiem_can_cu as kbc
 from src.canh_bao import bo_sot
 from src.canh_bao.loai import LOAI, THU_NGHIEM
 from src.canh_bao.phat_hien import NguCanh
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = "Bác sĩ: Chị có dị ứng thuốc gì không?\nBệnh nhân: Dạ có ạ."
 

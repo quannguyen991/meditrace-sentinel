@@ -1,20 +1,32 @@
 # -*- coding: utf-8 -*-
-"""Canh bao KIEN THUC LAM SANG trong lop canh bao: lieu vuot tran, tuong tac thuoc, ke thuoc
-nguoi benh dang di ung (25/11/2026).
+"""[Lớp cảnh báo]
+Làm gì   : Cảnh báo theo kiến thức lâm sàng: liều vượt trần ngày, tương tác thuốc, kê thuốc
+           cho người đang dị ứng.
+Vào → Ra : ngữ cảnh hội thoại + các dòng bản nháp → danh sách CanhBao về thuốc
+Đọc từ   : quet() chạy các luật; lieu_ngay_mg() tính liều ngày theo mg
+Mục lục (các hàm/lớp chính):
+  quet()  Quét kiến thức lâm sàng: quá liều, tương tác, dị ứng
+Gọi tới  : canh_bao/loai, canh_bao/phat_hien, cong_cu_lam_sang/canh_bao_tuong_tac_thuoc,
+           cong_cu_lam_sang/di_ung_cheo, cong_cu_lam_sang/tri_thuc_thuoc
+Dùng bởi : canh_bao/gop, he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Cảnh báo KIẾN THỨC LÂM SÀNG trong lớp cảnh báo: liều vượt trần, tương tác thuốc, kê thuốc
+người bệnh đang dị ứng (25/11/2026).
 
-Truoc ngay nay cac kiem tra nay chi nam o truong `lam_sang_nang_cao` cua `dich_vu` — mot he
-song song khong co ma, khong co muc tin cay, khong di qua cach gop canh bao. Gio chung la ma
-cua lop canh bao, nhom CLINICAL_KNOWLEDGE, tin cay THU_NGHIEM (chi hien, khong doi trang thai).
+Trước ngày này các kiểm tra này chỉ nằm ở trường `lam_sang_nang_cao` của `dich_vu` — một hệ
+song song không có mã, không có mức tin cậy, không đi qua cách gộp cảnh báo. Giờ chúng là mã
+của lớp cảnh báo, nhóm CLINICAL_KNOWLEDGE, tin cậy THU_NGHIEM (chỉ hiện, không đổi trạng thái).
 
-So lieu (lieu toi da) doc tu `tri_thuc_thuoc`. Muc `da_duyet=false` -> ket luan CAN_XEM, khong
-bao gio cao hon. Bang tuong tac (`duoc_ly_lam_sang.BANG_TUONG_TAC_THUOC`) chua co nguon nen
-luon CAN_XEM. Chong chi dinh o day chi la "ke dung chat nguoi benh dang di ung" — khong can
-nguong nao; di ung cheo theo nhom (penicillin -> amoxicillin) can tri thuc co nguon, chua lam.
+Số liệu (liều tối đa) đọc từ `tri_thuc_thuoc`. Mục `da_duyet=false` -> kết luận CAN_XEM, không
+bao giờ cao hơn. Bảng tương tác (`duoc_ly_lam_sang.BANG_TUONG_TAC_THUOC`) chưa có nguồn nên
+luôn CAN_XEM. Chống chỉ định ở đây chỉ là "kê đúng chất người bệnh đang dị ứng" — không cần
+ngưỡng nào; dị ứng chéo theo nhóm (penicillin -> amoxicillin) cần tri thức có nguồn, chưa làm.
 """
 import re
 from typing import List, Optional
 
-from src import tri_thuc_thuoc
+from src.cong_cu_lam_sang import tri_thuc_thuoc as tri_thuc_thuoc
 from src.canh_bao.loai import CAN_XEM, CAO, NGHI_RUI_RO, THAP, TRUNG, CanhBao, muc_do
 from src.canh_bao.phat_hien import NguCanh, _thuong
 
@@ -26,13 +38,16 @@ _MOI_GIO = re.compile(r"mỗi\s*" + _SO + r"\s*(?:giờ|tiếng)|cách\s*" + _SO
 _MOT_LAN = re.compile(r"(?<!\w)(mỗi (sáng|tối|trưa|chiều)|một lần|ngày một lần|1 lần|uống một liều)(?!\w)")
 
 
+# ─── _so() — Đọc số từ chữ số hoặc số viết bằng chữ ───────────────────────────────────
 def _so(s: str) -> float:
     return float(_SO_CHU.get(s, None) or s.replace(",", "."))
 
 
+# ═══ lieu_ngay_mg() — Tính tổng liều một ngày bằng mg ═════════════════════════════════
+# Từ liều và số lần dùng; trả về None nếu không đọc được liều hoặc số lần.
 def lieu_ngay_mg(thuoc: Optional[dict], noi_dung: str) -> Optional[float]:
-    """Tong lieu mot ngay (mg) tu `thuoc` {"lieu", "so_lan"} hoac tu noi dung. None khi
-    khong doc duoc ca lieu lan so lan."""
+    """Tổng liều một ngày (mg) từ `thuoc` {"lieu", "so_lan"} hoặc từ nội dung. None khi
+    không đọc được cả liều lẫn số lần."""
     thuoc = thuoc or {}
     t_lieu = _thuong(str(thuoc.get("lieu") or "")) or _thuong(noi_dung)
     t_lan = _thuong(str(thuoc.get("so_lan") or "")) or _thuong(noi_dung)
@@ -52,22 +67,28 @@ def lieu_ngay_mg(thuoc: Optional[dict], noi_dung: str) -> Optional[float]:
     return None
 
 
+# ─── _con() — Kiểm tra mệnh đề còn hiệu lực ───────────────────────────────────────────
 def _con(p) -> bool:
     return getattr(p, "trang_thai", "còn hiệu lực") != "bị thay thế"
 
 
+# ─── _la_di_ung() — Kiểm tra mệnh đề nói về dị ứng ────────────────────────────────────
 def _la_di_ung(p) -> bool:
     return "dị ứng" in _thuong(p.noi_dung)
 
 
+# ─── _hoat_chat() — Lấy hoạt chất của thuốc trong mệnh đề ─────────────────────────────
+# Tra bảng tri thức thuốc.
 def _hoat_chat(p) -> Optional[str]:
     ten = (getattr(p, "thuoc", None) or {}).get("ten") or ""
     return tri_thuc_thuoc.hoat_chat(ten) if ten else tri_thuc_thuoc.hoat_chat(p.noi_dung)
 
 
+# ─── _thuoc_dang_dung() — Liệt kê thuốc người bệnh đang dùng hoặc được kê ─────────────
+# Bỏ dòng dị ứng, phủ định, bị thay thế và của người khác.
 def _thuoc_dang_dung(ps) -> list:
-    """(hoat chat, phat bieu) cua thuoc benh nhan dang dung hoac duoc ke — khong tinh dong di
-    ung, dong phu dinh, dong bi thay the, dong cua nguoi khac."""
+    """(hoạt chất, phát biểu) của thuốc bệnh nhân đang dùng hoặc được kê — không tính dòng dị
+    ứng, dòng phủ định, dòng bị thay thế, dòng của người khác."""
     ra = []
     for p in ps:
         if not _con(p) or getattr(p, "phu_dinh", False) or _la_di_ung(p) or getattr(p, "chu_the_id", 0) != 0:
@@ -78,16 +99,20 @@ def _thuoc_dang_dung(ps) -> list:
     return ra
 
 
+# ─── _cb() — Dựng một cảnh báo kiến thức lâm sàng ─────────────────────────────────────
 def _cb(ma, p, ctx, ly_do, ket_luan, loai_tt="thuoc", trich=None):
     return CanhBao(ma=ma, phat_bieu_id=p.id, luot=ctx.dan(p), trich=trich or [p.noi_dung], ly_do=ly_do,
                    ket_luan=ket_luan, bat_dinh=TRUNG, bo_phat_hien=f"lam_sang:{ma.lower()}",
                    muc_do=muc_do(ma, loai_tt), loai_tt=loai_tt)
 
 
+# ═══ quet() — Quét kiến thức lâm sàng: quá liều, tương tác, dị ứng ════════════════════
+# Sinh DOSE_OVER_MAX, DRUG_INTERACTION, CONTRAINDICATION, CROSS_ALLERGY; số chưa duyệt
+# chỉ ở mức cần xem.
 def quet(ctx: NguCanh, ps) -> List[CanhBao]:
     ra: List[CanhBao] = []
     dang_dung = _thuoc_dang_dung(ps)
-    # 1. lieu vuot tran (nguoi lon; tre em can can nang — o kiem_duyet_bhyt)
+    # 1. liều vượt trần (người lớn; trẻ em cần cân nặng — ở kiem_duyet_bhyt)
     for hc, p in dang_dung:
         l = tri_thuc_thuoc.lieu_toi_da(hc, "nguoi_lon")
         ngay = lieu_ngay_mg(getattr(p, "thuoc", None), p.noi_dung)
@@ -97,9 +122,9 @@ def quet(ctx: NguCanh, ps) -> List[CanhBao]:
                       f"“{p.noi_dung}” = {ngay:g} mg/ngày, vượt mức tối đa người lớn {l.gia_tri:g} {l.don_vi} của "
                       f"{hc}" + ("" if l.da_duyet else " (số chưa được duyệt — chỉ để bác sĩ xem lại)") + ".",
                       NGHI_RUI_RO if l.da_duyet else CAN_XEM))
-    # 2. tuong tac thuoc (bang chua co nguon -> luon CAN_XEM)
+    # 2. tương tác thuốc (bảng chưa có nguồn -> luôn CAN_XEM)
     if len(dang_dung) >= 2:
-        from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine as Dl
+        from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine as Dl
         theo_hc = {}
         for hc, p in dang_dung:
             theo_hc.setdefault(hc, p)
@@ -111,12 +136,12 @@ def quet(ctx: NguCanh, ps) -> List[CanhBao]:
             ra.append(_cb("DRUG_INTERACTION", p2, ctx,
                           f"{h1} (dòng #{p1.id}) và {h2} (dòng #{p2.id}): {tt.muc_do} — {tt.hau_qua}. "
                           "Bảng tương tác chưa được duyệt nguồn.", CAN_XEM, trich=[p1.noi_dung, p2.noi_dung]))
-    # 3. ke / dung dung chat nguoi benh dang di ung (khang dinh)
+    # 3. kê / dùng đúng chất người bệnh đang dị ứng (khẳng định)
     di_ung = []
     di_ung_tho = []
     for p in ps:
         if _con(p) and _la_di_ung(p) and not getattr(p, "phu_dinh", False) and getattr(p, "chu_the_id", 0) == 0:
-            # Chi ve ngay sau "dị ứng": "dị ứng penicillin, đang dùng augmentin" -> penicillin.
+            # Chỉ vế ngay sau "dị ứng": "dị ứng penicillin, đang dùng augmentin" -> penicillin.
             sau = re.sub(r".*?dị ứng\s*(với\s*)?", "", _thuong(p.noi_dung), count=1)
             ve_dau = re.split(r"[,;.]|(?<!\w)(đang|nhưng|còn|và)(?!\w)", sau)[0].strip()
             hc = tri_thuc_thuoc.hoat_chat(ve_dau)
@@ -128,17 +153,17 @@ def quet(ctx: NguCanh, ps) -> List[CanhBao]:
     for hc_du, p_du in di_ung:
         for hc, p in dang_dung:
             if hc == hc_du or any(hc_du in t for t in tri_thuc_thuoc.ten_cua(hc)):
-                # Anh xa biet duoc -> hoat chat cung la tri thuc chua duyet: CAN_XEM cho toi khi ca
-                # hai muc da_duyet (ra soat 25/11).
+                # Ánh xạ biết được -> hoạt chất cũng là tri thức chưa duyệt: CAN_XEM cho tới khi cả
+                # hai mục da_duyet (rà soát 25/11).
                 duyet = all((tri_thuc_thuoc._theo_hoat_chat().get(x) or {}).get("da_duyet") for x in (hc, hc_du))
                 cap_da_bao_truc_tiep.add((p.id, p_du.id))
                 ra.append(_cb("CONTRAINDICATION", p, ctx,
                               f"“{p.noi_dung}” chứa {hc_du}, nhưng dòng #{p_du.id} ghi người bệnh dị ứng {hc_du}.",
                               NGHI_RUI_RO if duyet else CAN_XEM, loai_tt="di_ung", trich=[p.noi_dung, p_du.noi_dung]))
 
-    # 4. di ung cheo theo nhom ATC / chuoi nhanh hoa hoc (CROSS_ALLERGY, khong phat CONTRAINDICATION)
+    # 4. dị ứng chéo theo nhóm ATC / chuỗi nhánh hoá học (CROSS_ALLERGY, không phát CONTRAINDICATION)
     if di_ung_tho:
-        from src.di_ung_cheo import CHONG_CHI_DINH as _DU_CAM, kiem_tra_di_ung_cheo
+        from src.cong_cu_lam_sang.di_ung_cheo import CHONG_CHI_DINH as _DU_CAM, kiem_tra_di_ung_cheo
         thuoc_theo_pb = []
         for p in ps:
             if not _con(p) or getattr(p, "phu_dinh", False) or _la_di_ung(p) or getattr(p, "chu_the_id", 0) != 0:

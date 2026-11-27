@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src import nap_vietmed as nv
+from src.bo_du_lieu import nap_vietmed as nv
 
 
 def _d(text, spk="VietMed_007_a", f="VietMed_007/1.ogg"):

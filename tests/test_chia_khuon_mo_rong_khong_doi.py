@@ -13,9 +13,9 @@ BANG vao tap train. Mo hinh huan luyen tren bo do roi danh gia tren `viet_phat_t
 Cach sua (xem Task F2 trong ke hoach): khuon moi di vao nhom RIENG, khong chung nhom
 voi khuon 101-200. Phep thu nay phai PASS truoc khi sinh bo v2 hay huan luyen tren no.
 """
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src import tach_tap_viet as tt
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tt
 
 
 def _goc():
@@ -24,7 +24,7 @@ def _goc():
 
 def _tat():
     """Kho day du (200 goc + khuon mo rong), cung nguon voi bo sinh va buoc chia."""
-    from src import kho_khuon
+    from src.bo_du_lieu import kho_khuon as kho_khuon
     return [b["ten"] for b in kho_khuon.ds_khuon(True)]
 
 
@@ -49,7 +49,7 @@ def test_bang_tap_khuon_mo_rong_giu_tap_cua_200_cu():
 
 
 def test_khuon_moi_chia_10_phan_tram_phat_trien_va_kiem_tra():
-    from src import kho_khuon
+    from src.bo_du_lieu import kho_khuon as kho_khuon
     p = tt.phan_khuon(_tat())
     for d, ten_dot in kho_khuon.thanh_vien_dot().items():
         n = len(ten_dot)

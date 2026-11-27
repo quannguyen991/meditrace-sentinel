@@ -16,24 +16,24 @@ from src.audio.sim2real_v2 import (
     do_duong_cong_do_ben_nhieu_asr,
     tinh_chi_so_alert_fatigue,
 )
-from src.can_lam_sang import ParaclinicalCorrelator
-from src.chuan_hoa_don_vi_xet_nghiem import (
+from src.cong_cu_lam_sang.doi_soat_can_lam_sang import ParaclinicalCorrelator
+from src.cong_cu_lam_sang.chuan_hoa_don_vi_xet_nghiem import (
     chuan_hoa_creatinine,
     chuan_hoa_du_lieu_xet_nghiem,
     chuan_hoa_glucose,
     chuan_hoa_urea,
 )
-from src.dich_vu import AmThanh, Loi, May, _them_canh_bao
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator, _trich_danh_sach_thuoc_hop_le
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine
-from src.fhir_exporter import FHIRExporter
-from src.guardrails import ASRQualityGuardrail, tao_khoa_am_vi_vung_mien
-from src.hieu_chinh_lieu import kiem_tra_hieu_chinh_lieu
-from src.khu_dinh_danh import ClinicalDeidentifier
-from src.kiem_duyet_bhyt_va_bo_sot import BHYTXmlPreChecker, xuat_goi_xml_1_5_qd130
-from src.ocr_lam_sang import boc_tach_phieu_cu
-from src.phat_bieu import PhatBieu
-from src.worm_audit_log import WormAuditLogger
+from src.he_thong.dich_vu_http import AmThanh, Loi, May, _them_canh_bao
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator, _trich_danh_sach_thuoc_hop_le
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
+from src.he_thong.rao_chan_an_toan import ASRQualityGuardrail, tao_khoa_am_vi_vung_mien
+from src.cong_cu_lam_sang.hieu_chinh_lieu import kiem_tra_hieu_chinh_lieu
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
+from src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot import BHYTXmlPreChecker, xuat_goi_xml_1_5_qd130
+from src.cong_cu_lam_sang.doc_phieu_xet_nghiem import boc_tach_phieu_cu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
+from src.he_thong.nhat_ky_ky_duyet_worm import WormAuditLogger
 
 
 # ==============================================================================

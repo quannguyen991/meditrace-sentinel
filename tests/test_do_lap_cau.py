@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from src import do_lap_cau as dl
-from src import duong_dan
+from src.do_luong import do_lap_cau as dl
+from src.he_thong import duong_dan as duong_dan
 
 
 def _ca(*dong):

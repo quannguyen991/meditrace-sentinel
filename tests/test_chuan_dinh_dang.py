@@ -18,8 +18,8 @@ from pathlib import Path
 
 import pytest
 
-from src import chuan_dinh_dang as cd
-from src import sinh_benh_an
+from src.do_luong import chuan_dinh_dang as cd
+from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
 
 
 # -------------------------------------------- PHEP THU CONG BANG

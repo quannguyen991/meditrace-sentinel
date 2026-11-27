@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Canh phien ban bo cham 2026-09-22: ma loi thoi gian, ba ma con cua sai_muc,
 phu dinh o dau cau, va loi ghep cheo hai ban cung noi dung khac phu dinh."""
-from src import cham_he_thong as ch
+from src.do_luong import cham_he_thong as ch
 
 
 def _d(noi_dung, **kw):

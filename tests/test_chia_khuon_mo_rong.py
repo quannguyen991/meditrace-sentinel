@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Kiem thu chia tap khuon mo rong doc lap (Task F2)."""
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src import tach_tap_viet as tt
-from src import khuon_mo_rong as kmr
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tt
+from src.bo_du_lieu import khuon_mo_rong as kmr
 
 
 def _goc():

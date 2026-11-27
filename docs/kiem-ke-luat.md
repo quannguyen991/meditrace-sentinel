@@ -1,6 +1,6 @@
 # Kiểm kê mô-đun src/ (sinh bằng `python -m tools.kiem_ke_luat`)
 
-Tổng 142 mô-đun; 67 nằm trên luồng chính (bao đóng nhập từ `src/dich_vu.py`).
+Tổng 142 mô-đun; 67 nằm trên luồng chính (bao đóng nhập từ `src/he_thong/dich_vu_http.py`).
 
 Danh sách dưới đây chỉ để người dùng quyết; **không xoá gì tự động**. Một mô-đun không ai nhập vẫn có thể là lệnh chạy độc lập (`python -m src.x`).
 

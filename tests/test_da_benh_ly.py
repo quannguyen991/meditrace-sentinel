@@ -2,7 +2,7 @@
 """Test suite cho Trụ cột 3: Động cơ Đa bệnh lý trong tests/test_da_benh_ly.py."""
 import random
 import pytest
-from src.da_benh_ly import MultimorbidityEngine, BENH_NEN_MAN_TINH
+from src.bo_du_lieu.sinh_ca_da_benh_ly import MultimorbidityEngine, BENH_NEN_MAN_TINH
 
 
 def test_tao_ca_da_benh_ly_nguoi_lon_co_benh_nen():

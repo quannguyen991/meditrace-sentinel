@@ -306,13 +306,13 @@ def tao_bao_cao_word():
         " create mode 100644 docs/tai-lieu/hinh/flow-5-so-sanh-doi-dau-chatgpt-vs-meditrace.png\n"
         " create mode 100644 docs/tai-lieu/hinh/flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png\n"
         " create mode 100644 docs/tai-lieu/hinh/flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png\n"
-        " create mode 100644 src/dieu_phoi_ha_tang.py\n"
-        " create mode 100644 src/guardrails.py\n"
-        " create mode 100644 src/duoc_ly_lam_sang.py\n"
-        " create mode 100644 src/thang_diem_lam_sang.py\n"
-        " create mode 100644 src/can_lam_sang.py\n"
-        " create mode 100644 src/dan_do_benh_nhan.py\n"
-        " create mode 100644 src/fhir_exporter.py\n"
+        " create mode 100644 src/he_thong/dieu_phoi_cac_chot_an_toan.py\n"
+        " create mode 100644 src/he_thong/rao_chan_an_toan.py\n"
+        " create mode 100644 src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py\n"
+        " create mode 100644 src/cong_cu_lam_sang/thang_diem_nguy_co.py\n"
+        " create mode 100644 src/cong_cu_lam_sang/doi_soat_can_lam_sang.py\n"
+        " create mode 100644 src/cong_cu_lam_sang/to_dan_do_benh_nhan.py\n"
+        " create mode 100644 src/cong_cu_lam_sang/xuat_fhir_r4.py\n"
         " create mode 100644 tests/test_dieu_phoi_ha_tang.py\n"
         " create mode 100644 tests/test_guardrails.py\n"
         " create mode 100644 tests/test_duoc_ly_lam_sang.py\n"
@@ -408,7 +408,7 @@ def tao_bao_cao_word():
     # 6. CODE MINH CHỨNG AN TOÀN LÂM SÀNG
     add_heading_1(doc, "5. Minh chứng Đoạn Code Trọng tâm (Core Clinical Code)")
     
-    add_heading_2(doc, "5.1. Bôi đỏ Tên thuốc Âm vị Dân gian ASR (src/dieu_phoi_ha_tang.py)")
+    add_heading_2(doc, "5.1. Bôi đỏ Tên thuốc Âm vị Dân gian ASR (src/he_thong/dieu_phoi_cac_chot_an_toan.py)")
     add_code_block(
         doc,
         "def phan_tich_am_vi_thuoc(text: str) -> Tuple[str, List[Dict[str, Any]]]:\n"

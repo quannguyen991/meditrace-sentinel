@@ -3,8 +3,8 @@
 import json
 import random
 
-from src import du_lieu_trich
-from src import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def test_chi_bo_ban_SAO_giu_ly_do_kham_khong_co_ban_sinh_doi():

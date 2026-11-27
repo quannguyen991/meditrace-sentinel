@@ -7,9 +7,11 @@ import random
 
 import pytest
 
-from src import cham_he_thong as ch
-from src import du_lieu_trich, nhanh, thach_thuc
-from src import sinh_hoi_thoai_viet as sh
+from src.do_luong import cham_he_thong as ch
+from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
+from src.duong_ong import chay_duong_ong as nhanh
+from src.bo_du_lieu import sinh_bo_thach_thuc as thach_thuc
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 def _chay(cases, sua=None, ten="C_khoa_hoi"):

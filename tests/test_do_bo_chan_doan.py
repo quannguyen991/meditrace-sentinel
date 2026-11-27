@@ -5,8 +5,8 @@ Neu phep cham sai thi ca phep do sai theo. Moi phep kiem phai chung minh duoc
 ca hai chieu: bao DAT khi dung, va bao HONG khi sai. Mot phep kiem khong bao gio
 bao sai thi vo dung.
 """
-from src import do_bo_chan_doan as dbc
-from src import sinh_bo_chan_doan as sb
+from src.do_luong import do_bo_chan_doan as dbc
+from src.bo_du_lieu import sinh_bo_chan_doan as sb
 
 BO = sb.sinh_bo(3, seed=1)
 
@@ -268,7 +268,7 @@ def test_PHEP_KIEM_phu_du_moi_tinh_huong_cua_bo_sinh():
     Hau qua: `cham()` nem `KeyError` khi gap hai nhom do, tuc la chung CHUA BAO
     GIO duoc cham — va khong ai biet, vi khong ai chay toi do.
     """
-    from src import sinh_bo_chan_doan
+    from src.bo_du_lieu import sinh_bo_chan_doan as sinh_bo_chan_doan
     thieu = [b for b in sinh_bo_chan_doan.BAY if b not in dbc.PHEP_KIEM]
     assert not thieu, f"khong co phep kiem cho: {thieu}"
 

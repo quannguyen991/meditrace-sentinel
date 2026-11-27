@@ -3,7 +3,7 @@
 
 Ba test dau lay nguyen van tu ke hoach (Task 11 buoc 1).
 """
-from src import thuc_the
+from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
 
 HT = ("Bệnh nhân: Tôi uống thuốc A.\n"
       "Người nhà: Thuốc đó chồng tôi ngừng từ tuần trước rồi.\n"

@@ -16,7 +16,7 @@ le la giau mat dung cai can thay.
 """
 import pytest
 
-from src import do_quan_he as dq
+from src.do_luong import do_quan_he as dq
 
 
 def _ca(dap_an):

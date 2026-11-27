@@ -3,8 +3,8 @@
 (truoc day TypeError trong nhanh.chay_trung_gian -> /api/ho-so 500)."""
 import pytest
 
-from src import cong_rui_ro
-from src.ep_kieu_dau_vao import (chuan_hoa_du_lieu_xet_nghiem_dau_vao,
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.he_thong.ep_kieu_dau_vao import (chuan_hoa_du_lieu_xet_nghiem_dau_vao,
                                  chuan_hoa_thong_tin_benh_nhan, so_an_toan)
 
 

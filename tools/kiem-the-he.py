@@ -16,7 +16,7 @@ from pathlib import Path
 GOC = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(GOC))
 
-from src import van_tay_bo  # noqa: E402
+from src.bo_du_lieu import van_tay_bo as van_tay_bo  # noqa: E402
 
 
 def main() -> int:

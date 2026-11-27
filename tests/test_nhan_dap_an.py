@@ -11,8 +11,8 @@ import collections
 
 import pytest
 
-from src import sai_so
-from src import sinh_hoi_thoai_viet as sh
+from src.do_luong import khoang_tin_cay as sai_so
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
 
 
 @pytest.fixture(scope="module")
@@ -120,7 +120,7 @@ def test_tang_4_van_la_tang_4():
 def test_do_tang_quy_gan_DUNG_CHUNG_dinh_nghia(bo):
     """`menh_de_dap_an` chi bo them menh de khong co tu noi dung — tung tang
     khong duoc NHIEU hon `tang_menh_de`."""
-    from src import do_tang_quy_gan
+    from src.do_luong import do_tang_quy_gan as do_tang_quy_gan
     for m in bo[:120]:
         a = collections.Counter(
             t for t, _c, _g in do_tang_quy_gan.menh_de_dap_an(m))

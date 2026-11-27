@@ -10,7 +10,7 @@ import random
 
 import pytest
 
-from src import nhieu_asr as na
+from src.bo_du_lieu import nhieu_asr as na
 
 
 def test_bo_dau_bo_ca_chu_d():
@@ -99,11 +99,12 @@ def test_khong_khau_huan_luyen_nao_goi_nhieu_asr():
     import ast
     import pathlib
 
-    for ten in ("du_lieu_trich.py", "sinh_hoi_thoai_viet.py", "train_baseline.py",
-                "du_lieu.py", "tang_cuong.py"):
+    for ten in ("bo_du_lieu/du_lieu_huan_luyen_trich.py", "bo_du_lieu/sinh_hoi_thoai_viet.py",
+                "huan_luyen/huan_luyen_sft.py", "bo_du_lieu/nap_du_lieu.py", "bo_du_lieu/tang_cuong.py"):
         cay = ast.parse(pathlib.Path("src", ten).read_text(encoding="utf-8"))
         for nut in ast.walk(cay):
-            if isinstance(nut, ast.ImportFrom) and (nut.module or "").endswith("nhieu_asr"):
+            if isinstance(nut, ast.ImportFrom) and ((nut.module or "").endswith("nhieu_asr")
+                                                    or any(a.name == "nhieu_asr" for a in nut.names)):
                 pytest.fail(f"{ten} nhap khau nhieu_asr — bo lam nhieu chi de do")
             if isinstance(nut, ast.Import):
                 for a in nut.names:

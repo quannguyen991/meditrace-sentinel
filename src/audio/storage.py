@@ -1,4 +1,17 @@
-"""Durable, local session storage with audit logging."""
+"""[Âm thanh]
+Làm gì   : Lưu phiên âm thanh vào đĩa tại chỗ, bền vững qua các lần chạy, kèm nhật ký sự
+           kiện để kiểm toán.
+Vào → Ra : mã phiên + trường cần lưu → tệp JSON của phiên và dòng nhật ký jsonl
+Đọc từ   : class SessionStore lưu, nạp, cập nhật phiên và ghi nhật ký; class SessionNotFound
+           khi thiếu phiên
+Mục lục (các hàm/lớp chính):
+  class SessionStore     Kho lưu phiên âm thanh cục bộ kèm nhật ký kiểm toán
+  class SessionNotFound  Lỗi không tìm thấy phiên âm thanh
+Gọi tới  : audio/models
+Dùng bởi : audio/api, audio/pipeline, he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Lưu trữ phiên cục bộ, bền vững, kèm nhật ký kiểm toán."""
 
 from __future__ import annotations
 
@@ -12,10 +25,14 @@ from typing import Any, Iterable
 from .models import new_session, now_iso
 
 
+# ═══ class SessionNotFound — Lỗi không tìm thấy phiên âm thanh ════════════════════════
 class SessionNotFound(KeyError):
     pass
 
 
+# ═══ class SessionStore — Kho lưu phiên âm thanh cục bộ kèm nhật ký kiểm toán ═════════
+# Mỗi phiên một thư mục với session.json và audit.jsonl; ghi tệp qua tệp tạm để tránh
+# hỏng.
 class SessionStore:
     def __init__(self, root: str | Path):
         self.root = Path(root)

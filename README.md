@@ -51,12 +51,12 @@ lời thoại → 1. rút từng thông tin (AI) → 2. gom người → 3. cậ
 
 | Bước | Việc làm | Ai làm | Tệp mã |
 |---|---|---|---|
-| **1. Rút thông tin** | Đọc lời thoại và liệt kê từng thông tin lâm sàng, gọi là **mệnh đề**. Mỗi mệnh đề ghi: nội dung; thông tin này **nói về ai**; ai nói; chắc chắn hay chỉ nghi ngờ; có phủ định không ("không sốt"); là việc đã xảy ra, hay chỉ là giả định hoặc kế hoạch; thời gian; số thứ tự lượt nói làm căn cứ; và **câu trích nguyên văn**. | **Mô hình AI** (Qwen3-4B, chạy ngay trên máy) | `src/nhanh.py`, `src/phat_bieu.py` |
-| **2. Gom người** | Phân biệt **người nói** với **người được nói đến**. Ví dụ người con kể về bố thì thông tin thuộc về bố, không thuộc về người bệnh. | Chương trình theo luật cố định | `src/thuc_the.py` |
-| **3. Cập nhật trạng thái** | Khi người nói **tự sửa** ("một tuần… à không, mười ngày") thì bản cũ được đánh dấu "bị thay thế", **không xoá**. Khi hai thông tin theo thời gian đều đúng ("hôm qua đau, hôm nay hết") thì giữ cả hai. Khi hai người nói trái nhau mà chưa ai xác nhận thì đánh dấu **mâu thuẫn**. | Chương trình theo luật | `src/cap_nhat.py` |
-| **4. Kiểm căn cứ** | Đối chiếu từng thông tin với đúng lượt nói được dẫn. Sáu phép kiểm: (1) câu trích có thật trong lượt đó không; (2) nội dung có khớp không; (3) từ chỉ người có khớp với người được nhắc tới không; (4) mức chắc chắn có bị nâng lên không; (5) thời gian có xuất hiện trong lượt đó không; (6) liều thuốc có xuất hiện trong lượt đó không. | Chương trình theo luật | `src/khoa_bang_chung.py` |
-| **5. Xếp chỗ** | Mỗi thông tin vào một trong ba chỗ: **thân bản nháp**; mục **"Cần xác nhận"** (kèm lý do, để bác sĩ xem lại); hoặc **bị loại** (vẫn lưu vết). Sau đó bản nháp được viết ra theo mẫu câu cố định. | Chương trình theo luật | `src/cong_rui_ro.py`, `src/canh_bao/` |
-| *Phụ* | Gợi ý tối đa 3 câu hỏi để bác sĩ hỏi lại người bệnh. | Chương trình | `src/hoi_lai.py` |
+| **1. Rút thông tin** | Đọc lời thoại và liệt kê từng thông tin lâm sàng, gọi là **mệnh đề**. Mỗi mệnh đề ghi: nội dung; thông tin này **nói về ai**; ai nói; chắc chắn hay chỉ nghi ngờ; có phủ định không ("không sốt"); là việc đã xảy ra, hay chỉ là giả định hoặc kế hoạch; thời gian; số thứ tự lượt nói làm căn cứ; và **câu trích nguyên văn**. | **Mô hình AI** (Qwen3-4B, chạy ngay trên máy) | `src/duong_ong/chay_duong_ong.py`, `src/duong_ong/b1_cau_truc_menh_de.py` |
+| **2. Gom người** | Phân biệt **người nói** với **người được nói đến**. Ví dụ người con kể về bố thì thông tin thuộc về bố, không thuộc về người bệnh. | Chương trình theo luật cố định | `src/duong_ong/b2_gom_nguoi_thuc_the.py` |
+| **3. Cập nhật trạng thái** | Khi người nói **tự sửa** ("một tuần… à không, mười ngày") thì bản cũ được đánh dấu "bị thay thế", **không xoá**. Khi hai thông tin theo thời gian đều đúng ("hôm qua đau, hôm nay hết") thì giữ cả hai. Khi hai người nói trái nhau mà chưa ai xác nhận thì đánh dấu **mâu thuẫn**. | Chương trình theo luật | `src/duong_ong/b3_cap_nhat_trang_thai.py` |
+| **4. Kiểm căn cứ** | Đối chiếu từng thông tin với đúng lượt nói được dẫn. Sáu phép kiểm: (1) câu trích có thật trong lượt đó không; (2) nội dung có khớp không; (3) từ chỉ người có khớp với người được nhắc tới không; (4) mức chắc chắn có bị nâng lên không; (5) thời gian có xuất hiện trong lượt đó không; (6) liều thuốc có xuất hiện trong lượt đó không. | Chương trình theo luật | `src/duong_ong/b4_kiem_can_cu.py` |
+| **5. Xếp chỗ** | Mỗi thông tin vào một trong ba chỗ: **thân bản nháp**; mục **"Cần xác nhận"** (kèm lý do, để bác sĩ xem lại); hoặc **bị loại** (vẫn lưu vết). Sau đó bản nháp được viết ra theo mẫu câu cố định. | Chương trình theo luật | `src/duong_ong/b5_xep_cho_cong_rui_ro.py`, `src/canh_bao/` |
+| *Phụ* | Gợi ý tối đa 3 câu hỏi để bác sĩ hỏi lại người bệnh. | Chương trình | `src/duong_ong/b6_goi_y_hoi_lai.py` |
 
 **Chỉ bước 1 dùng mô hình AI. Các bước còn lại là luật mà con người đọc được.** Nhờ vậy, khi bản nháp có lỗi, có thể xác định lỗi do mô hình liệt kê thiếu hay do một luật xếp nhầm. Mỗi dòng của bản nháp đều truy ngược được về mệnh đề và câu nói gốc.
 
@@ -74,6 +74,8 @@ Kết quả đúng: dị ứng amoxicillin thuộc về **bệnh nhân** (căn c
 ---
 
 ## Các thành phần của phần mềm
+
+> **Tìm mã nguồn nhanh:** [`BAN_DO_MA_NGUON.md`](BAN_DO_MA_NGUON.md) xếp toàn bộ mã theo hệ thống (đường ống dựng bản nháp, dữ liệu, huấn luyện, đo lường, công cụ lâm sàng, dịch vụ và an toàn) và có bảng *"hỏi gì → mở tệp nào"*. Từ 27/11/2026 mã Python nằm trong các thư mục con của `src/` với tên mới; tài liệu cũ còn ghi tên trước đó (ví dụ `src/khoa_bang_chung.py`) thì tra bảng *Đối chiếu tên cũ* ở cuối bản đồ.
 
 | Thành phần | Mô tả |
 |---|---|
@@ -94,12 +96,12 @@ Các tính năng này nằm quanh bản nháp. **Không tính năng nào thay đ
 | # | Tính năng | Làm gì | Tệp chính |
 |---|---|---|---|
 | 1 | **Nghe lại đúng đoạn** | Bấm vào một dòng để phát lại đoạn ghi âm gốc (thêm 0,5 giây hai đầu). Dòng có số kèm đơn vị, có từ phủ định, hoặc chép lời kém chắc chắn được tô sáng. | `web/src/lib/asrHighlight.ts`, `DuyetBenCanh.tsx` |
-| 2 | **Ký duyệt có chuỗi băm & chốt chặn căn cứ** | Chặn cứng ký duyệt khi chưa có mệnh đề có căn cứ hoặc còn mục `Cần xác nhận` chưa xử lý. Khi ký, bản ghi nối vào nhật ký chỉ-ghi-thêm có chuỗi băm SHA-256 (WORM) kèm tệp neo `.anchor.json`; sửa sau ký hiện cảnh báo `Đã sửa · Ký lại`. | `web/may-chu/worm.ts`, `compileEffectiveNote.ts`, `src/worm_audit_log.py` |
+| 2 | **Ký duyệt có chuỗi băm & chốt chặn căn cứ** | Chặn cứng ký duyệt khi chưa có mệnh đề có căn cứ hoặc còn mục `Cần xác nhận` chưa xử lý. Khi ký, bản ghi nối vào nhật ký chỉ-ghi-thêm có chuỗi băm SHA-256 (WORM) kèm tệp neo `.anchor.json`; sửa sau ký hiện cảnh báo `Đã sửa · Ký lại`. | `web/may-chu/worm.ts`, `compileEffectiveNote.ts`, `src/he_thong/nhat_ky_ky_duyet_worm.py` |
 | 3 | **Phiếu bàn giao SBAR và chép sang HIS** | Tạo phiếu bàn giao SBAR từ bản nháp (tôn trọng dòng đã giữ/sửa/bỏ) và chép nhanh từng ô sang phần mềm bệnh viện. | `web/src/lib/sbar.ts`, `HisSmartCopyPopover.tsx` |
 | 4 | **Gợi ý câu hỏi cờ đỏ** | Trong lúc khám, gợi ý tối đa 2 câu hỏi an toàn chưa hỏi (theo tuổi, giới); tự đánh dấu khi bác sĩ đã hỏi. Chạy tại chỗ, không gọi mô hình. | `web/src/lib/radarCoDo.ts` |
 | 5 | **Tờ dặn dò cho người bệnh** | Tờ dặn dò in được, có nút đọc to bằng giọng tiếng Việt của trình duyệt. | `ToDanDoBenhNhanModal.tsx` |
-| 6 | **Tiền kiểm BHYT** | Gợi ý mã ICD-10 (gồm mã 4 ký tự) và cảnh báo các điểm dễ bị xuất toán; không gợi ý mã cho bệnh đã bị phủ định. | `src/kiem_duyet_bhyt_va_bo_sot.py`, `BhytPrecheckModal.tsx` |
-| 7 | **Đọc phiếu xét nghiệm, đơn thuốc cũ** | Bóc chỉ số từ phiếu cũ, quy đổi đơn vị (creatinin µmol/L ↔ mg/dL), tính độ thanh thải creatinin để gợi ý chỉnh liều, cảnh báo kết hợp nguy hiểm (ví dụ kali ≥ 5,0 kèm spironolacton). | `src/ocr_lam_sang.py`, `src/hieu_chinh_lieu.py` |
+| 6 | **Tiền kiểm BHYT** | Gợi ý mã ICD-10 (gồm mã 4 ký tự) và cảnh báo các điểm dễ bị xuất toán; không gợi ý mã cho bệnh đã bị phủ định. | `src/cong_cu_lam_sang/tien_kiem_bhyt_va_khoi_phuc_bo_sot.py`, `BhytPrecheckModal.tsx` |
+| 7 | **Đọc phiếu xét nghiệm, đơn thuốc cũ** | Bóc chỉ số từ phiếu cũ, quy đổi đơn vị (creatinin µmol/L ↔ mg/dL), tính độ thanh thải creatinin để gợi ý chỉnh liều, cảnh báo kết hợp nguy hiểm (ví dụ kali ≥ 5,0 kèm spironolacton). | `src/cong_cu_lam_sang/doc_phieu_xet_nghiem.py`, `src/cong_cu_lam_sang/hieu_chinh_lieu.py` |
 | 8 | **Đối chiếu với lần khám trước** | Báo khi dị ứng, bệnh nền hoặc thuốc mạn tính trái với các lần khám trước của cùng người bệnh; bỏ qua dòng bác sĩ đã bỏ hoặc đã đính chính. | `web/src/lib/doiChieuLanKham.ts`, `CrossVisitBanner.tsx` |
 
 Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa được dược sĩ hay bác sĩ duyệt** (`data/tri_thuc_thuoc.json`, mọi mục `da_duyet = false`). Chúng chỉ là gợi ý để đối chiếu.
@@ -110,10 +112,10 @@ Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa 
 |---|---|---|
 | 17–21/11 | Kế hoạch nâng cấp toàn diện, rà lại số liệu | `KE_HOACH_NANG_CAP_TOAN_DIEN_MEDITRACE.md`; đếm lại 200 khuôn bộ v1; rút bỏ con số chưa có phép đo; quyết định về các mô hình Qwen (`docs/BAN-GIAO-CONG-VIEC-DANG-DO.md`). |
 | 20–24/11 | **Bộ dữ liệu v2** | 657 khuôn bệnh thuộc 21 hệ cơ quan, 5.000 ca; tỷ lệ lặp câu giảm từ 76,92% xuống 47,37%; 100% trích dẫn khớp nguyên văn; chia train/phát triển/kiểm tra cuối không trùng khuôn (`docs/BAN-GIAO-SINH-DU-LIEU-V2.md`, `data/manifest_v2_mo_rong_5000.json`). |
-| 22–24/11 | Huấn luyện tiết kiệm bộ nhớ, adapter v3 | `src/loss_theo_doan.py` hạ đỉnh VRAM xuống 6,4 GiB trên RTX 3060; adapter v3 train trên bộ v2 (kết quả bỏ sót ở mục "Kết quả đo"). Hàng đợi việc nền bền vững bằng SQLite (`web/may-chu/hang-doi.ts`). |
+| 22–24/11 | Huấn luyện tiết kiệm bộ nhớ, adapter v3 | `src/huan_luyen/loss_theo_doan.py` hạ đỉnh VRAM xuống 6,4 GiB trên RTX 3060; adapter v3 train trên bộ v2 (kết quả bỏ sót ở mục "Kết quả đo"). Hàng đợi việc nền bền vững bằng SQLite (`web/may-chu/hang-doi.ts`). |
 | 24–25/11 | 8 tính năng hỗ trợ bác sĩ | Bảng ở trên: nghe lại đúng đoạn, ký duyệt có chuỗi băm, SBAR/HIS, câu hỏi cờ đỏ, tờ dặn dò, tiền kiểm BHYT, đọc phiếu cũ, đối chiếu lần khám trước. |
 | 25–26/11 | **Lớp cảnh báo** vòng 6 và đo bằng cấy lỗi | `src/canh_bao/`; tiêu chí đăng ký trước (`docs/dang-ky-truoc-bo-luat.md`); kết quả ở mục "Kết quả đo". |
-| 26/11 | Thử DPO trên cặp lỗi khó | `src/train_dpo.py`; chưa dùng trong hệ thống ([`docs/ket-qua/dpo-v3.md`](docs/ket-qua/dpo-v3.md)). |
+| 26/11 | Thử DPO trên cặp lỗi khó | `src/huan_luyen/huan_luyen_dpo.py`; chưa dùng trong hệ thống ([`docs/ket-qua/dpo-v3.md`](docs/ket-qua/dpo-v3.md)). |
 | 26/11 | Rà soát độc lập, sửa 9 lỗi nghiêm trọng | Mục "Quyền riêng tư và an toàn". |
 | 26/11 | **Công cụ lâm sàng mở rộng (Boost, M1–M4)** | Menu "Công cụ": tiền kiểm BHYT/ICD-10, đối soát đơn thuốc TT 26 và tương tác thuốc, cam đoan thủ thuật, đi buồng nội trú và bàn giao ca trực. Đọc khám rảnh tay (F2, PhoWhisper tại chỗ); gợi ý vai người nói một chạm; báo động giá trị xét nghiệm nguy kịch, nạp kết quả LIS/HL7 và danh mục thuốc bệnh viện (.csv) ở tab "Ngữ cảnh"; khôi phục mục bỏ sót một chạm; xuất gói HL7 FHIR R4 / BHYT XML 130. Màn "KHTH & Giám định BHYT" (kiểm toán XML 1–5) và cổng QR cho người bệnh. Bảng tri thức đi kèm **chưa được chuyên gia duyệt**. |
 | 26/11 | Giao diện gọn cho bác sĩ | Mở ca là thấy bản nháp (danh sách ca và khung tra cứu thu gọn sẵn); công cụ gom vào một menu; bấm một dòng mở ngăn duyệt bên cạnh; nút "Nghe lại" ghi âm gốc trên từng mệnh đề, nút "Nghe" đọc to từng lượt cho ca chỉ có chữ. |
@@ -187,10 +189,10 @@ Cần Python 3.11. Các thư viện chính: `torch 2.6`, `transformers ≥ 4.51`
 python -m pytest tests/ -q
 
 # sinh hội thoại mô phỏng
-python -m src.sinh_hoi_thoai_viet --so-ca 1000 --seed 42
+python -m src.bo_du_lieu.sinh_hoi_thoai_viet --so-ca 1000 --seed 42
 
 # dịch vụ cho giao diện web (chỉ nghe trên máy này, địa chỉ 127.0.0.1)
-python -m src.dich_vu --cong 8765
+python -m src.he_thong.dich_vu_http --cong 8765
 #   --khong-mo-hinh            không nạp mô hình; chỉ phục vụ các ca đã chạy trước
 #   --tach-nguoi-noi pyannote  bật tách giọng người nói (cần tệp khoá Hugging Face)
 
@@ -230,7 +232,7 @@ Rà soát độc lập ngày 26/11/2026 (hai lượt, Python và web) tìm ra 9 
 - Bước gom người còn một lỗi đã biết: khi mô hình ghi người được nhắc tới là "bố em", cụm này có thể bị gộp nhầm vào người bệnh.
 - Nhận dạng tiếng nói sai tên thuốc ở gần như mọi câu trong thử nghiệm; tách giọng người nói chưa được chạy thử với mô hình thật.
 - Các tính năng bổ sung 11/2026 (BHYT, chỉnh liều, đối chiếu lần khám, cờ đỏ) mới qua kiểm thử tự động, chưa được bác sĩ dùng thử. Bảng thuốc và mã bệnh chưa qua chuyên gia duyệt.
-- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đã thử huấn luyện thêm v3 bằng DPO trên 407 cặp lỗi khó (`src/train_dpo.py`). Trên 140 cặp kiểm tra, độ chênh log-prob giữa câu đúng và câu sai tăng từ 20,5 lên 45,1 (tăng ở cả 13 loại lỗi), nhưng log-prob của câu đúng giảm từ −1,38 xuống −4,90 và chưa đo bỏ sót trên ca đầy đủ, nên **chưa** dùng bản DPO trong hệ thống. Chi tiết: [docs/ket-qua/dpo-v3.md](docs/ket-qua/dpo-v3.md).
+- Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đã thử huấn luyện thêm v3 bằng DPO trên 407 cặp lỗi khó (`src/huan_luyen/huan_luyen_dpo.py`). Trên 140 cặp kiểm tra, độ chênh log-prob giữa câu đúng và câu sai tăng từ 20,5 lên 45,1 (tăng ở cả 13 loại lỗi), nhưng log-prob của câu đúng giảm từ −1,38 xuống −4,90 và chưa đo bỏ sót trên ca đầy đủ, nên **chưa** dùng bản DPO trong hệ thống. Chi tiết: [docs/ket-qua/dpo-v3.md](docs/ket-qua/dpo-v3.md).
 
 ## Công cụ AI đã dùng để làm dự án
 

@@ -33,9 +33,9 @@ def goi_du_lieu() -> Path:
     /kaggle/input/<ten> nhu tai lieu cu. Tim de quy thi khong phu thuoc cach gan.
     """
     for src in sorted(VAO.glob("**/src")):
-        if (src / "nhanh.py").is_file():
+        if (src / "duong_ong" / "chay_duong_ong.py").is_file():
             return src.parent
-    raise SystemExit(f"khong thay dataset co src/nhanh.py trong {VAO}")
+    raise SystemExit(f"khong thay dataset co src/duong_ong/chay_duong_ong.py trong {VAO}")
 
 
 def chuan_bi() -> Path:
@@ -80,7 +80,7 @@ def main() -> None:
 
     tien_trinh = []
     for card, tap in enumerate(CAC_TAP):
-        lenh = [sys.executable, "-m", "src.nhanh", "--nhanh", *NHANH,
+        lenh = [sys.executable, "-m", "src.duong_ong.chay_duong_ong", "--nhanh", *NHANH,
                 "--model", MO_HINH, "--tap", tap, "--max-token", MAX_TOKEN,
                 "--adapter-trich", adapter]
         if SO_CA:

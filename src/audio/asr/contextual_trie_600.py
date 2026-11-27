@@ -1,5 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Dynamic Contextual Prefix-Trie quy mô 600 Khuôn Bệnh (18 Hệ Cơ Quan) cho Sherpa-ONNX CPU INT8.
+"""[Âm thanh › Chép lời]
+Làm gì   : Dựng cây tiền tố từ 600 khuôn bệnh để bộ chép lời nghiêng về từ lâm sàng khi giải
+           mã.
+Vào → Ra : danh sách từ khoá lâm sàng theo hệ cơ quan → cây tiền tố và bộ xử lý logit cho bộ
+           giải mã
+Đọc từ   : class ContextualPrefixTrie600 là cây tiền tố; tao_trie_600_mac_dinh() dựng bản
+           mặc định
+Mục lục (các hàm/lớp chính):
+  class ContextualPrefixTrie600  Cây tiền tố ngữ cảnh cho 600 khuôn bệnh, 18 hệ cơ quan
+  tao_trie_600_mac_dinh()        Tạo cây tiền tố mặc định từ dược thư và khuôn bệnh
+  tao_trie_logits_processor()    Tạo bộ cộng điểm logits cho từ khoá của cây tiền tố
+  chuan_hoa_he_co_quan()         Đưa nhãn hệ cơ quan về mã chuẩn trong 18 hệ
+  class TrieNode600              Nút của cây tiền tố: một âm tiết và thông tin thực thể
+Gọi tới  : bo_du_lieu/kho_khuon, cong_cu_lam_sang/tri_thuc_thuoc
+Dùng bởi : audio/asr/faster_whisper_provider, audio/asr/phowhisper_provider,
+           he_thong/dich_vu_http
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Dynamic Contextual Prefix-Trie quy mô 600 Khuôn Bệnh (18 Hệ Cơ Quan) cho Sherpa-ONNX CPU INT8.
 
 Nhiệm vụ Phase 3 (Trục 1):
 - Mở rộng kiến trúc Prefix-Trie từ 200 khuôn lên 600 khuôn bệnh (toàn bộ 18 hệ cơ quan lâm sàng).
@@ -97,12 +115,15 @@ THUOC_UU_TIEN_THEO_HE_CO_QUAN: Dict[str, Tuple[str, ...]] = {
 }
 
 
+# ─── _bo_dau_viet() — Bỏ dấu tiếng Việt và đổi thành dạng snake_case ──────────────────
 def _bo_dau_viet(s: str) -> str:
     nfd = unicodedata.normalize("NFD", (s or "").replace("đ", "d").replace("Đ", "D"))
     khong_dau = "".join(ch for ch in nfd if unicodedata.category(ch) != "Mn")
     return re.sub(r"[^a-z0-9]+", "_", khong_dau.lower()).strip("_")
 
 
+# ═══ chuan_hoa_he_co_quan() — Đưa nhãn hệ cơ quan về mã chuẩn trong 18 hệ ═════════════
+# Chấp nhận cả tiếng Việt có dấu lẫn mã snake_case; rỗng trả None.
 def chuan_hoa_he_co_quan(he: Optional[str]) -> Optional[str]:
     """Chuẩn hóa nhãn hệ cơ quan (tiếng Việt có dấu hoặc snake_case) về mã chuẩn trong `HE_CO_QUAN_CHUAN`."""
     if he is None:
@@ -119,6 +140,7 @@ def chuan_hoa_he_co_quan(he: Optional[str]) -> Optional[str]:
     return slug or s
 
 
+# ═══ ten_he_co_quan_tieng_viet() — Đổi mã hệ cơ quan sang tên tiếng Việt ══════════════
 def ten_he_co_quan_tieng_viet(he: Optional[str]) -> Optional[str]:
     """Ánh xạ ngược từ mã hệ cơ quan chuẩn (hoặc nhãn bất kỳ) sang nhãn tiếng Việt chuẩn."""
     ma = chuan_hoa_he_co_quan(he)
@@ -127,10 +149,13 @@ def ten_he_co_quan_tieng_viet(he: Optional[str]) -> Optional[str]:
     return ANH_XA_MA_SANG_HE_CO_QUAN_VI.get(ma, ma)
 
 
+# ═══ chuan_hoa_am_tiet() — Chuẩn hoá một âm tiết về chữ thường NFC ════════════════════
 def chuan_hoa_am_tiet(s: str) -> str:
     return unicodedata.normalize("NFC", s or "").strip().lower()
 
 
+# ─── class _ChiMucHeCoQuanDict — Từ điển tra hệ cơ quan bằng mã hoặc tiếng Việt ───────
+# Mọi khoá được chuẩn hoá trước khi tra.
 class _ChiMucHeCoQuanDict(dict):
     """Từ điển chỉ mục hệ cơ quan hỗ trợ tra cứu 2 chiều bằng cả mã ASCII snake_case lẫn tiếng Việt có dấu."""
 
@@ -150,6 +175,8 @@ class _ChiMucHeCoQuanDict(dict):
         return super().setdefault(self._norm(key), default)
 
 
+# ─── _lam_sach_hotword() — Làm sạch cụm từ trước khi đưa vào danh sách hotwords ───────
+# Bỏ cụm có dấu phẩy hoặc chấm phẩy và cụm quá dài (mặc định hơn 6 từ).
 def _lam_sach_hotword(cum: str, max_words: int = 6) -> Optional[str]:
     """Làm sạch cụm từ đưa vào FasterWhisper hotwords: loại bỏ dấu phẩy/chấm nội bộ và câu văn xuôi quá dài."""
     if not cum:
@@ -167,6 +194,8 @@ def _lam_sach_hotword(cum: str, max_words: int = 6) -> Optional[str]:
     return s
 
 
+# ═══ class TrieNode600 — Nút của cây tiền tố: một âm tiết và thông tin thực thể ═══════
+# Giữ loại thực thể, hệ cơ quan, độ sâu và các nút con.
 @dataclass
 class TrieNode600:
     token: str
@@ -180,6 +209,9 @@ class TrieNode600:
     children: Dict[str, TrieNode600] = field(default_factory=dict)
 
 
+# ═══ class ContextualPrefixTrie600 — Cây tiền tố ngữ cảnh cho 600 khuôn bệnh, 18 hệ cơ quan ═══
+# Nạp khuôn bệnh, thuốc và biến thể ngữ âm; xuất hotwords, gợi ý sửa âm vị và điểm thiên
+# lệch khi giải mã.
 class ContextualPrefixTrie600:
     """Dynamic Prefix-Trie Engine hỗ trợ 600 khuôn bệnh và 18 hệ cơ quan."""
 
@@ -347,7 +379,7 @@ class ContextualPrefixTrie600:
     def nap_duoc_thu_va_g2p(self, danh_muc_thuoc: Dict[str, List[str]]) -> None:
         """Nạp danh mục thuốc kèm biến thể ngữ âm G2P tiếng Việt."""
         try:
-            from src import tri_thuc_thuoc as _ttt
+            from src.cong_cu_lam_sang import tri_thuc_thuoc as _ttt
             tap_ten_chinh_thuc = set(_ttt.tat_ca_ten())
         except Exception:
             tap_ten_chinh_thuc = set()
@@ -531,7 +563,7 @@ class ContextualPrefixTrie600:
         """Tính toán điểm bias cho một bước mở rộng Beam Search.
         
         Tích hợp 2 chốt chặn kiểm định:
-        1. Dialogue Act Masking: mu_dialogue_act in [0.0, 1.0]
+        1. Che hành động hội thoại (Dialogue Act Masking): mu_dialogue_act trong [0.0, 1.0]
         2. Organ System Filtering: Tăng điểm ưu tiên cho hệ cơ quan của phiên khám
            (chấp nhận cả tên tiếng Việt có dấu lẫn mã ASCII snake_case).
         """
@@ -666,6 +698,8 @@ _TRIE_MAC_DINH_CACHE: Optional[ContextualPrefixTrie600] = None
 _TRIE_CACHE_LOCK = threading.Lock()
 
 
+# ═══ tao_trie_600_mac_dinh() — Tạo cây tiền tố mặc định từ dược thư và khuôn bệnh ═════
+# Dùng chung một bản (singleton) an toàn theo luồng.
 def tao_trie_600_mac_dinh() -> ContextualPrefixTrie600:
     """Khởi tạo (có cache singleton an toàn luồng) ContextualPrefixTrie600 mặc định với danh mục dược thư & khuôn bệnh."""
     global _TRIE_MAC_DINH_CACHE
@@ -676,7 +710,7 @@ def tao_trie_600_mac_dinh() -> ContextualPrefixTrie600:
             return _TRIE_MAC_DINH_CACHE
         trie = ContextualPrefixTrie600()
         try:
-            from src import tri_thuc_thuoc as _ttt
+            from src.cong_cu_lam_sang import tri_thuc_thuoc as _ttt
             dm_thuoc: Dict[str, List[str]] = {}
             for m in _ttt.tat_ca():
                 hc = m.get("hoat_chat")
@@ -687,7 +721,7 @@ def tao_trie_600_mac_dinh() -> ContextualPrefixTrie600:
         except Exception:
             pass
         try:
-            from src.kho_khuon import ds_khuon
+            from src.bo_du_lieu.kho_khuon import ds_khuon
             khuon = list(ds_khuon(mo_rong=True))
             if khuon:
                 trie.nap_khuon_benh(khuon)
@@ -697,6 +731,8 @@ def tao_trie_600_mac_dinh() -> ContextualPrefixTrie600:
         return trie
 
 
+# ═══ tao_trie_logits_processor() — Tạo bộ cộng điểm logits cho từ khoá của cây tiền tố ═══
+# Lấy hotwords làm danh sách token cần ưu tiên; thiếu torch hoặc tokenizer thì trả None.
 def tao_trie_logits_processor(
     trie: Optional[ContextualPrefixTrie600],
     tokenizer: Any,

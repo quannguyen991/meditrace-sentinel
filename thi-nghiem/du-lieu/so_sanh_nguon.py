@@ -62,7 +62,7 @@ def main():
     ap.add_argument("--ra", type=Path, default=None)
     a = ap.parse_args()
 
-    from src import sinh_hoi_thoai_viet as sh
+    from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
     bo = sh.sinh_bo(a.so_ca, 42)
     mo_phong = []
     for m in bo:

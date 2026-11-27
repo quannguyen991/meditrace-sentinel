@@ -2,10 +2,10 @@
 """Kho khuon dung chung: bo sinh, chia tap va loc gioi tinh nhin cung mot danh sach."""
 import collections
 
-from src import kho_khuon as kk
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src import tach_tap_viet as tt
+from src.bo_du_lieu import kho_khuon as kk
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tt
 
 KHOA_BAT_BUOC = ("ten", "nhom", "dien_tien", "chinh", "phu", "kham", "chan_doan", "ke_hoach")
 
@@ -20,7 +20,7 @@ def test_mo_rong_bat_co_200_goc_dau_roi_70_cua_nl_roi_khuon_mo_rong():
     ten = [b["ten"] for b in ds]
     assert ten[:200] == [b["ten"] for b in nl.BENH_GOC]
     assert ten[200:270] == [b["ten"] for b in nl.BENH[200:270]]
-    from src import khuon_mo_rong as kmr
+    from src.bo_du_lieu import khuon_mo_rong as kmr
     assert set(b["ten"] for b in kmr.BENH_MO_RONG) <= set(ten)
     assert len(ten) == len(set(ten)), "co ten khuon trung"
 
@@ -32,7 +32,7 @@ def test_moi_khuon_du_truong_bat_buoc():
 
 
 def test_khuon_trung_ten_giu_noi_dung_nl_va_them_bien_the():
-    from src import khuon_mo_rong as kmr
+    from src.bo_du_lieu import khuon_mo_rong as kmr
     nl_theo_ten = {b["ten"]: b for b in nl.BENH[200:270]}
     chung = [b for b in kmr.BENH_MO_RONG if b["ten"] in nl_theo_ten]
     assert chung, "khong con khuon trung ten de kiem"
@@ -79,7 +79,7 @@ def test_tap_cua_khuon_khong_phu_thuoc_bo_ten_truyen_vao():
 
 
 def test_loc_gioi_khuon_mo_rong_chi_nu_khong_ra_cho_nam():
-    from src import khuon_mo_rong as kmr
+    from src.bo_du_lieu import khuon_mo_rong as kmr
     assert kmr.CHI_NU_MO_RONG, "kho mo rong khong co khuon chi nu"
     ten_nu = next(iter(kmr.CHI_NU_MO_RONG))
     assert sh._hop_gioi(ten_nu, "mẹ") is True

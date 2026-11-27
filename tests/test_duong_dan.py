@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 
-from src import duong_dan
+from src.he_thong import duong_dan as duong_dan
 import pytest
 
 pytestmark = pytest.mark.skipif(

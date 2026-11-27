@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from src import du_lieu, duong_dan, tach_tap
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.he_thong import duong_dan as duong_dan
+from src.bo_du_lieu import chia_bon_tap as tach_tap
 
 pytestmark = pytest.mark.skipif(
     not duong_dan.GOC_VAIC.exists(),

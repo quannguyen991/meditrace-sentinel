@@ -18,7 +18,7 @@ import os
 
 import pytest
 
-from src import du_lieu
+from src.bo_du_lieu import nap_du_lieu as du_lieu
 
 
 @pytest.mark.parametrize("ten", du_lieu.TAP_NGOAI)
@@ -66,7 +66,7 @@ def test_khong_con_mac_dinh_nao_tro_vao_du_lieu_cuoc_thi():
     import pathlib
     import re
     xau = []
-    for p in pathlib.Path("src").glob("*.py"):
+    for p in pathlib.Path("src").rglob("*.py"):
         for so, dong in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
             m = re.search(r'--tap".*default="([^"]+)"', dong)
             if m and m.group(1) in du_lieu.TAP_NGOAI:

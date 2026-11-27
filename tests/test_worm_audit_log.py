@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử tự động cho Sổ nhật ký kiểm toán bất biến WORM (src/worm_audit_log.py)."""
+"""Kiểm thử tự động cho Sổ nhật ký kiểm toán bất biến WORM (src/he_thong/nhat_ky_ky_duyet_worm.py)."""
 import sqlite3
 import tempfile
 from pathlib import Path
 import pytest
 
-from src.worm_audit_log import WormAuditLogger, GENESIS_HASH
+from src.he_thong.nhat_ky_ky_duyet_worm import WormAuditLogger, GENESIS_HASH
 
 
 @pytest.fixture

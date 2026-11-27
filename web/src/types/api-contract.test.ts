@@ -4,14 +4,14 @@ import path from "node:path";
 import test from "node:test";
 import { API_CONTRACT_SCHEMA } from "./api-contract";
 
-test("api-contract: TypeScript interfaces khop hai chieu voi API_CONTRACT_SCHEMA va src/api_contract.py", () => {
+test("api-contract: TypeScript interfaces khop hai chieu voi API_CONTRACT_SCHEMA va src/he_thong/hop_dong_api.py", () => {
   const tsSrc = fs.readFileSync(path.join(import.meta.dirname, "api-contract.ts"), "utf-8");
-  const pyPath = path.resolve(import.meta.dirname, "..", "..", "..", "src", "api_contract.py");
+  const pyPath = path.resolve(import.meta.dirname, "..", "..", "..", "src", "he_thong", "hop_dong_api.py");
   const pySrc = fs.readFileSync(pyPath, "utf-8");
 
   // Trich xuat CONTRACT_SCHEMA tu Python de doi chieu hai chieu
   const pySchemaMatch = pySrc.match(/CONTRACT_SCHEMA[\s\S]*?=\s*\{([\s\S]*?)\n\}/);
-  assert.ok(pySchemaMatch, "Khong tim thay CONTRACT_SCHEMA trong src/api_contract.py");
+  assert.ok(pySchemaMatch, "Khong tim thay CONTRACT_SCHEMA trong src/he_thong/hop_dong_api.py");
   const pyBlock = pySchemaMatch[1];
 
   const pyEntries = new Map<string, string[]>();

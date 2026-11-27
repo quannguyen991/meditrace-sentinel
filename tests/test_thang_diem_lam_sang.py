@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử unit test cho Động cơ Tính Thang điểm Nguy cơ Lâm sàng Quốc tế."""
 
-from src.thang_diem_lam_sang import ClinicalRiskScoringEngine
+from src.cong_cu_lam_sang.thang_diem_nguy_co import ClinicalRiskScoringEngine
 
 
 def test_tinh_curb65_nguy_co_cao():

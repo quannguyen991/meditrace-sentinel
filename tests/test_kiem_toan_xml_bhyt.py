@@ -4,8 +4,8 @@ import json
 import subprocess
 import sys
 
-from src.fhir_exporter import FHIRExporter
-from src.kiem_toan_xml_bhyt import kiem_toan_goi_xml_bhyt
+from src.cong_cu_lam_sang.xuat_fhir_r4 import FHIRExporter
+from src.cong_cu_lam_sang.kiem_toan_xml_bhyt import kiem_toan_goi_xml_bhyt
 
 
 def _xml1_hop_le(
@@ -218,7 +218,7 @@ def test_doi_soat_bang_chung_k1_k7():
 def test_cli_audit_stdin_json():
     payload = json.dumps({"xml_files": {"XML1": _xml1_hop_le()}})
     proc = subprocess.run(
-        [sys.executable, "-m", "src.kiem_toan_xml_bhyt", "--audit"],
+        [sys.executable, "-m", "src.cong_cu_lam_sang.kiem_toan_xml_bhyt", "--audit"],
         input=payload,
         text=True,
         capture_output=True,

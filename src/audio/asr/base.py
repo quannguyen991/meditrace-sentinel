@@ -1,11 +1,25 @@
-"""ASRProvider interface.
+"""[Âm thanh › Chép lời]
+Làm gì   : Quy định giao diện chung mọi bộ chép lời phải theo và đọc WAV về dạng chuẩn để
+           đưa vào bộ chép.
+Vào → Ra : đường dẫn WAV → mảng mẫu 16 kHz mono; ASRProvider.transcribe(âm thanh) →
+           ASRResult
+Đọc từ   : class ASRProvider giao diện chung; read_wav_16k_mono() đọc WAV chuẩn
+Mục lục (các hàm/lớp chính):
+  class ASRProvider    Giao diện chung cho mọi nhà cung cấp chép lời
+  read_wav_16k_mono()  Đọc tệp WAV 16 kHz mono ra mảng số
+Gọi tới  : audio/asr/schemas
+Dùng bởi : audio/asr/__init__, audio/asr/faster_whisper_provider,
+           audio/asr/phowhisper_provider, audio/asr/registry, audio/asr/sidecar_provider
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Giao diện ASRProvider.
 
-A provider turns a 16 kHz mono PCM WAV file into an ``ASRResult``. It must:
+Nhà cung cấp biến tệp WAV PCM mono 16 kHz thành ``ASRResult``. Nó phải:
 
-* keep the words it heard (no clinical normalisation, no diagnosis wording);
-* return timestamps on the time axis of the WAV it was given, or ``None``;
-* never infer speaker roles (that is diarization + human review);
-* declare ``external = True`` if it sends audio off the machine.
+* giữ nguyên các từ đã nghe (không chuẩn hoá lâm sàng, không dùng từ chẩn đoán);
+* trả mốc thời gian theo trục thời gian của tệp WAV được đưa vào, hoặc ``None``;
+* không bao giờ suy ra vai người nói (đó là việc của tách người nói + con người duyệt);
+* khai báo ``external = True`` nếu gửi âm thanh ra khỏi máy.
 """
 
 from __future__ import annotations
@@ -18,9 +32,12 @@ from typing import Any
 from .schemas import ASRError, ASRResult
 
 
+# ═══ class ASRProvider — Giao diện chung cho mọi nhà cung cấp chép lời ════════════════
+# Nhận WAV 16 kHz mono, trả ASRResult; giữ nguyên từ nghe được, không đoán vai;
+# external=True nếu gửi âm thanh ra ngoài.
 class ASRProvider(ABC):
     name: str = "base"
-    external: bool = False          # True = gui am thanh ra dich vu ngoai
+    external: bool = False          # True = gửi âm thanh ra dịch vụ ngoài
 
     @abstractmethod
     def transcribe(self, audio_path: str | Path) -> ASRResult: ...
@@ -29,11 +46,13 @@ class ASRProvider(ABC):
         return {"provider": self.name, "external": self.external}
 
 
+# ═══ read_wav_16k_mono() — Đọc tệp WAV 16 kHz mono ra mảng số ═════════════════════════
+# Trả mảng float32 trong [-1, 1] và thời lượng; sai định dạng báo audio_invalid.
 def read_wav_16k_mono(audio_path: str | Path):
-    """Doc WAV PCM 16 bit, 16 kHz, mono -> (numpy float32 trong [-1, 1], thoi luong).
+    """Đọc WAV PCM 16 bit, 16 kHz, mono -> (numpy float32 trong [-1, 1], thời lượng).
 
-    Dung module `wave` co san, khong can librosa/soundfile. Sai dinh dang thi bao
-    `audio_invalid` — preprocessing phai da chuyen dung dinh dang truoc do.
+    Dùng module `wave` có sẵn, không cần librosa/soundfile. Sai định dạng thì báo
+    `audio_invalid` — preprocessing phải đã chuyển đúng định dạng trước đó.
     """
     import numpy as np
     try:

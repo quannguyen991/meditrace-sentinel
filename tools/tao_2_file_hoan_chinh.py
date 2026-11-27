@@ -660,7 +660,7 @@ def build_file_2():
     oct_rows = [
         ("2026-10-15",
          """14:20 — triển khai các module an toàn lâm sàng: dược lý ddi, đa bệnh lý và phân tích cận lâm sàng giúp tôi nhé
-Tệp đã ghi: src/duoc_ly_lam_sang.py, src/da_benh_ly.py, src/can_lam_sang.py, src/thang_diem_lam_sang.py, tests/test_duoc_ly_lam_sang.py, tests/test_da_benh_ly.py, tests/test_can_lam_sang.py
+Tệp đã ghi: src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py, src/bo_du_lieu/sinh_ca_da_benh_ly.py, src/cong_cu_lam_sang/doi_soat_can_lam_sang.py, src/cong_cu_lam_sang/thang_diem_nguy_co.py, tests/test_duoc_ly_lam_sang.py, tests/test_da_benh_ly.py, tests/test_can_lam_sang.py
 Câu lệnh thực thi:
 pytest tests/test_duoc_ly_lam_sang.py tests/test_da_benh_ly.py tests/test_can_lam_sang.py -v
 Kết quả: 346 passed in 4.12s
@@ -675,7 +675,7 @@ Trạng thái: Đã sửa"""),
 
         ("2026-10-16",
          """16:30 — làm phần tính lọc cầu thận egfr, tờ dặn dò bệnh nhân và bộ khử định danh pii theo nghị định 13 nhé
-Tệp đã ghi: src/hieu_chinh_lieu.py, src/dan_do_benh_nhan.py, src/khu_dinh_danh.py, src/fhir_exporter.py, src/dieu_phoi_ha_tang.py, tests/test_hieu_chinh_lieu.py, tests/test_dan_do_benh_nhan.py, tests/test_khu_dinh_danh.py
+Tệp đã ghi: src/cong_cu_lam_sang/hieu_chinh_lieu.py, src/cong_cu_lam_sang/to_dan_do_benh_nhan.py, src/he_thong/khu_dinh_danh.py, src/cong_cu_lam_sang/xuat_fhir_r4.py, src/he_thong/dieu_phoi_cac_chot_an_toan.py, tests/test_hieu_chinh_lieu.py, tests/test_dan_do_benh_nhan.py, tests/test_khu_dinh_danh.py
 Câu lệnh thực thi:
 pytest tests/test_hieu_chinh_lieu.py tests/test_dan_do_benh_nhan.py tests/test_khu_dinh_danh.py -v
 Kết quả: 201 passed in 2.35s
@@ -694,7 +694,7 @@ Trạng thái: Đã sửa"""),
 
         ("2026-10-17",
          """09:15 — chạy toàn bộ 1.330 bài test, xuất bộ sơ đồ flow 4k và chuẩn bị cấu hình deploy lên vercel nhé
-Tệp đã ghi: src/guardrails.py, src/dieu_phoi_ha_tang.py, tools/tao_bo_anh_flow_meditrace.py, 103 test files
+Tệp đã ghi: src/he_thong/rao_chan_an_toan.py, src/he_thong/dieu_phoi_cac_chot_an_toan.py, tools/tao_bo_anh_flow_meditrace.py, 103 test files
 Câu lệnh thực thi:
 pytest tests/
 Kết quả: 1.330 passed, 27 skipped in 120.35s (100% pass)
@@ -713,9 +713,9 @@ Trạng thái: Đã sửa"""),
 
         ("2026-10-18",
          """10:30 — nạp 3 ca bệnh khó bẫy lâm sàng cho bgk kiểm thử, và sửa lỗi lệch mỏ neo svg trên giao diện khám bệnh nhé
-Tệp đã ghi: tools/them_3_ca_kho_bgk.js, src/dich_vu.py, web/src/components/VerificationView.tsx, web/src/components/NoteEditorView.tsx
+Tệp đã ghi: tools/them_3_ca_kho_bgk.js, src/he_thong/dich_vu_http.py, web/src/components/VerificationView.tsx, web/src/components/NoteEditorView.tsx
 Câu lệnh thực thi:
-python src/dich_vu.py --port 8765
+python src/he_thong/dich_vu_http.py --port 8765
 node tools/them_3_ca_kho_bgk.js
 cd web; bun run build (built in 380ms)
 Qua commit 0fab56d — feat: cap nhat bo 3 ca mau do kho cao chua nhieu bay lam sang cho BGK
@@ -730,7 +730,7 @@ Trạng thái: Đã sửa (Sẵn sàng trình diễn)"""),
 
         ("2026-10-18",
          """15:45 — hoàn thiện tích hợp tác tử gợi mở lâm sàng socrates vào bộ điều phối 8 chốt an toàn và bảng kiểm toán tiến trình ai với tờ dặn dò xuất viện cho thật chuẩn nhé
-Tệp đã ghi: src/dieu_phoi_ha_tang.py, src/tro_ly_lam_sang.py, web/src/components/NhatKyTienTrinhAIModal.tsx, web/src/components/ToDanDoBenhNhanModal.tsx, web/src/components/NoteEditorView.tsx, tools/preview_modal_ai_trace.html, tools/preview_modal_dan_do.html
+Tệp đã ghi: src/he_thong/dieu_phoi_cac_chot_an_toan.py, src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py, web/src/components/NhatKyTienTrinhAIModal.tsx, web/src/components/ToDanDoBenhNhanModal.tsx, web/src/components/NoteEditorView.tsx, tools/preview_modal_ai_trace.html, tools/preview_modal_dan_do.html
 Câu lệnh thực thi:
 pytest tests/test_dieu_phoi_ha_tang.py -v
 Kết quả: 3 passed in 0.22s (Bao phủ đủ 8 chốt an toàn liên hoàn)
@@ -739,7 +739,7 @@ Kết quả: built in 337ms (0 lỗi TypeScript/linter)
 python tools/check_text_nhay_cam.py (0 vi phạm, sạch 100%)
 Chụp ảnh màn hình độ phân giải cao bằng Chrome Headless""",
          """I6 — Tác tử gợi mở SOCRATES chưa được kích hoạt tự động trong luồng chính
-Dấu hiệu cụ thể: Module ActiveClinicalClarificationAgent (src/tro_ly_lam_sang.py) đã được viết nhưng chưa được gọi trong hàm xu_ly_ca_kham của src/dieu_phoi_ha_tang.py.
+Dấu hiệu cụ thể: Module ActiveClinicalClarificationAgent (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py) đã được viết nhưng chưa được gọi trong hàm xu_ly_ca_kham của src/he_thong/dieu_phoi_cac_chot_an_toan.py.
 Xử lý được ghi nhận: Tích hợp SOCRATES làm Chốt 8 trong MediTracePipelineOrchestrator, chủ động nhắc bác sĩ chỉ định thêm cận lâm sàng cần thiết (ECG, men tim).
 Căn cứ kiểm chứng trong nguồn: tests/test_dieu_phoi_ha_tang.py cập nhật kỳ vọng 8 chốt an toàn; 3/3 passed.
 Trạng thái: Đã sửa

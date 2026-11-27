@@ -67,18 +67,18 @@ def build_compact_documentation():
     md_lines.append("| :--- | :---: | :---: | :--- |")
     
     author_files = [
-        ("src/sinh_hoi_thoai_viet.py", "src/", 19, "Biên soạn kịch bản và gài bẫy lâm sàng: bệnh nhân tự sửa lời, câu hỏi giả định và vai người nhà"),
-        ("src/thuc_the.py", "src/", 2, "Bổ sung luật nhận diện đại từ tự xưng phương ngữ Nam Bộ 'tui' tương đương 'tôi'"),
-        ("src/duoc_ly_lam_sang.py", "src/", 5, "Thiết kế Chốt 5 DDI: Tra cứu tương tác nguy cơ cao (Clopidogrel + Omeprazole) và cảnh báo quá liều"),
-        ("src/hieu_chinh_lieu.py", "src/", 3, "Hiện thực hóa công thức tính eGFR và thuật toán cảnh báo giảm liều suy thận cho Metformin"),
-        ("src/khu_dinh_danh.py", "src/", 3, "Xây dựng thuật toán khử định danh PII 2 chiều tuân thủ Nghị định 13/2023/NĐ-CP"),
-        ("src/dieu_phoi_ha_tang.py", "src/", 6, "Thiết kế kiến trúc điều phối Orchestrator kết nối liên hoàn toàn bộ 8 chốt phòng vệ an toàn"),
-        ("src/can_lam_sang.py", "src/", 4, "Tích hợp bảng giá trị tham chiếu cận lâm sàng (Troponin I, men gan, Creatinine)"),
-        ("src/thang_diem_lam_sang.py", "src/", 4, "Xây dựng 9 thang điểm nguy cơ CDSS (CHA2DS2-VASc, HAS-BLED, Wells...) hỗ trợ bác sĩ"),
-        ("src/tro_ly_lam_sang.py", "src/", 3, "Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng cần thiết"),
-        ("src/dan_do_benh_nhan.py", "src/", 4, "Xây dựng bộ sinh tờ dặn dò bình dân chia 4 khung giờ sáng/trưa/chiều/tối chuẩn y khoa"),
-        ("src/guardrails.py", "src/", 4, "Xây dựng 5 tầng rào chắn độc lập chặn đứng lỗi ảo giác và sai sót y tế"),
-        ("src/fhir_exporter.py", "src/", 3, "Chuẩn hóa gói dữ liệu xuất viện HL7 FHIR R4 Bundle tích hợp bệnh viện"),
+        ("src/bo_du_lieu/sinh_hoi_thoai_viet.py", "src/", 19, "Biên soạn kịch bản và gài bẫy lâm sàng: bệnh nhân tự sửa lời, câu hỏi giả định và vai người nhà"),
+        ("src/duong_ong/b2_gom_nguoi_thuc_the.py", "src/", 2, "Bổ sung luật nhận diện đại từ tự xưng phương ngữ Nam Bộ 'tui' tương đương 'tôi'"),
+        ("src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py", "src/", 5, "Thiết kế Chốt 5 DDI: Tra cứu tương tác nguy cơ cao (Clopidogrel + Omeprazole) và cảnh báo quá liều"),
+        ("src/cong_cu_lam_sang/hieu_chinh_lieu.py", "src/", 3, "Hiện thực hóa công thức tính eGFR và thuật toán cảnh báo giảm liều suy thận cho Metformin"),
+        ("src/he_thong/khu_dinh_danh.py", "src/", 3, "Xây dựng thuật toán khử định danh PII 2 chiều tuân thủ Nghị định 13/2023/NĐ-CP"),
+        ("src/he_thong/dieu_phoi_cac_chot_an_toan.py", "src/", 6, "Thiết kế kiến trúc điều phối Orchestrator kết nối liên hoàn toàn bộ 8 chốt phòng vệ an toàn"),
+        ("src/cong_cu_lam_sang/doi_soat_can_lam_sang.py", "src/", 4, "Tích hợp bảng giá trị tham chiếu cận lâm sàng (Troponin I, men gan, Creatinine)"),
+        ("src/cong_cu_lam_sang/thang_diem_nguy_co.py", "src/", 4, "Xây dựng 9 thang điểm nguy cơ CDSS (CHA2DS2-VASc, HAS-BLED, Wells...) hỗ trợ bác sĩ"),
+        ("src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py", "src/", 3, "Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng cần thiết"),
+        ("src/cong_cu_lam_sang/to_dan_do_benh_nhan.py", "src/", 4, "Xây dựng bộ sinh tờ dặn dò bình dân chia 4 khung giờ sáng/trưa/chiều/tối chuẩn y khoa"),
+        ("src/he_thong/rao_chan_an_toan.py", "src/", 4, "Xây dựng 5 tầng rào chắn độc lập chặn đứng lỗi ảo giác và sai sót y tế"),
+        ("src/cong_cu_lam_sang/xuat_fhir_r4.py", "src/", 3, "Chuẩn hóa gói dữ liệu xuất viện HL7 FHIR R4 Bundle tích hợp bệnh viện"),
         ("tests/test_audio_clinical_tokens.py", "tests/", 1, "Kiểm thử bộ trích xuất và bảo toàn thực thể lâm sàng trọng yếu"),
         ("tests/test_chuan_hoa.py", "tests/", 1, "Xây dựng bộ kiểm thử quy đổi từ điển phương ngữ lâm sàng 3 miền"),
         ("tests/test_hoi_lai.py", "tests/", 1, "Xây dựng bộ test kiểm tra xung đột phát ngôn giữa bệnh nhân và người nhà"),
@@ -118,7 +118,7 @@ def build_compact_documentation():
          "**A9 — Dữ liệu ngoài là bản dịch từ tiếng Anh**<br>• *Vấn đề:* Dữ liệu cũ lẫn đơn vị pound/ounce và biệt dược Mỹ.<br>• *Xử lý:* Đổi tên thành 'bộ tham chiếu ngoài', loại khỏi chuỗi mặc định.<br>**D2 — Thước đo câu chữ che lấp lỗi quy gán**<br>• *Xử lý:* Dựng thước đo quy gán chuyên biệt (+0,2338).<br>• *Trạng thái:* **Đã sửa** (Commit `ad9c3e4`)."),
 
         ("08/09/2026",
-         "**Huấn luyện khâu trích trên 1.000 ca có đáp án cấu trúc**<br>• Tệp: `src/du_lieu_trich.py`<br>• Commit `66700d9`: Train khâu trích mệnh đề nguyên tử gắn mỏ neo.",
+         "**Huấn luyện khâu trích trên 1.000 ca có đáp án cấu trúc**<br>• Tệp: `src/bo_du_lieu/du_lieu_huan_luyen_trich.py`<br>• Commit `66700d9`: Train khâu trích mệnh đề nguyên tử gắn mỏ neo.",
          "**Kiểm soát quá trình huấn luyện**<br>• Thiết lập cơ chế lưu checkpoint định kỳ và theo dõi hàm mất mát eval_loss.<br>• *Trạng thái:* **Hoàn thành**."),
 
         ("09/09/2026",
@@ -158,7 +158,7 @@ def build_compact_documentation():
          "**A8 — Đáp án tự ý nâng từ dân gian thành triệu chứng chắc chắn**<br>• *Xử lý:* Giữ đúng lời bệnh nhân, sinh thế hệ 8b và chấm lại toàn bộ.<br>**C14 — Tự nhận chuẩn HIPAA/GDPR chưa qua kiểm định**<br>• *Xử lý:* Loại bỏ tuyên bố thiếu căn cứ, minh bạch phạm vi kiểm thử.<br>• *Trạng thái:* **Đã sửa**."),
 
         ("25/09 – 29/09/2026",
-         "**Ổn định Microservice & Trải nghiệm Phòng khám**<br>• Tệp: `src/dich_vu.py`, `server.ts`, `HomeDashboard.tsx`<br>• Commits: `df08143` (Sửa import os), `4269b89` (Thanh điều hướng mới), `59470b5` (Thanh sóng âm micrô thực).",
+         "**Ổn định Microservice & Trải nghiệm Phòng khám**<br>• Tệp: `src/he_thong/dich_vu_http.py`, `server.ts`, `HomeDashboard.tsx`<br>• Commits: `df08143` (Sửa import os), `4269b89` (Thanh điều hướng mới), `59470b5` (Thanh sóng âm micrô thực).",
          "**F5 — Thiếu import os làm dịch vụ khởi động hỏng 18 lần**<br>• *Xử lý:* Bổ sung import os, tách hàm và thêm 2 bài test kiểm tra đường nạp.<br>• *Trạng thái:* **Đã sửa** (Commit `df08143`)."),
 
         ("06/10/2026",
@@ -189,7 +189,7 @@ def build_compact_documentation():
          "**I4 — Lỗi từ chối yêu cầu CSRF trên môi trường Vercel Production**<br>• *Dấu hiệu:* Thao tác tạo bệnh án hoặc duyệt mệnh đề bị từ chối (403 Forbidden).<br>• *Nguyên nhân:* Middleware CSRF ở máy chủ Node.js chỉ cho phép origin localhost mặc định.<br>• *Xử lý:* Cập nhật biến môi trường `MEDITRACE_NGUON_DUOC_PHEP`, cho phép các domain được cấp quyền đi qua lớp bảo vệ an toàn.<br>• *Trạng thái:* **Đã sửa** (Commit `73b5a3b`)."),
 
         ("18/10/2026",
-         "**Nạp 3 Ca Khó BGK & Hoàn thiện Giao diện Doctor-in-the-Loop**<br>• Tệp: `tools/them_3_ca_kho_bgk.js`, `src/dich_vu.py`, `VerificationView.tsx`, `NoteEditorView.tsx`<br>• Lệnh: `python src/dich_vu.py --port 8765`<br>• Lệnh: `node tools/them_3_ca_kho_bgk.js`<br>• Lệnh: `cd web; bun run build` (built in 380ms)<br>• Commits: `0fab56d` (3 ca khó lâm sàng), `c7e8ef4` (Khởi động dịch vụ 8765).",
+         "**Nạp 3 Ca Khó BGK & Hoàn thiện Giao diện Doctor-in-the-Loop**<br>• Tệp: `tools/them_3_ca_kho_bgk.js`, `src/he_thong/dich_vu_http.py`, `VerificationView.tsx`, `NoteEditorView.tsx`<br>• Lệnh: `python src/he_thong/dich_vu_http.py --port 8765`<br>• Lệnh: `node tools/them_3_ca_kho_bgk.js`<br>• Lệnh: `cd web; bun run build` (built in 380ms)<br>• Commits: `0fab56d` (3 ca khó lâm sàng), `c7e8ef4` (Khởi động dịch vụ 8765).",
          "**I5 — Lệch tọa độ dây nối mỏ neo [T_i] khi bác sĩ sửa bệnh án**<br>• *Dấu hiệu:* Khi bác sĩ chỉnh sửa nội dung bệnh án, đường kẻ SVG nối giữa lượt thoại và mệnh đề bị lệch tọa độ.<br>• *Xử lý:* Thêm hook `ResizeObserver` tự động tính toán lại tọa độ hiển thị ngay khi DOM thay đổi.<br>• *Trạng thái:* **Đã sửa** (Sẵn sàng trình diễn)."),
 
         ("27/10/2026",

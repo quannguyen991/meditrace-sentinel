@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """doan_chua_ghi voi nguong_phu: mot doan chi coi la da ghi khi du nhieu tu noi dung cua no
 co trong menh de dan toi luot do — khong phai chi chung mot tu."""
-from src import khoa_bang_chung as kbc
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b4_kiem_can_cu as kbc
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = "Bác sĩ: Chị kể đi.\nNgười nhà: Cháu ho ba ngày nay, mẹ em bị tiểu đường lâu năm."
 

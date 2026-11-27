@@ -318,7 +318,7 @@ export function taoRouterQuanTriBv(ctx?: { db?: DatabaseSync }): express.Router 
         }
       }
 
-      const kqPython = await chayPythonJson("src.kiem_toan_xml_bhyt", ["--audit"], payload);
+      const kqPython = await chayPythonJson("src.cong_cu_lam_sang.kiem_toan_xml_bhyt", ["--audit"], payload);
       return res.json(kqPython);
     } catch (err) {
       return traLoi(res, err);

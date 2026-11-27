@@ -12,8 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.stdout.reconfigure(encoding="utf-8")
 
-from src import ngu_lieu_viet as nl, tach_tap_viet as tv
-from src.worm_audit_log import WormAuditLogger
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import chia_tap_theo_khuon as tv
+from src.he_thong.nhat_ky_ky_duyet_worm import WormAuditLogger
 
 DEFAULT_INPUT = Path("data/hoi_thoai_viet_v2_mo_rong.jsonl")
 DEFAULT_OUTPUT = Path("data/manifest_v2_mo_rong_5000.json")

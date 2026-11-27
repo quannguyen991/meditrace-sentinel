@@ -1,38 +1,48 @@
-"""PhoWhisper (VinAI) through Hugging Face transformers.
+"""[Âm thanh › Chép lời]
+Làm gì   : Chép lời tiếng Việt bằng PhoWhisper chạy tại chỗ, là bộ chép chính của hệ thống.
+Vào → Ra : tệp WAV 16 kHz mono → ASRResult: các đoạn chữ kèm mốc thời gian và độ tin cậy
+Đọc từ   : class PhoWhisperProvider chép lời; _group_words() gom từ thành đoạn
+Mục lục (các hàm/lớp chính):
+  class PhoWhisperProvider  Nhà cung cấp chép lời PhoWhisper chạy tại chỗ
+Gọi tới  : audio/asr/base, audio/asr/contextual_trie_600, audio/asr/schemas
+Dùng bởi : audio/asr/registry
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+PhoWhisper (VinAI) qua Hugging Face transformers.
 
-Models: vinai/PhoWhisper-{tiny,base,small,medium,large}. Licence BSD-3-Clause.
-Default here is ``small`` (pipeline checks); ``medium`` for quality benchmarks.
-``large`` is not the default: 1.55 B parameters do not fit a 4 GB GPU, and loading
-the fp32 checkpoint needs more than 10 GB RAM.
+Mô hình: vinai/PhoWhisper-{tiny,base,small,medium,large}. Giấy phép BSD-3-Clause.
+Mặc định ở đây là ``small`` (kiểm tra đường ống); ``medium`` cho benchmark chất lượng.
+``large`` không phải mặc định: 1,55 B tham số không vừa GPU 4 GB, và nạp
+checkpoint fp32 cần hơn 10 GB RAM.
 
-Decoding WITHOUT timestamp tokens. Measured on 22/09/2026 (docs/ket-qua/asr-benchmark.md):
-asking PhoWhisper for Whisper timestamp tokens — word or segment level, through the
-transformers pipeline — makes it append long repetition loops after the sentence
-("a. a. a. …", "chủ yếu là chủ yếu là …") on about half of the short test clips, and
-runs 10–20× slower. Decoding with ``<|notimestamps|>`` gives the clean sentence.
-So this provider:
+Giải mã KHÔNG dùng token mốc thời gian. Đo ngày 22/09/2026 (docs/ket-qua/asr-benchmark.md):
+yêu cầu PhoWhisper trả token mốc thời gian của Whisper — mức từ hoặc mức đoạn, qua
+đường ống transformers — khiến nó nối thêm các vòng lặp dài sau câu
+("a. a. a. …", "chủ yếu là chủ yếu là …") ở khoảng một nửa số đoạn thử ngắn,
+và chạy chậm hơn 10–20×. Giải mã với ``<|notimestamps|>`` cho câu sạch.
+Vì vậy nhà cung cấp này:
 
-1. cuts the audio into windows of at most 30 s, at the quietest 0.1 s frame between
-   20 s and 30 s (no cut inside the window, so no word is split by us);
-2. decodes each window with ``<|notimestamps|>``, greedy, ``max_new_tokens`` bounded by
-   the window length;
-3. takes token times from cross-attention DTW (``return_token_timestamps``, using the
-   ``alignment_heads`` shipped in the generation config). These times are ESTIMATES
-   (about ±0.2 s on the test clips; the first token of a window is pinned to the window
-   start). A word's end is the start of the next word, capped at TU_DAI_TOI_DA seconds
-   after its own start so that a pause shows up as a gap between words.
+1. cắt âm thanh thành các cửa sổ tối đa 30 s, tại khung 0,1 s yên tĩnh nhất giữa
+   20 s và 30 s (không cắt trong cửa sổ, nên ta không chẻ đôi từ nào);
+2. giải mã từng cửa sổ bằng ``<|notimestamps|>``, tham lam, ``max_new_tokens`` bị chặn theo
+   độ dài cửa sổ;
+3. lấy thời điểm token từ DTW chú ý chéo (``return_token_timestamps``, dùng
+   ``alignment_heads`` đi kèm trong cấu hình sinh). Các mốc này là ƯỚC LƯỢNG
+   (khoảng ±0,2 s trên các đoạn thử; token đầu của cửa sổ được ghim vào đầu
+   cửa sổ). Cuối một từ là đầu từ kế tiếp, nhưng không quá TU_DAI_TOI_DA giây
+   sau đầu của chính nó, để một quãng ngắt hiện ra như khoảng trống giữa các từ.
 
-If step 3 fails, words get no times and segments fall back to the window bounds with
-``timestamp_level = "window"`` — times are never invented.
+Nếu bước 3 lỗi, từ không có mốc và các đoạn lùi về biên cửa sổ với
+``timestamp_level = "window"`` — mốc thời gian không bao giờ bị bịa.
 
-Confidence. ``asr_confidence`` = exp(mean token log-probability) of the segment, the
-same definition as the faster-whisper provider. It measures how sure the recogniser is
-about the words — nothing more.
+Độ tin cậy. ``asr_confidence`` = exp(trung bình log-xác suất token) của đoạn, cùng
+định nghĩa với nhà cung cấp faster-whisper. Nó đo mức độ bộ nhận dạng chắc
+về các từ — không hơn.
 
-Repetition guard. If a window's text ends with the same 1–6 token n-gram repeated 4+
-times, a note ``lap_lai_nghi_ngo`` is recorded; the text is NOT trimmed.
+Chốt chặn lặp. Nếu văn bản của một cửa sổ kết thúc bằng cùng một n-gram 1–6 token lặp lại 4+
+lần, ghi chú ``lap_lai_nghi_ngo`` được ghi lại; văn bản KHÔNG bị cắt bớt.
 
-The model is loaded once per (model, revision, device) and cached in the process.
+Mô hình được nạp một lần cho mỗi (mô hình, bản sửa, thiết bị) và lưu đệm trong tiến trình.
 """
 
 from __future__ import annotations
@@ -53,7 +63,7 @@ from .contextual_trie_600 import (
 )
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
-# Ma commit tren Hugging Face, doc ngay 22/09/2026 — ghim du an lap thi nghiem.
+# Mã commit trên Hugging Face, đọc ngày 22/09/2026 — ghim dự án lặp thí nghiệm.
 REVISIONS = {
     "vinai/PhoWhisper-small": "a86b604c346caf7148c37512eafe783a16420adb",
     "vinai/PhoWhisper-medium": "55a7e3eb6c906de891f8f06a107754427dd3be79",
@@ -64,16 +74,18 @@ _CACHE_LOCK = threading.Lock()
 _INFER_LOCK = threading.Lock()
 
 SR = 16000
-GAP_SPLIT = 0.8            # khoang lang (giay) giua hai tu thi cat thanh doan moi
-CUA_SO_TOI_DA = 30.0       # Whisper chi nghe duoc 30 s moi lan
+GAP_SPLIT = 0.8            # khoảng lặng (giây) giữa hai từ thì cắt thành đoạn mới
+CUA_SO_TOI_DA = 30.0       # Whisper chỉ nghe được 30 s mỗi lần
 CUA_SO_TOI_THIEU = 20.0
-TOKEN_MOI_GIAY = 12        # tran so token sinh ra, chong lap vo han
+TOKEN_MOI_GIAY = 12        # trần số token sinh ra, chống lặp vô hạn
 TOKEN_TRAN = 440
-TU_DAI_TOI_DA = 1.2      # mot tu (ke ca ten thuoc nhieu am tiet) hiem khi dai hon
+TU_DAI_TOI_DA = 1.2      # một từ (kể cả tên thuốc nhiều âm tiết) hiếm khi dài hơn
 
 
+# ─── _group_words() — Gom các từ thành đoạn theo khoảng lặng ──────────────────────────
+# Hai từ cách nhau quá 0,8 giây thì tách đoạn mới; giữ nguyên chữ của mô hình.
 def _group_words(chunks: list[dict], gap: float = GAP_SPLIT) -> list[ASRSegment]:
-    """Gom tu thanh doan theo khoang lang. Giu nguyen chu cua mo hinh.
+    """Gom từ thành đoạn theo khoảng lặng. Giữ nguyên chữ của mô hình.
 
     chunks: [{"text", "timestamp": (a, b), "logprob"?: float, "n_tok"?: int}]
     """
@@ -104,9 +116,11 @@ def _group_words(chunks: list[dict], gap: float = GAP_SPLIT) -> list[ASRSegment]
     return segs
 
 
+# ─── _cat_cua_so() — Cắt âm thanh thành cửa sổ tối đa 30 giây ─────────────────────────
+# Cắt tại khung 0,1 giây ít năng lượng nhất trong khoảng 20 đến 30 giây.
 def _cat_cua_so(audio: np.ndarray, sr: int = SR, toi_da: float = CUA_SO_TOI_DA,
                 toi_thieu: float = CUA_SO_TOI_THIEU) -> list[tuple[int, int]]:
-    """Cat am thanh thanh cac cua so <= toi_da giay, tai khung 0,1 s it nang luong nhat."""
+    """Cắt âm thanh thành các cửa sổ <= toi_da giây, tại khung 0,1 s ít năng lượng nhất."""
     n, khung = len(audio), int(0.1 * sr)
     ra, dau = [], 0
     while n - dau > toi_da * sr:
@@ -119,6 +133,7 @@ def _cat_cua_so(audio: np.ndarray, sr: int = SR, toi_da: float = CUA_SO_TOI_DA,
     return ra
 
 
+# ─── _lap_lai() — Phát hiện đoạn cuối lặp lại một cụm token nhiều lần ─────────────────
 def _lap_lai(tokens: list[int], toi_thieu: int = 4) -> bool:
     for k in range(1, 7):
         if len(tokens) < k * toi_thieu:
@@ -129,6 +144,9 @@ def _lap_lai(tokens: list[int], toi_thieu: int = 4) -> bool:
     return False
 
 
+# ═══ class PhoWhisperProvider — Nhà cung cấp chép lời PhoWhisper chạy tại chỗ ═════════
+# Giải mã không dùng token thời gian, mốc từ ước lượng bằng DTW; có hotwords từ cây tiền
+# tố, gợi ý sửa âm vị và ghi chú nghi lặp.
 class PhoWhisperProvider(ASRProvider):
     name = "phowhisper"
     external = False
@@ -146,7 +164,7 @@ class PhoWhisperProvider(ASRProvider):
         self.he_co_quan = he_co_quan
         self.prompt_hotwords = prompt_hotwords
 
-    # -- nap mo hinh -------------------------------------------------------
+    # -- nạp mô hình -------------------------------------------------------
     def _load(self):
         try:
             import torch
@@ -162,17 +180,17 @@ class PhoWhisperProvider(ASRProvider):
                     proc = WhisperProcessor.from_pretrained(self.model, revision=self.revision)
                     m = WhisperForConditionalGeneration.from_pretrained(
                         self.model, revision=self.revision, torch_dtype=dtype).to(dev).eval()
-                except Exception as exc:  # mang, dia, bo nho, sai ten
+                except Exception as exc:  # mạng, đĩa, bộ nhớ, sai tên
                     raise ASRError("phowhisper_load_failed", f"{type(exc).__name__}: {exc}") from exc
                 _CACHE[key] = (m, proc)
             m, proc = _CACHE[key]
         return m, proc, dev, str(dtype).replace("torch.", "")
 
     def _decode_window(self, audio: np.ndarray) -> dict[str, Any]:
-        """Giai ma mot cua so <= 30 s.
+        """Giải mã một cửa sổ <= 30 s.
 
         -> {"tokens": [(text, start_s | None, logprob)], "ids": [int], "dtw": bool}
-        Thoi gian tinh tu dau cua so. Chi gom token van ban (bo token dac biet).
+        Thời gian tính từ đầu cửa sổ. Chỉ gồm token văn bản (bỏ token đặc biệt).
         """
         import torch
         m, proc, dev, _ = self._load()
@@ -202,13 +220,13 @@ class PhoWhisperProvider(ASRProvider):
                 out = m.generate(feats, attention_mask=mask, **kw)
         seq = out["sequences"][0].tolist()
         scores = out["scores"]
-        # scores[i] ung voi token sinh thu i = seq[len(seq) - len(scores) + i]
+        # scores[i] ứng với token sinh thứ i = seq[len(seq) - len(scores) + i]
         dau_sinh = len(seq) - len(scores)
         times = out["token_timestamps"][0].tolist() if dtw and "token_timestamps" in out else None
         dac_biet = set(proc.tokenizer.all_special_ids)
-        # Gom token thanh TU truoc khi giai ma. Tokenizer byte-level cat mot chu co dau
-        # (vd "ỡ") thanh nhieu token byte; giai ma tung token rieng se ra ky tu hong
-        # ("đ��"). Tu moi bat dau o token co dau cach "Ġ" cua tokenizer.
+        # Gom token thành TỪ trước khi giải mã. Tokenizer byte-level cắt một chữ có dấu
+        # (vd "ỡ") thành nhiều token byte; giải mã từng token riêng sẽ ra ký tự hỏng
+        # ("đ��"). Từ mới bắt đầu ở token có dấu cách "Ġ" của tokenizer.
         nhom: list[dict] = []
         ids = []
         for i, t in enumerate(seq):
@@ -226,11 +244,11 @@ class PhoWhisperProvider(ASRProvider):
                 g["n"] += 1
             ids.append(t)
         toks = [(proc.tokenizer.decode(g["ids"]), g["start"], g["lp"], g["n"]) for g in nhom]
-        # thoi diem ket thuc = moc cua token ket thuc (eos) neu co
+        # thời điểm kết thúc = mốc của token kết thúc (eos) nếu có
         het = times[-1] if times else None
         return {"tokens": toks, "ids": ids, "dtw": bool(times), "end": het}
 
-    # -- nhan dang ---------------------------------------------------------
+    # -- nhận dạng ---------------------------------------------------------
     def transcribe(self, audio_path: str | Path) -> ASRResult:
         audio, duration = read_wav_16k_mono(audio_path)
         _, _, dev, dtype = self._load()
@@ -259,10 +277,10 @@ class PhoWhisperProvider(ASRProvider):
             if _lap_lai(r["ids"]):
                 notes.append(f"lap_lai_nghi_ngo o cua so {k} ({off:.1f}-{b / SR:.1f} s)")
             co_dtw = co_dtw and r["dtw"]
-            # gom token thanh tu: token bat dau bang dau cach mo tu moi
+            # gom token thành từ: token bắt đầu bằng dấu cách mở từ mới
             words: list[dict] = []
-            # moi muc: (chu, moc bat dau, log-xac suat[, so token]); khong co so token
-            # nghia la muc do la mot token
+            # mỗi mục: (chữ, mốc bắt đầu, log-xác suất[, số token]); không có số token
+            # nghĩa là mục đó là một token
             for text, st, lp, *n in r["tokens"]:
                 if not words or text.startswith(" "):
                     words.append({"text": text, "start": st, "logprob": 0.0, "n_tok": 0})

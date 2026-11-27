@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử tự động cho Cơ sở Tri thức Phương ngữ Lâm sàng 3 Miền Toàn diện."""
 
-from src.phuong_ngu_lam_sang import ClinicalDialectEngine
+from src.cong_cu_lam_sang.tu_dien_phuong_ngu_lam_sang import ClinicalDialectEngine
 
 
 def test_chuan_hoa_phuong_ngu_nam_bo():

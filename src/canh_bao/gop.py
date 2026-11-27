@@ -1,22 +1,43 @@
 # -*- coding: utf-8 -*-
-"""Chay moi bo phat hien, GOP canh bao trung, chon canh bao CHINH, ap chinh sach D.
+"""[Lớp cảnh báo]
+Làm gì   : Chạy mọi bộ phát hiện, gộp cảnh báo trùng, chọn cảnh báo chính và áp chính sách D
+           để quyết định dòng nào bị chặn.
+Vào → Ra : bản nháp + lời thoại (+ kết quả kiểm căn cứ) → dict cảnh báo theo dòng, cảnh báo
+           toàn ca, trạng thái D
+Đọc từ   : chay() là điểm vào của lớp; chon_chinh() chọn cảnh báo chính; trang_thai_D() áp
+           chính sách D
+Mục lục (các hàm/lớp chính):
+  chay()                Chạy toàn bộ lớp cảnh báo cho một ca
+  chon_chinh()          Chọn cảnh báo chính cho một mệnh đề
+  trang_thai_D()        Quyết định trạng thái mệnh đề theo chính sách D
+  phan_tang_canh_bao()  Xếp một cảnh báo vào một trong ba tầng
+  phan_tang_ket_qua()   Tổng hợp ba tầng cảnh báo cho cả ca
+  ly_do_chan_D()        Lấy lý do chuyển sang cần xác nhận theo chính sách D
+  to_dict()             Chuyển kết quả cảnh báo sang dạng JSON
+Gọi tới  : canh_bao/asr, canh_bao/lam_sang, canh_bao/loai, canh_bao/phat_hien,
+           canh_bao/toan_ca, duong_ong/b4_kiem_can_cu, duong_ong/b5_xep_cho_cong_rui_ro
+Dùng bởi : do_luong/do_canh_bao, do_luong/do_cay_loi, duong_ong/chay_duong_ong,
+           he_thong/dich_vu_http, he_thong/dieu_phoi_cac_chot_an_toan
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Chạy mọi bộ phát hiện, GỘP cảnh báo trùng, chọn cảnh báo CHÍNH, áp chính sách D.
 
-CHONG BAO DONG TRAN LAN (dac ta muc 38-39). "Bo toi bi hen" ghi thanh "benh
-nhan bi hen" co the kich ca WRONG_SUBJECT, FAMILY_PATIENT_MIXUP, UNSUPPORTED...
-Giao dien chi hien MOT canh bao chinh cho moi nguyen nhan; phan con lai la ma phu:
-  1. cung MA tu nhieu bo phat hien -> gop lam mot (hop luot, hop trich dan)
-  2. cung NHOM -> ma uu tien cao nhat la chinh, ma khac thanh `phu`
-  3. khac nhom va DU NANG de doi trang thai -> giu rieng (toi da 2), con lai -> `phu`
+CHỐNG BÁO ĐỘNG TRÀN LAN (đặc tả mục 38-39). "Bố tôi bị hen" ghi thành "bệnh
+nhân bị hen" có thể kích cả WRONG_SUBJECT, FAMILY_PATIENT_MIXUP, UNSUPPORTED...
+Giao diện chỉ hiện MỘT cảnh báo chính cho mỗi nguyên nhân; phần còn lại là mã phụ:
+  1. cùng MÃ từ nhiều bộ phát hiện -> gộp làm một (hợp lượt, hợp trích dẫn)
+  2. cùng NHÓM -> mã ưu tiên cao nhất là chính, mã khác thành `phu`
+  3. khác nhóm và ĐỦ NẶNG để đổi trạng thái -> giữ riêng (tối đa 2), còn lại -> `phu`
 
-CHINH SACH D (moi, chua dung de do). Chinh sach C (`cong_rui_ro.CHINH_SACH`) van la
-chinh sach cua moi con so da bao cao; D chi bat khi goi ro `chinh_sach="D"`.
-    bị thay thế      trang_thai 'bị thay thế' — khong vao than, giu dau vet
+CHÍNH SÁCH D (mới, chưa dùng để đo). Chính sách C (`cong_rui_ro.CHINH_SACH`) vẫn là
+chính sách của mọi con số đã báo cáo; D chỉ bật khi gọi rõ `chinh_sach="D"`.
+    bị thay thế      trang_thai 'bị thay thế' — không vào thân, giữ dấu vết
     cần xác nhận     khoa chan, HOAC dang mau thuan, HOAC co canh bao du nang
-    đã kiểm chứng    con lai (van co the mang canh bao nhe de bac si luu y)
+    đã kiểm chứng    còn lại (vẫn có thể mang cảnh báo nhẹ để bác sĩ lưu ý)
 """
 from typing import Dict, List, Optional
 
-from src import cong_rui_ro
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
 from src.canh_bao import asr, lam_sang, phat_hien, toan_ca
 from src.canh_bao.loai import (CAN_XEM, CAO, LOAI, LOI_PHAT_HIEN, NGHI_RUI_RO, ON_DINH, PHIEN_BAN, THAP, CanhBao, _HANG)
 
@@ -57,6 +78,8 @@ _MA_TINH_LUOC = {
 }
 
 
+# ═══ phan_tang_canh_bao() — Xếp một cảnh báo vào một trong ba tầng ════════════════════
+# Chặn ngay, cần xem xét hoặc tinh lược, nhằm giảm mệt mỏi vì quá nhiều cảnh báo.
 def phan_tang_canh_bao(c: CanhBao) -> str:
     """Phân tầng cảnh báo thành 3 mức chống mệt mỏi cảnh báo (alert fatigue triage):
     - CHAN_NGAY: Lỗi/nguy cơ cao phải chặn ngay hoặc buộc xác nhận.
@@ -87,6 +110,8 @@ def phan_tang_canh_bao(c: CanhBao) -> str:
     return TANG_CAN_XEM_XET
 
 
+# ═══ phan_tang_ket_qua() — Tổng hợp ba tầng cảnh báo cho cả ca ════════════════════════
+# Trả về danh sách mỗi tầng kèm thống kê số lượng và tỷ lệ tinh lược.
 def phan_tang_ket_qua(theo_p: Dict[int, dict], toan: List[CanhBao]) -> Dict[str, object]:
     """Tổng hợp phân tầng 3 mức cho toàn ca mà không làm thay đổi cấu trúc theo_phat_bieu/toan_ca."""
     chan_ngay: List[CanhBao] = []
@@ -124,6 +149,8 @@ def phan_tang_ket_qua(theo_p: Dict[int, dict], toan: List[CanhBao]) -> Dict[str,
 _KL = {LOI_PHAT_HIEN: 2, NGHI_RUI_RO: 1, CAN_XEM: 0}
 
 
+# ─── _gop_cung_ma() — Gộp các cảnh báo cùng mệnh đề và cùng mã ────────────────────────
+# Hợp lượt và câu trích, lấy kết luận mạnh nhất, mức nghiêm trọng cao nhất.
 def _gop_cung_ma(ds: List[CanhBao]) -> List[CanhBao]:
     theo = {}
     for c in ds:
@@ -145,18 +172,22 @@ def _gop_cung_ma(ds: List[CanhBao]) -> List[CanhBao]:
     return list(theo.values())
 
 
+# ─── _khoa_sap() — Khoá sắp xếp để chọn cảnh báo chính ────────────────────────────────
+# Ưu tiên cảnh báo đổi được trạng thái, rồi theo thứ tự ưu tiên và mức nghiêm trọng.
 def _khoa_sap(c: CanhBao):
     return (not c.anh_huong_trang_thai, LOAI[c.ma].uu_tien, -_HANG[c.muc_do], _HANG[c.bat_dinh])
 
 
+# ═══ chon_chinh() — Chọn cảnh báo chính cho một mệnh đề ═══════════════════════════════
+# Trả về chính, tối đa 2 cảnh báo khác nhóm có sức đổi trạng thái, còn lại là mã phụ.
 def chon_chinh(ds: List[CanhBao]) -> dict:
-    """-> {chinh, khac: [..], phu: [ma..], tat_ca: [..]} cho MOT phat bieu."""
+    """-> {chinh, khac: [..], phu: [ma..], tat_ca: [..]} cho MỘT phát biểu."""
     if not ds:
         return {"chinh": None, "khac": [], "phu": [], "tat_ca": []}
     ds = sorted(ds, key=_khoa_sap)
-    # Canh bao "can xem" cua bo phat hien THU NGHIEM khong bao gio la canh bao chinh:
-    # IMPORTANT_MODIFIER_DROPPED bao 84 lan, 0 lan trung loi (do 24/09/2026) — hien no
-    # la tao bao dong gia. Van giu trong `tat_ca` de ghi nhat ky va do tiep.
+    # Cảnh báo "cần xem" của bộ phát hiện THỬ NGHIỆM không bao giờ là cảnh báo chính:
+    # IMPORTANT_MODIFIER_DROPPED báo 84 lần, 0 lần trúng lỗi (đo 24/09/2026) — hiện nó
+    # là tạo báo động giả. Vẫn giữ trong `tat_ca` để ghi nhật ký và đo tiếp.
     hien = [c for c in ds if not (c.ket_luan == CAN_XEM and c.tin_cay != ON_DINH)]
     if not hien:
         return {"chinh": None, "khac": [], "phu": [], "tat_ca": ds}
@@ -173,8 +204,10 @@ def chon_chinh(ds: List[CanhBao]) -> dict:
     return {"chinh": chinh, "khac": khac, "phu": chinh.phu, "tat_ca": ds}
 
 
+# ═══ trang_thai_D() — Quyết định trạng thái mệnh đề theo chính sách D ═════════════════
+# Bị thay thế, cần xác nhận hoặc đã kiểm chứng, kèm lý do.
 def trang_thai_D(p, cb: dict, kq_khoa=None) -> tuple:
-    """-> (trang thai, ly do) theo chinh sach D."""
+    """-> (trạng thái, lý do) theo chính sách D."""
     if getattr(p, "trang_thai", "còn hiệu lực") == "bị thay thế":
         return BI_THAY_THE, "đã được thông tin mới thay thế"
     if kq_khoa is not None and kq_khoa.chan:
@@ -188,11 +221,13 @@ def trang_thai_D(p, cb: dict, kq_khoa=None) -> tuple:
     return DA_KIEM_CHUNG, ""
 
 
+# ═══ chay() — Chạy toàn bộ lớp cảnh báo cho một ca ════════════════════════════════════
+# Chạy mọi bộ phát hiện, gộp, chọn cảnh báo chính, áp chính sách D và phân tầng.
 def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict] = None) -> dict:
-    """Canh bao cho MOT ca. `kk` = ket qua `khoa_bang_chung.khoa_ca` (tinh lai neu
-    khong truyen). `meta_asr` = {so luot: {asr_confidence, nguoi_noi_chua_chac}}
-    khi loi thoai den tu chep am; khong co thi khong sinh canh bao chep am."""
-    from src import khoa_bang_chung
+    """Cảnh báo cho MỘT ca. `kk` = kết quả `khoa_bang_chung.khoa_ca` (tính lại nếu
+    không truyền). `meta_asr` = {số lượt: {asr_confidence, nguoi_noi_chua_chac}}
+    khi lời thoại đến từ chép âm; không có thì không sinh cảnh báo chép âm."""
+    from src.duong_ong import b4_kiem_can_cu as khoa_bang_chung
     ctx = phat_hien.NguCanh(hoi_thoai)
     if kk is None:
         kk = khoa_bang_chung.khoa_ca(ps, hoi_thoai)
@@ -236,13 +271,17 @@ def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict]
     }
 
 
+# ═══ ly_do_chan_D() — Lấy lý do chuyển sang cần xác nhận theo chính sách D ════════════
+# Trả về {id mệnh đề: lý do} cho bước sinh bệnh án.
 def ly_do_chan_D(kq: dict) -> Dict[int, str]:
-    """{id: ly do} de `sinh_benh_an.sinh` dua sang CAN XAC NHAN theo chinh sach D."""
+    """{id: lý do} để `sinh_benh_an.sinh` đưa sang CẦN XÁC NHẬN theo chính sách D."""
     return {i: v["ly_do"] for i, v in kq["trang_thai_D"].items() if v["trang_thai"] == CAN_XAC_NHAN}
 
 
+# ═══ to_dict() — Chuyển kết quả cảnh báo sang dạng JSON ═══════════════════════════════
+# Dùng cho bản ghi kết quả, dịch vụ và giao diện.
 def to_dict(kq: dict) -> dict:
-    """Ban JSON — cho ban ghi ket qua, dich vu va giao dien."""
+    """Bản JSON — cho bản ghi kết quả, dịch vụ và giao diện."""
     def cb(c):
         return c.to_dict() if c is not None else None
     pt_raw = kq.get("phan_tang")

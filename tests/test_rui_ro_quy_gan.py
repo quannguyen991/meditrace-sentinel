@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test cho tang cham rui ro quy gan."""
-from src import rui_ro_quy_gan as rr
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b5_diem_rui_ro_quy_gan as rr
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 LUOT = [
     (1, "Bác sĩ", "Cháu có tiền sử dị ứng thuốc gì không ạ?"),

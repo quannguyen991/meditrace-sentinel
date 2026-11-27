@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Test suite cho Trụ cột 1: Động cơ Dược lý Lâm sàng trong src/duoc_ly_lam_sang.py."""
+"""Test suite cho Trụ cột 1: Động cơ Dược lý Lâm sàng trong src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py."""
 import pytest
-from src.duoc_ly_lam_sang import (
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import (
     ClinicalPharmacovigilanceEngine,
     ClinicalPharmacovigilanceEngine as CPE,
     DDI_CHONG_CHI_DINH,
     DDI_NGHIEM_TRONG
 )
-from src.aho_corasick_duoc_thu import (
+from src.cong_cu_lam_sang.tra_duoc_thu_aho_corasick import (
     BoTraCuuDuocThuAhoCorasick,
     PurePythonAhoCorasick
 )
@@ -74,7 +74,7 @@ def test_kiem_duyet_toan_dien_tong_hop():
 
 def test_pure_python_aho_corasick_co_ban():
     """Kiểm tra hoạt động máy trạng thái hữu hạn Aho-Corasick thuần Python."""
-    from src.aho_corasick_duoc_thu import PurePythonAhoCorasick
+    from src.cong_cu_lam_sang.tra_duoc_thu_aho_corasick import PurePythonAhoCorasick
 
     ac = PurePythonAhoCorasick()
     ac.them_tu_khoa("paracetamol", {"id": 1})
@@ -93,7 +93,7 @@ def test_pure_python_aho_corasick_co_ban():
 
 def test_aho_corasick_word_boundary_guard():
     """Kiểm tra Word Boundary Guard: không bắt nhầm chuỗi con vô nghĩa bên trong từ."""
-    from src.aho_corasick_duoc_thu import PurePythonAhoCorasick
+    from src.cong_cu_lam_sang.tra_duoc_thu_aho_corasick import PurePythonAhoCorasick
 
     ac = PurePythonAhoCorasick()
     ac.them_tu_khoa("tin", {"id": "statin_hoac_khac"})

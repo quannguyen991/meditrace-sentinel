@@ -13,9 +13,9 @@ sua doi o Luong B va F.
 import hashlib
 import json
 
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src import tach_tap_viet as tt
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu import chia_tap_theo_khuon as tt
 
 BAM_VANG = "2bedc64168fe45ddb73514d2cdb76537988fafbbf26f537afee4297b762af207"
 PHAT_TRIEN_VANG = ["béo phì", "liệt mặt ngoại biên", "lạc nội mạc tử cung", "ngưng thở khi ngủ do tắc nghẽn", "nhiễm giun", "nhiễm khuẩn HP dạ dày kháng thuốc", "rối loạn cương dương", "rối loạn tiêu hóa do kháng sinh", "rối loạn ám ảnh cưỡng chế", "suy tim phân xuất tống máu giảm", "sỏi thận", "sốt mò", "sốt phát ban", "sốt siêu vi", "thiếu máu thiếu sắt", "trào ngược dạ dày thực quản", "táo bón chức năng", "viêm amidan hốc mủ", "viêm cơ tim do virus", "viêm da cơ địa", "viêm hạch mạc treo cấp", "viêm loét dạ dày do HP", "viêm màng não do virus", "viêm túi mật cấp", "viêm xoang", "áp xe phổi"]

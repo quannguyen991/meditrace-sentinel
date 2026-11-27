@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Canh bao lam sang (lieu, tuong tac, chong chi dinh) di qua lop canh bao, co ma, co muc tin
 cay — thay cho he song song `lam_sang_nang_cao` khong ma, khong muc tin cay."""
-from src import tri_thuc_thuoc
+from src.cong_cu_lam_sang import tri_thuc_thuoc as tri_thuc_thuoc
 from src.canh_bao import gop, lam_sang
 from src.canh_bao.loai import CAN_XEM, LOAI, NHOM, THU_NGHIEM
 from src.canh_bao.phat_hien import NguCanh
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = ("Bác sĩ: Anh đang dùng thuốc gì?\n"
       "Bệnh nhân: Tôi uống paracetamol 1000 mg ngày 6 lần, với lại đang uống warfarin.\n"

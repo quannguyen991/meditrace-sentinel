@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử tự động cho Module Khử nhận dạng thông tin cá nhân y tế PII/PHI."""
 
-from src.khu_dinh_danh import ClinicalDeidentifier
+from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
 
 
 def test_an_danh_thong_tin_co_ban():

@@ -15,7 +15,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-from src import duong_dan
+from src.he_thong import duong_dan as duong_dan
 
 
 def _chuan_hoa_cau(s: str) -> str:

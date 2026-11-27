@@ -11,8 +11,9 @@ Hai hang rao trong tep nay:
   2. Tren ca co dinh chinh, `luot_sai_dau_tien` phai la luot TRUOC khi cau dinh chinh
      xuat hien, khong phai luot cuoi.
 """
-from src import cap_nhat, cham_he_thong as cht
-from src.phat_bieu import PhatBieu
+from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
+from src.do_luong import cham_he_thong as cht
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def _pb(id, noi_dung, bang_chung, quan_he=None, quan_he_voi=None, nguoi_noi="bệnh nhân"):

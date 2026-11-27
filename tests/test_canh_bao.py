@@ -10,7 +10,7 @@ import pytest
 
 from src.canh_bao import gop, so_lieu
 from src.canh_bao.loai import CAO, LOAI, LOI_PHAT_HIEN, THAP, TRUNG
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def ht(*luot):
@@ -389,7 +389,7 @@ def test_moi_ma_co_trong_bang():
 
 
 def test_chinh_sach_c_khong_doi():
-    from src import cong_rui_ro
+    from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
     assert cong_rui_ro.CHINH_SACH == "C-2026-09-22"
 
 
@@ -452,7 +452,7 @@ def _mot_ca_bo_dem():
     """Mot ca co trong bo dem khau trich, kem LOI THOAI GOC lay tu bo du lieu (tep dem
     chi co ma ca)."""
     import json
-    from src import dich_vu
+    from src.he_thong import dich_vu_http as dich_vu
     loi = dich_vu.Loi(cho_nap_mo_hinh=False)
     if not loi.dem:
         pytest.skip("may nay khong co tep dem khau trich")
@@ -471,7 +471,7 @@ def test_chinh_sach_c_ban_nhap_khong_doi_khi_them_lop_canh_bao(monkeypatch):
     """Lop canh bao KHONG duoc doi ban nhap cua chinh sach C — moi con so da bao cao
     dua tren chinh sach C. Chay mot ca tu bo dem hai lan: co lop canh bao, va voi lop
     canh bao bi thay bang ham rong. Ban nhap phai giong het."""
-    from src import nhanh
+    from src.duong_ong import chay_duong_ong as nhanh
     dem, mau = _mot_ca_bo_dem()
     co = nhanh.chay_trung_gian(mau, None, None, None, "C_khoa", kq_tho=[dem])[0]
     rong = {"phien_ban": "", "chinh_sach": "", "theo_phat_bieu": {}, "toan_ca": [], "trang_thai_D": {},
@@ -484,7 +484,7 @@ def test_chinh_sach_c_ban_nhap_khong_doi_khi_them_lop_canh_bao(monkeypatch):
 
 
 def test_chinh_sach_d_chi_khi_goi_ro():
-    from src import nhanh
+    from src.duong_ong import chay_duong_ong as nhanh
     dem, mau = _mot_ca_bo_dem()
     d = nhanh.chay_trung_gian(mau, None, None, None, "C_khoa", kq_tho=[dem], chinh_sach="D")[0]
     assert d["chinh_sach"] == gop.CHINH_SACH_D
@@ -535,7 +535,7 @@ def test_cum_mo_ho_khong_the_co_trong_du_lieu_the_he_8():
     import re
     from pathlib import Path
 
-    from src import dan_gian
+    from src.bo_du_lieu import dan_gian as dan_gian
     goc = Path(__file__).resolve().parents[1] / "src"
     mau = re.compile("|".join(re.escape(m.dan_gian) for m in dan_gian.BANG if m.loai == dan_gian.MO_HO),
                      re.I)

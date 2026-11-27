@@ -5,9 +5,9 @@ import random
 
 import pytest
 
-from src import sinh_benh_an as sba
-from src import sinh_hoi_thoai_viet as sh
-from src.danh_gia_khoa import phat_bieu_tu_dap_an, vao_than
+from src.duong_ong import b5_viet_ban_nhap as sba
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.do_luong.danh_gia_khoa import phat_bieu_tu_dap_an, vao_than
 
 
 def _muc(**kw):

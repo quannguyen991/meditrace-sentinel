@@ -1,6 +1,6 @@
 # DPO trên cặp lỗi khó — v3 so với v3 + DPO (26/11/2026)
 
-Huấn luyện thêm adapter v3 bằng DPO (`src/train_dpo.py`, β = 0,1, cộng NLL câu đúng α = 1, lr 2e-5, 51 bước × 8 cặp) trên **407 cặp** lỗi khó sinh từ dữ liệu train. Mô hình tham chiếu là v3.
+Huấn luyện thêm adapter v3 bằng DPO (`src/huan_luyen/huan_luyen_dpo.py`, β = 0,1, cộng NLL câu đúng α = 1, lr 2e-5, 51 bước × 8 cặp) trên **407 cặp** lỗi khó sinh từ dữ liệu train. Mô hình tham chiếu là v3.
 
 Đo trên **140 cặp kiểm tra** sinh từ `viet_phat_trien_v2` (tách khỏi dữ liệu train), cùng một tập cho cả hai bản.
 

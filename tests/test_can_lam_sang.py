@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kiểm thử unit test cho Module Đối soát Cận lâm sàng & Xét nghiệm."""
 
-from src.can_lam_sang import ParaclinicalCorrelator
+from src.cong_cu_lam_sang.doi_soat_can_lam_sang import ParaclinicalCorrelator
 
 
 def test_bao_dong_do_nhoi_mau_co_tim():

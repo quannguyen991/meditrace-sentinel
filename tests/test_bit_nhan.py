@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Test cho phep thu bit nhan nguoi noi."""
-from src import bit_nhan
+from src.do_luong import bit_nhan as bit_nhan
 
 HT = ("Bác sĩ: Cháu có tiền sử dị ứng thuốc gì không ạ?\n"
       "Người nhà: Tôi thì dị ứng penicillin, còn cháu chưa thấy bị bao giờ.\n"

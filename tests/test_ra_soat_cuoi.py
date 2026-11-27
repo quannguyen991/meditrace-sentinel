@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """Phep thu cho cac loi ra soat doc lap tim ra (25/11/2026), moi loi mot phep thu."""
-from src import cong_rui_ro, khoa_bang_chung as kbc
+from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
+from src.duong_ong import b4_kiem_can_cu as kbc
 from src.canh_bao import bo_sot, gop, lam_sang
 from src.canh_bao.loai import CAN_XEM
 from src.canh_bao.loi_noi import nhan_cau_hoi
 from src.canh_bao.phat_hien import NguCanh
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine as Dl
-from src.guardrails import EvidenceIntegrityGuardrail as MedicalGuardrails
-from src.phat_bieu import PhatBieu
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine as Dl
+from src.he_thong.rao_chan_an_toan import EvidenceIntegrityGuardrail as MedicalGuardrails
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 
 def _doan(so, doan, vai="bệnh nhân"):

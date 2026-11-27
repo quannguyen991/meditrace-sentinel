@@ -27,7 +27,7 @@ Hai bộ mới:
 
 ## Chỉ số chính
 
-Đo trên đầu ra của mô hình (Giai đoạn 5) bằng `python -m src.do_canh_bao --thu-muc data/thach_thuc_v2`.
+Đo trên đầu ra của mô hình (Giai đoạn 5) bằng `python -m src.do_luong.do_canh_bao --thu-muc data/thach_thuc_v2`.
 Mọi số ghi "so với bộ chấm tự động", trừ chỉ số 4.
 
 1. **Tỉ lệ lỗi nguy hiểm lọt vào thân** (dị ứng, thuốc, chẩn đoán), chính sách đang dùng.

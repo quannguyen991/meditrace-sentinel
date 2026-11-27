@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Kiểm thử Động cơ Dị ứng Chéo Thuốc theo Nhóm ATC & Chuỗi nhánh Hóa học (`src/di_ung_cheo.py`)
+"""Kiểm thử Động cơ Dị ứng Chéo Thuốc theo Nhóm ATC & Chuỗi nhánh Hóa học (`src/cong_cu_lam_sang/di_ung_cheo.py`)
 và tích hợp vào `duoc_ly_lam_sang`, `canh_bao.lam_sang`, `dieu_phoi_ha_tang`."""
 import pytest
 
 from src.canh_bao import gop, lam_sang
 from src.canh_bao.loai import CAN_XEM, NGHI_RUI_RO
 from src.canh_bao.phat_hien import NguCanh
-from src.di_ung_cheo import CHONG_CHI_DINH, THAN_TRONG, kiem_tra_di_ung_cheo
-from src.dieu_phoi_ha_tang import MediTracePipelineOrchestrator
-from src.duoc_ly_lam_sang import ClinicalPharmacovigilanceEngine
-from src.phat_bieu import PhatBieu
+from src.cong_cu_lam_sang.di_ung_cheo import CHONG_CHI_DINH, THAN_TRONG, kiem_tra_di_ung_cheo
+from src.he_thong.dieu_phoi_cac_chot_an_toan import MediTracePipelineOrchestrator
+from src.cong_cu_lam_sang.canh_bao_tuong_tac_thuoc import ClinicalPharmacovigilanceEngine
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 KHOA_BAT_BUOC = {
     "thuoc",

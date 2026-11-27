@@ -2,9 +2,9 @@
 """Bộ kiểm thử cho Nhiệm vụ VẤN ĐỀ 2 (Axis 1): Phân chia độc lập & Kiểm nghiệm Ngoài khuôn."""
 import pytest
 
-from src import ngu_lieu_viet as nl
-from src.tach_tap_viet import phan_khuon
-from src.kiem_nghiem_ngoai_khuon import (
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu.chia_tap_theo_khuon import phan_khuon
+from src.do_luong.kiem_nghiem_ngoai_khuon import (
     tinh_ma_tran_trung_lap_train_test,
     chay_kiem_nghiem_ngoai_khuon,
     KICH_BAN_NGOAI_KHUON,

@@ -9,11 +9,11 @@ import random
 
 import pytest
 
-from src import khoa_bang_chung as kbc
-from src import sinh_hoi_thoai_viet as sh
-from src.danh_gia_khoa import (do_bat_loi, phat_bieu_tu_dap_an, thong_ke_khoa,
+from src.duong_ong import b4_kiem_can_cu as kbc
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.do_luong.danh_gia_khoa import (do_bat_loi, phat_bieu_tu_dap_an, thong_ke_khoa,
                                vao_than)
-from src.phat_bieu import PhatBieu
+from src.duong_ong.b1_cau_truc_menh_de import PhatBieu
 
 HT = ("Bác sĩ: Cháu có dị ứng thuốc gì không chị?\n"
       "Người nhà: Dạ, tôi thì dị ứng penicillin, còn cháu chưa thấy bị bao giờ ạ.\n"

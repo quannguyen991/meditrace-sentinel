@@ -26,9 +26,9 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-from src import ngu_lieu_viet as nl
-from src import sinh_hoi_thoai_viet as sh
-from src.da_benh_ly import MultimorbidityEngine
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu.sinh_ca_da_benh_ly import MultimorbidityEngine
 
 
 def tach_tu(van_ban: str) -> List[str]:

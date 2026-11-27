@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from src.do_bo_sot import ti_le_bo_sot
+from src.do_luong.do_bo_sot import ti_le_bo_sot
 
 
 def _md(noi_dung, nhom=None):

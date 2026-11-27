@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Kiem ke cac mo-dun luat trong src/: ai nhap, co phep thu khong, ghi nguon may cho,
-co nam tren luong chinh (bao dong nhap tu src/dich_vu.py) khong.
+co nam tren luong chinh (bao dong nhap tu src/he_thong/dich_vu_http.py) khong.
 
 Doc bang `ast`, khong regex. Chi liet ke ung vien ma chet; KHONG xoa gi.
 
@@ -94,7 +94,7 @@ def bang_md(ds: list) -> str:
     khong_thu = [d for d in ds if d["nam_tren_luong_chinh"] and not d["co_phep_thu"] and d["so_dong"] > 30]
     dong = ["# Kiểm kê mô-đun src/ (sinh bằng `python -m tools.kiem_ke_luat`)", "",
             f"Tổng {len(ds)} mô-đun; {sum(d['nam_tren_luong_chinh'] for d in ds)} nằm trên luồng chính "
-            "(bao đóng nhập từ `src/dich_vu.py`).", "",
+            "(bao đóng nhập từ `src/he_thong/dich_vu_http.py`).", "",
             "Danh sách dưới đây chỉ để người dùng quyết; **không xoá gì tự động**. Một mô-đun không ai nhập "
             "vẫn có thể là lệnh chạy độc lập (`python -m src.x`).", "",
             f"## Ứng viên mã chết: không ai nhập, không trên luồng chính ({len(chet)})", "",

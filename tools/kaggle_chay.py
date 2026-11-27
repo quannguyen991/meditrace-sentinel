@@ -76,7 +76,7 @@ def chay_mot_tap(goc: Path, tap: str, card: int, adapter: str):
     moi_truong = dict(os.environ, CUDA_VISIBLE_DEVICES=str(card),
                       PYTHONIOENCODING="utf-8", HF_HUB_ENABLE_HF_TRANSFER="1")
     log = open(LAM / f"log_{tap}_card{card}.txt", "w", encoding="utf-8")
-    lenh = [sys.executable, "-m", "src.nhanh", "--nhanh", *NHANH,
+    lenh = [sys.executable, "-m", "src.duong_ong.chay_duong_ong", "--nhanh", *NHANH,
             "--model", MO_HINH, "--tap", tap, "--max-token", MAX_TOKEN,
             "--adapter-trich", adapter]
     # SO_CA: chay thu vai ca de do nhip truoc khi chay dai. Khong dat thi chay het.

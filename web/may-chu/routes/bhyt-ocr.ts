@@ -4,7 +4,7 @@ import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 export function dangKyBhytOcrRoutes(app: express.Express) {
   /**
    * Bóc tách chỉ số XN & đơn thuốc cũ (Clinical OCR Parser 100% cục bộ + hiệu chỉnh liều KDIGO):
-   * Gọi `src/ocr_lam_sang.py` nối thẳng `src/hieu_chinh_lieu.py`.
+   * Gọi `src/cong_cu_lam_sang/doc_phieu_xet_nghiem.py` nối thẳng `src/cong_cu_lam_sang/hieu_chinh_lieu.py`.
    * Không bao giờ tự bịa `tuoi = 50` khi giao diện không gửi tuổi (`tuoi: req.body?.tuoi ?? null`).
    */
   app.post("/api/ocr/phieu-cu", async (req, res) => {
@@ -26,7 +26,7 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
         // Chỉ chạy Python tại chỗ khi dịch vụ đang tắt; thiếu/sai khoá nội bộ thì báo lỗi rõ.
         if (err?.code !== "dich_vu_tat") throw err;
       }
-      const kq = await chayPythonJson("src.ocr_lam_sang", ["--parse"], payload);
+      const kq = await chayPythonJson("src.cong_cu_lam_sang.doc_phieu_xet_nghiem", ["--parse"], payload);
       res.json(kq);
     } catch (err) {
       traLoi(res, err);
@@ -55,7 +55,7 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
       } catch (err: any) {
         if (err?.code !== "dich_vu_tat") throw err;
       }
-      const kq = await chayPythonJson("src.kiem_duyet_bhyt_va_bo_sot", ["--precheck"], payload);
+      const kq = await chayPythonJson("src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot", ["--precheck"], payload);
       res.json(kq);
     } catch (err) {
       traLoi(res, err);
@@ -113,10 +113,10 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
         }
       }
       try {
-        const kqRecompile = await chayPythonJson("src.kiem_duyet_bhyt_va_bo_sot", ["--recompile"], payload);
+        const kqRecompile = await chayPythonJson("src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot", ["--recompile"], payload);
         return res.json(kqRecompile);
       } catch {
-        const kqFallback = await chayPythonJson("src.kiem_duyet_bhyt_va_bo_sot", ["--precheck"], payload);
+        const kqFallback = await chayPythonJson("src.cong_cu_lam_sang.tien_kiem_bhyt_va_khoi_phuc_bo_sot", ["--precheck"], payload);
         return res.json(kqFallback);
       }
     } catch (err) {

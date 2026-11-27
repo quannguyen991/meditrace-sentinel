@@ -1,6 +1,6 @@
 # Bộ hội thoại khám bệnh Việt Nam — sinh bằng luật
 
-Sinh tự động bằng `python -m src.sinh_hoi_thoai_viet --so-ca 5000`.
+Sinh tự động bằng `python -m src.bo_du_lieu.sinh_hoi_thoai_viet --so-ca 5000`.
 Đừng sửa tay: sửa tay rồi chạy lại là mất.
 
 ## Vì sao tự dựng bộ này
@@ -30,7 +30,7 @@ về phía làm vấn đề trông nhẹ hơn thật.
 | | |
 |---|---|
 | Số ca | **5000** (hội thoại không trùng nhau: 5000) |
-| Khuôn bệnh | 270 ở bản trung gian · **657 khuôn (21 hệ cơ quan)** ở bản v2 mở rộng (`src/kho_khuon.py`, xem `docs/HO_SO_DU_LIEU_DATASHEET.md`) |
+| Khuôn bệnh | 270 ở bản trung gian · **657 khuôn (21 hệ cơ quan)** ở bản v2 mở rộng (`src/bo_du_lieu/kho_khuon.py`, xem `docs/HO_SO_DU_LIEU_DATASHEET.md`) |
 | Tổng lượt thoại | 87097 · trung bình 17.4 lượt/ca |
 | Tổng từ | 1,525,126 |
 | Mệnh đề trong đáp án | 47530 |

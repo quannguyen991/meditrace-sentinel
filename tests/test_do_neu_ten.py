@@ -17,8 +17,8 @@ import json
 
 import pytest
 
-from src import do_neu_ten as dnt
-from src import sinh_benh_an
+from src.do_luong import do_neu_ten as dnt
+from src.duong_ong import b5_viet_ban_nhap as sinh_benh_an
 
 MUC = sinh_benh_an.MUC_NGUOI_KHAC
 

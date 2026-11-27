@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Do ti le bo sot tu tep dem khau trich (Task A6 cua ke hoach nang cap).
 
-Doc `data/trich_<tap>_<max_token>[_hl].jsonl` do `src.nhanh` ghi (moi dong: id, ly_do,
+Doc `data/trich_<tap>_<max_token>[_hl].jsonl` do `src.duong_ong.chay_duong_ong` ghi (moi dong: id, ly_do,
 phat_bieu, tho), ghep voi dap an cua `data/<tap>.jsonl`, roi tinh ti le bo sot bang
-`src.do_bo_sot.ti_le_bo_sot`. Chi tinh tren cac ca CO TRONG TAT CA cac tep dem duoc
+`src.do_luong.do_bo_sot.ti_le_bo_sot`. Chi tinh tren cac ca CO TRONG TAT CA cac tep dem duoc
 dua vao, de so cac mo hinh tren cung mot tap ca.
 
   python tools/do_bo_sot_tren_tap.py --ra docs/ket-qua/bo-sot-qwen3-4b.md \\
@@ -18,8 +18,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import duong_dan  # noqa: E402
-from src.do_bo_sot import ti_le_bo_sot  # noqa: E402
+from src.he_thong import duong_dan as duong_dan  # noqa: E402
+from src.do_luong.do_bo_sot import ti_le_bo_sot  # noqa: E402
 
 
 def doc_jsonl_theo_id(duong_dan_tep) -> dict:

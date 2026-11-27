@@ -39,32 +39,32 @@ function Chay-Lai {
 # 1. Train nhanh A. 500 buoc x grad_accum 16 = 8.000 mau tren 2.231 ca
 #    = khoang 3,6 epoch. Train ky hon lan truoc (200 buoc).
 Chay-Lai "1-TRAIN-A" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "benh_an", "--buoc", "500", "--do-dai", "1024") | Out-Null
 
 # 2. Tam nhanh tren tap phat trien, mot lan trich dung chung.
 Chay-Lai "2-CAC-NHANH" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C_khong_luat", "C_khong_lien_ket",
     "C", "C_ghi_de", "D", "--model", $mo_hinh, "--tap", "viet_phat_trien",
     "--max-token", "3072", "--n", "60") | Out-Null
 
 Chay-Lai "2b-NHANH-A" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--adapter", "models/nen-qwen3-4b/best_checkpoint",
     "--tap", "viet_phat_trien", "--n", "60") | Out-Null
 
 Chay-Lai "2c-NHANH-A-NEN" @(
-    "-m", "src.nhanh", "--nhanh", "A", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "A", "--model", $mo_hinh,
     "--tap", "viet_phat_trien", "--n", "60") | Out-Null
 
 # 3. Train khau trich. 2048 token nen cham hon nhieu; 300 buoc = ~2,2 epoch.
 Chay-Lai "3-TRAIN-TRICH" @(
-    "-m", "src.train_baseline", "--model", $mo_hinh,
+    "-m", "src.huan_luyen.huan_luyen_sft", "--model", $mo_hinh,
     "--nhiem-vu", "trich", "--buoc", "300", "--do-dai", "2048") | Out-Null
 
 # 4. Chay lai cac nhanh voi adapter trich.
 Chay-Lai "4-NHANH-CO-ADAPTER" @(
-    "-m", "src.nhanh", "--nhanh", "B", "C", "D", "--model", $mo_hinh,
+    "-m", "src.duong_ong.chay_duong_ong", "--nhanh", "B", "C", "D", "--model", $mo_hinh,
     "--tap", "viet_phat_trien", "--max-token", "3072", "--n", "60",
     "--adapter-trich", "models/nen-qwen3-4b-trich/best_checkpoint") | Out-Null
 

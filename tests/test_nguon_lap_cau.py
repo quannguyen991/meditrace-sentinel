@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from src import ngu_lieu_viet as nl
-from src import nguon_lap_cau as nlc
-from src import do_lap_cau as dl
+from src.bo_du_lieu import ngu_lieu_viet as nl
+from src.do_luong import nguon_lap_cau as nlc
+from src.do_luong import do_lap_cau as dl
 
 
 def test_cau_trong_nhom_duoc_gan_ten_nhom():

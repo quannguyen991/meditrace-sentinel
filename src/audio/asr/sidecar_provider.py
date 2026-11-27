@@ -1,7 +1,18 @@
-"""Deterministic provider reading a JSON transcript next to the audio.
+"""[Âm thanh › Chép lời]
+Làm gì   : Cho ra bản chép lời cố định bằng cách đọc tệp JSON đặt cạnh âm thanh, dùng cho
+           demo và phép thử lặp lại được.
+Vào → Ra : tệp âm thanh có JSON cùng tên → ASRResult lấy nguyên từ JSON
+Đọc từ   : class SidecarProvider đọc bản chép từ JSON cạnh âm thanh
+Mục lục (các hàm/lớp chính):
+  class SidecarProvider  Nhà cung cấp đọc lời chép sẵn từ tệp JSON cạnh âm thanh
+Gọi tới  : audio/asr/base, audio/asr/schemas
+Dùng bởi : audio/asr/registry, audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Nhà cung cấp tất định đọc bản chép lời JSON nằm cạnh tệp âm thanh.
 
-Used for demos, offline tests and fixtures. Wraps the legacy
-``providers.JsonSidecarASRProvider`` into the common ``ASRResult`` schema.
+Dùng cho demo, kiểm thử ngoại tuyến và dữ liệu mẫu. Bọc lớp cũ
+``providers.JsonSidecarASRProvider`` vào lược đồ ``ASRResult`` chung.
 """
 
 from __future__ import annotations
@@ -14,6 +25,8 @@ from .base import ASRProvider
 from .schemas import ASRError, ASRResult, ASRSegment, ASRWord
 
 
+# ═══ class SidecarProvider — Nhà cung cấp đọc lời chép sẵn từ tệp JSON cạnh âm thanh ═══
+# Dùng cho demo và kiểm thử ngoại tuyến; kết quả tất định.
 class SidecarProvider(ASRProvider):
     name = "sidecar"
     external = False

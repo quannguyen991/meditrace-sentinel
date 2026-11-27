@@ -33,7 +33,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import du_lieu, duong_dan  # noqa: E402
+from src.bo_du_lieu import nap_du_lieu as du_lieu  # noqa: E402
+from src.he_thong import duong_dan as duong_dan
 
 
 def tu(s: str):

@@ -2,7 +2,7 @@
 """Chung chi thuoc do MO RONG: thuoc do chu co nhin thay loi phu dinh, loi thoi gian,
 loi ke hoach ghi thanh da lam khong (22/09/2026). Gia thuyet H3.
 
-`src/chung_chi_thuoc_do.py` da chung minh cho loi DOI CHU THE: ROUGE-1 = 1,0000.
+`src/do_luong/chung_chi_thuoc_do.py` da chung minh cho loi DOI CHU THE: ROUGE-1 = 1,0000.
 Tep nay lam ba kieu loi con lai cua dinh nghia "loi nguy hiem".
 
 CACH LAM. Moi ca tap phat trien:
@@ -37,7 +37,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import cham_diem, cham_he_thong as ch, du_lieu, du_lieu_trich, nhanh  # noqa: E402
+from src.do_luong import cham_diem as cham_diem  # noqa: E402
+from src.do_luong import cham_he_thong as ch
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.bo_du_lieu import du_lieu_huan_luyen_trich as du_lieu_trich
+from src.duong_ong import chay_duong_ong as nhanh
 
 HAT = 2026
 # Chi cap 1 am tiet <-> 1 am tiet, de so tu bi doi bang voi loi phu dinh (1 tu).

@@ -29,9 +29,12 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
-from src import du_lieu, kho_khuon, nhieu_asr, van_tay_bo
-from src import sinh_hoi_thoai_viet as sh
-from src.thach_thuc import BAY_CAP_NHAT, _so_cap_phuong_ngu, bo_trich_dan
+from src.bo_du_lieu import nap_du_lieu as du_lieu
+from src.bo_du_lieu import kho_khuon as kho_khuon
+from src.bo_du_lieu import nhieu_asr as nhieu_asr
+from src.bo_du_lieu import van_tay_bo as van_tay_bo
+from src.bo_du_lieu import sinh_hoi_thoai_viet as sh
+from src.bo_du_lieu.sinh_bo_thach_thuc import BAY_CAP_NHAT, _so_cap_phuong_ngu, bo_trich_dan
 
 GOC = Path(__file__).resolve().parents[1]
 THU_MUC_RA = GOC / "data" / "thach_thuc_v2"

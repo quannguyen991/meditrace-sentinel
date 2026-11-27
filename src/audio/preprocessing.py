@@ -1,10 +1,22 @@
-"""Audio conversion while preserving the raw source file.
+"""[Âm thanh]
+Làm gì   : Đưa âm thanh về WAV 16 kHz mono để bộ chép dùng, vẫn giữ nguyên tệp gốc.
+Vào → Ra : tệp âm thanh bất kỳ (webm, mp3...) → tệp WAV 16 kHz mono và kết quả kiểm chất
+           lượng
+Đọc từ   : class AudioPreprocessor chuyển định dạng; kiem_chat_luong() kiểm tệp
+Mục lục (các hàm/lớp chính):
+  class AudioPreprocessor     Chuyển âm thanh gốc sang WAV 16 kHz mono bằng ffmpeg
+  kiem_chat_luong()           Kiểm tra chất lượng WAV: quá nhỏ, méo, quá ngắn
+  class AudioProcessingError  Lỗi khi chuyển đổi âm thanh
+Dùng bởi : audio/pipeline
+Bản đồ   : BAN_DO_MA_NGUON.md
+────────────────────────────────────────────────────────────────────────
+Chuyển đổi âm thanh nhưng vẫn giữ nguyên tệp nguồn thô.
 
 raw_audio.<ext>  --ffmpeg-->  processed.wav (16 kHz, mono, PCM 16 bit)
 
-The raw file is never written to: the target must be a different path, and the
-conversion refuses to run otherwise. A quality check (too quiet, clipped, too short)
-is attached to the metadata as warnings; it does not block processing.
+Tệp thô không bao giờ bị ghi vào: đích phải là đường dẫn khác, và
+phép chuyển đổi từ chối chạy nếu không. Kiểm tra chất lượng (quá nhỏ, bị méo, quá ngắn)
+được gắn vào siêu dữ liệu dưới dạng cảnh báo; nó không chặn việc xử lý.
 """
 
 from __future__ import annotations
@@ -18,18 +30,22 @@ import wave
 from pathlib import Path
 from typing import Any
 
-# Nguong kiem chat luong (am thanh 16 bit). Dat bao thu: canh bao, khong chan.
-RMS_QUA_NHO = 300          # trung binh binh phuong duoi muc nay: noi qua nho / micro xa
-TY_LE_MEO = 0.001          # hon 0,1% mau cham tran: bi meo
+# Ngưỡng kiểm chất lượng (âm thanh 16 bit). Đặt bảo thủ: cảnh báo, không chặn.
+RMS_QUA_NHO = 300          # trung bình bình phương dưới mức này: nói quá nhỏ / micro xa
+TY_LE_MEO = 0.001          # hơn 0,1% mẫu chạm trần: bị méo
 THOI_LUONG_TOI_THIEU = 1.0
 
 
+# ═══ class AudioProcessingError — Lỗi khi chuyển đổi âm thanh ═════════════════════════
 class AudioProcessingError(RuntimeError):
     pass
 
 
+# ═══ kiem_chat_luong() — Kiểm tra chất lượng WAV: quá nhỏ, méo, quá ngắn ══════════════
+# Trả rms, tỷ lệ chạm trần, thời lượng và danh sách cảnh báo; chỉ cảnh báo, không chặn
+# xử lý.
 def kiem_chat_luong(wav_path: str | Path) -> dict[str, Any]:
-    """-> {rms, clipping_ratio, duration, warnings}. Doc ca tep; du cho mot buoi kham."""
+    """-> {rms, clipping_ratio, duration, warnings}. Đọc cả tệp; đủ cho một buổi khám."""
     with wave.open(str(wav_path), "rb") as w:
         n = w.getnframes()
         data = array.array("h")
@@ -51,6 +67,8 @@ def kiem_chat_luong(wav_path: str | Path) -> dict[str, Any]:
             "warnings": canh}
 
 
+# ═══ class AudioPreprocessor — Chuyển âm thanh gốc sang WAV 16 kHz mono bằng ffmpeg ═══
+# Không bao giờ ghi đè tệp gốc; lưu siêu dữ liệu và kết quả kiểm chất lượng.
 class AudioPreprocessor:
     def __init__(self, ffmpeg: str | None = None):
         self.ffmpeg = ffmpeg or shutil.which("ffmpeg") or "ffmpeg"
@@ -58,7 +76,7 @@ class AudioPreprocessor:
     def convert(self, source: str | Path, target: str | Path) -> dict[str, Any]:
         source, target = Path(source), Path(target)
         if source.resolve() == target.resolve():
-            raise AudioProcessingError("audio_conversion_failed")   # khong bao gio ghi de ban goc
+            raise AudioProcessingError("audio_conversion_failed")   # không bao giờ ghi đè bản gốc
         target.parent.mkdir(parents=True, exist_ok=True)
         command = [self.ffmpeg, "-y", "-i", str(source), "-ac", "1", "-ar", "16000", "-sample_fmt", "s16", str(target)]
         result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
