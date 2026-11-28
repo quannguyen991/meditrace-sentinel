@@ -17,6 +17,7 @@ import {
 import type { TranscriptSegment } from "../types";
 import { khoangPhatLaiLuot } from "../lib/asrHighlight";
 import { canXacNhan, tachLuot } from "../lib/compileEffectiveNote";
+import { chiaCanhBaoCa, chiaCanhBaoMenhDe, nhanXemThem } from "../lib/nganSachCanhBao";
 import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
 
 export { canXacNhan, tachLuot };
@@ -39,6 +40,9 @@ export interface Proposition {
   warning?: CanhBaoUI | null;
   otherWarnings?: CanhBaoUI[];
   warningTags?: string[];
+  /** Ngân sách cảnh báo (từ `canh_bao_hien` / `canh_bao_gap`). Thiếu thì hiển thị như cũ. */
+  warningsShown?: CanhBaoUI[];
+  warningsFolded?: CanhBaoUI[];
   stateD?: string | null;
   stateDReason?: string | null;
 }
@@ -73,6 +77,9 @@ export interface NoteMeta {
   seconds?: number;
   transcript?: string;
   caseWarnings?: CanhBaoUI[];
+  /** Ngân sách cảnh báo toàn ca (từ `toan_ca_ngan_sach`). Thiếu thì hiện hết `caseWarnings`. */
+  caseWarningsShown?: CanhBaoUI[];
+  caseWarningsFolded?: CanhBaoUI[];
   warningPolicy?: string | null;
   clinicalSafety?: any;
 }
@@ -269,6 +276,9 @@ export const VerificationView: React.FC<Props> = ({
   };
   const [boQua, setBoQua] = useState<Record<number, boolean>>({});
   const [moKhac, setMoKhac] = useState<Record<number, boolean>>({});
+  // Phần gập của ngân sách cảnh báo: theo mệnh đề, và của nhóm cảnh báo toàn ca.
+  const [moGap, setMoGap] = useState<Record<number, boolean>>({});
+  const [moGapCa, setMoGapCa] = useState(false);
   // Luot bi bo sot (canh bao toan ca) -> danh dau o cot hoi thoai
   const luotBoSot = useMemo(() => {
     const m = new Map<number, CanhBaoUI>();
@@ -401,6 +411,7 @@ export const VerificationView: React.FC<Props> = ({
 
   const daQuyet = ds.filter((p) => quyet[p.id] && quyet[p.id] !== "cho").length;
   const phanTram = ds.length ? Math.round((daQuyet / ds.length) * 100) : 0;
+  const caCb = chiaCanhBaoCa(note);
   const nguon = NHAN_NGUON[note.source || ""] || { chu: note.source || "không rõ nguồn", mau: "bg-[#EEE] text-[#444] border-[#DDD]" };
   const dem = (q: Quyet) => Object.values(quyet).filter((x) => x === q).length;
   const dat = (id: number, q: Quyet) => setQuyet((p) => ({ ...p, [id]: q }));
@@ -466,17 +477,17 @@ export const VerificationView: React.FC<Props> = ({
         </div>
       </div>
 
-      {(note.caseWarnings?.length || 0) > 0 && (
+      {(caCb.hien.length + caCb.gap.length) > 0 && (
         <div className="px-4 sm:px-8 pb-4 max-w-[1400px] mx-auto w-full">
           <div className="rounded-2xl border border-[#F2DFA8] bg-[#FFFBEB] p-4">
             <h2 className="text-sm font-bold text-[#92400E] flex items-center gap-1.5">
-              <EyeOff size={15} /> Có thể bỏ sót ({note.caseWarnings!.length})
+              <EyeOff size={15} /> Có thể bỏ sót ({caCb.hien.length})
             </h2>
             <p className="text-[11.5px] text-[#92400E]/80 mt-0.5">
               Đoạn hội thoại có thông tin quan trọng mà không dòng nào trong bản nháp dẫn tới. Máy không tự thêm vào bản nháp.
             </p>
             <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-              {note.caseWarnings!.map((c, i) => (
+              {[...caCb.hien, ...(moGapCa ? caCb.gap : [])].map((c, i) => (
                 <li key={i} className="bg-white rounded-xl border border-[#F2DFA8] px-3 py-2 text-[12px] flex items-start justify-between gap-2">
                   <span className="min-w-0">
                     <strong className="text-[#92400E]">{c.title}</strong>
@@ -490,6 +501,15 @@ export const VerificationView: React.FC<Props> = ({
                 </li>
               ))}
             </ul>
+            {caCb.gap.length > 0 && (
+              <button
+                onClick={() => setMoGapCa((v) => !v)}
+                aria-expanded={moGapCa}
+                className="mt-2 px-2.5 py-1 rounded-lg border border-[#F2DFA8] bg-white text-[13px] font-semibold text-[#92400E] hover:bg-[#FEF3C7]"
+              >
+                {nhanXemThem(caCb.gap.length, moGapCa)}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -678,7 +698,11 @@ export const VerificationView: React.FC<Props> = ({
                 const mau = mauMD(p);
                 const canh = mau === MAU.canh;
                 const bo = q === "bo";
-                const cbGoc = boQua[p.id] ? null : p.warning || null;
+                // Ngân sách cảnh báo: có `warningsShown` thì thẻ chính = cảnh báo hiện đầu tiên,
+                // phần gập nằm sau "Xem thêm N gợi ý"; không có thì như cũ (warning + otherWarnings).
+                const chia = chiaCanhBaoMenhDe(p);
+                const khacCu = chia.coNganSach ? [] : p.otherWarnings || [];
+                const cbGoc = boQua[p.id] ? null : chia.chinh;
                 // Loai "luu y" (chat luong, ghi lap): chi mot dong ghi chu xam, khong to mau the.
                 const ghiChu = cbGoc && cbGoc.kind === "can_xem" && !canh ? cbGoc : null;
                 const cb = ghiChu ? null : cbGoc;
@@ -807,21 +831,28 @@ export const VerificationView: React.FC<Props> = ({
                               <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">{KET_LUAN[cb.kind]}</span>
                               <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">Mức độ: {MUC_DO[cb.severity]}</span>
                               <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">{CAN_CU[cb.uncertainty]}</span>
-                              {(p.otherWarnings?.length || 0) + (cb.tagTitles?.length || 0) > 0 && (
+                              {khacCu.length + (cb.tagTitles?.length || 0) > 0 && (
                                 <button
                                   onClick={() => setMoKhac((m2) => ({ ...m2, [p.id]: !m2[p.id] }))}
                                   className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#0369A1] font-semibold"
                                 >
-                                  +{(p.otherWarnings?.length || 0) + (cb.tagTitles?.length || 0)} dấu hiệu khác
+                                  +{khacCu.length + (cb.tagTitles?.length || 0)} dấu hiệu khác
                                 </button>
                               )}
                             </div>
                             {moKhac[p.id] && (
                               <ul className="mt-2 space-y-1 text-[11.5px] text-[#3F2A1D]">
-                                {(p.otherWarnings || []).map((o, i) => (
+                                {khacCu.map((o, i) => (
                                   <li key={i}><strong>{o.title}</strong> — {o.reason}</li>
                                 ))}
                                 {(cb.tagTitles || []).map((t, i) => <li key={`t${i}`} className="text-[#64748B]">cùng nguyên nhân: {t}</li>)}
+                              </ul>
+                            )}
+                            {chia.hienThem.length > 0 && (
+                              <ul className="mt-2 space-y-1 text-[13px] text-[#3F2A1D]">
+                                {chia.hienThem.map((o, i) => (
+                                  <li key={`h${i}`}><strong>{o.title}</strong> — {o.reason}</li>
+                                ))}
                               </ul>
                             )}
                             <div className="flex flex-wrap gap-1.5 mt-2.5">
@@ -842,6 +873,24 @@ export const VerificationView: React.FC<Props> = ({
                             </div>
                           </div>
                         </div>
+                      </div>
+                    )}
+                    {chia.coNganSach && chia.gap.length > 0 && !boQua[p.id] && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => setMoGap((m2) => ({ ...m2, [p.id]: !m2[p.id] }))}
+                          aria-expanded={!!moGap[p.id]}
+                          className="px-2 py-1 rounded-lg border border-[#E2E8F0] bg-white text-[13px] font-semibold text-[#0369A1] hover:border-[#0284C7]"
+                        >
+                          {nhanXemThem(chia.gap.length, !!moGap[p.id])}
+                        </button>
+                        {moGap[p.id] && (
+                          <ul className="mt-1.5 space-y-1 text-[13px] text-[#475569]">
+                            {chia.gap.map((o, i) => (
+                              <li key={`g${i}`}><strong className="text-[#334155]">{o.title}</strong> — {o.reason}</li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     )}
                     {ghiChu && (

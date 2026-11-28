@@ -989,6 +989,9 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
         ]
         if not r.get("canh_bao"):
             r["canh_bao"] = gop.to_dict(gop.chay(ps, r["input"]))
+        # Ngân sách cảnh báo (Task 5): mỗi mệnh đề có canh_bao_hien / canh_bao_gap, cả ca có
+        # toan_ca_ngan_sach. Bản ghi lưu trước đó chưa có thì bổ sung từ tat_ca / toan_ca.
+        gop.bo_sung_ngan_sach(r["canh_bao"])
     except Exception as exc_log:
         in_loi_an_toan(exc_log)
         r["canh_bao_loi"] = "không tính được lớp cảnh báo cho bản ghi này"

@@ -29,12 +29,39 @@ export type MenhDeGiaoDienMoRong = ApiUiProposition & {
   chu_the_id: number | null;
   wormSeq?: number | null;
   wormHash?: string | null;
+  /** Ngân sách cảnh báo: chỉ có khi dịch vụ Python trả `canh_bao_hien` / `canh_bao_gap`. */
+  warningsShown?: Array<ApiUiWarning | null>;
+  warningsFolded?: Array<ApiUiWarning | null>;
 };
 
 export type PhanHoiBanNhapMoRong = ApiNoteResponse & {
   wormSeq?: number | null;
   wormHash?: string | null;
+  caseWarningsShown?: Array<ApiUiWarning | null>;
+  caseWarningsFolded?: Array<ApiUiWarning | null>;
 };
+
+/** Ngân sách cảnh báo của một mệnh đề -> trường giao diện. Thiếu trường thì trả {} (giao diện dùng cách cũ). */
+export function nganSachMenhDeGiaoDien(v: any): Pick<MenhDeGiaoDienMoRong, "warningsShown" | "warningsFolded"> {
+  if (!v || !Array.isArray(v.canh_bao_hien)) return {};
+  return {
+    warningsShown: v.canh_bao_hien.map(canhBaoGiaoDien),
+    warningsFolded: (Array.isArray(v.canh_bao_gap) ? v.canh_bao_gap : []).map(canhBaoGiaoDien),
+  };
+}
+
+/** Cảnh báo toàn ca: `caseWarnings` như cũ, cộng ngân sách (`toan_ca_ngan_sach`) nếu dịch vụ có trả. */
+export function canhBaoCaGiaoDien(cb: any): Pick<PhanHoiBanNhapMoRong, "caseWarnings" | "caseWarningsShown" | "caseWarningsFolded"> {
+  const ra: Pick<PhanHoiBanNhapMoRong, "caseWarnings" | "caseWarningsShown" | "caseWarningsFolded"> = {
+    caseWarnings: (cb?.toan_ca || []).filter((c: any) => c.ket_luan !== "can_xem").map(canhBaoGiaoDien),
+  };
+  const ns = cb?.toan_ca_ngan_sach;
+  if (ns && Array.isArray(ns.canh_bao_hien)) {
+    ra.caseWarningsShown = ns.canh_bao_hien.map(canhBaoGiaoDien);
+    ra.caseWarningsFolded = (Array.isArray(ns.canh_bao_gap) ? ns.canh_bao_gap : []).map(canhBaoGiaoDien);
+  }
+  return ra;
+}
 
 /** Một cảnh báo -> dạng giao diện. Không gửi mã kỹ thuật lên làm tiêu đề. */
 export function canhBaoGiaoDien(c: any): ApiUiWarning | null {
@@ -98,6 +125,7 @@ export function menhDeChoGiaoDien(r: PyNoteResponse | any): MenhDeGiaoDienMoRong
         warning: canhBaoGiaoDien(cb?.theo_phat_bieu?.[String(p.id)]?.chinh),
         otherWarnings: (cb?.theo_phat_bieu?.[String(p.id)]?.khac || []).map(canhBaoGiaoDien),
         warningTags: cb?.theo_phat_bieu?.[String(p.id)]?.phu || [],
+        ...nganSachMenhDeGiaoDien(cb?.theo_phat_bieu?.[String(p.id)]),
         stateD: cb?.trang_thai_D?.[String(p.id)]?.trang_thai || null,
         stateDReason: cb?.trang_thai_D?.[String(p.id)]?.ly_do || null,
         ...(wormSeq !== undefined && wormSeq !== null ? { wormSeq } : {}),
@@ -142,7 +170,7 @@ async function taoBanNhap({
     source: d.nguon,
     seconds: d.giay_xu_ly,
     transcript: d.input,
-    caseWarnings: (d.canh_bao?.toan_ca || []).filter((c: any) => c.ket_luan !== "can_xem").map(canhBaoGiaoDien),
+    ...canhBaoCaGiaoDien(d.canh_bao),
     warningPolicy: d.canh_bao?.chinh_sach || null,
     warningVersion: d.canh_bao?.phien_ban || null,
     clinicalSafety: d.lam_sang_nang_cao || null,

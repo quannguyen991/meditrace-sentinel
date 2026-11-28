@@ -1,0 +1,417 @@
+{
+ "ghi_chu": "Tren loi cay nhan tao, ban sach = dap an. Khong phai do chinh xac thuc te.",
+ "seed": 42,
+ "so_ca": 400,
+ "canh_bao_moi_ca_sach": {
+  "tat_ca": 11.547,
+  "ui_cu": 2.333,
+  "ngan_sach": 3.873
+ },
+ "theo_ma_ca_sach": {
+  "tat_ca": {
+   "POSSIBLE_IMPORTANT_OMISSION": 3368,
+   "SPEAKER_SUBJECT_MISMATCH": 233,
+   "CONTRADICTION_UNRESOLVED": 122,
+   "UNSUPPORTED_INFORMATION": 106,
+   "OMITTED_MEDICATION": 101,
+   "IMPORTANT_MODIFIER_DROPPED": 97,
+   "CERTAINTY_INCREASED": 78,
+   "DUPLICATE_INFORMATION": 76,
+   "FAMILY_PATIENT_MIXUP": 74,
+   "PAST_CURRENT_CONFUSION": 74,
+   "WRONG_SUBJECT": 59,
+   "POSSIBLE_NEGATION_ERROR": 45,
+   "SUBJECT_AMBIGUOUS": 37,
+   "NOT_YET_AS_NEGATIVE": 31,
+   "CONDITION_AS_FACT": 29,
+   "OMITTED_ANSWER": 29,
+   "SEMANTIC_DUPLICATE": 11,
+   "OMITTED_ALLERGY": 8,
+   "CONTRADICTORY_INFORMATION": 6,
+   "APPROXIMATION_LOST": 6,
+   "INTERNAL_CONTRADICTION": 6,
+   "CONDITION_AS_CONFIRMED_PLAN": 4,
+   "DURATION_MISMATCH": 3,
+   "CONTRAINDICATION": 3,
+   "CLINICALLY_IRRELEVANT": 3,
+   "PLAN_AS_FACT": 2,
+   "OMITTED_CORRECTION": 2,
+   "SEVERITY_CHANGED": 2,
+   "OLD_AND_NEW_VALUE_DUPLICATED": 1,
+   "NUMERIC_MISMATCH": 1,
+   "CROSS_ALLERGY": 1,
+   "EVIDENCE_CONTEXT_MISSING": 1
+  },
+  "ui_cu": {
+   "SPEAKER_SUBJECT_MISMATCH": 202,
+   "CONTRADICTION_UNRESOLVED": 122,
+   "OMITTED_MEDICATION": 101,
+   "CERTAINTY_INCREASED": 78,
+   "UNSUPPORTED_INFORMATION": 68,
+   "WRONG_SUBJECT": 59,
+   "FAMILY_PATIENT_MIXUP": 57,
+   "PAST_CURRENT_CONFUSION": 46,
+   "POSSIBLE_NEGATION_ERROR": 38,
+   "NOT_YET_AS_NEGATIVE": 31,
+   "CONDITION_AS_FACT": 29,
+   "OMITTED_ANSWER": 29,
+   "SUBJECT_AMBIGUOUS": 23,
+   "DUPLICATE_INFORMATION": 12,
+   "OMITTED_ALLERGY": 8,
+   "SEMANTIC_DUPLICATE": 6,
+   "INTERNAL_CONTRADICTION": 6,
+   "CONTRADICTORY_INFORMATION": 4,
+   "CONDITION_AS_CONFIRMED_PLAN": 4,
+   "PLAN_AS_FACT": 2,
+   "APPROXIMATION_LOST": 2,
+   "OMITTED_CORRECTION": 2,
+   "OLD_AND_NEW_VALUE_DUPLICATED": 1,
+   "DURATION_MISMATCH": 1,
+   "CROSS_ALLERGY": 1,
+   "EVIDENCE_CONTEXT_MISSING": 1
+  },
+  "ngan_sach": {
+   "POSSIBLE_IMPORTANT_OMISSION": 661,
+   "CONTRADICTION_UNRESOLVED": 122,
+   "UNSUPPORTED_INFORMATION": 104,
+   "OMITTED_MEDICATION": 101,
+   "CERTAINTY_INCREASED": 78,
+   "FAMILY_PATIENT_MIXUP": 74,
+   "PAST_CURRENT_CONFUSION": 67,
+   "WRONG_SUBJECT": 59,
+   "SPEAKER_SUBJECT_MISMATCH": 59,
+   "POSSIBLE_NEGATION_ERROR": 44,
+   "SUBJECT_AMBIGUOUS": 37,
+   "NOT_YET_AS_NEGATIVE": 31,
+   "CONDITION_AS_FACT": 29,
+   "OMITTED_ANSWER": 29,
+   "SEMANTIC_DUPLICATE": 10,
+   "OMITTED_ALLERGY": 8,
+   "CONTRADICTORY_INFORMATION": 6,
+   "APPROXIMATION_LOST": 6,
+   "INTERNAL_CONTRADICTION": 6,
+   "CONDITION_AS_CONFIRMED_PLAN": 4,
+   "CONTRAINDICATION": 3,
+   "DURATION_MISMATCH": 2,
+   "PLAN_AS_FACT": 2,
+   "SEVERITY_CHANGED": 2,
+   "OLD_AND_NEW_VALUE_DUPLICATED": 1,
+   "CROSS_ALLERGY": 1,
+   "OMITTED_CORRECTION": 1,
+   "EVIDENCE_CONTEXT_MISSING": 1,
+   "DUPLICATE_INFORMATION": 1
+  }
+ },
+ "chan_thua_D_ban_sach": 0.088,
+ "do_nhay_trung_binh": {
+  "tat_ca": 0.871,
+  "ui_cu": 0.772,
+  "ngan_sach": 0.801
+ },
+ "theo_loai": {
+  "doi_chu_the": {
+   "n": 400,
+   "d_can_xac_nhan": 173,
+   "do_nhay_tat_ca": 0.945,
+   "do_nhay_ui_cu": 0.932,
+   "do_nhay_ngan_sach": 0.892,
+   "wilson_tat_ca": [
+    0.918,
+    0.963
+   ],
+   "wilson_ui_cu": [
+    0.904,
+    0.953
+   ],
+   "wilson_ngan_sach": [
+    0.858,
+    0.919
+   ]
+  },
+  "dao_phu_dinh": {
+   "n": 400,
+   "d_can_xac_nhan": 277,
+   "do_nhay_tat_ca": 0.695,
+   "do_nhay_ui_cu": 0.69,
+   "do_nhay_ngan_sach": 0.695,
+   "wilson_tat_ca": [
+    0.648,
+    0.738
+   ],
+   "wilson_ui_cu": [
+    0.643,
+    0.733
+   ],
+   "wilson_ngan_sach": [
+    0.648,
+    0.738
+   ]
+  },
+  "nang_chac_chan": {
+   "n": 160,
+   "d_can_xac_nhan": 141,
+   "do_nhay_tat_ca": 0.881,
+   "do_nhay_ui_cu": 0.881,
+   "do_nhay_ngan_sach": 0.881,
+   "wilson_tat_ca": [
+    0.822,
+    0.923
+   ],
+   "wilson_ui_cu": [
+    0.822,
+    0.923
+   ],
+   "wilson_ngan_sach": [
+    0.822,
+    0.923
+   ]
+  },
+  "gia_dinh_thanh_that": {
+   "n": 400,
+   "d_can_xac_nhan": 183,
+   "do_nhay_tat_ca": 0.448,
+   "do_nhay_ui_cu": 0.448,
+   "do_nhay_ngan_sach": 0.448,
+   "wilson_tat_ca": [
+    0.4,
+    0.496
+   ],
+   "wilson_ui_cu": [
+    0.4,
+    0.496
+   ],
+   "wilson_ngan_sach": [
+    0.4,
+    0.496
+   ]
+  },
+  "ban_cu_con_hieu_luc": {
+   "n": 56,
+   "d_can_xac_nhan": 28,
+   "do_nhay_tat_ca": 0.482,
+   "do_nhay_ui_cu": 0.482,
+   "do_nhay_ngan_sach": 0.482,
+   "wilson_tat_ca": [
+    0.357,
+    0.61
+   ],
+   "wilson_ui_cu": [
+    0.357,
+    0.61
+   ],
+   "wilson_ngan_sach": [
+    0.357,
+    0.61
+   ]
+  },
+  "doi_lieu": {
+   "n": 19,
+   "d_can_xac_nhan": 15,
+   "do_nhay_tat_ca": 0.789,
+   "do_nhay_ui_cu": 0.789,
+   "do_nhay_ngan_sach": 0.789,
+   "wilson_tat_ca": [
+    0.567,
+    0.915
+   ],
+   "wilson_ui_cu": [
+    0.567,
+    0.915
+   ],
+   "wilson_ngan_sach": [
+    0.567,
+    0.915
+   ]
+  },
+  "doi_so": {
+   "n": 270,
+   "d_can_xac_nhan": 98,
+   "do_nhay_tat_ca": 0.9,
+   "do_nhay_ui_cu": 0.878,
+   "do_nhay_ngan_sach": 0.9,
+   "wilson_tat_ca": [
+    0.858,
+    0.93
+   ],
+   "wilson_ui_cu": [
+    0.833,
+    0.912
+   ],
+   "wilson_ngan_sach": [
+    0.858,
+    0.93
+   ]
+  },
+  "doi_thuoc": {
+   "n": 247,
+   "d_can_xac_nhan": 246,
+   "do_nhay_tat_ca": 0.996,
+   "do_nhay_ui_cu": 0.996,
+   "do_nhay_ngan_sach": 0.996,
+   "wilson_tat_ca": [
+    0.977,
+    0.999
+   ],
+   "wilson_ui_cu": [
+    0.977,
+    0.999
+   ],
+   "wilson_ngan_sach": [
+    0.977,
+    0.999
+   ]
+  },
+  "doi_thoi_gian": {
+   "n": 345,
+   "d_can_xac_nhan": 114,
+   "do_nhay_tat_ca": 0.916,
+   "do_nhay_ui_cu": 0.826,
+   "do_nhay_ngan_sach": 0.916,
+   "wilson_tat_ca": [
+    0.882,
+    0.941
+   ],
+   "wilson_ui_cu": [
+    0.783,
+    0.862
+   ],
+   "wilson_ngan_sach": [
+    0.882,
+    0.941
+   ]
+  },
+  "bia_menh_de": {
+   "n": 400,
+   "d_can_xac_nhan": 400,
+   "do_nhay_tat_ca": 1.0,
+   "do_nhay_ui_cu": 1.0,
+   "do_nhay_ngan_sach": 1.0,
+   "wilson_tat_ca": [
+    0.99,
+    1.0
+   ],
+   "wilson_ui_cu": [
+    0.99,
+    1.0
+   ],
+   "wilson_ngan_sach": [
+    0.99,
+    1.0
+   ]
+  },
+  "bia_trich_dan": {
+   "n": 400,
+   "d_can_xac_nhan": 400,
+   "do_nhay_tat_ca": 1.0,
+   "do_nhay_ui_cu": 0.998,
+   "do_nhay_ngan_sach": 1.0,
+   "wilson_tat_ca": [
+    0.99,
+    1.0
+   ],
+   "wilson_ui_cu": [
+    0.986,
+    1.0
+   ],
+   "wilson_ngan_sach": [
+    0.99,
+    1.0
+   ]
+  },
+  "doi_bang_chung": {
+   "n": 400,
+   "d_can_xac_nhan": 107,
+   "do_nhay_tat_ca": 1.0,
+   "do_nhay_ui_cu": 0.465,
+   "do_nhay_ngan_sach": 0.818,
+   "wilson_tat_ca": [
+    0.99,
+    1.0
+   ],
+   "wilson_ui_cu": [
+    0.417,
+    0.514
+   ],
+   "wilson_ngan_sach": [
+    0.777,
+    0.852
+   ]
+  },
+  "xoa_di_ung": {
+   "n": 118,
+   "d_can_xac_nhan": 0,
+   "do_nhay_tat_ca": 0.983,
+   "do_nhay_ui_cu": 0.907,
+   "do_nhay_ngan_sach": 0.907,
+   "wilson_tat_ca": [
+    0.94,
+    0.995
+   ],
+   "wilson_ui_cu": [
+    0.841,
+    0.947
+   ],
+   "wilson_ngan_sach": [
+    0.841,
+    0.947
+   ]
+  },
+  "xoa_thuoc": {
+   "n": 276,
+   "d_can_xac_nhan": 0,
+   "do_nhay_tat_ca": 0.96,
+   "do_nhay_ui_cu": 0.928,
+   "do_nhay_ngan_sach": 0.946,
+   "wilson_tat_ca": [
+    0.93,
+    0.978
+   ],
+   "wilson_ui_cu": [
+    0.891,
+    0.953
+   ],
+   "wilson_ngan_sach": [
+    0.912,
+    0.967
+   ]
+  },
+  "xoa_phu_dinh": {
+   "n": 181,
+   "d_can_xac_nhan": 0,
+   "do_nhay_tat_ca": 1.0,
+   "do_nhay_ui_cu": 0.425,
+   "do_nhay_ngan_sach": 0.453,
+   "wilson_tat_ca": [
+    0.979,
+    1.0
+   ],
+   "wilson_ui_cu": [
+    0.356,
+    0.498
+   ],
+   "wilson_ngan_sach": [
+    0.382,
+    0.526
+   ]
+  },
+  "xoa_so_lieu": {
+   "n": 270,
+   "d_can_xac_nhan": 0,
+   "do_nhay_tat_ca": 0.948,
+   "do_nhay_ui_cu": 0.711,
+   "do_nhay_ngan_sach": 0.696,
+   "wilson_tat_ca": [
+    0.915,
+    0.969
+   ],
+   "wilson_ui_cu": [
+    0.654,
+    0.762
+   ],
+   "wilson_ngan_sach": [
+    0.639,
+    0.748
+   ]
+  }
+ }
+}

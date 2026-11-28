@@ -284,6 +284,26 @@ LUON_CAO = {"NEGATION_FLIP", "NEGATION_SCOPE_ERROR", "UNKNOWN_AS_NEGATIVE", "FAB
             "DOSE_MISMATCH", "DECIMAL_MISMATCH", "UNIT_MISMATCH", "DISCONTINUED_AS_CURRENT",
             "PLANNED_TEST_AS_RESULT", "LATERALITY_CHANGED", "INTERNAL_CONTRADICTION"}
 
+# Mã chỉ còn là GỢI Ý (V11, 28/11/2026). Tiêu chí: báo ≥ 20 lần mà độ chính xác cùng loại < 0,10
+# trong docs/ket-qua/canh-bao.json (4 bộ thach_thuc/*_phat_trien, bộ chấm 2026-09-22), và không
+# thuộc LUON_CAO. Số đo: SPEAKER_SUBJECT_MISMATCH 382 lần / 0,058; DUPLICATE_INFORMATION 108 / 0,056;
+# IMPORTANT_MODIFIER_DROPPED 84 / 0,0. Các mã này bị hạ xuống mức `thap` (`gop._ha_ma_goi_y`), không
+# đổi trạng thái theo chính sách D và luôn nằm trong phần gập (`gop.chon_hien_thi`). Riêng cảnh báo
+# có kết luận `loi_phat_hien` (bằng chứng đối nghịch rõ) thì giữ nguyên.
+# Phép thử: tests/test_ngan_sach_canh_bao.py::test_ma_vo_dung_xuong_goi_y tính lại tập này từ tệp đo.
+MA_GOI_Y_CHINH_XAC_THAP = frozenset({"SPEAKER_SUBJECT_MISMATCH", "DUPLICATE_INFORMATION",
+                                     "IMPORTANT_MODIFIER_DROPPED"})
+# Ngoại lệ an toàn (quyết định 28/11/2026): trên các loại thông tin này, mã gợi ý KHÔNG bị hạ —
+# vẫn chặn theo chính sách D và vẫn hiện. Đo trên 4 bộ thach_thuc/*_phat_trien: hạ cả ở đây thì
+# D lọt lỗi nguy hiểm 26/220 (11,8%) -> 53/220 (24,1%); giữ ngoại lệ thì D không đổi.
+# Xem docs/ket-qua/canh-bao-ngan-sach.md.
+LOAI_GOI_Y_VAN_CHAN = frozenset({"di_ung", "thuoc", "thuoc_nti"})
+
+
+# ═══ la_ma_goi_y() — Cảnh báo này có phải gợi ý (bị hạ, gập, không chặn D) không ══════
+def la_ma_goi_y(ma: str, ket_luan: str, loai_tt: Optional[str]) -> bool:
+    return ma in MA_GOI_Y_CHINH_XAC_THAP and ket_luan != LOI_PHAT_HIEN and loai_tt not in LOAI_GOI_Y_VAN_CHAN
+
 
 # ═══ muc_do() — Tính mức nghiêm trọng theo loại thông tin ═════════════════════════════
 # Dị ứng, thuốc nâng một bậc; thông tin khác hạ một bậc, trừ các mã luôn cao.
@@ -332,6 +352,9 @@ class CanhBao:
         Bộ phát hiện thử nghiệm và nhóm chất lượng/chép âm: không bao giờ."""
         if self.tin_cay != ON_DINH or self.nhom in ("QUALITY", "ASR_UPSTREAM", "OMISSION"):
             return False
+        # Mã chỉ còn là gợi ý (V11): không vào hàng chặn của chính sách D — trừ dị ứng / thuốc.
+        if la_ma_goi_y(self.ma, self.ket_luan, self.loai_tt):
+            return False
         if self.ket_luan == LOI_PHAT_HIEN:
             return self.muc_do in (CAO, TRUNG)
         if self.ket_luan == NGHI_RUI_RO:
@@ -341,6 +364,8 @@ class CanhBao:
             # NGOẠI TRỪ dị ứng / thuốc: trên hai loại này, cảnh báo nghi ngờ dù yếu vẫn đi
             # kèm lỗi thật 44% số lần (cùng phép đo) — bỏ đi thì lỗi nguy hiểm lọt tăng từ
             # 44,7% lên 55,3%. An toàn đặt trước ít chặn thừa.
+            # (28/11/2026: SPEAKER_SUBJECT_MISMATCH đã thành mã gợi ý, xem MA_GOI_Y_CHINH_XAC_THAP
+            # và docs/ket-qua/canh-bao-ngan-sach.md cho số lọt nguy hiểm của chính sách D sau đổi.)
             return self.muc_do == CAO and (self.bat_dinh != CAO or self.loai_tt in LOAI_NANG)
         return False
 

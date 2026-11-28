@@ -13,6 +13,9 @@ Mục lục (các hàm/lớp chính):
   phan_tang_canh_bao()  Xếp một cảnh báo vào một trong ba tầng
   phan_tang_ket_qua()   Tổng hợp ba tầng cảnh báo cho cả ca
   ly_do_chan_D()        Lấy lý do chuyển sang cần xác nhận theo chính sách D
+  chon_hien_thi()       Ngân sách hiển thị: chia cảnh báo một mệnh đề thành hiện / gập
+  hien_thi_ca()         Áp ngân sách hiển thị cho cả ca
+  bo_sung_ngan_sach()   Thêm canh_bao_hien / canh_bao_gap cho bản JSON lưu trước đó
   to_dict()             Chuyển kết quả cảnh báo sang dạng JSON
 Gọi tới  : canh_bao/asr, canh_bao/lam_sang, canh_bao/loai, canh_bao/phat_hien,
            canh_bao/toan_ca, duong_ong/b4_kiem_can_cu, duong_ong/b5_xep_cho_cong_rui_ro
@@ -39,7 +42,8 @@ from typing import Dict, List, Optional
 
 from src.duong_ong import b5_xep_cho_cong_rui_ro as cong_rui_ro
 from src.canh_bao import asr, lam_sang, phat_hien, toan_ca
-from src.canh_bao.loai import (CAN_XEM, CAO, LOAI, LOI_PHAT_HIEN, NGHI_RUI_RO, ON_DINH, PHIEN_BAN, THAP, CanhBao, _HANG)
+from src.canh_bao.loai import (CAN_XEM, CAO, LOAI, LOI_PHAT_HIEN, LUON_CAO, NGHI_RUI_RO, ON_DINH, PHIEN_BAN, THAP,
+                               CanhBao, _HANG, la_ma_goi_y)
 
 CHINH_SACH_D = "D-2026-09-24"
 DA_KIEM_CHUNG = "đã kiểm chứng"
@@ -88,6 +92,8 @@ def phan_tang_canh_bao(c: CanhBao) -> str:
     """
     if c.anh_huong_trang_thai:
         return TANG_CHAN_NGAY
+    if _la_goi_y(c):
+        return TANG_TINH_LUOC
     if c.ma in _MA_DUOC_LY_BAO_VE and c.ket_luan != CAN_XEM and c.muc_do == CAO:
         return TANG_CHAN_NGAY
     if c.ma in _MA_DUOC_LY_BAO_VE or c.nhom == "CLINICAL_KNOWLEDGE":
@@ -178,6 +184,106 @@ def _khoa_sap(c: CanhBao):
     return (not c.anh_huong_trang_thai, LOAI[c.ma].uu_tien, -_HANG[c.muc_do], _HANG[c.bat_dinh])
 
 
+# ─── Ngân sách cảnh báo (Task 5 plan 27/11, V11 plan 28/11) ───────────────────────────
+# Mỗi mệnh đề chỉ HIỆN tối đa `ngan_sach` cảnh báo; phần còn lại GẬP sau nút "Xem thêm N gợi ý".
+# Không bao giờ gập: mức `cao`, kết luận `loi_phat_hien`, mã LUON_CAO. Luôn gập: mã gợi ý
+# (MA_GOI_Y_CHINH_XAC_THAP) và cảnh báo `can_xem` của bộ phát hiện thử nghiệm (cùng luật với
+# chon_chinh). Chỉ đổi phần HIỂN THỊ — `tat_ca`, chính/khác và chính sách D giữ nguyên.
+NGAN_SACH_MAC_DINH = 2
+
+# Độ chính xác cùng loại theo mã, chép từ docs/ket-qua/canh-bao.json (24/09/2026, 4 bộ
+# thach_thuc/*_phat_trien). Chỉ dùng để XẾP THỨ TỰ hiển thị; mã chưa đo xếp như 0.
+CHINH_XAC_CUNG_LOAI = {
+    "SPEAKER_SUBJECT_MISMATCH": 0.058, "UNSUPPORTED_INFORMATION": 0.31, "WRONG_SUBJECT": 0.5,
+    "CONTRADICTION_UNRESOLVED": 0.866, "SUBJECT_AMBIGUOUS": 0.59, "DUPLICATE_INFORMATION": 0.056,
+    "IMPORTANT_MODIFIER_DROPPED": 0.0, "CERTAINTY_INCREASED": 0.42, "POSSIBLE_NEGATION_ERROR": 0.319,
+    "FAMILY_PATIENT_MIXUP": 0.231, "PAST_CURRENT_CONFUSION": 0.344, "NEGATION_FLIP": 0.684,
+    "FABRICATED_QUOTE": 0.176, "ROUTE_MISMATCH": 0.875, "DOSE_MISMATCH": 1.0, "EVIDENCE_CONTEXT_MISSING": 0.143,
+    "DOCTOR_STATEMENT_AS_PATIENT_FACT": 0.0, "APPROXIMATION_LOST": 1.0, "UNSUPPORTED_FACT_COMBINATION": 1.0,
+    "NEGATION_SCOPE_ERROR": 1.0, "TEMPORAL_MISMATCH": 0.25, "CONTRADICTORY_INFORMATION": 0.5,
+    "CORRECTION_NOT_APPLIED": 1.0, "WRONG_EVIDENCE": 0.0, "PLAN_AS_FACT": 0.5, "FREQUENCY_MISMATCH": 1.0,
+    "QUESTION_AS_FACT": 0.0, "OVER_NORMALIZATION": 1.0, "SEMANTIC_DUPLICATE": 0.0,
+    "FAMILY_STATEMENT_AS_CLINICIAN_PLAN": 1.0, "FABRICATED_MEDICATION": 0.0, "FABRICATED_ALLERGY": 0.0,
+}
+
+
+def _g(c, k):
+    """Đọc trường của cảnh báo, dạng CanhBao hoặc dict (bản ghi đã lưu qua to_dict)."""
+    if isinstance(c, dict):
+        if k == "tin_cay" and k not in c:
+            return LOAI[c["ma"]].tin_cay if c.get("ma") in LOAI else ON_DINH
+        return c.get(k)
+    return getattr(c, k)
+
+
+def _la_goi_y(c) -> bool:
+    # Trên dị ứng / thuốc mã gợi ý vẫn chặn D và vẫn hiện (loai.LOAI_GOI_Y_VAN_CHAN): cảnh báo
+    # đã đổi trạng thái thì không được gập.
+    return la_ma_goi_y(_g(c, "ma"), _g(c, "ket_luan"), _g(c, "loai_tt"))
+
+
+def _luon_hien(c) -> bool:
+    return _g(c, "muc_do") == CAO or _g(c, "ket_luan") == LOI_PHAT_HIEN or _g(c, "ma") in LUON_CAO
+
+
+def _ha_ma_goi_y(ds) -> None:
+    """Hạ mức mã gợi ý xuống `thap` (tại chỗ). Không đụng mã LUON_CAO, không đụng loi_phat_hien."""
+    for c in ds:
+        if _la_goi_y(c) and c.ma not in LUON_CAO:
+            c.muc_do = THAP
+
+
+def _khoa_hien_thi(c):
+    """Thứ tự hiển thị xác định: mức nặng → kết luận → độ chính xác đã đo → ưu tiên → mã → lượt."""
+    ma = _g(c, "ma")
+    return (-_HANG.get(_g(c, "muc_do"), 0), -_KL.get(_g(c, "ket_luan"), 0),
+            -CHINH_XAC_CUNG_LOAI.get(ma, 0.0), LOAI[ma].uu_tien if ma in LOAI else 99, ma,
+            tuple(_g(c, "luot") or ()))
+
+
+# ═══ chon_hien_thi() — Chia cảnh báo của một mệnh đề thành phần hiện và phần gập ═════
+def chon_hien_thi(ds, ngan_sach: int = NGAN_SACH_MAC_DINH):
+    """-> (hien, gap). `ds`: cảnh báo của MỘT mệnh đề (hoặc cảnh báo toàn ca), CanhBao hoặc dict.
+    Cảnh báo luôn-hiện chiếm ngân sách trước và không bao giờ bị gập, kể cả khi vượt ngân sách."""
+    luon, gap_san, con = [], [], []
+    for c in sorted(ds, key=_khoa_hien_thi):
+        if _la_goi_y(c):
+            gap_san.append(c)
+        elif _luon_hien(c):
+            luon.append(c)
+        elif _g(c, "ket_luan") == CAN_XEM and _g(c, "tin_cay") != ON_DINH:
+            gap_san.append(c)
+        else:
+            con.append(c)
+    cho = max(0, ngan_sach - len(luon))
+    hien = luon + con[:cho]
+    gap = sorted(con[cho:] + gap_san, key=_khoa_hien_thi)
+    return hien, gap
+
+
+# ═══ hien_thi_ca() — Áp ngân sách cho cả ca (mỗi mệnh đề + nhóm cảnh báo toàn ca) ═════
+def hien_thi_ca(kq: dict, ngan_sach: int = NGAN_SACH_MAC_DINH) -> dict:
+    """-> {"theo_phat_bieu": {id: (hien, gap)}, "toan_ca": (hien, gap)} từ kết quả `chay()`.
+    Cảnh báo toàn ca (bỏ sót) là một nhóm riêng, cùng ngân sách như một mệnh đề."""
+    return {"theo_phat_bieu": {i: chon_hien_thi(v["tat_ca"], ngan_sach) for i, v in kq["theo_phat_bieu"].items()},
+            "toan_ca": chon_hien_thi(kq.get("toan_ca") or [], ngan_sach)}
+
+
+# ═══ bo_sung_ngan_sach() — Thêm canh_bao_hien / canh_bao_gap cho bản JSON đã có ═══════
+def bo_sung_ngan_sach(d: dict, ngan_sach: int = NGAN_SACH_MAC_DINH) -> dict:
+    """Bản ghi lưu trước Task 5 (to_dict cũ) chưa có hai trường: tính từ `tat_ca`/`toan_ca`.
+    Đã có `toan_ca_ngan_sach` thì trả nguyên. Sửa tại chỗ và trả lại chính `d`."""
+    if not isinstance(d, dict) or "toan_ca_ngan_sach" in d:
+        return d
+    for v in (d.get("theo_phat_bieu") or {}).values():
+        hien, gap = chon_hien_thi([c for c in (v.get("tat_ca") or []) if isinstance(c, dict)], ngan_sach)
+        v["canh_bao_hien"], v["canh_bao_gap"] = hien, gap
+    hien, gap = chon_hien_thi([c for c in (d.get("toan_ca") or []) if isinstance(c, dict)], ngan_sach)
+    d["toan_ca_ngan_sach"] = {"canh_bao_hien": hien, "canh_bao_gap": gap}
+    d["ngan_sach"] = ngan_sach
+    return d
+
+
 # ═══ chon_chinh() — Chọn cảnh báo chính cho một mệnh đề ═══════════════════════════════
 # Trả về chính, tối đa 2 cảnh báo khác nhóm có sức đổi trạng thái, còn lại là mã phụ.
 def chon_chinh(ds: List[CanhBao]) -> dict:
@@ -250,6 +356,7 @@ def chay(ps, hoi_thoai: str, kk: Optional[dict] = None, meta_asr: Optional[dict]
     if meta_asr:
         tho += asr.canh_bao(ctx, ps, meta_asr, loai)
     gop = _gop_cung_ma(tho)
+    _ha_ma_goi_y(gop)
 
     theo_p: Dict[int, dict] = {}
     trang_thai: Dict[int, dict] = {}
@@ -287,12 +394,18 @@ def to_dict(kq: dict) -> dict:
     pt_raw = kq.get("phan_tang")
     if not isinstance(pt_raw, dict):
         pt_raw = phan_tang_ket_qua(kq.get("theo_phat_bieu") or {}, kq.get("toan_ca") or [])
+    hs = hien_thi_ca(kq)
+    hien_ca, gap_ca = hs["toan_ca"]
     return {
         "phien_ban": kq["phien_ban"], "chinh_sach": kq["chinh_sach"],
         "theo_phat_bieu": {str(i): {"chinh": cb(v["chinh"]), "khac": [cb(c) for c in v["khac"]],
-                                    "phu": v["phu"], "tat_ca": [cb(c) for c in v["tat_ca"]]}
+                                    "phu": v["phu"], "tat_ca": [cb(c) for c in v["tat_ca"]],
+                                    "canh_bao_hien": [cb(c) for c in hs["theo_phat_bieu"][i][0]],
+                                    "canh_bao_gap": [cb(c) for c in hs["theo_phat_bieu"][i][1]]}
                            for i, v in kq["theo_phat_bieu"].items()},
         "toan_ca": [cb(c) for c in kq["toan_ca"]],
+        "toan_ca_ngan_sach": {"canh_bao_hien": [cb(c) for c in hien_ca], "canh_bao_gap": [cb(c) for c in gap_ca]},
+        "ngan_sach": NGAN_SACH_MAC_DINH,
         "trang_thai_D": {str(i): v for i, v in kq["trang_thai_D"].items()},
         "cac_dinh_chinh": kq["cac_dinh_chinh"],
         "phan_tang": {
