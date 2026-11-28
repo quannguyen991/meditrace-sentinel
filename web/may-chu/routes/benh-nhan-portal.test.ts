@@ -116,14 +116,20 @@ test("tao-ma: xuất tab khác tab đã ký -> 422", async () => {
   assert.equal((await taoMa({ sessionId: "ca_portal_tab", tabId: "tab-doc", ttlDays: 7 })).status, 201);
 });
 
-test("tao-ma: gói dựng từ bản đã ký, không theo dữ liệu đổi sau khi ký (ngoài băm)", async () => {
+test("tao-ma: gói dựng từ bản đã ký; đổi tên bệnh nhân sau khi ký (ngoài băm) -> 409", async () => {
   taoCaDaKy(1, "ca_portal_doi_ten", { ten: "Tên lúc ký" });
-  luuCaMau(1, caMauDuDieuKienKy("ca_portal_doi_ten", { ten: "Tên đổi sau ký" }));
-  const r = await taoMa({ sessionId: "ca_portal_doi_ten" });
-  assert.equal(r.status, 201);
-  const { goi } = (await r.json()) as any;
+  const ok = await taoMa({ sessionId: "ca_portal_doi_ten" });
+  assert.equal(ok.status, 201);
+  const { goi } = (await ok.json()) as any;
   assert.equal(goi.tenBenhNhan, "Tên lúc ký");
   assert.match(goi.chanDoan, /Rối loạn mỡ máu/);
+
+  const truoc = soMaCong();
+  luuCaMau(1, caMauDuDieuKienKy("ca_portal_doi_ten", { ten: "Tên đổi sau ký" }));
+  const r = await taoMa({ sessionId: "ca_portal_doi_ten" });
+  assert.equal(r.status, 409);
+  assert.match(((await r.json()) as any).lyDo, /dữ liệu dùng để xuất đã đổi sau lần ký/);
+  assert.equal(soMaCong(), truoc);
 });
 
 test("Bác sĩ tạo mã cổng, lọc dữ liệu nội bộ, gắn cờ thuốc mơ hồ và đọc công khai qua GET", async () => {

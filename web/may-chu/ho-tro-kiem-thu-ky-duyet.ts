@@ -29,6 +29,13 @@ export interface TuyChonCaMau {
   phuDe?: string;
   nguCanh?: string;
   transcript?: string;
+  /** Lời thoại cấp ca (`Session.transcript`), mặc định "BS: chào". */
+  transcriptCa?: string;
+  /** Mệnh đề tuỳ chọn; khi đặt thì mặc định mọi mệnh đề "giu". */
+  menhDe?: Array<Record<string, unknown>>;
+  quyet?: Record<number, string>;
+  banSua?: Record<number, string>;
+  segments?: Array<{ luot: number; start_s: number; end_s: number }>;
   signOffTabId?: string;
 }
 
@@ -40,7 +47,7 @@ export function caMauDuDieuKienKy(id: string, noiDungHoacTuyChon: string | TuyCh
     caseId: "py_mau",
     content: noiDung,
     transcript: tc.transcript ?? "BS: Anh đau ngực từ hôm qua?\nBN: Có, hơi sốt.\nBS: Kê Atorvastatin.",
-    propositions: [
+    propositions: tc.menhDe ?? [
       { id: 1, text: "đau ngực", status: "than", section: "LÝ DO KHÁM BỆNH", evidenceTurns: [1] },
       { id: 2, text: "sốt?", status: "can_xac_nhan", section: "CẦN XÁC NHẬN", evidenceTurns: [2] },
       { id: 3, text: "Atorvastatin 20mg tối", status: "than", section: "ĐƠN THUỐC", drug: "Atorvastatin", evidenceTurns: [3] },
@@ -50,7 +57,8 @@ export function caMauDuDieuKienKy(id: string, noiDungHoacTuyChon: string | TuyCh
     id,
     patientIdentifier: tc.ten ?? "BN thử",
     patientSubtitle: tc.phuDe ?? "Nam, 4 tuổi, 15 kg",
-    transcript: "BS: chào",
+    transcript: tc.transcriptCa ?? "BS: chào",
+    ...(tc.segments ? { transcriptSegments: tc.segments } : {}),
     activeTabId: "tab-doc",
     tabs: [
       { id: "tab-transcript", title: "Lời thoại", type: "transcript", content: "BS: chào" },
@@ -59,7 +67,13 @@ export function caMauDuDieuKienKy(id: string, noiDungHoacTuyChon: string | TuyCh
       { id: "tab-doc", title: "Bản nháp hồ sơ", type: "custom", content: noiDung },
     ],
     note,
-    duyet: { khoa: khoaDuyetCuaNote(note), quyet: { 1: "giu", 2: "sua", 3: "bo" }, banSua: { 2: "không sốt" } },
+    duyet: {
+      khoa: khoaDuyetCuaNote(note),
+      quyet:
+        tc.quyet ??
+        (tc.menhDe ? Object.fromEntries(tc.menhDe.map((p) => [Number(p.id), "giu"])) : { 1: "giu", 2: "sua", 3: "bo" }),
+      banSua: tc.banSua ?? (tc.menhDe ? {} : { 2: "không sốt" }),
+    },
     ...(tc.signOffTabId ? { signOff: { tabId: tc.signOffTabId } } : {}),
   };
 }

@@ -417,8 +417,9 @@ export const CamDoanThuThuatModal: React.FC<CamDoanThuThuatModalProps> = ({
             stampWorm: true,
           }),
         });
-        if (r.status === 409) {
-          // Máy chủ chặn vì chưa ký / sửa sau ký: không rơi xuống nhánh đóng dấu offline giả.
+        if (r.status >= 400 && r.status < 500) {
+          // Máy chủ từ chối (409 chưa ký / sửa sau ký, 422 lệch mã ca / nội dung khác bản ký):
+          // không rơi xuống nhánh đóng dấu offline giả.
           const loi = (await r.json().catch(() => ({}))) as { error?: string; lyDo?: string };
           setLoiWorm(loi.lyDo || loi.error || "Bác sĩ chưa ký duyệt hồ sơ này — chưa được đóng dấu WORM.");
           return;

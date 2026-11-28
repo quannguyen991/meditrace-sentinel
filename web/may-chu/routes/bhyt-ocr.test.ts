@@ -167,16 +167,29 @@ test("trộn hai ca: mã ca A đã ký + nội dung ca B -> 422, dịch vụ kh�
   assert.deepEqual(daGoi, []);
 });
 
-test("ngữ cảnh sửa sau khi ký (ngoài băm): gửi thông tin BN mới -> 422; không gửi -> xuất bản lúc ký", async () => {
-  taoCaDaKy(1, "ca_sua_ngu_canh");
-  const sau = caMauDuDieuKienKy("ca_sua_ngu_canh", { phuDe: "Nam, 4 tuổi, 30 kg" });
-  luuCaMau(1, sau);
-  const r = await post("/api/bhyt/precheck", { sessionId: "ca_sua_ngu_canh", ...thanNhuGiaoDien(sau) });
-  assert.equal(r.status, 422);
-  thanDaGoi.length = 0;
-  const ok = await post("/api/bhyt/precheck", { sessionId: "ca_sua_ngu_canh" });
-  assert.equal(ok.status, 200);
-  assert.equal(thanDaGoi[0].thong_tin_benh_nhan?.can_nang_kg, 15, "gói xuất là bản đã ký, không phải bản sửa sau");
+test("dữ liệu xuất (ngoài băm) đổi sau khi ký: tên / mệnh đề / lời thoại / xét nghiệm -> 409; không đổi -> 200", async () => {
+  const doi: Array<[string, (ca: any) => void]> = [
+    ["cân nặng", (ca) => (ca.patientSubtitle = "Nam, 4 tuổi, 30 kg")],
+    ["tên", (ca) => (ca.patientIdentifier = "Tên khác")],
+    ["mệnh đề", (ca) => (ca.note.propositions[0].text = "đau bụng")],
+    ["lời thoại", (ca) => (ca.note.transcript = "BS: lời thoại khác")],
+    ["xét nghiệm", (ca) => (ca.tabs.find((t: any) => t.type === "context").content = "Creatinine 300 umol/L")],
+  ];
+  for (const [nhan, sua] of doi) {
+    const id = `ca_doi_${doi.findIndex((d) => d[0] === nhan)}`;
+    taoCaDaKy(1, id);
+    assert.equal((await post("/api/bhyt/precheck", { sessionId: id })).status, 200, `${nhan}: trước khi đổi`);
+    const sau: any = caMauDuDieuKienKy(id);
+    sua(sau);
+    luuCaMau(1, sau);
+    daGoi.length = 0;
+    for (const body of [{ sessionId: id }, { sessionId: id, ...thanNhuGiaoDien(sau) }]) {
+      const r = await post("/api/bhyt/precheck", body);
+      assert.equal(r.status, 409, `${nhan}: ${JSON.stringify(body).slice(0, 60)}`);
+      assert.match(r.body.lyDo, /dữ liệu dùng để xuất đã đổi sau lần ký/);
+    }
+    assert.deepEqual(daGoi, []);
+  }
 });
 
 test("xuất tab khác tab đã ký -> 422", async () => {

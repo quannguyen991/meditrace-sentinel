@@ -2,7 +2,14 @@ import crypto from "crypto";
 import type express from "express";
 import { cheLog } from "../che-log";
 import { caKhamThuocNguoiKhac, ghiNhatKy, khoWorm } from "../csdl";
-import { kiemDaKyChoXuat, layBanKyDeXuat, LOI_CHUA_KY_DUYET, MA_LOI_CHUA_KY_DUYET } from "../kiem-ky-may-chu";
+import {
+  chanNeuTruongLech,
+  goiCamDoanTuBanKy,
+  goiDiBuongTuBanKy,
+  hopNhatMaCa,
+  layBanKyDeXuat,
+  layBanKyTheoMa,
+} from "../kiem-ky-may-chu";
 import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 
 const TOI_DA_CSV_DUOC_THU_BYTES = 500 * 1024; // 500 KB
@@ -18,24 +25,17 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
       const uid = req.nguoiDung?.id;
       if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
 
-      const {
-        transcript = "",
-        propositions = [],
-        audioMetadata = null,
-        procedureName = null,
-        stampWorm = false,
-        sessionId = null,
-      } = req.body || {};
+      const body = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
+      // Chỉ tên thủ thuật / ghi chú bác sĩ / cờ đóng dấu là của riêng phiếu cam đoan và được lấy từ trình duyệt;
+      // dữ liệu hồ sơ (mệnh đề, lời thoại, thông tin BN, mốc âm thanh) lấy từ bản đã ký.
+      const procedureName = typeof body.procedureName === "string" ? body.procedureName : null;
+      const stampWorm = body.stampWorm === true;
 
-      if (!Array.isArray(propositions)) {
-        return res.status(400).json({ error: "propositions phải là mảng" });
-      }
-
-      const cleanSessionId = typeof sessionId === "string" ? sessionId.trim() : "";
+      const cleanSessionId = typeof body.sessionId === "string" ? body.sessionId.trim() : "";
       if (cleanSessionId.length > 200) {
         return res.status(400).json({ error: "sessionId vượt quá 200 ký tự" });
       }
-      const rawCaseId = typeof req.body?.caseId === "string" ? req.body.caseId.trim().slice(0, 200) : "";
+      const rawCaseId = typeof body.caseId === "string" ? body.caseId.trim().slice(0, 200) : "";
       const maCa = cleanSessionId || rawCaseId;
       if (maCa && caKhamThuocNguoiKhac(uid, maCa)) {
         return res.status(403).json({
@@ -43,19 +43,33 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
           code: "idor_forbidden",
         });
       }
-      if (!layBanKyDeXuat(req, res)) return;
+      const banKy = layBanKyDeXuat(req, res);
+      if (!banKy) return;
+      const goi = goiCamDoanTuBanKy(banKy);
+      if (
+        chanNeuTruongLech(res, body, [
+          ["propositions", goi.propositions],
+          ["transcript", goi.transcript],
+          ["thong_tin_benh_nhan", goi.thong_tin_benh_nhan],
+          ["patientInfo", goi.thong_tin_benh_nhan],
+          ["audioMetadata", goi.audioMetadata],
+        ])
+      ) {
+        return;
+      }
 
-      const transcriptStr = String(transcript ?? "");
+      const propositions = goi.propositions;
+      const transcriptStr = goi.transcript;
       const payload = {
         transcript: transcriptStr,
         hoi_thoai: transcriptStr,
         propositions,
         phat_bieu: propositions,
-        audioMetadata: audioMetadata ?? null,
-        metadata_am_thanh: audioMetadata ?? null,
-        metadata: audioMetadata ?? null,
-        procedureName: procedureName ?? null,
-        ten_thu_thuat: procedureName ?? null,
+        audioMetadata: goi.audioMetadata,
+        metadata_am_thanh: goi.audioMetadata,
+        metadata: goi.audioMetadata,
+        procedureName,
+        ten_thu_thuat: procedureName,
       };
 
       let kq: any;
@@ -70,7 +84,8 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         kq = await chayPythonJson("src.cong_cu_lam_sang.cam_doan_thu_thuat", ["--check"], payload);
       }
 
-      if (stampWorm === true && cleanSessionId) {
+      if (stampWorm && banKy.sessionId) {
+        const cleanSessionId = banKy.sessionId;
         const checkedAt = new Date().toISOString();
         const consentHash = crypto
           .createHash("sha256")
@@ -127,43 +142,45 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
       const uid = req.nguoiDung?.id;
       if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
       const body = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
-      const coSessionOrCase =
-        (typeof body.sessionId === "string" && body.sessionId.trim()) ||
-        (typeof body.caseId === "string" && body.caseId.trim()) ||
-        (typeof req.query?.sessionId === "string" && req.query.sessionId.trim()) ||
-        (typeof req.query?.caseId === "string" && req.query.caseId.trim());
-      if (coSessionOrCase) {
-        if (!layBanKyDeXuat(req, res)) return;
-      } else {
-        const currentSid = typeof body.currentSessionId === "string" ? body.currentSessionId.trim().slice(0, 200) : "";
-        const kqKy = kiemDaKyChoXuat(uid, currentSid);
-        if (!kqKy.duoc || !kqKy.banKy) {
-          return res.status(409).json({
-            error: LOI_CHUA_KY_DUYET,
-            code: MA_LOI_CHUA_KY_DUYET,
-            lyDo: kqKy.lyDo,
-          });
-        }
+      const q = (req.query || {}) as Record<string, unknown>;
+      // Ca hôm nay: sessionId / caseId / currentSessionId phải chỉ cùng MỘT ca, nếu lệch -> 422 lech_ma_ca.
+      const maHomNay = hopNhatMaCa(res, [body.sessionId, body.caseId, body.currentSessionId, q.sessionId, q.caseId]);
+      if (maHomNay === null) return;
+      const banHomNay = layBanKyTheoMa(req, res, maHomNay);
+      if (!banHomNay) return;
+      // Ca hôm qua (nếu có) cũng phải do chính bác sĩ này ký và chưa đổi sau ký.
+      const maHomQua = hopNhatMaCa(res, [body.previousSessionId, body.yesterdaySessionId]);
+      if (maHomQua === null) return;
+      const banHomQua = maHomQua ? layBanKyTheoMa(req, res, maHomQua) : null;
+      if (maHomQua && !banHomQua) return;
+
+      // Dữ liệu hồ sơ lấy từ hai bản đã ký; trình duyệt gửi kèm thì phải trùng khít.
+      const homNay = goiDiBuongTuBanKy(banHomNay);
+      const homQua = banHomQua ? goiDiBuongTuBanKy(banHomQua).propositions : [];
+      const thanKhongRong: Record<string, unknown> = { ...body };
+      if (!banHomQua && Array.isArray(body.yesterdayPropositions) && body.yesterdayPropositions.length === 0) {
+        delete thanKhongRong.yesterdayPropositions; // [] khi không có ca trước là hợp lệ
+      }
+      if (
+        chanNeuTruongLech(res, thanKhongRong, [
+          ["todayPropositions", homNay.propositions],
+          ["yesterdayPropositions", homQua],
+          ["todayTranscript", homNay.transcript],
+          ["transcriptToday", homNay.transcript],
+        ])
+      ) {
+        return;
       }
 
-      const {
-        todayPropositions = [],
-        yesterdayPropositions = [],
-        todayTranscript = "",
-        transcriptToday = "",
-        dayNumber = null,
-        treatmentDay = null,
-      } = req.body || {};
-
-      if (!Array.isArray(todayPropositions) || !Array.isArray(yesterdayPropositions)) {
-        return res.status(400).json({ error: "todayPropositions và yesterdayPropositions phải là mảng" });
-      }
+      const { dayNumber = null, treatmentDay = null } = body as { dayNumber?: unknown; treatmentDay?: unknown };
       const rawDay = dayNumber ?? treatmentDay ?? null;
       if (rawDay !== null && rawDay !== undefined && (typeof rawDay !== "number" || !Number.isFinite(rawDay) || rawDay < 1)) {
         return res.status(400).json({ error: "dayNumber phải là số dương hợp lệ hoặc null" });
       }
 
-      const transcriptStr = String(todayTranscript || transcriptToday || "");
+      const todayPropositions = homNay.propositions;
+      const yesterdayPropositions = homQua;
+      const transcriptStr = homNay.transcript;
       const payload = {
         todayPropositions,
         phat_bieu_hom_nay: todayPropositions,

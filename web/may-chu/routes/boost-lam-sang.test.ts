@@ -390,12 +390,16 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
 
   // 4. Boost 8 — `/api/clinical/informed-consent` + đóng dấu WORM `consentHash` + chặn IDOR + khóa ký duyệt 409 + che PII log
   const uidBsA = (db.prepare("SELECT id FROM nguoi_dung WHERE email = ?").get("bsa@meditrace.vn") as { id: number }).id;
-  taoCaDaKy(uidBsA, "ca_thu_thuat_a");
+  const consentTranscript = "BS: Bác cần nội soi dạ dày gây mê, nguy cơ sặc hoặc phản vệ hiếm gặp.\nBN: Tôi đã hiểu và đồng ý làm.";
+  const consentProps = [{ id: 1, text: "chỉ định nội soi dạ dày gây mê", status: "than", evidenceTurns: [1] }];
+  // Dữ liệu hồ sơ của phiếu cam đoan lấy từ bản đã ký: ca đã ký mang đúng mệnh đề + lời thoại + mốc âm thanh.
+  taoCaDaKy(uidBsA, "ca_thu_thuat_a", {
+    menhDe: consentProps,
+    transcript: consentTranscript,
+    segments: [{ luot: 2, start_s: 4.2, end_s: 7.1 }],
+  });
   luuCaMau(uidBsA, caMauDuDieuKienKy("ca_thu_thuat_chua_ky"));
   taoCaDaKy(uidBsA, "ca_thu_thuat_sua_sau_ky", { suaSauKy: true });
-
-  const consentTranscript = "BS: Bác cần nội soi dạ dày gây mê, nguy cơ sặc hoặc phản vệ hiếm gặp.\nBN: Tôi đã hiểu và đồng ý làm.";
-  const consentProps = [{ id: 1, text: "chỉ định nội soi dạ dày gây mê", evidenceTurns: [1] }];
 
   // 4a. Thiếu mã ca / ca chưa ký / ca sửa sau ký -> 409 chua_ky_duyet, không gọi Python và không ghi WORM
   for (const [nhan, sid] of [
@@ -431,15 +435,15 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
     body: JSON.stringify({
-      transcript: consentTranscript,
-      propositions: consentProps,
-      audioMetadata: [{ luot: 2, start_ms: 4200, end_ms: 7100, speaker_id: "BN" }],
       procedureName: "Nội soi thực quản - dạ dày gây mê",
       stampWorm: true,
       sessionId: "ca_thu_thuat_a",
     }),
   });
   assert.equal(consentRes.status, 200);
+  const goiCamDoan = capturedPyRequests.find((x) => x.url === "/api/cam-doan-thu-thuat")?.body;
+  assert.equal(goiCamDoan?.transcript, consentTranscript, "lời thoại lấy từ bản đã ký");
+  assert.deepEqual(goiCamDoan?.metadata_am_thanh, [{ luot: 2, start_ms: 4200, end_ms: 7100 }]);
   const consentData: any = await consentRes.json();
   assert.equal(consentData.du_6_muc_phap_ly, true);
   assert.equal(consentData.sessionId, "ca_thu_thuat_a");
@@ -468,8 +472,6 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
     body: JSON.stringify({
-      transcript: consentTranscript,
-      propositions: consentProps,
       procedureName: "Nội soi cho Nguyễn Văn Minh 0912345678",
       stampWorm: true,
       sessionId: "ca_thu_thuat_a",
@@ -498,7 +500,14 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   assert.equal((await consentIdor.json()).code, "idor_forbidden");
 
   // 5. Boost 10 — `/api/inpatient/ward-round-diff` (khóa ký duyệt 409 + nhánh 200)
-  taoCaDaKy(uidBsA, "ca_noi_tru_a");
+  // Đi buồng: cả ca hôm nay và ca hôm qua phải đã ký; mệnh đề + lời thoại lấy từ hai bản đã ký.
+  taoCaDaKy(uidBsA, "ca_noi_tru_a", {
+    menhDe: [{ id: 2, text: "tăng liều Furosemid 40mg tiêm tĩnh mạch", status: "than", evidenceTurns: [1] }],
+    transcriptCa: "BS: Hôm nay ngày thứ 3, còn phù nhẹ hai chân, tăng liều Furosemid 40mg tiêm tĩnh mạch.",
+  });
+  taoCaDaKy(uidBsA, "ca_noi_tru_hom_qua", {
+    menhDe: [{ id: 1, text: "Furosemid 20mg uống", status: "than", evidenceTurns: [1] }],
+  });
   luuCaMau(uidBsA, caMauDuDieuKienKy("ca_noi_tru_chua_ky"));
   taoCaDaKy(uidBsA, "ca_noi_tru_sua_sau_ky", { suaSauKy: true });
 
@@ -536,14 +545,18 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
     body: JSON.stringify({
-      todayPropositions: [{ id: 2, text: "tăng liều Furosemid 40mg tiêm tĩnh mạch", evidenceTurns: [1] }],
-      yesterdayPropositions: [{ id: 1, text: "Furosemid 20mg uống", evidenceTurns: [1] }],
-      todayTranscript: "BS: Hôm nay ngày thứ 3, còn phù nhẹ hai chân, tăng liều Furosemid 40mg tiêm tĩnh mạch.",
       dayNumber: 3,
       currentSessionId: "ca_noi_tru_a",
+      previousSessionId: "ca_noi_tru_hom_qua",
     }),
   });
   assert.equal(wardRes.status, 200);
+  const wardHomQuaChuaKy = await fetch(`${baseUrl}/api/inpatient/ward-round-diff`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    body: JSON.stringify({ currentSessionId: "ca_noi_tru_a", previousSessionId: "ca_noi_tru_chua_ky" }),
+  });
+  assert.equal(wardHomQuaChuaKy.status, 409, "ca hôm qua chưa ký thì không so sánh");
   const wardData: any = await wardRes.json();
   assert.equal(wardData.ngay_dieu_tri_thu, 3);
   assert.equal(wardData.y_lenh_thay_doi.length, 1);
@@ -582,6 +595,27 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
     .get() as { chi_tiet: string } | undefined;
   assert.ok(logCsv?.chi_tiet.includes("bytes="));
 
+  // Các ca đã ký cho đường fallback Python thật (7c cam đoan, 7d đi buồng).
+  taoCaDaKy(uidBsA, "ca_thu_thuat_fb", {
+    menhDe: [{ id: 1, text: "chỉ định nội soi dạ dày cầm máu", status: "than", evidenceTurns: [1] }],
+    transcript:
+      "BS: Bác đang bị loét dạ dày chảy máu, chỉ định nội soi dạ dày cầm máu. Nguy cơ tai biến có thể chảy máu hoặc phản vệ. Phương án thay thế là điều trị nội khoa bảo tồn; nếu từ chối hoặc chậm trễ bệnh sẽ tiến triển nặng nguy hiểm tính mạng.\nBN: Tôi đã hiểu và đồng ý tiến hành nội soi.",
+    segments: [{ luot: 2, start_s: 8, end_s: 11.5 }],
+  });
+  taoCaDaKy(uidBsA, "ca_noi_tru_fb_qua", {
+    menhDe: [
+      { id: 1, text: "sốt cao 39 độ C", status: "than", evidenceTurns: [1] },
+      { id: 2, text: "Ceftriaxon 2g tiêm tĩnh mạch 1 lần/ngày", status: "than", drug: "Ceftriaxon", evidenceTurns: [2] },
+    ],
+  });
+  taoCaDaKy(uidBsA, "ca_noi_tru_fb_nay", {
+    menhDe: [
+      { id: 3, text: "hết sốt, nhiệt độ 36.8 độ C", status: "than", evidenceTurns: [1] },
+      { id: 4, text: "duy trì thuốc như ngày trước", status: "than", evidenceTurns: [2] },
+    ],
+    transcriptCa: "BN: Hôm nay tôi hết sốt rồi bác sĩ ạ.\nBS: Nhiệt độ 36.8 độ C, duy trì thuốc như ngày trước.",
+  });
+
   // 7. Tắt mockPyServer để kiểm thử thật 100% đường fallback `dich_vu_tat` -> `chayPythonJson` cho cả 4 module Python!
   mockPyServer.closeAllConnections?.();
   await new Promise<void>((resolve) => mockPyServer.close(() => resolve()));
@@ -611,13 +645,10 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const fbConsentRes = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    // Máy chủ lấy lời thoại, mệnh đề, mốc âm thanh từ bản đã ký `ca_thu_thuat_fb`; trình duyệt chỉ gửi tên thủ thuật.
     body: JSON.stringify({
-      transcript:
-        "BS: Bác đang bị loét dạ dày chảy máu, chỉ định nội soi dạ dày cầm máu. Nguy cơ tai biến có thể chảy máu hoặc phản vệ. Phương án thay thế là điều trị nội khoa bảo tồn; nếu từ chối hoặc chậm trễ bệnh sẽ tiến triển nặng nguy hiểm tính mạng.\nBN: Tôi đã hiểu và đồng ý tiến hành nội soi.",
-      propositions: [],
-      audioMetadata: [{ luot: 2, start_ms: 8000, end_ms: 11500, speaker_id: "BN" }],
       procedureName: "Nội soi dạ dày cầm máu",
-      sessionId: "ca_thu_thuat_a",
+      sessionId: "ca_thu_thuat_fb",
     }),
   });
   assert.equal(fbConsentRes.status, 200);
@@ -629,18 +660,11 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const fbWardRes = await fetch(`${baseUrl}/api/inpatient/ward-round-diff`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    // Mệnh đề hôm nay/hôm qua + lời thoại lấy từ hai bản đã ký.
     body: JSON.stringify({
-      yesterdayPropositions: [
-        { id: 1, text: "sốt cao 39 độ C", evidenceTurns: [1] },
-        { id: 2, text: "Ceftriaxon 2g tiêm tĩnh mạch 1 lần/ngày", drug: "Ceftriaxon", evidenceTurns: [2] },
-      ],
-      todayPropositions: [
-        { id: 3, text: "hết sốt, nhiệt độ 36.8 độ C", evidenceTurns: [1] },
-        { id: 4, text: "duy trì thuốc như ngày trước", evidenceTurns: [2] },
-      ],
-      todayTranscript: "BN: Hôm nay tôi hết sốt rồi bác sĩ ạ.\nBS: Nhiệt độ 36.8 độ C, duy trì thuốc như ngày trước.",
       dayNumber: 4,
-      currentSessionId: "ca_noi_tru_a",
+      currentSessionId: "ca_noi_tru_fb_nay",
+      previousSessionId: "ca_noi_tru_fb_qua",
     }),
   });
   assert.equal(fbWardRes.status, 200);

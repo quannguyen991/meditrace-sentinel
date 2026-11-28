@@ -63,6 +63,8 @@ export function ghiBanKyDuyet(x: {
 
 /* ------------------------------------------------------------------ kiểm */
 
+export const LY_DO_DU_LIEU_XUAT_DOI = "Hồ sơ hoặc dữ liệu dùng để xuất đã đổi sau lần ký — cần ký lại";
+
 export function kiemDaKyChoXuat(uid: number, caseId: string): { duoc: boolean; lyDo?: string; banKy?: BanKyDuyet } {
   const id = typeof caseId === "string" ? caseId.trim() : "";
   if (!id) return { duoc: false, lyDo: "Thiếu mã ca khám để đối chiếu chữ ký." };
@@ -109,6 +111,11 @@ export function kiemDaKyChoXuat(uid: number, caseId: string): { duoc: boolean; l
   if (kqHienTai.tabId !== tabId || kqHienTai.contentHash !== ban.content_hash) {
     return { duoc: false, lyDo: "Hồ sơ đã sửa sau lần ký — cần ký lại." };
   }
+  // Băm ký chỉ phủ tab bệnh án + quyết định duyệt. Mọi dữ liệu khác dùng để dựng gói xuất (mệnh đề, lời thoại,
+  // tên/phụ đề, ngữ cảnh/xét nghiệm, mốc âm thanh) cũng phải y hệt bản chụp lúc ký.
+  if (!giongNhau(duLieuXuatChuan(ca.duLieu, tabId), duLieuXuatChuan(duLieu, tabId))) {
+    return { duoc: false, lyDo: LY_DO_DU_LIEU_XUAT_DOI };
+  }
   return { duoc: true, banKy: { wormSeq: ban.worm_seq, sessionId: id, tabId, contentHash: ban.content_hash, duLieu } };
 }
 
@@ -131,15 +138,32 @@ export function layBanKyDeXuat(req: express.Request, res: express.Response): Ban
     res.status(422).json({ error: "sessionId và caseId chỉ hai ca khác nhau — không xuất.", code: "lech_ma_ca" });
     return null;
   }
-  const uid = (req as express.Request & { nguoiDung?: { id?: number } }).nguoiDung?.id;
-  const kq = kiemDaKyChoXuat(typeof uid === "number" ? uid : NaN, (sessionId || caseId).slice(0, 200));
-  if (!kq.duoc || !kq.banKy) {
-    res.status(409).json({ error: LOI_CHUA_KY_DUYET, code: MA_LOI_CHUA_KY_DUYET, lyDo: kq.lyDo });
+  const banKy = layBanKyTheoMa(req, res, sessionId || caseId);
+  if (!banKy) return null;
+  const tabXin = chuoiKhac(body.tabId) || chuoiKhac(q.tabId);
+  if (tabXin && tabXin !== banKy.tabId) {
+    res.status(422).json({ error: "Tab xin xuất không phải tab bác sĩ đã ký.", code: "lech_tab_da_ky" });
     return null;
   }
-  const tabXin = chuoiKhac(body.tabId) || chuoiKhac(q.tabId);
-  if (tabXin && tabXin !== kq.banKy.tabId) {
-    res.status(422).json({ error: "Tab xin xuất không phải tab bác sĩ đã ký.", code: "lech_tab_da_ky" });
+  return banKy;
+}
+
+/** 422 `lech_ma_ca` khi các mã ca gửi kèm (bỏ qua chuỗi rỗng) không trùng nhau. Trả mã chung, hoặc `null` khi đã trả lời. */
+export function hopNhatMaCa(res: express.Response, dsMa: unknown[]): string | null {
+  const ma = [...new Set(dsMa.map(chuoiKhac).filter(Boolean))];
+  if (ma.length > 1) {
+    res.status(422).json({ error: "Các mã ca gửi kèm chỉ những ca khác nhau — không xuất.", code: "lech_ma_ca" });
+    return null;
+  }
+  return (ma[0] || "").slice(0, 200);
+}
+
+/** Kiểm chữ ký của đúng ca `maCa` cho người đang đăng nhập; 409 khi không đạt. */
+export function layBanKyTheoMa(req: express.Request, res: express.Response, maCa: string): BanKyDuyet | null {
+  const uid = (req as express.Request & { nguoiDung?: { id?: number } }).nguoiDung?.id;
+  const kq = kiemDaKyChoXuat(typeof uid === "number" ? uid : NaN, String(maCa || "").slice(0, 200));
+  if (!kq.duoc || !kq.banKy) {
+    res.status(409).json({ error: LOI_CHUA_KY_DUYET, code: MA_LOI_CHUA_KY_DUYET, lyDo: kq.lyDo });
     return null;
   }
   return kq.banKy;
@@ -148,9 +172,9 @@ export function layBanKyDeXuat(req: express.Request, res: express.Response): Ban
 /* ------------------------------------------------------------------ dựng nội dung xuất từ bản đã ký */
 
 /** Mệnh đề hiệu lực đúng như giao diện tính: bỏ mệnh đề "bỏ", mệnh đề "sửa" dùng bản sửa. */
-function menhDeHieuLuc(ban: BanKyDuyet): Array<Record<string, any>> {
-  const { quyet, banSua } = tinhKyDuyetTuCa(ban.duLieu, ban.tabId);
-  const ds = Array.isArray(ban.duLieu?.note?.propositions) ? ban.duLieu.note.propositions : [];
+function menhDeHieuLucTu(duLieu: any, tabId: string | null): Array<Record<string, any>> {
+  const { quyet, banSua } = tinhKyDuyetTuCa(duLieu, tabId);
+  const ds = Array.isArray(duLieu?.note?.propositions) ? duLieu.note.propositions : [];
   return ds
     .filter((p: any) => p && typeof p === "object" && quyet[Number(p.id)] !== "bo")
     .map((p: any) => {
@@ -158,17 +182,60 @@ function menhDeHieuLuc(ban: BanKyDuyet): Array<Record<string, any>> {
       return quyet[Number(p.id)] === "sua" && sua?.trim() ? { ...p, text: sua.trim() } : p;
     });
 }
+const menhDeHieuLuc = (ban: BanKyDuyet) => menhDeHieuLucTu(ban.duLieu, ban.tabId);
+
+function nguCanhTu(ca: any) {
+  return xayNguCanhChoTaoHoSo({
+    sessionId: ca?.id,
+    patientIdentifier: ca?.patientIdentifier,
+    patientSubtitle: ca?.patientSubtitle,
+    tabs: ca?.tabs,
+    contextNotes: ca?.contextNotes,
+  });
+}
+
+/** Mốc âm thanh từng lượt (`transcriptSegments`) theo dạng dịch vụ cam đoan cần. */
+function mocAmThanhTu(ca: any): Array<{ luot: number; start_ms: number; end_ms: number }> | null {
+  const ds = Array.isArray(ca?.transcriptSegments) ? ca.transcriptSegments : null;
+  if (!ds) return null;
+  return ds
+    .filter((s: any) => s && Number.isFinite(Number(s.luot)))
+    .map((s: any) => ({
+      luot: Number(s.luot),
+      start_ms: Math.round(Number(s.start_s) * 1000),
+      end_ms: Math.round(Number(s.end_s) * 1000),
+    }));
+}
+
+/**
+ * Mọi dữ liệu của ca mà các gói xuất (BHYT/FHIR, cổng người bệnh, cam đoan, đi buồng) đọc tới.
+ * Bản hiện tại phải trùng bản chụp lúc ký thì mới được xuất.
+ */
+function duLieuXuatChuan(caTho: unknown, tabId: string | null) {
+  const ca: any = caTho && typeof caTho === "object" ? caTho : {};
+  const ky = tinhKyDuyetTuCa(ca, tabId);
+  const tabNguCanh = Array.isArray(ca.tabs) ? ca.tabs.filter((t: any) => t && t.type === "context") : [];
+  return {
+    soapRaw: ky.soapRaw,
+    quyet: ky.quyet,
+    banSua: ky.banSua,
+    menhDe: Array.isArray(ca.note?.propositions) ? ca.note.propositions : [],
+    menhDeHieuLuc: menhDeHieuLucTu(ca, tabId),
+    loiThoaiBanNhap: ca.note?.transcript ?? null,
+    loiThoaiCa: ca.transcript ?? null,
+    ten: ca.patientIdentifier ?? null,
+    phuDe: ca.patientSubtitle ?? null,
+    nguCanhTab: tabNguCanh.map((t: any) => t.content ?? ""),
+    nguCanhGhiChu: ca.contextNotes ?? null,
+    nguCanh: nguCanhTu(ca),
+    mocAmThanh: mocAmThanhTu(ca),
+  };
+}
 
 /** Gói BHYT/FHIR dựng hoàn toàn từ bản đã ký. */
 export function goiBhytTuBanKy(ban: BanKyDuyet) {
   const ca = ban.duLieu || {};
-  const nc = xayNguCanhChoTaoHoSo({
-    sessionId: ca.id,
-    patientIdentifier: ca.patientIdentifier,
-    patientSubtitle: ca.patientSubtitle,
-    tabs: ca.tabs,
-    contextNotes: ca.contextNotes,
-  });
+  const nc = nguCanhTu(ca);
   return {
     propositions: menhDeHieuLuc(ban),
     transcript: String(ca.note?.transcript || ca.transcript || ""),
@@ -199,14 +266,22 @@ const giongNhau = (a: unknown, b: unknown) =>
  */
 export function chanNeuNoiDungKhacBanKy(req: express.Request, res: express.Response, goi: ReturnType<typeof goiBhytTuBanKy>) {
   const body = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
-  const doiChieu: Array<[string, unknown]> = [
+  return chanNeuTruongLech(res, body, [
     ["propositions", goi.propositions],
     ["transcript", goi.transcript],
     ["thong_tin_benh_nhan", goi.thong_tin_benh_nhan],
     ["patientInfo", goi.thong_tin_benh_nhan],
     ["du_lieu_xet_nghiem", goi.du_lieu_xet_nghiem],
     ["noteSections", goi.noteSections],
-  ];
+  ]);
+}
+
+/** Đối chiếu từng trường trình duyệt gửi (bỏ qua trường vắng/null) với giá trị dựng từ bản đã ký; lệch -> 422. */
+export function chanNeuTruongLech(
+  res: express.Response,
+  body: Record<string, unknown>,
+  doiChieu: Array<[string, unknown]>,
+): boolean {
   const lech = doiChieu.filter(([k, v]) => body[k] !== undefined && body[k] !== null && !giongNhau(body[k], v)).map(([k]) => k);
   if (!lech.length) return false;
   res.status(422).json({
@@ -235,6 +310,23 @@ export function goiCongTuBanKy(ban: BanKyDuyet): { tenBenhNhan: string; chanDoan
         .map((p) => String(p.text).trim());
   const ten = typeof ca.patientIdentifier === "string" ? ca.patientIdentifier.trim() : "";
   return { tenBenhNhan: ten || "Quý khách / Người bệnh", chanDoan: String(chanDoan).trim(), thuoc };
+}
+
+/** Cam đoan thủ thuật: mệnh đề hiệu lực, lời thoại và mốc âm thanh lấy từ bản đã ký. */
+export function goiCamDoanTuBanKy(ban: BanKyDuyet) {
+  const goi = goiBhytTuBanKy(ban);
+  return {
+    propositions: goi.propositions,
+    transcript: goi.transcript,
+    thong_tin_benh_nhan: goi.thong_tin_benh_nhan,
+    audioMetadata: mocAmThanhTu(ban.duLieu),
+  };
+}
+
+/** Đi buồng: mệnh đề hiệu lực + lời thoại cấp ca (thứ tự giống DiBuongNoiTruModal: Session.transcript trước). */
+export function goiDiBuongTuBanKy(ban: BanKyDuyet) {
+  const ca = ban.duLieu || {};
+  return { propositions: menhDeHieuLuc(ban), transcript: String(ca.transcript || ca.note?.transcript || "") };
 }
 
 /* ------------------------------------------------------------------ giao diện cũ (route khác đang dùng) */

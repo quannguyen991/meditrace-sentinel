@@ -100,8 +100,10 @@ test("signOff.tabId do trình duyệt ghi không đổi được tab đối chi�
 test("được xuất thì trả kèm bản chụp đã ký và đúng tab đã ký", () => {
   luuCaMau(1, caMauDuDieuKienKy("ca_ban_chup", { ten: "Lúc ký" }));
   kyCaMau(1, "ca_ban_chup", "tab-soap");
-  // Đổi trường không nằm trong băm sau khi ký: vẫn được xuất, nhưng nội dung xuất là bản lúc ký.
-  luuCaMau(1, caMauDuDieuKienKy("ca_ban_chup", { ten: "Sau khi ký" }));
+  // Đổi trường không dùng để xuất (tab đang mở) sau khi ký: vẫn được xuất.
+  const caDoiTab = caMauDuDieuKienKy("ca_ban_chup", { ten: "Lúc ký" });
+  caDoiTab.activeTabId = "tab-transcript";
+  luuCaMau(1, caDoiTab);
   const r = kiemDaKyChoXuat(1, "ca_ban_chup") as any;
   assert.equal(r.duoc, true);
   assert.equal(r.banKy?.tabId, "tab-soap");
@@ -125,4 +127,29 @@ test("chữ ký WORM cũ không có bản chụp máy chủ: phải ký lại", 
   const r = kiemDaKyChoXuat(1, "ca_ky_kieu_cu");
   assert.equal(r.duoc, false);
   assert.match(r.lyDo || "", /ký lại/i);
+});
+
+test("dữ liệu dùng để xuất (ngoài băm ký) đổi sau khi ký -> không được xuất, phải ký lại", () => {
+  const LY_DO = /dữ liệu dùng để xuất đã đổi sau lần ký — cần ký lại/;
+  const doi: Array<[string, (ca: any) => void]> = [
+    ["tên bệnh nhân", (ca) => (ca.patientIdentifier = "Tên khác")],
+    ["phụ đề (tuổi/cân nặng)", (ca) => (ca.patientSubtitle = "Nam, 4 tuổi, 30 kg")],
+    ["mệnh đề", (ca) => (ca.note.propositions[0].text = "đau bụng")],
+    ["mệnh đề thêm thuốc", (ca) => (ca.note.propositions[0].drug = "Warfarin")],
+    ["lời thoại bản nháp", (ca) => (ca.note.transcript = "BS: lời thoại khác")],
+    ["lời thoại ca", (ca) => (ca.transcript = "BS: lời thoại ca khác")],
+    ["xét nghiệm ở tab ngữ cảnh", (ca) => (ca.tabs.find((t: any) => t.type === "context").content = "Creatinine 300 umol/L")],
+    ["mốc âm thanh", (ca) => (ca.transcriptSegments = [{ luot: 1, start_s: 0, end_s: 9 }])],
+  ];
+  for (const [nhan, sua] of doi) {
+    const id = `ca_doi_${nhan.replace(/\W+/g, "_")}`;
+    taoCaDaKy(1, id);
+    assert.equal(kiemDaKyChoXuat(1, id).duoc, true, `${nhan}: trước khi đổi`);
+    const ca: any = caMauDuDieuKienKy(id);
+    sua(ca);
+    luuCaMau(1, ca);
+    const r = kiemDaKyChoXuat(1, id);
+    assert.equal(r.duoc, false, `${nhan}: đổi sau ký phải bị chặn`);
+    assert.match(r.lyDo || "", LY_DO, nhan);
+  }
 });
