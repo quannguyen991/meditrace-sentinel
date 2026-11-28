@@ -135,9 +135,9 @@ process.env.MEDITRACE_INTERNAL_TOKEN = "boost-test-internal-token";
 process.env.MEDITRACE_WORM_KEY = "khoa-worm-kiem-thu-boost-lam-sang-0123456789abcdef";
 process.env.MEDITRACE_API = `http://127.0.0.1:${mockPyPort}`;
 
-const { db, damBaoKhoMoRong, TEN_KHO } = await import("../csdl");
+const { db, damBaoKhoMoRong, khoWorm, TEN_KHO } = await import("../csdl");
 const { taoUngDung } = await import("../../server");
-const { caMauDuDieuKienKy } = await import("../ho-tro-kiem-thu-ky-duyet");
+const { caMauDuDieuKienKy, luuCaMau, taoCaDaKy } = await import("../ho-tro-kiem-thu-ky-duyet");
 
 test.after(() => {
   mockPyServer.closeAllConnections?.();
@@ -310,71 +310,73 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
 
   // 3. Boost 5 — `/api/bhyt/precheck` truyền `thong_tin_benh_nhan` (cân nặng & tuổi nhi khoa) + `/api/ocr/phieu-cu` không bịa tuổi 50
   // Xuất gói BHYT chỉ được khi ca đã ký duyệt: bác sĩ A lưu ca rồi ký qua đúng API thật.
-  const luuCaBhyt = await fetch(`${baseUrl}/api/ca-kham/ca_bhyt_a`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({ session: caMauDuDieuKienKy("ca_bhyt_a") }),
+  // Máy chủ dựng gói từ bản chụp lúc ký (mệnh đề hiệu lực, lời thoại, thông tin BN từ phụ đề/ngữ cảnh ca).
+  const kyCaQuaApi = async (ca: { id: string }) => {
+    const luu = await fetch(`${baseUrl}/api/ca-kham/${ca.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+      body: JSON.stringify({ session: ca }),
+    });
+    assert.equal(luu.status, 200);
+    const ky = await fetch(`${baseUrl}/api/sessions/${ca.id}/sign-off`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+      body: JSON.stringify({}),
+    });
+    assert.equal(ky.status, 200);
+  };
+  await kyCaQuaApi(caMauDuDieuKienKy("ca_bhyt_a", { phuDe: "Nam, 4 tuổi, 15 kg" }));
+  // Ca nhi dùng cho đường fallback Python thật (mục 7a): Paracetamol quá liều theo cân nặng.
+  const caNhi: any = caMauDuDieuKienKy("ca_bhyt_nhi", {
+    phuDe: "Nam, 3 tuổi, 12 kg",
+    transcript: "BS: Cháu viêm họng cấp, uống Paracetamol 1000 mg 4 lần một ngày.",
   });
-  assert.equal(luuCaBhyt.status, 200);
-  const kyCaBhyt = await fetch(`${baseUrl}/api/sessions/ca_bhyt_a/sign-off`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({}),
-  });
-  assert.equal(kyCaBhyt.status, 200);
-  const bhytChuaKy = await fetch(`${baseUrl}/api/bhyt/precheck`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({ propositions: [], transcript: "BS: chưa ký." }),
-  });
+  caNhi.note.propositions = [
+    { id: 1, text: "viêm họng cấp", status: "than", evidenceTurns: [1] },
+    { id: 2, text: "Paracetamol 1000 mg uống 4 lần/ngày", status: "than", drug: "Paracetamol", evidenceTurns: [1] },
+  ];
+  caNhi.duyet.quyet = { 1: "giu", 2: "giu" };
+  caNhi.duyet.banSua = {};
+  await kyCaQuaApi(caNhi);
+
+  const postBhyt = (duong: string, body: unknown) =>
+    fetch(`${baseUrl}${duong}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+      body: JSON.stringify(body),
+    });
+  const bhytChuaKy = await postBhyt("/api/bhyt/precheck", { propositions: [], transcript: "BS: chưa ký." });
   assert.equal(bhytChuaKy.status, 409, "không gửi mã ca đã ký thì không được xuất gói BHYT");
-  capturedPyRequests.length = 0;
-  const bhytRes = await fetch(`${baseUrl}/api/bhyt/precheck`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({
-      propositions: [{ id: 1, text: "viêm họng cấp, kê Amoxicillin 1000mg/lần", evidenceTurns: [1] }],
-      transcript: "BS: Cháu viêm họng cấp, kê Amoxicillin.",
-      thong_tin_benh_nhan: { tuoi: 4, can_nang_kg: 15, gioi_tinh: "nam" },
-      sessionId: "ca_bhyt_a",
-    }),
+  const bhytTronCa = await postBhyt("/api/bhyt/precheck", {
+    sessionId: "ca_bhyt_a",
+    thong_tin_benh_nhan: { tuoi: 70, can_nang_kg: 50 },
   });
+  assert.equal(bhytTronCa.status, 422, "thông tin BN khác bản đã ký thì không xuất");
+
+  capturedPyRequests.length = 0;
+  const bhytRes = await postBhyt("/api/bhyt/precheck", { sessionId: "ca_bhyt_a" });
   assert.equal(bhytRes.status, 200);
   const bhytData: any = await bhytRes.json();
-  assert.deepEqual(bhytData.nhan_thong_tin_bn, { tuoi: 4, can_nang_kg: 15, gioi_tinh: "nam" });
   assert.equal(capturedPyRequests[0].url, "/api/bhyt/precheck");
-  assert.deepEqual(capturedPyRequests[0].body.thong_tin_benh_nhan, { tuoi: 4, can_nang_kg: 15, gioi_tinh: "nam" });
+  for (const ttbn of [bhytData.nhan_thong_tin_bn, capturedPyRequests[0].body.thong_tin_benh_nhan]) {
+    assert.equal(ttbn.tuoi, 4);
+    assert.equal(ttbn.can_nang_kg, 15);
+    assert.equal(ttbn.gioi_tinh, "nam");
+  }
+  assert.deepEqual(
+    capturedPyRequests[0].body.propositions.map((p: any) => p.text),
+    ["đau ngực", "không sốt"],
+    "mệnh đề hiệu lực từ bản đã ký: bỏ mệnh đề bị bác, dùng bản sửa",
+  );
 
-  // Hỗ trợ cả alias `patientInfo` từ giao diện
-  const bhytAliasRes = await fetch(`${baseUrl}/api/bhyt/precheck`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({
-      propositions: [],
-      transcript: "BS: Khám nhi.",
-      patientInfo: { tuoi: 2, can_nang_kg: 11.5 },
-      sessionId: "ca_bhyt_a",
-    }),
-  });
-  assert.equal(bhytAliasRes.status, 200);
-  assert.deepEqual((await bhytAliasRes.json()).nhan_thong_tin_bn, { tuoi: 2, can_nang_kg: 11.5 });
-
-  // `/api/bhyt/recompile` truyền mệnh đề hiệu lực + `thong_tin_benh_nhan`
-  const recompileRes = await fetch(`${baseUrl}/api/bhyt/recompile`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({
-      caseId: "ca_nhi_01",
-      propositions: [{ id: 1, text: "viêm họng cấp", evidenceTurns: [1] }],
-      transcript: "BS: Viêm họng cấp.",
-      thong_tin_benh_nhan: { tuoi: 4, can_nang_kg: 15 },
-      sessionId: "ca_bhyt_a",
-    }),
-  });
+  // `/api/bhyt/recompile` dựng gói từ bản đã ký; caseId là mã ca đã ký; caseId lệch sessionId -> 422
+  const recompileLech = await postBhyt("/api/bhyt/recompile", { sessionId: "ca_bhyt_a", caseId: "ca_nhi_01" });
+  assert.equal(recompileLech.status, 422);
+  const recompileRes = await postBhyt("/api/bhyt/recompile", { sessionId: "ca_bhyt_a" });
   assert.equal(recompileRes.status, 200);
   const recompileBody: any = await recompileRes.json();
-  assert.equal(recompileBody.caseId, "ca_nhi_01");
-  assert.deepEqual(recompileBody.nhan_thong_tin_bn, { tuoi: 4, can_nang_kg: 15 });
+  assert.equal(recompileBody.caseId, "ca_bhyt_a");
+  assert.equal(recompileBody.nhan_thong_tin_bn.can_nang_kg, 15);
 
   // `/api/ocr/phieu-cu` khi không gửi `tuoi` phải gửi `tuoi: null` (tuyệt đối không bịa 50)
   const ocrNoAgeRes = await fetch(`${baseUrl}/api/ocr/phieu-cu`, {
@@ -505,15 +507,8 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const fbBhytRes = await fetch(`${baseUrl}/api/bhyt/precheck`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({
-      propositions: [
-        { id: 1, text: "viêm họng cấp", evidenceTurns: [1] },
-        { id: 2, text: "Paracetamol 1000 mg uống 4 lần/ngày", drug: "Paracetamol", evidenceTurns: [2] },
-      ],
-      transcript: "BS: Cháu viêm họng cấp, uống Paracetamol 1000 mg 4 lần một ngày.",
-      thong_tin_benh_nhan: { tuoi: 3, can_nang_kg: 12, gioi_tinh: "nam" },
-      sessionId: "ca_bhyt_a",
-    }),
+    // Máy chủ dựng gói từ bản đã ký của ca nhi (Paracetamol 1000 mg × 4, 3 tuổi, 12 kg).
+    body: JSON.stringify({ sessionId: "ca_bhyt_nhi" }),
   });
   assert.equal(fbBhytRes.status, 200);
   const fbBhytBody: any = await fbBhytRes.json();
