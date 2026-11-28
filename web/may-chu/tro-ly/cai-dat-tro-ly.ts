@@ -1,7 +1,7 @@
 /**
  * Cài đặt trợ lý, lưu trong bảng `cai_dat (khoa, gia_tri)` có sẵn:
  *  - `tro_ly:<id người dùng>`: JSON danh sách tác tử người đó bật (mặc định bật cả sáu).
- *  - `tro_ly_ngoai`: "tat" là công tắc quản trị tắt toàn hệ thống đường ngoài (hoặc env MEDITRACE_TRO_LY_NGOAI=tat).
+ *  - `tro_ly_ngoai`: "bat" là quản trị đã bật đường ngoài; không có hoặc "tat" thì tắt (env MEDITRACE_TRO_LY_NGOAI=tat|bat thắng).
  */
 import type { DatabaseSync } from "node:sqlite";
 import type { TacTuMa } from "./kieu";
@@ -34,9 +34,16 @@ export function ghiCaiDat(db: DatabaseSync, nguoiDungId: number, batTacTu: TacTu
   ghiKhoa(db, `tro_ly:${nguoiDungId}`, JSON.stringify([...new Set((Array.isArray(batTacTu) ? batTacTu : []).filter(hopLe))]));
 }
 
+/**
+ * Đường ra mô hình ngoài (AIBOX, dịch vụ bên thứ ba) MẶC ĐỊNH TẮT (Đề cải tiến 1, 28/11/2026):
+ * env "tat" luôn tắt; quản trị bấm tắt thì tắt, bấm bật thì mở; chưa ai chọn thì chỉ mở khi env "bat" (máy chủ thử).
+ */
 export function ngoaiBat(db: DatabaseSync, env: NodeJS.ProcessEnv): boolean {
   if (env.MEDITRACE_TRO_LY_NGOAI === "tat") return false;
-  return docKhoa(db, "tro_ly_ngoai") !== "tat";
+  const quanTri = docKhoa(db, "tro_ly_ngoai");
+  if (quanTri === "tat") return false; // quản trị đã bấm tắt thì luôn tắt
+  if (quanTri === "bat") return true;
+  return env.MEDITRACE_TRO_LY_NGOAI === "bat"; // chưa ai chọn: chỉ mở khi máy chủ đặt env bat
 }
 
 export function ghiNgoaiBat(db: DatabaseSync, bat: boolean): void {

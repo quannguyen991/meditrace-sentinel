@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { THONG_BAO_BAN_DEMO } from "../lib/thongBaoBanDemo";
 import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { MediTraceLogo } from "./MediTraceLogo";
 import { dangKy, dangNhap, type NguoiDung, type TinhTrangToi } from "../lib/taiKhoan";
@@ -229,6 +230,9 @@ export function ManDangNhap({ tinhTrang, onVao }: Props) {
               Ban giám khảo dùng tài khoản demo trong hồ sơ.
             </p>
           )}
+          <p role="note" className="mt-3 rounded-lg border border-[#F5E6B8] bg-[#FEF9E7] px-3 py-2 text-center text-[13px] leading-snug text-[#92400E]">
+            {THONG_BAO_BAN_DEMO}
+          </p>
         </div>
       </main>
     </div>

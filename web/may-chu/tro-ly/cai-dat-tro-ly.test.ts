@@ -34,16 +34,19 @@ const moi = () => {
   assert.equal(docCaiDat(db, 1).batTacTu.length, 6);
 }
 
-// 4. công tắc ngoài: mặc định bật; env "tat" hoặc ghi false thì tắt
+// 4. công tắc ngoài (AIBOX là dịch vụ bên thứ ba): mặc định TẮT; quản trị bật hoặc env "bat" mới mở; env "tat" luôn thắng
 {
   const db = moi();
-  assert.equal(ngoaiBat(db, {}), true);
+  assert.equal(ngoaiBat(db, {}), false, "chưa ai bật thì tắt");
   assert.equal(ngoaiBat(db, { MEDITRACE_TRO_LY_NGOAI: "tat" }), false);
+  assert.equal(ngoaiBat(moi(), { MEDITRACE_TRO_LY_NGOAI: "bat" }), true, "env bat mở được cho máy chủ thử");
   ghiNgoaiBat(db, false);
   assert.equal(ngoaiBat(db, {}), false);
   ghiNgoaiBat(db, true);
   assert.equal(ngoaiBat(db, {}), true);
-  assert.equal(ngoaiBat(db, { MEDITRACE_TRO_LY_NGOAI: "tat" }), false, "env thắng công tắc bật");
+  assert.equal(ngoaiBat(db, { MEDITRACE_TRO_LY_NGOAI: "tat" }), false, "env tat thắng công tắc bật");
+  ghiNgoaiBat(db, false);
+  assert.equal(ngoaiBat(db, { MEDITRACE_TRO_LY_NGOAI: "bat" }), false, "quản trị bấm tắt thắng env bat");
 }
 
 console.log("cai-dat-tro-ly.test.ts: tất cả đều qua");
