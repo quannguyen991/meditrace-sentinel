@@ -10,6 +10,7 @@ import {
   tachLuot,
   trichChanDoanVaThuocTuSoap,
 } from "../lib/compileEffectiveNote";
+import { vietHoaCau, vietHoaDauDong } from "../lib/vietHoaCau";
 import { taoPhieuSbar, tachMucHis } from "../lib/sbar";
 import { choPhepDungHoSo, nhanInHoSo } from "../lib/choPhepDungHoSo";
 import { xuatGoiFhirVaBhytHieuLuc } from "../lib/taiBienDichHieuLuc";
@@ -627,7 +628,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
   const handleCopy = () => {
     if (!dungHoSo.duoc) return;
-    navigator.clipboard.writeText(effectiveContent);
+    navigator.clipboard.writeText(vietHoaDauDong(effectiveContent));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -635,7 +636,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   // Tải file Text (dùng văn bản hiệu lực đã áp dụng Sửa/Bỏ mệnh đề)
   const handleDownloadTxt = () => {
     if (!dungHoSo.duoc) return;
-    const blob = new Blob([effectiveContent], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([vietHoaDauDong(effectiveContent)], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -648,7 +649,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   // Tải file Markdown (dùng văn bản hiệu lực đã áp dụng Sửa/Bỏ mệnh đề)
   const handleDownloadMd = () => {
     if (!dungHoSo.duoc) return;
-    const blob = new Blob([effectiveContent], { type: "text/markdown;charset=utf-8" });
+    const blob = new Blob([vietHoaDauDong(effectiveContent)], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1042,7 +1043,8 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   const khoaHoSoDanDo = sessionId || tab.id;
 
   const renderNoiDungBenhAn = (noiDung: string, choPhepTuongTacMenhDe: boolean) =>
-    noiDung.split("\n").map((dong, i) => {
+    noiDung.split("\n").map((dongGoc, i) => {
+      const dong = vietHoaCau(dongGoc);
       const dongTrim = dong.trim();
       if (!dongTrim) {
         return <div key={i} className="h-2.5" />;
@@ -1635,9 +1637,13 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
               </button>
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                className="px-1.5 py-1 border-l border-white/20 hover:bg-[#0369A1]"
-                title="In / Lưu PDF, tải tệp"
+                className="flex items-center gap-1 px-2.5 py-1 border-l border-white/30 text-xs font-semibold whitespace-nowrap hover:bg-[#0369A1]"
+                title="Xuất hồ sơ: In / Lưu PDF, tải tệp .txt, .md, FHIR"
+                aria-haspopup="menu"
+                aria-expanded={isExportMenuOpen}
               >
+                <Download size={12} />
+                <span>Xuất</span>
                 <ChevronDown size={11} />
               </button>
             </div>
