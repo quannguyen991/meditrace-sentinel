@@ -319,10 +319,13 @@ class AudioPipeline:
         suffix = Path(filename).suffix.lower() or ".webm"
         if suffix not in {".webm", ".wav", ".mp3", ".m4a", ".ogg", ".flac"}:
             raise ValueError("upload_failed")
-        target = self.store.path(session_id, "raw" + suffix)
-        target.write_bytes(data)
-        value = self.store.update(session_id, raw_audio_path=str(target), status=SessionStatus.RECORDED.value, recording_ended_at=now_iso(), transcript_status="not_started")
-        self.store.log(session_id, "audio_uploaded", bytes=len(data), extension=suffix)
+        with self.store.khoa_phien(session_id):
+            target = self.store.path(session_id, "raw" + suffix)
+            target.write_bytes(data)
+            # Âm thanh mới: lần duyệt cũ (nếu có) hết hiệu lực, để hạn giữ không xoá bản chưa duyệt.
+            self.store.huy_duyet_am_thanh(session_id)
+            value = self.store.update(session_id, raw_audio_path=str(target), status=SessionStatus.RECORDED.value, recording_ended_at=now_iso(), transcript_status="not_started")
+            self.store.log(session_id, "audio_uploaded", bytes=len(data), extension=suffix)
         return value
 
     def start_recording(self, session_id: str) -> dict[str, Any]:
@@ -336,10 +339,16 @@ class AudioPipeline:
         return value
 
     def process(self, session_id: str, tach_nguoi_noi: bool = True) -> dict[str, Any]:
+        # Giữ khoá phiên suốt lúc xử lý: dọn hạn giữ âm thanh bỏ qua phiên đang bận.
+        with self.store.khoa_phien(session_id):
+            return self._process(session_id, tach_nguoi_noi)
+
+    def _process(self, session_id: str, tach_nguoi_noi: bool = True) -> dict[str, Any]:
         session = self.store.load(session_id)
         raw = Path(session.get("raw_audio_path") or "")
         if not raw.exists():
             raise ValueError("upload_failed")
+        self.store.huy_duyet_am_thanh(session_id)  # xử lý lại thì lời thoại cũ không còn là bản đã duyệt
         self.store.update(session_id, status=SessionStatus.PROCESSING_AUDIO.value, error=None)
         self.store.log(session_id, "processing_started")
         try:
@@ -514,6 +523,8 @@ class AudioPipeline:
         if any(s.get("asr_review_required") for s in items):
             raise ValueError("asr_review_pending")
         result = to_meditrace(items, strict=True)
-        self.store.update(session_id, meditrace_status="ready")
-        self.store.log(session_id, "sent_to_meditrace", turn_count=len(result["turns"]))
+        with self.store.khoa_phien(session_id):
+            # Duyệt gắn với dấu vân tay tệp âm thanh hiện có (hạn giữ chỉ xoá đúng bản này).
+            self.store.ghi_duyet_am_thanh(session_id)
+            self.store.log(session_id, "sent_to_meditrace", turn_count=len(result["turns"]))
         return result

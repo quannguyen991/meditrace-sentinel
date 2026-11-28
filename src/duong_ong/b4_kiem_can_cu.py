@@ -4,6 +4,27 @@ Làm gì   : Kiểm mỗi mệnh đề có thật sự được nói trong lời
            người, đúng mức — trước khi cho vào bản nháp.
 Vào → Ra : danh sách mệnh đề + lời thoại → mỗi mệnh đề đạt / cảnh báo / chặn kèm mã lý do
 Đọc từ   : khoa_ca() chạy cho cả ca; khoa_mot() là 7 phép kiểm K1–K7 cho một mệnh đề
+Bảy phép kiểm (🔴 chặn = chuyển sang CẦN XÁC NHẬN, không xoá · 🟡 cảnh báo = vẫn vào thân):
+  K1 Nguồn       Câu trích có NGUYÊN VĂN trong lượt được dẫn không.
+                 🔴 không có câu trích / lượt không tồn tại / câu trích không có trong hội
+                 thoại · 🟡 câu trích nằm ở lượt khác lượt được dẫn.
+  K2 Nội dung    Nội dung mệnh đề có trùng từ với câu trích không (chỉ so từ, không hiểu ý).
+                 🟡 không trùng từ nào / chỉ khớp qua một từ phương ngữ mơ hồ.
+  K3 Người       Câu trích nói về ĐÚNG NGƯỜI không ("tôi" của người mẹ ≠ bệnh nhi).
+                 🔴 ghi cho bệnh nhân mà câu gốc là người kể tự nói về mình; ghi cho người
+                 nhà mà câu gốc nói về bệnh nhân · 🟡 có nhắc người nhà / chủ thể chỉ suy từ
+                 người nói / chưa rõ chủ thể.
+  K4 Mức         Không biến nghi ngờ, "nếu…", "chưa ghi nhận" thành điều chắc chắn đã xảy ra.
+                 🔴 câu gốc chỉ nghi / là câu điều kiện hay dự phòng / là chưa ghi nhận / đã
+                 bị đính chính ngầm hoặc xét nghiệm loại trừ · 🟡 đoạn dẫn có từ phủ định.
+  K5 Thời gian   Mốc thời gian của mệnh đề có xuất hiện trong lượt dẫn không.
+                 🟡 không thấy mốc thời gian.
+  K6 Thuốc       Chi tiết thuốc có trong lời nói không. 🔴 liều không có trong lượt dẫn ·
+                 🟡 số lần dùng, lúc bắt đầu/ngừng, đường dùng không thấy.
+  K7 Thay thế    Thông tin đã bị đính chính hoặc diễn biến mới thay thế chưa (trạng thái từ
+                 bước b3). 🔴 bị thay thế · 🟡 đang mâu thuẫn, chưa giải quyết.
+  Giới hạn: K1 là so chuỗi nên chắc chắn; K2–K6 là luật theo từ nên chỉ bắt được một phần —
+  câu trích có thật nhưng bị diễn giải sai có thể chỉ bị cảnh báo. Tên lý do: bảng LY_DO.
 Mục lục (các hàm/lớp chính):
   khoa_ca()               Khoá căn cứ cho cả danh sách mệnh đề
   khoa_mot()              Khoá căn cứ một mệnh đề qua các phép kiểm K1 đến K7
