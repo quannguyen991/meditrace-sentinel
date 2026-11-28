@@ -82,16 +82,19 @@ def _nap_mo_hinh(ten_mo_hinh, adapter=None):
 # ─── _sinh() — Gọi mô hình sinh một lần ───────────────────────────────────────────────
 # Tắt thinking và giải mã tham lam để hai lần chạy cho cùng kết quả; trả về (văn bản,
 # token vào, token ra).
-def _sinh(tok, model, noi_dung_nguoi_dung, max_token=512):
+def _sinh(tok, model, noi_dung_nguoi_dung, max_token=512, he_thong=LOI_NHAC_HE_THONG):
     """Trả về (van_ban, so_token_vao, so_token_ra).
 
     `enable_thinking=False` giống lúc train — khác nhau là lệch phân phối.
     Giải mã tham lam (`do_sample=False`) giống `inference.py` gốc: hai lần chạy
     cùng một đầu vào phải ra cùng một kết quả, không thì không so sánh được nhánh.
+
+    `he_thong`: lời nhắc hệ thống; "" hoặc None thì không gửi lời nhắc hệ thống. Quét lại
+    (Task 1, 27/11) truyền lời nhắc của khâu TRÍCH cho khớp phân phối lúc train adapter trích.
     """
     import torch
-    msgs = [{"role": "system", "content": LOI_NHAC_HE_THONG},
-            {"role": "user", "content": noi_dung_nguoi_dung}]
+    msgs = ([{"role": "system", "content": he_thong}] if he_thong else []) + [
+        {"role": "user", "content": noi_dung_nguoi_dung}]
     prompt = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
                                      enable_thinking=False)
     inp = tok(prompt, return_tensors="pt").to(model.device)
@@ -226,7 +229,7 @@ def ten_ket_qua(nhanh, adapter):
 def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                     max_token=1536, kq_tho=None, prefix_phan=None,
                     bat_buoc_trich_dan=None, chinh_sach="C",
-                    prompt_lookup_num_tokens=None):
+                    prompt_lookup_num_tokens=None, quet_lai: bool = False):
     """Ba nhánh dùng chung một đường ống, khác nhau ĐÚNG hai bước.
 
         B        trích -> sinh.          Không liên kết thực thể, không áp luật.
@@ -256,6 +259,12 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
     Truyền lại kết quả trích vào đây vừa nhanh gấp sáu lần, vừa bảo đảm mỗi
     nhánh nhìn thấy ĐÚNG một đầu ra mô hình — chênh lệch đo được chắc chắn
     đến từ hậu xử lý chứ không từ một lần sinh khác.
+
+    `quet_lai` (Task 1, 27/11/2026; mặc định tắt): sau lượt trích đầu, tìm các VẾ có tín
+    hiệu lâm sàng mà chưa câu trích nào phủ (`b1_quet_lai_ve.ve_chua_phu`); có vế thì sinh
+    thêm ĐÚNG MỘT lần cho riêng các vế đó, rồi gộp vào bảng trước Bước 2–5. Chỉ cho nhánh có
+    khoá K1–K6 (`CO_KHOA`): mệnh đề mới phải qua khoá như mọi mệnh đề khác, không qua thì
+    xuống CẦN XÁC NHẬN. Không sửa `kq_tho` đầu vào (sáu nhánh dùng chung nó).
     """
     from src.huan_luyen import chon_mo_hinh_bakeoff as bakeoff
     from src.duong_ong import b3_cap_nhat_trang_thai as cap_nhat
@@ -264,6 +273,10 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
     from src.duong_ong import b2_gom_nguoi_thuc_the as thuc_the
 
     assert nhanh in NHANH_TRUNG_GIAN, nhanh
+    if quet_lai and nhanh not in CO_KHOA:
+        raise ValueError(f"quet_lai chi dung cho nhanh co khoa K1-K6 {CO_KHOA}, khong cho {nhanh}")
+    if quet_lai and model is None:
+        raise SystemExit("quet_lai can mo hinh de sinh them; --tu-dem khong chay duoc")
     if kq_tho is None:
         if prompt_lookup_num_tokens is not None:
             kq_tho = bakeoff.trich(tok, model, prefix_fn, mau_list, max_token=max_token,
@@ -290,7 +303,29 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
             ten_chu_the = {t.id: t.ten_chuan for t in tt
                            if t.loai == "người" and t.id != 0}
 
-        ps, loi = phat_bieu.tu_json(k["phat_bieu"] or [],
+        ps_tho = k["phat_bieu"] or []
+        tk_quet, so_luot_goi = None, 1
+        if quet_lai:
+            from src.duong_ong import b1_quet_lai_ve as quet
+            ve = quet.ve_chua_phu(m["input"], ps_tho)
+            tk_quet = {"so_ve": len(ve), "so_moi": 0, "so_bo_ngoai_van": 0, "so_bo_trung": 0}
+            if ve:
+                from src.huan_luyen.huan_luyen_sft import LOI_NHAC_HE_THONG_TRICH
+                # Cùng lời nhắc hệ thống với lượt trích đầu: adapter trích thì có, mô hình nền
+                # thì không (xem `bakeoff._vong_trich`).
+                he_thong = (LOI_NHAC_HE_THONG_TRICH
+                            if getattr(model, "_co_adapter_trich", False) else None)
+                van_ql, _vao, _ra = _sinh(tok, model, quet.loi_nhac_quet_lai(m["input"], ve),
+                                          max_token, he_thong=he_thong)
+                so_luot_goi = 2
+                _hop_le, moi, _ly_do = bakeoff._phan_tich(
+                    van_ql, bakeoff.danh_so_luot(m["input"])[1])
+                giu, bo = quet.loc_trong_van(m["input"], moi if isinstance(moi, list) else [])
+                ps_tho = quet.gop_ket_qua_quet_lai(ps_tho, giu)
+                so_moi = len(ps_tho) - len(k["phat_bieu"] or [])
+                tk_quet.update(so_moi=so_moi, so_bo_ngoai_van=len(bo),
+                               so_bo_trung=len(giu) - so_moi)
+        ps, loi = phat_bieu.tu_json(ps_tho,
                                     nguoi_noi_theo_luot=nguoi_noi,
                                     id_theo_ten=bang)
         # `ten_chu_the` do `phat_bieu.tu_json` gán ngay tại chỗ đúng bản ghi.
@@ -401,7 +436,7 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
         ra.append({"id": m["id"], "input": m["input"],
                    "tham_chieu": m.get("output"), "du_doan": van,
                    "du_doan_khong_muc_phu": than,
-                   "so_luot_goi": 1,
+                   "so_luot_goi": so_luot_goi,
                    "token_vao": 0, "token_ra": 0,
                    "so_phat_bieu": len(ps), "loi_ban_ghi": loi,
                    "so_can_xac_nhan": sum(
@@ -414,6 +449,8 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                    # giao diện duyệt và của bộ 500 GPT (`bo_gpt500 --cham`).
                    "phat_bieu": [p.to_dict() for p in ps],
                    **khoa})
+        if tk_quet is not None:
+            ra[-1]["quet_lai"] = tk_quet
         them = ""
         if tk_phan:
             them = (f", {tk_phan['so_cap']} cap -> "
