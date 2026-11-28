@@ -236,7 +236,7 @@ def dap_an(ca):
 
 # ═══ ghep_menh_de() — Ghép một-một mệnh đề đáp án với mệnh đề bản rút ═════════════════
 # Nội dung phải đạt ngưỡng; hoà thì xếp theo mốc thời gian rồi theo lượt dẫn.
-def ghep_menh_de(da, ps):
+def ghep_menh_de(da, ps, nguong=NGUONG_GHEP):
     """Ghép 1-1 tham lam -> {chỉ số trong `da`: chỉ số trong `ps`}.
 
     Nội dung phải đạt NGUONG_GHEP. Khi nhiều mệnh đề CÙNG nội dung — hai bản "sốt"
@@ -251,7 +251,7 @@ def ghep_menh_de(da, ps):
         la = set(d.get("luot") or [])
         for j, p in enumerate(ps):
             s = do_giong(a, _nd(p.get("noi_dung")))
-            if s < NGUONG_GHEP:
+            if s < nguong:
                 continue
             t = do_giong(_nd(d.get("moc_thoi_gian")), _nd(p.get("moc_thoi_gian")))
             lb = set(p.get("bang_chung") or p.get("luot_thoai") or [])

@@ -1,0 +1,150 @@
+[
+  {
+    "he_thong": "C_khoa",
+    "tap": "thach_thuc_dinh_chinh_phat_trien",
+    "tep_he_thong": "ra_C_khoa_thach_thuc_dinh_chinh_phat_trien.jsonl",
+    "so_ca": 60,
+    "so_ca_dap_an": 60,
+    "so_du_doan": 569,
+    "so_dap_an": 570,
+    "nguong": {
+      "0.4": {
+        "precision": 0.9806678383128296,
+        "recall": 0.9789473684210527,
+        "f1": 0.9798068481123793,
+        "so_ghep": 558
+      },
+      "0.5": {
+        "precision": 0.9771528998242531,
+        "recall": 0.9754385964912281,
+        "f1": 0.9762949956101845,
+        "so_ghep": 556
+      },
+      "0.6": {
+        "precision": 0.9718804920913884,
+        "recall": 0.9701754385964912,
+        "f1": 0.971027216856892,
+        "so_ghep": 553
+      },
+      "0.7": {
+        "precision": 0.9560632688927944,
+        "recall": 0.9543859649122807,
+        "f1": 0.9552238805970148,
+        "so_ghep": 544
+      }
+    },
+    "coverage_trung_binh": 0.7063173760086234,
+    "density_trung_binh": 3.9100772748518673
+  },
+  {
+    "he_thong": "C_khoa",
+    "tap": "thach_thuc_doi_chu_the_phat_trien",
+    "tep_he_thong": "ra_C_khoa_thach_thuc_doi_chu_the_phat_trien.jsonl",
+    "so_ca": 80,
+    "so_ca_dap_an": 80,
+    "so_du_doan": 806,
+    "so_dap_an": 780,
+    "nguong": {
+      "0.4": {
+        "precision": 0.9478908188585607,
+        "recall": 0.9794871794871794,
+        "f1": 0.9634300126103404,
+        "so_ghep": 764
+      },
+      "0.5": {
+        "precision": 0.9454094292803971,
+        "recall": 0.9769230769230769,
+        "f1": 0.9609079445145019,
+        "so_ghep": 762
+      },
+      "0.6": {
+        "precision": 0.9305210918114144,
+        "recall": 0.9615384615384616,
+        "f1": 0.9457755359394705,
+        "so_ghep": 750
+      },
+      "0.7": {
+        "precision": 0.9094292803970223,
+        "recall": 0.9397435897435897,
+        "f1": 0.9243379571248423,
+        "so_ghep": 733
+      }
+    },
+    "coverage_trung_binh": 0.6440920724054973,
+    "density_trung_binh": 3.2587851022100778
+  },
+  {
+    "he_thong": "C_khoa",
+    "tap": "thach_thuc_nhieu_asr_phat_trien",
+    "tep_he_thong": "ra_C_khoa_thach_thuc_nhieu_asr_phat_trien.jsonl",
+    "so_ca": 80,
+    "so_ca_dap_an": 80,
+    "so_du_doan": 712,
+    "so_dap_an": 702,
+    "nguong": {
+      "0.4": {
+        "precision": 0.8721910112359551,
+        "recall": 0.8846153846153846,
+        "f1": 0.8783592644978784,
+        "so_ghep": 621
+      },
+      "0.5": {
+        "precision": 0.8539325842696629,
+        "recall": 0.8660968660968661,
+        "f1": 0.8599717114568599,
+        "so_ghep": 608
+      },
+      "0.6": {
+        "precision": 0.7823033707865169,
+        "recall": 0.7934472934472935,
+        "f1": 0.7878359264497878,
+        "so_ghep": 557
+      },
+      "0.7": {
+        "precision": 0.7008426966292135,
+        "recall": 0.7108262108262108,
+        "f1": 0.7057991513437059,
+        "so_ghep": 499
+      }
+    },
+    "coverage_trung_binh": 0.6689544501868254,
+    "density_trung_binh": 3.84639097943448
+  },
+  {
+    "he_thong": "C_khoa",
+    "tap": "thach_thuc_phuong_ngu_phat_trien",
+    "tep_he_thong": "ra_C_khoa_thach_thuc_phuong_ngu_phat_trien.jsonl",
+    "so_ca": 80,
+    "so_ca_dap_an": 80,
+    "so_du_doan": 742,
+    "so_dap_an": 738,
+    "nguong": {
+      "0.4": {
+        "precision": 0.967654986522911,
+        "recall": 0.9728997289972899,
+        "f1": 0.9702702702702702,
+        "so_ghep": 718
+      },
+      "0.5": {
+        "precision": 0.9663072776280324,
+        "recall": 0.9715447154471545,
+        "f1": 0.9689189189189189,
+        "so_ghep": 717
+      },
+      "0.6": {
+        "precision": 0.9622641509433962,
+        "recall": 0.967479674796748,
+        "f1": 0.9648648648648649,
+        "so_ghep": 714
+      },
+      "0.7": {
+        "precision": 0.9407008086253369,
+        "recall": 0.94579945799458,
+        "f1": 0.9432432432432433,
+        "so_ghep": 698
+      }
+    },
+    "coverage_trung_binh": 0.6948586031520888,
+    "density_trung_binh": 3.805815544974778
+  }
+]
