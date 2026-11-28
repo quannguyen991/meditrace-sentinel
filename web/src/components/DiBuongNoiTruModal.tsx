@@ -486,6 +486,7 @@ export const DiBuongNoiTruModal: React.FC<DiBuongNoiTruModalProps> = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId: currentSession?.id || noteMeta?.caseId || "",
           todayPropositions: todayProps,
           yesterdayPropositions: yesterdayProps,
           todayTranscript: currentSession?.transcript || noteMeta?.transcript || "",
@@ -493,6 +494,10 @@ export const DiBuongNoiTruModal: React.FC<DiBuongNoiTruModalProps> = ({
           currentSessionId: currentSession?.id || noteMeta?.caseId || "current",
         }),
       });
+      if (r.status === 409) {
+        setServerDiff(null);
+        return;
+      }
       if (r.ok) {
         setServerDiff(await r.json());
       } else {

@@ -448,7 +448,9 @@ class AmThanh:
                 from src.audio.pipeline import AudioPipeline
                 from src.audio.storage import SessionStore
                 THU_MUC_PHIEN.mkdir(parents=True, exist_ok=True)
-                self._pipe = AudioPipeline(SessionStore(THU_MUC_PHIEN))
+                store = SessionStore(THU_MUC_PHIEN)
+                store.don_dinh_ky()
+                self._pipe = AudioPipeline(store)
         return self._pipe
 
     def chep(self, du_lieu: bytes, ten_tep: str, tach_nguoi_noi: bool = True, doctor_voiceprint: Optional[list] = None):

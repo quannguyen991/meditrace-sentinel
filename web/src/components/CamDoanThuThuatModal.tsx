@@ -320,6 +320,7 @@ export const CamDoanThuThuatModal: React.FC<CamDoanThuThuatModalProps> = ({
     seq: number | string | null;
     stampedAt: string;
   } | null>(null);
+  const [loiWorm, setLoiWorm] = useState<string | null>(null);
   const [daChep, setDaChep] = useState(false);
   const [hienXemTruocPhieu, setHienXemTruocPhieu] = useState(false);
 
@@ -397,6 +398,7 @@ export const CamDoanThuThuatModal: React.FC<CamDoanThuThuatModalProps> = ({
 
   const dongDauWormVaXuatPhieu = async () => {
     setDangDongDauWorm(true);
+    setLoiWorm(null);
     try {
       let hashTuServer: string | null = null;
       let seqTuServer: number | string | null = null;
@@ -415,6 +417,12 @@ export const CamDoanThuThuatModal: React.FC<CamDoanThuThuatModalProps> = ({
             stampWorm: true,
           }),
         });
+        if (r.status === 409) {
+          // Máy chủ chặn vì chưa ký / sửa sau ký: không rơi xuống nhánh đóng dấu offline giả.
+          const loi = (await r.json().catch(() => ({}))) as { error?: string; lyDo?: string };
+          setLoiWorm(loi.lyDo || loi.error || "Bác sĩ chưa ký duyệt hồ sơ này — chưa được đóng dấu WORM.");
+          return;
+        }
         if (r.ok) {
           const kq = await r.json();
           setDuLieuServer(kq);
@@ -526,6 +534,14 @@ export const CamDoanThuThuatModal: React.FC<CamDoanThuThuatModalProps> = ({
 
         {/* Nội dung cuộn */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-[#F8FBFC]">
+          {/* Cảnh báo 409 nếu ca chưa ký duyệt */}
+          {loiWorm && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 flex items-start gap-2 text-xs text-amber-900">
+              <AlertTriangle size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
+              <span>{loiWorm}</span>
+            </div>
+          )}
+
           {/* Banner WORM nếu đã đóng dấu */}
           {wormStamp && (
             <div className="rounded-xl border border-[#A7E3C9] bg-[#F3FBF7] p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[#0D6B50]">

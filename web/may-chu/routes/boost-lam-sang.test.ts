@@ -388,17 +388,45 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   const ocrNoAgeData: any = await ocrNoAgeRes.json();
   assert.equal(ocrNoAgeData.nhan_tuoi, null, "thiếu tuổi phải truyền null thay vì tự bịa tuổi 50");
 
-  // 4. Boost 8 — `/api/clinical/informed-consent` + đóng dấu WORM `consentHash` + chặn IDOR
-  // Bác sĩ A tạo một ca khám thuộc quyền sở hữu của mình
-  const createCaseA = await fetch(`${baseUrl}/api/ca-kham/ca_thu_thuat_a`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
-    body: JSON.stringify({ session: { id: "ca_thu_thuat_a", patientIdentifier: "BN Nội Soi" } }),
-  });
-  assert.equal(createCaseA.status, 200);
+  // 4. Boost 8 — `/api/clinical/informed-consent` + đóng dấu WORM `consentHash` + chặn IDOR + khóa ký duyệt 409 + che PII log
+  const uidBsA = (db.prepare("SELECT id FROM nguoi_dung WHERE email = ?").get("bsa@meditrace.vn") as { id: number }).id;
+  taoCaDaKy(uidBsA, "ca_thu_thuat_a");
+  luuCaMau(uidBsA, caMauDuDieuKienKy("ca_thu_thuat_chua_ky"));
+  taoCaDaKy(uidBsA, "ca_thu_thuat_sua_sau_ky", { suaSauKy: true });
 
   const consentTranscript = "BS: Bác cần nội soi dạ dày gây mê, nguy cơ sặc hoặc phản vệ hiếm gặp.\nBN: Tôi đã hiểu và đồng ý làm.";
   const consentProps = [{ id: 1, text: "chỉ định nội soi dạ dày gây mê", evidenceTurns: [1] }];
+
+  // 4a. Thiếu mã ca / ca chưa ký / ca sửa sau ký -> 409 chua_ky_duyet, không gọi Python và không ghi WORM
+  for (const [nhan, sid] of [
+    ["thiếu mã ca", undefined],
+    ["ca chưa ký", "ca_thu_thuat_chua_ky"],
+    ["ca sửa sau ký", "ca_thu_thuat_sua_sau_ky"],
+  ] as const) {
+    capturedPyRequests.length = 0;
+    const truocWorm = sid ? khoWorm.docLichSuSignOff(sid, { userId: uidBsA }).length : 0;
+    const r409 = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+      body: JSON.stringify({
+        transcript: consentTranscript,
+        propositions: consentProps,
+        stampWorm: true,
+        ...(sid ? { sessionId: sid } : {}),
+      }),
+    });
+    assert.equal(r409.status, 409, `informed-consent (${nhan}) phải trả 409`);
+    assert.equal((await r409.json()).code, "chua_ky_duyet");
+    assert.equal(capturedPyRequests.length, 0, `informed-consent (${nhan}) không được gọi Python`);
+    if (sid) {
+      assert.equal(
+        khoWorm.docLichSuSignOff(sid, { userId: uidBsA }).length,
+        truocWorm,
+        `informed-consent (${nhan}) không được ghi thêm WORM`,
+      );
+    }
+  }
+
   const consentRes = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
@@ -435,6 +463,26 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
     .get() as { chi_tiet: string } | undefined;
   assert.ok(logWorm?.chi_tiet.includes(expectedConsentHash));
 
+  // Che PII trong procedureName khi ghi bảng nhat_ky
+  const consentPiiRes = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    body: JSON.stringify({
+      transcript: consentTranscript,
+      propositions: consentProps,
+      procedureName: "Nội soi cho Nguyễn Văn Minh 0912345678",
+      stampWorm: true,
+      sessionId: "ca_thu_thuat_a",
+    }),
+  });
+  assert.equal(consentPiiRes.status, 200);
+  const logWormPii = db
+    .prepare("SELECT chi_tiet FROM nhat_ky WHERE hanh_dong = 'cam_doan_thu_thuat_worm' ORDER BY id DESC LIMIT 1")
+    .get() as { chi_tiet: string } | undefined;
+  assert.ok(logWormPii?.chi_tiet, "phải ghi dòng nhật ký WORM");
+  assert.equal(logWormPii.chi_tiet.includes("Nguyễn Văn Minh"), false, "nhat_ky không được chứa tên bệnh nhân thô");
+  assert.equal(logWormPii.chi_tiet.includes("0912345678"), false, "nhat_ky không được chứa SĐT bệnh nhân thô");
+
   // Bác sĩ B cố đóng dấu cam đoan thủ thuật vào ca của Bác sĩ A -> 403 IDOR!
   const consentIdor = await fetch(`${baseUrl}/api/clinical/informed-consent`, {
     method: "POST",
@@ -449,7 +497,41 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   assert.equal(consentIdor.status, 403);
   assert.equal((await consentIdor.json()).code, "idor_forbidden");
 
-  // 5. Boost 10 — `/api/inpatient/ward-round-diff`
+  // 5. Boost 10 — `/api/inpatient/ward-round-diff` (khóa ký duyệt 409 + nhánh 200)
+  taoCaDaKy(uidBsA, "ca_noi_tru_a");
+  luuCaMau(uidBsA, caMauDuDieuKienKy("ca_noi_tru_chua_ky"));
+  taoCaDaKy(uidBsA, "ca_noi_tru_sua_sau_ky", { suaSauKy: true });
+
+  for (const [nhan, sid] of [
+    ["thiếu mã ca", undefined],
+    ["ca chưa ký", "ca_noi_tru_chua_ky"],
+    ["ca sửa sau ký", "ca_noi_tru_sua_sau_ky"],
+  ] as const) {
+    capturedPyRequests.length = 0;
+    const truocWorm = sid ? khoWorm.docLichSuSignOff(sid, { userId: uidBsA }).length : 0;
+    const w409 = await fetch(`${baseUrl}/api/inpatient/ward-round-diff`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+      body: JSON.stringify({
+        todayPropositions: [{ id: 2, text: "tăng liều Furosemid 40mg tiêm tĩnh mạch", evidenceTurns: [1] }],
+        yesterdayPropositions: [{ id: 1, text: "Furosemid 20mg uống", evidenceTurns: [1] }],
+        todayTranscript: "BS: Hôm nay ngày thứ 3, tăng liều Furosemid 40mg.",
+        dayNumber: 3,
+        ...(sid ? { currentSessionId: sid } : {}),
+      }),
+    });
+    assert.equal(w409.status, 409, `ward-round-diff (${nhan}) phải trả 409`);
+    assert.equal((await w409.json()).code, "chua_ky_duyet");
+    assert.equal(capturedPyRequests.length, 0, `ward-round-diff (${nhan}) không được gọi Python`);
+    if (sid) {
+      assert.equal(
+        khoWorm.docLichSuSignOff(sid, { userId: uidBsA }).length,
+        truocWorm,
+        `ward-round-diff (${nhan}) không được ghi thêm WORM`,
+      );
+    }
+  }
+
   const wardRes = await fetch(`${baseUrl}/api/inpatient/ward-round-diff`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
@@ -458,6 +540,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       yesterdayPropositions: [{ id: 1, text: "Furosemid 20mg uống", evidenceTurns: [1] }],
       todayTranscript: "BS: Hôm nay ngày thứ 3, còn phù nhẹ hai chân, tăng liều Furosemid 40mg tiêm tĩnh mạch.",
       dayNumber: 3,
+      currentSessionId: "ca_noi_tru_a",
     }),
   });
   assert.equal(wardRes.status, 200);
@@ -534,6 +617,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       propositions: [],
       audioMetadata: [{ luot: 2, start_ms: 8000, end_ms: 11500, speaker_id: "BN" }],
       procedureName: "Nội soi dạ dày cầm máu",
+      sessionId: "ca_thu_thuat_a",
     }),
   });
   assert.equal(fbConsentRes.status, 200);
@@ -556,6 +640,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       ],
       todayTranscript: "BN: Hôm nay tôi hết sốt rồi bác sĩ ạ.\nBS: Nhiệt độ 36.8 độ C, duy trì thuốc như ngày trước.",
       dayNumber: 4,
+      currentSessionId: "ca_noi_tru_a",
     }),
   });
   assert.equal(fbWardRes.status, 200);

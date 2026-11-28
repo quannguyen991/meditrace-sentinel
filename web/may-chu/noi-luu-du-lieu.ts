@@ -58,7 +58,7 @@ export const NOI_LUU_DU_LIEU: ReadonlyArray<NoiLuu> = [
     noiDung: "Tải trọng và kết quả của việc dựng bản nháp / trợ lý (có lời thoại)",
     coDinhDanh: "co",
     aiDoc: "Người dùng tạo việc",
-    giu: "Việc quá 30 phút bị đánh dấu thất bại; hạn dọn bảng chưa kiểm",
+    giu: "Việc quá 30 phút bị đánh dấu thất bại; Việc đã kết thúc (xong/thất bại/đã hủy) cũ hơn 30 phút bị xóa định kỳ bởi donViecCu(TUOI_VIEC_TOI_DA_MS) (asr.ts, tro-ly.ts)",
   },
   {
     noi: "Thư mục phiên âm thanh (dịch vụ Python)",
@@ -66,7 +66,15 @@ export const NOI_LUU_DU_LIEU: ReadonlyArray<NoiLuu> = [
     noiDung: "Tệp ghi âm gốc và bản 16 kHz, lời thoại chép, nhật ký sự kiện",
     coDinhDanh: "co",
     aiDoc: "Dịch vụ Python tại chỗ",
-    giu: "Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên, tối đa 1 lần/ngày, và khi api.py khởi động. Phiên chưa duyệt chưa có hạn tự xóa",
+    giu: "Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), và phiên chưa duyệt bị bỏ dở bị xóa sau 7 ngày (MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY), đều ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên (tối đa 1 lần/ngày), khi api.py khởi động, và khi dich_vu_http.py khởi tạo AudioPipeline",
+  },
+  {
+    noi: "Bảng ban_ky_duyet (bản chụp hồ sơ lúc ký)",
+    tep: "web/may-chu/kiem-ky-may-chu.ts",
+    noiDung: "Số thứ tự WORM, mã tab đã ký, băm nội dung, và bản chụp ca_kham.du_lieu đúng thời điểm bác sĩ ký",
+    coDinhDanh: "co",
+    aiDoc: "Chỉ bác sĩ sở hữu ca (đối chiếu lúc xuất)",
+    giu: "Vĩnh viễn (trigger SQLite cấm sửa/xóa; gắn với chuỗi WORM)",
   },
   {
     noi: "Sổ WORM của dịch vụ Python (data/audit_log_worm.db)",

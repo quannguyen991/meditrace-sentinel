@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import type express from "express";
+import { cheLog } from "../che-log";
 import { caKhamThuocNguoiKhac, ghiNhatKy, khoWorm } from "../csdl";
+import { kiemDaKyChoXuat, layBanKyDeXuat, LOI_CHUA_KY_DUYET, MA_LOI_CHUA_KY_DUYET } from "../kiem-ky-may-chu";
 import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 
 const TOI_DA_CSV_DUOC_THU_BYTES = 500 * 1024; // 500 KB
@@ -33,12 +35,15 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
       if (cleanSessionId.length > 200) {
         return res.status(400).json({ error: "sessionId vượt quá 200 ký tự" });
       }
-      if (stampWorm === true && cleanSessionId && caKhamThuocNguoiKhac(uid, cleanSessionId)) {
+      const rawCaseId = typeof req.body?.caseId === "string" ? req.body.caseId.trim().slice(0, 200) : "";
+      const maCa = cleanSessionId || rawCaseId;
+      if (maCa && caKhamThuocNguoiKhac(uid, maCa)) {
         return res.status(403).json({
           error: "Không được đóng dấu cam đoan thủ thuật cho ca khám của bác sĩ khác",
           code: "idor_forbidden",
         });
       }
+      if (!layBanKyDeXuat(req, res)) return;
 
       const transcriptStr = String(transcript ?? "");
       const payload = {
@@ -94,7 +99,7 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
         ghiNhatKy(
           uid,
           "cam_doan_thu_thuat_worm",
-          `session=${cleanSessionId} procedure=${String(procedureName || "-").slice(0, 120)} seq=${wormRes.wormSeq} hash=${consentHash}`,
+          `session=${cleanSessionId} procedure=${cheLog(String(procedureName || "-"), 120)} seq=${wormRes.wormSeq} hash=${consentHash}`,
         );
 
         return res.json({
@@ -121,6 +126,25 @@ export function dangKyBoostLamSangRoutes(app: express.Express) {
     try {
       const uid = req.nguoiDung?.id;
       if (typeof uid !== "number") return res.status(401).json({ error: "Chưa đăng nhập" });
+      const body = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
+      const coSessionOrCase =
+        (typeof body.sessionId === "string" && body.sessionId.trim()) ||
+        (typeof body.caseId === "string" && body.caseId.trim()) ||
+        (typeof req.query?.sessionId === "string" && req.query.sessionId.trim()) ||
+        (typeof req.query?.caseId === "string" && req.query.caseId.trim());
+      if (coSessionOrCase) {
+        if (!layBanKyDeXuat(req, res)) return;
+      } else {
+        const currentSid = typeof body.currentSessionId === "string" ? body.currentSessionId.trim().slice(0, 200) : "";
+        const kqKy = kiemDaKyChoXuat(uid, currentSid);
+        if (!kqKy.duoc || !kqKy.banKy) {
+          return res.status(409).json({
+            error: LOI_CHUA_KY_DUYET,
+            code: MA_LOI_CHUA_KY_DUYET,
+            lyDo: kqKy.lyDo,
+          });
+        }
+      }
 
       const {
         todayPropositions = [],
