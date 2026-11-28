@@ -26,12 +26,14 @@ import {
   dongTuDoan,
   ganVaiNguoiNoi,
   goiYVaiTuDoan,
+  goiYVaiXenKe,
   goiYVaiTuVanBanLuot,
   moTaTach,
   soNguoiNoiLonNhat,
   type VaiChuan,
 } from "../lib/nguoiNoi";
 import { quetRadarCoDo } from "../lib/radarCoDo";
+import { loaiTepDauVao } from "../lib/loaiTepDauVao";
 
 const KHOA_MAU_GIONG_BS = "meditrace_doctor_voiceprint_v1";
 
@@ -432,8 +434,47 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     e.target.value = "";
+    await xuLyTep(file);
+  };
+
+  // Kéo-thả: tệp âm thanh (mp3, wav, m4a, webm, ogg) đi qua PhoWhisper; tệp .txt/.md là lời thoại gõ sẵn.
+  const [dangKeoTep, setDangKeoTep] = useState(false);
+  const keoThaProps = {
+    onDragOver: (e: React.DragEvent) => {
+      if (!Array.from(e.dataTransfer?.types || []).includes("Files")) return;
+      e.preventDefault();
+      if (!dangKeoTep) setDangKeoTep(true);
+    },
+    onDragLeave: (e: React.DragEvent) => {
+      if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+      setDangKeoTep(false);
+    },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDangKeoTep(false);
+      const tep = e.dataTransfer?.files?.[0];
+      if (tep && !isUploading) void xuLyTep(tep);
+    },
+  };
+  const lopKeoTep = dangKeoTep ? " ring-4 ring-inset ring-[#0284C7]/50 bg-[#E0F2FE]" : "";
+
+  const xuLyTep = async (file: File) => {
+    const loai = loaiTepDauVao(file);
+    if (loai === "khong_ho_tro") {
+      setUploadError(`Chưa đọc được tệp "${file.name}". Thả tệp âm thanh (mp3, wav, m4a, webm, ogg) hoặc lời thoại .txt.`);
+      return;
+    }
+    if (loai === "loi_thoai") {
+      setUploadError(null);
+      const chu = (await file.text()).replace(/\r\n/g, "\n").trim();
+      if (!chu) {
+        setUploadError("Tệp lời thoại trống.");
+        return;
+      }
+      onUpdateTranscript(transcript ? `${transcript.trimEnd()}\n${chu}` : chu);
+      return;
+    }
     setIsUploading(true);
     setUploadError(null);
     setThongBaoDaGanNhanh(null);
@@ -473,7 +514,9 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
       if (!doan.length) throw new Error("PhoWhisper không nghe ra câu nào trong tệp này.");
 
       const offsetLuot = transcript ? transcript.split("\n").filter((l) => l.trim()).length : 0;
-      const dsGoiY = goiYVaiTuDoan(doan);
+      const dsGoiY0 = goiYVaiTuDoan(doan);
+      // Chưa tách được giọng: gợi ý xen kẽ từ lượt có mốc để bác sĩ bấm áp dụng một lần rồi kiểm lại.
+      const dsGoiY = data.diarization?.tach_that ? dsGoiY0 : goiYVaiXenKe(dsGoiY0);
       setSuggestedRolesByTurn((prev) => {
         const tiep = { ...prev };
         for (const g of dsGoiY) {
@@ -513,16 +556,20 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[#F0F7FA] via-[#F8FBFC] to-[#EEF6FB] flex flex-col items-center justify-center text-center select-none"
+        {...keoThaProps}
+        className={`flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[#F0F7FA] via-[#F8FBFC] to-[#EEF6FB] flex flex-col items-center justify-center text-center select-none transition-colors${lopKeoTep}`}
       >
         <div className="max-w-xs w-full flex flex-col items-center">
           <div className="w-14 h-14 rounded-2xl bg-white border border-[#BAE6FD] flex items-center justify-center text-[#0284C7] mb-3.5 shadow-tactile-doctor-pill">
             <Mic size={24} className="text-[#0284C7]" />
           </div>
 
-          <h2 className="font-serif text-base font-semibold text-[#0F172A] mb-4">
+          <h2 className="font-serif text-base font-semibold text-[#0F172A] mb-1">
             Chưa có bản ghi âm
           </h2>
+          <p className="text-[11.5px] text-[#475569] mb-4">
+            {dangKeoTep ? "Thả tệp vào đây để phân tích" : "Kéo-thả tệp mp3, wav, m4a hoặc lời thoại .txt vào khung này"}
+          </p>
 
           <div className="w-full flex flex-col gap-2.5">
             {onStartRecording && (
@@ -539,7 +586,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg"
+              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.txt,.md,text/plain"
               className="hidden"
             />
             <button
@@ -603,7 +650,8 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   return (
     <div
       id="transcript-view-container"
-      className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[#F8FBFC] via-[#F0F7FA] to-[#EEF6FB] relative flex flex-col justify-between select-none"
+      {...keoThaProps}
+      className={`flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[#F8FBFC] via-[#F0F7FA] to-[#EEF6FB] relative flex flex-col justify-between select-none transition-colors${lopKeoTep}`}
     >
       <div>
         {/* Thao tác nhanh phía trên */}
@@ -652,7 +700,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg"
+              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.txt,.md,text/plain"
               className="hidden"
             />
             <button

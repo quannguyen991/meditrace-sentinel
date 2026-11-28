@@ -30,6 +30,7 @@ import { chonTabBenhAnDeBam, khoaDuyetCuaNote } from "./lib/kyDuyet";
 import { bienDichBieuMauPhapLyTaiCho } from "./lib/bieuMauPhapLyOffline";
 import { taoDaiTomTatTruocKham } from "./lib/trichNhiemVuVaTomTat";
 import { useSessionsStore } from "./hooks/useSessionsStore";
+import { kiemVaBatMoHinhNgoai } from "./lib/moHinhNgoai";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -164,6 +165,37 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       localStorage.setItem("meditrace_cho_phep_ngoai", choPhepNgoai ? "1" : "0");
     } catch {}
   }, [choPhepNgoai]);
+
+  /**
+   * Bật/tắt mô hình ngoài. Tắt: chỉ tắt ở trình duyệt này. Bật: hỏi máy chủ trước — chưa có khoá thì báo;
+   * máy chủ đang tắt thì quản trị xác nhận để bật (ghi nhật ký), bác sĩ thường được nhắc nhờ quản trị.
+   * Nhờ vậy không còn cảnh công tắc sáng mà mọi lệnh gửi ra đều bị máy chủ từ chối.
+   */
+  const doiChoPhepNgoai = async (bat: boolean) => {
+    if (!bat) {
+      setChoPhepNgoai(false);
+      return;
+    }
+    const kq = await kiemVaBatMoHinhNgoai(window.confirm.bind(window));
+    if (kq.duoc) {
+      setApiError(null);
+      setChoPhepNgoai(true);
+    } else {
+      setApiError(kq.lyDo);
+      setChoPhepNgoai(false);
+    }
+  };
+  useEffect(() => {
+    // Công tắc nhớ từ lần trước nhưng máy chủ đã tắt: hạ công tắc cho khớp.
+    if (!choPhepNgoai) return;
+    fetch("/api/external/status")
+      .then((r) => r.json())
+      .then((st) => {
+        if (!st?.configured || !st?.enabled) setChoPhepNgoai(false);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Ca khám đang hoạt động
   const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
@@ -1160,7 +1192,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       isRightDrawerOpen={isRightDrawerOpen}
                       onToggleRightDrawer={handleToggleRightDrawer}
                       choPhepNgoai={choPhepNgoai}
-                      onToggleChoPhepNgoai={setChoPhepNgoai}
+                      onToggleChoPhepNgoai={doiChoPhepNgoai}
                     />
 
                     {/* Thanh các Tab tài liệu */}
@@ -1510,7 +1542,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       onSubmitPrompt={handleBottomPrompt}
                       isLoading={isCurrentSessionGenerating}
                       allowExternal={choPhepNgoai}
-                      onToggleAllowExternal={setChoPhepNgoai}
+                      onToggleAllowExternal={doiChoPhepNgoai}
                     />
                   </div>
                 </div>
@@ -1560,7 +1592,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                     caTen={currentSession.patientIdentifier}
                     coLoiThoai={!!currentSession.transcript.trim()}
                     allowExternal={choPhepNgoai}
-                    onToggleExternal={setChoPhepNgoai}
+                    onToggleExternal={doiChoPhepNgoai}
                     hoi={hoiDap}
                     onNavigate={handleSelectView}
                     onOpenCreate={() => {
@@ -1735,7 +1767,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                         <input
                           type="checkbox"
                           checked={choPhepNgoai}
-                          onChange={(event) => setChoPhepNgoai(event.target.checked)}
+                          onChange={(event) => void doiChoPhepNgoai(event.target.checked)}
                           className="accent-[#087FC1]"
                         />
                         Cho phép mô hình ngoài
@@ -1763,7 +1795,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         session={currentSession}
         note={noteMeta}
         allowExternal={choPhepNgoai}
-        onEnableExternal={() => setChoPhepNgoai(true)}
+        onEnableExternal={() => void doiChoPhepNgoai(true)}
         onCreate={taoVanBan}
       />
     </div>

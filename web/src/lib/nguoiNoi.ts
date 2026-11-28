@@ -216,6 +216,30 @@ export function goiYVaiTuDoan(
 }
 
 /**
+ * Khi máy chủ CHƯA tách được giọng (cả tệp coi như một người nói), lấp các lượt chưa có gợi ý bằng cách
+ * xen kẽ Bác sĩ ↔ phía người bệnh tính từ lượt có gợi ý gần nhất (ưu tiên lượt phía trước).
+ * Chỉ là GỢI Ý: dòng vẫn mang nhãn "Chưa rõ vai" cho tới khi bác sĩ bấm áp dụng và kiểm lại.
+ * Không có lượt nào làm mốc thì không đoán.
+ */
+export function goiYVaiXenKe<T extends { luot: number; vaiGoiY: VaiChuan | null; lyDo: string | null }>(ds: T[]): T[] {
+  const moc = ds.map((g, i) => (g.vaiGoiY ? i : -1)).filter((i) => i >= 0);
+  if (!moc.length) return ds.map((g) => ({ ...g }));
+  const phia = (v: VaiChuan) => (v === "Bác sĩ" ? 0 : 1);
+  return ds.map((g, i) => {
+    if (g.vaiGoiY) return { ...g };
+    const truoc = [...moc].reverse().find((m) => m < i);
+    const m = truoc ?? moc[0];
+    const kc = Math.abs(i - m);
+    const p = (phia(ds[m].vaiGoiY as VaiChuan) + kc) % 2;
+    return {
+      ...g,
+      vaiGoiY: (p === 0 ? "Bác sĩ" : "Bệnh nhân") as VaiChuan,
+      lyDo: `Xen kẽ lượt nói từ lượt ${ds[m].luot} (chưa tách được giọng) — bác sĩ kiểm lại`,
+    };
+  });
+}
+
+/**
  * Áp dụng vai gợi ý cho các dòng ĐANG MANG NHÃN "Chưa rõ vai:" hoặc "Người nói N:".
  * Tuyệt đối KHÔNG ghi đè dòng đã gán "Bác sĩ:", "Bệnh nhân:", hoặc "Người nhà:".
  */

@@ -98,3 +98,37 @@ test("Boost 1: goiYVaiTuDoan, goiYVaiTuVanBanLuot và apDungVaiGoiY không bao g
     ].join("\n")
   );
 });
+
+import { goiYVaiXenKe } from "./nguoiNoi";
+
+test("xen_ke_tu_moc_bac_si_khi_chua_tach_giong", () => {
+  const ds = [
+    { luot: 1, vaiGoiY: "Bác sĩ" as const, lyDo: "chào bác" },
+    { luot: 2, vaiGoiY: null, lyDo: null },
+    { luot: 3, vaiGoiY: null, lyDo: null },
+    { luot: 4, vaiGoiY: null, lyDo: null },
+  ];
+  const kq = goiYVaiXenKe(ds);
+  assert.deepEqual(kq.map((g) => g.vaiGoiY), ["Bác sĩ", "Bệnh nhân", "Bác sĩ", "Bệnh nhân"]);
+  assert.equal(kq[0].lyDo, "chào bác");
+  assert.match(kq[1].lyDo || "", /xen kẽ/i);
+});
+
+test("xen_ke_lui_ve_truoc_moc_dau_tien_va_giu_goi_y_co_san", () => {
+  const ds = [
+    { luot: 1, vaiGoiY: null, lyDo: null },
+    { luot: 2, vaiGoiY: "Bệnh nhân" as const, lyDo: "tôi bị ho" },
+    { luot: 3, vaiGoiY: "Người nhà" as const, lyDo: "mẹ tôi" },
+    { luot: 4, vaiGoiY: null, lyDo: null },
+  ];
+  const kq = goiYVaiXenKe(ds);
+  assert.deepEqual(kq.map((g) => g.vaiGoiY), ["Bác sĩ", "Bệnh nhân", "Người nhà", "Bác sĩ"]);
+});
+
+test("khong_co_moc_nao_thi_khong_doan", () => {
+  const ds = [
+    { luot: 1, vaiGoiY: null, lyDo: null },
+    { luot: 2, vaiGoiY: null, lyDo: null },
+  ];
+  assert.deepEqual(goiYVaiXenKe(ds).map((g) => g.vaiGoiY), [null, null]);
+});
