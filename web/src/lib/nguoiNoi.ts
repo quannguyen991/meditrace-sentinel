@@ -221,7 +221,29 @@ export function goiYVaiTuDoan(
  * Chỉ là GỢI Ý: dòng vẫn mang nhãn "Chưa rõ vai" cho tới khi bác sĩ bấm áp dụng và kiểm lại.
  * Không có lượt nào làm mốc thì không đoán.
  */
-export function goiYVaiXenKe<T extends { luot: number; vaiGoiY: VaiChuan | null; lyDo: string | null }>(ds: T[]): T[] {
+export function goiYVaiXenKe<T extends { luot: number; vaiGoiY: VaiChuan | null; lyDo: string | null }>(
+  ds0: T[],
+  cau?: string[],
+): T[] {
+  // Mốc theo nội dung để bắt lại nhịp khi máy chép cắt/gộp lượt.
+  const ds = ds0.map((g, i) => {
+    if (!cau?.[i]) return g;
+    const c = cau[i].trim().toLowerCase().replace(/[.?!…,\s]+$/u, "");
+    const NB = (lyDo: string) => ({ ...g, vaiGoiY: "Bệnh nhân" as VaiChuan, lyDo });
+    const LaBS = (lyDo: string) => ({ ...g, vaiGoiY: "Bác sĩ" as VaiChuan, lyDo });
+    // Mốc mạnh (ghi đè gợi ý cũ vì máy chưa tách giọng): mở đầu "dạ/vâng", hoặc gọi "bác sĩ".
+    if (/^(dạ|vâng)(\s|$)/u.test(c)) return NB("Mở đầu bằng “dạ/vâng” — bác sĩ kiểm lại");
+    if (/bác sĩ ơi|(^|\s)bác sĩ$/u.test(c)) return NB("Gọi “bác sĩ” — bác sĩ kiểm lại");
+    if (/(^|\s)(anh|chị|chú|cô|em|cháu|bà|ông) ơi/u.test(c)) return LaBS("Gọi người bệnh — bác sĩ kiểm lại");
+    if (/nằm (sấp|ngửa|xuống)|cho (tôi|cháu|em) (khám|nghe|xem|đo)|để (tôi|cháu|em) (khám|nghe|đo)|hít sâu|há miệng/u.test(c))
+      return LaBS("Lời khám bệnh — bác sĩ kiểm lại");
+    if (g.vaiGoiY) return g;
+    // Mốc yếu: chỉ lấp lượt chưa có gợi ý.
+    if (/^(tôi|em|cháu|con)\s+(cũng\s+)?(bị|hổng|không|chưa|đau|uống|thấy|có)(\s|$)/u.test(c))
+      return NB("Kể về bản thân — bác sĩ kiểm lại");
+    if (/(^|\s)(không|chưa|gì|sao|nào|hông|hả|vậy|chứ)$/u.test(c)) return LaBS("Câu hỏi — bác sĩ kiểm lại");
+    return g;
+  });
   const moc = ds.map((g, i) => (g.vaiGoiY ? i : -1)).filter((i) => i >= 0);
   if (!moc.length) return ds.map((g) => ({ ...g }));
   const phia = (v: VaiChuan) => (v === "Bác sĩ" ? 0 : 1);

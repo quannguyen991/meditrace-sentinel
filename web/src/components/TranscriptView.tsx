@@ -522,7 +522,10 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
       const offsetLuot = transcript ? transcript.split("\n").filter((l) => l.trim()).length : 0;
       const dsGoiY0 = goiYVaiTuDoan(doan);
       // Chưa tách được giọng: gợi ý xen kẽ từ lượt có mốc để bác sĩ bấm áp dụng một lần rồi kiểm lại.
-      const dsGoiY = data.diarization?.tach_that ? dsGoiY0 : goiYVaiXenKe(dsGoiY0);
+      const dsGoiY = data.diarization?.tach_that ? dsGoiY0 : goiYVaiXenKe(
+            dsGoiY0,
+            doan.map((d: any) => String(d.text_original || "")).filter((t: string) => t.trim()),
+          );
       setSuggestedRolesByTurn((prev) => {
         const tiep = { ...prev };
         for (const g of dsGoiY) {
