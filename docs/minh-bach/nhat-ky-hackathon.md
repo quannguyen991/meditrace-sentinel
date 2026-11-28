@@ -12,3 +12,4 @@ Mỗi dòng: giờ · task · commit · công cụ AI · đội đã sửa/bác 
 | 08:10 | 5 Đường ra bên thứ ba mặc định tắt + cảnh báo bản demo | (commit này) | claude_code | Test cũ của dự án bắt được lỗi trong luật mới (env bat đè quản trị bấm tắt) — đội đổi thứ tự ưu tiên để quản trị tắt luôn thắng |
 | 08:11 | 2–3 Bộ ca rò rỉ dùng chung, đo và vá hai bộ che | (commit này) | claude_code (agent) | Agent vá trên dev, đo test đúng 2 lần; test chưa đạt 0,95 (TS 0,940, Python 0,938) — đội giữ nguyên số thật, không vá thêm theo test để tránh học tủ |
 | 08:14 | 6 Sơ đồ dữ liệu sinh từ mã | (commit này) | claude_code | Khi đọc lại mã để điền nơi lưu, đội phát hiện trình duyệt cũng giữ bản sao danh sách ca khám có tên bệnh nhân (localStorage) — ghi thẳng vào bảng thay vì bỏ qua |
+| 08:15 | 7 Quy trình phê duyệt | (commit này) | claude_code | Đội tự kiểm thêm trường hợp đổi quyết định duyệt sau ký (giữ → bỏ) cũng phải khóa lại; ghi rõ 2 giới hạn không chặn được (bôi đen Ctrl+C, Ctrl+P) |
