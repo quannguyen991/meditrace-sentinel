@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chiaCanhBaoCa, chiaCanhBaoMenhDe, nhanXemThem, type CanhBaoToiThieu } from "./nganSachCanhBao";
+import { chiaCanhBaoCa, chiaCanhBaoMenhDe, nhanXemThem, tachTheVaGhiChu, type CanhBaoToiThieu } from "./nganSachCanhBao";
 
 const cb = (code: string, severity: CanhBaoToiThieu["severity"] = "trung", kind: CanhBaoToiThieu["kind"] = "nghi_rui_ro") =>
   ({ code, severity, kind });
@@ -35,6 +35,31 @@ test("thiếu trường ngân sách: giữ cách cũ (chính + dấu hiệu khá
   assert.deepEqual(r.hienThem, []);
   assert.deepEqual(r.gap.map((c) => c.code), ["NEGATION_FLIP"]);
   assert.equal(chiaCanhBaoMenhDe({}).chinh, null);
+});
+
+test("cảnh báo đầu là can_xem (thành ghi chú): mọi cảnh báo hiện khác vẫn được dựng", () => {
+  const chia = chiaCanhBaoMenhDe({
+    warningsShown: [cb("APPROXIMATION_LOST", "thap", "can_xem"), cb("SUBJECT_AMBIGUOUS"), cb("NEGATION_FLIP", "cao", "loi_phat_hien")],
+    warningsFolded: [cb("SPEAKER_SUBJECT_MISMATCH", "thap")],
+  });
+  const t = tachTheVaGhiChu(chia, false);
+  assert.equal(t.the, null);
+  assert.equal(t.ghiChu?.code, "APPROXIMATION_LOST");
+  assert.deepEqual(t.dongHien.map((c) => c.code), ["SUBJECT_AMBIGUOUS", "NEGATION_FLIP"]);
+  // tổng số hiện trên giao diện = đúng phần hien của ngân sách
+  assert.equal((t.the ? 1 : 0) + (t.ghiChu ? 1 : 0) + t.dongHien.length, 3);
+  // dòng đang bị chặn (canh): cảnh báo can_xem vẫn là thẻ, không thành ghi chú
+  const t2 = tachTheVaGhiChu(chia, true);
+  assert.equal(t2.the?.code, "APPROXIMATION_LOST");
+  assert.equal(t2.ghiChu, null);
+  // bỏ qua cảnh báo: không dựng gì
+  assert.deepEqual(tachTheVaGhiChu(chia, false, true), { the: null, ghiChu: null, dongHien: [] });
+});
+
+test("cảnh báo đầu là thẻ: các cảnh báo hiện khác nằm trong dongHien", () => {
+  const t = tachTheVaGhiChu(chiaCanhBaoMenhDe({ warningsShown: [cb("WRONG_SUBJECT", "cao"), cb("SUBJECT_AMBIGUOUS")] }), false);
+  assert.equal(t.the?.code, "WRONG_SUBJECT");
+  assert.deepEqual(t.dongHien.map((c) => c.code), ["SUBJECT_AMBIGUOUS"]);
 });
 
 test("cảnh báo toàn ca: có ngân sách thì chia, không có thì hiện hết", () => {

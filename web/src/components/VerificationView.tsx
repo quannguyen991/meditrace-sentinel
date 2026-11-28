@@ -17,7 +17,7 @@ import {
 import type { TranscriptSegment } from "../types";
 import { khoangPhatLaiLuot } from "../lib/asrHighlight";
 import { canXacNhan, tachLuot } from "../lib/compileEffectiveNote";
-import { chiaCanhBaoCa, chiaCanhBaoMenhDe, nhanXemThem } from "../lib/nganSachCanhBao";
+import { chiaCanhBaoCa, chiaCanhBaoMenhDe, nhanXemThem, tachTheVaGhiChu } from "../lib/nganSachCanhBao";
 import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
 
 export { canXacNhan, tachLuot };
@@ -702,10 +702,9 @@ export const VerificationView: React.FC<Props> = ({
                 // phần gập nằm sau "Xem thêm N gợi ý"; không có thì như cũ (warning + otherWarnings).
                 const chia = chiaCanhBaoMenhDe(p);
                 const khacCu = chia.coNganSach ? [] : p.otherWarnings || [];
-                const cbGoc = boQua[p.id] ? null : chia.chinh;
                 // Loai "luu y" (chat luong, ghi lap): chi mot dong ghi chu xam, khong to mau the.
-                const ghiChu = cbGoc && cbGoc.kind === "can_xem" && !canh ? cbGoc : null;
-                const cb = ghiChu ? null : cbGoc;
+                // Cac canh bao hien con lai (dongHien) luon duoc dung, du canh bao chinh la the hay ghi chu.
+                const { the: cb, ghiChu, dongHien } = tachTheVaGhiChu(chia, canh, !!boQua[p.id]);
                 const coLuuY = !canh && !!cb;
                 const IconCb = (cb && ICON_NHOM[cb.group]) || AlertTriangle;
                 return (
@@ -848,13 +847,6 @@ export const VerificationView: React.FC<Props> = ({
                                 {(cb.tagTitles || []).map((t, i) => <li key={`t${i}`} className="text-[#64748B]">cùng nguyên nhân: {t}</li>)}
                               </ul>
                             )}
-                            {chia.hienThem.length > 0 && (
-                              <ul className="mt-2 space-y-1 text-[13px] text-[#3F2A1D]">
-                                {chia.hienThem.map((o, i) => (
-                                  <li key={`h${i}`}><strong>{o.title}</strong> — {o.reason}</li>
-                                ))}
-                              </ul>
-                            )}
                             <div className="flex flex-wrap gap-1.5 mt-2.5">
                               {cb.turns.length > 0 && (
                                 <button onClick={() => xemLuot(cb.turns[0])} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] font-semibold text-[#0C2340] hover:border-[#0284C7]">
@@ -874,6 +866,13 @@ export const VerificationView: React.FC<Props> = ({
                           </div>
                         </div>
                       </div>
+                    )}
+                    {dongHien.length > 0 && (
+                      <ul className="mt-2 space-y-1 rounded-xl border border-[#F2DFA8] bg-[#FFFBEB] px-3 py-2 text-[13px] text-[#3F2A1D]">
+                        {dongHien.map((o, i) => (
+                          <li key={`h${i}`}><strong>{o.title}</strong> — {o.reason}</li>
+                        ))}
+                      </ul>
                     )}
                     {chia.coNganSach && chia.gap.length > 0 && !boQua[p.id] && (
                       <div className="mt-2">

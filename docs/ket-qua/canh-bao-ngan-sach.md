@@ -128,5 +128,6 @@ Cả 89 lần `SPEAKER_SUBJECT_MISMATCH` đổi trạng thái đều rơi vào d
 
 - Mọi số đo là trên lỗi cấy nhân tạo. Bản sạch là đáp án, nên một cảnh báo hợp lý vẫn bị tính là báo nhầm.
 - Bảng độ chính xác dùng để xếp thứ tự lấy từ cùng tập phát triển đã nhìn (24/09).
-- Chưa kiểm trên trình duyệt. Giao diện chỉ nhận trường mới nếu `App.tsx` chuyển nguyên phản hồi BFF vào `NoteMeta`.
-  Mình không đọc hay sửa `App.tsx` để xác nhận điều này.
+- `App.tsx` (khoảng dòng 270) chuyển nguyên phản hồi BFF vào `NoteMeta`, nên giao diện nhận được các trường mới. Số
+  cảnh báo trên một dòng bằng đúng phần `hien` của ngân sách, kể cả khi cảnh báo đầu là ghi chú `can_xem`
+  (`tachTheVaGhiChu`). Chưa kiểm bằng mắt trên trình duyệt.

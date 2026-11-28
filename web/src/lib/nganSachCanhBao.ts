@@ -40,6 +40,23 @@ export function chiaCanhBaoMenhDe<C extends CanhBaoToiThieu>(p: MenhDeCoCanhBao<
   return { coNganSach: true, chinh: hien[0] || null, hienThem: hien.slice(1), gap: p.warningsFolded || [] };
 }
 
+/**
+ * Dựng một dòng: cảnh báo chính thành THẺ, hoặc thành GHI CHÚ xám khi nó là `can_xem` mà dòng không
+ * bị chặn (`canh` = false). Các cảnh báo hiện còn lại (`dongHien`) luôn được dựng, dù cảnh báo
+ * chính là thẻ hay ghi chú — để số cảnh báo trên giao diện đúng bằng phần `hien` của ngân sách.
+ * `boQua` = bác sĩ đã bấm "Bỏ qua cảnh báo": không dựng gì.
+ */
+export function tachTheVaGhiChu<C extends CanhBaoToiThieu>(
+  chia: ChiaCanhBao<C>,
+  canh: boolean,
+  boQua = false,
+): { the: C | null; ghiChu: C | null; dongHien: C[] } {
+  if (boQua || (!chia.chinh && chia.hienThem.length === 0)) return { the: null, ghiChu: null, dongHien: [] };
+  const goc = chia.chinh;
+  const ghiChu = goc && goc.kind === "can_xem" && !canh ? goc : null;
+  return { the: ghiChu ? null : goc, ghiChu, dongHien: chia.hienThem };
+}
+
 /** Cảnh báo toàn ca (bỏ sót). Cách cũ: hiện hết `caseWarnings`, không gập. */
 export function chiaCanhBaoCa<C>(note: {
   caseWarnings?: C[];
