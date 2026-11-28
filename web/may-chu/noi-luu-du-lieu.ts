@@ -66,7 +66,7 @@ export const NOI_LUU_DU_LIEU: ReadonlyArray<NoiLuu> = [
     noiDung: "Tệp ghi âm gốc và bản 16 kHz, lời thoại chép, nhật ký sự kiện",
     coDinhDanh: "co",
     aiDoc: "Dịch vụ Python tại chỗ",
-    giu: "Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), và phiên chưa duyệt bị bỏ dở bị xóa sau 7 ngày (MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY), đều ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên (tối đa 1 lần/ngày), khi api.py khởi động, và khi dich_vu_http.py khởi tạo AudioPipeline",
+    giu: "Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), phiên chưa duyệt đã có lời thoại (chờ bác sĩ nghe kiểm) giữ 30 ngày (MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY), phiên bỏ dở không có lời thoại bị xóa sau 7 ngày (MEDITRACE_GIU_AM_THANH_BO_DO_NGAY), đều ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên (tối đa 1 lần/ngày), khi api.py khởi động, và khi dich_vu_http.py khởi tạo AudioPipeline",
   },
   {
     noi: "Bảng ban_ky_duyet (bản chụp hồ sơ lúc ký)",

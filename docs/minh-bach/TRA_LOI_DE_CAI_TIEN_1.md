@@ -118,7 +118,7 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 | R4 | (rà soát độc lập) Từ khóa tra cứu do mô hình đặt có thể mang tên thật ra nguồn tài liệu | như trên |
 | R5 | (rà soát độc lập) Hook commit không chạy trên macOS/Linux | như trên |
 | R6 | (gia cố vòng 2) Khóa máy chủ 6 đường xuất qua bản chụp `ban_ky_duyet` + che `procedureName` trong `nhat_ky` | `98bd5de`, `a555bdc`, `web/may-chu/routes/boost-lam-sang.ts` |
-| R7 | (gia cố vòng 2) Tự xóa âm thanh quá hạn: 30 ngày đã duyệt, 7 ngày chưa duyệt; dọn khi `dich_vu_http.py` khởi tạo `AudioPipeline` | `22c61af`, `src/audio/storage.py`, `src/he_thong/dich_vu_http.py` |
+| R7 | (gia cố vòng 2) Tự xóa âm thanh quá hạn: 30 ngày đã duyệt, 30 ngày chưa duyệt (chờ bác sĩ nghe kiểm), 7 ngày phiên bỏ dở không lời thoại (`fb6ef97`); dọn khi `dich_vu_http.py` khởi tạo `AudioPipeline` | `22c61af`, `src/audio/storage.py`, `src/he_thong/dich_vu_http.py` |
 | R8 | (gia cố vòng 2) Gỡ Google Fonts khỏi `web/index.html`, dùng font hệ thống tiếng Việt + test chặn tài nguyên ngoài | `web/index.html`, `web/src/lib/khongTaiNguonNgoai.test.ts` |
 | R9 | (gia cố vòng 2) Xóa bản sao ca khám ở `localStorage` khi đăng xuất, hết phiên `401`, hoặc đổi người dùng | `22c61af`, `web/src/lib/xoaDuLieuTrinhDuyet.ts` |
 | R10 | (rà soát độc lập lần 2, ChatGPT 6.1 Terra) Máy chủ kiểm chữ ký ca A nhưng xuất dữ liệu ca B do trình duyệt gửi; tab chưa sửa che tab đã sửa | `a555bdc` — dữ liệu xuất dựng từ bản chụp lúc ký, chỉ kiểm đúng tab đã ký |
