@@ -724,40 +724,39 @@ export const VerificationView: React.FC<Props> = ({
                       bo ? "bg-[#F8FAFC] border-[#E2E8F0]" : canh ? "bg-[#FFF5F5] border-[#F5C2C2]" : coLuuY ? "bg-[#FFFBEB] border-[#F5E1A4]" : "bg-[#F3FBF7] border-[#CDEBDD]"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="flex flex-col gap-1 flex-shrink-0">
+                    <div className="flex items-start gap-2.5">
+                      <div className="flex flex-col gap-1 flex-shrink-0 items-start">
                         {(p.evidenceTurns.length ? p.evidenceTurns : [0]).map((t) => (
-                          <span
-                            key={t}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11.5px] font-semibold whitespace-nowrap ${
-                              t === 0 ? "bg-[#FDE8E8] text-[#B4232C]" : canh ? "bg-[#FDE2E2] text-[#9B2C2C]" : "bg-[#DDF3E9] text-[#0D6B50]"
-                            }`}
-                          >
-                            <MessageSquare size={12} /> {t === 0 ? "Không dẫn lượt" : `Từ lượt ${t}`}
-                          </span>
-                        ))}
-                        {/* Nghe lại đúng đoạn ghi âm gốc làm căn cứ cho mệnh đề này */}
-                        {p.evidenceTurns
-                          .filter((t) => audioUrl && khoangPhatLaiLuot(t, segments))
-                          .map((t) => (
-                            <button
-                              key={`nghe-${t}`}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                phatDoanLuot(t);
-                              }}
-                              title={dangPhatLuot === t ? "Dừng nghe" : `Nghe lại ghi âm gốc lượt ${t}`}
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border text-[11.5px] font-semibold whitespace-nowrap ${
-                                dangPhatLuot === t
-                                  ? "bg-[#0284C7] text-white border-[#0284C7]"
-                                  : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                          <div key={t} className="inline-flex items-center gap-1">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold whitespace-nowrap ${
+                                t === 0 ? "bg-[#FDE8E8] text-[#B4232C]" : canh ? "bg-[#FDE2E2] text-[#9B2C2C]" : "bg-[#DDF3E9] text-[#0D6B50]"
                               }`}
                             >
-                              {dangPhatLuot === t ? <Square size={11} /> : <Play size={11} />}
-                              {dangPhatLuot === t ? "Dừng" : p.evidenceTurns.length > 1 ? `Nghe lượt ${t}` : "Nghe lại"}
-                            </button>
-                          ))}
+                              <MessageSquare size={11} /> {t === 0 ? "Không dẫn lượt" : `Lượt ${t}`}
+                            </span>
+                            {/* Nghe lại đúng đoạn ghi âm gốc làm căn cứ cho mệnh đề này */}
+                            {t > 0 && audioUrl && khoangPhatLaiLuot(t, segments) && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  phatDoanLuot(t);
+                                }}
+                                title={dangPhatLuot === t ? "Dừng nghe" : `Nghe lại ghi âm gốc lượt ${t}`}
+                                aria-label={dangPhatLuot === t ? "Dừng nghe" : `Nghe lại ghi âm gốc lượt ${t}`}
+                                className={`h-6 px-1.5 inline-flex items-center justify-center gap-1 text-[11px] font-semibold whitespace-nowrap rounded-lg border ${
+                                  dangPhatLuot === t
+                                    ? "bg-[#0284C7] text-white border-[#0284C7]"
+                                    : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                                }`}
+                              >
+                                {dangPhatLuot === t ? <Square size={10} /> : <Play size={10} />}
+                                {dangPhatLuot === t ? "Dừng" : "Nghe lại"}
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
                       <div className="flex-1 min-w-0">
                         {suaId === p.id ? (
@@ -775,128 +774,99 @@ export const VerificationView: React.FC<Props> = ({
                             autoFocus
                           />
                         ) : (
-                          <p className={`text-[14px] font-semibold text-[#0C2340] leading-snug ${bo ? "line-through text-[#94A3B8]" : ""}`}>{chu}</p>
+                          <p title={`#${p.id}`} className={`text-[14px] font-semibold text-[#0C2340] leading-snug ${bo ? "line-through text-[#94A3B8]" : ""}`}>{chu}</p>
                         )}
                         {banSua[p.id] && <p className="text-[11px] text-[#A16207] mt-0.5">Máy viết: “{p.text}”</p>}
-                        <div className="flex flex-wrap gap-1.5 mt-2 text-[11px]">
-                          <span className="px-2 py-0.5 rounded-lg bg-[#E0EDFF] text-[#1E4E9C]">nói về: {p.subject || "chưa rõ"}</span>
-                          {p.negated && <span className="px-2 py-0.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold">phủ định</span>}
-                          {p.certainty && p.certainty !== "chắc chắn" && <span className="px-2 py-0.5 rounded-lg bg-[#FEF3C7] text-[#92400E]">{p.certainty}</span>}
-                          {p.situation && p.situation !== "thực tế" && <span className="px-2 py-0.5 rounded-lg bg-[#FEF3C7] text-[#92400E]">{p.situation}</span>}
-                          {p.time && <span className="px-2 py-0.5 rounded-lg bg-[#E0F2FE] text-[#0369A1]">{p.time}</span>}
-                          {p.drug && <span className="px-2 py-0.5 rounded-lg bg-[#EDE9FE] text-[#5B21B6]">{p.drug}</span>}
-                          <span className="px-2 py-0.5 rounded-lg bg-[#F1F5F9] text-[#475569]">{p.section}</span>
+                        {/* Chỉ hiện nhãn có thông tin: bỏ "nói về: bệnh nhân" (mặc định) và mục hồ sơ ở chế độ theo mục */}
+                        <div className="flex flex-wrap gap-1 mt-1.5 text-[11px]">
+                          {p.subject && p.subject !== "bệnh nhân" && <span className="px-1.5 py-0.5 rounded-md bg-[#E0EDFF] text-[#1E4E9C]">nói về: {p.subject}</span>}
+                          {p.negated && <span className="px-1.5 py-0.5 rounded-md bg-[#FEE2E2] text-[#991B1B] font-bold">phủ định</span>}
+                          {p.certainty && p.certainty !== "chắc chắn" && <span className="px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E]">{p.certainty}</span>}
+                          {p.situation && p.situation !== "thực tế" && <span className="px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E]">{p.situation}</span>}
+                          {p.time && <span className="px-1.5 py-0.5 rounded-md bg-[#E0F2FE] text-[#0369A1]">{p.time}</span>}
+                          {p.drug && <span className="px-1.5 py-0.5 rounded-md bg-[#EDE9FE] text-[#5B21B6]">{p.drug}</span>}
+                          {xep === "luot" && <span className="px-1.5 py-0.5 rounded-md bg-[#F1F5F9] text-[#64748B]">{p.section}</span>}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-semibold ${
-                            bo ? "bg-[#F1F5F9] text-[#64748B]" : q === "giu" ? "bg-[#D1F2E3] text-[#0D6B50]" : q === "sua" ? "bg-[#FEF3C7] text-[#92400E]" : canh ? "bg-[#FDE2E2] text-[#B4232C]" : coLuuY ? "bg-[#FEF3C7] text-[#92400E]" : "bg-[#DDF3E9] text-[#0D6B50]"
-                          }`}
-                        >
-                          {bo ? <><Trash2 size={13} /> Đã bỏ</>
-                            : q === "giu" ? <><CheckCircle2 size={13} /> Đã giữ</>
-                              : q === "sua" ? <><Pencil size={12} /> Đã sửa</>
-                                : canh ? <><IconCb size={13} /> Cần bác sĩ xác nhận</>
-                                  : coLuuY ? <><Info size={13} /> Có lưu ý</>
-                                    : <><CheckCircle2 size={13} /> Máy không cảnh báo</>}
-                        </span>
-                        <span className="text-[10px] font-mono text-[#94A3B8]">#{p.id}</span>
-                      </div>
-                    </div>
-
-                    {cb && (
-                      <div
-                        className={`mt-3 rounded-xl border px-3 py-2.5 ${
-                          canh ? "bg-[#FDECEC] border-[#F7CFCF]" : "bg-[#FEF6DD] border-[#F2DFA8]"
+                      <span
+                        className={`flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${
+                          bo ? "bg-[#F1F5F9] text-[#64748B]" : q === "giu" ? "bg-[#D1F2E3] text-[#0D6B50]" : q === "sua" ? "bg-[#FEF3C7] text-[#92400E]" : canh ? "bg-[#FDE2E2] text-[#B4232C]" : coLuuY ? "bg-[#FEF3C7] text-[#92400E]" : "bg-[#DDF3E9] text-[#0D6B50]"
                         }`}
                       >
-                        <div className="flex items-start gap-2.5">
-                          <IconCb size={18} className={`flex-shrink-0 mt-0.5 ${canh ? "text-[#C53030]" : "text-[#B45309]"}`} />
-                          <div className="flex-1 min-w-0">
-                            <div className={`text-[13px] font-bold ${canh ? "text-[#B4232C]" : "text-[#92400E]"}`}>
-                              {cb.title}
-                              {cb.reliability !== "on_dinh" && (
-                                <span className="ml-1.5 px-1.5 py-0.5 rounded bg-white/70 text-[10px] font-semibold text-[#64748B] align-middle">thử nghiệm</span>
+                        {bo ? <><Trash2 size={12} /> Đã bỏ</>
+                          : q === "giu" ? <><CheckCircle2 size={12} /> Đã giữ</>
+                            : q === "sua" ? <><Pencil size={11} /> Đã sửa</>
+                              : canh ? <><IconCb size={12} /> Cần xác nhận</>
+                                : coLuuY ? <><Info size={12} /> Có lưu ý</>
+                                  : <><CheckCircle2 size={12} /> Không cảnh báo</>}
+                      </span>
+                    </div>
+
+                    {/* Mọi cảnh báo, lưu ý, ghi chú gộp vào MỘT dòng tóm tắt; bấm mới mở chi tiết */}
+                    {(() => {
+                      const khac = [
+                        ...khacCu,
+                        ...dongHien,
+                        ...(chia.coNganSach && !boQua[p.id] ? chia.gap : []),
+                      ];
+                      const them = [
+                        ...(cb?.tagTitles || []).map((t) => `cùng nguyên nhân: ${t}`),
+                        ...(ghiChu ? [`${ghiChu.title} — ${ghiChu.reason}`] : []),
+                      ];
+                      const dem = (cb ? 1 : 0) + khac.length + them.length;
+                      if (dem === 0) return null;
+                      const tieuDe = cb?.title || khac[0]?.title || ghiChu?.title || "";
+                      const mo = !!moKhac[p.id];
+                      return (
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            onClick={() => setMoKhac((m2) => ({ ...m2, [p.id]: !m2[p.id] }))}
+                            aria-expanded={mo}
+                            className={`w-full flex items-center gap-2 text-left rounded-xl px-2.5 py-1.5 text-[12.5px] ${canh ? "bg-[#FDECEC] text-[#B4232C]" : "bg-[#FEF6DD] text-[#92400E]"}`}
+                          >
+                            <IconCb size={14} className="flex-shrink-0" />
+                            <span className="font-semibold truncate">{tieuDe}</span>
+                            {dem > 1 && <span className="text-[11px] opacity-80 whitespace-nowrap">+{dem - 1} lưu ý</span>}
+                            <span className="ml-auto flex-shrink-0">{mo ? <ChevronUp size={13} /> : <ChevronDown size={13} />}</span>
+                          </button>
+                          {mo && (
+                            <div className="mt-1.5 rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-2 space-y-1.5 text-[12px] text-[#3F2A1D] leading-snug">
+                              {cb && <p>{cb.reason}</p>}
+                              {cb && cb.quotes.length > 0 && (
+                                <p className="text-[#334155] italic border-l-2 border-[#CBD5E1] pl-2">“{cb.quotes[0]}”</p>
                               )}
-                            </div>
-                            <div className="text-[12px] text-[#3F2A1D] leading-snug mt-0.5">{cb.reason}</div>
-                            {cb.quotes.length > 0 && (
-                              <div className="mt-1.5 text-[12px] text-[#334155] italic border-l-2 border-current/30 pl-2 opacity-90">
-                                “{cb.quotes[0]}”
+                              {cb && (
+                                <p className="text-[10.5px] text-[#64748B]">
+                                  {KET_LUAN[cb.kind]} · Mức độ: {MUC_DO[cb.severity]} · {CAN_CU[cb.uncertainty]}
+                                  {cb.reliability !== "on_dinh" ? " · thử nghiệm" : ""}
+                                </p>
+                              )}
+                              {(khac.length > 0 || them.length > 0) && (
+                                <ul className="space-y-1 text-[#475569]">
+                                  {khac.map((o, i) => (
+                                    <li key={`k${i}`}><strong className="text-[#334155]">{o.title}</strong> — {o.reason}</li>
+                                  ))}
+                                  {them.map((t, i) => <li key={`t${i}`} className="text-[#64748B]">{t}</li>)}
+                                </ul>
+                              )}
+                              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                {cb && cb.turns.length > 0 && (
+                                  <button onClick={() => xemLuot(cb.turns[0])} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] font-semibold text-[#0C2340] hover:border-[#0284C7]">
+                                    <Eye size={12} /> Xem câu gốc (lượt {cb.turns.join(", ")})
+                                  </button>
+                                )}
+                                {cb && (
+                                  <button onClick={() => setBoQua((b2) => ({ ...b2, [p.id]: true }))} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] text-[#64748B] hover:border-[#94A3B8]">
+                                    <BoQua size={12} /> Bỏ qua cảnh báo
+                                  </button>
+                                )}
                               </div>
-                            )}
-                            <div className="flex flex-wrap gap-1.5 mt-2 text-[10.5px]">
-                              <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">{KET_LUAN[cb.kind]}</span>
-                              <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">Mức độ: {MUC_DO[cb.severity]}</span>
-                              <span className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#475569]">{CAN_CU[cb.uncertainty]}</span>
-                              {khacCu.length + (cb.tagTitles?.length || 0) > 0 && (
-                                <button
-                                  onClick={() => setMoKhac((m2) => ({ ...m2, [p.id]: !m2[p.id] }))}
-                                  className="px-1.5 py-0.5 rounded-md bg-white/80 text-[#0369A1] font-semibold"
-                                >
-                                  +{khacCu.length + (cb.tagTitles?.length || 0)} dấu hiệu khác
-                                </button>
-                              )}
                             </div>
-                            {moKhac[p.id] && (
-                              <ul className="mt-2 space-y-1 text-[11.5px] text-[#3F2A1D]">
-                                {khacCu.map((o, i) => (
-                                  <li key={i}><strong>{o.title}</strong> — {o.reason}</li>
-                                ))}
-                                {(cb.tagTitles || []).map((t, i) => <li key={`t${i}`} className="text-[#64748B]">cùng nguyên nhân: {t}</li>)}
-                              </ul>
-                            )}
-                            <div className="flex flex-wrap gap-1.5 mt-2.5">
-                              {cb.turns.length > 0 && (
-                                <button onClick={() => xemLuot(cb.turns[0])} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] font-semibold text-[#0C2340] hover:border-[#0284C7]">
-                                  <Eye size={12} /> Xem câu gốc (lượt {cb.turns.join(", ")})
-                                </button>
-                              )}
-                              <button onClick={() => dat(p.id, "giu")} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] font-semibold text-[#0D6B50] hover:border-[#0D9488]">
-                                <Check size={12} /> Xác nhận đúng
-                              </button>
-                              <button onClick={() => { setSuaId(p.id); setChuSua(chu); }} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] font-semibold text-[#0C2340] hover:border-[#0284C7]">
-                                <Pencil size={12} /> Sửa
-                              </button>
-                              <button onClick={() => setBoQua((b2) => ({ ...b2, [p.id]: true }))} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-[#E2E8F0] text-[11.5px] text-[#64748B] hover:border-[#94A3B8]">
-                                <BoQua size={12} /> Bỏ qua cảnh báo
-                              </button>
-                            </div>
-                          </div>
+                          )}
                         </div>
-                      </div>
-                    )}
-                    {dongHien.length > 0 && (
-                      <ul className="mt-2 space-y-1 rounded-xl border border-[#F2DFA8] bg-[#FFFBEB] px-3 py-2 text-[13px] text-[#3F2A1D]">
-                        {dongHien.map((o, i) => (
-                          <li key={`h${i}`}><strong>{o.title}</strong> — {o.reason}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {chia.coNganSach && chia.gap.length > 0 && !boQua[p.id] && (
-                      <div className="mt-2">
-                        <button
-                          onClick={() => setMoGap((m2) => ({ ...m2, [p.id]: !m2[p.id] }))}
-                          aria-expanded={!!moGap[p.id]}
-                          className="px-2 py-1 rounded-lg border border-[#E2E8F0] bg-white text-[13px] font-semibold text-[#0369A1] hover:border-[#0284C7]"
-                        >
-                          {nhanXemThem(chia.gap.length, !!moGap[p.id])}
-                        </button>
-                        {moGap[p.id] && (
-                          <ul className="mt-1.5 space-y-1 text-[13px] text-[#475569]">
-                            {chia.gap.map((o, i) => (
-                              <li key={`g${i}`}><strong className="text-[#334155]">{o.title}</strong> — {o.reason}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    )}
-                    {ghiChu && (
-                      <p className="mt-2 text-[11.5px] text-[#64748B] flex items-start gap-1.5">
-                        <Info size={12} className="mt-0.5 flex-shrink-0" /> Ghi chú: {ghiChu.title} — {ghiChu.reason}
-                      </p>
-                    )}
+                      );
+                    })()}
                     {boQua[p.id] && p.warning && (
                       <button onClick={() => setBoQua((b2) => ({ ...b2, [p.id]: false }))} className="mt-2 text-[11px] text-[#64748B] underline">
                         Đã bỏ qua cảnh báo “{p.warning.title}” — hiện lại
@@ -917,7 +887,7 @@ export const VerificationView: React.FC<Props> = ({
                       </div>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                       {suaId === p.id ? (
                         <>
                           <button
@@ -926,37 +896,37 @@ export const VerificationView: React.FC<Props> = ({
                               dat(p.id, "sua");
                               setSuaId(null);
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-[#0284C7] text-white text-xs font-semibold"
+                            className="px-3 py-1 rounded-xl bg-[#0284C7] text-white text-[12px] font-semibold"
                           >
                             Lưu sửa
                           </button>
-                          <button onClick={() => setSuaId(null)} className="px-3 py-1.5 rounded-xl border border-[#CCE3F0] bg-white text-xs">Huỷ</button>
+                          <button onClick={() => setSuaId(null)} className="px-3 py-1 rounded-xl border border-[#CCE3F0] bg-white text-[12px]">Huỷ</button>
                         </>
                       ) : (
                         <>
                           <button
                             onClick={() => dat(p.id, "giu")}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border ${q === "giu" ? "bg-[#0D9488] text-white border-[#0D9488]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#0D9488]"}`}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-semibold border ${q === "giu" ? "bg-[#0D9488] text-white border-[#0D9488]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#0D9488]"}`}
                           >
-                            <Check size={13} /> {canh ? "Đã xác nhận, giữ" : "Giữ"}
+                            <Check size={13} /> {canh ? "Xác nhận" : "Giữ"}
                           </button>
                           <button
                             onClick={() => {
                               setSuaId(p.id);
                               setChuSua(chu);
                             }}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border ${q === "sua" ? "bg-[#FEF6E0] border-[#F2DFA8] text-[#A16207]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#0284C7]"}`}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-semibold border ${q === "sua" ? "bg-[#FEF6E0] border-[#F2DFA8] text-[#A16207]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#0284C7]"}`}
                           >
-                            <Pencil size={13} /> Sửa mệnh đề
+                            <Pencil size={12} /> Sửa
                           </button>
                           <button
                             onClick={() => dat(p.id, "bo")}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border ${bo ? "bg-[#FDE8E8] border-[#F5C2C2] text-[#B4232C]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#E86A6A]"}`}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-semibold border ${bo ? "bg-[#FDE8E8] border-[#F5C2C2] text-[#B4232C]" : "bg-white border-[#CCE3F0] text-[#0C2340] hover:border-[#E86A6A]"}`}
                           >
-                            <Trash2 size={13} /> Bỏ
+                            <Trash2 size={12} /> Bỏ
                           </button>
                           {q !== "cho" && (
-                            <button onClick={() => dat(p.id, "cho")} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-[#64748B]">
+                            <button onClick={() => dat(p.id, "cho")} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11.5px] text-[#64748B]">
                               <Undo2 size={12} /> bỏ đánh dấu
                             </button>
                           )}
