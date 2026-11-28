@@ -32,6 +32,7 @@ import { taoDaiTomTatTruocKham } from "./lib/trichNhiemVuVaTomTat";
 import { useSessionsStore } from "./hooks/useSessionsStore";
 import { kiemVaBatMoHinhNgoai } from "./lib/moHinhNgoai";
 import { docJsonHoacNull } from "./lib/docJson";
+import { gopTabBanNhap, TEN_TAB_BAN_NHAP } from "./lib/gopTabBanNhap";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -659,7 +660,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       isClosable: true,
     };
     capNhatCaTheoId(targetId, (ca) => ({
-      tabs: [...ca.tabs, newTab],
+      tabs: gopTabBanNhap(ca.tabs, newTab),
       activeTabId: newTabId,
     }));
   };
@@ -690,12 +691,10 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         transcript: meta.transcript || "",
         duyet: undefined,
         signOff: undefined,
-        tabs: [
-          ...phien.tabs
-            .filter((t) => t.title !== "Bản nháp hồ sơ")
-            .map((t) => (t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t)),
-          { id: tabId, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true },
-        ],
+        tabs: gopTabBanNhap(
+          phien.tabs.map((t) => (t.type === "transcript" ? { ...t, content: meta.transcript || "" } : t)),
+          { id: tabId, title: TEN_TAB_BAN_NHAP, type: "custom", content: meta.content, isClosable: true },
+        ),
         activeTabId: tabId,
       }));
     } catch (err: any) {
@@ -746,10 +745,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       if (!meta) return;
       const id = `tab-doc-${Date.now()}`;
       capNhatCaTheoId(targetId, (ca) => ({
-        tabs: [
-          ...ca.tabs,
-          { id, title: "Bản nháp hồ sơ", type: "custom", content: meta.content, isClosable: true },
-        ],
+        tabs: gopTabBanNhap(ca.tabs, { id, title: TEN_TAB_BAN_NHAP, type: "custom", content: meta.content, isClosable: true }),
         activeTabId: id,
       }));
       return;
