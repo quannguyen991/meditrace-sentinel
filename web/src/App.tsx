@@ -34,6 +34,7 @@ import { kiemVaBatMoHinhNgoai } from "./lib/moHinhNgoai";
 import { docJsonHoacNull } from "./lib/docJson";
 import { gopTabBanNhap, TEN_TAB_BAN_NHAP } from "./lib/gopTabBanNhap";
 import { moTaDuLieuTroLy } from "./lib/moTaDuLieuTroLy";
+import { laCauHoiNenHoiThem, locGoiYBamLoiThoai, soanCauNenHoiThem } from "./lib/cauHoiNenHoiThem";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -926,6 +927,38 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
     caTroLyRef.current = targetId;
     setCaCuaTroLy(targetId);
     try {
+      // "Nên hỏi thêm gì?" — trả lời bằng dữ liệu của CHÍNH ca đang mở, không qua tra cứu tài liệu.
+      if (mode === "tra_cuu" && laCauHoiNenHoiThem(query)) {
+        const tai = soanCauNenHoiThem({
+          cauHoiLamRo: noteMeta?.questions,
+          goiYSocrates: locGoiYBamLoiThoai(
+            (noteMeta as any)?.clinicalSafety?.tro_ly_socrates?.danh_sach_goi_y,
+            noteMeta?.transcript || transcriptSnapshot,
+          ),
+          menhDe: propsSnapshot as any,
+        });
+        let noiDung = tai.noiDung;
+        let meta = "Từ dữ liệu ca đang mở · tại chỗ, không gửi ra ngoài · bác sĩ quyết định";
+        if (choPhepNgoai && (transcriptSnapshot.trim() || propsSnapshot?.length)) {
+          const d = await deXuatCauHoi();
+          if (d?.questions?.length) {
+            noiDung +=
+              "\n\n**Mô hình đọc lời thoại của ca này đề xuất thêm**\n" +
+              d.questions
+                .map(
+                  (q: any, i: number) =>
+                    `${i + 1}. ${q.hoi}${q.luot?.length ? ` — _T${q.luot.join(", T")}_` : ""}`,
+                )
+                .join("\n");
+            meta += ` · phần cuối do mô hình ngoài ${d.model} đề xuất, chưa qua kiểm căn cứ`;
+          }
+        }
+        capNhatEvidenceChatChoCa(targetId, (prev) => [
+          ...prev,
+          { id: `asst-${Date.now()}`, role: "assistant", mode, content: noiDung, meta, timestamp: gio() },
+        ]);
+        return;
+      }
       if (mode === "tra_cuu") {
         const cauHoiGoc = query.replace(/\s*\(tra nguồn khác\)$/, "");
         setApiError(null);

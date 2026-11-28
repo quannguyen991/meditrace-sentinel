@@ -13,6 +13,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { tinhDiemAcbThamKhao } from "./BangDoiSoatThuocVaDonQuocGiaModal";
+import { locGoiYBamLoiThoai } from "../lib/cauHoiNenHoiThem";
 
 export interface ThangDiemHoatDong {
   ma: string;
@@ -27,6 +28,8 @@ interface BangDongCoLamSangThucTinhProps {
   clinicalSafety?: any;
   onOpenPolypharmacyModal?: () => void;
   onSelectSocratesChip?: (chipText: string, chuDe?: string) => void;
+  /** Lời thoại của ca đang mở, để lọc gợi ý không có căn cứ trong đó. */
+  transcript?: string;
 }
 
 const TEN_9_THANG_DIEM: Record<string, string> = {
@@ -129,6 +132,7 @@ export const BangDongCoLamSangThucTinh: React.FC<BangDongCoLamSangThucTinhProps>
   clinicalSafety,
   onOpenPolypharmacyModal,
   onSelectSocratesChip,
+  transcript = "",
 }) => {
   const [thuGon, setThuGon] = useState(true);
   const [moChiTietXn, setMoChiTietXn] = useState(false);
@@ -177,7 +181,11 @@ export const BangDongCoLamSangThucTinh: React.FC<BangDongCoLamSangThucTinhProps>
     [clinicalSafety?.thang_diem_nguy_co],
   );
 
-  const dsGoiYSocrates: any[] = Array.isArray(socrates?.danh_sach_goi_y) ? socrates.danh_sach_goi_y : [];
+  // Đọc lại lời thoại của ca đang mở: chỉ hiện gợi ý có căn cứ nằm trong chính lời thoại đó.
+  const dsGoiYSocrates: any[] = useMemo(
+    () => locGoiYBamLoiThoai(Array.isArray(socrates?.danh_sach_goi_y) ? socrates.danh_sach_goi_y : [], transcript),
+    [socrates, transcript],
+  );
 
   const coBatKyPhatHienNao =
     coGiaTriNguyKich ||

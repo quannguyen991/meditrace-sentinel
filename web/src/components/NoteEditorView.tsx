@@ -1740,6 +1740,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
         <BangDongCoLamSangThucTinh
           clinicalSafety={noteMeta?.clinicalSafety}
+          transcript={transcript}
           onOpenPolypharmacyModal={() => dungHoSo.duoc && setMoModalThuocTt26(true)}
           onSelectSocratesChip={(chip) => {
             const capNhat = chenGhiNhanKhamTrucTiep(
