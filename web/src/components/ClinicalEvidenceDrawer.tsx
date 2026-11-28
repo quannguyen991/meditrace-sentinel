@@ -282,17 +282,15 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                 {deXuat.questions.map((q, i) => (
                   <div
                     key={`n-${i}`}
-                    className="bg-white rounded-2xl border border-[#BAE6FD] p-3 shadow-tactile-doctor-card"
+                    className="bg-white rounded-xl border border-[#BAE6FD] px-3 py-2"
+                    title={[q.goi_y, q.vi_sao].filter(Boolean).join(" — ") || undefined}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-[#0F172A] leading-snug">{q.hoi}</h4>
-                        {q.goi_y && <p className="text-[11px] text-[#64748B] mt-0.5">{q.goi_y}</p>}
-                      </div>
+                      <h4 className="flex-1 min-w-0 text-xs font-semibold text-[#0F172A] leading-snug">{q.hoi}</h4>
                       <NutThem cau={q.hoi} />
                     </div>
-                    {(q.vi_sao || q.nhom || (q.luot && q.luot.length > 0)) && (
-                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {(q.nhom || (q.luot && q.luot.length > 0)) && (
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {q.nhom && (
                           <span
                             className={`px-2 py-0.5 rounded-md border text-[10px] font-semibold ${
@@ -305,7 +303,6 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                         {q.luot && q.luot.length > 0 && (
                           <span className="text-[10px] text-[#64748B] font-mono">lượt {q.luot.join(", ")}</span>
                         )}
-                        {q.vi_sao && <span className="text-[10.5px] text-[#475569] w-full">{q.vi_sao}</span>}
                       </div>
                     )}
                   </div>
@@ -475,7 +472,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-2 text-[11.5px] text-[#0C4A6E]">
                       <Stethoscope size={12} className="text-[#0284C7]" />
-                      Trả lời từ hội thoại của ca này · không cần tra tài liệu
+                      Từ hội thoại ca này
                     </div>
                   )}
                   {coNguon && moDs && (
@@ -625,7 +622,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
             className="text-[10px] text-[#0369A1]/80 text-center px-1 leading-snug"
             title="Nguồn: Bộ Y tế (phác đồ + kcb.vn), MSD Manual, DailyMed/FDA, StatPearls, AAFP, NICE, WHO, CDC, MedlinePlus, PubMed/PMC"
           >
-            Mô hình ngoài chỉ nhận dữ liệu đã ẩn danh (không tên, ngày, địa chỉ, trích dẫn) · chỉ để tham khảo, bác sĩ quyết định
+            Dữ liệu đã ẩn danh · bác sĩ quyết định
           </p>
         </div>
       </motion.div>

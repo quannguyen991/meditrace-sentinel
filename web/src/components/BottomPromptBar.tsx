@@ -177,10 +177,6 @@ export const BottomPromptBar: React.FC<BottomPromptBarProps> = ({
 
       </div>
 
-      {/* Medical Disclaimer */}
-      <p className="hidden @md:block text-[10px] @xl:text-[11px] text-[#0369A1]/70 mt-1 text-center truncate max-w-full px-2">
-        Vui lòng xem lại bệnh án trước khi sử dụng để đảm bảo tính chuẩn xác cho ca khám
-      </p>
     </div>
   );
 };

@@ -623,11 +623,11 @@ export const DuyetBenCanh: React.FC<Props> = ({
 
       {/* Chú giải phím tắt nhanh */}
       <div className="px-3 py-1.5 border-t border-[#E2ECF3] bg-white space-y-0.5">
-        <p className="text-[10.5px] font-mono text-[#0369A1] font-semibold">
-          J/K chọn · Enter giữ · E sửa · Backspace bỏ · Space nghe gốc
-        </p>
-        <p className="hidden @4xl:block text-[10px] text-[#64748B] leading-snug">
-          Bấm mệnh đề để thấy câu đó trong bản nháp; bấm câu trong bản nháp để tìm mệnh đề. Đỏ: cần xác nhận · vàng: có lưu ý · xanh: không cảnh báo.
+        <p
+          className="text-[10.5px] font-mono text-[#0369A1] font-semibold"
+          title="Bấm mệnh đề để thấy câu đó trong bản nháp; bấm câu trong bản nháp để tìm mệnh đề. Đỏ: cần xác nhận · vàng: có lưu ý · xanh: không cảnh báo."
+        >
+          J/K chọn · Enter giữ · E sửa · ⌫ bỏ · Space nghe
         </p>
       </div>
     </aside>

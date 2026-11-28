@@ -1310,17 +1310,25 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                   {noteMeta && (
                     <div className="bg-[#E6F4F1] border-b border-[#BCE3DB] px-3 @md:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-[#0D5F57] no-print">
                       <span>
-                        Bản nháp có <strong>{noteMeta.propositions.length}</strong> mệnh đề
+                        <strong>{noteMeta.propositions.length}</strong> mệnh đề
                         {noteMeta.needsConfirmCount > 0 && (
                           <>
-                            , trong đó <strong>{noteMeta.needsConfirmCount}</strong> máy đưa sang mục cần bác sĩ xác nhận
+                            {" · "}
+                            <strong>{noteMeta.needsConfirmCount}</strong> cần xác nhận
                           </>
                         )}
-                        .
-                        {noteMeta.source === "chay_truoc" && " Đây là bản ghi đã chạy từ trước."}
-                        {noteMeta.source === "bo_dem" && " Khâu trích lấy từ bộ đệm đã chạy trước."}
-                        {noteMeta.source !== "chay_truoc" && noteMeta.source !== "bo_dem" && " Qwen3-4B vừa chạy tại chỗ."}
-                        <span className="ml-1 font-semibold">Chưa có bác sĩ duyệt.</span>
+                        <span
+                          className="ml-1 font-semibold"
+                          title={
+                            noteMeta.source === "chay_truoc"
+                              ? "Bản ghi đã chạy từ trước"
+                              : noteMeta.source === "bo_dem"
+                              ? "Khâu trích lấy từ bộ đệm đã chạy trước"
+                              : "Qwen3-4B vừa chạy tại chỗ"
+                          }
+                        >
+                          · chưa duyệt
+                        </span>
                       </span>
                       <div className="flex flex-wrap items-center gap-2 ml-auto">
                         {choPhepNgoai && (

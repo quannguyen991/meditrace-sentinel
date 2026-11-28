@@ -10,11 +10,11 @@ export function moTaDuLieuTroLy(t: {
   coThai?: boolean;
 }): { coDuLieu: boolean; chu: string } {
   if (!t.coBanNhap || t.soMenhDe === 0) {
-    return { coDuLieu: false, chu: "Chưa có bản nháp — trợ lý chưa đọc được dữ liệu ca này. Tạo bản nháp trước." };
+    return { coDuLieu: false, chu: "Chưa có bản nháp — tạo bản nháp trước." };
   }
-  const phan = [`${t.soMenhDe} mệnh đề của ca`];
+  const phan = [`${t.soMenhDe} mệnh đề`];
   if (typeof t.tuoi === "number") phan.push(`${t.tuoi} tuổi`);
   if (t.gioi) phan.push(t.gioi);
   if (t.coThai) phan.push("có thai");
-  return { coDuLieu: true, chu: `Đang dùng: ${phan.join(" · ")} (không gửi tên, ngày, địa chỉ)` };
+  return { coDuLieu: true, chu: `Đang dùng: ${phan.join(" · ")}` };
 }
