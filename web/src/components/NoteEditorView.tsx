@@ -1450,8 +1450,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Boost 5: Nút Tiền kiểm BHYT & ICD-10 (truyền đầy đủ thong_tin_benh_nhan + mệnh đề đã sửa/lọc) */}
           <button
             type="button"
-            disabled={dangKiemBhyt}
+            disabled={dangKiemBhyt || !dungHoSo.duoc}
             onClick={async () => {
+              if (!dungHoSo.duoc) return;
               setMoModalBhyt(true);
               setDangKiemBhyt(true);
               try {
@@ -1475,8 +1476,8 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                 setDangKiemBhyt(false);
               }
             }}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#7A4B00] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Tiền kiểm mã ICD-10 (4 ký tự), Biện luận CLS XML3/4 ↔ XML5 & Xuất gói XML1–XML5 QĐ 130/4750"
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#F5E6B8] bg-[#FEF9E7] hover:bg-[#FEF3C7] text-[#7A4B00] rounded-xl font-semibold shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Tiền kiểm mã ICD-10 (4 ký tự), Biện luận CLS XML3/4 ↔ XML5 & Xuất gói XML1–XML5 QĐ 130/4750"}
           >
             <ShieldAlert size={12} className="text-[#B45309]" />
             <span className="text-[11px] hidden lg:inline">{dangKiemBhyt ? "Đang kiểm..." : "BHYT / ICD-10"}</span>
@@ -1485,9 +1486,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Boost 6: Nút Đối soát Đa thuốc & Đơn thuốc Quốc gia TT 26/2025 */}
           <button
             type="button"
-            onClick={() => setMoModalThuocTt26(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Đối soát Đa thuốc ở nhà (DDI/ATC/ACB) & Lập nháp Đơn thuốc Quốc gia Thông tư 26/2025/TT-BYT"
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoModalThuocTt26(true)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Đối soát Đa thuốc ở nhà (DDI/ATC/ACB) & Lập nháp Đơn thuốc Quốc gia Thông tư 26/2025/TT-BYT"}
           >
             <Pill size={12} className="text-[#0284C7]" />
             <span className="text-[11px] hidden xl:inline">Đơn thuốc TT26 / DDI</span>
@@ -1497,9 +1499,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Boost 8: Nút Cam đoan Thủ thuật / Phẫu thuật WORM (Luật KBCB 2023) */}
           <button
             type="button"
-            onClick={() => setMoModalCamDoanPttt(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Kiểm định 6 trụ cột Điều 10 & 63 Luật KBCB 2023 & Xuất Phiếu Cam Đoan PTTT đóng dấu WORM"
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoModalCamDoanPttt(true)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Kiểm định 6 trụ cột Điều 10 & 63 Luật KBCB 2023 & Xuất Phiếu Cam Đoan PTTT đóng dấu WORM"}
           >
             <ShieldCheck size={12} className="text-[#0D9488]" />
             <span className="text-[11px] hidden xl:inline">Cam đoan PTTT</span>
@@ -1508,9 +1511,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Boost 10: Nút Đi buồng Nội trú TT 32/2023 & Sổ Bàn giao Ca trực */}
           <button
             type="button"
-            onClick={() => setMoModalDiBuong(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Tờ điều trị Nội trú Mẫu BV-01/BV2 (Thông tư 32/2023) & Sổ Bàn giao Ca trực Toàn khoa"
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoModalDiBuong(true)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Tờ điều trị Nội trú Mẫu BV-01/BV2 (Thông tư 32/2023) & Sổ Bàn giao Ca trực Toàn khoa"}
           >
             <Stethoscope size={12} className="text-[#0284C7]" />
             <span className="text-[11px] hidden xl:inline">Đi buồng / Trực</span>
@@ -1729,7 +1733,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
         <BangDongCoLamSangThucTinh
           clinicalSafety={noteMeta?.clinicalSafety}
-          onOpenPolypharmacyModal={() => setMoModalThuocTt26(true)}
+          onOpenPolypharmacyModal={() => dungHoSo.duoc && setMoModalThuocTt26(true)}
           onSelectSocratesChip={(chip) => {
             const capNhat = chenGhiNhanKhamTrucTiep(
               tabContentRef.current,
