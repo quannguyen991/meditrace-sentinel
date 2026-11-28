@@ -2,7 +2,7 @@
 
 **Dự án:** MediTrace Sentinel — Hệ thống Hồ sơ Lâm sàng Có căn cứ Mỏ neo & Phòng vệ Y tế  
 **Mã nguồn Repository:** `https://github.com/quannguyen991/meditrace-sentinel` (Nhánh: `main`)  
-**Tác giả:** Nguyễn Minh Quân (Tech Lead / Kiến trúc phần mềm) & Đội ngũ Nghiên cứu Lâm sàng  
+**Tác giả:** Nguyễn Minh Quân (Tech Lead / Kiến trúc phần mềm)  
 **Thời gian đối soát toàn diện:** 05/09/2026 – 18/10/2026  
 **Quy chuẩn:** 302 tệp mã nguồn sạch · 1.330 bài test tự động (100% PASSED) · 8 Chốt an toàn Guardrails
 

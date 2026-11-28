@@ -56,7 +56,7 @@ def build_full_documentation():
     md_parts.append("# BẢNG KHAI MÃ NGUỒN & NHẬT KÝ THỰC THI LỆNH DỰ ÁN MEDITRACE SENTINEL\n")
     md_parts.append("**Dự án:** MediTrace Sentinel — Hệ thống Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa  ")
     md_parts.append("**Mã nguồn Repository:** `https://github.com/quannguyen991/meditrace-sentinel` (Nhánh: `main`)  ")
-    md_parts.append("**Tác giả:** Nguyễn Minh Quân (Tech Lead / Kiến trúc phần mềm) & Đội ngũ Nghiên cứu Lâm sàng  ")
+    md_parts.append("**Tác giả:** Nguyễn Minh Quân (Tech Lead / Kiến trúc phần mềm)  ")
     md_parts.append("**Thời gian thực hiện & nâng cấp:** 05/09/2026 – 27/10/2026  \n")
     md_parts.append("---\n")
 
