@@ -137,6 +137,9 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const [isEvidenceLoading, setIsEvidenceLoading] = useState(false);
   /** Kế hoạch + bước của việc trợ lý đang chạy, để ngăn phải vẽ thẻ tiến độ thật. */
   const [tienDoTroLy, setTienDoTroLy] = useState<any | null>(null);
+  /** Ca (session id) mà lần hỏi trợ lý đang chạy thuộc về. Chỉ ca này thấy "đang trả lời" và tiến độ. */
+  const [caCuaTroLy, setCaCuaTroLy] = useState<string | null>(null);
+  const caTroLyRef = useRef<string | null>(null);
   /** Gắn theo mã ca đang tạo AI: Ca A đang chạy không khoá trắng Ca B khi bác sĩ chuyển ca! */
   const [generatingSessionId, setGeneratingSessionId] = useState<string | null>(null);
   /** Việc tạo bản nháp đang chạy nền trên máy chủ: lúc bắt đầu, số việc xếp trước. */
@@ -204,6 +207,12 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
   const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
   const isCurrentSessionGenerating = Boolean(currentSession && generatingSessionId === currentSession.id);
   const isOtherSessionGenerating = Boolean(generatingSessionId && generatingSessionId !== currentSession?.id);
+
+  // Đổi ca: bỏ thông báo lỗi của ca cũ, không để nó hiện ở ca mới.
+  const idCaHienTai = currentSession?.id;
+  useEffect(() => {
+    setApiError(null);
+  }, [idCaHienTai]);
 
   // Tab tài liệu đang xem trong ca khám
   const currentTab =
@@ -847,6 +856,9 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
             propositions: propsSnapshot,
           })
         : { tuoi: undefined, gioi: undefined, coThai: undefined };
+      const caHoi = currentSession.id;
+      caTroLyRef.current = caHoi;
+      setCaCuaTroLy(caHoi);
       const kq = await hoiTroLy(
         {
           cauHoi: cauHoiGoc,
@@ -856,7 +868,11 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         },
         (tt) => setTienDoTroLy(tt),
       );
-      setTienDoTroLy(null);
+      if (caTroLyRef.current === caHoi) {
+        caTroLyRef.current = null;
+        setCaCuaTroLy(null);
+        setTienDoTroLy(null);
+      }
       if ("loi" in kq) {
         setApiError(kq.loi);
         if (kq.code === "cau_hoi_co_danh_tinh") {
@@ -907,6 +923,8 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
       { id: userMsgId, role: "user", content: query, mode, timestamp: gio() },
     ]);
     setIsEvidenceLoading(true);
+    caTroLyRef.current = targetId;
+    setCaCuaTroLy(targetId);
     try {
       if (mode === "tra_cuu") {
         const cauHoiGoc = query.replace(/\s*\(tra nguồn khác\)$/, "");
@@ -968,8 +986,13 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         ]);
       }
     } finally {
-      setIsEvidenceLoading(false);
-      setTienDoTroLy(null);
+      // Chỉ tắt "đang trả lời" nếu chưa có lần hỏi mới ở ca khác chiếm chỗ.
+      if (caTroLyRef.current === targetId) {
+        caTroLyRef.current = null;
+        setCaCuaTroLy(null);
+        setIsEvidenceLoading(false);
+        setTienDoTroLy(null);
+      }
     }
   };
 
@@ -1576,7 +1599,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       chatHistory={evidenceChat}
                       onSendMessage={handleSendEvidenceMessage}
                       onNewChat={() => capNhatEvidenceChatChoCa(currentSession.id, [])}
-                      isLoading={isEvidenceLoading}
+                      isLoading={isEvidenceLoading && caCuaTroLy === currentSession.id}
                       patientContext={currentSession.patientSubtitle}
                       ruleQuestions={noteMeta?.questions || []}
                       hasDraft={!!noteMeta}
@@ -1584,7 +1607,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       hasMaterial={!!(currentSession.transcript.trim() || nguCanh().trim())}
                       onSuggestQuestions={deXuatCauHoi}
                       onAddToContext={themVaoNguCanh}
-                      tienDoTroLy={tienDoTroLy}
+                      tienDoTroLy={caCuaTroLy === currentSession.id ? tienDoTroLy : null}
                       laQuanTri={nguoiDung.vai === "quan_tri"}
                       duLieuCa={moTaDuLieuTroLy({
                         coBanNhap: !!noteMeta,
@@ -1611,6 +1634,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
               >
                 <Suspense fallback={<KhungDangTaiManHinh />}>
                   <EvidenceView
+                    key={currentSession.id}
                     caTen={currentSession.patientIdentifier}
                     coLoiThoai={!!currentSession.transcript.trim()}
                     allowExternal={choPhepNgoai}
