@@ -76,6 +76,8 @@ interface ClinicalEvidenceDrawerProps {
   tienDoTroLy?: any | null;
   /** Hiện công tắc toàn hệ thống trong bảng tác tử. */
   laQuanTri?: boolean;
+  /** Trợ lý đang dùng dữ liệu gì của ca đang mở (hiện ngay trên ô hỏi). */
+  duLieuCa?: { coDuLieu: boolean; chu: string };
 }
 
 const MAU_NHOM: Record<string, string> = {
@@ -98,6 +100,7 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
   onNewChat,
   isLoading = false,
   patientContext,
+  duLieuCa,
   ruleQuestions,
   hasDraft,
   allowExternal,
@@ -585,6 +588,14 @@ export const ClinicalEvidenceDrawer: React.FC<ClinicalEvidenceDrawerProps> = ({
               <User size={11} className="text-[#0284C7] flex-shrink-0" />
               <span className="font-semibold text-[#0C4A6E] truncate">{patientContext || "Ca khám hiện tại"}</span>
             </div>
+            {duLieuCa && (
+              <p
+                className={`px-1 text-[11px] leading-snug ${duLieuCa.coDuLieu ? "text-[#0369A1]" : "text-amber-700"}`}
+                title="Câu hỏi được gửi kèm đúng các dữ liệu này của ca đang mở"
+              >
+                {duLieuCa.chu}
+              </p>
+            )}
 
             <div className="flex items-end gap-2">
               <input

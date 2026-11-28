@@ -33,6 +33,7 @@ import { useSessionsStore } from "./hooks/useSessionsStore";
 import { kiemVaBatMoHinhNgoai } from "./lib/moHinhNgoai";
 import { docJsonHoacNull } from "./lib/docJson";
 import { gopTabBanNhap, TEN_TAB_BAN_NHAP } from "./lib/gopTabBanNhap";
+import { moTaDuLieuTroLy } from "./lib/moTaDuLieuTroLy";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -1585,6 +1586,15 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                       onAddToContext={themVaoNguCanh}
                       tienDoTroLy={tienDoTroLy}
                       laQuanTri={nguoiDung.vai === "quan_tri"}
+                      duLieuCa={moTaDuLieuTroLy({
+                        coBanNhap: !!noteMeta,
+                        soMenhDe: noteMeta?.propositions?.length || 0,
+                        ...trichNguCanhChoTroLy({
+                          patientSubtitle: currentSession.patientSubtitle,
+                          contextNotes: nguCanh(),
+                          propositions: noteMeta?.propositions,
+                        }),
+                      })}
                     />
                   </ErrorBoundary>
                 </div>
