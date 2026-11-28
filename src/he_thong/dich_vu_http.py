@@ -69,6 +69,7 @@ from __future__ import annotations
 import argparse
 import base64
 import binascii
+import hashlib
 import hmac
 import io
 import json
@@ -183,6 +184,8 @@ class Loi:
                                 if dong.strip():
                                     b = json.loads(dong)
                                     dem_moi.setdefault(b["id"], b)
+                                    if b.get("input"):            # đệm tự ghi: có sẵn lời thoại
+                                        dem_chu_moi.setdefault(" ".join(b["input"].split()), b)
                     # Tệp đệm chỉ có mã ca, không có lời thoại. Giao diện lại gửi LỜI THOẠI. Dựng
                     # chỉ mục lời thoại -> mã ca từ chính các bộ dữ liệu để tra ngược lại.
                     for tep in sorted(THU_MUC_BO.glob("*.jsonl")):
@@ -198,6 +201,29 @@ class Loi:
                     self._dem_theo_chu = dem_chu_moi
                     self._dem = dem_moi
         return self._dem
+
+    def luu_dem(self, hoi_thoai, ban_tho, tep=None) -> bool:
+        """Ghi đầu ra khâu trích của một lời thoại vào bộ đệm (đĩa + bộ nhớ) để lần sau chạy trong vài giây.
+
+        CHỈ ghi khi bật MEDITRACE_DEM_TU_DONG=bat (mặc định TẮT): bộ đệm không có hạn giữ, nên chỉ bật
+        lúc chạy trước các ca demo TỔNG HỢP, không bật khi có lời thoại người bệnh thật.
+        """
+        if os.environ.get("MEDITRACE_DEM_TU_DONG", "").strip().lower() != "bat":
+            return False
+        if not isinstance(ban_tho, dict) or not ban_tho.get("json_hop_le", True) or not hoi_thoai:
+            return False
+        chu = " ".join(hoi_thoai.split())
+        b = dict(ban_tho)
+        b["id"] = "dem_" + hashlib.sha256(chu.encode("utf-8")).hexdigest()[:12]
+        b["input"] = hoi_thoai
+        tep = tep or (duong_dan.GOC_DU_AN / "data" / "trich_dem_dich_vu_hl.jsonl")
+        with self._khoa_dem:
+            with open(tep, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(b, ensure_ascii=False) + "\n")
+            if self._dem is not None:
+                self._dem.setdefault(b["id"], b)
+                self._dem_theo_chu.setdefault(chu, b)
+        return True
 
     def so_ca_bo_dem(self) -> int:
         """Trả số ca đã nạp trong bộ đệm mà KHÔNG ép quét đĩa nếu chưa nạp."""
@@ -358,6 +384,15 @@ class Loi:
                     import inspect
                     plt_raw = os.environ.get("MEDITRACE_PROMPT_LOOKUP_TOKENS", "5").strip()
                     plt_tok = max(0, int(plt_raw)) if plt_raw.lstrip("-").isdigit() else 5
+                    if os.environ.get("MEDITRACE_DEM_TU_DONG", "").strip().lower() == "bat":
+                        # Chạy trước ca demo: tự trích để giữ đầu ra thô cho bộ đệm.
+                        from src.huan_luyen import chon_mo_hinh_bakeoff as _bakeoff
+                        try:
+                            kq_tho = _bakeoff.trich(tok, model, prefix_fn, mau, max_token=MAX_TOKEN,
+                                                    prompt_lookup_num_tokens=plt_tok)
+                        except TypeError:
+                            kq_tho = _bakeoff.trich(tok, model, prefix_fn, mau, max_token=MAX_TOKEN)
+                        self.luu_dem(hoi_thoai, kq_tho[0])
                     sig = inspect.signature(_nhanh.chay_trung_gian)
                     if "prompt_lookup_num_tokens" in sig.parameters or any(
                         p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
