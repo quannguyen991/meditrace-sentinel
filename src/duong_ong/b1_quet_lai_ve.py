@@ -164,7 +164,24 @@ def loi_nhac_quet_lai(hoi_thoai: str, ve: List[dict]) -> str:
 # ═══ loc_trong_van() — Giữ mệnh đề có câu trích nằm trong chính lượt nó dẫn ═══════════
 # Lần sinh thứ hai được hỏi về những vế cụ thể; câu trích không có trong lượt dẫn (bịa, dẫn
 # sai lượt, lượt không tồn tại, không trích) là không truy được về hội thoại -> bỏ, kèm đếm.
-def loc_trong_van(hoi_thoai: str, moi: List[dict]) -> Tuple[List[dict], List[dict]]:
+# Có `ve` (danh sách vế đã gửi trong lời nhắc): mỗi câu trích còn phải GIAO một vế đã chọn
+# của lượt dẫn. Lời nhắc gửi cả hội thoại, nên mô hình có thể trả mệnh đề của vế khác; mệnh
+# đề đó không phải kết quả quét lại -> bỏ, kèm đếm.
+def _giao_ve(t: str, s: int, van: str, ve: List[dict]) -> bool:
+    k = tim_trich(t, van)
+    for v in ve:
+        if v["luot"] != s:
+            continue
+        if k and v["dau"] < k[1] and k[0] < v["cuoi"]:
+            return True
+        # tim_trich trả lần xuất hiện ĐẦU; câu trích lặp lại trong lượt vẫn được nếu nằm trong vế.
+        if tim_trich(t, van[v["dau"]:v["cuoi"]]):
+            return True
+    return False
+
+
+def loc_trong_van(hoi_thoai: str, moi: List[dict],
+                  ve: Optional[List[dict]] = None) -> Tuple[List[dict], List[dict]]:
     luot = _luot(hoi_thoai)
     giu, bo = [], []
     for p in moi or []:
@@ -174,6 +191,8 @@ def loc_trong_van(hoi_thoai: str, moi: List[dict]) -> Tuple[List[dict], List[dic
         dan, td = _luot_dan(p), _trich(p)
         ok = bool(dan) and bool(td) and all(s in luot for s in dan) and all(
             any(tim_trich(t, luot[s][1]) for s in dan) for t in td)
+        if ok and ve is not None:
+            ok = all(any(_giao_ve(t, s, luot[s][1], ve) for s in dan) for t in td)
         (giu if ok else bo).append(p)
     return giu, bo
 

@@ -320,7 +320,7 @@ def chay_trung_gian(mau_list, tok, model, prefix_fn, nhanh,
                 so_luot_goi = 2
                 _hop_le, moi, _ly_do = bakeoff._phan_tich(
                     van_ql, bakeoff.danh_so_luot(m["input"])[1])
-                giu, bo = quet.loc_trong_van(m["input"], moi if isinstance(moi, list) else [])
+                giu, bo = quet.loc_trong_van(m["input"], moi if isinstance(moi, list) else [], ve=ve)
                 ps_tho = quet.gop_ket_qua_quet_lai(ps_tho, giu)
                 so_moi = len(ps_tho) - len(k["phat_bieu"] or [])
                 tk_quet.update(so_moi=so_moi, so_bo_ngoai_van=len(bo),

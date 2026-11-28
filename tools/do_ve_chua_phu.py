@@ -8,7 +8,7 @@ của chẩn đoán "172/200 sót nằm ở lượt đã có mệnh đề" trong
   2. với mỗi mệnh đề đáp án bị sót, định vị câu trích của đáp án trong lượt của nó;
   3. xếp nó vào một nhóm theo các vế của `b1_quet_lai_ve.cac_ve`:
        trong_ve_chua_phu   giao một vế có tín hiệu lâm sàng mà chưa câu trích nào phủ
-                           -> quét lại SẼ hỏi lại mô hình về chỗ này (trần thu hồi)
+                           -> quét lại SẼ hỏi lại mô hình về chỗ này (ước lượng, không phải trần)
        ve_khong_tin_hieu   chỉ giao vế chưa phủ nhưng không có tín hiệu -> bị lọc, không hỏi
        ve_da_phu           chỉ giao vế đã có câu trích phủ (mô hình đã dẫn tới, nhưng nội dung
                            không ghép được với đáp án: ghi sai/khác chữ, hoặc giới hạn bộ chấm)
@@ -144,7 +144,7 @@ def in_bang(kq: dict) -> str:
          f"{tong['trung_da']} bản trùng. Ghép một-một đếm bản trùng là bỏ sót dù mô hình đã ghi "
          f"(chưa bỏ trùng: {tong['sot_goc']} sót), nên các bảng dưới tính trên đáp án ĐÃ bỏ trùng.", "",
          "## Mệnh đề bị sót nằm ở đâu", "",
-         "| Bộ | Ca | Mệnh đề đáp án | Bị sót | Sót ở lượt đã dẫn | Trong vế chưa phủ (trần) | "
+         "| Bộ | Ca | Mệnh đề đáp án | Bị sót | Sót ở lượt đã dẫn | Trong vế chưa phủ (ước lượng) | "
          "Vế chưa phủ, không tín hiệu | Vế đã phủ | Ngoài vế | Không định vị |",
          "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for ten, r in hang.items():
@@ -173,7 +173,7 @@ def in_bang(kq: dict) -> str:
           "Nghĩa là con số \"86% sót nằm ở lượt đã có mệnh đề\" chủ yếu là **ghi sai nội dung trên đúng vế**, "
           "không phải vế bị bỏ qua. Quét lại vế chưa phủ không nhắm vào nhóm này; muốn thu hồi phải kiểm "
           "`noi_dung` so với câu trích của chính nó (vd. vế có câu trích mà nội dung mệnh đề ít trùng từ).",
-          "- Hệ quả cho MT1 (≤ 8,0% từ 11,5%, đo trên `viet_phat_trien_v2`): trên bộ này trần của quét lại chỉ "
+          "- Hệ quả cho MT1 (≤ 8,0% từ 11,5%, đo trên `viet_phat_trien_v2`): trên bộ này ước lượng phần quét lại có thể cứu chỉ "
           f"bớt được {pt(tran, tong['menh_de'])} điểm sót, nên quét lại đơn thuần khó đạt MT1. Đây là dự báo "
           "trên bộ khác, cần đo thật để kết luận.",
           f"- {n.get('ve_khong_tin_hieu', 0)} mệnh đề sót nằm ở vế chưa phủ nhưng không có tín hiệu lâm sàng "

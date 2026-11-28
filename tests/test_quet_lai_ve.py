@@ -93,6 +93,27 @@ def test_quet_lai_khong_tao_menh_de_ngoai_van():
                 assert all(t.lower() in _luot(HT, so) for t in p["trich_dan"])
 
 
+def test_loc_bo_menh_de_trich_ve_khac_cung_luot():
+    """Lần quét lại chỉ được hỏi về vế đã chọn. Mệnh đề trích một vế KHÁC của cùng lượt
+    (dù câu trích có thật trong lượt) bị bỏ và được đếm."""
+    ve = ve_chua_phu(HT, [{"trich_dan": "Tôi uống amlodipin 5mg", "bang_chung": [2]}])
+    assert [v["van"] for v in ve] == ["còn dị ứng tôm"]
+    moi = [{"noi_dung": "dị ứng tôm", "luot_thoai": [2], "trich_dan": ["dị ứng tôm"]},
+           {"noi_dung": "uống amlodipin", "luot_thoai": [2], "trich_dan": ["uống amlodipin 5mg"]},
+           {"noi_dung": "dùng thuốc", "luot_thoai": [1], "trich_dan": ["dùng thuốc"]}]
+    giu, bo = loc_trong_van(HT, moi, ve=ve)
+    assert [p["noi_dung"] for p in giu] == ["dị ứng tôm"]
+    assert [p["noi_dung"] for p in bo] == ["uống amlodipin", "dùng thuốc"]
+    # Không truyền vế: chỉ kiểm câu trích nằm trong lượt dẫn, như trước.
+    assert len(loc_trong_van(HT, moi)[0]) == 3
+
+
+def test_loc_giu_cau_trich_tran_qua_ranh_gioi_ve():
+    ve = ve_chua_phu(HT, [{"trich_dan": "Tôi uống amlodipin 5mg", "bang_chung": [2]}])
+    moi = [{"noi_dung": "dị ứng tôm", "luot_thoai": [2], "trich_dan": ["5mg, còn dị ứng tôm"]}]
+    assert len(loc_trong_van(HT, moi, ve=ve)[0]) == 1
+
+
 def test_gop_doi_lai_quan_he_voi_theo_vi_tri_moi():
     cu = [{"trich_dan": ["a"], "luot_thoai": [1]}]
     moi = [{"trich_dan": ["a"], "luot_thoai": [1]},                    # trùng -> bỏ
