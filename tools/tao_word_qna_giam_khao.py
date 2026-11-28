@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Script tao file Word (.docx) sieu dep cho Bo Cau hoi & Tra loi Ban Giam khao.
+"""Script tao file Word (.docx) cho Bo Cau hoi & Tra loi Ban Giam khao.
 Thiet ke theo tieu chuan an pham trinh bay chuyen nghiep:
 - Font Segoe UI dong nhat, mau sac Navy & Teal trang nha
+- Co Phan 0 trinh bay ro cau truc du an (3 khoi, 6 goi Python, 5 tang, Full-stack Web)
 - Hop cau hoi co vien mau, nen sang kem huy hieu muc do (De, Trung binh, Kho, Stress-test)
-- Bang bieu va hop chu y bo tri khoa hoc de gay an tuong manh voi Ban Giam khao
 """
 
 from pathlib import Path
@@ -100,13 +100,13 @@ def them_doan_van(doc, text="", dam=False, nghieng=False, co_chu=10,
 
 def them_tieu_de_phan(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(18)
-    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.space_before = Pt(16)
+    p.paragraph_format.space_after = Pt(6)
     p.paragraph_format.keep_with_next = True
     r = p.add_run(text)
     r.bold = True
     r.font.name = "Segoe UI"
-    r.font.size = Pt(14)
+    r.font.size = Pt(13.5)
     r.font.color.rgb = COLOR_NAVY
     return p
 
@@ -124,7 +124,6 @@ def them_hop_cau_hoi(doc, ma_muc, tieu_de_cau_hoi, noi_dung_tra_loi, mau_vien=HE
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(4)
 
-    # Badge muc do
     if badge_text:
         r_badge = p.add_run(f"[{badge_text.upper()}] ")
         r_badge.bold = True
@@ -136,23 +135,23 @@ def them_hop_cau_hoi(doc, ma_muc, tieu_de_cau_hoi, noi_dung_tra_loi, mau_vien=HE
             r_badge.font.color.rgb = COLOR_NAVY
         elif badge_text.lower() in ("khó", "hard"):
             r_badge.font.color.rgb = COLOR_PURPLE
+        elif badge_text.lower() in ("kiến trúc", "cấu trúc"):
+            r_badge.font.color.rgb = COLOR_TEAL
         else:
             r_badge.font.color.rgb = COLOR_DANGER
 
     r_q = p.add_run(tieu_de_cau_hoi + "\n")
     r_q.bold = True
-    r_q.font.size = Pt(11)
+    r_q.font.size = Pt(10.8)
     r_q.font.name = "Segoe UI"
     r_q.font.color.rgb = COLOR_DARK
 
-    # Noi dung tra loi
     for dong in noi_dung_tra_loi:
         p_ans = cell.add_paragraph()
         p_ans.paragraph_format.space_before = Pt(2)
         p_ans.paragraph_format.space_after = Pt(3)
         p_ans.paragraph_format.line_spacing = 1.15
-        
-        # Parse dinh dang co ban
+
         parts = dong.split("**")
         is_bold = False
         for part in parts:
@@ -164,7 +163,49 @@ def them_hop_cau_hoi(doc, ma_muc, tieu_de_cau_hoi, noi_dung_tra_loi, mau_vien=HE
                 r.font.color.rgb = COLOR_DARK
             is_bold = not is_bold
 
-    them_doan_van(doc, "")
+    them_doan_van(doc, "", cach_duoi=2)
+
+
+def them_bang_cau_truc(doc, rows):
+    tbl = doc.add_table(rows=len(rows) + 1, cols=3)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    headers = ["Thư mục / Gói", "Vai trò kiến trúc", "Mô-đun tiêu biểu & Quy mô thực tế"]
+    widths = [Inches(1.5), Inches(2.2), Inches(3.1)]
+
+    for col_idx, h_text in enumerate(headers):
+        cell = tbl.cell(0, col_idx)
+        cell.width = widths[col_idx]
+        dat_nen_o(cell, HEX_NAVY)
+        dat_vien_o(cell, top=HEX_NAVY, bottom=HEX_NAVY, left=HEX_NAVY, right=HEX_NAVY, sz="4")
+        dat_le_o(cell, top=70, bottom=70, left=90, right=90)
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
+        r = p.add_run(h_text)
+        r.bold = True
+        r.font.name = "Segoe UI"
+        r.font.size = Pt(9)
+        r.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+
+    for r_idx, (pkg, role, modules) in enumerate(rows, start=1):
+        bg = "FFFFFF" if r_idx % 2 == 1 else "F8FAFC"
+        for col_idx, text in enumerate((pkg, role, modules)):
+            cell = tbl.cell(r_idx, col_idx)
+            cell.width = widths[col_idx]
+            dat_nen_o(cell, bg)
+            dat_vien_o(cell, top="CBD5E1", bottom="CBD5E1", left="CBD5E1", right="CBD5E1", sz="4")
+            dat_le_o(cell, top=60, bottom=60, left=90, right=90)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(0)
+            p.paragraph_format.line_spacing = 1.12
+            r = p.add_run(text)
+            r.bold = (col_idx == 0)
+            r.font.name = "Segoe UI"
+            r.font.size = Pt(8.5)
+            r.font.color.rgb = COLOR_TEAL if col_idx == 0 else COLOR_DARK
+
+    them_doan_van(doc, "", cach_duoi=4)
 
 
 def tao_word_qna():
@@ -172,8 +213,8 @@ def tao_word_qna():
 
     # Thiet lap le trang A4
     for section in doc.sections:
-        section.top_margin = Inches(0.7)
-        section.bottom_margin = Inches(0.7)
+        section.top_margin = Inches(0.65)
+        section.bottom_margin = Inches(0.65)
         section.left_margin = Inches(0.7)
         section.right_margin = Inches(0.7)
         section.page_width = Inches(8.27)
@@ -186,7 +227,7 @@ def tao_word_qna():
     cell_top.width = Inches(6.8)
     dat_nen_o(cell_top, HEX_NAVY)
     dat_vien_o(cell_top, top=HEX_NAVY, bottom=HEX_NAVY, left=HEX_NAVY, right=HEX_NAVY)
-    dat_le_o(cell_top, top=160, bottom=160, left=180, right=180)
+    dat_le_o(cell_top, top=150, bottom=150, left=180, right=180)
 
     p_top = cell_top.paragraphs[0]
     p_top.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -198,33 +239,33 @@ def tao_word_qna():
 
     r_top_title = p_top.add_run("BỘ CÂU HỎI & TRẢ LỜI PHẢN BIỆN BAN GIÁM KHẢO\n")
     r_top_title.bold = True
-    r_top_title.font.size = Pt(18)
+    r_top_title.font.size = Pt(17.5)
     r_top_title.font.name = "Segoe UI"
     r_top_title.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
 
-    r_top2 = p_top.add_run("TỔNG HỢP CÂU HỎI TỪ DỄ ĐẾN KHÓ · PHÂN LOẠI LÝ THUYẾT VÀ KỸ THUẬT CHUYÊN SÂU")
+    r_top2 = p_top.add_run("BẢN ĐỒ CẤU TRÚC DỰ ÁN · CÂU HỎI LÝ THUYẾT, KỸ THUẬT & STRESS-TEST (DỮ LIỆU ĐÃ KIỂM CHỨNG)")
     r_top2.italic = True
-    r_top2.font.size = Pt(9.0)
+    r_top2.font.size = Pt(8.8)
     r_top2.font.name = "Segoe UI"
     r_top2.font.color.rgb = RGBColor(0xCC, 0xFB, 0xF1)
 
-    them_doan_van(doc, "")
+    them_doan_van(doc, "", cach_duoi=4)
 
-    # 4 o chi so thuc nghiem
+    # 4 o chi so thuc nghiem trung thuc
     tbl_stats = doc.add_table(rows=1, cols=4)
     tbl_stats.alignment = WD_TABLE_ALIGNMENT.CENTER
     stats = [
-        ("KIỂM THỬ TỰ ĐỘNG", "Đang cần tái kiểm tra", "100% test vượt qua", HEX_SAFE, "ECFDF5"),
-        ("SÓT DỊ ỨNG", "0.0%", "Tuyệt đối không bỏ sót", HEX_DANGER, "FEF2F2"),
-        ("CHẶN BỊA ĐẶT", "7 CỔNG K1-K7", "Khóa bằng chứng 2 chiều", HEX_TEAL, "F0FDFA"),
-        ("GIẢM LỖI NHỚ SAI", "GIẢM 14 LẦN", "Từ 11.5% xuống 0.8%", HEX_WARN, "FFFBEB")
+        ("KIỂM THỬ TỰ ĐỘNG", "1.974 & 96 PASS", "Pytest (25 skip) + Web TS", HEX_SAFE, "ECFDF5"),
+        ("CHẶN LỖI NGUY HIỂM", "88,2% (CHÍNH SÁCH D)", "11,8% lọt dev | Giữ kín 0,946", HEX_DANGER, "FEF2F2"),
+        ("CHẶN ẢO GIÁC", "7 CỔNG K1–K7", "0 / 30.136 chặn nhầm đáp án chuẩn", HEX_TEAL, "F0FDFA"),
+        ("GIẢM SÓT ĐÍNH CHÍNH", "11,48% -> 0,80%", "Giảm > 14 lần tin cũ bị thay thế", HEX_WARN, "FFFBEB")
     ]
     for idx, (label, val, desc, border_c, bg_c) in enumerate(stats):
         cell = tbl_stats.cell(0, idx)
         cell.width = Inches(1.7)
         dat_nen_o(cell, bg_c)
         dat_vien_o(cell, top=border_c, bottom=border_c, left=border_c, right=border_c, sz="6")
-        dat_le_o(cell, top=60, bottom=60, left=80, right=80)
+        dat_le_o(cell, top=60, bottom=60, left=70, right=70)
 
         p = cell.paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -239,16 +280,16 @@ def tao_word_qna():
 
         r_v = p.add_run(f"{val}\n")
         r_v.bold = True
-        r_v.font.size = Pt(11)
+        r_v.font.size = Pt(10)
         r_v.font.name = "Segoe UI"
         r_v.font.color.rgb = COLOR_NAVY
 
         r_d = p.add_run(desc)
-        r_d.font.size = Pt(7.5)
+        r_d.font.size = Pt(7.3)
         r_d.font.name = "Segoe UI"
         r_d.font.color.rgb = COLOR_MUTED
 
-    them_doan_van(doc, "")
+    them_doan_van(doc, "", cach_duoi=4)
 
     # HUONG DAN SU DUNG
     tbl_guide = doc.add_table(rows=1, cols=1)
@@ -268,14 +309,51 @@ def tao_word_qna():
     r_g1.font.color.rgb = COLOR_TEAL
 
     r_g2 = p_g.add_run(
-        "Mọi câu hỏi phản biện của Ban Giám khảo (dù là Bác sĩ hay Chuyên gia AI) đều tuân theo công thức trả lời 3 bước:\n"
-        "1. Trực diện khẳng định: Trả lời 'Có/Không' hoặc nêu thẳng quan điểm, không vòng vo.\n"
-        "2. Bản chất kỹ thuật/lâm sàng: Giải thích nguyên nhân cốt lõi và cơ chế hoạt động của hệ thống.\n"
-        "3. Số liệu thực nghiệm: Bắn trúng đích bằng con số đo lường khoa học (1.320 tests, 0% sót dị ứng, giảm 14 lần lỗi nhớ nhầm)."
+        "Mọi câu hỏi phản biện của Ban Giám khảo đều tuân theo công thức trả lời 3 bước:\n"
+        "1. Trực diện khẳng định: Trả lời thẳng trọng tâm câu hỏi, không vòng vo.\n"
+        "2. Bản chất kỹ thuật/lâm sàng: Gắn đúng tên mô-đun thật trong mã nguồn (src/ và web/).\n"
+        "3. Số liệu trung thực: Dùng đúng các con số đã đo (1.974 pytest + 96 TS tests, Chính sách D chặn 88,2% lỗi nguy hiểm / còn 11,8% trên 4 tập dev, giữ kín 0,946/0,871, giảm >14 lần lỗi đính chính) và chủ động nêu cả giới hạn còn lại."
     )
-    r_g2.font.size = Pt(9.0)
+    r_g2.font.size = Pt(8.8)
     r_g2.font.name = "Segoe UI"
     r_g2.font.color.rgb = COLOR_DARK
+
+    # =========================================================================
+    # PHẦN 0: CẤU TRÚC DỰ ÁN & BẢN ĐỒ KIẾN TRÚC TỔNG THỂ
+    # =========================================================================
+    them_tieu_de_phan(doc, "PHẦN 0: CẤU TRÚC DỰ ÁN & BẢN ĐỒ KIẾN TRÚC TỔNG THỂ")
+    them_doan_van(doc, "Tóm tắt tổ chức mã nguồn theo mô hình 3 khối – 6 gói Python lõi – 5 tầng Neuro-Symbolic và Web Full-Stack.",
+                  nghieng=True, co_chu=9.2, mau=COLOR_MUTED)
+
+    them_hop_cau_hoi(
+        doc, "p0_flow",
+        "Luồng xử lý đầu – cuối từ Âm thanh phòng khám đến Sổ ký duyệt WORM",
+        [
+            "1. **Tầng 0 (ASR & Âm thanh - src/audio/):** PhoWhisper + PyAnnote tách giọng người nói + Trie 65+ G2P tên thuốc (`contextual_trie_600.py`, chỉ gợi ý, không tự sửa ngầm).",
+            "2. **B0 (Chuẩn hóa phương ngữ - src/duong_ong/b0_chuan_hoa_phuong_ngu.py):** Quy đổi phương ngữ 3 miền kèm khóa bảo vệ ngữ cảnh lâm sàng ('tứ chi', 'mô mềm', 'cấy ghép', 'vô kinh', 'bờ mi').",
+            "3. **B1 (Rút mệnh đề bằng AI - src/duong_ong/b1_cau_truc_menh_de.py):** Khâu DUY NHẤT dùng LLM (`Qwen3-4B QLoRA 4-bit`) để bóc từng mệnh đề `PhatBieu` gắn `bang_chung [T_i]` và `trich_dan` nguyên văn.",
+            "4. **B2 & B3 (Chủ thể & Trạng thái FSM - b2_*, b3_*):** Gom nhóm người nói/bù chủ ngữ tỉnh lược -> Máy trạng thái FSM đánh dấu đính chính `DA_THAY_THE`.",
+            "5. **B4 (Khóa căn cứ K1–K7 - b4_kiem_can_cu.py):** 7 cổng xác định kiểm tra nguyên văn, từ khóa lâm sàng, chủ thể, phủ định/giả định, thời gian, liều lượng (`s.ho == 'lieu'`), đính chính.",
+            "6. **B5, B6, Cảnh báo & Lâm sàng (b5_*, src/canh_bao/, src/cong_cu_lam_sang/):** Định tuyến rủi ro (Chính sách C/D), 13 nhóm/56 mã cảnh báo, 158 hoạt chất Dược thư, DDI, TT 26/2025.",
+            "7. **BFF + WORM + React UI (web/may-chu/ + web/src/):** Hàng đợi nền `202 Accepted` trong SQLite -> Bác sĩ rà `Cần xác nhận` + Click-to-Verify -> Sổ WORM SHA-256 (`.anchor.json`)."
+        ],
+        mau_vien=HEX_TEAL, mau_nen="F0FDFA", badge_text="Kiến trúc"
+    )
+
+    cau_truc_rows = [
+        ("src/audio/", "Thu nhận âm thanh, ASR & Diarization", "pipeline.py, phowhisper_provider.py, disagreement.py, contextual_trie_600.py (65+ G2P gợi ý)"),
+        ("src/bo_du_lieu/", "Kho khuôn bệnh, chia tập chống rò rỉ & giả lập", "kho_khuon.py (657 khuôn, 21 hệ cơ quan), chia_tap_theo_khuon.py (515/72/70), ca_mau_bgk.py"),
+        ("src/duong_ong/", "Lõi Neuro-Symbolic B0–B6", "chay_duong_ong.py, b0..b6 (PhatBieu, chủ thể, FSM đính chính, K1–K7, định tuyến rủi ro, SOAP)"),
+        ("src/canh_bao/", "Phát hiện & gom nhóm cảnh báo 3 mức", "loai.py (13 nhóm, 56 mã gồm thuoc_nti), phat_hien.py, toan_ca.py, gop.py"),
+        ("src/cong_cu_lam_sang/", "Dược lý, thang điểm, BHYT & chuẩn bệnh viện", "tra_duoc_thu_aho_corasick.py (158 hoạt chất), DDI, 9 thang điểm, TT 26/2025, FHIR R4, LIS/HL7, QR"),
+        ("src/do_luong/", "Bộ chấm SER, F1, lặp câu & ngoài khuôn", "cham_he_thong.py, do_canh_bao.py, do_lap_cau.py, do_vidia2std.py, kiem_nghiem_ngoai_khuon.py"),
+        ("src/he_thong/", "HTTP Service (:8765), PII, 5 chốt & WORM", "dich_vu_http.py, hop_dong_api.py, khu_dinh_danh.py, dieu_phoi_cac_chot_an_toan.py, nhat_ky_ky_duyet_worm.py"),
+        ("src/huan_luyen/", "Huấn luyện SFT / DPO / RLVR cho Qwen3-4B", "chon_mo_hinh_bakeoff.py, huan_luyen_sft.py, huan_luyen_dpo.py, loss_theo_doan.py"),
+        ("web/may-chu/", "Node/Express BFF + SQLite WAL + WORM", "csdl.ts, hang-doi.ts (202 Accepted), worm.ts (SHA-256 + .anchor.json), tro-ly/an-danh.ts"),
+        ("web/src/", "Giao diện React 19 + TS + Tailwind", "TranscriptView, VerificationView (J/K/Enter/Space), DuyetBenCanh, HisSmartCopyPopover, BhytPrecheckModal, useTurnAudioPlayer"),
+        ("tools/, tests/, docs/", "Đo đa nguồn, xuất báo cáo & kiểm thử", "do_da_nguon_doc_lap.py (5 nguồn ngoài), tao_word_qna_giam_khao.py, 1.974 pytest + 96 TS tests")
+    ]
+    them_bang_cau_truc(doc, cau_truc_rows)
 
     doc.add_page_break()
 
@@ -283,16 +361,16 @@ def tao_word_qna():
     # PHẦN 1: CÂU HỎI LÝ THUYẾT, NGHIỆP VỤ & SẢN PHẨM
     # =========================================================================
     them_tieu_de_phan(doc, "PHẦN 1: CÂU HỎI LÝ THUYẾT, NGHIỆP VỤ LÂM SÀNG & GIÁ TRỊ SẢN PHẨM")
-    them_doan_van(doc, "Tập trung vào tính cấp thiết, nghiệp vụ phòng khám, giá trị bảo vệ người bệnh và trách nhiệm pháp lý.",
-                  nghieng=True, co_chu=9.5, mau=COLOR_MUTED)
+    them_doan_van(doc, "Tập trung vào tính cấp thiết, nghiệp vụ phòng khám, bảo mật, định tuyến rủi ro và bản địa hóa tiếng Việt.",
+                  nghieng=True, co_chu=9.2, mau=COLOR_MUTED)
 
     # Cau 1
     them_hop_cau_hoi(
         doc, "q1",
         "Câu 1: MediTrace Sentinel giải quyết vấn đề gì lớn nhất trong bệnh viện?",
         [
-            "• **Vấn đề giải quyết:** Bác sĩ ngoại trú tại Việt Nam đang bị quá tải khốc liệt (khám 50–80 ca/ngày, mỗi ca chỉ có 3–5 phút). Bác sĩ phải dành hơn 50% thời gian cắm cúi gõ bàn phím nhập bệnh án điện tử (EMR), dẫn đến kiệt sức (burnout), mất kết nối mắt với người bệnh và rất dễ ghi sót tiền sử dị ứng hoặc bệnh mạn tính.",
-            "• **Giải pháp của MediTrace:** Đóng vai trò người trợ lý vô hình (Ambient Medical Scribe) ngồi cạnh lắng nghe cuộc trò chuyện tự nhiên giữa bác sĩ và người bệnh, tự động gỡ băng và dựng bản nháp bệnh án chuẩn cấu trúc SOAP. Bác sĩ chỉ mất 15–30 giây liếc mắt kiểm tra và bấm nút duyệt."
+            "• **Vấn đề giải quyết:** Bác sĩ ngoại trú tại bệnh viện đông bệnh nhân vừa khám hỏi vừa phải nhập bệnh án điện tử (EMR/HIS), dễ quá tải (burnout), giảm giao tiếp trực tiếp với người bệnh và có nguy cơ ghi sót tiền sử hoặc dị ứng.",
+            "• **Giải pháp của MediTrace:** Đóng vai trò **trợ lý dựng bản nháp bệnh án theo nguồn thoại (Evidence-Linked Ambient Clinical Scribe)**: lắng nghe cuộc hội thoại, gỡ băng, bóc tách cấu trúc SOAP kèm câu trích nguyên văn và gom sẵn các điểm rủi ro vào hàng đợi 'Cần xác nhận'. Bác sĩ dùng phím tắt (`J/K/Enter/Space`, `Giữ nhanh`) và copy nhanh sang HIS qua `HisSmartCopyPopover`."
         ],
         mau_vien=HEX_SAFE, badge_text="Dễ"
     )
@@ -302,10 +380,10 @@ def tao_word_qna():
         doc, "q2",
         "Câu 2: Tại sao không dùng luôn ChatGPT, Claude hay Gemini cho nhanh và rẻ?",
         [
-            "Có 3 lý do sống còn khiến việc dùng ChatGPT ở bệnh viện là **vi phạm pháp luật và nguy hiểm tính mạng**:",
-            "1. **Rủi ro dữ liệu:** Dịch vụ bên ngoài có thể nhận dữ liệu tùy theo cấu hình. Bản hiện tại của MediTrace chỉ che một số mẫu định danh trực tiếp trước khi gọi mô hình; chưa bảo đảm ẩn danh hoàn toàn hay chạy on-premise. Cần đánh giá pháp lý và luồng dữ liệu trước triển khai.",
-            "2. **Ảo giác AI (Hallucination):** ChatGPT có xu hướng 'nói dối trơn tru', sẵn sàng tự điền con số huyết áp hoặc tiền sử bệnh mà bệnh nhân không hề nói. MediTrace có 7 cổng khóa K1–K7 dò từng chữ với thoại gốc, phát hiện bịa đặt là chặn ngay.",
-            "3. **Không thể kiểm chứng:** ChatGPT trả ra một đoạn văn xuôi dài, bác sĩ muốn kiểm tra phải đọc lại cả băng ghi âm 15 phút. MediTrace có tính năng Click-to-Verify: bấm vào dòng nào trên bệnh án là sáng lên câu nói ở đúng giây ghi âm gốc."
+            "Có 3 lý do sống còn khiến việc dùng chatbot đám mây trực tiếp tại bệnh viện tiềm ẩn rủi ro pháp lý và an toàn lâm sàng:",
+            "1. **Bảo vệ dữ liệu nhạy cảm (Nghị định 13/2023/NĐ-CP):** Gửi nguyên văn lời thoại có họ tên, địa chỉ, số điện thoại, số CCCD ra máy chủ nước ngoài vi phạm kiểm soát dữ liệu y tế. MediTrace mặc định chạy **100% On-premise nội bộ** (`PhoWhisper` + `Qwen3-4B` + `SQLite`). Chế độ trợ lý bên ngoài mặc định **TẮT** (`MEDITRACE_TRO_LY_NGOAI=tat`); nếu bật vẫn phải đi qua bộ lọc allowlist khử định danh (`web/may-chu/tro-ly/an-danh.ts` & `src/he_thong/khu_dinh_danh.py`).",
+            "2. **Rủi ro ảo giác AI (Hallucination):** Chatbot tổng quát có thể tự điền thông tin bệnh nhân không nói hoặc trộn bệnh của người nhà thành của bệnh nhân. MediTrace áp dụng 7 cổng khóa căn cứ **K1–K7** (`src/duong_ong/b4_kiem_can_cu.py`) để chặn và gắn cờ các mệnh đề sai nguồn.",
+            "3. **Khả năng kiểm chứng tức thì:** Thay vì trả một đoạn văn xuôi dài khó dò, MediTrace gắn từng dòng với lượt thoại `[T_i]` và đoạn âm thanh gốc qua `useTurnAudioPlayer.ts` (Click-to-Verify)."
         ],
         mau_vien=HEX_SAFE, badge_text="Dễ"
     )
@@ -315,11 +393,11 @@ def tao_word_qna():
         doc, "q3",
         "Câu 3: Bác sĩ rất bận, liệu việc bắt bác sĩ ngồi duyệt từng dòng có làm mất thêm thời gian không?",
         [
-            "• **Không làm mất thời gian, mà tiết kiệm từ 5 đến 7 phút mỗi ca khám.**",
-            "• Bác sĩ **không phải đọc lại toàn bộ từ đầu đến cuối**. Màn hình của MediTrace chia làm 2 phần trực quan:",
-            "  - *Phần thân bệnh án:* Chứa những thông tin đã vượt qua toàn bộ 7 cổng kiểm tra (K1–K7) với độ tin cậy tuyệt đối.",
-            "  - *Mục 'Cần bác sĩ xác nhận':* Chỉ gom đúng những điểm nghi ngờ (ví dụ: bệnh nhân nói nhầm, thuốc có tương tác kỵ nhau, câu giả định chưa rõ ràng) kèm cờ cảnh báo đỏ/vàng.",
-            "• Bác sĩ chỉ cần liếc mắt đúng 15–30 giây vào các điểm cảnh báo, thấy đúng bấm nút duyệt là xong."
+            "• **Thiết kế giao diện hướng tới giảm thao tác đọc dư thừa, không bắt bác sĩ đọc lại toàn bộ từ đầu đến cuối** (đội ngũ chưa công bố con số 'tiết kiệm X phút/ca' ngoài đời thực khi chưa hoàn tất thử nghiệm đo thời gian trực tiếp trên bác sĩ lâm sàng).",
+            "• Màn hình duyệt (`VerificationView.tsx` & `DuyetBenCanh.tsx`) chia thành 2 phần rõ ràng:",
+            "  - **Phần thân bản nháp (đã qua K1–K7 và không vướng cờ rủi ro):** Gom các mệnh đề đạt căn cứ, hỗ trợ thao tác 'Giữ nhanh' thay vì sửa tay từng dòng.",
+            "  - **Mục 'Cần bác sĩ xác nhận':** Chỉ gom những điểm nghi ngờ hoặc nguy cấp (đính chính, câu giả định, thuốc khoảng điều trị hẹp, tên thuốc G2P gợi ý, tương tác thuốc) để xử lý bằng phím tắt `J / K / Enter / Space`.",
+            "• Ngoài ra, khâu suy luận nặng chạy qua hàng đợi nền `202 Accepted` (`web/may-chu/hang-doi.ts`), bác sĩ chuyển sang ca khám tiếp theo ngay mà không đứng chờ."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
     )
@@ -329,11 +407,11 @@ def tao_word_qna():
         doc, "q4",
         "Câu 4: Nếu phần mềm ghi nhầm hoặc gợi ý sai dẫn đến tai biến y khoa thì ai chịu trách nhiệm?",
         [
-            "• **Về mặt pháp lý:** Bác sĩ luôn là người chịu trách nhiệm chuyên môn cuối cùng. MediTrace được định vị chính xác là **Công cụ hỗ trợ soạn thảo bản nháp (Drafting Copilot)**, không phải bác sĩ điều trị và không tự động ra quyết định thay con người.",
-            "• **Về mặt bảo vệ thầy thuốc:** MediTrace bảo vệ bác sĩ tốt hơn việc ghi chép tay:",
-            "  1. Mọi dòng trong bệnh án đều có liên kết căn cứ trỏ về đúng câu nói của bệnh nhân -> Minh bạch nguồn gốc, tránh tranh chấp 'bệnh nhân bảo có nói mà bác sĩ không ghi'.",
-            "  2. Hệ thống có thể tạo mã băm SHA-256 để đối chiếu nội dung. Mã băm không phải chữ ký số hay tự bảo đảm giá trị pháp lý; cần cơ chế lưu trữ, xác minh và ký số riêng.",
-            "  3. Tích hợp sẵn Dược thư Quốc gia để 'nhắc nhở' bác sĩ khi vô tình kê 2 thuốc kỵ nhau."
+            "• **Về mặt pháp lý:** Bác sĩ khám chữa bệnh luôn là người chịu trách nhiệm chuyên môn cuối cùng. MediTrace được định vị là **công cụ hỗ trợ soạn thảo bản nháp có căn cứ (Source-Grounded Drafting Copilot)**, không tự động ra y lệnh.",
+            "• **Về mặt kỹ thuật bảo vệ thầy thuốc và kiểm toán nội bộ:**",
+            "  1. **Truy vết hai chiều:** Mọi dòng bệnh án đều gắn `bang_chung [T_i]`, `trich_dan` nguyên văn và đoạn âm thanh gốc.",
+            "  2. **Khóa ký duyệt + Sổ kiểm toán WORM:** Cổng `sign-off.ts` khóa ký duyệt nếu còn mục 'Cần xác nhận' chưa xử lý. Sau khi duyệt, `web/may-chu/worm.ts` & `nhat_ky_ky_duyet_worm.py` nối chuỗi băm **SHA-256** (`prev_hash` -> `entry_hash`) kèm tệp neo ngoại biên `.anchor.json` để phát hiện sửa/xoá lén dưới SQLite (là sổ kiểm toán kỹ thuật nội bộ, chưa thay thế chữ ký số CA).",
+            "  3. **Cảnh báo dược lý:** Bộ tra **158 hoạt chất** Aho-Corasick và kiểm tra tương tác thuốc (DDI) / cân nặng trẻ em TT 26/2025 nhắc bác sĩ trước khi hoàn tất đơn."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
     )
@@ -343,11 +421,12 @@ def tao_word_qna():
         doc, "q5",
         "Câu 5: Trong y tế có sự đánh đổi: Kiểm tra quá chặt thì bỏ sót thông tin (Low Recall), nới lỏng thì bị sai (Low Precision). MediTrace giải quyết sự đánh đổi này như thế nào?",
         [
-            "• **Hệ thống áp dụng triết lý 'Định tuyến bất đối xứng theo độ rủi ro' (Fail-Safe Asymmetric Routing):**",
-            "  - Với thông tin thông thường (ví dụ: đau bụng âm ỉ, mệt mỏi): Ưu tiên độ chính xác (Precision). Nếu trượt bài kiểm tra K1–K7 thì loại khỏi thân bệnh án.",
-            "  - Với thông tin nguy cấp (Dị ứng thuốc, Thuốc có khoảng điều trị hẹp như Digoxin/Warfarin, Bệnh tim mạch): **Tuyệt đối không bao giờ âm thầm xóa bỏ (Zero Information Loss)**.",
-            "• **Giải pháp kỹ thuật:** Dù mẩu tin dị ứng có bị nghi ngờ (ví dụ người nhà nói lấp lửng), hệ thống vẫn giữ lại 100% và chuyển sang mục *'CẦN BÁC SĨ XÁC NHẬN'* kèm cờ đỏ.",
-            "• **Kết quả thực nghiệm:** Tỷ lệ bỏ sót dị ứng giảm về **0.0%**, trong khi tỷ lệ thông tin đúng bị chặn nhầm đạt **0 / 30.136 dòng**."
+            "• **Hệ thống áp dụng triết lý 'Định tuyến bất đối xứng theo độ rủi ro' (Fail-Safe Asymmetric Routing)** tại `b5_xep_cho_cong_rui_ro.py` và `src/canh_bao/`:",
+            "  - Với thông tin nhẹ: Ưu tiên độ chính xác (Precision), trượt K1–K7 thì không đưa vào thân bệnh án sạch.",
+            "  - Với nhóm nguy cấp (Dị ứng, Thuốc khoảng điều trị hẹp `thuoc_nti` như Digoxin/Warfarin, Đe dọa tính mạng, Lẫn người nhà, Bất đồng liều): Giữ lại trong mục 'CẦN BÁC SĨ XÁC NHẬN' kèm cờ đỏ/vàng, khóa ký duyệt cho tới khi bác sĩ quyết định.",
+            "• **Kết quả thực nghiệm đã đo & minh bạch phạm vi:**",
+            "  - Trên phép đo cấy lỗi có đăng ký trước (`docs/ket-qua/cay-loi.md`), độ nhạy bắt lỗi xoá dị ứng đạt **98,3%** (tập điều chỉnh 400 ca) và **97,2%** (tập giữ kín 240 ca). Chặn nhầm đáp án chuẩn ở K1–K7 là **0 / 30.136 dòng**.",
+            "  - Trên **4 bộ thử thách phát triển** (300 ca, 2.789 phát biểu dùng để tinh chỉnh luật), khi nâng cấp từ Chính sách C lên **Chính sách D**, tỷ lệ lọt lỗi nguy hiểm vào thân (`lot_nguy_hiem`) giảm từ **45,9% (101/220) xuống 11,8% (26/220)** — tức **chặn được 88,2% (194/220)** lỗi nguy hiểm bộ chấm gắn nhãn, với chặn thừa tăng từ 8,0% lên **10,0%**. Trên tập giữ kín `thach_thuc_v2` (240 ca), độ nhạy phát hiện đạt **0,871**, đổi chủ thể đạt **0,946**."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -357,11 +436,11 @@ def tao_word_qna():
         doc, "q6",
         "Câu 6: Người Việt Nam khi đi khám nói năng lộn xộn, hay nuốt chủ ngữ, xưng hô 'con/cháu/ông nhà', dùng từ địa phương ('trúng gió', 'xót ruột'). Làm sao hệ thống của bạn xử lý được?",
         [
-            "Đây chính là 'vũ khí bản địa hóa' của MediTrace mà các mô hình nước ngoài không thể có:",
-            "1. **Tầng 2 (Gom nhóm chủ thể - src/duong_ong/b2_gom_nguoi_thuc_the.py):** Bộ luật ngữ pháp xử lý đại từ xưng hô Việt Nam. Phân biệt rõ: người mẹ nói *'Cháu nhà em bị sốt'* thì chủ thể bệnh là 'con' (id=1), không phải người mẹ (id=0).",
-            "2. **Xử lý câu nuốt chủ ngữ:** Khi bệnh nhân nói *'Sốt 2 hôm nay rồi'*, ngữ cảnh lượt thoại được đối chiếu với vai người nói (Speaker Role). Nếu là bệnh nhân nói về bản thân thì tự động gán chủ thể 0.",
-            "3. **Động cơ phương ngữ 3 miền (src/cong_cu_lam_sang/tu_dien_phuong_ngu_lam_sang.py):** Bộ từ điển hơn 60 thuật ngữ dân gian (Bắc - Trung - Nam) quy đổi về chuẩn y khoa: *'trúng gió'* -> liệt dây VII ngoại biên / cảm mạo; *'xót ruột/cồn cào'* -> viêm loét dạ dày; *'nấc cục'* -> nấc cụt.",
-            "4. **Từ điển âm vị thuốc Tây:** Bệnh nhân đọc tên thuốc dân gian: *'a móc'* -> *Amoxicillin*; *'ô mê'* -> *Omeprazole*."
+            "Gồm 4 lớp bản địa hóa phối hợp:",
+            "1. **Gom nhóm chủ thể xưng hô tiếng Việt (`b2_gom_nguoi_thuc_the.py`):** Tách rạch ròi `nguoi_noi` với `chu_the_id` (mẹ nói 'Cháu nhà em sốt' -> gán chủ thể là con/cháu, không lẫn sang mẹ).",
+            "2. **Bù chủ ngữ tỉnh lược (`b2_bu_chu_ngu_tinh_luoc.py`):** Câu cụt không chủ ngữ được đối chiếu vai `nguoi_noi` và bối cảnh lượt thoại liền kề.",
+            "3. **Chuẩn hóa phương ngữ 3 miền có khóa bảo vệ ngữ cảnh (`b0_chuan_hoa_phuong_ngu.py` & `tu_dien_phuong_ngu_lam_sang.py`):** Quy đổi từ Bắc–Trung–Nam kèm guard tránh sửa nhầm cụm y khoa ('tứ chi', 'mô mềm', 'cấy ghép', 'vô kinh', 'bờ mi'). Đo trên `ViDia2Std/test.csv` (1.603 câu): đúng chuẩn xác **28,0%**, tổng độ phủ **37,1%**, kéo WER giảm từ **30,1% xuống 21,9%**.",
+            "4. **Gợi ý âm vị G2P (`contextual_trie_600.py`) & Dược thư (`tra_duoc_thu_aho_corasick.py`):** **65+** ánh xạ phiên âm thuốc dân gian kèm khóa ngữ cảnh thuốc ('uống/viên/mg/đơn') và **158 hoạt chất** chuẩn, luôn ở dạng gợi ý chờ bác sĩ xác nhận."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -372,18 +451,18 @@ def tao_word_qna():
     # PHẦN 2: CÂU HỎI KỸ THUẬT, THUẬT TOÁN & CÔNG NGHỆ CHUYÊN SÂU
     # =========================================================================
     them_tieu_de_phan(doc, "PHẦN 2: CÂU HỎI KỸ THUẬT, THUẬT TOÁN & CÔNG NGHỆ CHUYÊN SÂU")
-    them_doan_van(doc, "Tập trung vào kiến trúc Neuro-symbolic, tối ưu QLoRA, cơ chế khóa bằng chứng K1–K7, thước đo SER và Guardrails.",
-                  nghieng=True, co_chu=9.5, mau=COLOR_MUTED)
+    them_doan_van(doc, "Tập trung vào kiến trúc 5 tầng, Qwen3-4B QLoRA, chia mệnh đề PhatBieu, khóa bằng chứng K1–K7, SER và Guardrails.",
+                  nghieng=True, co_chu=9.2, mau=COLOR_MUTED)
 
     # Cau 7
     them_hop_cau_hoi(
         doc, "q7",
         "Câu 7: Kiến trúc tổng thể của MediTrace gồm những thành phần công nghệ nào?",
         [
-            "• **Tầng 0 (ASR):** PhoWhisper (fine-tuned nhận dạng tiếng nói tiếng Việt) + PyAnnote Diarization (tách giọng người nói).",
-            "• **Tầng 1 (Bóc tách thông tin):** Mô hình nguồn mở Qwen3-4B chạy kèm adapter huấn luyện QLoRA 4-bit (chạy ngay trên GPU máy trạm phòng khám).",
-            "• **Tầng 2 đến Tầng 5 (Xử lý & Kiểm chứng):** 100% viết bằng Python thuật toán xác định (Deterministic Rule-Based, Máy trạng thái hữu hạn FSM, Bảng tra Dược thư Quốc gia, Template Engine).",
-            "• **Giao diện Web:** React 19 + TypeScript + TailwindCSS, giao tiếp với backend qua REST API nội bộ (src/he_thong/dich_vu_http.py)."
+            "• **Tầng 0 — Âm thanh & Tiền xử lý (`src/audio/` + `B0`):** PhoWhisper + PyAnnote tách giọng, đo bất đồng ASR (`disagreement.py`), trie gợi ý 65+ G2P thuốc (`contextual_trie_600.py`) và chuẩn hóa phương ngữ 3 miền (`b0_chuan_hoa_phuong_ngu.py`).",
+            "• **Tầng 1 — Rút mệnh đề bằng AI (`b1_cau_truc_menh_de.py`):** Mô hình **Qwen3-4B QLoRA 4-bit** là khâu DUY NHẤT dùng LLM, xuất danh sách `PhatBieu` kèm căn cứ nguyên văn.",
+            "• **Tầng 2 đến Tầng 5 — Chuỗi thuật toán xác định (`src/duong_ong/`, `src/canh_bao/`, `src/cong_cu_lam_sang/`):** 100% Python xác định gồm gom chủ thể/bù tỉnh lược (`B2`), FSM đính chính (`B3`), 7 cổng K1–K7 (`B4`), định tuyến Chính sách C/D & SOAP (`B5`), gợi ý hỏi lại (`B6`), 13 nhóm/56 mã cảnh báo, Dược thư 158 hoạt chất, DDI, 9 thang điểm, TT 26/2025 và FHIR R4.",
+            "• **Tầng Ứng dụng Web & Lưu trữ (`web/may-chu/` + `web/src/` + `src/he_thong/`):** Node/Express BFF + SQLite WAL + hàng đợi `202 Accepted` + WORM SHA-256 (`.anchor.json`), React 19 + TS + Tailwind và dịch vụ HTTP Python (`dich_vu_http.py` cổng `8765`)."
         ],
         mau_vien=HEX_SAFE, badge_text="Dễ"
     )
@@ -393,9 +472,9 @@ def tao_word_qna():
         doc, "q8",
         "Câu 8: Tại sao lại chọn mô hình Qwen3-4B mà không chọn Llama-3-8B hay mô hình lớn hơn?",
         [
-            "1. **Khả năng triển khai tại phòng khám (Hardware Feasibility):** Các phòng khám Việt Nam chỉ trang bị máy tính phổ thông hoặc máy trạm có card đồ họa vừa phải (4GB – 8GB VRAM). Mô hình 8B cần tối thiểu 12GB–16GB VRAM, chi phí phần cứng quá đắt. Qwen3-4B QLoRA chỉ tốn ~3.8GB VRAM, chạy mượt trên card đồ họa phổ thông (như RTX 3050/3060).",
-            "2. **Thời gian phản hồi:** Mô hình 4B xử lý bóc tách một ca khám chỉ mất ~30–45 giây trên GPU phổ thông, trong khi mô hình lớn mất từ 5–10 phút (không kịp cho ca khám tiếp theo).",
-            "3. **Độ chính xác chuyên biệt:** Nhờ kỹ thuật huấn luyện QLoRA trên tập dữ liệu hội thoại y tế tiếng Việt chuẩn, Qwen3-4B đạt độ chính xác trích xuất tương đương mô hình 8B nhưng nhẹ hơn gấp đôi."
+            "1. **Khả năng triển khai phần cứng (Hardware Feasibility):** Máy trạm phòng khám phổ thông thường chỉ có **6GB–8GB VRAM** (như RTX 3050/3060). Mô hình 8B trở lên đòi hỏi VRAM và chi phí đầu tư cao hơn hẳn, trong khi **Qwen3-4B QLoRA 4-bit** chạy vừa trên GPU 8GB nội bộ.",
+            "2. **Trung thực tốc độ & giải pháp bất đồng bộ:** Khi chạy PyTorch (`transformers`) mặc định chưa tối ưu trên RTX 3060 8GB, một ca đầy đủ mất khoảng **~3,5 phút/ca** (không phóng đại thành 30–45 giây). MediTrace giải quyết trực tiếp trên luồng khám bằng **hàng đợi nền `202 Accepted`** trong SQLite (`web/may-chu/hang-doi.ts`): bác sĩ chuyển sang bệnh nhân kế tiếp ngay với **0 giây đứng chờ giao diện**, bản nháp được xử lý ngầm; lộ trình tiếp theo là chuyển sang `vLLM / llama.cpp + XGrammar` để hướng tới **15–25 giây/ca**.",
+            "3. **Hiệu quả QLoRA chuyên biệt:** Trên 30 ca phát triển độc lập (304 mệnh đề), adapter Qwen3-4B giảm tỷ lệ bỏ sót từ **43,1%** (trước huấn luyện) xuống **11,5%** (khoảng tin cậy 95%: 8,4%–15,6%) với **0 ca lỗi cấu trúc JSON**."
         ],
         mau_vien=HEX_SAFE, badge_text="Dễ"
     )
@@ -403,13 +482,13 @@ def tao_word_qna():
     # Cau 9
     them_hop_cau_hoi(
         doc, "q9",
-        "Câu 9: Tại sao dự án chỉ dùng AI ở Tầng 1, còn Tầng 2–5 lại dùng thuật toán luật (Rule-based)? Sao không dùng AI làm hết (End-to-End)?",
+        "Câu 9: Tại sao B1 phải chia câu nói ra thành từng mệnh đề (`PhatBieu`), và tại sao B2–B5 dùng thuật toán luật thay vì AI End-to-End?",
         [
-            "• **Đây là quyết định kiến trúc quan trọng nhất của dự án (Neuro-symbolic Architecture):**",
-            "  - Điểm mạnh của AI (LLM) là: Đọc hiểu ngôn ngữ tự nhiên lộn xộn, nhận diện từ đồng nghĩa và nhặt mẩu tin.",
-            "  - Điểm yếu chết người của AI là: Hay bịa đặt (hallucination), không làm toán chuẩn, không kiểm soát được ranh giới logic chặt chẽ.",
-            "• **Nếu để AI làm từ đầu đến cuối (End-to-End):** Mô hình sẽ tự tiện gộp các câu khác chủ thể lại với nhau, biến câu dặn dò tương lai thành bệnh đã có, và khi sai thì không ai biết nó sai ở bước nào ('hộp đen').",
-            "• **Khi tách thành luật ở Tầng 2–5:** Mọi quy tắc (đối soát chữ, tra thuốc kỵ nhau, cộng điểm thang điểm) đều minh bạch 100%, có thể viết Unit Test kiểm thử độc lập và sửa lỗi ngay lập tức mà không cần phải train lại AI."
+            "• **Tại sao B1 phải tách câu nói thành từng mệnh đề nguyên tử (`PhatBieu`):**",
+            "  1. Trong hội thoại tự nhiên, một lượt nói thường **trộn nhiều chủ thể, nhiều thời điểm và lời tự đính chính** (vd: 'Hôm qua tôi tưởng đau dạ dày, sáng nay siêu âm ra sỏi mật; còn mẹ tôi dị ứng penicillin').",
+            "  2. Nếu gộp nguyên đoạn văn dài, không thể gán rạch ròi `chu_the_id`, `phu_dinh`, `tinh_huong` hay `moc_thoi_gian` cho từng sự kiện lâm sàng.",
+            "  3. Tách thành từng `PhatBieu` cho phép B3 đánh dấu đúng ý 'đau dạ dày' thành `DA_THAY_THE`, B4 soi nguyên văn từng câu trích bằng K1–K7, và B5 chỉ đẩy riêng mệnh đề nghi ngờ sang 'Cần xác nhận' mà không bỏ phí phần thông tin sạch.",
+            "• **Tại sao kiến trúc Lai Neuro-Symbolic (AI ở B1 + Rule ở B2–B5):** AI giỏi hiểu ngôn ngữ tự do nhưng dễ bịa và yếu logic nhất quán; còn B2–B5 viết bằng Python xác định nên **minh bạch 100%**, dễ truy lỗi đúng mô-đun và kiểm thử được bằng **1.974 unit/integration tests** mà không phải huấn luyện lại LLM."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
     )
@@ -419,14 +498,14 @@ def tao_word_qna():
         doc, "q10",
         "Câu 10: Cơ chế Khóa bằng chứng K1–K7 ở Tầng 4 hoạt động cụ thể như thế nào để chặn Hallucination?",
         [
-            "Mỗi mệnh đề được AI trích ra ở Tầng 1 bắt buộc phải có trường `trich_dan` (chuỗi trích dẫn nguyên văn) và `bang_chung` (lượt thoại [Ti]). Cổng khóa tại `src/duong_ong/b4_kiem_can_cu.py` thực thi 7 chốt chặn:",
-            "• **K1 (Nguồn gốc nguyên văn):** Dò trực tiếp xâu ký tự `trich_dan` vào lượt thoại [Ti]. Nếu không có trong lượt thoại -> Bị CHẶN lập tức (`trich_khong_co`), đánh dấu Hallucination.",
-            "• **K2 (Khớp nội dung):** Quét tỷ lệ trùng lặp từ ngữ lâm sàng cốt lõi.",
-            "• **K3 (Khớp chủ thể):** Đối chiếu từ chỉ người trong lượt thoại với vai người được gán.",
-            "• **K4 (Khớp mức khẳng định):** Phát hiện câu nghi ngờ hoặc câu điều kiện/phòng ngừa ('Nếu... thì...') mà bị ghi thành sự thật -> Bị CHẶN (`dieu_kien`).",
-            "• **K5 (Khớp mốc thời gian):** Mốc thời gian phải có thật trong lượt thoại.",
-            "• **K6 (Khớp liều lượng & thuốc):** Số lượng viên, hàm lượng mg phải trùng khớp với con số người nói nhắc đến.",
-            "• **K7 (Kiểm tra đính chính - Superseded):** Nếu thông tin đã bị câu nói sau đính chính hoặc xét nghiệm loại trừ -> Đánh dấu bị thay thế, không cho vào thân bệnh án."
+            "Mỗi `PhatBieu` từ B1 phải có `bang_chung [T_i]` và `trich_dan` nguyên văn. Cổng `src/duong_ong/b4_kiem_can_cu.py` kiểm tra 7 chốt:",
+            "• **K1 (Nguồn gốc nguyên văn):** Dò trực tiếp xâu `trich_dan` vào lượt thoại `[T_i]`. Không có -> chặn ngay (`trich_khong_co`).",
+            "• **K2 (Khớp nội dung):** Kiểm tra độ phủ từ khóa lâm sàng cốt lõi giữa `noi_dung` và `trich_dan`.",
+            "• **K3 (Khớp chủ thể):** Đối chiếu từ chỉ người trong lượt thoại với `chu_the_id` được gán.",
+            "• **K4 (Khớp mức khẳng định & điều kiện):** Chặn câu nghi ngờ hoặc câu điều kiện/phòng ngừa ('Nếu... thì...') bị biến thành sự thật (`dieu_kien`).",
+            "• **K5 (Khớp mốc thời gian):** Mốc thời gian gắn cho sự kiện phải có căn cứ trong lượt thoại.",
+            "• **K6 (Khớp liều lượng & thuốc):** Kiểm tra số lượng/đơn vị liều (`mg, g, ml, mcg, UI, viên...`) trên phát biểu thuộc họ liều (`s.ho == 'lieu'`).",
+            "• **K7 (Kiểm tra đính chính — Superseded):** Các phát biểu đã bị câu sau phủ định hoặc xét nghiệm loại trừ (FSM ở B3 đánh dấu `DA_THAY_THE`) bị loại khỏi thân bệnh án."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
     )
@@ -434,16 +513,12 @@ def tao_word_qna():
     # Cau 11
     them_hop_cau_hoi(
         doc, "q11",
-        "Câu 11: Tại sao trong báo cáo bạn khẳng định điểm ROUGE (thước đo AI văn bản phổ biến) là vô dụng trong đánh giá bệnh án? Bạn dùng thước đo nào thay thế?",
+        "Câu 11: Tại sao khẳng định điểm ROUGE là vô dụng trong đánh giá bệnh án? Dự án dùng thước đo nào thay thế?",
         [
-            "• **Thực nghiệm chứng minh ROUGE vô dụng trong y tế:**",
-            "  Trong thử nghiệm trên 400 ca bệnh của dự án, khi cố ý đổi chỗ chữ **'bệnh nhân'** và **'người nhà'** (ví dụ: biến bệnh hen của người nhà thành bệnh của bệnh nhân — một lỗi y khoa cực kỳ nghiêm trọng):",
-            "  **Điểm ROUGE-1 vẫn đạt đúng 1.0000 (điểm tuyệt đối!)**",
-            "  Lý do: ROUGE chỉ đếm số từ trùng lặp mà không hiểu ngữ nghĩa. Hoán đổi hai người thì tập hợp từ không hề thay đổi, nên ROUGE không phát hiện được lỗi!",
-            "• **Thước đo thay thế của dự án:**",
-            "  Dự án xây dựng bộ đo chuyên biệt **Entity Slot Error Rate (SER)** và **Attribution F1**:",
-            "  - Đo đạc chính xác trên từng ô thuộc tính: (Chủ thể, Bệnh/Thuốc, Trạng thái, Thời gian).",
-            "  - Đo tỷ lệ thông tin bị thay thế nhưng vẫn còn sót lại trong bản nháp (nhờ đó chứng minh Cổng K7 giảm tỷ lệ sót tin cũ từ 11.48% xuống **0.80%**)."
+            "• **Thực nghiệm chứng minh ROUGE không đo được an toàn lâm sàng:** Trên phép thử 400 ca bệnh, khi hoán đổi vị trí chữ **'bệnh nhân'** và **'người nhà'** (lỗi y khoa nghiêm trọng): **Điểm ROUGE-1 vẫn đạt 1.0000** vì tập hợp từ không đổi.",
+            "• **Thước đo thay thế của dự án (`src/do_luong/cham_he_thong.py`):**",
+            "  - **Entity Slot Error Rate (SER)** và **Attribution F1:** Chấm chính xác trên từng bộ giá trị `(Chủ thể, Bệnh/Thuốc, Trạng thái, Thời gian)`.",
+            "  - **Tỷ lệ sót thông tin bị thay thế (Superseded Retention):** Cổng K7 và máy trạng thái B3 kéo tỷ lệ sót tin cũ đã đính chính giảm từ **11,48% xuống 0,80%** (giảm hơn **14 lần**)."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -451,12 +526,13 @@ def tao_word_qna():
     # Cau 12
     them_hop_cau_hoi(
         doc, "q12",
-        "Câu 12: Dữ liệu huấn luyện của bạn là dữ liệu mô phỏng (Synthetic Data). Làm sao chứng minh mô hình không bị 'học vẹt' (overfitting) và có tính tổng quát ngoài đời thực?",
+        "Câu 12: Dữ liệu huấn luyện có phần mô phỏng (Synthetic Data). Làm sao chứng minh mô hình không 'học vẹt' và có tính tổng quát?",
         [
-            "Dự án giải quyết triệt để vấn đề này qua 3 kỹ thuật khoa học:",
-            "1. **Chia tách theo khuôn bệnh độc lập (Template-Disjoint Split):** 200 khuôn ca bệnh được chia thành tập Train, Dev, Test riêng biệt. Tập Test gồm những khuôn bệnh mà mô hình **chưa bao giờ nhìn thấy trong lúc huấn luyện**.",
-            "2. **Đo đạc độ đa dạng từ vựng bằng toán học:** Bộ dữ liệu thế hệ v2 mở rộng đạt **45.835 câu duy nhất** (+127% so với v1), tỷ lệ lặp câu giảm mạnh từ 76,92% xuống **47,37%** (câu >= 8 từ: 42,19%), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%), triệt tiêu 100% câu hỏi máy móc của bác sĩ. [ĐÃ RÚT: con số 78.3% cũ không có phép đo tương ứng trong mã; hiện dùng công cụ toán học chính xác `src/do_luong/do_lap_cau.py`].",
-            "3. **Bộ dữ liệu Thử thách Cặp đôi (Adversarial Contrastive Pairs):** Tạo 300 ca thử thách theo cặp chỉ khác nhau đúng một yếu tố ranh giới (đổi người mang dị ứng, người nói tự đính chính sau 5 câu, chèn tiếng ồn ASR, phương ngữ 3 miền). Kết quả nhánh C của MediTrace vượt trội hoàn toàn so với nhánh A (AI thông thường) với F1 tăng từ 66.1% lên **70.8%** và SER giảm từ 45.4% xuống **36.9%**."
+            "Dự án kiểm soát rò rỉ dữ liệu qua 4 lớp độc lập:",
+            "1. **Chia tách không trùng khuôn (`chia_tap_theo_khuon.py`):** **657 khuôn ca bệnh** (21 hệ cơ quan) chia độc lập thành **515 Train / 72 Dev / 70 Test**. Độ tương đồng Jaccard từ khóa triệu chứng trung bình giữa Train và Test chỉ **5,87%**.",
+            "2. **Đo đa dạng từ vựng (`src/do_luong/do_lap_cau.py`):** Bộ 5.000 hội thoại mô phỏng v2 đạt **45.835 câu duy nhất** (+127% so với v1), lặp câu giảm từ 76,92% xuống **47,37%** (câu >= 8 từ: **42,19%**), MTLD đạt **145,4**, Distinct-2 đạt **0,0468**, và **52.634/52.634 (100%)** trích dẫn đều là chuỗi con nguyên văn.",
+            "3. **Tập thách thức đối lập (Adversarial Contrastive Pairs):** Trên các cặp ca bệnh đổi duy nhất một ranh giới, nhánh C tăng F1 từ 66,1% lên **70,8%** và giảm SER từ 45,4% xuống **36,9%**.",
+            "4. **Ngoài khuôn & dữ liệu công khai:** Bổ sung **10 kịch bản bệnh hiếm ngoài khuôn** (`kiem_nghiem_ngoai_khuon.py`) và đối chiếu **5 bộ dữ liệu tiếng Việt công khai bên ngoài** (xem Câu 18)."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -464,16 +540,15 @@ def tao_word_qna():
     # Cau 13
     them_hop_cau_hoi(
         doc, "q13",
-        "Câu 13: Hệ thống Guardrails 5 chốt chặn vừa nâng cấp giải quyết hiện tượng Cascading Errors (Lỗi dây chuyền) như thế nào?",
+        "Câu 13: Hệ thống Guardrails 5 chốt chặn giải quyết hiện tượng Cascading Errors (Lỗi dây chuyền) như thế nào?",
         [
-            "• **Cơ chế Cascading Error:** Nếu Tầng 0 (ASR) nghe sai từ *'Aspirin'* thành *'Amlodipin'*, Tầng 1 sẽ nhặt mẩu tin *'Amlodipin'*, Tầng 2 gán cho bệnh nhân, Tầng 3 lưu trạng thái. Đến Tầng 4 kiểm tra thì thấy câu trích vẫn khớp với đoạn gỡ băng (vì chính đoạn gỡ băng đã bị chép sai từ đầu!), dẫn đến bệnh án sai hoàn toàn.",
-            "• **Cách Guardrails 5 tầng chặn đứng:**",
-            "  - **Chốt 1 (ASR Guardrail):** Chạy ngay sau gỡ băng. Dò âm vị dược thư và từ điển phương ngữ, phát hiện từ lặp bất thường và tự động quy đổi cách đọc dân gian (*'a móc'* -> *Amoxicillin*) ngay tại nguồn.",
-            "  - **Chốt 2 (Speaker Guardrail):** Rà soát mâu thuẫn đại từ nhân xưng ngay khi Tầng 1 vừa nhặt mẩu tin.",
-            "  - **Chốt 3 (Dialogue Act Gate):** Bóc tách các câu đính chính (*'à không'*) và câu giả định (*'nếu mai sốt'*) trước khi đưa vào máy trạng thái.",
-            "  - **Chốt 4 (Evidence Integrity Gate):** Soi xâu ký tự và đối soát từng con số sinh hiệu/liều thuốc.",
-            "  - **Chốt 5 (Clinical Safety Gate):** Soi tương tác thuốc kỵ nhau DDI và liều trần trước khi xuất bệnh án.",
-            "• **Kết quả:** Sai ở khâu nào bị chặn đứng và cô lập ngay ở khâu đó, không bao giờ lan truyền sang khâu tiếp theo."
+            "• **Cơ chế Cascading Error:** Nếu ASR nghe sai tên thuốc hoặc mất dấu tiếng Việt, lỗi ở tầng đầu có thể bị AI chép lại vào `trich_dan` ở B1 và đi qua phép khớp xâu B4 nếu thiếu kiểm soát từng tầng.",
+            "• **5 chốt điều phối tại `src/he_thong/dieu_phoi_cac_chot_an_toan.py`:**",
+            "  - **Chốt 1 (ASR & B0):** Gắn trie gợi ý 65+ G2P thuốc có khóa ngữ cảnh, phát hiện bất thường ASR/không dấu và chuẩn hóa phương ngữ có guard bảo vệ cụm từ y khoa.",
+            "  - **Chốt 2 (Speaker Guardrail - B2):** Kiểm tra nhất quán vai `nguoi_noi` với `chu_the_id` và bù chủ ngữ tỉnh lược.",
+            "  - **Chốt 3 (Dialogue Act & FSM - B3):** Tách câu nghi vấn/điều kiện và cập nhật trạng thái đính chính `DA_THAY_THE`.",
+            "  - **Chốt 4 (Evidence Integrity K1–K7 - B4):** Soi nguyên văn trích dẫn, mức khẳng định, thời gian và hàm lượng/đơn vị liều.",
+            "  - **Chốt 5 (Clinical Safety & WORM):** Soi 158 hoạt chất, tương tác DDI, liều trần, quy tắc BHYT/TT 26/2025, đẩy nhóm nguy cấp sang 'Cần xác nhận', khóa ký duyệt và ghi WORM SHA-256."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -481,23 +556,22 @@ def tao_word_qna():
     doc.add_page_break()
 
     # =========================================================================
-    # PHẦN 3: CÂU HỎI "BẮT BẺ CHÍ MẠNG" (STRESS-TEST)
+    # PHẦN 3: CÂU HỎI "BẮT BẺ CHÍ MẠNG" (STRESS-TEST) & MỞ RỘNG
     # =========================================================================
-    them_tieu_de_phan(doc, "PHẦN 3: BỘ CÂU HỎI 'BẮT BẺ CHÍ MẠNG' (STRESS-TEST) & CÁCH PHẢN BIỆN ĐOẠT ĐIỂM")
-    them_doan_van(doc, "Các câu hỏi tình huống thực tế hóc búa nhất mà Giám khảo thường dùng để 'thử lửa' thí sinh.",
-                  nghieng=True, co_chu=9.5, mau=COLOR_MUTED)
+    them_tieu_de_phan(doc, "PHẦN 3: BỘ CÂU HỎI 'BẮT BẺ CHÍ MẠNG' (STRESS-TEST) & KIỂM CHỨNG ĐỘC LẬP")
+    them_doan_van(doc, "Các câu hỏi hóc búa nhất về an toàn thuốc, tạp âm phòng khám, dữ liệu công khai và triển khai tại bệnh viện Việt Nam.",
+                  nghieng=True, co_chu=9.2, mau=COLOR_MUTED)
 
-    # Cau 14: ASR Drug name mishearing
+    # Cau 14
     them_hop_cau_hoi(
         doc, "q14",
-        "❓ Giám khảo hỏi: 'Lúc ghi âm thực tế không thể đảm bảo thu nhận đúng 100% tín hiệu và câu từ, ví dụ tên thuốc bệnh nhân đọc hay bị sai hoặc ASR nghe nhầm ('a móc', 'ô mê', 'viên con nhộng đỏ'). Phần mềm có tự động sửa thành tên thuốc chính xác vào đơn không? Nhỡ AI đoán sai loại thuốc thì sao?'",
+        "❓ Câu 14: 'Lúc ghi âm tên thuốc bệnh nhân đọc sai hoặc ASR nghe nhầm (a móc, ô mê). Phần mềm có tự sửa thẳng thành tên thuốc vào đơn không?'",
         [
             "🎯 **Phản biện tự tin:**",
-            "'Thưa Ban Giám khảo, đây là câu hỏi chạm đúng vào **nguyên tắc an toàn y tế sống còn (Zero Silent Normalization)** của MediTrace Sentinel:",
-            "1. **TUYỆT ĐỐI CẤM TỰ Ý SỬA NGẦM VÀO ĐƠN THUỐC:** Trong điều trị, chỉ một sai khác nhỏ về hoạt chất (ví dụ Amoxicillin đơn chất vs. Augmentin phối hợp Clavulanate) có thể gây kháng kháng sinh hoặc sốc phản vệ nguy hiểm tính mạng. Do đó, hệ thống cấm chỉ việc AI tự động 'đoán mò' rồi âm thầm điền tên thuốc vào đơn chính thức.",
-            "2. **CƠ CHẾ BÔI ĐỎ & PHÂN VÙNG CÁCH LY AN TOÀN:** Mọi tên thuốc được gợi ý từ âm vị dân gian hoặc nhận diện trong điều kiện âm thanh không chắc chắn **bắt buộc phải BÔI ĐỎ (Red Badge cảnh báo cao nhất)** và chuyển thẳng sang mục **'CẦN BÁC SĨ XÁC NHẬN'**.",
-            "3. **ĐỐI SOÁT CLICK-TO-VERIFY TRONG 1 GIÂY:** Trên giao diện, bác sĩ sẽ nhìn thấy ngay dòng cảnh báo nổi bật: `[BÔI ĐỎ - CẦN BÁC SĨ XÁC NHẬN TÊN THUỐC]: Tín hiệu ASR nghe là 'a móc' -> Gợi ý: 'Amoxicillin 500mg'`. Bác sĩ chỉ cần bấm vào mỏ neo âm thanh là nghe lại đúng 2 giây bệnh nhân nói trong băng ghi âm gốc để xác nhận hoặc gõ sửa lại.",
-            "4. **QUY TRÌNH KÉP BẢO VỆ PHÁP LÝ:** Chỉ khi Bác sĩ bấm [Xác nhận đúng], tên thuốc mới được chuyển vào đơn chính thức và tiếp tục chạy qua Chốt Guardrail 5 để rà soát tương tác kỵ nhau (DDI) và liều trần. Quyết định chuyên môn 100% thuộc về Bác sĩ (Human-in-the-Loop), và hành động duyệt được ghi vết vào Audit Trail niêm phong chữ ký số SHA-256.'"
+            "1. **TUYỆT ĐỐI KHÔNG TỰ Ý SỬA NGẦM VÀO ĐƠN (Zero Silent Normalization):** Sai lệch giữa hai hoạt chất gần âm (vd: Amoxicillin đơn chất vs. Augmentin phối hợp Clavulanate) có thể gây dị ứng hoặc sai điều trị. Do đó `contextual_trie_600.py` chỉ trả về **gợi ý** khi xuất hiện trong ngữ cảnh thuốc (`uống/viên/mg/đơn`).",
+            "2. **CÁCH LY SANG 'CẦN BÁC SĨ XÁC NHẬN':** Mọi trường hợp gợi ý từ âm vị dân gian, nghi ngờ nhầm họ thuốc hoặc thiếu liều (Chính sách D) đều gắn cờ cảnh báo để bác sĩ kiểm tra.",
+            "3. **ĐỐI SOÁT CLICK-TO-VERIFY:** Bác sĩ bấm vào thẻ cảnh báo để `useTurnAudioPlayer.ts` phát lại đúng đoạn âm thanh gốc tại lượt thoại đó, tự tay bấm Xác nhận hoặc Sửa lại.",
+            "4. **KHÓA KÝ DUYỆT & WORM:** Chỉ khi hết mục treo, đơn mới qua được `sign-off.ts` để kiểm DDI/TT 26/2025 và ghi sổ WORM nối chuỗi SHA-256 kèm `.anchor.json`."
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
     )
@@ -505,12 +579,10 @@ def tao_word_qna():
     # Cau 15
     them_hop_cau_hoi(
         doc, "q15",
-        "❓ Giám khảo hỏi: 'Nếu micrô phòng khám thu nhiều tạp âm, bệnh nhân nói lí nhí, ASR nghe sai be bét thì phần mềm của bạn có thành đống rác không?'",
+        "❓ Câu 15: 'Nếu micrô thu nhiều tạp âm, bệnh nhân nói lí nhí, ASR nghe sai be bét thì phần mềm có tạo bệnh án rác không?'",
         [
             "🎯 **Phản biện tự tin:**",
-            "'Thưa Ban Giám khảo, đây chính là lý do MediTrace vượt trội hơn ChatGPT.",
-            "Nếu là ChatGPT, khi gặp đoạn gỡ băng sai be bét, nó vẫn cố tình 'sáng tác' ra một bệnh án đọc rất mượt nhưng sai sự thật -> cực kỳ nguy hiểm.",
-            "Còn với MediTrace, nhờ Chốt Guardrail 1 và Cổng K1: Khi âm thanh bị nhiễu hoặc không rõ ràng, hệ thống sẽ phát hiện độ tin cậy thấp (Low Confidence) và câu trích không đủ căn cứ. Mẩu tin đó **lập tức bị chặn lại và chuyển sang mục 'Cần bác sĩ xác nhận'** chứ tuyệt đối không bao giờ được ghi vào bệnh án chính thức. Thà để bác sĩ tự điền bằng tay còn hơn để phần mềm tự bịa thông tin sai!'"
+            "Khác với chatbot tổng quát dễ 'sáng tác' phần bị mất cho mượt câu chữ, khi ASR vỡ chữ hoặc không rõ ngữ cảnh, bộ phát hiện bất thường ASR/không dấu trong `src/canh_bao/` kết hợp K1–K2 tại `b4_kiem_can_cu.py` sẽ chặn mệnh đề thiếu căn cứ và chuyển sang trạng thái chờ bác sĩ kiểm tra — không tự bịa thông số lâm sàng vào thân bệnh án sạch."
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
     )
@@ -518,10 +590,10 @@ def tao_word_qna():
     # Cau 16
     them_hop_cau_hoi(
         doc, "q16",
-        "❓ Giám khảo hỏi: 'Một ngày khám 80 ca, nhỡ bác sĩ bận quá quên bấm duyệt mà tắt máy về thì dữ liệu có bị mất không?'",
+        "❓ Câu 16: 'Một ngày khám đông ca, nhỡ bác sĩ đang dở tay hoặc tắt máy đột ngột thì dữ liệu có mất không?'",
         [
             "🎯 **Phản biện tự tin:**",
-            "'Hệ thống thiết kế cơ chế tự động lưu trữ tức thời (Auto-Save Persistence) vào cơ sở dữ liệu SQLite cục bộ tại phòng khám sau mỗi lượt thoại. Toàn bộ phiên âm thanh, các mẩu tin trích xuất và bản nháp đều được lưu vết. Nếu bác sĩ bị ngắt quãng ca khám để đi cấp cứu hoặc tắt máy đột ngột, khi mở lại phần mềm, ca khám vẫn hiển thị nguyên vẹn ở trạng thái 'Chờ duyệt' để bác sĩ kiểm tra tiếp mà không bị mất một chữ nào.'"
+            "Backend BFF (`web/may-chu/csdl.ts`) lưu phiên khám liên tục trên cơ sở dữ liệu **SQLite WAL cục bộ** kèm hàng đợi nền `hang-doi.ts`. Bản ghi âm, bản gỡ băng, danh sách mệnh đề và trạng thái từng mục xác nhận được lưu bền vững; khi mở lại phần mềm, bác sĩ tiếp tục đúng phiên ở trạng thái `Chờ duyệt` mà không mất dữ liệu."
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
     )
@@ -529,22 +601,51 @@ def tao_word_qna():
     # Cau 17
     them_hop_cau_hoi(
         doc, "q17",
-        "❓ Giám khảo hỏi: 'Dự án của bạn đã kiểm thử trên bao nhiêu ca bệnh và độ ổn định thực tế ra sao?'",
+        "❓ Câu 17: 'Dự án đã kiểm thử tự động trên quy mô bao nhiêu, kết quả thực tế thế nào?'",
         [
             "🎯 **Phản biện tự tin:**",
-            "'Số lượng và kết quả kiểm thử cần được xác nhận bằng lần chạy có lưu log. Không nên công bố tỷ lệ đạt hoặc độ bao phủ nếu chưa có báo cáo tái lập được.",
-            "Ngoài ra, cơ sở dữ liệu khuôn bệnh đã được nâng cấp lên **200 khuôn ca bệnh thuộc 10 chuyên khoa lâm sàng**, với hơn 5.000 hội thoại mô phỏng và 300 ca thử thách đối đầu ranh giới, bảo đảm hệ thống sẵn sàng hoạt động ổn định trong môi trường thực tế.'"
+            "Toàn hệ thống được bảo vệ bởi bộ kiểm thử hồi quy hai tầng chạy sau các đợt tinh chỉnh cuối cùng:",
+            "1. **Kiểm thử phần mềm tự động:** **1.974 bài test Python passed, 25 skipped** (trong 1.999 tests thu thập qua `pytest`, các bài skip phụ thuộc phần cứng/sidecar GPU ngoài môi trường CPU) và **96/96 bài kiểm thử TypeScript/BFF passed** (`web/`).",
+            "2. **Kiểm thử dữ liệu & an toàn lâm sàng:** **657 khuôn ca bệnh** (21 hệ cơ quan, chia 515/72/70), **5.000 hội thoại mô phỏng v2** (100% trích dẫn chuỗi con nguyên văn), **4 bộ thử thách phát triển** (300 ca: Chính sách D giảm `lot_nguy_hiem` từ 45,9% xuống **11,8%**, chặn **88,2%** lỗi nguy hiểm, chặn thừa **10,0%**), **240 ca giữ kín `thach_thuc_v2`** (nhạy **0,871**, đổi chủ thể **0,946**, bắt xoá dị ứng **97,2%**), và **10 ca bệnh hiếm ngoài khuôn**."
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
+    )
+
+    # Cau 18
+    them_hop_cau_hoi(
+        doc, "q18",
+        "❓ Câu 18: 'Đã đo trên bộ dữ liệu tiếng Việt công khai độc lập nào chưa? Có điểm yếu nào được phát hiện không?'",
+        [
+            "🎯 **Phản biện tự tin (Minh bạch 5 nguồn ngoài tại `tools/do_da_nguon_doc_lap.py` & `docs/ket-qua/da-nguon-doc-lap.json`):**",
+            "1. **`ViDia2Std/test.csv`** (1.603 câu chuẩn hóa phương ngữ người thật): Chuẩn hóa đúng hoàn toàn **28,0%** (1.192/4.264), tổng độ phủ **37,1%**, kéo WER giảm từ **30,1% xuống 21,9%**.",
+            "2. **`ViHealthQA`** (2.013 mẫu hỏi đáp): Khớp 14/42 câu hỏi/đáp nhắc hoạt chất trong Dược thư **158 hoạt chất**.",
+            "3. **`ViMedAQA`** (500 mẫu hỏi đáp y khoa): Bắt khớp **87** lượt nhắc hoạt chất chuẩn.",
+            "4. **`ViMQ`** (1.000 câu hỏi ý định y khoa): Khớp 10 lượt thuốc (9/334 thực thể `MED` có nhãn) do bệnh nhân đại chúng ít gọi tên hoạt chất Tây y.",
+            "5. **`PhoNER_COVID19`** (1.000 câu tin tức dịch tễ — **giới hạn được báo cáo thẳng**): Đối chiếu nhãn vàng `NAME` và `PATIENT_ID`, `khu_dinh_danh.py` chỉ đạt **10/847 (1,2%)** vì được thiết kế theo mẫu hội thoại y tế ('tên tôi là...', 'bác sĩ...', mã hồ sơ) chứ chưa có mô hình NER tin tức cho tên riêng không tiền tố ('Bệnh nhân 45 tuổi ở Hải Dương...'). Đội ngũ đưa thẳng điểm này vào lộ trình nâng cấp NER."
+        ],
+        mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
+    )
+
+    # Cau 19
+    them_hop_cau_hoi(
+        doc, "q19",
+        "❓ Câu 19: 'Ngoài bóc tách bệnh án SOAP, dự án có gì phục vụ vận hành thực tế tại bệnh viện Việt Nam (BHYT, HIS cũ, bệnh nhân)?'",
+        [
+            "🎯 **Phản biện tự tin (Bộ tiện ích `src/cong_cu_lam_sang/` & `web/`):**",
+            "• **Tiền kiểm BHYT & TT 26/2025 (`tien_kiem_bhyt_va_khoi_phuc_bo_sot.py` + `BhytPrecheckModal.tsx`):** Rà **13 quy tắc cận lâm sàng (CLS)** dễ bị xuất toán BHYT và bắt buộc kiểm tra **cân nặng trẻ em** khi kê đơn nhi khoa.",
+            "• **Sao chép thông minh sang HIS (`HisSmartCopyPopover.tsx`):** Copy theo từng khối (Lý do khám, Bệnh sử, Tiền sử/Dị ứng, Chẩn đoán, Điều trị) sang phần mềm HIS sẵn có của bệnh viện mà không phải chờ tích hợp sâu ngày đầu.",
+            "• **Chuẩn liên thông & ngoại viện:** Xuất **FHIR R4** (`xuat_fhir_r4.py`), nạp **LIS/HL7** (`nap_ket_qua_lis_hl7.py`), **9 thang điểm nguy cơ** (`thang_diem_nguy_co.py`), đi buồng nội trú, **Cổng bệnh nhân & QR tóm tắt đơn/dặn dò** (`ho_so_benh_nhan_qr.py`, `PatientPortalView.tsx`) và **Trung tâm điều hành bệnh viện** (`HospitalCommandCenterView.tsx`)."
+        ],
+        mau_vien=HEX_NAVY, mau_nen="F8FAFC", badge_text="Trung bình"
     )
 
     # THONG DIEP CHOT
     them_hop_cau_hoi(
         doc, "conclusion",
-        "🏆 THÔNG ĐIỆP CHỐT HẠ ĐOẠT ĐIỂM TUYỆT ĐỐI:",
+        "🏆 THÔNG ĐIỆP CHỐT HẠ TRƯỚC BAN GIÁM KHẢO:",
         [
-            "**'MediTrace Sentinel không phải là một công cụ AI biểu diễn công nghệ viết văn.**",
-            "Đây là một giải pháp y tế số an toàn được xây dựng bằng tư duy lâm sàng thực chiến: **Đặt an toàn tính mạng người bệnh lên hàng đầu, triệt tiêu ảo giác bằng luật toán học xác định, và giải phóng đôi tay người thầy thuốc.'**"
+            "**'MediTrace Sentinel không trình diễn một chatbot viết văn y khoa trơn tru.**",
+            "Đây là kiến trúc **Neuro-Symbolic đặt an toàn người bệnh lên trước**: dùng AI đúng một chỗ để tách từng mệnh đề có căn cứ nguyên văn, kiểm soát rủi ro ảo giác bằng **7 cổng khóa K1–K7** và **5 chốt an toàn xác định**, minh bạch cả kết quả đo được lẫn giới hạn còn lại để người thầy thuốc luôn giữ quyền quyết định cuối cùng.'**"
         ],
         mau_vien=HEX_NAVY, mau_nen="F1F5F9", badge_text="Kết luận"
     )
@@ -557,7 +658,7 @@ def tao_word_qna():
         doc.save(r"C:\Users\admin\Desktop\Bo_Cau_Hoi_Va_Tra_Loi_Ban_Giam_Khao_MediTrace.docx")
     except Exception as e:
         print(f"Luu Desktop/Downloads: {e}")
-    print(f"Da xuat xong file Word dep tai:\n-> {FILE_OUT_GOC}\n-> {FILE_OUT_DOCS}")
+    print(f"Da xuat xong file Word tai:\n-> {FILE_OUT_GOC}\n-> {FILE_OUT_DOCS}")
 
 
 if __name__ == "__main__":
