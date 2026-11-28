@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Newsreader", Georgia, Cambria, "Times New Roman", "Palatino Linotype", "Noto Serif", serif;
-  --font-sans: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Noto Sans", sans-serif;
+  --font-serif: "Times New Roman", "Noto Serif", Cambria, "Palatino Linotype", serif;
+  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Noto Sans", sans-serif;
 }
 
 body {
