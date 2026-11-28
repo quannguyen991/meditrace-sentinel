@@ -19,8 +19,9 @@ def test_kappa_vi_du_biet_truoc():
     assert cohen_kappa(a, b) == pytest.approx(0.4)
 
 
-def test_kappa_mot_nhan_duy_nhat_khong_chia_cho_0():
-    assert cohen_kappa(["dung"] * 4, ["dung"] * 4) == pytest.approx(1.0)
+def test_kappa_suy_bien_tra_none_khong_xac_dinh():
+    # Cả hai chỉ dùng một nhãn: mẫu số bằng 0, κ không xác định (rà soát độc lập 28/11)
+    assert cohen_kappa(["dung"] * 4, ["dung"] * 4) is None
 
 
 def test_kappa_do_dai_lech_thi_bao_loi():
@@ -28,9 +29,14 @@ def test_kappa_do_dai_lech_thi_bao_loi():
         cohen_kappa(["dung"], ["dung", "dung"])
 
 
-def test_dong_thuan_chi_tinh_muc_ca_hai_cung_gan():
-    ra = dong_thuan({"a#1": "dung", "a#2": "bia"}, {"a#1": "dung", "a#3": "dung"})
-    assert ra["so_muc"] == 1 and ra["kappa"] == pytest.approx(1.0)
+def test_dong_thuan_bao_muc_thieu_moi_ben():
+    ra = dong_thuan({"a#1": "dung", "a#2": "bia", "a#4": "sai_nguoi"}, {"a#1": "dung", "a#3": "dung", "a#4": "dung"})
+    assert ra["so_muc"] == 2
+    assert ra["thieu_o_b"] == ["a#2"] and ra["thieu_o_a"] == ["a#3"]
+
+
+def test_dong_thuan_khong_co_muc_chung_thi_kappa_none():
+    assert dong_thuan({"a#1": "dung"}, {"b#1": "dung"})["kappa"] is None
 
 
 def test_nap_nhan_bo_dong_trong_va_bao_nhan_la(tmp_path):
@@ -46,6 +52,13 @@ def test_nap_nhan_bo_dong_trong_va_bao_nhan_la(tmp_path):
         nap_nhan(p)
 
 
+def test_nap_nhan_tu_choi_ma_trung(tmp_path):
+    p = tmp_path / "phieu.csv"
+    p.write_text("ma_muc,nhan\nx#0,dung\nx#0,bia\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        nap_nhan(p)
+
+
 def test_xuat_phieu_mu_khong_lo_dau_ra_bo_cham_va_on_dinh():
     ca = [{"id": f"c{i}", "input": "Bác sĩ: Ho không?\nBệnh nhân: Ho ba ngày.",
            "phat_bieu": [{"id": 0, "noi_dung": "ho ba ngày", "bang_chung": [2], "trich_dan": ["Ho ba ngày"],
@@ -55,4 +68,6 @@ def test_xuat_phieu_mu_khong_lo_dau_ra_bo_cham_va_on_dinh():
     assert p1 == p2 and len({r["ma_ca"] for r in p1}) == 40
     assert all(r["nhan"] == "" for r in p1)
     assert all("loi" not in r for r in p1), "phiếu phải mù với kết quả bộ chấm"
+    assert all(r["muc_may_xep"] for r in p1), "phải có mục bệnh án để gán được nhãn sai_muc"
+    assert all("toan_bo_hoi_thoai" in r for r in p1)
     assert set(NHAN_HOP_LE) >= {"dung", "sai_nguoi", "sai_noi_dung", "bia", "sai_muc"}
