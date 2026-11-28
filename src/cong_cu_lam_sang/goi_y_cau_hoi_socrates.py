@@ -12,39 +12,44 @@ Mục lục (các hàm/lớp chính):
 Dùng bởi : he_thong/dieu_phoi_cac_chot_an_toan
 Tên cũ   : tro_ly_lam_sang.py (trước 27/11/2026) · Bản đồ: BAN_DO_MA_NGUON.md
 ────────────────────────────────────────────────────────────────────────
-Trợ lý Gợi ý Câu hỏi Lâm sàng Thông minh (Active Clinical Clarification Agent).
+Trợ lý Gợi ý Câu hỏi Lâm sàng (Active Clinical Clarification Agent).
 
-Chủ động phân tích cuộc hội thoại khám bệnh và danh sách phát biểu để phát hiện:
-1. Khoảng trống bệnh sử cốt lõi (Clinical Information Gaps theo chuẩn SOCRATES cho triệu chứng đau).
-2. Chi tiết triệu chứng sốt (nhiệt độ đỉnh, rét run, tính chất sốt).
-3. Chi tiết triệu chứng hô hấp (ho khan/đờm, màu sắc đờm, máu, khó thở tư thế).
-4. Thông tin dùng thuốc chưa đầy đủ (thiếu hàm lượng, liều dùng hàng ngày, tuân thủ điều trị).
-5. Yếu tố nguy cơ & cơ địa nhạy cảm (thai kỳ/cho con bú ở phụ nữ tuổi sinh sản khi có thuốc/triệu chứng liên quan).
+Phát hiện:
+1. Đau: vị trí, tính chất, hướng lan (đau ngực).
+2. Sốt: nhiệt độ đo được, rét run.
+3. Ho: ho khan hay có đờm, màu đờm.
+4. Thuốc thường gặp chưa rõ hàm lượng/liều.
+5. Nữ tuổi sinh sản chưa hỏi thai kỳ/cho con bú (căn cứ hồ sơ).
 
-Sinh ra các câu hỏi gợi ý thông minh (Smart Clarification Prompts) hiển thị tức thời cho bác sĩ
-để hỏi bổ sung trước khi kết thúc ca khám.
+Bám lời thoại (28/11/2026): gợi ý chỉ bật khi CHÍNH LỜI bệnh nhân/người nhà của ca khám nhắc
+tới triệu chứng hoặc thuốc: khớp nguyên từ ("ho" không khớp "cho", "thoải"), bỏ câu phủ định
+("không sốt"), bỏ câu hỏi của bác sĩ, bỏ lời của "người khác". Mỗi gợi ý mang `luot_dan` và
+`trich_dan` là lượt nói làm căn cứ để bác sĩ thấy vì sao hệ thống hỏi. Gợi ý thai kỳ dựa trên
+hồ sơ (giới, tuổi) và ghi nguồn "hồ sơ".
 """
 
 from dataclasses import dataclass, field
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 # ═══ class GoiYLamSang — Một câu hỏi gợi ý cho bác sĩ để lấp khoảng trống ═════════════
-# Có chủ đề, mức ưu tiên, khoảng trống, câu hỏi, lựa chọn nhanh và lý do y khoa.
+# Có chủ đề, mức ưu tiên, khoảng trống, câu hỏi, lựa chọn nhanh, lý do và căn cứ (lượt nói).
 @dataclass
 class GoiYLamSang:
     ma_goi_y: str
     chu_de: str              # ĐAU, SỐT, HÔ_HẤP, THUỐC, THAI_KỲ, TIỀN_SỬ
     muc_do_uu_tien: str      # CAO, TRUNG_BINH, KHUYEN_NGHI
     khoang_trong: str        # Mô tả thông tin đang bị khuyết thiếu
-    cau_hoi_goi_y: str       # Câu hỏi đề xuất cho bác sĩ
+    cau_hoi_goi_y: str       # Câu hỏi đề xuất cho bác sĩ (ngắn)
     cac_lua_chon: List[str]  # Các nhãn gợi ý nhanh cho UI
     ly_do_y_khoa: str        # Giải thích tại sao cần hỏi thông tin này
+    luot_dan: List[int] = field(default_factory=list)  # Số lượt nói làm căn cứ (đếm từ 1)
+    trich_dan: str = ""      # Đoạn lời thoại hoặc hồ sơ làm căn cứ
+    nguon: str = ""          # "lời bệnh nhân", "lời người nhà", "lời người bệnh", "hồ sơ"
 
 
 # ═══ class KetQuaTroLyLamSang — Tập gợi ý và mức đầy đủ của bệnh án ═══════════════════
-# Gồm danh sách gợi ý, số khoảng trống và điểm đầy đủ từ 0 đến 1.
 @dataclass
 class KetQuaTroLyLamSang:
     danh_sach_goi_y: List[GoiYLamSang] = field(default_factory=list)
@@ -52,11 +57,86 @@ class KetQuaTroLyLamSang:
     muc_do_day_du_benh_an: float = 1.0  # Từ 0.0 đến 1.0
 
 
+_VAI_KHAI = {"bệnh nhân": "lời bệnh nhân", "người bệnh": "lời bệnh nhân",
+             "người nhà": "lời người nhà"}
+_VAI_BIET = {"bác sĩ", "điều dưỡng", "người khác", "bệnh nhân", "người bệnh", "người nhà"}
+_PHU_DINH_TRUOC = re.compile(r"(?:^|\W)(?:không|chưa|hết|chẳng|ko)(?:\s+\w+){0,2}\s*$", re.I)
+
+
+def _tach_luot(hoi_thoai: str) -> List[Tuple[int, str, str]]:
+    """-> [(so_luot, vai_viet_thuong, noi_dung)]. Dòng không có vai -> vai ''."""
+    ra = []
+    for i, dong in enumerate(d for d in (hoi_thoai or "").split("\n") if d.strip()):
+        m = re.match(r"^\s*([^:\n]{1,20}):\s*(.*)$", dong)
+        if m and m.group(1).strip().lower() in _VAI_BIET:
+            ra.append((i + 1, m.group(1).strip().lower(), m.group(2).strip()))
+        else:
+            ra.append((i + 1, "", dong.strip()))
+    return ra
+
+
+def _mau_tu(tu: str) -> "re.Pattern[str]":
+    return re.compile(r"(?<!\w)" + re.escape(tu) + r"(?!\w)", re.I)
+
+
+def _co_tu(van_ban: str, cac_tu) -> bool:
+    return any(_mau_tu(t).search(van_ban) for t in cac_tu)
+
+
+def _trich_quanh(noi_dung: str, vi_tri: int, do_dai: int = 70) -> str:
+    """Lấy vế câu chứa vị trí khớp, cắt ngắn."""
+    dau = max(noi_dung.rfind(c, 0, vi_tri) for c in ".,;!?") + 1
+    cuoi = min([c for c in (noi_dung.find(x, vi_tri) for x in ".;!?") if c != -1] or [len(noi_dung)])
+    doan = noi_dung[dau:cuoi].strip()
+    return doan if len(doan) <= do_dai else doan[:do_dai].rstrip() + "…"
+
+
+# Người nhà kể về CHÍNH MÌNH ("còn tôi thì bị…", "tôi cũng đang uống…") — không phải bệnh nhân.
+_NGUOI_NHA_TU_KE = re.compile(r"(?:^|\W)(?:còn\s+)?(?:tôi|em|mình|tui)\s+(?:thì\s+|cũng\s+)?"
+                              r"(?:bị|có|đang|hay|từng)(?!\w)", re.I)
+
+
+def _ve_cau(noi_dung: str, vi_tri: int) -> str:
+    dau = max(noi_dung.rfind(c, 0, vi_tri) for c in ".;!?") + 1
+    cuoi = min([c for c in (noi_dung.find(x, vi_tri) for x in ".;!?") if c != -1] or [len(noi_dung)])
+    return noi_dung[dau:cuoi]
+
+
+def _tim_can_cu(luot, cac_tu, bo_neu_cau_co=()) -> Optional[Tuple[int, str, str]]:
+    """Lượt ĐẦU TIÊN của bệnh nhân/người nhà nhắc một từ trong `cac_tu` ở dạng khẳng định.
+
+    Bỏ qua: câu phủ định ngay trước từ khoá; câu người nhà kể về chính mình; câu chứa một
+    cụm trong `bo_neu_cau_co` (vd "dị ứng" khi tìm tên thuốc đang dùng).
+    -> (so_luot, trich_dan, nguon) hoặc None. Khi hội thoại không ghi vai (một khối văn bản),
+    mọi dòng được xét như lời người bệnh.
+    """
+    co_vai = any(v for _, v, _ in luot)
+    for so, vai, nd in luot:
+        if co_vai and vai not in _VAI_KHAI:
+            continue
+        for t in cac_tu:
+            for m in _mau_tu(t).finditer(nd):
+                if _PHU_DINH_TRUOC.search(nd[:m.start()]):
+                    continue
+                cau = _ve_cau(nd, m.start())
+                if vai == "người nhà" and _NGUOI_NHA_TU_KE.search(cau):
+                    continue
+                if bo_neu_cau_co and _co_tu(cau, bo_neu_cau_co):
+                    continue
+                return so, _trich_quanh(nd, m.start()), _VAI_KHAI.get(vai, "lời người bệnh")
+    return None
+
+
+def _noi_dung_phat_bieu(p: Any) -> str:
+    if isinstance(p, dict):
+        return str(p.get("noi_dung", ""))
+    return str(getattr(p, "noi_dung", p))
+
+
 # ═══ class ActiveClinicalClarificationAgent — Tìm thông tin còn thiếu và gợi ý câu hỏi cho bác sĩ ═══
-# Rà hội thoại và mệnh đề theo từ khoá để đề xuất câu hỏi theo khung SOCRATES. Chỉ là
-# gợi ý.
+# Chỉ gợi ý khi lời bệnh nhân/người nhà thật sự nhắc tới vấn đề. Chỉ là gợi ý.
 class ActiveClinicalClarificationAgent:
-    """Động cơ phát hiện khoảng trống lâm sàng và gợi ý câu hỏi thời gian thực."""
+    """Phát hiện khoảng trống bệnh sử từ lời thoại của chính ca khám."""
 
     @classmethod
     def phan_tich_khoang_trong(
@@ -65,152 +145,105 @@ class ActiveClinicalClarificationAgent:
         danh_sach_phat_bieu: Optional[List[Any]] = None,
         thong_tin_benh_nhan: Optional[Dict[str, Any]] = None
     ) -> KetQuaTroLyLamSang:
-        """Rà soát toàn diện cuộc khám để tìm các thông tin y khoa còn thiếu."""
-        hoi_thoai_lower = (hoi_thoai or "").lower()
-        phat_bieu_texts = [
-            str(getattr(p, "noi_dung", p)).lower()
-            for p in (danh_sach_phat_bieu or [])
-        ]
-        toan_bo_van_ban = hoi_thoai_lower + " " + " ".join(phat_bieu_texts)
+        luot = _tach_luot(hoi_thoai)
+        # "Đã có chưa" xét trên toàn bộ hội thoại (mọi vai) và mệnh đề đã trích.
+        da_co = " \n".join([nd for _, _, nd in luot] +
+                           [_noi_dung_phat_bieu(p) for p in (danh_sach_phat_bieu or [])])
 
         goi_y_list: List[GoiYLamSang] = []
 
-        # ----------------------------------------------------------------------
-        # 1. RÀ SOÁT TRIỆU CHỨNG ĐAU (SOCRATES)
-        # ----------------------------------------------------------------------
-        co_dau = any(w in toan_bo_van_ban for w in ["đau bụng", "đau ngực", "đau đầu", "đau lưng", "đau khớp"])
-        if co_dau:
-            # Kiểm tra vị trí cụ thể của đau bụng
-            if "đau bụng" in toan_bo_van_ban:
-                vi_tri_bung = ["thượng vị", "hạ sườn", "quanh rốn", "hố chậu", "hạ vị", "mỏ ác"]
-                if not any(vt in toan_bo_van_ban for vt in vi_tri_bung):
-                    goi_y_list.append(GoiYLamSang(
-                        ma_goi_y="GAP_DAU_VI_TRI_BUNG",
-                        chu_de="ĐAU",
-                        muc_do_uu_tien="CAO",
-                        khoang_trong="Bệnh nhân khai đau bụng nhưng chưa xác định vị trí khu trú giải phẫu.",
-                        cau_hoi_goi_y="Bác/cháu đau nhiều nhất ở vị trí nào trong bụng (trên rốn, dưới rốn, hay bên phải/trái)?",
-                        cac_lua_chon=["Thượng vị (trên rốn)", "Hố chậu phải", "Quanh rốn", "Hạ vị (dưới rốn)", "Đau khắp bụng"],
-                        ly_do_y_khoa="Khu trú vị trí đau bụng là yếu tố then chốt để phân biệt cấp cứu ngoại khoa (viêm ruột thừa, thủng tạng rỗng) với nội khoa."
-                    ))
+        def them(can_cu, **k):
+            so, trich, nguon = can_cu
+            goi_y_list.append(GoiYLamSang(luot_dan=[so], trich_dan=trich, nguon=nguon, **k))
 
-            # Kiểm tra tính chất đau
-            tinh_chat_dau = ["quặn", "âm ỉ", "nhói", "như dao đâm", "từng cơn", "bỏng rát", "căng tức"]
-            if not any(tc in toan_bo_van_ban for tc in tinh_chat_dau):
-                goi_y_list.append(GoiYLamSang(
-                    ma_goi_y="GAP_DAU_TINH_CHAT",
-                    chu_de="ĐAU",
-                    muc_do_uu_tien="TRUNG_BINH",
-                    khoang_trong="Chưa rõ tính chất cơn đau (quặn từng cơn, âm ỉ liên tục, hay nhói buốt).",
-                    cau_hoi_goi_y="Cơn đau có tính chất như thế nào: đau quặn thắt từng cơn hay đau âm ỉ liên tục cả ngày?",
-                    cac_lua_chon=["Đau quặn từng cơn", "Đau âm ỉ liên tục", "Đau nhói như kim châm", "Đau rát bỏng"],
-                    ly_do_y_khoa="Tính chất đau giúp định hướng cơ chế đau do co thắt tạng rỗng hay do viêm phúc mạc/thần kinh."
-                ))
+        # 1. ĐAU
+        cc_dau = _tim_can_cu(luot, ["đau bụng", "đau ngực", "đau đầu", "đau lưng", "đau khớp"])
+        if cc_dau:
+            cc_bung = _tim_can_cu(luot, ["đau bụng"])
+            if cc_bung and not _co_tu(da_co, ["thượng vị", "hạ sườn", "quanh rốn", "hố chậu", "hạ vị",
+                                              "mỏ ác", "trên rốn", "dưới rốn"]):
+                them(cc_bung, ma_goi_y="GAP_DAU_VI_TRI_BUNG", chu_de="ĐAU", muc_do_uu_tien="CAO",
+                     khoang_trong="Có đau bụng nhưng chưa rõ vị trí.",
+                     cau_hoi_goi_y="Đau chỗ nào nhất trong bụng?",
+                     cac_lua_chon=["Thượng vị", "Hố chậu phải", "Quanh rốn", "Hạ vị", "Khắp bụng"],
+                     ly_do_y_khoa="Vị trí đau giúp phân biệt bệnh ngoại khoa cấp với nội khoa.")
+            if not _co_tu(da_co, ["quặn", "âm ỉ", "nhói", "như dao đâm", "từng cơn", "bỏng rát",
+                                  "căng tức", "rát", "thắt"]):
+                them(cc_dau, ma_goi_y="GAP_DAU_TINH_CHAT", chu_de="ĐAU", muc_do_uu_tien="TRUNG_BINH",
+                     khoang_trong="Chưa rõ tính chất cơn đau.",
+                     cau_hoi_goi_y="Đau quặn từng cơn hay âm ỉ liên tục?",
+                     cac_lua_chon=["Quặn từng cơn", "Âm ỉ liên tục", "Nhói", "Rát bỏng"],
+                     ly_do_y_khoa="Tính chất đau định hướng cơ chế gây đau.")
+            cc_nguc = _tim_can_cu(luot, ["đau ngực"])
+            if cc_nguc and not _co_tu(da_co, ["lan lên", "lan ra", "lan xuống", "lan sang", "không lan"]):
+                them(cc_nguc, ma_goi_y="GAP_DAU_NGUC_HUONG_LAN", chu_de="ĐAU", muc_do_uu_tien="CAO",
+                     khoang_trong="Đau ngực chưa rõ hướng lan.",
+                     cau_hoi_goi_y="Đau ngực có lan lên cằm, xuống tay trái hay ra sau lưng không?",
+                     cac_lua_chon=["Lan tay trái", "Lan sau lưng", "Lan cằm/cổ", "Không lan"],
+                     ly_do_y_khoa="Sàng lọc hội chứng mạch vành cấp và lóc tách động mạch chủ.")
 
-            # Kiểm tra hướng lan nếu là đau ngực
-            if "đau ngực" in toan_bo_van_ban:
-                huong_lan = ["lan lên", "lan ra sau lưng", "lan xuống tay", "lan sang vai", "không lan"]
-                if not any(hl in toan_bo_van_ban for hl in huong_lan):
-                    goi_y_list.append(GoiYLamSang(
-                        ma_goi_y="GAP_DAU_NGUC_HUONG_LAN",
-                        chu_de="ĐAU",
-                        muc_do_uu_tien="CAO",
-                        khoang_trong="Khai đau ngực nhưng chưa xác định hướng lan sang cánh tay trái, cằm hoặc sau lưng.",
-                        cau_hoi_goi_y="Cơn đau ngực có lan lên cổ, cằm, xuống cánh tay trái hay ra sau lưng không?",
-                        cac_lua_chon=["Lan xuống tay trái", "Lan ra sau lưng", "Lan lên cằm/cổ", "Chỉ đau tại chỗ, không lan"],
-                        ly_do_y_khoa="Loại trừ hội chứng mạch vành cấp (nhồi máu cơ tim) và lóc tách động mạch chủ ngực."
-                    ))
+        # 2. SỐT
+        cc_sot = _tim_can_cu(luot, ["sốt"])
+        if cc_sot:
+            if not re.search(r"(?<!\d)(?:3[6-9]|4[0-2])(?:[.,]\d)?\s*(?:độ|°c|°)", da_co, re.I):
+                them(cc_sot, ma_goi_y="GAP_SOT_NHIET_DO", chu_de="SỐT", muc_do_uu_tien="TRUNG_BINH",
+                     khoang_trong="Có sốt nhưng chưa có nhiệt độ đo được.",
+                     cau_hoi_goi_y="Đo được cao nhất bao nhiêu độ?",
+                     cac_lua_chon=["37,5–38°C", "38,5–39°C", "Trên 39°C", "Chưa đo"],
+                     ly_do_y_khoa="Mức sốt giúp phân tầng nguy cơ nhiễm trùng.")
+            if not _co_tu(da_co, ["rét run", "ớn lạnh", "lạnh run", "rét"]):
+                them(cc_sot, ma_goi_y="GAP_SOT_RET_RUN", chu_de="SỐT", muc_do_uu_tien="TRUNG_BINH",
+                     khoang_trong="Chưa hỏi rét run kèm sốt.",
+                     cau_hoi_goi_y="Sốt có kèm rét run không?",
+                     cac_lua_chon=["Rét run", "Chỉ ớn lạnh", "Không rét run"],
+                     ly_do_y_khoa="Rét run gợi ý nhiễm khuẩn huyết hoặc nhiễm khuẩn đường mật.")
 
-        # ----------------------------------------------------------------------
-        # 2. RÀ SOÁT TRIỆU CHỨNG SỐT
-        # ----------------------------------------------------------------------
-        if "sốt" in toan_bo_van_ban:
-            # Kiểm tra nhiệt độ đo được
-            co_nhiet_do = bool(re.search(r"\b(?:3[6-9]|4[0-2])(?:\.[0-9])?\s*(?:độ|°c|°)\b", toan_bo_van_ban))
-            if not co_nhiet_do:
-                goi_y_list.append(GoiYLamSang(
-                    ma_goi_y="GAP_SOT_NHIET_DO",
-                    chu_de="SỐT",
-                    muc_do_uu_tien="TRUNG_BINH",
-                    khoang_trong="Bệnh nhân khai sốt nhưng chưa có chỉ số nhiệt độ đo bằng nhiệt kế tại nhà.",
-                    cau_hoi_goi_y="Ở nhà bác/cháu có cặp nhiệt độ không, đo được bao nhiêu độ C lúc sốt cao nhất?",
-                    cac_lua_chon=["37.5 - 38.0°C (Sốt nhẹ)", "38.5 - 39.0°C (Sốt vừa)", "Trên 39°C (Sốt cao)", "Chưa cặp nhiệt độ, chỉ cảm thấy nóng"],
-                    ly_do_y_khoa="Định lượng mức độ sốt giúp phân tầng nguy cơ nhiễm trùng nặng và chỉ định thuốc hạ sốt phù hợp."
-                ))
+        # 3. HO
+        cc_ho = _tim_can_cu(luot, ["ho"])
+        if cc_ho and not _co_tu(da_co, ["ho khan", "ho đờm", "có đờm", "khạc đờm", "đờm", "ho ra máu"]):
+            them(cc_ho, ma_goi_y="GAP_HO_TINH_CHAT_DOM", chu_de="HÔ_HẤP", muc_do_uu_tien="TRUNG_BINH",
+                 khoang_trong="Chưa rõ ho khan hay có đờm.",
+                 cau_hoi_goi_y="Ho khan hay có đờm? Đờm màu gì?",
+                 cac_lua_chon=["Ho khan", "Đờm trắng trong", "Đờm vàng/xanh", "Đờm lẫn máu"],
+                 ly_do_y_khoa="Phân biệt nhiễm virus với bội nhiễm vi khuẩn.")
 
-            # Kiểm tra rét run
-            if not any(rr in toan_bo_van_ban for rr in ["rét run", "ớn lạnh", "lạnh run", "không rét"]):
-                goi_y_list.append(GoiYLamSang(
-                    ma_goi_y="GAP_SOT_RET_RUN",
-                    chu_de="SỐT",
-                    muc_do_uu_tien="TRUNG_BINH",
-                    khoang_trong="Chưa khai thác cơn rét run đi kèm sốt.",
-                    cau_hoi_goi_y="Khi sốt bác/cháu có kèm theo cơn rét run, phải đắp nhiều chăn không?",
-                    cac_lua_chon=["Có rét run bần bật", "Chỉ ớn lạnh gai người", "Không rét run"],
-                    ly_do_y_khoa="Cơn rét run là dấu hiệu chỉ điểm du khuẩn huyết (nhiễm trùng huyết) hoặc sốt rét/nhiễm khuẩn đường mật."
-                ))
+        # 4. THUỐC chưa rõ hàm lượng
+        for thuoc in ["amlodipin", "losartan", "metformin", "gliclazide", "atorvastatin", "paracetamol", "aspirin"]:
+            cc_thuoc = _tim_can_cu(luot, [thuoc], bo_neu_cau_co=["dị ứng"])
+            if not cc_thuoc:
+                continue
+            if re.search(r"(?<!\w)" + thuoc + r"\w*[^\n.]{0,25}?\d+(?:[.,]\d+)?\s*(?:mg|g|viên)", da_co, re.I):
+                continue
+            ten = thuoc.capitalize()
+            them(cc_thuoc, ma_goi_y=f"GAP_THUOC_HAM_LUONG_{thuoc.upper()}", chu_de="THUỐC",
+                 muc_do_uu_tien="CAO",
+                 khoang_trong=f"Có dùng {ten} nhưng chưa rõ hàm lượng và liều.",
+                 cau_hoi_goi_y=f"{ten} viên bao nhiêu mg, ngày uống mấy viên?",
+                 cac_lua_chon=[f"{ten} 1 viên/ngày", f"{ten} 2 viên/ngày", "Không nhớ, có mang vỏ thuốc"],
+                 ly_do_y_khoa=f"Cần liều {ten} chính xác để đánh giá điều trị và tránh quá liều.")
 
-        # ----------------------------------------------------------------------
-        # 3. RÀ SOÁT TRIỆU CHỨNG HÔ HẤP (HO & ĐỜM)
-        # ----------------------------------------------------------------------
-        if "ho" in toan_bo_van_ban:
-            tinh_chat_ho = ["ho khan", "ho đờm", "có đờm", "đờm xanh", "đờm vàng", "đờm trắng", "ho ra máu"]
-            if not any(th in toan_bo_van_ban for th in tinh_chat_ho):
-                goi_y_list.append(GoiYLamSang(
-                    ma_goi_y="GAP_HO_TINH_CHAT_DOM",
-                    chu_de="HÔ_HẤP",
-                    muc_do_uu_tien="TRUNG_BINH",
-                    khoang_trong="Chưa rõ ho khan hay ho có đờm, màu sắc và tính chất đờm.",
-                    cau_hoi_goi_y="Bác/cháu ho khan hay có khạc ra đờm? Đờm màu trắng trong hay vàng đục/xanh?",
-                    cac_lua_chon=["Ho khan không có đờm", "Ho đờm trắng trong", "Ho đờm vàng/xanh đục", "Đờm có vệt máu"],
-                    ly_do_y_khoa="Phân biệt nhiễm virus đường hô hấp trên với bội nhiễm vi khuẩn cần can thiệp kháng sinh."
-                ))
+        # 5. THAI KỲ — căn cứ là HỒ SƠ (giới, tuổi), không phải lời thoại
+        ttbn = thong_tin_benh_nhan or {}
+        gioi_tinh = str(ttbn.get("gioi_tinh", "")).lower()
+        try:
+            tuoi = int(ttbn.get("tuoi") or 0)
+        except (TypeError, ValueError):
+            tuoi = 0
+        la_nu = "nữ" in gioi_tinh or gioi_tinh in ("nu", "f", "female")
+        if la_nu and 15 <= tuoi <= 49 and not _co_tu(
+                da_co, ["mang thai", "có bầu", "có thai", "thai kỳ", "kinh nguyệt", "trễ kinh", "cho con bú"]):
+            goi_y_list.append(GoiYLamSang(
+                ma_goi_y="GAP_NU_THAI_KY", chu_de="THAI_KỲ", muc_do_uu_tien="CAO",
+                khoang_trong="Nữ tuổi sinh sản, chưa hỏi thai kỳ/cho con bú.",
+                cau_hoi_goi_y="Có đang mang thai, trễ kinh hay cho con bú không?",
+                cac_lua_chon=["Không", "Đang mang thai", "Đang cho con bú", "Trễ kinh, chưa thử"],
+                ly_do_y_khoa="Ảnh hưởng chỉ định thuốc và chụp X-quang/CT.",
+                trich_dan=f"Hồ sơ: nữ, {tuoi} tuổi", nguon="hồ sơ"))
 
-        # ----------------------------------------------------------------------
-        # 4. RÀ SOÁT THÔNG TIN DÙNG THUỐC (THIẾU LIỀU DÙNG / HÀM LƯỢNG)
-        # ----------------------------------------------------------------------
-        cac_thuoc_thuong_gap = ["amlodipin", "losartan", "metformin", "gliclazide", "atorvastatin", "paracetamol", "aspirin"]
-        for thuoc in cac_thuoc_thuong_gap:
-            if thuoc in toan_bo_van_ban:
-                # Kiểm tra xem có hàm lượng (mg) đi kèm không
-                pattern_lieu = rf"{thuoc}\s*(?:[a-zA-Z\s]*?)(\d+(?:\.\d+)?\s*(?:mg|g|viên))"
-                if not re.search(pattern_lieu, toan_bo_van_ban):
-                    goi_y_list.append(GoiYLamSang(
-                        ma_goi_y=f"GAP_THUOC_HAM_LUONG_{thuoc.upper()}",
-                        chu_de="THUỐC",
-                        muc_do_uu_tien="CAO",
-                        khoang_trong=f"Bệnh nhân có dùng {thuoc.capitalize()} nhưng chưa rõ hàm lượng cụ thể và liều lượng mỗi ngày.",
-                        cau_hoi_goi_y=f"Thuốc {thuoc.capitalize()} bác đang uống là viên bao nhiêu miligram (mg), ngày uống mấy viên và vào lúc nào?",
-                        cac_lua_chon=[f"{thuoc.capitalize()} liều thấp (1 viên/ngày)", f"{thuoc.capitalize()} liều chuẩn", "Không nhớ rõ hàm lượng, có mang theo vỏ thuốc"],
-                        ly_do_y_khoa=f"Nắm chính xác liều {thuoc.capitalize()} là bắt buộc để đánh giá hiệu quả kiểm soát bệnh mạn tính và phòng ngừa quá liều/tác dụng phụ."
-                    ))
-
-        # ----------------------------------------------------------------------
-        # 5. RÀ SOÁT NGUY CƠ THAI KỲ Ở PHỤ NỮ TUỔI SINH SẢN
-        # ----------------------------------------------------------------------
-        gioi_tinh = str(thong_tin_benh_nhan.get("gioi_tinh", "")).lower() if thong_tin_benh_nhan else ""
-        tuoi = thong_tin_benh_nhan.get("tuoi", 0) if thong_tin_benh_nhan else 0
-
-        la_nu_sinh_san = ("nữ" in gioi_tinh or "nu" in gioi_tinh) and (15 <= int(tuoi) <= 49 if tuoi else False)
-        if la_nu_sinh_san:
-            chua_hoi_thai = not any(tk in toan_bo_van_ban for tk in ["mang thai", "có bầu", "thai kỳ", "kinh nguyệt", "trễ kinh", "cho con bú"])
-            if chua_hoi_thai:
-                goi_y_list.append(GoiYLamSang(
-                    ma_goi_y="GAP_NU_THAI_KY",
-                    chu_de="THAI_KỲ",
-                    muc_do_uu_tien="CAO",
-                    khoang_trong="Bệnh nhân nữ trong độ tuổi sinh sản chưa được khai thác tình trạng thai kỳ hoặc cho con bú.",
-                    cau_hoi_goi_y="Hiện tại chị/em có đang mang thai, nghi ngờ có thai (trễ kinh) hoặc đang cho con bú không?",
-                    cac_lua_chon=["Không mang thai, không cho con bú", "Đang mang thai", "Đang cho con bú", "Đang trễ kinh chưa thử thai"],
-                    ly_do_y_khoa="An toàn tuyệt đối trong chỉ định thuốc chống chỉ định cho thai kỳ và chụp X-quang/CT."
-                ))
-
-        # Tính điểm độ đầy đủ
         so_khoang_trong = len(goi_y_list)
         do_day_du = max(0.0, round(1.0 - (so_khoang_trong * 0.15), 2))
-
         return KetQuaTroLyLamSang(
             danh_sach_goi_y=goi_y_list,
             tong_so_khoang_trong=so_khoang_trong,
-            muc_do_day_du_benh_an=do_day_du
+            muc_do_day_du_benh_an=do_day_du,
         )

@@ -216,7 +216,7 @@ export const BangDongCoLamSangThucTinh: React.FC<BangDongCoLamSangThucTinhProps>
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0369A1]">
               <HeartPulse size={14} className="text-[#0284C7]" />
-              <span>Trợ lý Cảnh giới Lâm sàng Tức thời</span>
+              <span>Hỗ trợ lâm sàng</span>
             </span>
 
             {/* Pill bấm mở nhanh bảng DDI / Đa thuốc TT26 */}
@@ -383,25 +383,27 @@ export const BangDongCoLamSangThucTinh: React.FC<BangDongCoLamSangThucTinhProps>
             {/* Chip Hỏi & Xác nhận Nhanh SOCRATES (Pertinent Negatives / Cái lắc đầu tại bàn khám) */}
             {dsGoiYSocrates.length > 0 && (
               <div className="rounded-xl bg-[#F8FBFC] border border-[#E2ECF3] p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#0C4A6E]">
-                    <HelpCircle size={13} className="text-[#0284C7]" />
-                    <span>Gợi ý hỏi bổ sung SOCRATES & Xác nhận 1 chạm tại bàn khám</span>
-                  </span>
-                  <span className="text-[10.5px] text-[#64748B]">
-                    Bấm chip để ghi nhận trả lời / lắc đầu của người bệnh kèm nhãn nguồn rõ ràng
-                  </span>
-                </div>
+                <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#0C4A6E]">
+                  <HelpCircle size={13} className="text-[#0284C7]" />
+                  <span>Nên hỏi thêm</span>
+                </span>
 
                 <div className="space-y-2">
                   {dsGoiYSocrates.map((gy, idx) => {
                     const luaChon: string[] = Array.isArray(gy.cac_lua_chon) ? gy.cac_lua_chon : [];
                     return (
                       <div key={gy.ma_goi_y || idx} className="space-y-1">
-                        <div className="text-[11.5px] text-[#334155]">
-                          <strong className="text-[#0369A1]">[{gy.chu_de || "BỆNH SỬ"}]</strong>{" "}
+                        <div className="text-[12px] text-[#1E293B] font-medium">
                           {gy.cau_hoi_goi_y || gy.khoang_trong}
                         </div>
+                        {gy.trich_dan && (
+                          <div className="text-[10.5px] text-[#64748B]" title={gy.ly_do_y_khoa || undefined}>
+                            {Array.isArray(gy.luot_dan) && gy.luot_dan.length > 0
+                              ? `T${gy.luot_dan.join(", T")} · `
+                              : ""}
+                            “{gy.trich_dan}”
+                          </div>
+                        )}
                         {luaChon.length > 0 && (
                           <div className="flex flex-wrap gap-1.5">
                             {luaChon.map((chip) => {
