@@ -1,0 +1,9 @@
+# Nhật ký hackathon — Đề cải tiến 1 (28/11/2026)
+
+Bắt đầu: 07:50, nhánh `hackathon-de-1`. Đường cơ sở: pytest 1.960 passed / 27 skipped; web 96/96 pass.
+
+Mỗi dòng: giờ · task · commit · công cụ AI · đội đã sửa/bác bỏ gì ở đầu ra AI.
+
+| Giờ | Task | Commit | Công cụ AI | Đội kiểm / sửa |
+|---|---|---|---|---|
+| 08:00 | 1 Khóa chép/in/xuất trước khi ký | (commit này) | claude_code | Đội kiểm trên giao diện thật 3 trạng thái (chưa ký / đã ký / sửa sau ký), chụp 3 ảnh; phát hiện menu Công cụ có SBAR/HIS/Tờ dặn dò nằm trong menu xổ xuống, đã khóa cả ở đó |

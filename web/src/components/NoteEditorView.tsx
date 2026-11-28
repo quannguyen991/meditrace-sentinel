@@ -11,6 +11,7 @@ import {
   trichChanDoanVaThuocTuSoap,
 } from "../lib/compileEffectiveNote";
 import { taoPhieuSbar, tachMucHis } from "../lib/sbar";
+import { choPhepDungHoSo, nhanInHoSo } from "../lib/choPhepDungHoSo";
 import { xuatGoiFhirVaBhytHieuLuc } from "../lib/taiBienDichHieuLuc";
 import type { CanhBaoMauThuanLanKham } from "../lib/doiChieuLanKham";
 import type { Proposition, Quyet } from "./VerificationView";
@@ -583,6 +584,18 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
     [noteMeta?.propositions, quyetDuyet, banSuaDuyet],
   );
 
+  // Đề cải tiến 1: chỉ được đưa hồ sơ ra khỏi phần mềm (chép, in, tải, HIS, SBAR, tờ dặn dò) sau khi ký.
+  const dungHoSo = useMemo(
+    () => choPhepDungHoSo({ daKy: Boolean(signOff), daSuaSauKy }),
+    [signOff, daSuaSauKy],
+  );
+  const lopNutKhoa = dungHoSo.duoc ? "" : " opacity-40 cursor-not-allowed pointer-events-auto";
+  const inHoSo = () => {
+    setIsExportMenuOpen(false);
+    if (!dungHoSo.duoc) return;
+    window.print();
+  };
+
   const handleTextChange = useCallback(
     (newVal: string) => {
       onUpdateContent(newVal);
@@ -613,6 +626,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
   };
 
   const handleCopy = () => {
+    if (!dungHoSo.duoc) return;
     navigator.clipboard.writeText(effectiveContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -620,6 +634,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
   // Tải file Text (dùng văn bản hiệu lực đã áp dụng Sửa/Bỏ mệnh đề)
   const handleDownloadTxt = () => {
+    if (!dungHoSo.duoc) return;
     const blob = new Blob([effectiveContent], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -632,6 +647,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
   // Tải file Markdown (dùng văn bản hiệu lực đã áp dụng Sửa/Bỏ mệnh đề)
   const handleDownloadMd = () => {
+    if (!dungHoSo.duoc) return;
     const blob = new Blob([effectiveContent], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -644,6 +660,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
   // Boost 4C: Tải gói chuẩn liên thông HL7 FHIR R4 & BHYT XML 130/4750 (.json) đã lọc mục Bỏ & áp dụng mục Sửa
   const handleDownloadFhirBhytJson = () => {
+    if (!dungHoSo.duoc) return;
     const payload = xuatGoiFhirVaBhytHieuLuc({
       noteMeta,
       quyetDuyet,
@@ -1502,9 +1519,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Nút Tạo phiếu bàn giao SBAR */}
           <button
             type="button"
-            onClick={() => setMoModalSbar(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0"
-            title="Tạo phiếu bàn giao SBAR nhanh cho ca trực / khoa nội trú"
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoModalSbar(true)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] rounded-xl font-medium shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Tạo phiếu bàn giao SBAR nhanh cho ca trực / khoa nội trú"}
           >
             <FileText size={12} className="text-[#0284C7]" />
             <span className="text-[11px] hidden md:inline">SBAR</span>
@@ -1513,11 +1531,12 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Nút Chép nhanh sang HIS */}
           <button
             type="button"
-            onClick={() => setMoPanelHis((v) => !v)}
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoPanelHis((v) => !v)}
             className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl shadow-tactile-doctor-pill transition-all active:scale-95 whitespace-nowrap cursor-pointer flex-shrink-0 ${
               moPanelHis ? "border-[#0284C7] bg-[#E0F2FE] text-[#0369A1] font-semibold" : "border-[#BAE6FD] bg-white hover:bg-[#F0F9FF] text-[#0C4A6E] font-medium"
-            }`}
-            title="Chép nhanh từng ô sang phần mềm HIS (VNPT-HIS, Viettel HIS, FPT.eHospital)"
+            }${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Chép nhanh từng ô sang phần mềm HIS (VNPT-HIS, Viettel HIS, FPT.eHospital)"}
           >
             <Copy size={12} className="text-[#0284C7]" />
             <span className="text-[11px] hidden md:inline">Chép HIS</span>
@@ -1526,9 +1545,10 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
           {/* Nút mở tờ dặn dò người bệnh */}
           <button
             type="button"
-            onClick={() => setMoModalDanDo(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium"
-            title="Xem và in tờ dặn dò trao tay người bệnh"
+            disabled={!dungHoSo.duoc}
+            onClick={() => dungHoSo.duoc && setMoModalDanDo(true)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs border rounded-xl transition-all shadow-tactile-doctor-pill whitespace-nowrap flex-shrink-0 text-[#0C4A6E] hover:bg-[#F0F9FF] border-[#BAE6FD] bg-white font-medium${lopNutKhoa}`}
+            title={dungHoSo.lyDo ?? "Xem và in tờ dặn dò trao tay người bệnh"}
           >
             <FileHeart size={12} className="text-[#0284C7]" />
             <span className="text-[11px] hidden sm:inline">Tờ dặn dò</span>
@@ -1592,7 +1612,9 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
             <div className="flex items-center bg-[#0284C7] text-white rounded-xl overflow-hidden shadow-tactile-doctor hover:bg-[#0369A1] transition-all whitespace-nowrap">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap hover:bg-[#0369A1]"
+                disabled={!dungHoSo.duoc}
+                title={dungHoSo.lyDo ?? "Sao chép bản đã duyệt"}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap hover:bg-[#0369A1]${lopNutKhoa}`}
               >
                 {copied ? (
                   <>
@@ -1621,54 +1643,59 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                   className="fixed inset-0 z-30"
                   onClick={() => setIsExportMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl shadow-[0_8px_24px_rgba(2,132,199,0.16)] border border-[#BAE6FD] py-1 z-40 text-left animate-in fade-in">
+                <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-[0_8px_24px_rgba(2,132,199,0.16)] border border-[#BAE6FD] py-1 z-40 text-left animate-in fade-in">
+                  {!dungHoSo.duoc && (
+                    <p className="px-3 py-1.5 text-[13px] leading-snug text-[#92400E] bg-[#FEF9E7] border-b border-[#F5E6B8]">
+                      {dungHoSo.lyDo}
+                    </p>
+                  )}
                   <button
+                    disabled={!dungHoSo.duoc}
                     onClick={() => {
                       handleCopy();
                       setIsExportMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]${lopNutKhoa}`}
                   >
                     <Copy size={13} className="text-[#0284C7]" />
                     <span>Sao chép vào Clipboard</span>
                   </button>
                   <button
-                    onClick={() => {
-                      setIsExportMenuOpen(false);
-                      window.print();
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                    disabled={!dungHoSo.duoc}
+                    onClick={inHoSo}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]${lopNutKhoa}`}
                   >
                     <Printer size={13} className="text-[#0D9488]" />
                     <span>In / Lưu PDF</span>
                   </button>
                   <button
+                    disabled={!dungHoSo.duoc}
                     onClick={handleDownloadTxt}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]${lopNutKhoa}`}
                   >
                     <Download size={13} className="text-[#0284C7]" />
                     <span>Tải tệp văn bản (.txt)</span>
                   </button>
                   <button
+                    disabled={!dungHoSo.duoc}
                     onClick={handleDownloadMd}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]${lopNutKhoa}`}
                   >
                     <FileCode size={13} className="text-[#0284C7]" />
                     <span>Tải tệp Markdown (.md)</span>
                   </button>
                   <button
+                    disabled={!dungHoSo.duoc}
                     onClick={handleDownloadFhirBhytJson}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]"
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE]${lopNutKhoa}`}
                   >
                     <FileCode size={13} className="text-[#0D9488]" />
                     <span>Tải HL7 FHIR & BHYT (.json)</span>
                   </button>
                   <button
-                    onClick={() => {
-                      setIsExportMenuOpen(false);
-                      window.print();
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE] border-t border-[#CCE3F0] font-semibold"
+                    disabled={!dungHoSo.duoc}
+                    onClick={inHoSo}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#0C4A6E] hover:bg-[#E0F2FE] border-t border-[#CCE3F0] font-semibold${lopNutKhoa}`}
                   >
                     <Printer size={13} className="text-[#0D9488]" />
                     <span>In / Lưu PDF (Ctrl+P)</span>
@@ -1682,6 +1709,11 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
 
       {/* Editor Main Content Area: Giấy bệnh án nổi khối */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 relative bg-gradient-to-b from-[#F0F7FA] via-[#F8FBFC] to-[#EEF6FB]">
+        {nhanInHoSo(dungHoSo.duoc) && (
+          <div className="chi-hien-khi-in" role="note">
+            {nhanInHoSo(dungHoSo.duoc)}
+          </div>
+        )}
         {dictationNotice && (
           <div className="max-w-3xl mx-auto mb-3 px-3.5 py-2 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] text-[#0369A1] text-xs font-medium flex items-center justify-between gap-2 no-print print:hidden">
             <span>{dictationNotice}</span>
