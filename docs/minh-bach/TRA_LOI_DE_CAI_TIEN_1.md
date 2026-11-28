@@ -50,9 +50,9 @@ Mọi ý dưới đây kèm tệp minh chứng và lệnh kiểm. Mọi test ch�
 **Chúng tôi làm gì.**
 - **Lõi chạy tại chỗ:** chép lời (PhoWhisper), trích mệnh đề (Qwen3-4B), kiểm căn cứ và ký duyệt không gửi gì ra ngoài.
 - **Mọi lối ra mạng nằm trong một danh sách duy nhất.** Test đếm mọi lời gọi mạng trong mã máy chủ; thêm lối ra mới mà không khai báo thì test đỏ. Bên Python chỉ có một lối ra (máy xa của đội, mặc định không bật), cũng có test giữ.
-- **Đường ra bên thứ ba (AIBOX) mặc định TẮT ở cả hai lớp.** Quản trị phải bật, rồi bác sĩ bật cho từng lần gửi. Quản trị bấm tắt thì luôn tắt.
+- **Đường gửi nội dung ca khám ra bên thứ ba (AIBOX) mặc định TẮT.** Quản trị phải bật trong giao diện, rồi bác sĩ bật công tắc “Cho phép gửi ra mô hình ngoài” (trình duyệt nhớ lựa chọn này, không phải bật lại cho từng lần). Quản trị bấm tắt thì luôn tắt. Riêng lời gọi kiểm tình trạng cổng (`/models`) vẫn chạy khi có khóa, nhưng không mang nội dung ca khám.
 - **Che định danh trước khi gửi, còn sót thì từ chối gửi.** Hai bộ che (TypeScript ở cổng ra mô hình ngoài, Python ở cổng ra máy xa) được vá thêm cho mã ca bệnh ("bệnh nhân 416", "BN416") và tên viết tắt ("bà H.T.P"). Một bộ ca rò rỉ dùng chung giữ cả hai bộ che.
-- **Ô tìm tài liệu PubMed** từ chối từ khóa có tên, mã hay số liên lạc. Trước đây từ khóa đi thẳng ra NCBI.
+- **Ô tìm tài liệu PubMed** từ chối từ khóa có tên, mã hay số liên lạc (kể cả tên địa danh viết hoa, nên đôi khi từ chối thừa). Trước đây từ khóa đi thẳng ra NCBI. Từ khóa do mô hình đặt cho tra cứu nhiều nguồn cũng được lọc: từ khóa nào còn dấu hiệu định danh thì bỏ trước khi gửi ra NCBI/MSD/NICE/Bộ Y tế (`locTuKhoaCoDanhTinh`).
 - **Bản demo công khai:** màn đăng nhập ghi "chỉ nhập dữ liệu mô phỏng", vì bản demo đi qua Cloudflare.
 
 **Số đo bộ che** trên PhoNER_COVID19, nhãn tên và mã bệnh nhân. Luật được vá trên tập dev; tập test chỉ đo hai lần, trước và sau khi vá:
@@ -82,7 +82,7 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 - `traceback.print_exc()` được thay bằng bản in tên lỗi và vị trí, không in giá trị.
 - Nhật ký hoạt động vốn chỉ ghi siêu dữ liệu.
 
-**Minh chứng:** `web/may-chu/che-log.ts`, `src/he_thong/che_log.py`.
+**Minh chứng:** `web/may-chu/che-log.ts`, `src/he_thong/che_log.py`. Một test quét (`web/may-chu/log-da-che.test.ts`) đỏ nếu còn dòng `console.error/warn` in biến lỗi mà không qua `cheLog`. Bộ che chạy trước rồi mới cắt ngắn, để không chặt đôi một số điện thoại.
 
 **Kiểm:**
 - `cd web; npx tsx --test may-chu/che-log.test.ts may-chu/routes/llm-ngoai.test.ts` (gồm test "cổng ngoài trả lỗi có tên bệnh nhân → log không có tên").
@@ -94,11 +94,11 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 
 ## 7. Quy trình bác sĩ phê duyệt trước khi dùng hồ sơ
 
-**Chúng tôi làm gì.** Trước ngày 28/11, chỉ nút *Ký* bị chặn khi còn mục chưa xác nhận. Các nút *Sao chép*, *In*, *Tải tệp*, *FHIR/BHYT*, *Chép HIS*, *SBAR*, *Tờ dặn dò* vẫn dùng được khi **chưa ký**. Đây là chỗ hở nặng nhất mà đội tự tìm ra khi rà mã. Nay tất cả chỉ mở khi đã ký, và khóa lại khi sửa sau ký. Bản in khi chưa ký mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT".
+**Chúng tôi làm gì.** Trước ngày 28/11, chỉ nút *Ký* bị chặn khi còn mục chưa xác nhận. Các nút *Sao chép*, *In*, *Tải tệp*, *FHIR/BHYT*, *Chép HIS*, *SBAR*, *Tờ dặn dò* vẫn dùng được khi **chưa ký**. Đây là chỗ hở nặng nhất mà đội tự tìm ra khi rà mã. Nay tất cả, cùng các nút *BHYT / ICD-10 (tải gói XML1–XML5)*, *Đơn thuốc TT26*, *Cam đoan PTTT*, *Đi buồng / Trực*, chỉ mở khi đã ký và khóa lại khi sửa sau ký. Bốn nút sau do **rà soát độc lập** tìm ra; một test quét giờ đỏ ngay nếu xuất hiện lối xuất hồ sơ mới chưa khóa (`web/src/lib/loiRaHoSo.test.ts`). Việc khóa nằm **ở giao diện**: máy chủ chưa tự kiểm chữ ký trước khi trả dữ liệu xuất. Bản in khi chưa ký mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT".
 
 **Minh chứng:** [`quy-trinh-phe-duyet.md`](quy-trinh-phe-duyet.md), gồm sơ đồ trạng thái, 3 ảnh chụp trên giao diện thật, và lệnh kiểm sổ ký `GET /api/worm/verify`.
 
-**Kiểm:** `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts`.
+**Kiểm:** `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts src/lib/loiRaHoSo.test.ts`.
 
 ---
 
@@ -112,10 +112,16 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 | H4 | Log lỗi có thể in nội dung ca khám | `054c8b3` |
 | H5 | Đường ra bên thứ ba mặc định bật | `8b752da` |
 | H6 | Lịch sử sửa đổi không ghi công cụ AI | `9f290d2` |
+| R1 | (rà soát độc lập) BHYT/XML, đơn thuốc TT26, cam đoan, đi buồng vẫn xuất được khi chưa ký | xem mục "Sửa sau rà soát" trong `nhat-ky-hackathon.md` |
+| R2 | (rà soát độc lập) Vài dòng log lỗi còn in thô; cắt chuỗi trước khi che | như trên |
+| R3 | (rà soát độc lập) Bộ che Python bỏ sót họ tên viết thường; hai bộ che che nhầm "sốt từ thứ 2", "viêm gan B.", "nhóm máu A.", "Thái Lan" | như trên |
+| R4 | (rà soát độc lập) Từ khóa tra cứu do mô hình đặt có thể mang tên thật ra nguồn tài liệu | như trên |
+| R5 | (rà soát độc lập) Hook commit không chạy trên macOS/Linux | như trên |
 
 ## Còn hạn chế (chưa làm, nói thẳng)
 
-- Bộ che đạt 94,0% / 93,8% trên tập test, chưa tới ngưỡng 95%. Phần lọt chủ yếu là tên một tiếng đứng trơ.
+- Bộ che đạt 94,0% / 93,8% trên tập test, chưa tới ngưỡng 95%. Phần lọt chủ yếu là tên một tiếng đứng trơ. Sau rà soát độc lập có vá thêm luật; chỉ đo lại trên tập dev (không đổi: 97,5% / 97,3%), **không** đo tập test lần ba.
+- Khóa chép/in/xuất nằm ở giao diện; máy chủ chưa tự chặn các lệnh xuất (ví dụ tạo mã cổng bệnh nhân, tiền kiểm BHYT) khi chưa ký.
 - Âm thanh ghi âm (giọng nói là dữ liệu nhận dạng) **chưa có hạn giữ và tự xóa**.
 - Trình duyệt của bác sĩ giữ bản sao danh sách ca khám để mở nhanh. Bản sao này nằm trên máy bác sĩ, nhưng chưa được mã hóa.
 - 34 commit cũ chưa xác định công cụ (trong đó có các commit Antigravity 25–27/11). Tác giả sẽ xác nhận dần, máy không đoán.
@@ -124,12 +130,12 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 
 ## Kết quả kiểm thử toàn bộ
 
-Chạy ngày 28/11/2026 trên nhánh `hackathon-de-1` (commit `867a783`):
+Chạy ngày 28/11/2026 trên nhánh `hackathon-de-1` (sau lượt sửa theo rà soát độc lập):
 
 | Bộ kiểm | Trước đợt này | Sau đợt này |
 |---|---|---|
-| Python `pytest -q` | 1.960 qua, 27 bỏ qua | **2.018 qua**, 27 bỏ qua, 0 lỗi |
-| Web `npm test` | 96/96 | **157/157** |
+| Python `pytest -q` | 1.960 qua, 27 bỏ qua | **2.030 qua**, 27 bỏ qua, 0 lỗi |
+| Web `npm test` | 96/96 | **170/170** |
 | Kiểu `npm run lint` (tsc) | sạch | sạch |
 | Đóng gói `npm run build` | xong | xong |
 | 3 ca demo cho BGK | — | không đổi (test dùng ca mẫu xanh) |

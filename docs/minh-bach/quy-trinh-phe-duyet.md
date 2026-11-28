@@ -27,7 +27,7 @@ stateDiagram-v2
 | 6. Được dùng hồ sơ | Các nút mở | `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 4 |
 | 7. Sửa sau khi ký | Băm đổi → hồ sơ khóa lại, lý do *"Hồ sơ đã sửa sau lần ký — cần ký lại…"*; đổi quyết định duyệt cũng vậy | `isSignOffStale` + `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 5–6 |
 
-Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*.
+Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*, *BHYT / ICD-10* (có tải gói XML1–XML5), *Đơn thuốc TT26* (cả lối mở từ bảng an toàn lâm sàng), *Cam đoan PTTT*, *Đi buồng / Trực*. Bốn nhóm cuối do rà soát độc lập phát hiện. Test `web/src/lib/loiRaHoSo.test.ts` đỏ khi có component mới chép/in/tải mà chưa được phân loại, hoặc khi một hộp xuất hồ sơ mở được mà không qua bước kiểm ký.
 
 ## Ảnh chụp trên giao diện thật (ca mẫu, máy chủ thử với CSDL tạm)
 
@@ -42,6 +42,7 @@ Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *T�
 
 ## Giới hạn, nói thẳng
 
+- Việc khóa nằm ở giao diện. Máy chủ chưa tự kiểm chữ ký trước các lệnh xuất (ví dụ tạo mã cổng bệnh nhân, tiền kiểm BHYT).
 - Không chặn được việc bôi đen chữ trên màn hình rồi Ctrl+C. Phần mềm chỉ khóa các nút đưa hồ sơ ra ngoài.
 - Không chặn được phím in của trình duyệt (Ctrl+P). Vì vậy bản in khi chưa ký tự mang dòng **"BẢN NHÁP — CHƯA KÝ DUYỆT"** ở đầu trang.
 - Phần mềm chưa đo việc bác sĩ có duyệt bừa hay không. Đó là việc tiếp theo: thử với người dùng, cấy sẵn lỗi nguy hiểm để xem họ bắt được bao nhiêu.

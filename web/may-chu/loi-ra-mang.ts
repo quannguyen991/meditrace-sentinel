@@ -28,7 +28,7 @@ export const LOI_RA_DUOC_PHEP: ReadonlyArray<LoiRa> = [
     tep: "may-chu/routes/llm-ngoai.ts",
     dich: "Cổng mô hình ngoài AIBOX — dịch vụ bên thứ ba (chat/completions)",
     mucDich: "Tính năng phụ: sửa bản nháp theo lời nhắc, hỏi đáp về ca, soạn văn bản",
-    duLieu: "Lời thoại/bản nháp ĐÃ CHE định danh; còn định danh thì từ chối gửi (422). Phải qua công tắc quản trị và bác sĩ bật cho từng lần",
+    duLieu: "Lời thoại/bản nháp ĐÃ CHE định danh; còn định danh thì từ chối gửi (422). Phải qua công tắc quản trị (mặc định tắt) và công tắc của bác sĩ (trình duyệt nhớ)",
     macDinh: "tat",
   },
   {

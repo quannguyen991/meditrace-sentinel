@@ -22,3 +22,10 @@ test("loi_co_stack_khong_lo_ten", () => {
   const ra = cheLog(e.stack || e.message);
   assert.ok(!ra.includes("Trần Thị Hoa") && !ra.includes("0987654321"), ra);
 });
+
+test("che_truoc_roi_moi_cat_khong_lo_so_bi_cat_doi", () => {
+  // Số điện thoại nằm vắt qua mốc 300 ký tự: cắt trước thì phần đầu số không còn đủ dài để bị nhận ra.
+  const ra = cheLog("x".repeat(292) + " 0912345678 đau ngực");
+  assert.ok(!ra.includes("0912"), ra);
+  assert.ok(ra.length <= 300);
+});

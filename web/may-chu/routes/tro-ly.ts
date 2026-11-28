@@ -11,6 +11,7 @@ import type { TacTuMa, YeuCauTroLy } from "../tro-ly/kieu";
 import { type KhoViec, taoKhoViec } from "../tro-ly/viec-tro-ly";
 import { traLoi, TUOI_VIEC_TOI_DA_MS } from "./dung-chung";
 import { chayVoiNguoiDung, goiNgoai, NGOAI } from "./llm-ngoai";
+import { cheLog } from "../che-log";
 
 const TRO_LY_TOI_DA_DONG_THOI = 2;
 const TRO_LY_CHO_TRUC_TIEP_MS = Number(process.env.MEDITRACE_TRO_LY_CHO_MS) || 1500;
@@ -119,7 +120,7 @@ export function dangKyTroLyRoutes(app: express.Express) {
           ghiNhatKy(viec.nguoiDungId, hanhDong, chiTiet),
         ),
       )
-        .catch((e) => console.error("[tro-ly] lỗi không bắt được:", e))
+        .catch((e) => console.error("[tro-ly] lỗi không bắt được:", cheLog(e, 1500)))
         .finally(() => {
           boHuyTheoViec.delete(viec.id);
           kichHoatTroLy();

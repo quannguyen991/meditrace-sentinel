@@ -224,9 +224,10 @@ _CHU_THUONG = f"[{_THUONG}]"
 # MA_CA_BENH: "bệnh nhân 416", "BN416", "bệnh nhân số 91", "ca bệnh 950", "bệnh nhân 861, 862 và 863".
 # Chỉ che phần số. Không có "số"/"thứ" mà số theo sau là đơn vị ("bệnh nhân 3 ngày", "BN 2 lần") thì bỏ qua.
 _BAO_MA_CA = r"(?:[Bb]ệnh\s+nhân|BỆNH\s+NHÂN|[Nn]gười\s+bệnh|[Cc]a\s+(?:bệnh|nhiễm|mắc|dương\s+tính)|CA\s+BỆNH|[Cc]a|BN)"
+# "thứ N" chỉ là mã ca sau từ chỉ ca bệnh; sau "từ/là/các…" chỉ nhận "số N" (tránh "sốt từ thứ 2", "là thứ 3").
 _BAO_MA_CA_MANH = (
-    rf"(?:{_BAO_MA_CA}|(?:COVID|Covid|covid)\s*-\s*19|nCoV|CoV\s*-\s*2|từ|gồm|các|là|nhận|thân)"
-    r"(?:\s+từ)?\s+(?:thứ|số)"
+    rf"(?:(?:{_BAO_MA_CA}|(?:COVID|Covid|covid)\s*-\s*19|nCoV|CoV\s*-\s*2)(?:\s+từ)?\s+(?:thứ|số)"
+    r"|(?:từ|gồm|các|là|nhận|thân)(?:\s+từ)?\s+số)"
 )
 _SO_CA = r"(?:\d{1,3}(?:\.\d{3})+|\d{1,6})(?![\d.,/]?\d)"
 _DON_VI_SAU_SO = (
@@ -254,6 +255,7 @@ RE_TEN_VIET_TAT_RIENG = re.compile(
     rf"(?<!\w)(?P<ten>{_CHU_TAT}\.\s?{_CHU_TAT}(?:\.\s?{_CHU_TAT})*\.?)(?!\w)(?!\s+{_CHU_HOA})"
 )
 RE_TEN_VIET_TAT_MOT_CHU = re.compile(rf"(?<=[\w,;:()\"“”]\s)(?P<ten>{_CHU_HOA}\.)(?=\s+{_CHU_THUONG})")
+_RE_DANH_TU_Y_KHOA_TRUOC = re.compile(r"(?i)(?:gan|máu|vitamin|type|tuýp|nhóm|đồ|loại|khối|thể|dạng)\s$")
 # Tên thương mại viết hoa đứng ngay trước chữ tắt ("Alsiful S.R") thì không phải tên người.
 _RE_TU_HOA_DUNG_TRUOC = re.compile(rf"{_CHU_HOA}\w*\s$")
 
@@ -268,7 +270,15 @@ _HO_HOA = (
     "Nguyễn|Trần|Lê|Phạm|Hoàng|Huỳnh|Phan|Vũ|Võ|Đặng|Bùi|Đỗ|Hồ|Ngô|Dương|Lý|Đinh|Trương|Đoàn|Lương|Trịnh|"
     "Phùng|Quách|Vương|Nghiêm|Kiều|Mai|Đào|Tạ|Tô|Lâm|Châu|Thái|Hà|Cao|Đàm|Lại|Khúc|Kim|Triệu"
 )
-RE_HO_TEN_HOA = re.compile(rf"(?<!\w)(?P<ten>(?:{_HO_HOA})(?:\s+{_CHU_HOA}{_CHU_THUONG}*){{1,3}})(?!\w)")
+# Cụm trùng họ mà không phải tên người: "Lý Do", "Thái Lan", "Cao Bằng", "Kim Ngân", "Hà Nội"…
+_CUM_KHONG_PHAI_TEN = r"(?:Lý\s+Do|Thái\s+Lan|Cao\s+Bằng|Kim\s+Ngân|Hà\s+(?:Nội|Giang|Nam|Tĩnh))(?!\w)"
+RE_HO_TEN_HOA = re.compile(rf"(?<!\w)(?!{_CUM_KHONG_PHAI_TEN})(?P<ten>(?:{_HO_HOA})(?:\s+{_CHU_HOA}{_CHU_THUONG}*){{1,3}})(?!\w)")
+# Họ tên viết thường ba tiếng ("nguyễn văn an") — cùng luật với bộ che TypeScript.
+_TEN_DEM_THUONG = (
+    "văn|thị|hữu|đức|đình|xuân|ngọc|quốc|bá|trọng|công|duy|minh|hoài|thu|thanh|anh|quang|tuấn|hải|phương|"
+    "thành|tiến|mạnh|khánh|thảo|hồng|kim|mỹ|gia|bảo|nhật|thế|việt|tấn|vĩnh|diệu|như|ánh|tường|trung"
+)
+RE_HO_TEN_THUONG = re.compile(rf"(?<!\w)(?P<ten>(?:{_HO_HOA.lower()})\s+(?:{_TEN_DEM_THUONG})\s+{_CHU_THUONG}+)(?!\w)")
 
 # Mã hồ sơ có từ báo trước ("Mã bệnh nhân 20261125", "PID: 12345678", "số hồ sơ BV-2026-00123").
 RE_MA_HO_SO = re.compile(
@@ -312,6 +322,9 @@ def tim_ten_viet_tat(van_ban: str) -> List[Tuple[int, int]]:
             continue
         ra.append((m.start("ten"), m.end("ten")))
     for m in RE_TEN_VIET_TAT_MOT_CHU.finditer(van_ban):
+        # Không che chữ cái sau danh từ y khoa: "viêm gan B.", "nhóm máu A.", "Vitamin B.", "phác đồ A."
+        if _RE_DANH_TU_Y_KHOA_TRUOC.search(van_ban, max(0, m.start() - 12), m.start()):
+            continue
         ra.append((m.start("ten"), m.end("ten")))
     gon: List[Tuple[int, int]] = []
     for a, b in sorted(ra, key=lambda x: (x[0], -(x[1] - x[0]))):
@@ -593,7 +606,7 @@ class ClinicalDeidentifier:
             _them_vi_tri(a, b, "TEN_VIET_TAT", "TEN_VIET_TAT")
 
         # 14. Xưng hô + tên viết hoa ("Bà Hoa", "Chị Lan") và họ + tên viết hoa ("Nguyễn Hồng Nhung")
-        for re_ten in (RE_TEN_SAU_XUNG_HO, RE_HO_TEN_HOA):
+        for re_ten in (RE_TEN_SAU_XUNG_HO, RE_HO_TEN_HOA, RE_HO_TEN_THUONG):
             for m in re_ten.finditer(van_ban):
                 a, b = m.start("ten"), m.end("ten")
                 tu = list(_RE_TU.finditer(van_ban, a, b))

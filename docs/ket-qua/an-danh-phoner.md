@@ -32,6 +32,12 @@ Tách theo nhãn trên test sau khi vá: PATIENT_ID 1.888/2.005 (94,2%) ở cả
 
 PhoNER là văn bản tin tức về COVID-19, không phải hội thoại khám; ngưỡng đặt trên tập dev, số test đo đúng hai lần (trước và sau).
 
+## Vá thêm sau rà soát độc lập (28/11, sau lần đo test thứ hai)
+
+Rà soát độc lập chỉ ra các ca che nhầm/bỏ sót: "sốt từ thứ 2", "là thứ 3", "viêm gan B.", "nhóm máu A.", "Vitamin B.", "Lý Do Khám", "Thái Lan" bị che nhầm; Python bỏ sót họ tên viết thường ("nguyễn văn an"). Đã vá cả hai bộ che và thêm 8 ca vào bộ ca dùng chung.
+
+**Không đo lại tập test** (đã đo đủ hai lần). Đo lại tập dev: bảo vệ TS 1.427/1.464 (97,5%), Python 1.425/1.464 (97,3%) — không đổi; che nhầm ViMedAQA TS 1,3%, Python 1,3% (Python tăng từ 0,7% do thêm luật tên viết thường, bằng mức của TS).
+
 ## Đã vá gì
 
 Thêm hai luật cùng tên vào cả hai bộ che:

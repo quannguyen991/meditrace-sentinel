@@ -1,4 +1,5 @@
 #!/bin/sh
 # Bắt buộc trailer `Cong-cu-AI: <claude_code|antigravity|codex|chatgpt|khong>`.
 # Bật: git config core.hooksPath .githooks
-exec python tools/kiem_trailer_commit.py "$1"
+if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
+exec "$PY" tools/kiem_trailer_commit.py "$1"

@@ -31,7 +31,7 @@ Bản cho phòng khám chạy hoàn toàn trong mạng của bệnh viện.
 | Đích | Để làm gì | Dữ liệu đi ra và cách bảo vệ | Mặc định | Mã |
 |---|---|---|---|---|
 | Dịch vụ MediTrace (Python) trên cùng máy, MEDITRACE_API, mặc định 127.0.0.1:8765 | Chép lời, trích mệnh đề, kiểm căn cứ, dựng bản nháp — chạy tại chỗ | Âm thanh và lời thoại ca khám; không rời máy (địa chỉ nội bộ, kèm khóa nội bộ) | mở | `web/may-chu/routes/dung-chung.ts` |
-| Cổng mô hình ngoài AIBOX — dịch vụ bên thứ ba (chat/completions) | Tính năng phụ: sửa bản nháp theo lời nhắc, hỏi đáp về ca, soạn văn bản | Lời thoại/bản nháp ĐÃ CHE định danh; còn định danh thì từ chối gửi (422). Phải qua công tắc quản trị và bác sĩ bật cho từng lần | **tắt** | `web/may-chu/routes/llm-ngoai.ts` |
+| Cổng mô hình ngoài AIBOX — dịch vụ bên thứ ba (chat/completions) | Tính năng phụ: sửa bản nháp theo lời nhắc, hỏi đáp về ca, soạn văn bản | Lời thoại/bản nháp ĐÃ CHE định danh; còn định danh thì từ chối gửi (422). Phải qua công tắc quản trị (mặc định tắt) và công tắc của bác sĩ (trình duyệt nhớ) | **tắt** | `web/may-chu/routes/llm-ngoai.ts` |
 | Cổng mô hình ngoài AIBOX — dịch vụ bên thứ ba (/models) | Kiểm tình trạng cổng | Không có nội dung ca khám (chỉ khóa truy cập của máy chủ) | mở | `web/may-chu/routes/llm-ngoai.ts` |
 | API tài liệu: NCBI E-utilities (PubMed), WHO IRIS, openFDA… (hàm layChu) | Tra tài liệu y khoa | Từ khóa y khoa; ô tìm từ chối từ khóa có tên/mã/số liên lạc (422) | mở | `web/may-chu/tra-cuu/nguon-ngoai.ts` |
 | Trang tài liệu y khoa chính thống (StatPearls/PMC, MedlinePlus, DailyMed, Bộ Y tế, MSD, NICE, WHO, CDC) (hàm layWeb) | Đọc nội dung tài liệu để trả lời có nguồn | Địa chỉ trang tài liệu; từ khóa do bước tra cứu đặt từ văn bản đã che | mở | `web/may-chu/tra-cuu/nguon-ngoai.ts` |

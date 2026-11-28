@@ -19,6 +19,7 @@ const XUNG_HO =
   "[Ôô]ng|[Bb]à|[Aa]nh|[Cc]hị|[Ee]m|[Cc]ô|[Cc]hú|[Bb]ác(?:\\s+sĩ)?|[Cc]háu|[Bb]é|[Cc]ụ|[Dd]ì|[Cc]ậu|[Mm]ợ|[Tt]hím|[Mm]ẹ|[Bb]ố|[Vv]ợ|[Cc]hồng|BS\\.?|[Bb]s\\.?|[Cc]on(?:\\s+(?:trai|gái|dâu|rể))?(?:\\s+(?:là|tên))?";
 const TU_DIA_CHI = "ngõ|ngách|hẻm|kiệt|phố|đường|phường|quận|huyện|xã|thôn|xóm|ấp|thị\\s+trấn|thị\\s+xã|tỉnh|thành\\s+phố|tp\\.?|TP\\.?";
 const NOI_TIEP_DIA_CHI = `(?:[\\s,]+(?:\\d+[\\p{L}\\d/-]*|\\p{Lu}\\p{Ll}*|(?:${TU_DIA_CHI})(?=\\s)))*`;
+const CUM_KHONG_PHAI_TEN = "(?:Lý\\s+Do|Thái\\s+Lan|Cao\\s+Bằng|Kim\\s+Ngân|Hà\\s+(?:Nội|Giang|Nam|Tĩnh))";
 const NGAY_SO = "\\d{1,2}[/.-]\\d{1,2}[/.-]\\d{2,4}";
 
 // MA_CA_BENH: "bệnh nhân 416", "BN416", "bệnh nhân số 91", "ca bệnh 950", "bệnh nhân 861, 862 và 863".
@@ -26,7 +27,8 @@ const NGAY_SO = "\\d{1,2}[/.-]\\d{1,2}[/.-]\\d{2,4}";
 // "BN 2 lần", "bệnh nhân 65 tuổi") thì không phải mã. "thứ 2" chỉ tính sau "bệnh nhân"/"ca"/"COVID-19" (tránh thứ trong tuần).
 const BAO_MA_CA =
   "(?:[Bb]ệnh\\s+nhân|BỆNH\\s+NHÂN|[Nn]gười\\s+bệnh|[Cc]a\\s+(?:bệnh|nhiễm|mắc|dương\\s+tính)|CA\\s+BỆNH|[Cc]a|BN)";
-const BAO_MA_CA_MANH = `(?:${BAO_MA_CA}|(?:COVID|Covid|covid)\\s*-\\s*19|nCoV|CoV\\s*-\\s*2|từ|gồm|các|là|nhận|thân)(?:\\s+từ)?\\s+(?:thứ|số)`;
+// "thứ N" chỉ là mã ca sau từ chỉ ca bệnh; sau "từ/là/các…" chỉ nhận "số N" (tránh "sốt từ thứ 2", "là thứ 3").
+const BAO_MA_CA_MANH = `(?:(?:${BAO_MA_CA}|(?:COVID|Covid|covid)\\s*-\\s*19|nCoV|CoV\\s*-\\s*2)(?:\\s+từ)?\\s+(?:thứ|số)|(?:từ|gồm|các|là|nhận|thân)(?:\\s+từ)?\\s+số)`;
 const SO_CA = "(?:\\d{1,3}(?:\\.\\d{3})+|\\d{1,6})(?![\\d.,/]?\\d)";
 const DON_VI_SAU_SO =
   "\\s*(?:tuổi|ngày(?!\\s*\\d)|tuần|tháng|năm|giờ|h|phút|giây|tiếng|buổi|lần|lượt|đợt|ca|trường\\s+hợp|%|mg|mcg|µg|ml|mmol|kg|g|độ|viên|ống|gói|mũi|liều|cữ|giọt|xịt|đơn\\s+vị|UI|IU|mmHg|lít|l|cm|mm|m)(?![\\p{L}\\d])";
@@ -56,7 +58,9 @@ const TEN_VIET_TAT_RIENG = new RegExp(
   `(?<!\\p{Lu}[\\p{L}\\d]*\\s)${KHONG_CHU_TRUOC}${CHU_TAT}\\.\\s?${CHU_TAT}(?:\\.\\s?${CHU_TAT})*\\.?${KHONG_CHU_SAU}(?!\\s+\\p{Lu})`,
   "gu",
 );
-const TEN_VIET_TAT_MOT_CHU = /(?<=[\p{L}\d,;:()"“”]\s)\p{Lu}\.(?=\s+\p{Ll})/gu;
+// Không che chữ cái đứng sau danh từ y khoa: "viêm gan B.", "nhóm máu A.", "Vitamin B.", "phác đồ A.".
+const TEN_VIET_TAT_MOT_CHU =
+  /(?<=[\p{L}\d,;:()"“”]\s)(?<!(?:[Gg]an|[Mm]áu|[Vv]itamin|VITAMIN|[Tt]ype|[Tt]uýp|[Nn]hóm|đồ|[Ll]oại|[Kk]hối|[Tt]hể|[Dd]ạng)\s)\p{Lu}\.(?=\s+\p{Ll})/gu;
 
 /** Luật che theo thứ tự: số liên lạc / mã trước, rồi ngày, địa chỉ, nơi học/làm, tên. */
 const LUAT: RegExp[] = [
@@ -116,9 +120,11 @@ const LUAT: RegExp[] = [
   // Xưng hô + tên viết hoa: "Bà Hoa", "ông Nam", "Bác sĩ Minh", "con gái là Ngọc"
   new RegExp(`${KHONG_CHU_TRUOC}(?:${XUNG_HO})\\s+${TEN_HOA}${KHONG_CHU_SAU}`, "gu"),
   // Họ + tên viết hoa: "Nguyễn Văn Nam", "Trần Thị Hoa"
-  new RegExp(`${KHONG_CHU_TRUOC}(?:${HO})(?:\\s+\\p{Lu}\\p{Ll}*){1,3}${KHONG_CHU_SAU}`, "gu"),
+  // (không che cụm trùng họ mà không phải tên người: "Lý Do", "Thái Lan", "Cao Bằng", "Kim Ngân", "Hà Nội"…)
+  new RegExp(`${KHONG_CHU_TRUOC}(?!${CUM_KHONG_PHAI_TEN}${KHONG_CHU_SAU})(?:${HO})(?:\\s+\\p{Lu}\\p{Ll}*){1,3}${KHONG_CHU_SAU}`, "gu"),
   // Họ tên chữ thường ba tiếng: "nguyễn văn an"
-  new RegExp(`${KHONG_CHU_TRUOC}(?:${HO_THUONG})\\s+(?:${TEN_DEM_THUONG})\\s+\\p{Ll}+(?:\\s+\\p{Ll}+)?${KHONG_CHU_SAU}`, "giu"),
+  // (ba tiếng; không nuốt tiếng thứ tư vì đó thường là động từ/triệu chứng: "nguyễn văn an bị sốt")
+  new RegExp(`${KHONG_CHU_TRUOC}(?:${HO_THUONG})\\s+(?:${TEN_DEM_THUONG})\\s+\\p{Ll}+${KHONG_CHU_SAU}`, "giu"),
 ];
 
 const SO_VONG_CHE_TOI_DA = 8;

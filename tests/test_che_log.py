@@ -21,3 +21,22 @@ def test_che_log_cat_ngan():
 def test_che_log_che_ten_va_so():
     ra = che_log("Bệnh nhân Nguyễn Văn An, sđt 0912345678, đau ngực")
     assert "Nguyễn Văn An" not in ra and "0912345678" not in ra
+
+
+def test_in_loi_an_toan_keyerror_ten_chu_thuong(capsys):
+    # Rà soát độc lập: KeyError("nguyễn văn an") từng in nguyên tên
+    try:
+        {}["nguyễn văn an"]
+    except KeyError as exc:
+        in_loi_an_toan(exc)
+    err = capsys.readouterr().err
+    assert "KeyError" in err and "nguyễn văn an" not in err
+
+
+def test_che_log_che_ten_chu_thuong_ho_ten_day_du():
+    assert "nguyễn văn an" not in che_log("bệnh nhân nguyễn văn an bị sốt")
+
+
+def test_che_log_che_truoc_roi_cat():
+    ra = che_log("x" * 292 + " 0912345678 đau ngực")
+    assert "0912" not in ra and len(ra) <= 300

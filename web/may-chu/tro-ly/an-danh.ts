@@ -253,8 +253,9 @@ const R_BN_TEN = new RegExp(
   `(?<![\\p{L}])(?:[Bb]ệnh nhân|BỆNH NHÂN|BN)\\s+(?!(?:${MAU_WHITELIST_SAU_BN})(?![\\p{L}\\d]))\\p{Lu}[\\p{Ll}\\p{Lu}]+(?![\\p{L}\\d])`,
   "u",
 );
+// Bỏ qua cụm trùng họ mà không phải tên người ("Lý Do", "Thái Lan", "Cao Bằng", "Kim Ngân", "Hà Nội"…).
 const R_HO =
-  /(?<![\p{L}])(?:(?:Nguyễn|Trần|Lê|Phạm|Hoàng|Huỳnh|Phan|Vũ|Võ|Đặng|Bùi|Đỗ|Hồ|Ngô|Dương|Lý|Đinh|Trương|Đoàn|Lương|Trịnh|Phùng|Quách|Vương|Nghiêm|Kiều|Nguyen|Tran|Pham|Hoang|Huynh)\s+\p{Lu}[\p{Ll}\p{Lu}]*|(?:NGUYỄN|TRẦN|LÊ|PHẠM|HUỲNH|PHAN|VŨ|VÕ|ĐẶNG|BÙI|ĐỖ|NGÔ|ĐINH|TRƯƠNG|ĐOÀN|LƯƠNG|TRỊNH|PHÙNG|QUÁCH|VƯƠNG|NGHIÊM|KIỀU|NGUYEN|TRAN|PHAM|HOANG|HUYNH)\s+\p{Lu}+|(?:HOÀNG|HỒ|DƯƠNG|LÝ)\s+(?!(?:TÍNH|VẬT|ĐẢM|ĐIỂM|THỂ|SƠ|MÁU|DO|LỊCH|THUYẾT|TƯỞNG)(?![\p{L}]))\p{Lu}+)(?![\p{L}\d])/u;
+  /(?<![\p{L}])(?!(?:Lý\s+Do|Thái\s+Lan|Cao\s+Bằng|Kim\s+Ngân|Hà\s+(?:Nội|Giang|Nam|Tĩnh))(?![\p{L}\d]))(?:(?:Nguyễn|Trần|Lê|Phạm|Hoàng|Huỳnh|Phan|Vũ|Võ|Đặng|Bùi|Đỗ|Hồ|Ngô|Dương|Lý|Đinh|Trương|Đoàn|Lương|Trịnh|Phùng|Quách|Vương|Nghiêm|Kiều|Nguyen|Tran|Pham|Hoang|Huynh)\s+\p{Lu}[\p{Ll}\p{Lu}]*|(?:NGUYỄN|TRẦN|LÊ|PHẠM|HUỲNH|PHAN|VŨ|VÕ|ĐẶNG|BÙI|ĐỖ|NGÔ|ĐINH|TRƯƠNG|ĐOÀN|LƯƠNG|TRỊNH|PHÙNG|QUÁCH|VƯƠNG|NGHIÊM|KIỀU|NGUYEN|TRAN|PHAM|HOANG|HUYNH)\s+\p{Lu}+|(?:HOÀNG|HỒ|DƯƠNG|LÝ)\s+(?!(?:TÍNH|VẬT|ĐẢM|ĐIỂM|THỂ|SƠ|MÁU|DO|LỊCH|THUYẾT|TƯỞNG)(?![\p{L}]))\p{Lu}+)(?![\p{L}\d])/u;
 
 // Họ tên tiếng Việt viết chữ thường đi sau từ khóa nhận diện (bệnh nhân, ông/bà/anh/chị/cháu...) hoặc họ + tên đệm + tên
 const XUNG_HO_CA_NHAN_THUONG = "(?:ông|bà|anh|chị|cháu|cô|chú|bé)";

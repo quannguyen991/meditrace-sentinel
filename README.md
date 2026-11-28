@@ -210,7 +210,7 @@ Biến môi trường cần đặt từ 26/11/2026 (đủ danh sách ở `web/.e
 | `MEDITRACE_WORM_KEY` | Khoá HMAC của nhật ký ký duyệt. Không đặt thì tự sinh vào `~/.meditrace/worm.key`; phải sao lưu cùng cơ sở dữ liệu. |
 | `HOST`, `MEDITRACE_ALLOWED_HOSTS` | Chế độ dev chỉ nghe `127.0.0.1`; muốn mở qua đường hầm thì liệt kê tên miền. |
 | `MEDITRACE_NGOAI_TOI_DA_PHUT`, `MEDITRACE_NGOAI_TOI_DA_NGAY` | Giới hạn số lần gọi mô hình ngoài mỗi người dùng (mặc định 10/phút, 200/ngày). |
-| `MEDITRACE_TRO_LY_NGOAI` | Đường ra mô hình ngoài (AIBOX, **dịch vụ bên thứ ba**) **mặc định TẮT**. Quản trị bật trong giao diện; bác sĩ còn phải bật cho từng lần gửi. `tat` khóa hẳn (nên đặt ở bản cho phòng khám); `bat` chỉ mở khi quản trị chưa chọn. |
+| `MEDITRACE_TRO_LY_NGOAI` | Đường ra mô hình ngoài (AIBOX, **dịch vụ bên thứ ba**) **mặc định TẮT**. Quản trị bật trong giao diện; bác sĩ còn phải bật công tắc “Cho phép gửi ra mô hình ngoài” (trình duyệt nhớ lựa chọn này). `tat` khóa hẳn (nên đặt ở bản cho phòng khám); `bat` chỉ mở khi quản trị chưa chọn. |
 
 Bản chạy thử công khai (từ 26/11/2026, thay Vercel): máy chủ web và dịch vụ Python chạy trên một máy có GPU, ra ngoài qua đường hầm Cloudflare; một Cloudflare Worker (`trien-khai/cloudflare/`) giữ địa chỉ cố định https://meditrace-sentinel.meditrace.workers.dev và chuyển tiếp tới đường hầm hiện tại (đọc từ kho KV). Khi đường hầm đổi địa chỉ, máy chủ tự gửi địa chỉ mới lên Worker qua một đường riêng có mật mã chung (`cap-nhat-kv.ps1`), không cần khoá API Cloudflare. Trang chính không được trình duyệt giữ bản cũ; các tệp giao diện của bản trước được giữ lại khi triển khai, nên trang đang mở không bị lỗi khi máy chủ đổi bản.
 

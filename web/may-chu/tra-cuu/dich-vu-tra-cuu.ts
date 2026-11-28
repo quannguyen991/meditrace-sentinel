@@ -4,6 +4,7 @@
  *  - `timTaiLieuTheoTuKhoa`: chạy song song các nguồn y khoa, lọc bài lạc đề
  *  - `soanTraLoiCoNguon`: tổng hợp phương án có trích dẫn kèm kiểm định số liệu `soLech`
  */
+import { anDanhChoNgoai } from "../an-danh-ngoai";
 import { goiNgoai } from "../routes/llm-ngoai";
 import { chuanSo, soLech } from "./kiem-dinh-so";
 import {
@@ -68,7 +69,26 @@ export async function datTuKhoaTraCuu(
   try {
     tuKhoa = { ...tuKhoa, ...JSON.parse(b1.text.match(/\{[\s\S]*\}/)?.[0] || b1.text) };
   } catch {}
-  return { tuKhoa, b1 };
+  // Từ khóa sẽ đi thẳng ra NCBI/MSD/NICE/Bộ Y tế…: bỏ từ khóa còn dấu hiệu định danh (mô hình có thể lặp lại tên).
+  return { tuKhoa: locTuKhoaCoDanhTinh(tuKhoa).tuKhoa, b1 };
+}
+
+/** Bỏ mọi từ khóa tra cứu còn dấu hiệu định danh (Đề cải tiến 1). Che rồi gửi sẽ làm hỏng câu tìm, nên bỏ hẳn. */
+export function locTuKhoaCoDanhTinh(tuKhoa: any): { tuKhoa: any; boDi: number } {
+  let boDi = 0;
+  const sach = (v: unknown): boolean => {
+    if (typeof v !== "string" || !v.trim()) return true;
+    const kq = anDanhChoNgoai(v);
+    const ok = kq.ok && kq.van === v.normalize("NFC");
+    if (!ok) boDi++;
+    return ok;
+  };
+  const ra: any = { ...tuKhoa };
+  for (const k of Object.keys(ra)) {
+    if (typeof ra[k] === "string" && !sach(ra[k])) ra[k] = "";
+    else if (Array.isArray(ra[k])) ra[k] = ra[k].filter((x: unknown) => sach(x));
+  }
+  return { tuKhoa: ra, boDi };
 }
 
 /** Bước "server tự tìm": chạy song song các nguồn, một nguồn lỗi thì dùng nguồn khác và báo lỗi. */

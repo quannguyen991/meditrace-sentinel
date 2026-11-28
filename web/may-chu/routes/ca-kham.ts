@@ -1,6 +1,7 @@
 import type express from "express";
 import { docKho, ghiKho, ghiMotCaKham, laTenKho, xoaMotCaKham } from "../csdl";
 import { goiDichVu, traLoi } from "./dung-chung";
+import { cheLog } from "../che-log";
 
 export function dangKyCaKhamRoutes(app: express.Express) {
   // /api/ca-kham giữ lại tương thích ngược 100% cho giao diện hiện có; /api/kho/<tên> dùng cho các kho khác.
@@ -12,7 +13,7 @@ export function dangKyCaKhamRoutes(app: express.Express) {
     try {
       res.set("Cache-Control", "no-store").json(docKho(uid, ten));
     } catch (err: any) {
-      console.error(`[kho ${ten}] đọc lỗi:`, err);
+      console.error(`[kho ${ten}] đọc lỗi:`, cheLog(err, 1500));
       res.status(500).json({ error: `Không đọc được kho ${ten}` });
     }
   });
@@ -32,7 +33,7 @@ export function dangKyCaKhamRoutes(app: express.Express) {
       res.json({ ok: true, count: danhSach.length, ...kq });
     } catch (err: any) {
       const status = Number(err?.status || err?.ma) || 500;
-      if (status >= 500) console.error(`[kho ${ten}] ghi lỗi:`, err);
+      if (status >= 500) console.error(`[kho ${ten}] ghi lỗi:`, cheLog(err, 1500));
       res.status(status).json({
         error: status >= 500 ? `Không ghi được kho ${ten}` : `Không ghi được kho ${ten}: ${err?.message || err}`,
         ...(err?.code ? { code: err.code } : {}),

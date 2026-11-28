@@ -47,7 +47,7 @@ export async function goiDichVu(duong: string, tuyChon?: RequestInit) {
   try {
     res = await fetch(`${API}${duong}`, { ...(tuyChon || {}), headers, dispatcher: choLau } as any);
   } catch (err: any) {
-    console.error(`[dich-vu] Không kết nối được ${API}${duong}:`, err?.message || err);
+    console.error(`[dich-vu] Không kết nối được ${API}${duong}:`, cheLog(err?.message || err));
     throw loiCongKhai("Không kết nối được dịch vụ MediTrace chạy tại chỗ. Hãy bật dịch vụ rồi thử lại.", 503, "dich_vu_tat");
   }
   const data = await res.json().catch(() => ({}));
