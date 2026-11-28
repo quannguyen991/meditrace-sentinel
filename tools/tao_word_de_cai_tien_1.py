@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Xuất báo cáo Word (.docx) hoàn chỉnh cho Đề cải tiến 1 (28/11/2026):
+"""Xuất báo cáo Word (.docx) cho Đề cải tiến 1 (28/11/2026):
 'Chứng minh làm chủ và bảo vệ dữ liệu sức khỏe'.
 
-Phong cách văn bản chuyên nghiệp, trang trọng (chuẩn báo cáo kỹ thuật / y tế):
+Phong cách văn bản hành chính – kỹ thuật gọn, dễ đọc:
 - Phông Times New Roman thống nhất, mã/commit dùng Consolas
-- Không dùng thẻ KPI màu mè, không dùng khung hộp tô nền sặc sỡ
-- Bảng biểu kiểu học thuật (nền trắng, tiêu đề xám nhạt, đường kẻ ngang mảnh)
-- Đánh số trang tự động và tiêu đề đầu trang trang nhã
+- Câu văn ngắn gọn, rõ ý, tránh nhồi chữ vào ô bảng
+- Bảng biểu nền trắng, tiêu đề xám nhạt, đường kẻ ngang mảnh
 """
 
 from collections import Counter
@@ -35,6 +34,7 @@ ANH_DIR = GOC / "docs" / "minh-bach" / "anh"
 OUT_ROOT = GOC / "Bao_Cao_De_Cai_Tien_1_Lam_Chu_Va_Bao_Ve_Du_Lieu_Suc_Khoe.docx"
 OUT_MINH_BACH = GOC / "docs" / "minh-bach" / "TRA_LOI_DE_CAI_TIEN_1.docx"
 OUT_TAI_LIEU = GOC / "docs" / "tai-lieu" / "Bao_Cao_De_Cai_Tien_1_Lam_Chu_Va_Bao_Ve_Du_Lieu_Suc_Khoe.docx"
+OUT_DOWNLOADS_V2 = Path.home() / "Downloads" / "Bao_Cao_De_Cai_Tien_1_Ban_Chuyen_Nghiep.docx"
 
 PHONG_CHU = "Times New Roman"
 MAU_CHU = RGBColor(0x11, 0x18, 0x27)
@@ -88,7 +88,7 @@ def them_duong_ke_duoi(p, mau_hex="334155", sz="8"):
     pPr.append(pBdr)
 
 
-def them_trinh_ky_trich_dan(p, mau_hex="94A3B8"):
+def them_vach_trai(p, mau_hex="94A3B8"):
     pPr = p._p.get_or_add_pPr()
     pBdr = OxmlElement("w:pBdr")
     left = OxmlElement("w:left")
@@ -123,7 +123,7 @@ def dat_nen_o(cell, hex_color):
     tcPr.append(shd)
 
 
-def dat_le_o(cell, top=70, bottom=70, left=100, right=100):
+def dat_le_o(cell, top=65, bottom=65, left=85, right=85):
     tcPr = cell._tc.get_or_add_tcPr()
     tcMar = OxmlElement("w:tcMar")
     for m, val in [("w:top", top), ("w:bottom", bottom), ("w:left", left), ("w:right", right)]:
@@ -160,19 +160,19 @@ def them_gach_dau_dong(doc, text, co=11.2):
 
 def them_trich_dan(doc, text, co=11.0):
     p = them_doan(doc, text, nghieng=True, co=co, mau=MAU_CHU, cach_tren=4, cach_duoi=6, lui_trai=0.2)
-    them_trinh_ky_trich_dan(p)
+    them_vach_trai(p)
     return p
 
 
 def them_tieu_de_phan(doc, text):
-    p = them_doan(doc, text, dam=True, co=13.5, mau=MAU_NHAN, cach_tren=14, cach_duoi=6, gian_dong=1.15)
+    p = them_doan(doc, text, dam=True, co=13.0, mau=MAU_NHAN, cach_tren=14, cach_duoi=6, gian_dong=1.15)
     p.paragraph_format.keep_with_next = True
     them_duong_ke_duoi(p, mau_hex="94A3B8", sz="6")
     return p
 
 
 def them_tieu_de_muc(doc, text):
-    p = them_doan(doc, text, dam=True, co=12.0, mau=MAU_NHAN, cach_tren=10, cach_duoi=4, gian_dong=1.15)
+    p = them_doan(doc, text, dam=True, co=11.8, mau=MAU_NHAN, cach_tren=9, cach_duoi=3, gian_dong=1.15)
     p.paragraph_format.keep_with_next = True
     return p
 
@@ -181,13 +181,12 @@ def them_bang(doc, headers, rows, col_widths_in, first_col_bold=True, font_size=
     tbl = doc.add_table(rows=len(rows) + 1, cols=len(headers))
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 
-    # Hang tieu de: nen xam rat nhat, ke duoi dam, chu den trang nha
     for ci, h in enumerate(headers):
         cell = tbl.cell(0, ci)
         cell.width = Inches(col_widths_in[ci])
         dat_nen_o(cell, "F1F5F9")
         dat_vien_o(cell, top="single", bottom="single", left="none", right="none", sz="8", mau="334155")
-        dat_le_o(cell, top=80, bottom=80, left=85, right=85)
+        dat_le_o(cell, top=75, bottom=75, left=80, right=80)
         p = cell.paragraphs[0]
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(0)
@@ -209,11 +208,11 @@ def them_bang(doc, headers, rows, col_widths_in, first_col_bold=True, font_size=
                 sz="8" if is_last else "4",
                 mau="334155" if is_last else "CBD5E1",
             )
-            dat_le_o(cell, top=65, bottom=65, left=85, right=85)
+            dat_le_o(cell, top=60, bottom=60, left=80, right=80)
             p = cell.paragraphs[0]
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.space_after = Pt(0)
-            p.paragraph_format.line_spacing = 1.16
+            p.paragraph_format.line_spacing = 1.15
             viet_rich(p, str(val), dam=(first_col_bold and ci == 0), co=font_size, mau=MAU_CHU)
 
     them_doan(doc, "", cach_duoi=4)
@@ -247,28 +246,21 @@ def thong_ke_git_hien_tai():
     )
     blocks = [b.strip() for b in out.split("===END===") if b.strip()]
     cnt = Counter()
-    recent = []
-    for idx, b in enumerate(blocks):
-        lines = b.splitlines()
-        head = lines[0].split("|", 3)
-        short_h, date_s, subj = head[1], head[2], head[3]
-        body = "\n".join(lines[1:])
+    for b in blocks:
+        body = "\n".join(b.splitlines()[1:])
         m = re.search(r"Cong-cu-AI:\s*([A-Za-z0-9_]+)", body)
         if m:
-            tool = m.group(1)
+            cnt[m.group(1)] += 1
         elif "Co-Authored-By: Claude" in body:
-            tool = "claude_code"
+            cnt["claude_code"] += 1
         else:
-            tool = "chua_xac_dinh"
-        cnt[tool] += 1
-        if idx < 18:
-            recent.append((date_s, f"`{short_h}`", subj, f"`{tool}`"))
+            cnt["chua_xac_dinh"] += 1
     head_short = blocks[0].split("|", 3)[1] if blocks else "main"
-    return len(blocks), dict(cnt), recent, head_short
+    return len(blocks), dict(cnt), head_short
 
 
 def tao_bao_cao():
-    tong_commit, dem_cong_cu, commits_gan_nhat, head_short = thong_ke_git_hien_tai()
+    tong_commit, dem_cong_cu, head_short = thong_ke_git_hien_tai()
 
     doc = docx.Document()
     for s in doc.sections:
@@ -281,282 +273,230 @@ def tao_bao_cao():
 
     them_header_footer(doc)
 
-    # PHAN MO DAU TRANG TRONG (KHONG TO MAU / KHONG HOP KPI)
+    # TIEU DE TRANG TRONG, NGAN GON
     them_doan(
         doc,
-        "DỰ ÁN MEDITRACE SENTINEL — HỒ SƠ ĐÁP ỨNG ĐỀ CẢI TIẾN 1",
+        "DỰ ÁN MEDITRACE SENTINEL — BÁO CÁO ĐÁP ỨNG ĐỀ CẢI TIẾN 1",
         dam=True, co=10.5, mau=MAU_PHU, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_duoi=4,
     )
     them_doan(
         doc,
         "CHỨNG MINH LÀM CHỦ CÔNG NGHỆ VÀ BẢO VỆ DỮ LIỆU SỨC KHỎE",
-        dam=True, co=15.5, mau=MAU_NHAN, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_duoi=4,
+        dam=True, co=15.0, mau=MAU_NHAN, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_duoi=4,
     )
     p_sub = them_doan(
         doc,
-        f"Ngày xác nhận đề: 07:32:49, 28/11/2026  |  Nhánh mã nguồn: main (commit {head_short})  |  Đơn vị thực hiện: Đội MediTrace",
+        f"Ngày nhận đề: 28/11/2026  |  Nhánh main (commit {head_short})  |  Đội thực hiện: MediTrace",
         nghieng=True, co=10.0, mau=MAU_PHU, can_le=WD_ALIGN_PARAGRAPH.CENTER, cach_duoi=10,
     )
     them_duong_ke_duoi(p_sub, mau_hex="1E293B", sz="10")
 
     them_trich_dan(
         doc,
-        "**Đề bài cải tiến:** Quá trình sử dụng AI để phát triển sản phẩm và phạm vi xử lý thông tin bệnh nhân cần minh bạch hơn. "
-        "Trình bày quyết định thiết kế, những nội dung AI hỗ trợ và đội tự đánh giá/sửa; không đưa dữ liệu bệnh nhân nhận dạng được vào dịch vụ hoặc log trái phép. "
-        "Minh chứng: lịch sử sửa đổi, sơ đồ dữ liệu và quy trình bác sĩ phê duyệt trước khi dùng hồ sơ.",
+        "**Yêu cầu của đề:** Minh bạch quá trình dùng AI khi phát triển sản phẩm và phạm vi xử lý thông tin bệnh nhân; "
+        "trình bày quyết định thiết kế, phần AI hỗ trợ và phần đội tự đánh giá/sửa; không đưa dữ liệu nhận dạng vào dịch vụ hay log trái phép. "
+        "Minh chứng gồm lịch sử sửa đổi, sơ đồ dữ liệu và quy trình bác sĩ phê duyệt trước khi dùng hồ sơ.",
     )
 
-    them_doan(doc, "**Hai xác nhận chính thức của nhóm tác giả (28/11/2026):**", cach_tren=4, cach_duoi=2)
+    them_doan(doc, "**Hai điểm nhóm tác giả xác nhận rõ (28/11/2026):**", cach_tren=4, cach_duoi=2)
     them_gach_dau_dong(
         doc,
-        "**Chưa từng đưa hồ sơ bệnh nhân thật vào công cụ AI nào.** Trong suốt quá trình phát triển và kiểm thử, đội chỉ sử dụng dữ liệu mô phỏng tự sinh và các bộ dữ liệu công khai có giấy phép hợp lệ.",
+        "**Chưa từng đưa hồ sơ bệnh nhân thật vào bất kỳ công cụ AI nào.** Trong quá trình phát triển và kiểm thử, nhóm chỉ dùng dữ liệu mô phỏng và các bộ dữ liệu công khai hợp lệ.",
     )
     them_gach_dau_dong(
         doc,
-        "**Cổng mô hình ngoài AIBOX là dịch vụ bên thứ ba.** Do đó tính năng trợ lý ngoài là tính năng phụ, mặc định tắt ở cả hai lớp (quản trị và bác sĩ), và chỉ gửi văn bản đã khử định danh (từ chối HTTP 422 nếu còn sót dấu hiệu danh tính).",
+        "**Cổng AI bên ngoài (AIBOX) chỉ là tính năng phụ của bên thứ ba.** Tính năng này mặc định tắt ở cả quản trị lẫn màn hình bác sĩ, và chỉ gửi văn bản đã xóa thông tin cá nhân.",
     )
 
-    # BANG TOM TAT DOI CHIEU
-    them_tieu_de_phan(doc, "Tóm tắt đối chiếu yêu cầu của đề bài với minh chứng thực tế")
+    # BANG DOI CHIEU NGAN GON
+    them_tieu_de_phan(doc, "Tóm tắt đối chiếu với yêu cầu của Ban Giám khảo")
     them_bang(
         doc,
-        ["Nội dung yêu cầu", "Giải pháp đã triển khai trong mã nguồn", "Tệp minh chứng và phép thử kiểm chứng"],
+        ["Yêu cầu", "Cách MediTrace giải quyết", "Minh chứng kiểm tra được"],
         [
-            [
-                "1. Quyết định thiết kế",
-                "Sổ 13 quyết định thiết kế ghi rõ vấn đề, các phương án cân nhắc, phương án chọn, lý do, người quyết và mã commit/tệp bằng chứng.",
-                "`docs/minh-bach/so-quyet-dinh-thiet-ke.md`; `tests/test_minh_chung_trich_commit.py`",
-            ],
-            [
-                "2. Nội dung AI hỗ trợ và đội tự đánh giá/sửa",
-                "Bảng phân vai theo từng cấu phần dự án và danh sách 14 lần đội rà soát, phát hiện lỗi, bác bỏ hoặc tự sửa đầu ra của AI kèm nhật ký.",
-                "`docs/minh-bach/ai-ho-tro-va-doi-tu-sua.md`, `nhat-ky-hackathon.md`",
-            ],
-            [
-                "3. Lịch sử sửa đổi",
-                f"Toàn bộ {tong_commit} commit trên nhánh `main` được thống kê theo công cụ AI; hook `.githooks/commit-msg` chặn mọi commit mới thiếu dòng `Cong-cu-AI:`.",
-                "`tools/truy_nguon_commit.py`, `tools/kiem_trailer_commit.py`, `test_truy_nguon_commit.py`",
-            ],
-            [
-                "4. Không gửi dữ liệu nhận dạng vào dịch vụ trái phép",
-                "Lõi PhoWhisper, Qwen3-4B, luật K1–K7 và SQLite chạy tại chỗ; mọi lời gọi mạng khai báo tập trung có test quét; bộ che định danh đạt 94,0% (TS) / 93,8% (Python) trên PhoNER test; chặn từ khóa PubMed có danh tính.",
-                "`web/may-chu/loi-ra-mang.ts`, `an-danh-ngoai.ts`, `khu_dinh_danh.py`, `test_loi_ra_mang_python.py`",
-            ],
-            [
-                "5. Không đưa dữ liệu nhận dạng vào log trái phép",
-                "Che định danh trước khi cắt ngắn chuỗi log lỗi (`cheLog`/`che_log`), thay `traceback.print_exc()`, che `procedureName` trong `nhat_ky`; tự xóa audio quá hạn 30/30/7 ngày; xóa `localStorage` khi đăng xuất; gỡ Google Fonts.",
-                "`che-log.ts`, `che_log.py`, `log-da-che.test.ts`, `test_che_log.py`, `khongTaiNguonNgoai.test.ts`",
-            ],
-            [
-                "6. Sơ đồ dữ liệu và quy trình phê duyệt trước khi dùng hồ sơ",
-                "Sơ đồ dữ liệu sinh tự động từ mã nguồn; khóa 2 tầng (12 nút xuất trên giao diện + 6 API máy chủ) qua bản chụp `ban_ky_duyet` và sổ ký WORM SHA-256 + HMAC; sửa sau khi ký tự động khóa lại.",
-                "`so-do-du-lieu.md`, `choPhepDungHoSo.ts`, `kiem-ky-may-chu.ts`, `worm.ts`, `loiRaHoSo.test.ts`",
-            ],
+            ["1. Quyết định thiết kế", "Ghi rõ 13 quyết định cốt lõi: vì sao chọn cách này, ai quyết và tệp nào thực hiện.", "`so-quyet-dinh-thiet-ke.md`, `test_minh_chung_trich_commit.py`"],
+            ["2. AI hỗ trợ & Đội tự sửa", "Ghi rõ AI viết phần nào, đội kiểm/bác bỏ/sửa lại lỗi gì qua từng đợt rà soát.", "`ai-ho-tro-va-doi-tu-sua.md`, `nhat-ky-hackathon.md`"],
+            ["3. Lịch sử sửa đổi", f"Thống kê {tong_commit} commit theo công cụ AI; tự động chặn commit mới nếu thiếu ghi chú công cụ.", "`tools/truy_nguon_commit.py`, `.githooks/commit-msg`"],
+            ["4. Không lộ dữ liệu ra ngoài", "Lõi AI chạy tại chỗ; mọi kết nối mạng phải khai báo vào một danh sách; che tên/SĐT/mã bệnh nhân trước khi ra cổng phụ.", "`loi-ra-mang.ts`, `an-danh-ngoai.ts`, `khu_dinh_danh.py`"],
+            ["5. Không lộ dữ liệu vào log", "Che tên và số điện thoại trước khi cắt ngắn log lỗi; tự xóa tệp ghi âm sau 30/30/7 ngày; gỡ Google Fonts.", "`che-log.ts`, `che_log.py`, `storage.py`, `khongTaiNguonNgoai.test.ts`"],
+            ["6. Sơ đồ & Phê duyệt hồ sơ", "Sơ đồ dữ liệu sinh từ mã; khóa 12 nút xuất và 6 API máy chủ cho tới khi bác sĩ duyệt hết mục nghi ngờ và bấm ký.", "`so-do-du-lieu.md`, `choPhepDungHoSo.ts`, `kiem-ky-may-chu.ts`, `worm.ts`"],
         ],
         [1.45, 3.05, 2.05],
+        font_size=9.3,
+    )
+
+    # =========================================================================
+    # MUC 1: QUYET DINH THIET KE
+    # =========================================================================
+    them_tieu_de_phan(doc, "1. Các quyết định thiết kế cốt lõi")
+    them_doan(
+        doc,
+        "Bảng dưới tóm tắt 13 quyết định thiết kế chính của đội (`docs/minh-bach/so-quyet-dinh-thiet-ke.md`), "
+        "trả lời rõ vì sao đội chọn phương án này thay vì cách làm phổ biến hơn.",
+        co=11.0,
+    )
+
+    them_bang(
+        doc,
+        ["Nhóm quyết định", "Phương án chọn & Lý do", "Bằng chứng"],
+        [
+            ["1. Tách AI và Luật\n(QĐ 1)", "Chỉ để `Qwen3-4B` nhặt từng ý nhỏ kèm câu trích ở Bước 1; các bước ghép người, xử lý đính chính và kiểm căn cứ K1–K7 viết bằng luật cố định để dễ truy lỗi và tránh trộn bệnh của người nhà.", "`chay_duong_ong.py`, `b4_kiem_can_cu.py`"],
+            ["2. Chạy tại chỗ & Khóa lối ra\n(QĐ 2–4)", "Chạy lõi ngay trên máy nội bộ; cổng AI ngoài (AIBOX) mặc định tắt ở 2 lớp; tự xóa ghi âm sau 30 ngày (đã duyệt/chờ duyệt) hoặc 7 ngày (bỏ dở); gỡ Google Fonts để không lộ IP.", "`loi-ra-mang.ts`, `8b752da`, `fb6ef97`, `storage.py`"],
+            ["3. Phê duyệt 2 tầng\n(QĐ 5–6)", "Khóa toàn bộ nút xuất trên giao diện và 6 API trên máy chủ cho tới khi bác sĩ duyệt xong và ký; sửa 1 chữ sau ký tự khóa lại. Bảng thuốc tham khảo giữ nhãn chưa duyệt để bác sĩ tự đối chiếu.", "`f111b14`, `a555bdc`, `kiem-ky-may-chu.ts`, `tri_thuc_thuoc.json`"],
+            ["4. Kỷ luật dữ liệu & Độ tin cậy\n(QĐ 7–10)", "Chưa đưa mô hình mới (`v3`, `DPO`) vào chạy chính vì `v3` bỏ sót nhiều hơn `v1` (14,1% so với 11,8%) và `DPO` làm tụt điểm câu đúng. Không train bằng dữ liệu do GPT tạo; chỉ thử nghiệm `PhoWhisper-small` trên `VNMed_Speech` (CC BY 4.0) và giữ các bộ ngoài làm bài thi độc lập.", "`dpo-v3.md`, `90687ad`, `asr-vnmed-lora.md`, `1553a4f`"],
+            ["5. Chống học vẹt & Hứa suông\n(QĐ 11–13)", "Tập kiểm tra giữ kín 240 ca chỉ chạy đúng 1 lần; ghi rõ tỷ lệ 11,8% là đo trên tập phát triển; không hứa hẹn 'tiết kiệm X% thời gian' khi chưa bấm giờ trên bác sĩ thật.", "`cay-loi.md`, `2fc4eba`, `7acd457`"],
+        ],
+        [1.35, 3.65, 1.55],
         font_size=9.2,
     )
 
     # =========================================================================
-    # PHAN 1: QUYET DINH THIET KE
+    # MUC 2: AI HO TRO VA DOI TU SUA
     # =========================================================================
-    them_tieu_de_phan(doc, "1. Quyết định thiết kế cốt lõi")
+    them_tieu_de_phan(doc, "2. Phần AI hỗ trợ và phần đội tự kiểm tra, sửa lỗi")
+
+    them_tieu_de_muc(doc, "2.1. Phân công giữa AI và đội phát triển")
+    them_bang(
+        doc,
+        ["Hạng mục", "AI hỗ trợ viết mã", "Đội tự làm và kiểm chứng", "Công cụ chính"],
+        [
+            ["Sinh dữ liệu mẫu", "Viết code sinh hội thoại và biến thể câu", "Thiết kế 657 khuôn bệnh, tách tập theo khuôn để tránh rò rỉ dữ liệu", "Claude Code, Antigravity"],
+            ["Huấn luyện mô hình", "Viết code huấn luyện QLoRA, DPO, LoRA ASR", "Chạy thực nghiệm, kiểm tra trùng lặp, loại bỏ bản DPO kém ổn định", "Claude Code"],
+            ["Luật kiểm căn cứ & Cảnh báo", "Viết khung luật K1–K7 và bộ bắt lỗi", "Đặt quy tắc lâm sàng, khóa ngữ cảnh y khoa, chạy kiểm chứng độc lập", "Claude Code, Antigravity"],
+            ["Giao diện & Máy chủ", "Viết màn hình React và API Express", "Tự bấm kiểm tra từng trạng thái, bỏ bớt nút thừa, chặn lỗ hổng phía máy chủ", "Claude Code, Antigravity"],
+            ["Đo lường & Báo cáo", "Viết kịch bản chạy đo và tổng hợp bảng", "Đối chiếu từng số liệu với log thật, xóa các bảng cũ thiếu căn cứ", "Claude Code, Antigravity"],
+        ],
+        [1.3, 1.7, 2.25, 1.3],
+        font_size=9.1,
+    )
+
+    them_tieu_de_muc(doc, "2.2. Các lần đội tự phát hiện sai sót và sửa lại đầu ra của AI")
+    them_bang(
+        doc,
+        ["Đợt kiểm tra", "Lỗi phát hiện từ mã/tài liệu do AI sinh", "Cách đội sửa và xác nhận lại"],
+        [
+            ["Rà mã sau commit `8120ce4`", "Chữ *\"mi\"* (mí mắt) bị đổi nhầm thành *\"mày\"*; số ngày *\"ho 3 ngày\"* bị báo nhầm là sai liều thuốc.", "Sửa ngay tại `2fc4eba` và ghi rõ bối cảnh số liệu tập phát triển."],
+            ["Rà soát độc lập 26/11", "Lỗi so liều (`5 mg` khớp nhầm `2.5 mg`); mặc định tuổi bằng 50 khi thiếu; gán nhầm thuốc `Sintrom` thành `warfarin`.", "Sửa dứt điểm từng lỗi và viết phép thử khóa hồi quy (`f14a490`, `d1a6cb6`, `e9a1866`)."],
+            ["Rà soát lộ dữ liệu & khóa xuất", "4 nút BHYT/TT26/Cam đoan/Đi buồng vẫn xuất được khi chưa ký; log lỗi còn in thô hoặc cắt chuỗi trước khi che; từ khóa tìm tài liệu có thể chứa tên người.", "Viết phép thử tái hiện lỗi trước rồi mới sửa (`2f41851`, `b4b3633`, `a555bdc`); khóa đủ 6 API ở máy chủ."],
+            ["Rà soát số liệu báo cáo", "Một số bảng cũ (so sánh GPT-4o/Claude/Gemini, con số *\"78,3% đa dạng\"*) không có tệp kết quả đối chứng.", "Rút bỏ hoàn toàn khỏi báo cáo, chỉ giữ số chạy lại được (`doi-chieu-so-lieu-bao-cao.md`)."],
+        ],
+        [1.45, 2.8, 2.3],
+        font_size=9.1,
+    )
+
+    # =========================================================================
+    # MUC 3: LICH SU GIT
+    # =========================================================================
+    them_tieu_de_phan(doc, "3. Lịch sử sửa đổi Git và truy nguồn công cụ AI")
     them_doan(
         doc,
-        "Sổ quyết định thiết kế (`docs/minh-bach/so-quyet-dinh-thiet-ke.md`) ghi lại 13 quyết định kiến trúc quan trọng nhất của dự án. "
-        "Phép thử tự động `tests/test_minh_chung_trich_commit.py` kiểm tra mọi mã commit (`git cat-file`) và đường dẫn tệp được trích dẫn.",
+        f"Nhánh `main` hiện có **{tong_commit} commit** (tính tới `{head_short}`): `claude_code` ({dem_cong_cu.get('claude_code', 0)}), "
+        f"`antigravity` ({dem_cong_cu.get('antigravity', 0)}), `codex` ({dem_cong_cu.get('codex', 0)}) và {dem_cong_cu.get('chua_xac_dinh', 0)} commit cũ "
+        "trước khi áp dụng quy ước ghi công cụ (để nguyên `chua_xac_dinh`, không đoán). "
+        "Mọi commit mới đều bị hook `.githooks/commit-msg` chặn lại nếu thiếu dòng `Cong-cu-AI:` hợp lệ.",
         co=11.0,
     )
 
     them_bang(
         doc,
-        ["Nhóm", "Quyết định lựa chọn và lý do kỹ thuật", "Người quyết & Bằng chứng"],
+        ["Ngày", "Commit", "Nội dung chính của các mốc sửa đổi tiêu biểu", "Công cụ"],
         [
-            [
-                "Nhóm 1:\nKiến trúc AI & Bảo vệ dữ liệu\n(QĐ 1–4)",
-                "**QĐ 1:** Chỉ dùng AI (`Qwen3-4B`) ở Bước 1 để tách từng mệnh đề kèm câu trích; các bước gom chủ thể, xử lý đính chính, khóa căn cứ `K1–K7` và dựng bản nháp đều dùng luật xác định để truy vết được lỗi và chặn trộn bệnh của người nhà.\n"
-                "**QĐ 2:** Chạy toàn bộ lõi tại chỗ (offline mặc định); gom mọi lối ra mạng vào một danh sách duy nhất có test quét (`loi-ra-mang.ts`); máy xa fail-closed nếu kiểm tra còn sót định danh.\n"
-                "**QĐ 3:** Đường gửi nội dung ca khám ra bên thứ ba (AIBOX) mặc định TẮT ở hai lớp (công tắc quản trị tắt luôn thắng biến môi trường); màn hình đăng nhập bản demo cảnh báo chỉ dùng dữ liệu mô phỏng.\n"
-                "**QĐ 4:** Đặt hạn tự xóa tệp ghi âm sau 30 ngày (ca đã duyệt và ca chờ duyệt để bác sĩ kịp nghe lại căn cứ) và 7 ngày (phiên bỏ dở chưa có lời thoại, `fb6ef97`); gỡ hoàn toàn Google Fonts khỏi `web/index.html`.",
-                "Tác giả (đội)\n`chay_duong_ong.py`, `b4_kiem_can_cu.py`, `7d00a2a`, `4c57e89`, `054c8b3`, `8b752da`, `22c61af`, `fb6ef97`",
-            ],
-            [
-                "Nhóm 2:\nPhê duyệt trước khi dùng hồ sơ\n(QĐ 5–6)",
-                "**QĐ 5:** Khóa hai tầng ở cả giao diện (12 nút chép/in/xuất) lẫn máy chủ (lưu bản chụp `ban_ky_duyet`, trả `409`/`422` cho cả 6 API xuất hồ sơ khi chưa ký hoặc sửa sau ký); bản in chưa ký tự đóng dấu *\"BẢN NHÁP — CHƯA KÝ DUYỆT\"*.\n"
-                "**QĐ 6:** Danh mục thuốc và mã bệnh tham khảo giữ nguyên cờ `da_duyet = false`, chỉ hiển thị ở mức gợi ý đối chiếu chờ bác sĩ/dược sĩ thẩm định.",
-                "Tác giả (đội); thuốc chờ hội đồng duyệt\n`f111b14`, `98bd5de`, `a555bdc`, `kiem-ky-may-chu.ts`, `tri_thuc_thuoc.json`",
-            ],
-            [
-                "Nhóm 3:\nKỷ luật dữ liệu & Trung thực\n(QĐ 7–13)",
-                "**QĐ 7:** Giữ Chính sách C làm mặc định, Chính sách D bật tường minh nhằm không làm lệch bảng số liệu đã công bố.\n"
-                "**QĐ 8:** Chưa đưa bản `v3` hay `DPO` vào chạy chính do đo trên ca đầy đủ `v3` bỏ sót `14,1%` (cao hơn `11,8%` của `v1`) và `DPO` làm giảm xác suất câu đúng (log-prob tụt từ `-1,38` xuống `-4,90`).\n"
-                "**QĐ 9–10:** Tuyệt đối không train bằng dữ liệu GPT sinh (`VietMed-Sum SYN`); chỉ dùng `VNMed_Speech` (`CC BY 4.0`) thử LoRA `PhoWhisper-small` (lọc 0/0 câu trùng với tập test, chưa thay mô hình sản xuất), giữ các bộ ngoài (`ViDia2Std`, `PhoNER`, `ViMQ`, `ViMedAQA`, `ViHealthQA`) làm bài thi độc lập.\n"
-                "**QĐ 11–13:** Tập giữ kín `240 ca` chỉ chạy đúng 1 lần; luôn gắn rõ nhãn *\"tập phát triển\"* cạnh tỷ lệ `11,8%`; không công bố con số tiết kiệm thời gian khi chưa đo thực nghiệm trên bác sĩ thật.",
-                "Tác giả (đội)\n`3d8a91b`, `90687ad`, `1553a4f`, `2fc4eba`, `7acd457`, `asr-vnmed-lora.md`, `an-danh-phoner.md`",
-            ],
+            ["2026-11-28", "`06a1caa` / `e06236c`", "Hiển thị rõ dữ liệu ca đang dùng cho trợ lý; đồng bộ tài liệu Đề cải tiến 1", "`antigravity` / `claude_code`"],
+            ["2026-11-28", "`90687ad`", "Thử nghiệm LoRA `PhoWhisper-small` trên `VNMed_Speech` (WER giảm 0,3165 → 0,2610, kiểm rò rỉ 0/0)", "`claude_code`"],
+            ["2026-11-28", "`b4b3633`", "Vá theo rà soát độc lập: che log trước khi cắt, che tên viết thường, lọc từ khóa tra cứu", "`claude_code`"],
+            ["2026-11-28", "`a555bdc` / `2f41851`", "Khóa máy chủ cho 6 API xuất hồ sơ qua bản chụp lúc ký; che tên thủ thuật trong nhật ký", "`claude_code`"],
+            ["2026-11-28", "`a4fb3d6`", "Nâng cấp bộ che định danh cho mã ca bệnh và tên viết tắt (Python + TypeScript)", "`claude_code`"],
+            ["2026-11-28", "`8b752da` / `054c8b3`", "Tắt mặc định cổng AI bên thứ ba ở 2 lớp; che log lỗi và chặn tên người trong ô tìm PubMed", "`claude_code`"],
+            ["2026-11-28", "`9f290d2` / `f111b14`", "Bật hook truy nguồn commit theo công cụ AI; khóa 12 nút xuất khi bác sĩ chưa ký", "`claude_code`"],
+            ["2026-11-27", "`2fc4eba` / `1878711`", "Sửa lỗi phương ngữ/liều thuốc và quy hoạch mã nguồn `src/` thành 6 gói rõ ràng", "`claude_code` / `chua_xac_dinh`"],
         ],
-        [1.15, 3.85, 1.55],
-        font_size=9.0,
-    )
-
-    # =========================================================================
-    # PHAN 2: NOI DUNG AI HO TRO VA DOI TU DANH GIA / SUA
-    # =========================================================================
-    them_tieu_de_phan(doc, "2. Nội dung AI hỗ trợ và quá trình đội tự đánh giá, sửa lỗi")
-
-    them_tieu_de_muc(doc, "2.1. Phân vai theo từng cấu phần của dự án")
-    them_bang(
-        doc,
-        ["Thành phần", "Phần AI hỗ trợ viết mã", "Phần đội thiết kế, kiểm chứng và quyết định", "Công cụ & Bằng chứng"],
-        [
-            ["Dữ liệu mô phỏng", "Viết mã sinh hội thoại theo khuôn, biến thể câu, phương ngữ", "Chọn sinh bằng luật xác định thay vì để LLM viết văn; thiết kế 657 khuôn; chia tập không trùng khuôn", "Claude Code; Antigravity (`bffaa3c`, `chia_tap_theo_khuon.py`)"],
-            ["Huấn luyện Qwen3 & ASR", "Viết mã QLoRA, DPO, LoRA `PhoWhisper-small` (`VNMed_Speech`)", "Chạy trên máy của đội, kiểm rò rỉ 0/0, bác bỏ DPO và giữ nguyên mô hình sản xuất", "Claude Code (`huan_luyen_dpo.py`, `90687ad`, `asr-vnmed-lora.md`)"],
-            ["Luật K1–K7 & Cảnh báo", "Viết mã phát hiện theo quy cách và các vòng vá điểm mù", "Đặt luật, đăng ký trước tiêu chí, chỉ chạy tập giữ kín 1 lần, siết khóa ngữ cảnh y khoa", "Claude Code; Antigravity (`b4_kiem_can_cu.py`, `397ddbb`, `8120ce4`)"],
-            ["Đo lường & Tài liệu", "Viết công cụ chấm điểm, soạn báo cáo và sổ tay", "Chạy lại phép đo, giữ nguyên số chưa đạt, rút các bảng/con số thiếu bằng chứng", "Claude Code; Antigravity (`doi-chieu-so-lieu-bao-cao.md`, `13cd479`, `6e0a245`)"],
-            ["Giao diện & Máy chủ Web", "Viết mã React/Express và kiểm thử tự động", "Thử tay từng trạng thái thật, chụp 4 ảnh minh chứng, bớt nút thừa, thêm khóa server 6 API xuất", "Claude Code; Antigravity; Codex (`src/audio/`, `f111b14`, `e06236c`)"],
-        ],
-        [1.15, 1.75, 2.1, 1.55],
-        font_size=8.9,
-    )
-
-    them_tieu_de_muc(doc, "2.2. Những lần đội phát hiện lỗi, bác bỏ hoặc tự sửa đầu ra của AI")
-    them_bang(
-        doc,
-        ["Đợt rà soát", "Lỗi trong đầu ra hoặc đề xuất của AI", "Biện pháp sửa và kiểm chứng của đội"],
-        [
-            ["Sửa 3 lỗi ở `8120ce4`", "Mã do Antigravity viết đổi chữ *\"mi\"* (bờ mi mắt) thành *\"mày\"*; báo `DOSE_MISMATCH` cho số ngày *\"ho 3 ngày\"*; gán chữ viết tắt `\"DIA\"` là nhiễu mất dấu ASR.", "Đội rà lại mã trực tiếp, sửa tại `2fc4eba`, ghi rõ `11,8%` là số đo trên tập phát triển."],
-            ["Rà soát độc lập 26/11", "9 lỗi nghiêm trọng: khóa K6 coi `5 mg` khớp `2.5 mg`; thiếu tuổi mặc định `50`; bảng thuốc cũ ghi `Sintrom` là biệt dược của `warfarin`; thiếu đồng bộ khóa nội bộ.", "Viết test hồi quy cho từng lỗi (`f14a490`, `d1a6cb6`, `7d00a2a`, `e9a1866`, `2286ee0`)."],
-            ["Hackathon Task 4 & 5", "Test quét `loi-ra-mang.ts` tự bắt chú thích chứa chữ `fetch(`; luật mới để biến môi trường bật đè lên việc quản trị bấm tắt AIBOX.", "Sửa chú thích và giữ test nghiêm (`054c8b3`); đổi thứ tự ưu tiên để quản trị tắt luôn thắng (`8b752da`)."],
-            ["Rà soát độc lập vòng 1", "Phát hiện 4 nút BHYT/XML, TT26, cam đoan, đi buồng xuất được khi chưa ký; log thô ở 4 route; cắt chuỗi trước khi che; tên viết thường lọt; từ khóa tra cứu mang tên thật; hook không chạy trên macOS/Linux.", "Viết test đỏ tái hiện từng lỗi trước khi vá (`2f41851`, `b4b3633`: `loiRaHoSo.test.ts`, `log-da-che.test.ts`, `loc-tu-khoa.test.ts`)."],
-            ["Rà soát vòng 2 (28/11)", "Cổng cam đoan PTTT & đi buồng chưa khóa ở máy chủ; `procedureName` ghi thô vào `nhat_ky`; tab chưa sửa che tab đã ký; `web/index.html` còn tải Google Fonts.", "Khóa `ban_ky_duyet` ở 6 API (`98bd5de`, `a555bdc`), che `procedureName`, xóa `localStorage` khi đăng xuất (`22c61af`), gỡ Google Fonts."],
-            ["Thanh lọc tài liệu nói quá", "Bảng so sánh GPT-4o/Gemini/Claude/Llama và con số *\"78,3% đa dạng\"* không có tệp đo; câu chữ nói quá *\"0% sót dị ứng\"* / *\"5–7 phút\"*.", "Rút bỏ hoặc đánh dấu chưa có bằng chứng (`doi-chieu-so-lieu-bao-cao.md`, `13cd479`, `6e0a245`)."],
-        ],
-        [1.3, 2.95, 2.3],
-        font_size=8.9,
-    )
-
-    # =========================================================================
-    # PHAN 3: LICH SU SUA DOI GIT
-    # =========================================================================
-    them_tieu_de_phan(doc, "3. Lịch sử sửa đổi Git và cơ chế truy nguồn công cụ AI")
-    them_doan(
-        doc,
-        f"Tính đến thời điểm xuất báo cáo (commit `{head_short}`), nhánh `main` có tổng cộng **{tong_commit} commit**, phân bổ như sau: "
-        f"`claude_code` (**{dem_cong_cu.get('claude_code', 0)}**), `antigravity` (**{dem_cong_cu.get('antigravity', 0)}**), "
-        f"`codex` (**{dem_cong_cu.get('codex', 0)}**), và `chua_xac_dinh` (**{dem_cong_cu.get('chua_xac_dinh', 0)}** commit cũ trước khi áp dụng trailer — hệ thống giữ nguyên không đoán). "
-        "Hook `.githooks/commit-msg` (tương thích Windows, macOS và Linux) chặn mọi commit mới nếu thiếu dòng trailer `Cong-cu-AI:` hợp lệ (`tests/test_kiem_trailer_commit.py`).",
-        co=11.0,
-    )
-
-    them_bang(
-        doc,
-        ["Ngày", "Commit", "Tóm tắt thay đổi (18 commit gần nhất trên nhánh main)", "Công cụ AI"],
-        commits_gan_nhat,
-        [0.85, 0.75, 3.85, 1.1],
+        [0.85, 1.05, 3.6, 1.05],
         first_col_bold=False,
-        font_size=8.6,
+        font_size=8.8,
     )
 
     # =========================================================================
-    # PHAN 4: KHONG DUA DU LIEU NHAN DANG VAO DICH VU / LOG TRAI PHEP
+    # MUC 4: BAO VE DU LIEU SUC KHOE & LOG
     # =========================================================================
-    them_tieu_de_phan(doc, "4. Bảo vệ dữ liệu sức khỏe: Dịch vụ ngoài, Bộ che định danh và Log")
+    them_tieu_de_phan(doc, "4. Bảo vệ dữ liệu bệnh nhân: Kết nối ngoài, Bộ che định danh và Log")
 
-    them_tieu_de_muc(doc, "4.1. Danh sách toàn bộ 6 lối ra mạng của máy chủ Web")
+    them_tieu_de_muc(doc, "4.1. Kiểm soát toàn bộ 6 kết nối mạng của máy chủ")
     them_doan(
         doc,
-        "Mọi lời gọi mạng ra ngoài đều tập trung trong danh sách `web/may-chu/loi-ra-mang.ts`; phép thử `loi-ra-mang.test.ts` tự động quét toàn bộ mã máy chủ và báo lỗi ngay nếu phát hiện lệnh `fetch` chưa khai báo. Phía Python cũng chỉ có một lối ra máy xa mặc định tắt (`tests/test_loi_ra_mang_python.py`).",
+        "Tất cả lệnh gọi mạng trong máy chủ đều phải khai báo tại `web/may-chu/loi-ra-mang.ts`. Nếu lập trình viên thêm lệnh gọi mới mà không khai báo, bộ test tự động sẽ báo lỗi ngay.",
         co=10.8,
     )
     them_bang(
         doc,
-        ["Đích kết nối", "Mục đích", "Dữ liệu đi ra và chốt kiểm soát", "Mặc định"],
+        ["Đích kết nối", "Mục đích", "Cách bảo vệ dữ liệu", "Mặc định"],
         [
-            ["Dịch vụ Python tại chỗ (`127.0.0.1:8765`)", "Chép lời, rút mệnh đề, K1–K7, dựng nháp", "Âm thanh và lời thoại ca khám; chỉ chạy nội bộ trong máy kèm khóa nội bộ", "Mở (nội bộ)"],
-            ["Cổng mô hình ngoài AIBOX (`/chat/completions`)", "Tính năng phụ: sửa nháp / hỏi đáp", "Chỉ gửi văn bản ĐÃ CHE định danh; còn sót danh tính từ chối gửi (HTTP 422); cần quản trị và bác sĩ cùng bật", "**Tắt**"],
-            ["Cổng mô hình ngoài AIBOX (`/models`)", "Kiểm tra tình trạng cổng", "Không mang dữ liệu ca khám (chỉ gửi khóa truy cập máy chủ)", "Mở (chỉ ping)"],
-            ["API tài liệu (`PubMed / IRIS / openFDA`)", "Tra cứu tài liệu y khoa", "Từ khóa y khoa; từ chối (HTTP 422) nếu chứa tên, mã hoặc số liên lạc (`locTuKhoaCoDanhTinh`)", "Mở (đã lọc)"],
-            ["Trang chính thống (`WHO/CDC/BYT/NICE/MSD`)", "Đọc nội dung tài liệu đối chiếu", "Chỉ địa chỉ URL trang tài liệu công khai", "Mở"],
-            ["`www.aafp.org`", "Mở bài AAFP theo mã PubMed", "Chỉ mã PMID bài báo; không có dữ liệu ca khám", "Mở"],
+            ["Dịch vụ Python tại chỗ (`127.0.0.1:8765`)", "Gỡ băng, rút ý và kiểm K1–K7", "Chạy ngay trên cùng máy bệnh viện, dùng khóa nội bộ", "Mở (nội bộ)"],
+            ["Cổng AI ngoài AIBOX (`/chat/completions`)", "Hỏi đáp / sửa nháp phụ trợ", "Chỉ gửi văn bản đã che tên/SĐT/mã; sót danh tính từ chối ngay", "**Tắt**"],
+            ["Cổng AI ngoài AIBOX (`/models`)", "Kiểm tra cổng còn hoạt động", "Chỉ gửi khóa kết nối, không có bất kỳ dữ liệu bệnh nhân nào", "Mở (chỉ ping)"],
+            ["Kho tài liệu y khoa (`PubMed / IRIS / openFDA`)", "Tìm bài báo tham khảo", "Chỉ gửi từ khóa y khoa; chặn ngay nếu từ khóa chứa tên hoặc SĐT", "Mở (đã lọc)"],
+            ["Trang y khoa chính thống (`WHO / CDC / BYT`)", "Đọc phác đồ đối chiếu", "Chỉ mở địa chỉ bài viết công khai", "Mở"],
+            ["`www.aafp.org`", "Mở bài báo theo mã PubMed", "Chỉ gửi mã bài báo khoa học", "Mở"],
         ],
-        [1.65, 1.5, 2.55, 0.85],
-        font_size=8.8,
+        [1.75, 1.55, 2.45, 0.8],
+        font_size=8.9,
     )
 
-    them_tieu_de_muc(doc, "4.2. Kiểm định hai bộ che định danh trên PhoNER_COVID19 (Trước vá → Sau vá)")
+    them_tieu_de_muc(doc, "4.2. Kết quả kiểm tra bộ che định danh trên PhoNER_COVID19 (Trước và sau khi vá)")
     them_bang(
         doc,
-        ["Bộ che định danh", "Trước vá (dev / test)", "Sau vá (dev / test)", "Đo lại 1.000 câu đầu (`da-nguon-doc-lap.json`)", "Che nhầm `ViMedAQA`"],
+        ["Bộ che định danh", "Trước khi vá (dev / test)", "Sau khi vá (dev / test)", "Đo trên 1.000 câu đầu", "Che nhầm câu y khoa (`ViMedAQA`)"],
         [
-            ["TypeScript (`an-danh-ngoai.ts`)", "7,3% / 7,5%", "**97,5%** / **94,0%** (2.183/2.323)", "— (kiểm qua bộ 45 ca rò rỉ chung `an-danh-chung.test.ts`)", "4/300 (**1,3%**)"],
-            ["Python (`khu_dinh_danh.py`)", "1,5% / 0,8%", "**97,3%** / **93,8%** (2.178/2.323)", "Tăng từ **10/847 (1,2%)** → **775/847 (91,5%)**", "2→4/300 (**0,7–1,3%**)"],
+            ["TypeScript (cổng web)", "7,3% / 7,5%", "**97,5%** / **94,0%**", "— (khớp 45/45 ca rò rỉ chung)", "4/300 (**1,3%**)"],
+            ["Python (cổng dịch vụ)", "1,5% / 0,8%", "**97,3%** / **93,8%**", "**1,2% → 91,5%** (775/847)", "2→4/300 (**0,7–1,3%**)"],
         ],
-        [1.45, 1.1, 1.35, 1.7, 0.95],
-        font_size=8.8,
+        [1.45, 1.15, 1.35, 1.5, 1.1],
+        font_size=8.9,
     )
     them_doan(
         doc,
-        "Lưu ý trung thực: Tập test `PhoNER_COVID19` mới đạt 94,0% / 93,8% (chưa chạm ngưỡng 95%) vì còn sót tên riêng một tiếng đứng trơ như *\"Nhung\"*, *\"Oanh\"*, *\"Kim\"*. Đội không xem ca lọt của tập test để vá đuổi tránh học tủ; đồng thời vẫn giữ bộ luật che `MA_CA_BENH` (`BN416`), `TEN_VIET_TAT` (`bà H.T.P`) và bảo vệ không che nhầm *\"sốt từ thứ 2\"*, *\"viêm gan B.\"*, *\"Vitamin B.\"*, *\"Alsiful S.R\"*.",
+        "Ghi chú: Bộ test `PhoNER_COVID19` hiện còn sót ~6% (chủ yếu là tên 1 tiếng đứng riêng như *\"Nhung\"*, *\"Oanh\"*, *\"Kim\"*). "
+        "Đội không vá đuổi theo tập kiểm tra để tránh học vẹt, đồng thời giữ quy tắc không che nhầm chữ thông dụng như *\"sốt từ thứ 2\"*, *\"viêm gan B.\"*, *\"Vitamin B.\"*. ",
         nghieng=True, co=10.2, mau=MAU_PHU,
     )
 
-    them_tieu_de_muc(doc, "4.3. Kiểm soát log lỗi và vòng đời 11 nơi lưu dữ liệu")
-    them_gach_dau_dong(
-        doc,
-        "**Che log trước khi cắt ngắn (`web/may-chu/che-log.ts`, `src/he_thong/che_log.py`):** Toàn bộ log lỗi máy chủ (kể cả thông báo lỗi do cổng ngoài dội lại) đều đi qua bộ che tên/SĐT/CCCD trước rồi mới cắt tối đa 300 ký tự để không cắt đôi số điện thoại; tên thủ thuật (`procedureName`) khi ghi `nhat_ky` cũng qua `cheLog`; thay `traceback.print_exc()` bằng tên lỗi và vị trí; phép thử `log-da-che.test.ts` quét toàn bộ mã để chặn dòng `console.error/warn` in biến lỗi thô.",
-    )
-    them_gach_dau_dong(
-        doc,
-        "**Kiểm soát lưu trữ 11 nơi trong `docs/minh-bach/so-do-du-lieu.md`:** Toàn bộ dữ liệu ca khám nằm trong SQLite nội bộ (lọc truy vấn theo `nguoi_dung_id`); bảng `worm_signoff` và `audit_log_worm.db` chỉ lưu mã băm, số đếm và người ký, tuyệt đối không lưu lời thoại; hàng đợi `viec_nen` tự dọn việc quá 30 phút.",
-    )
-    them_gach_dau_dong(
-        doc,
-        "**Tự xóa tệp ghi âm & dữ liệu trình duyệt:** `src/audio/storage.py` tự xóa tệp ghi âm gốc và bản 16 kHz sau **30 ngày** (ca đã duyệt và ca chờ duyệt) và **7 ngày** (phiên bỏ dở không lời thoại), kích hoạt khi `AudioPipeline` khởi tạo; trình duyệt xóa toàn bộ khóa `meditrace_*` trong `localStorage` khi đăng xuất, hết phiên `401` hoặc đổi tài khoản (`xoaDuLieuTrinhDuyet.ts`), và đã gỡ Google Fonts khỏi `web/index.html`.",
-    )
+    them_tieu_de_muc(doc, "4.3. Kiểm soát log lỗi và lưu trữ dữ liệu")
+    them_gach_dau_dong(doc, "**Che log trước khi cắt ngắn:** Mọi thông báo lỗi đều được che tên, số điện thoại, CCCD trước rồi mới cắt tối đa 300 ký tự để tránh cắt đôi số điện thoại (`che-log.ts`, `che_log.py`).")
+    them_gach_dau_dong(doc, "**Sổ ký duyệt không lưu lời thoại:** Các bảng nhật ký WORM chỉ ghi mã băm, số lượng mục và người ký; bảng `ca_kham` luôn lọc theo đúng bác sĩ sở hữu ca.")
+    them_gach_dau_dong(doc, "**Tự dọn dữ liệu tạm:** Tệp ghi âm gốc tự xóa sau 30 ngày (ca đã duyệt/chờ duyệt) hoặc 7 ngày (phiên bỏ dở không lời thoại); bộ nhớ tạm trình duyệt (`localStorage`) tự xóa sạch khi bác sĩ đăng xuất hoặc đổi tài khoản.")
 
     # =========================================================================
-    # PHAN 5: SO DO DU LIEU & QUY TRINH PHE DUYET + ANH CHUP THAT
+    # MUC 5: SO DO DU LIEU & QUY TRINH PHE DUYET
     # =========================================================================
     them_tieu_de_phan(doc, "5. Sơ đồ dữ liệu và quy trình bác sĩ phê duyệt trước khi dùng hồ sơ")
 
-    them_tieu_de_muc(doc, "5.1. Luồng dữ liệu đầu – cuối")
-    them_gach_dau_dong(
-        doc,
-        "**Luồng nội bộ tại phòng khám (mặc định):** Micro phòng khám → Trình duyệt bác sĩ → Máy chủ Web MediTrace (Node/Express) → Dịch vụ Python tại chỗ `127.0.0.1:8765` (PhoWhisper + Qwen3-4B + K1–K7) → SQLite tại chỗ (`ca_kham`, `ban_ky_duyet`, sổ WORM) và thư mục âm thanh nội bộ.",
-    )
-    them_gach_dau_dong(
-        doc,
-        "**Luồng bản demo công khai:** Người xem qua Cloudflare Worker/Tunnel chuyển tiếp TLS chỉ được nhập dữ liệu mô phỏng (có hộp cảnh báo ngay tại màn hình đăng nhập).",
-    )
-    them_gach_dau_dong(
-        doc,
-        "**Luồng ra ngoài có điều kiện:** Từ khóa y khoa sạch đi ra PubMed/WHO/openFDA; hoặc văn bản đã che đi ra AIBOX chỉ khi cả quản trị và bác sĩ chủ động bật.",
-    )
+    them_tieu_de_muc(doc, "5.1. Đường đi của dữ liệu trong hệ thống")
+    them_gach_dau_dong(doc, "**Trong phòng khám (luồng chính):** Micro → Trình duyệt bác sĩ → Máy chủ Web → Dịch vụ AI Python tại chỗ (`127.0.0.1:8765`) → Lưu tại SQLite và thư mục âm thanh nội bộ.")
+    them_gach_dau_dong(doc, "**Trên bản demo công khai:** Đi qua Cloudflare Worker chuyển tiếp; màn hình đăng nhập ghi rõ chỉ được nhập dữ liệu mô phỏng.")
+    them_gach_dau_dong(doc, "**Khi ra ngoài mạng:** Chỉ cho phép gửi từ khóa y khoa đã lọc danh tính tới PubMed/WHO/openFDA, hoặc văn bản đã che tới AIBOX khi được bật chủ động.")
 
     them_tieu_de_muc(doc, "5.2. Quy trình bác sĩ phê duyệt 2 tầng (Giao diện + Máy chủ)")
     them_bang(
         doc,
-        ["Trạng thái hồ sơ", "Quy tắc khóa/mở trên giao diện và máy chủ", "Tệp cài đặt và kiểm chứng"],
+        ["Giai đoạn", "Quy định hiển thị và chặn xuất hồ sơ", "Nơi kiểm soát"],
         [
-            ["1. Bản nháp mới", "Chỉ được xem; toàn bộ 12 nút xuất (Chép, In, PDF, `.txt`, `.md`, FHIR, SBAR, Chép HIS, Dặn dò, BHYT/XML, TT26, Cam đoan, Đi buồng) đều khóa.", "`choPhepDungHoSo.ts`, `loiRaHoSo.test.ts`"],
-            ["2. Còn mục *Cần xác nhận*", "Nút ký hiển thị `Cần xác nhận (n)`, không cho ký; bấm vào sẽ cuộn tới đúng mệnh đề treo hoặc mệnh đề thiếu căn cứ lượt thoại.", "`kiemTraDieuKienKyDuyet`, `compileEffectiveNote.ts`, `quyTrinhPheDuyet.test.ts`"],
-            ["3. Bác sĩ duyệt và Ký", "Bác sĩ chọn Giữ/Sửa/Bỏ từng mục rồi bấm Ký → Máy chủ tính SHA-256 + HMAC-SHA256 nối vào WORM và lưu bản chụp `ban_ky_duyet`.", "`worm.ts`, `sign-off.ts`, `kiem-ky-may-chu.ts`, `worm.test.ts`"],
-            ["4. Hồ sơ được phép dùng", "Mở khóa 12 nút giao diện; khi gọi 6 API xuất (`tao-ma`, `bhyt/precheck`, `bhyt/recompile`, `fhir/recompile`, `informed-consent`, `ward-round-diff`), máy chủ đối chiếu `ban_ky_duyet` và kiểm IDOR (`403`).", "`kiem-ky-may-chu.test.ts`, `bhyt-ocr.test.ts`, `boost-lam-sang.test.ts`"],
-            ["5. Sửa nội dung sau ký", "Băm nội dung hoặc quyết định duyệt thay đổi → tự động khóa lại ở cả giao diện lẫn máy chủ (`409 chua_ky_duyet` / `422 noi_dung_khac_ban_ky`), bắt ký lại.", "`isSignOffStale`, `quyTrinhPheDuyet.test.ts`, `kiem-ky-may-chu.test.ts`"],
+            ["1. Bản nháp mới", "Chỉ cho xem; toàn bộ 12 nút chép, in, tải PDF, xuất BHYT/FHIR/HIS/SBAR đều bị khóa.", "`choPhepDungHoSo.ts`, `loiRaHoSo.test.ts`"],
+            ["2. Còn mục nghi ngờ", "Nút ký báo `Cần xác nhận (n)` và không cho ký cho tới khi bác sĩ chọn Giữ, Sửa hoặc Bỏ hết các mục treo.", "`compileEffectiveNote.ts`, `quyTrinhPheDuyet.test.ts`"],
+            ["3. Bác sĩ bấm Ký", "Máy chủ kiểm tra đủ điều kiện, tính mã băm SHA-256 + HMAC lưu vào sổ WORM và chụp lại bản đã ký (`ban_ky_duyet`).", "`worm.ts`, `sign-off.ts`, `kiem-ky-may-chu.ts`"],
+            ["4. Mở khóa xuất hồ sơ", "Giao diện mở 12 nút; khi gọi 6 API xuất hồ sơ, máy chủ đối chiếu lại đúng bản chụp lúc ký và kiểm tra đúng chủ sở hữu.", "`kiem-ky-may-chu.test.ts`, `bhyt-ocr.test.ts`"],
+            ["5. Sửa nội dung sau ký", "Chỉ cần sửa 1 chữ hoặc đổi quyết định duyệt, cả giao diện lẫn máy chủ lập tức khóa lại và yêu cầu ký lại.", "`isSignOffStale`, `kiem-ky-may-chu.test.ts`"],
         ],
-        [1.35, 3.3, 1.9],
-        font_size=9.0,
+        [1.35, 3.35, 1.85],
+        font_size=9.2,
     )
 
-    # 4 ANH CHUP GIAO DIEN THAT (KHUNG TRANG NHA, NEN TRANG)
     anh_list = [
-        (ANH_DIR / "khoa-truoc-ky-1.jpg", "Hình 1. Chưa ký duyệt: toàn bộ nút chép, in và xuất hồ sơ bị khóa."),
-        (ANH_DIR / "khoa-truoc-ky-2.jpg", "Hình 2. Đã ký duyệt WORM (#1): mở khóa các chức năng sử dụng hồ sơ."),
-        (ANH_DIR / "khoa-truoc-ky-3.jpg", "Hình 3. Sửa nội dung sau khi ký: hệ thống tự khóa lại và yêu cầu ký lại."),
-        (ANH_DIR / "thong-bao-ban-demo.jpg", "Hình 4. Cảnh báo bản demo công khai: chỉ nhập dữ liệu mô phỏng."),
+        (ANH_DIR / "khoa-truoc-ky-1.jpg", "Hình 1. Chưa ký: các nút chép, in, xuất hồ sơ bị khóa."),
+        (ANH_DIR / "khoa-truoc-ky-2.jpg", "Hình 2. Đã ký (#1): mở khóa sử dụng hồ sơ."),
+        (ANH_DIR / "khoa-truoc-ky-3.jpg", "Hình 3. Sửa sau khi ký: tự khóa lại và đòi ký lại."),
+        (ANH_DIR / "thong-bao-ban-demo.jpg", "Hình 4. Cảnh báo bản demo chỉ dùng dữ liệu mô phỏng."),
     ]
     if all(p.exists() for p, _ in anh_list):
-        them_tieu_de_muc(doc, "5.3. Ảnh chụp kiểm chứng trên giao diện thực tế")
+        them_tieu_de_muc(doc, "5.3. Ảnh chụp kiểm chứng trên giao diện thật")
         tbl_img = doc.add_table(rows=2, cols=2)
         tbl_img.alignment = WD_TABLE_ALIGNMENT.CENTER
         for idx, (img_path, caption) in enumerate(anh_list):
@@ -568,8 +508,7 @@ def tao_bao_cao():
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.space_after = Pt(2)
-            run_img = p.add_run()
-            run_img.add_picture(str(img_path), width=Inches(3.05))
+            p.add_run().add_picture(str(img_path), width=Inches(3.05))
             pc = cell.add_paragraph()
             pc.alignment = WD_ALIGN_PARAGRAPH.CENTER
             pc.paragraph_format.space_before = Pt(2)
@@ -579,40 +518,41 @@ def tao_bao_cao():
         them_doan(doc, "", cach_duoi=4)
 
     # =========================================================================
-    # PHAN 6: GIOI HAN NOI THANG & KET QUA KIEM THU
+    # MUC 6: GIOI HAN VA KIEM THU
     # =========================================================================
-    them_tieu_de_phan(doc, "6. Giới hạn còn lại và kết quả kiểm thử xác minh")
+    them_tieu_de_phan(doc, "6. Giới hạn còn lại và kết quả kiểm thử")
 
-    them_tieu_de_muc(doc, "6.1. Các giới hạn còn lại (trình bày thẳng thắn)")
-    them_gach_dau_dong(doc, "**Bộ che định danh trên `PhoNER_COVID19` test:** Đạt `94,0%` (TypeScript) và `93,8%` (Python), chưa chạm ngưỡng `95%` do còn tên riêng một tiếng đứng trơ; nhóm không vá theo tập test để tránh học tủ.")
-    them_gach_dau_dong(doc, "**Bản sao tạm trên trình duyệt:** `localStorage` xóa sạch khi đăng xuất, hết phiên `401` hoặc đổi tài khoản, nhưng nếu đóng tab mà không đăng xuất thì bản sao cục bộ trên máy đó chưa mã hóa.")
-    them_gach_dau_dong(doc, "**Thao tác hệ điều hành trình duyệt:** Chưa chặn được bôi đen `Ctrl+C` khi đọc tại chỗ hoặc `Ctrl+P`, nên bản in chưa ký tự động mang dòng *\"BẢN NHÁP — CHƯA KÝ DUYỆT\"*.")
-    them_gach_dau_dong(doc, "**Lịch sử cũ và giữ âm thanh demo:** `34` commit cũ trước khi áp dụng trailer giữ nguyên trạng thái `chua_xac_dinh`; chính sách tự xóa audio `30/30/7` ngày tạm nâng hạn trên máy chủ demo tới sau buổi thi để giữ âm thanh mẫu.")
-    them_gach_dau_dong(doc, "**Thử nghiệm người dùng thật & LoRA ASR:** Chưa thử bấm giờ trên bác sĩ thật; adapter LoRA `PhoWhisper-small` trên `VNMed_Speech` (`WER ViMedCSS 0,3165 → 0,2610`) mới ở mức báo cáo thực nghiệm (`docs/ket-qua/asr-vnmed-lora.md`), chưa triển khai thay thế mô hình chính.")
+    them_tieu_de_muc(doc, "6.1. Những điểm chưa làm được (nêu thẳng)")
+    them_gach_dau_dong(doc, "**Bộ che định danh trên `PhoNER_COVID19` test:** Đạt 94,0% (web) và 93,8% (Python), chưa đạt 95% vì còn sót tên riêng 1 tiếng đứng trơ.")
+    them_gach_dau_dong(doc, "**Bộ nhớ tạm trình duyệt:** `localStorage` xóa khi đăng xuất hoặc hết phiên, nhưng nếu người dùng đóng tab ngang mà chưa đăng xuất thì dữ liệu tạm trên máy đó chưa mã hóa.")
+    them_gach_dau_dong(doc, "**Sao chép thủ công trên trình duyệt:** Chưa chặn được thao tác bôi đen Ctrl+C hoặc phím Ctrl+P, nên bản in khi chưa ký tự chèn dòng chữ *\"BẢN NHÁP — CHƯA KÝ DUYỆT\"*.")
+    them_gach_dau_dong(doc, "**Lịch sử cũ & Âm thanh bản demo:** 34 commit cũ giữ trạng thái chưa xác định công cụ; riêng máy chủ demo tạm nâng hạn xóa âm thanh tới sau buổi thi để giữ 8 ca mẫu.")
+    them_gach_dau_dong(doc, "**Thử nghiệm trên bác sĩ thật & ASR LoRA:** Chưa đo thực nghiệm bấm giờ trên bác sĩ lâm sàng; bản LoRA `PhoWhisper-small` trên `VNMed_Speech` mới là thử nghiệm (`asr-vnmed-lora.md`), chưa thay vào bản chạy chính.")
 
-    them_tieu_de_muc(doc, "6.2. Kết quả kiểm thử tự động xác minh")
+    them_tieu_de_muc(doc, "6.2. Kết quả kiểm thử xác minh")
     them_bang(
         doc,
-        ["Nhóm kiểm thử", "Kết quả quan sát trực tiếp", "Phạm vi kiểm chứng"],
+        ["Nhóm kiểm thử", "Kết quả", "Nội dung kiểm tra"],
         [
-            ["Nhóm test Đề 1 (Python, chạy lại 28/11)", "**69 passed, 0 failed** (1,75 giây)", "`test_minh_chung_trich_commit`, `test_truy_nguon_commit`, `test_kiem_trailer_commit`, `test_loi_ra_mang_python`, `test_ro_ri_dinh_danh_chung`, `test_che_log`"],
-            ["Nhóm test Đề 1 (Web TS, chạy lại 28/11)", "**93 passed, 0 failed** (3,08 giây)", "`quyTrinhPheDuyet`, `choPhepDungHoSo`, `loiRaHoSo`, `kiem-ky-may-chu`, `worm`, `che-log`, `loi-ra-mang`, `an-danh-chung`, `llm-ngoai`, `tra-cuu`"],
-            ["Toàn bộ hồi quy (`TRA_LOI_DE_CAI_TIEN_1.md`)", "**2.106 Python passed** (28 skip) · **214/214 Web TS passed**", "Đóng gói `npm run build` và kiểm kiểu `tsc --noEmit` (`npm run lint`) không có lỗi"],
+            ["Nhóm test Đề 1 (Python, chạy 28/11)", "**69 passed, 0 failed** (1,75s)", "Trích dẫn commit, hook git, lối ra mạng, che định danh chung, che log"],
+            ["Nhóm test Đề 1 (Web TS, chạy 28/11)", "**93 passed, 0 failed** (3,08s)", "Phê duyệt 2 tầng, khóa 6 API, WORM HMAC, che log, danh sách lối ra mạng, lọc PubMed"],
+            ["Hồi quy toàn hệ thống (`TRA_LOI_DE_CAI_TIEN_1.md`)", "**2.106 Python passed** (28 skip) · **214/214 Web TS**", "Kiểm kiểu TypeScript (`npm run lint`) và đóng gói (`npm run build`) sạch lỗi"],
         ],
-        [2.0, 1.85, 2.7],
-        font_size=9.0,
+        [2.05, 1.8, 2.7],
+        font_size=9.1,
     )
 
-    doc.save(str(OUT_ROOT))
-    doc.save(str(OUT_MINH_BACH))
-    doc.save(str(OUT_TAI_LIEU))
+    for out_path in (OUT_ROOT, OUT_MINH_BACH, OUT_TAI_LIEU, OUT_DOWNLOADS_V2):
+        try:
+            doc.save(str(out_path))
+        except Exception as e:
+            print(f"Luu {out_path.name}: {e}")
     for folder in ("Downloads", "Desktop"):
         try:
-            target = Path.home() / folder / OUT_ROOT.name
-            doc.save(str(target))
+            doc.save(str(Path.home() / folder / OUT_ROOT.name))
         except Exception as e:
             print(f"Luu {folder}: {e}")
-    print(f"Da xuat xong ban Word chuyen nghiep tai:\n-> {OUT_ROOT}\n-> {OUT_MINH_BACH}\n-> {OUT_TAI_LIEU}")
+    print(f"Da xuat xong ban Word gon, de hieu tai:\n-> {OUT_ROOT}\n-> {OUT_DOWNLOADS_V2}")
 
 
 if __name__ == "__main__":
