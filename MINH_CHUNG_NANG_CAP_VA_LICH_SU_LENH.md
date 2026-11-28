@@ -39,9 +39,9 @@
   * Bổ sung dược lý lâm sàng `src/duoc_ly_lam_sang.py` và hiệu chỉnh liều suy thận `src/hieu_chinh_lieu.py`.
   * Bổ sung cận lâm sàng `src/can_lam_sang.py` và 9 thang điểm nguy cơ `src/thang_diem_lam_sang.py`.
   * Bổ sung tờ dặn dò bệnh nhân 4 khung giờ `src/dan_do_benh_nhan.py`.
-  * Bổ sung cơ chế khử định danh tuân thủ Nghị định 13/2023/NĐ-CP `src/khu_dinh_danh.py`.
+  * Bổ sung cơ chế khử định danh `src/khu_dinh_danh.py` (khi đó tham chiếu Nghị định 13/2023/NĐ-CP; từ 01/01/2026 khung hiện hành là Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP).
   * Bổ sung xuất chuẩn HL7 FHIR R4 `src/fhir_exporter.py` và phân tách khuôn ca bệnh `src/kiem_khuon.py`.
-  * Bổ sung 13 bộ test suite mới nâng tổng số bài test lên **1.330 automated tests**.
+  * Bổ sung 13 bộ test suite mới; theo nhật ký lúc đó tổng số bài test là **1.330** (con số tại thời điểm 17/10/2026; lần chạy mới nhất 26/11/2026 ghi ở `README.md`: 1.942 qua, 27 bỏ qua).
   * Bổ sung công cụ đồ họa sinh 7 sơ đồ Flow 4K `tools/tao_bo_anh_flow_meditrace.py`.
   * Bổ sung cẩm nang Q&A 35 câu hỏi giám khảo và các báo cáo kỹ thuật định dạng Word (`.docx`).
 
@@ -263,6 +263,6 @@ if (input.soChuaXacNhan !== undefined && input.soChuaXacNhan !== 0) {
 
 ## 6. KẾT LUẬN & CAM KẾT KỸ THUẬT
 
-1. **Tính trung thực & Khả năng tái lập (Reproducibility):** Mọi con số (1.779 bài test `pytest`, 43 bài test TypeScript, độ nhạy lớp cảnh báo 0,871 trên tập giữ kín, tỷ lệ bỏ sót 43,1% → 11,5%, thống kê lặp câu 47,37%) đều do mã nguồn trong kho in ra và tái lập được bằng lệnh thực thi.
-2. **An toàn dữ liệu Y khoa:** Hệ thống vận hành theo kiến trúc Neuro-Symbolic chạy tại chỗ (On-premise/Edge), không tự hoàn tất hồ sơ khi thiếu căn cứ, tuân thủ Nghị định 13/2023/NĐ-CP và Luật Khám bệnh, chữa bệnh 2023.
+1. **Tính trung thực & Khả năng tái lập (Reproducibility):** Mọi con số (1.942 bài test `pytest` qua và 96 bài test TypeScript theo lần chạy 26/11/2026 ở `README.md`, độ nhạy lớp cảnh báo 0,871 trên tập giữ kín, tỷ lệ bỏ sót 43,1% → 11,5%, thống kê lặp câu 47,37%) đều do mã nguồn trong kho in ra và tái lập được bằng lệnh thực thi.
+2. **An toàn dữ liệu Y khoa:** Hệ thống vận hành theo kiến trúc Neuro-Symbolic chạy tại chỗ (On-premise/Edge), không tự hoàn tất hồ sơ khi thiếu căn cứ; dữ liệu người bệnh không cần rời phòng khám (khung pháp lý hiện hành: Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15, Nghị định 356/2025/NĐ-CP) và bác sĩ giữ quyền quyết định theo Luật Khám bệnh, chữa bệnh 2023.
 3. **Tính sẵn sàng Production:** Ứng dụng chạy thử tại `https://meditrace-sentinel.meditrace.workers.dev` (có sẵn 3 ca mẫu đa người nói mở ngay không cần GPU).

@@ -69,7 +69,7 @@ def ve_so_sanh_nhanh():
     # ========================== 1. TIEU DE CHINH ==========================
     ax.text(9.5, 14.0, "SO SÁNH KIẾN TRÚC CÁC NHÁNH THỬ NGHIỆM & BÓC TÁCH (ABLATION STUDY)",
             ha="center", va="center", fontsize=15.5, fontweight="bold", color=C_TEXT_MAIN)
-    ax.text(9.5, 13.62, "Chứng minh giá trị an toàn vượt trội của rào chắn cấu trúc so với mô hình sinh tự do và tự soát lỗi (Self-Review)",
+    ax.text(9.5, 13.62, "Số đo lấy từ docs/final/Báo cáo dự án.md mục 4.1 (bộ đổi chủ thể 80 ca). Nhánh nào chưa đo thì ghi CHƯA ĐO.",
             ha="center", va="center", fontsize=10.5, color=C_TEXT_MUTED)
 
     # ========================== 2. SÁU NHÁNH THỬ NGHIỆM ==========================
@@ -79,21 +79,21 @@ def ve_so_sanh_nhanh():
          "#64748B", "#F1F5F9",
          [("Hội thoại khám", "Âm thanh / Văn bản", C_RULE),
           ("Mô hình AI (Qwen3-4B)", "Viết thẳng cả đoạn văn xuôi", C_AI),
-          ("Bản nháp bệnh án", "Câu trôi chảy, không truy vết (Wrong-subject 12.4%)", "#64748B")]),
+          ("Bản nháp bệnh án", "Ghi đúng người 0,939 (CAO HƠN\nC_khoá 0,748), không truy vết", "#64748B")]),
 
         (9.9, "NHÁNH A+ (Self-Review)", "Sinh thẳng + Tự kiểm tra lại\n(\"Check your answer\" prompt)",
          "#D97706", "#FFFBEB",
          [("Hội thoại khám", "Âm thanh / Văn bản", C_RULE),
           ("Mô hình AI sinh nháp", "Tạo bản nháp ban đầu", C_AI),
           ("Prompt: Tự soát lỗi AI", "\"Check for hallucinations & errors\"", C_WARN),
-          ("Bản nháp sau tự soát", "Vẫn bị mù cấu trúc (Wrong-subject 9.8%, lọt lỗi)", C_WARN)]),
+          ("Bản nháp sau tự soát", "CHƯA ĐO trên bộ thử thách", C_WARN)]),
 
         (8.0, "NHÁNH B", "Trích mệnh đề AI +\nGhép bệnh án bằng luật",
          C_RULE, C_RULE_BG,
          [("Hội thoại khám", "Âm thanh / Văn bản", C_RULE),
           ("Rút mệnh đề (Tầng 1)", "AI trích JSON + câu trích", C_AI),
           ("Ghép theo luật mẫu câu", "Xếp vào các mục cố định", C_RULE),
-          ("Bản nháp có trích dẫn", "Bắt đầu truy vết được từng câu nói", C_RULE)]),
+          ("Bản nháp có trích dẫn", "F1 66,1 / SER 45,4 / nhầm người 22,0%", C_RULE)]),
 
         (6.1, "NHÁNH C", "Nhánh B + Gom người (T2)\n+ Cập nhật trạng thái (T3)",
          C_RULE, C_RULE_BG,
@@ -101,22 +101,22 @@ def ve_so_sanh_nhanh():
           ("Rút mệnh đề (Tầng 1)", "AI trích JSON + câu trích", C_AI),
           ("Gom người (Tầng 2)", "Bệnh nhân vs Người nhà", C_RULE),
           ("Cập nhật (Tầng 3)", "Bắt tự sửa & mâu thuẫn", C_RULE),
-          ("Bản nháp đúng người", "Lỗi tự sửa giảm từ 11.5% -> 0.8%", C_RULE)]),
+          ("Bản nháp đúng người", "F1 69,2 / nhầm người 20,0%", C_RULE)]),
 
         (4.2, "NHÁNH C_KHOÁ (Chính)", "Nhánh C + Khóa bằng chứng (T4)\n+ Cổng rủi ro & Xếp chỗ (T5)",
          C_DANGER, C_DANGER_BG,
          [("Hội thoại khám", "Âm thanh / Văn bản", C_RULE),
           ("Rút mệnh đề (T1)", "AI trích JSON", C_AI),
           ("Gom người & Cập nhật (T2-T3)", "Đúng chủ thể, đúng diễn biến", C_RULE),
-          ("Khóa bằng chứng (T4)", "7 cổng K1-K7 (chặn K7 superseded)", C_DANGER),
-          ("Cổng rủi ro (T5)", "Wrong-subject giảm còn 2.1%, False-block <= 1%", C_SAFE)]),
+          ("Khóa bằng chứng (T4)", "7 cổng K1-K7\nbản cũ còn giữ 11,48% -> 0,80%", C_DANGER),
+          ("Cổng rủi ro (T5)", "F1 70,8 / SER 36,9\nnhầm người 17,9%", C_SAFE)]),
 
         (2.3, "NHÁNH D (C_khoa_hoi)", "Nhánh C_khoá +\nHỏi lại bác sĩ (Khâu 6)",
          C_PURPLE, C_PURPLE_BG,
          [("Hội thoại khám", "Âm thanh / Văn bản", C_RULE),
           ("Pipeline 5 tầng", "Tầng 1 -> Tầng 2 -> Tầng 3 -> Tầng 4 -> Tầng 5", C_SAFE),
           ("Hỏi lại bác sĩ (Khâu 6)", "Gợi ý tối đa 3 câu hỏi làm rõ mâu thuẫn", C_PURPLE),
-          ("Bệnh án hoàn chỉnh", "An toàn lâm sàng và độ chính xác cao nhất", C_PURPLE)]),
+          ("Bệnh án hoàn chỉnh", "CHƯA ĐO (chưa chạy với bác sĩ thật)", C_PURPLE)]),
     ]
 
     for y, ten_nhanh, mo_ta, vien_nhanh, nen_nhanh, buoc_list in cac_nhanh:
@@ -150,10 +150,10 @@ def ve_so_sanh_nhanh():
     ax.add_patch(khung_bot)
 
     so_sanh_text = (
-        "[*] BẢN CHẤT THỰC NGHIỆM & PHẢN BIỆN HỌC THUẬT:\n"
-        "• Tại sao Prompt \"Tự kiểm tra\" (Self-Review A+) không đủ: Mô hình tự soát chỉ giảm lỗi chủ thể nhẹ (12.4% -> 9.8%) vì LLM bị mù trước chính ảo giác của mình.\n"
-        "• MediTrace Full (C_khoá): Giảm sai chủ thể xuống 2.1% (giảm 83% lỗi), F1 đạt 70.8%, tỷ lệ chặn oan (False-block rate) cực thấp <= 1% (0/30.136 dòng test thật).\n"
-        "• Khẳng định khoa học: \"When the same model and same cases are used, structural safeguards reduced clinical risk leakage by over 80%.\""
+        "[*] ĐỌC KẾT QUẢ (bộ đổi chủ thể 80 ca, so với bộ chấm tự động, dữ liệu mô phỏng):\n"
+        "• C_khoá so với chỉ tách thông tin (B): nhầm người 22,0% -> 17,9%; F1 66,1 -> 70,8; SER 45,4 -> 36,9. Bộ nhiễu giọng nói gần như không cải thiện.\n"
+        "• Nhánh A sinh thẳng ghi đúng người cao hơn (0,939 so với 0,748); điểm mạnh của C_khoá là mỗi dòng kiểm tra được về lượt nói gốc. A+ và D chưa đo.\n"
+        "• Chặn nhầm 0/30.136 chỉ đúng vì đáp án chép gần nguyên văn hội thoại (độ phủ 0,95); trên đầu ra mô hình thật chặn thừa 8,0-10,0%."
     )
     ax.text(0.75, 1.05, so_sanh_text, ha="left", va="center", fontsize=9.2, color=C_TEXT_MAIN, linespacing=1.4)
 

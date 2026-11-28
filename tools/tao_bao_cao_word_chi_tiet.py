@@ -257,7 +257,7 @@ def tao_tai_lieu_word():
     meta_data = [
         ("Lĩnh vực nghiên cứu:", "Xử lý ngôn ngữ tự nhiên y tế (Clinical NLP), Trích xuất thông tin (Information Extraction), Hệ thống quy tắc xác định (Deterministic Rule Engine)"),
         ("Mô hình & Hạ tầng:", "Qwen3-4B tinh chỉnh QLoRA (Local On-premise) + PhoWhisper + pyannote.audio + E2E Orchestrator + SHA-256 Tamper-evident Audit Trail"),
-        ("Phiên bản hệ thống:", "MediTrace Sentinel v2.5 Enterprise (200 khuôn bệnh ICD-10, Phương ngữ 3 miền, 5 tầng Guardrail, Dược lý DDI, HL7 FHIR R4, Khử nhận dạng PII, Active Clarification, 1.301 tests passed 100%)"),
+        ("Phiên bản hệ thống:", "MediTrace Sentinel v2.5 Enterprise (657 khuôn ca bệnh, 5 tầng kiểm tra, Dược lý DDI, HL7 FHIR R4, Khử nhận dạng PII; 1.942 bài pytest qua theo README.md 26/11/2026)"),
     ]
     for i, (k, v) in enumerate(meta_data):
         c0 = tbl_meta.cell(i, 0)
@@ -305,21 +305,21 @@ def tao_tai_lieu_word():
     them_doan_van(doc,
         "1. Hiện tượng ảo giác và bịa đặt thông tin (Fabrication & Hallucination):\n"
         "Mô hình ngôn ngữ tự động bổ sung các triệu chứng, chỉ số cận lâm sàng hoặc tên thuốc không hề xuất hiện trong cuộc đối thoại. "
-        "Nghiên cứu của JMIR Medical Informatics (2025) chỉ ra rằng có tới 14.2% bệnh án do LLM tự do sinh ra chứa thông tin bịa đặt.")
+        "Các nghiên cứu về trợ lý ghi chép lâm sàng (JMIR Medical Informatics 2025) ghi nhận hiện tượng này ở bệnh án do LLM sinh ra.")
 
     them_doan_van(doc,
         "2. Lỗi hoán đổi chủ thể phát ngôn (Wrong-Subject Misattribution):\n"
         "Trong hội thoại khám bệnh thực tế tại Việt Nam, người nhà bệnh nhân (bố, mẹ, con cái) thường xuyên tham gia đối thoại. "
         "Khi người nhà nói về tiền sử bệnh của chính họ ('Bố em bị hen phế quản'), các mô hình LLM thông thường có xu hướng gán "
-        "tiền sử đó cho bệnh nhân đang được khám. Báo cáo của JAMA Network Open (2026) ghi nhận 8.7% lỗi tráo đổi chủ thể bệnh lý "
-        "trong các hệ thống phiên âm tự động.")
+        "tiền sử đó cho bệnh nhân đang được khám. Đây là loại lỗi dự án đo trực tiếp trên bộ thử thách "
+        "\"đổi chủ thể\" 80 ca (xem Mục 11).")
 
     them_doan_van(doc,
         "3. Xung đột thời gian và hiện tượng tự sửa lời (Temporal Contradiction & Self-Correction):\n"
         "Bệnh nhân thường nói nhầm và đính chính ngay sau đó trong cuộc hội thoại (ví dụ: Lượt 12: 'Tôi sốt 39 độ'; Lượt 18: 'À tôi nhìn nhầm nhiệt kế, sốt 38.5 độ thôi'). "
         "Các kiến trúc Truy xuất tăng cường (Retrieval-Augmented Generation - RAG) thông thường gặp điểm mù nghiêm trọng: mô hình truy xuất "
         "đoạn văn bản tương đồng ở lượt 12 và xác nhận thông tin 39 độ, hoàn toàn bỏ qua việc thông tin này đã bị vô hiệu hóa ở lượt 18. "
-        "Tạp chí npj Digital Medicine (2025) ghi nhận 9.3% lỗi mâu thuẫn thời gian do duy trì thông tin lỗi thời.")
+        "Dự án đo loại lỗi này trên bộ thử thách \"tự sửa\" 60 ca (xem Mục 11).")
 
     them_doan_van(doc,
         "4. Lỗi biến đổi phát ngôn giả định thành thực tế (Modality & Contingency Inversion):\n"
@@ -330,9 +330,9 @@ def tao_tai_lieu_word():
     them_doan_van(doc,
         "Một câu hỏi kỹ thuật quan trọng thường được đặt ra: 'Tại sao không sử dụng kỹ thuật Prompting yêu cầu mô hình LLM tự kiểm tra "
         "lại bản nháp (Direct Generation + Self-Review)?'.\n"
-        "Thực nghiệm cho thấy phương pháp tự rà soát chỉ giảm lỗi sai chủ thể từ 12.4% xuống 9.8% (mức giảm không đáng kể 2.6%). "
+        "Dự án chưa đo nhánh tự rà soát (A+). Lập luận dưới đây là giả thuyết thiết kế, chưa có số đo. "
         "Nguyên nhân kỹ thuật xuất phát từ hiện tượng Thiên kiến tự xác nhận (Self-Confirmation Bias) của mô hình xác suất: mô hình "
-        "có xu hướng tin tưởng vào các token mà chính nó đã sinh ra ở bước trước đó. Để giải quyết triệt để, hệ thống bắt buộc phải "
+        "có xu hướng tin tưởng vào các token mà chính nó đã sinh ra ở bước trước đó. Vì vậy dự án chọn "
         "phân tách quy trình thành các bước độc lập và sử dụng các rào cản quy tắc xác định (Deterministic Rule Engine).")
 
     # ========================== MỤC 2: KIẾN TRÚC TỔNG THỂ ==========================
@@ -368,9 +368,9 @@ def tao_tai_lieu_word():
     du_lieu_tang = [
         ("Tầng 0: Tiền xử lý", "PhoWhisper + pyannote.audio (Local On-premise)", "Nhận dạng giọng nói tiếng Việt, tách luồng người nói, định danh lượt thoại [T1, T2...]", "Mất nguồn gốc phát ngôn, lộ lọt dữ liệu âm thanh"),
         ("Tầng 1: Rút mệnh đề", "Qwen3-4B tinh chỉnh QLoRA + Constrained JSON Decoding", "Trích xuất mẩu sự thật lâm sàng có cấu trúc, kèm trích dẫn nguyên văn và chỉ mục lượt thoại", "Ảo giác (Hallucination), Bịa đặt (Fabrication), Bỏ sót (Omission)"),
-        ("Tầng 2: Gán chủ thể", "Thuật toán phân giải đại từ nhân xưng & vai trò ngữ cảnh", "Phân định 4 cấp độ quy gán: Bác sĩ, Bệnh nhân tự thuật, Kể hộ, Tiền sử bệnh lý gia đình", "Hoán đổi chủ thể (Wrong-subject: 12.4% -> 2.1%)"),
-        ("Tầng 3: Trạng thái", "Máy trạng thái hữu hạn (Temporal State Machine)", "Xác định 4 quan hệ: Bổ sung, Đính chính, Diễn biến, Mâu thuẫn. Chuyển trạng thái 'Bị thay thế'", "Lỗi duy trì thông tin cũ (Outdated fact: 11.5% -> 0.8%)"),
-        ("Tầng 4: Khóa bằng chứng", "Bộ kiểm tra quy tắc xác định 7 cổng (K1 - K7)", "Kiểm định chéo đối soát nguyên văn với dữ liệu hội thoại gốc; cổng K7 chặn thông tin bị thay thế", "Chặn thông tin sai lệch; Tỷ lệ chặn oan <= 1.0%"),
+        ("Tầng 2: Gán chủ thể", "Thuật toán phân giải đại từ nhân xưng & vai trò ngữ cảnh", "Phân định 4 cấp độ quy gán: Bác sĩ, Bệnh nhân tự thuật, Kể hộ, Tiền sử bệnh lý gia đình", "Ghi nhầm người: 22,0% -> 17,9% (bộ đổi chủ thể 80 ca)"),
+        ("Tầng 3: Trạng thái", "Máy trạng thái hữu hạn (Temporal State Machine)", "Xác định 4 quan hệ: Bổ sung, Đính chính, Diễn biến, Mâu thuẫn. Chuyển trạng thái 'Bị thay thế'", "Bản cũ còn giữ: 11,48% -> 0,80% (bộ tự sửa 60 ca)"),
+        ("Tầng 4: Khóa bằng chứng", "Bộ kiểm tra quy tắc xác định 7 cổng (K1 - K7)", "Kiểm định chéo đối soát nguyên văn với dữ liệu hội thoại gốc; cổng K7 chặn thông tin bị thay thế", "Chặn thừa trên đầu ra mô hình thật 8,0-10,0%"),
         ("Tầng 5: Phân luồng rủi ro", "Động cơ phân tầng rủi ro & Xuất bản kép", "Phân tách: Thân bệnh án SOAP (an toàn) vs Mục Cần xác nhận (cách ly rủi ro) vs Gợi ý hỏi lại", "Bỏ sót rủi ro sốc phản vệ; Quá tải thao tác của bác sĩ"),
     ]
     for i, hang in enumerate(du_lieu_tang):
@@ -502,7 +502,8 @@ def tao_tai_lieu_word():
 
     them_hop_ghi_chu(doc, "KẾT QUẢ ĐẠT ĐƯỢC TẠI TẦNG 2",
         "Nhờ việc tách biệt 4 cấp độ phân giải bằng luật xác định, tỷ lệ rò rỉ lỗi sai chủ thể (Wrong-Subject Leakage Rate) "
-        "giảm từ 12.4% (Direct Generation) xuống còn 2.1% (MediTrace), tương ứng với mức giảm 83% nguy cơ nhầm lẫn người bệnh.",
+        "giảm từ 22,0% (chỉ tách thông tin) xuống 17,9% (C_khoá) trên bộ đổi chủ thể 80 ca. Cách sinh thẳng bản nháp vẫn ghi đúng người "
+        "cao hơn (0,939 so với 0,748), nên dự án không khẳng định MediTrace chính xác hơn cách sinh thẳng.",
         loai="safe")
 
     # ========================== MỤC 6: TẦNG 3 ==========================
@@ -591,8 +592,8 @@ def tao_tai_lieu_word():
         "MediTrace Sentinel áp dụng nguyên tắc thiết kế tối ưu:\n"
         "• Chỉ áp dụng lệnh CHẶN (Block) khi có bằng chứng vi phạm logic rõ ràng (như K1 vi phạm trích dẫn, K4 câu điều kiện, K7 thông tin bị thay thế).\n"
         "• Đối với các trường hợp nghi vấn chưa đủ căn cứ khẳng định, hệ thống gán nhãn CẢNH BÁO (Warning) chứ không chặn, đưa lên đầu bản nháp để bác sĩ rà soát.\n"
-        "• Thực nghiệm kiểm chứng trên 30.136 dòng dữ liệu lâm sàng thực tế ghi nhận Tỷ lệ chặn oan đạt 0.0% (0/30.136 dòng bị chặn oan), "
-        "đáp ứng hoàn hảo tiêu chí kỹ thuật False-block rate <= 1.0%.")
+        "• Trên 30.136 dòng đáp án mô phỏng, không dòng đúng nào bị chặn (0/30.136). Số này chỉ đúng vì đáp án chép gần nguyên văn "
+        "hội thoại (độ phủ 0,95); trên đầu ra mô hình thật, chặn thừa là 8,0% (C) / 10,0% (D) (docs/ket-qua/canh-bao.json).")
 
     # ========================== MỤC 8: TẦNG 5 ==========================
     them_tieu_de_1(doc, "8. TẦNG 5: PHÂN LUỒNG RỦI RO LÂM SÀNG VÀ XUẤT BẢN KÉP (RISK STRATIFICATION & DUAL-STREAM)")
@@ -609,7 +610,7 @@ def tao_tai_lieu_word():
         "2. Luồng 2 - Mục Cần Bác sĩ Xác nhận (Clinical Quarantine):\n"
         "Toàn bộ các mệnh đề BỊ CHẶN hoặc mang nhãn CẢNH BÁO được cách ly hoàn toàn vào một mục riêng biệt ở cuối bản nháp. "
         "Mỗi mục hiển thị rõ ràng: Nội dung phát ngôn, Lý do cảnh báo (ví dụ: 'Nghi vấn dị ứng thuốc mức độ cao' hoặc 'Phát hiện mâu thuẫn lượt thoại [T12] và [T18]'), "
-        "cùng 2 nút thao tác nhanh: [Chấp thuận] hoặc [Loại bỏ]. Bác sĩ chỉ mất trung bình 30 giây để hoàn thành duyệt mục này.")
+        "cùng 2 nút thao tác nhanh: [Chấp thuận] hoặc [Loại bỏ]. Thời gian bác sĩ duyệt mục này chưa đo.")
 
     them_tieu_de_2(doc, "8.2 Phân hệ Gợi ý hỏi lại thông minh (Active Clarification Query)")
     them_doan_van(doc,
@@ -674,7 +675,7 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "9.5 Module Khử nhận dạng Thông tin Cá nhân Y tế (Clinical PII/PHI De-identification)")
     them_doan_van(doc,
-        "Nhằm tuân thủ tuyệt đối Luật Khám bệnh, chữa bệnh 2023 (Điều 10, Điều 32), Nghị định 13/2023/NĐ-CP và tiêu chuẩn HIPAA / GDPR, "
+        "Để hỗ trợ đáp ứng Luật Khám bệnh, chữa bệnh 2023 và Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026), "
         "module src/he_thong/khu_dinh_danh.py tự động phát hiện và ẩn danh 7 nhóm thực thể nhạy cảm:\n"
         "Họ tên bệnh nhân/thân nhân, Số điện thoại di động, Số CCCD/CMND, Số thẻ BHYT (chuẩn 15 ký tự), Địa chỉ cư trú chi tiết, Ngày sinh và Email.\n"
         "Cơ chế Ẩn danh 2 chiều (Reversible Tokenization): Thay thế bằng các mã an toàn ([BENH_NHAN], [SDT_1], [BHYT_1]) trước khi xử lý qua AI, "
@@ -779,13 +780,13 @@ def tao_tai_lieu_word():
     them_tieu_de_1(doc, "11. KẾT QUẢ THỰC NGHIỆM ĐỊNH LƯỢNG & PHÂN TÍCH ĐỐI CHỨNG")
 
     them_hinh_anh(doc, "bang-doi-chung-thuc-nghiem.png",
-                  "Bảng so sánh thực nghiệm đối chứng định lượng giữa 6 nhánh kiến trúc")
+                  "Kết quả đo của ba phương án có cấu trúc trên 4 bộ thử thách (docs/final/Báo cáo dự án.md mục 4.1)")
 
     them_tieu_de_2(doc, "11.1 Bảng số liệu định lượng tổng hợp")
 
-    tbl_res = doc.add_table(rows=7, cols=7)
+    tbl_res = doc.add_table(rows=5, cols=4)
     tbl_res.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cot_res = ["Nhánh kiến trúc", "Sai chủ thể (%)", "Tin cũ lỗi thời (%)", "Chặn oan (%)", "Slot Error Rate", "Điểm F1 (%)", "Nguy cơ cao (%)"]
+    cot_res = ["Bộ thử thách (số ca)", "Chỉ tách thông tin: F1 / SER / nhầm người", "+ Xử lý lời sửa", "+ Kiểm bằng chứng (C_khoá)"]
     for j, td in enumerate(cot_res):
         c = tbl_res.cell(0, j)
         dat_nen_o(c, HEX_PRIMARY)
@@ -798,12 +799,10 @@ def tao_tai_lieu_word():
         r.font.name = "Segoe UI"
 
     du_lieu_res = [
-        ("A: Direct Generation", "12.4%", "11.5%", "0.0%", "0.312", "76.8%", "8.5%"),
-        ("A+: Direct + Self-Review", "9.8%", "8.2%", "0.0%", "0.274", "79.5%", "6.8%"),
-        ("B: Proposition Only", "8.5%", "7.1%", "0.2%", "0.231", "83.2%", "5.4%"),
-        ("C: MediTrace (No Lock)", "2.4%", "6.8%", "0.3%", "0.165", "88.4%", "3.2%"),
-        ("C_khoa: Full MediTrace", "2.1%", "0.8%", "0.4%", "0.089", "94.1%", "0.6%"),
-        ("D: Traditional RAG", "10.1%", "9.4%", "0.1%", "0.258", "80.6%", "7.1%"),
+        ("Đổi chủ thể (80)", "66,1 / 45,4 / 22,0%", "69,2 / 38,2 / 20,0%", "70,8 / 36,9 / 17,9%"),
+        ("Đính chính (60)", "80,9 / 29,9 / 7,6%", "85,9 / 17,4 / 6,8%", "87,0 / 17,4 / 5,5%"),
+        ("Nhiễu giọng nói (80)", "63,2 / 63,7 / 3,7%", "64,9 / 58,4 / 3,3%", "64,8 / 58,6 / 3,5%"),
+        ("Vùng miền (80)", "85,8 / 21,5 / 1,7%", "87,8 / 16,9 / 1,5%", "88,0 / 16,3 / 1,5%"),
     ]
     for i, hang in enumerate(du_lieu_res):
         la_ckhoa = "C_khoa" in hang[0]
@@ -826,25 +825,19 @@ def tao_tai_lieu_word():
     p_sr = doc.add_paragraph()
     p_sr.paragraph_format.space_before = Pt(8)
 
-    them_tieu_de_2(doc, "11.2 Phân tích kết quả thực nghiệm và Độ tin cậy kiểm thử 100%")
+    them_tieu_de_2(doc, "11.2 Phân tích kết quả thực nghiệm")
     them_doan_van(doc,
-        "1. So sánh Nhánh A (Direct) và Nhánh A+ (Self-Review):\n"
-        "Phương pháp Prompting yêu cầu mô hình tự rà soát chỉ giảm lỗi sai chủ thể từ 12.4% xuống 9.8% (giảm 21% tương đối) "
-        "và nguy cơ cao từ 8.5% xuống 6.8%. Điều này chứng minh rằng việc dựa vào khả năng 'tự suy ngẫm' của LLM không đủ an toàn cho y tế.\n\n"
-        "2. Tác động của Tầng 2 (Gán chủ thể) trong Nhánh C và C_khoa:\n"
-        "Khi đưa thuật toán gán chủ thể 4 cấp độ vào vận hành, tỷ lệ sai chủ thể giảm mạnh từ 8.5% (Nhánh B) xuống còn 2.4% (Nhánh C) "
-        "và đạt 2.1% (Nhánh C_khoa). Mức giảm hơn 83% lỗi nhầm lẫn chủ thể khẳng định tính ưu việt của việc dùng luật xác định.\n\n"
-        "3. Tác động của Cổng K7 Supersession trong Tầng 4:\n"
-        "Tại Nhánh C (chưa có khóa K7), tỷ lệ duy trì thông tin cũ lỗi thời vẫn ở mức 6.8%. Khi kích hoạt Cổng K7 (Nhánh C_khoa), "
-        "tỷ lệ này giảm đột ngột xuống 0.8% (giảm gần 90% lỗi duy trì dữ liệu cũ). Đây là bằng chứng thực nghiệm rõ ràng nhất chứng minh "
-        "MediTrace giải quyết trọn vẹn điểm mù của kiến trúc RAG truyền thống (Nhánh D đạt 9.4%).\n\n"
-        "4. Tỷ lệ chặn oan cực thấp:\n"
-        "Toàn bộ pipeline chỉ có tỷ lệ chặn oan 0.4% trên tập thực nghiệm (và 0.0% trên tập kiểm chứng 30.136 dòng), "
-        "đảm bảo không làm nghẽn quy trình làm việc của bác sĩ.\n\n"
-        "5. Kết quả Kiểm thử Tự động Toàn diện (Continuous Integration & Test Suite):\n"
-        "Toàn bộ hệ sinh thái MediTrace Sentinel v2.5 được bảo vệ bởi bộ kiểm thử tự động gồm số bài test cần được xác nhận lại trên revision hiện tại. "
-        "Kết quả kiểm thử chính thức ghi nhận: kết quả lịch sử chưa thống nhất và chưa được tái chạy trên revision hiện tại; "
-        "chứng minh tính ổn định và sẵn sàng sản xuất của hệ thống.")
+        "Mọi số đo dưới đây là trên dữ liệu mô phỏng, so với bộ chấm tự động (nguồn: README.md mục \"Kết quả đo\", "
+        "docs/final/Báo cáo dự án.md mục 4, docs/ket-qua/).\n\n"
+        "1. Ghi nhầm người: ở bộ đổi chủ thể, các bước phía sau giảm từ 22,0% xuống 17,9%, F1 tăng từ 66,1 lên 70,8, SER giảm từ 45,4 xuống 36,9. "
+        "Ở bộ nhiễu giọng nói gần như không cải thiện (F1 64,9 -> 64,8).\n\n"
+        "2. Thông tin đã bị sửa: trên bộ tự sửa 60 ca, tỷ lệ bản cũ còn bị giữ giảm từ 11,48% xuống 0,80%.\n\n"
+        "3. Kết quả không có lợi: cách sinh thẳng bản nháp (nhánh A) ghi đúng người cao hơn pipeline (0,939 so với 0,748 ở bộ đổi chủ thể); "
+        "kiểm bằng chứng làm tăng bỏ sót (4,5% -> 7,7%); lỗi nguy hiểm vẫn lọt vào thân bản nháp 11,8% (chính sách D, tập phát triển "
+        "đã dùng để chỉnh luật). Nhánh A+ (tự rà soát) và nhánh D (hỏi lại bác sĩ) chưa đo.\n\n"
+        "4. Chặn nhầm: 0/30.136 trên đáp án chỉ đúng vì đáp án chép gần nguyên văn (độ phủ 0,95); trên đầu ra mô hình thật chặn thừa 8,0-10,0%.\n\n"
+        "5. Kiểm thử tự động: 1.942 bài pytest qua, 27 bỏ qua theo phần cứng (README.md, chạy lại 26/11/2026). "
+        "Kiểm thử đơn vị không phải tỷ lệ chính xác trên bệnh nhân thật.")
 
     them_hinh_anh(doc, "h11-du-lieu.png",
                   "Phân bố và quy mô các tập dữ liệu hội thoại y tế tiếng Việt sử dụng trong nghiên cứu")
@@ -857,32 +850,21 @@ def tao_tai_lieu_word():
 
     them_tieu_de_2(doc, "12.1 Cấu hình môi trường phần cứng")
     them_doan_van(doc,
-        "Hệ thống được thiết kế để triển khai trên các máy trạm phòng khám tiêu chuẩn với cấu hình thử nghiệm:\n"
-        "• Bộ vi xử lý (CPU): AMD Ryzen 9 7900X (12 nhân, 24 luồng, xung nhịp 4.7GHz).\n"
-        "• Bộ nhớ trong (RAM): 64GB DDR5 5600MHz.\n"
-        "• Card đồ họa (GPU): NVIDIA GeForce RTX 4090 24GB VRAM (hoặc RTX 3060 12GB đối với phiên bản tối ưu hóa).\n"
-        "• Ổ cứng lưu trữ: 2TB NVMe PCIe 4.0 SSD.\n"
-        "• Hệ điều hành: Linux Ubuntu 22.04 LTS / Windows 11 Pro 64-bit.")
+        "Máy chạy thử của dự án: GPU NVIDIA RTX 3060. Huấn luyện adapter chạy trên Kaggle. "
+        "Đỉnh VRAM khi huấn luyện tiết kiệm bộ nhớ: 6,4 GiB (README.md).")
 
     them_tieu_de_2(doc, "12.2 Phân bổ thời gian thực thi (Latency Breakdown)")
     them_doan_van(doc,
-        "Đối với một cuộc hội thoại khám bệnh có độ dài trung bình 3-5 phút (khoảng 25-40 lượt thoại):\n"
-        "• Khâu 0 (ASR & Diarization): 3.20 giây (tỷ lệ Real-Time Factor < 0.02 trên GPU).\n"
-        "• Khâu 1 (Rút mệnh đề QLoRA): 1.45 giây (tốc độ suy luận đạt ~68 tokens/giây).\n"
-        "• Khâu 2 (Gán chủ thể): 0.08 giây (thuật toán luật thuần túy, độ phức tạp O(N)).\n"
-        "• Khâu 3 (Theo dõi trạng thái): 0.12 giây (so khớp đồ thị trạng thái, O(N^2) trên số mệnh đề liên quan).\n"
-        "• Khâu 4 (Kiểm định 7 Cổng K1-K7): 0.15 giây (kiểm tra chuỗi con và đối soát từ điển).\n"
-        "• Khâu 5 (Xuất bản kép & Giao diện): 0.05 giây.\n"
-        "-> Tổng thời gian xử lý toàn trình (End-to-End Latency): ~5.05 giây. Bác sĩ nhận được bản nháp bệnh án gần như tức thì "
-        "ngay sau khi kết thúc buổi trò chuyện với bệnh nhân.")
+        "Theo README.md: khoảng 3,5 phút để tạo một bản nháp trên một card RTX 3060; các bước theo luật mất dưới một giây. "
+        "Chưa có phép đo chi tiết từng khâu.")
 
     them_tieu_de_2(doc, "12.3 Tiêu chuẩn An toàn thông tin và Pháp lý y tế")
     them_doan_van(doc,
         "• Cơ chế Zero Cloud Transmission: Toàn bộ âm thanh và văn bản bệnh án không rời khỏi mạng nội bộ của cơ sở y tế, "
-        "tuân thủ tuyệt đối Luật Khám bệnh, chữa bệnh Việt Nam và các hướng dẫn bảo vệ dữ liệu y tế quốc tế (HIPAA / GDPR).\n"
+        "nên dữ liệu người bệnh không cần rời phòng khám (Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026)).\n"
         "• Bác sĩ là chủ thể quyết định duy nhất: Hệ thống không tự động ký bệnh án. Bệnh án chỉ được lưu vào hệ thống EMR "
         "khi có chữ ký số xác nhận của bác sĩ phụ trách.\n"
-        "• Truy vết nguồn gốc 100%: Mọi dòng thông tin đều gắn với chỉ mục [T_i], cho phép kiểm toán chéo khi có tranh chấp y khoa.")
+        "• Truy vết nguồn gốc: Mọi dòng thông tin đều gắn với chỉ mục [T_i], cho phép kiểm toán chéo khi có tranh chấp y khoa.")
 
     # ========================== MỤC 13: KẾT LUẬN ==========================
     them_tieu_de_1(doc, "13. KẾT LUẬN KỸ THUẬT & HƯỚNG PHÁT TRIỂN TIẾP THEO")
@@ -895,7 +877,7 @@ def tao_tai_lieu_word():
     them_doan_van(doc,
         "Các đóng góp kỹ thuật cốt lõi của phiên bản v2.5 Enterprise:\n"
         "1. Xây dựng thành công quy trình kiến trúc 5 tầng phân cấp phối hợp cùng 7 chốt Guardrails đa lớp, phân định rõ ràng giữa suy luận xác suất và kiểm soát quy tắc xác định.\n"
-        "2. Phát triển thuật toán phân giải chủ thể 4 cấp độ và Cổng K7 Supersession, khắc phục triệt để điểm mù của các hệ thống RAG truyền thống đối với phát ngôn đính chính.\n"
+        "2. Phát triển thuật toán phân giải chủ thể 4 cấp độ và Cổng K7 Supersession, nhắm vào điểm mù của các hệ thống RAG truyền thống đối với phát ngôn đính chính.\n"
         "3. Thực thi triết lý an toàn lâm sàng 'Bắt nhầm còn hơn bỏ sót' (Zero Critical Information Loss) thông qua phân vùng CẦN XÁC NHẬN, bảo đảm an toàn sinh mạng người bệnh.\n"
         "4. Tích hợp Động cơ Dược lý lâm sàng phát hiện tương tác thuốc DDI, kiểm soát liều trần và cảnh báo chống chỉ định cơ địa theo chuẩn Bộ Y tế.\n"
         "5. Chuẩn hóa xuất bản quốc tế HL7 FHIR R4 Bundle Resource sẵn sàng tích hợp với hệ thống EMR/HIS của bệnh viện.\n"

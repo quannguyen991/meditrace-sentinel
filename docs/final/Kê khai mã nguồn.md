@@ -40,7 +40,7 @@
 | `fhir_exporter.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Chuẩn hóa xuất dữ liệu hồ sơ lâm sàng sang chuẩn quốc tế HL7 FHIR R4: Patient, Encounter, Condition...) |
 | `guardrails.py` | 4 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Thiết lập các rào chắn phòng vệ thuật toán và bộ kiểm soát an toàn dữ liệu) |
 | `hieu_chinh_lieu.py` | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa công thức tính eGFR CKD-EPI/Cockcroft-Gault và luật chỉnh liều thuốc suy thận) |
-| `khu_dinh_danh.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Xây dựng bộ lọc khử định danh dữ liệu cá nhân PII hai chiều tuân thủ Nghị định 13/2023/NĐ-CP) |
+| `khu_dinh_danh.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Xây dựng bộ lọc khử định danh dữ liệu cá nhân PII hai chiều) |
 | `kiem_khuon.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Thiết kế bộ kiểm tra tính toàn vẹn cấu trúc 4 phần Subjective-Objective-Assessment-Plan) |
 | `thang_diem_lam_sang.py` | 4 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa các thang điểm lâm sàng CKD-EPI, Cockcroft-Gault, CHA2DS2-VASc và HAS-BLED) |
 | `tro_ly_lam_sang.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Tích hợp tác tử gợi mở lâm sàng chủ động SOCRATES hỗ trợ bác sĩ hỏi bệnh đầy đủ) |
@@ -140,7 +140,7 @@
 | `test_fhir_exporter.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử cấu trúc gói JSON Bundle HL7 FHIR R4 hợp lệ theo lược đồ y tế quốc tế) |
 | `test_guardrails.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử đơn vị và kịch bản tấn công bypass 8 chốt an toàn lâm sàng) |
 | `test_hieu_chinh_lieu.py` | 2 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Kiểm thử các mốc giảm liều kháng sinh và thuốc hạ đường huyết theo độ lọc cầu thận) |
-| `test_khu_dinh_danh.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Bộ kiểm thử tự động khả năng che giấu số điện thoại, CCCD, thẻ BHYT theo Nghị định 13) |
+| `test_khu_dinh_danh.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Bộ kiểm thử tự động khả năng che giấu số điện thoại, CCCD, thẻ BHYT) |
 | `test_kiem_khuon.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử bẫy định dạng cấu trúc bệnh án khi thiếu mục khám thực thể hoặc chẩn đoán) |
 | `test_thang_diem_lam_sang.py` | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Bộ test case đối soát độ chính xác tính toán eGFR và phân tầng nguy cơ đột quỵ) |
 | `test_tro_ly_lam_sang.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Bộ kiểm thử tác tử SOCRATES gợi ý câu hỏi làm rõ theo ngữ cảnh ca bệnh) |

@@ -22,21 +22,53 @@
 
 Tại các bệnh viện công lập và phòng khám đa khoa ở Việt Nam hiện nay, công tác ghi chép hồ sơ khám bệnh đang đối mặt với áp lực lớn:
 
-* **Quá tải bệnh nhân ngoại trú:** Một bác sĩ ngoại trú thường tiếp nhận **50 đến 80 bệnh nhân/ngày**, mỗi lượt khám thường chỉ gói gọn **3 đến 5 phút**.
-* **Gánh nặng gõ bàn phím ("Pajama Time"):** Trong quỹ thời gian ngắn ngủi đó, bác sĩ phải vừa hỏi bệnh vừa nhập liệu vào phần mềm bệnh viện (HIS), làm giảm giao tiếp mắt trực tiếp với người bệnh và kéo dài giờ hoàn tất hồ sơ sau ca trực.
+* **Quá tải bệnh nhân ngoại trú:** Viện Chiến lược và Chính sách Y tế ghi nhận ở khu vực phòng khám, một bác sĩ khám **60–100 bệnh nhân/ngày** là phổ biến [6]. Bộ Y tế phải đặt trần **65 lượt khám BHYT/bàn khám/ngày** (Thông tư 15) [7]. Với nhịp đó, mỗi lượt gặp chỉ còn vài phút, và một lượt khám thường phải chia làm hai lần (hỏi bệnh, rồi xem kết quả xét nghiệm để kê đơn) [8].
+* **Thiếu nhân lực:** Việt Nam có **12,5 bác sĩ/10.000 dân (2023)**, thấp hơn mục tiêu **15 (2025)** và **19 (2030)** của quy hoạch mạng lưới y tế [9].
+* **Gánh nặng gõ bàn phím ("Pajama Time"):** Bác sĩ phải vừa hỏi bệnh vừa nhập liệu vào phần mềm bệnh viện (HIS), làm giảm giao tiếp mắt với người bệnh và kéo dài giờ hoàn tất hồ sơ sau ca trực.
 * **Áp lực chuẩn hóa hồ sơ & pháp lý:** **Thông tư 46/2018/TT-BYT**, **Thông tư 32/2023/TT-BYT**, **Thông tư 26/2025/TT-BYT** và **Quyết định 130/QĐ-BYT** đòi hỏi bệnh án điện tử (EMR), đơn thuốc điện tử và bảng XML BHYT phải đầy đủ, chính xác và có căn cứ chặt chẽ.
+
+### 1.1. Số liệu bối cảnh (nguồn bên ngoài, không phải số đo của dự án)
+
+| Vấn đề | Số liệu | Nguồn |
+|---|---|---|
+| **Bác sĩ kiệt sức (Mỹ)** | **43,2%** bác sĩ có ít nhất một triệu chứng kiệt sức năm 2024, giảm từ 48,2% (2023) và 53% (2022). Cấp cứu 52,2%, y học gia đình 46,4% | AMA [1] |
+| **Bác sĩ kiệt sức (Việt Nam)** | Chưa có ước tính đại diện toàn quốc. Các khảo sát đơn lẻ: **hơn 41%** bác sĩ có nguy cơ kiệt sức (374 bác sĩ, BV TP Thủ Đức, 2022–2023); **25,4%** nhân viên Viện Sức khỏe Tâm thần Quốc gia; **21,3%** bác sĩ nội trú (ĐH Y Dược Thái Nguyên, 2025) | [2] |
+| **Thời gian dành cho hồ sơ điện tử** | Bác sĩ ngoại trú dùng trung bình **5,8 giờ trên phần mềm hồ sơ cho mỗi 8 giờ khám theo lịch**, riêng ghi chép **2,3 giờ**; khoảng **42%** thời gian này rơi ra ngoài giờ khám (dữ liệu 200.081 bác sĩ, 396 tổ chức) | J Gen Intern Med 2024 [3] |
+| **Hiệu quả của trợ lý ghi chép AI** | Sau 30 ngày dùng trợ lý ghi chép AI, tỷ lệ kiệt sức giảm từ **51,9% xuống 38,8%** (6 hệ thống y tế Mỹ). Một thử nghiệm ngẫu nhiên trên 238 bác sĩ ghi nhận giảm thời gian viết ghi chú | JAMA Netw Open 2025; NEJM AI 2025 [4] |
+| **AI viết bệnh án vẫn có thể bịa và bỏ sót** | Trên 12.999 câu do bác sĩ chấm, mô hình ngôn ngữ lớn viết ghi chú lâm sàng có tỷ lệ **bịa 1,47%** và **bỏ sót 3,45%** | npj Digital Medicine 2025 [5] |
+| **An toàn người bệnh (toàn cầu)** | Khoảng **1/10** người bệnh bị tổn hại khi được chăm sóc y tế; **hơn 3 triệu** ca tử vong mỗi năm do chăm sóc không an toàn; **hơn 50%** tổn hại có thể phòng tránh, và **một nửa** trong số đó liên quan đến thuốc | WHO 2023 [10] |
+| **Chi phí sai sót dùng thuốc** | Khoảng **42 tỷ USD/năm**, gần 1% chi tiêu y tế toàn cầu. Mệt mỏi của nhân viên y tế và quá tải là các nguyên nhân được nêu | WHO [11] |
+
+**Ý nghĩa với MediTrace:**
+- Trợ lý ghi chép AI có thể giảm gánh nặng giấy tờ và kiệt sức, nhưng **AI viết bệnh án vẫn bịa khoảng 1–2% số câu**. Trong hồ sơ y tế, mỗi câu bịa về dị ứng hay thuốc là một nguy cơ thật.
+- Vì vậy MediTrace không cố làm một AI "viết hay hơn", mà làm cho **mỗi dòng đều phải có bằng chứng**, và dòng nào không chứng minh được thì thành câu hỏi cho bác sĩ.
+- *Lưu ý trung thực:* dự án **chưa đo** thời gian tiết kiệm hay mức giảm kiệt sức trên bác sĩ thật. Các số trên chỉ mô tả bối cảnh.
+
+**Nguồn:**
+1. AMA, *Physician burnout rate drops below 50% for first time in 4 years* — https://www.ama-assn.org/practice-management/physician-health/physician-burnout-rate-drops-below-50-first-time-4-years ; *Physician burnout statistics 2024* — https://www.ama-assn.org/practice-management/physician-health/physician-burnout-statistics-2024-latest-changes-and-trends
+2. VOV, *Nhiều bác sĩ bị "kiệt sức" ở mức cao* — https://vov.gov.vn/nhieu-bac-si-bi-kiet-suc-o-muc-cao-dtnew-528022 ; Tạp chí Nghiên cứu Y học, *Tình trạng kiệt sức và yếu tố liên quan của bác sĩ nội trú ĐH Y Dược Thái Nguyên* — https://tapchinghiencuuyhoc.vn/index.php/tcncyh/article/view/4087 ; Tạp chí Y học Cộng đồng, *Burnout among medical staff at the National Institute of Mental Health* — https://tapchiyhcd.vn/index.php/yhcd/en/article/download/4465/4170 ; Lifestyle Medicine Việt Nam (nhận định chưa có ước tính toàn quốc) — https://lifestylemedicinevietnam.org/lifestyle-medicine-for-healthcare-professionals-in-viet-nam-personal-health-burnout-and-the-role-of-individual-and-organizational-action
+3. Journal of General Internal Medicine (2024), EHR use across specialties — https://link.springer.com/article/10.1007/s11606-024-08930-4
+4. JAMA Network Open (10/2025), *Use of Ambient AI Scribes to Reduce Administrative Burden and Professional Burnout* — https://pubmed.ncbi.nlm.nih.gov/41037268/ ; NEJM AI (2025), *Ambient AI Scribes in Clinical Practice: A Randomized Trial* — https://pubmed.ncbi.nlm.nih.gov/41497288/
+5. Asgari và cộng sự, *A framework to assess clinical safety and hallucination rates of LLMs for medical text summarisation*, npj Digital Medicine (2025) — https://pmc.ncbi.nlm.nih.gov/articles/PMC12075489/
+6. Viện Chiến lược và Chính sách Y tế, nghiên cứu thực trạng quá tải bệnh viện — http://www.hspi.org.vn/vcl/Nghien-cuu-thuc-trang-qua-tai-duoi-tai-cua--he-thong-benh-vien-cac-tuyen-va-de-xuat-giai--phap-khac-phuc-t85-8128.html
+7. VOV, *Bác sĩ khám tối đa 65 bệnh nhân/bàn khám/ngày* — https://vov.vn/xa-hoi/bac-si-kham-toi-da-65-benh-nhanban-khamngay-con-nhieu-ban-khoan-786748.vov
+8. VnExpress, *Tự sự của bác sĩ cấp cứu về áp lực với thầy thuốc VN* — https://vnexpress.net/tu-su-cua-bac-si-cap-cuu-ve-ap-luc-voi-thay-thuoc-vn-3176759.html
+9. VnExpress, *Vietnam aims for 15 doctors per 10,000 people by 2025* — https://e.vnexpress.net/news/news/vietnam-aims-for-15-doctors-per-10-000-people-by-2025-4716651.html ; Tạp chí Y học Cộng đồng — https://tapchiyhcd.vn/index.php/yhcd/article/download/2066/1537/1793
+10. WHO, *Patient safety — fact sheet* (11/9/2023) — https://www.who.int/news-room/fact-sheets/detail/patient-safety
+11. WHO, *WHO launches global effort to halve medication-related errors in 5 years* — https://www.who.int/news-room/detail/29-03-2017-who-launches-global-effort-to-halve-medication-related-errors-in-5-years
 
 ---
 
 <a name="2-tại-sao-cần-phải-giải-quyết"></a>
 ## 2. TẠI SAO CẦN PHẢI GIẢI QUYẾT VẤN ĐỀ NÀY NGAY LẬP TỨC?
 
-1. **Nguy cơ ghi chép thiếu hoặc sót tiền sử trọng yếu:** Khi quá vội, các chi tiết nhạy cảm như dị ứng thuốc, bệnh nền (suy thận, tăng huyết áp, đái tháo đường) hoặc thuốc bệnh nhân tự mua uống ở nhà rất dễ bị bỏ sót.
-2. **Nguy cơ tai biến dược lý:**
+1. **Nguy cơ ghi chép thiếu hoặc sót tiền sử trọng yếu:** Khi quá vội, các chi tiết nhạy cảm như dị ứng thuốc, bệnh nền (suy thận, tăng huyết áp, đái tháo đường) hoặc thuốc bệnh nhân tự mua uống ở nhà rất dễ bị bỏ sót. WHO nêu mệt mỏi của nhân viên y tế và quá tải là các nguyên nhân dẫn tới sai sót dùng thuốc, và một nửa số tổn hại có thể phòng tránh trong chăm sóc y tế liên quan đến thuốc (mục 1.1).
+2. **Giải pháp AI phổ thông chưa đủ an toàn:** Trợ lý ghi chép AI giúp giảm kiệt sức, nhưng AI viết văn xuôi vẫn bịa và bỏ sót một phần nhỏ số câu (mục 1.1). Nếu không có cơ chế kiểm từng dòng, bác sĩ phải đọc lại toàn bộ, và lợi ích tiết kiệm thời gian bị mất.
+3. **Nguy cơ tai biến dược lý:**
    * Quên ghi nhận dị ứng kháng sinh làm tăng rủi ro kê trùng thuốc gây phản vệ.
    * Kê đồng thời hai thuốc có tương tác nặng (như Clopidogrel + Omeprazole hoặc Warfarin + Ibuprofen) mà không kịp tra cứu Dược thư.
    * Chưa kịp hiệu chỉnh liều cho bệnh nhân suy thận theo độ lọc cầu thận (eGFR).
-3. **Rủi ro pháp lý khi hồ sơ thiếu truy vết:** Bệnh án là tài liệu pháp lý cốt lõi; nếu bản nháp ghi nhầm lời người nhà thành bệnh sử bệnh nhân hoặc giữ lại thông tin người bệnh đã đính chính, bác sĩ sẽ gánh rủi ro chuyên môn.
+4. **Rủi ro pháp lý khi hồ sơ thiếu truy vết:** Bệnh án là tài liệu pháp lý cốt lõi; nếu bản nháp ghi nhầm lời người nhà thành bệnh sử bệnh nhân hoặc giữ lại thông tin người bệnh đã đính chính, bác sĩ sẽ gánh rủi ro chuyên môn.
 
 ---
 
@@ -56,18 +88,20 @@ Tại các bệnh viện công lập và phòng khám đa khoa ở Việt Nam hi
 
 | Tiêu chí | ChatGPT / LLM đám mây viết văn xuôi | MediTrace Sentinel |
 | :--- | :--- | :--- |
-| **1. Pháp lý & Bảo mật dữ liệu** | Gửi dữ liệu hội thoại nhạy cảm ra máy chủ bên thứ ba ngoài cơ sở khám chữa bệnh. Mặc định không đáp ứng yêu cầu giữ dữ liệu nội bộ tại chỗ. | **Chạy 100% nội bộ tại chỗ (`On-premise`).** Sử dụng mô hình mở `Qwen3-4B` (Apache-2.0); công tắc mô hình ngoài mặc định **TẮT**; Trợ lý tra cứu y văn dùng danh sách cho phép ẩn danh (Allowlist). |
+| **1. Pháp lý & Bảo mật dữ liệu** | Gửi dữ liệu hội thoại nhạy cảm ra máy chủ bên thứ ba ngoài cơ sở khám chữa bệnh. Mặc định không đáp ứng yêu cầu giữ dữ liệu nội bộ tại chỗ. | **Lõi dựng bản nháp chạy 100% tại chỗ (`On-premise`).** Sử dụng mô hình mở `Qwen3-4B` (Apache-2.0); công tắc mô hình ngoài mặc định **TẮT**; Trợ lý tra cứu y văn dùng danh sách cho phép ẩn danh (Allowlist). |
 | **2. Kiểm soát ảo giác AI** | Sinh văn xuôi mượt mà trong hộp đen; có thể tự suy diễn lý do, chẩn đoán hoặc thông tin không có trong lời thoại. | **Kiến trúc Lai (Neuro-Symbolic):** AI chỉ rút JSON mệnh đề thô ở Bước 1; toàn bộ khâu gom người, đính chính, **7 cổng khóa K1–K7** và **56 mã cảnh báo (Chính sách D)** đều là mã luật kiểm thử được. |
 | **3. Truy vết hai chiều (`Click-to-Verify`)** | Văn xuôi dài không gắn chỉ mục từng câu về giây ghi âm gốc. | **Mỗi dòng bệnh án nối tới đúng lượt `[T_i]` và đoạn băng gốc `[start_s - 0.5, end_s + 0.5]`**, cho phép bấm `Space` nghe lại tức thì. |
 | **4. Xử lý bẫy ngôn ngữ Việt** | Dễ gộp nhầm *"Bố em bị hen"* vào bệnh nhân; dễ bỏ qua tự sửa *"4 ngày… à không, 10 ngày"*; dễ hiểu nhầm câu điều kiện/hỏi đáp. | **Tách riêng `nguoi_noi` và `chu_the_id`**, dùng **FSM đính chính** lưu vết trạng thái `bị thay thế`, khóa chặt mẫu người nhà tự xưng và câu hỏi chưa trả lời (`QUESTION_AS_FACT`). |
 | **5. Dược lý, BHYT & Chốt ký WORM** | Không tích hợp Dược thư VN, BHYT XML1–XML5 hay sổ cái chống sửa lén sau ký duyệt. | Tích hợp **158 hoạt chất Dược thư QG**, tính eGFR/9 thang điểm, tiền kiểm BHYT XML3/XML5 TT 26/2025, và **khóa cứng ký duyệt WORM `SHA-256` + `.anchor.json`** khi còn mục `Cần xác nhận`. |
+
+**Bảng trên so sánh thiết kế, không phải kết quả đo.** Dự án **chưa chạy so sánh đầy đủ** với mô hình thương mại. Phép đo duy nhất có thật (173/300 ca, dừng do hết số dư) cho thấy mô hình thương mại **ghi nhầm người ít hơn** mô hình nhỏ của dự án: 1,4% so với 7,6% ở bộ đính chính, 15,4% so với 22,9% ở bộ đổi chủ thể (`docs/final/Báo cáo dự án.md`, `README.md`). Cách để mô hình nhỏ viết thẳng bản nháp cũng ghi đúng người **cao hơn** đường ống (0,939 so với 0,748 ở bộ đổi chủ thể). Vì vậy điểm khác biệt của MediTrace là chạy tại chỗ và kiểm tra được từng dòng, không phải chính xác hơn. Kế hoạch đo đầy đủ: `docs/superpowers/plans/2026-11-27-nang-cap-toan-dien-bgk.md` Task 6.
 
 ---
 
 <a name="5-cấu-trúc-triệt-tiêu-ảo-giác"></a>
 ## 5. KIẾN TRÚC 5 TẦNG & 6 GÓI LÕI: CÁCH MEDITRACE KHOANH VÙNG ẢO GIÁC AI VÀ KHÓA BẰNG CHỨNG
 
-Thư mục lõi Python `src/` được quy hoạch rành mạch thành **6 gói nghiệp vụ** (chi tiết tại [`BAN_DO_MA_NGUON.md`](../../BAN_DO_MA_NGUON.md)): `bo_du_lieu/`, `duong_ong/`, `canh_bao/`, `cong_cu_lam_sang/`, `do_luong/`, `he_thong/` (cùng mô-đun `audio/` và `huan_luyen/`):
+Thư mục lõi Python `src/` được quy hoạch rành mạch thành **6 gói nghiệp vụ** (chi tiết tại [`BAN_DO_MA_NGUON.md`](BAN_DO_MA_NGUON.md)): `bo_du_lieu/`, `duong_ong/`, `canh_bao/`, `cong_cu_lam_sang/`, `do_luong/`, `he_thong/` (cùng mô-đun `audio/` và `huan_luyen/`):
 
 ```text
 [Lời nói cuộc khám]
@@ -171,17 +205,17 @@ Thư mục lõi Python `src/` được quy hoạch rành mạch thành **6 gói 
 <a name="7-số-liệu-thực-nghiệm"></a>
 ## 7. BẢNG SỐ LIỆU THỰC NGHIỆM CHỨNG MINH HIỆU QUẢ
 
-Toàn bộ các cải tiến được đo đạc và tái lập trực tiếp bằng kịch bản Python/TypeScript trong kho mã (xem điều kiện đo và giới hạn chi tiết tại [`BAO_CAO_CAI_TIEN_CHANG_1.md`](../../BAO_CAO_CAI_TIEN_CHANG_1.md) và `docs/ket-qua/`):
+Toàn bộ các cải tiến được đo đạc và tái lập trực tiếp bằng kịch bản Python/TypeScript trong kho mã (xem điều kiện đo và giới hạn chi tiết tại [`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md) và `docs/ket-qua/`):
 
 | Hạng mục đo đạc | Đối chứng / Trước nâng cấp | Kết quả hiện tại (Cập nhật 27/11/2026) | Phạm vi & Ghi chú trung thực |
 | :--- | :--- | :--- | :--- |
-| **Kiểm thử tự động toàn kho** | 370 test ban đầu | **`1.960+` test Pytest (`25–27` skip) + `96/96` test TypeScript/BFF** | TypeScript `tsc --noEmit` 0 lỗi, build sản xuất thành công. |
+| **Kiểm thử tự động toàn kho** | 370 test ban đầu | **`1.942` test Pytest qua, `27` bỏ qua (lần chạy 26/11/2026, `README.md`) + `96` test TypeScript/BFF** | TypeScript `tsc --noEmit` 0 lỗi, build sản xuất thành công. |
 | **Lỗi nguy hiểm lọt thân bản nháp (`lot_nguy_hiem`)** | Chính sách C: `45,9%` (`101/220`)<br>Chính sách D cũ: `24,1%` (`53/220`) | **Chính sách D mới: `11,8%` (`26/220`) — chặn `88,2%` (`194/220`)** | Đo trên **chính 4 tập phát triển đã dùng để viết các luật mới** (300 ca, 2.789 phát biểu, so với bộ chấm tự động — chưa phải số liệu trên tập kín); đổi lại chặn thừa `8,0%` (C) → `10,0%` (D). Tập giữ kín `thach_thuc_v2` giữ `0,946` (`doi_chu_the`) & `0,871` (`cay-loi`). |
 | **Chặn lỗi nguy hiểm theo nhóm (`do_truyen_lan_loi_tung_tang`)** | Tổng tuyến: `75,9%` (`167/220`)<br>Nhiễu ASR: `53,7%` (`36/67`) | **Tổng tuyến: `88,2%` (`194/220`)** — Đổi chủ thể `96,5%`, Phương ngữ `93,3%`, Đính chính `84,0%`, Nhiễu ASR **`74,6%` (`50/67`)** | Trên cùng 4 tập thách thức phát triển (`docs/ket-qua/truyen-lan-loi-tung-tang.json`). |
-| **Tỷ lệ bỏ sót mệnh đề (`bo-sot-qwen3-4b.md`)** | Qwen3-4B chưa train: `43,1%` | **Qwen3-4B + QLoRA: `11,5%`** (Wilson 95%: `8,4%–15,6%`, 0 lỗi JSON) | Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề); lưu ý trọng số Qwen3-4B chạy trên GPU 12 GB. |
+| **Tỷ lệ bỏ sót mệnh đề (`bo-sot-qwen3-4b.md`)** | Qwen3-4B chưa train: `43,1%` | **Qwen3-4B + QLoRA: `11,5%`** (Wilson 95%: `8,4%–15,6%`, 0 lỗi JSON) | Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề), so với bộ chấm tự động, đáp án v1; lần chạy 26/11: adapter v1 `11,8%`, adapter v3 `14,1%`; lưu ý trọng số Qwen3-4B chạy trên GPU 12 GB. |
 | **Chuẩn hóa phương ngữ trên `ViDia2Std/test.csv`** | Lỗi từ gốc so với câu chuẩn: `30,1%` | **Đổi đúng `28,0%` (`1.192/4.264`), tổng phủ `37,1%`, lỗi từ giảm còn `21,9%` (`doi_thua: 44`)** | 1.603 câu phương ngữ 63 tỉnh; bảng có khai thác thêm từ `ViDia2Std/train.csv`, giữ nguyên từ y khoa chuẩn. |
-| **Phủ dược lý & Đối chiếu 4 bộ công khai khác** | Trước sửa chỉ nạp 33 thuốc cứng | **Nạp `158` hoạt chất (`ViMedAQA`: `87/500` mẫu bắt thuốc; `ViHealthQA`: `14/42` Q/A)** | `PhoNER_COVID19` (`1.000` câu): chỉ che được `10/847` (`1,2%`) nhãn vàng `NAME`/`PATIENT_ID` viết tắt/mã số không khung — ghi nhận làm hạn chế cần cải tiến. |
-| **Độ phong phú kho khuôn v2 (5.000 ca)** | v1: `20.190` câu duy nhất (lặp `76,92%`) | **v2: `45.835` câu duy nhất (lặp `47,37%`, ≥ 8 từ: `42,19%`)** | 657 khuôn thuộc 21 hệ cơ quan; Jaccard từ khóa Train–Test trung bình `5,87%`; 100% trích dẫn chuỗi con. |
+| **Phủ dược lý & Đối chiếu 4 bộ công khai khác** | Trước sửa chỉ nạp 33 thuốc cứng | **Nạp `158` hoạt chất (`ViMedAQA`: `87/500` mẫu bắt thuốc; `ViHealthQA`: bắt thuốc ở `14` câu hỏi và `42` câu trả lời trên `2.013` mẫu)** | `PhoNER_COVID19` (`1.000` câu): chỉ che được `10/847` (`1,2%`) nhãn vàng `NAME`/`PATIENT_ID` viết tắt/mã số không khung — ghi nhận làm hạn chế cần cải tiến. |
+| **Độ phong phú kho khuôn v2 (5.000 ca)** | v1: `20.190` câu duy nhất (lặp `76,92%`) | **v2: `45.835` câu duy nhất (lặp `47,37%`, ≥ 8 từ: `42,19%`)** | 657 khuôn thuộc 21 hệ cơ quan; Jaccard từ khóa Train–Test trung bình `5,87%`; 100% trích dẫn trong dữ liệu tự sinh là chuỗi con (kiểm dữ liệu huấn luyện, không phải đầu ra mô hình). |
 
 ---
 
@@ -190,9 +224,11 @@ Toàn bộ các cải tiến được đo đạc và tái lập trực tiếp b�
 
 1. **Đối với Bác sĩ:** Giảm thao tác gõ phím lặp lại, có công cụ kiểm tra tương tác thuốc, eGFR, 9 thang điểm lâm sàng, biện luận CLS BHYT và phát lại đúng câu nói gốc chỉ bằng 1 chạm — giúp tập trung hơn vào thăm khám và giải thích cho người bệnh *(chưa công bố số giờ tiết kiệm thực tế vì dự án chưa thực hiện thử nghiệm lâm sàng với bác sĩ ngoài đời)*.
 2. **Đối với Người bệnh:** Được lắng nghe trọn vẹn hơn, giảm nguy cơ bỏ sót dị ứng/tương tác thuốc nhờ chốt rà soát đa tầng, và nhận bản dặn dò tiếng Việt dễ hiểu kèm lịch uống thuốc rõ ràng.
-3. **Đối với Bệnh viện và Ngành Y tế:** Tuân thủ **Nghị định 13/2023/NĐ-CP** (chạy tại chỗ, không gửi lời thoại thô ra ngoài), sẵn sàng liên thông chuẩn **HL7 FHIR R4 / XML1–XML5** theo **QĐ 130/QĐ-BYT** & **TT 26/2025/TT-BYT**, và đảm bảo vết kiểm toán pháp lý WORM `SHA-256` minh bạch.
+3. **Đối với Bệnh viện và Ngành Y tế:** Chạy tại chỗ nên dữ liệu người bệnh không cần rời phòng khám (khung pháp lý hiện hành: **Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15** và **Nghị định 356/2025/NĐ-CP**, hiệu lực 01/01/2026), sẵn sàng liên thông chuẩn **HL7 FHIR R4 / XML1–XML5** theo **QĐ 130/QĐ-BYT** & **TT 26/2025/TT-BYT**, và đảm bảo vết kiểm toán pháp lý WORM `SHA-256` minh bạch.
 
 ---
+
+> **Tài liệu đi kèm:** bộ hỏi – đáp từ dễ đến khó [`docs/HOI_DAP_BGK.md`](docs/HOI_DAP_BGK.md) · giải thích cấu trúc mã [`docs/GIAI_THICH_CAU_TRUC_DU_AN.md`](docs/GIAI_THICH_CAU_TRUC_DU_AN.md).
 
 > **THÔNG ĐIỆP KẾT LUẬN:**  
 > **MediTrace Sentinel** không thay thế bác sĩ và không viết bệnh án kiểu "hộp đen". Đây là hệ thống trợ lý lâm sàng **lấy bằng chứng lời thoại làm gốc, lấy luật y khoa xác định làm rào chắn an toàn, và lấy quyết định duyệt cuối của thầy thuốc làm chuẩn mực pháp lý**.

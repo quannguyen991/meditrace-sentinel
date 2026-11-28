@@ -88,19 +88,19 @@ def ve_tong_the():
          "• PhoWhisper thu âm tiếng Việt\n• pyannote.audio tách người nói\n• Định danh vai: Bác sĩ / BN\n• Chia lượt nói [T1], [T2], [T3]...\n• Hoạt động 100% On-Premise",
          C_GRAY, C_GRAY_BG),
         (3.55, 7.05, 2.7, 2.9, "TẦNG 1: RÚT MỆNH ĐỀ",
-         "• Mô hình Qwen3-4B QLoRA Local\n• Trích xuất mẩu dữ liệu nhỏ\n• Gắn mỏ neo bằng chứng [T_i]\n• TUYỆT ĐỐI không sinh tự do\n• Triệt tiêu bịa đặt (Hallucination)",
+         "• Mô hình Qwen3-4B QLoRA Local\n• Trích xuất mẩu dữ liệu nhỏ\n• Gắn mỏ neo bằng chứng [T_i]\n• Không sinh văn xuôi tự do\n• Bỏ sót còn 11,5% (30 ca)",
          C_AI, C_AI_BG),
         (6.65, 7.05, 2.7, 2.9, "TẦNG 2: GÁN CHỦ THỂ",
-         "• Phân giải đại từ nhân xưng\n• Tách rõ Bệnh nhân vs Gia đình\n• Chống nhầm tiền sử bệnh\n• Lỗi giảm từ 12.4% -> 2.1%\n• Minh chứng bám sát JAMA 2026",
+         "• Phân giải đại từ nhân xưng\n• Tách rõ Bệnh nhân vs Gia đình\n• Chống nhầm tiền sử bệnh\n• Nhầm người 22,0% -> 17,9%\n  (đổi chủ thể 80 ca)",
          C_RULE, C_RULE_BG),
         (9.75, 7.05, 2.7, 2.9, "TẦNG 3: TRẠNG THÁI",
-         "• Theo dõi dòng thời gian thoại\n• Nhận diện tự sửa & đính chính\n• Đổi trạng thái 'Bị thay thế'\n• Lỗi giữ tin cũ: 11.5% -> 0.8%\n• Lưu trọn vẹn Audit Trail",
+         "• Theo dõi dòng thời gian thoại\n• Nhận diện tự sửa & đính chính\n• Đổi trạng thái 'Bị thay thế'\n• Bản cũ còn giữ: 11,48% -> 0,80%\n• Lưu trọn vẹn Audit Trail",
          C_RULE, C_RULE_BG),
         (12.85, 7.05, 2.8, 2.9, "TẦNG 4: KHÓA BẰNG CHỨNG",
-         "• 7 Cổng kiểm định độc lập (K1-K7)\n• Chặn câu giả định / dặn dò (K4)\n• Cổng K7 chặn fact bị thay thế\n• Chặn oan (False-block) <= 1%\n• (0/30.136 dòng bị chặn oan)",
+         "• 7 Cổng kiểm định độc lập (K1-K7)\n• Chặn câu giả định / dặn dò (K4)\n• Cổng K7 chặn fact bị thay thế\n• Chặn thừa trên đầu ra mô hình\n  thật: 8,0-10,0%",
          C_DANGER, C_DANGER_BG),
         (16.05, 7.05, 2.55, 2.9, "TẦNG 5: CỔNG RỦI RO",
-         "• Phân luồng xuất bản kép\n• Thân SOAP vs Mục Xác nhận\n• Bác sĩ duyệt trong 30 giây\n• Gợi ý tối đa 3 câu hỏi làm rõ\n• Lưu vết pháp lý EMR trọn vẹn",
+         "• Phân luồng xuất bản kép\n• Thân SOAP vs Mục Xác nhận\n• Bác sĩ duyệt từng dòng\n• Gợi ý tối đa 3 câu hỏi làm rõ\n• Lưu vết pháp lý EMR trọn vẹn",
          C_SAFE, C_SAFE_BG),
     ]
 
@@ -155,7 +155,7 @@ def ve_tong_the():
         (6.65, 3.06, 2.9, 0.74, "K5: Mốc thời gian xuất hiện", "Khớp thời điểm thực tế diễn ra", C_RULE),
         (9.70, 3.06, 2.9, 0.74, "K6: Chi tiết thuốc & Liều", "Đúng tên, hàm lượng, cách dùng", C_RULE),
         (6.65, 1.95, 5.95, 0.95, "K7: Supersession / Đính chính thay thế (Độc quyền MediTrace)",
-         "Chặn triệt để fact cũ đã bị đính chính ở lượt sau — Khắc phục điểm mù RAG thông thường", C_DANGER),
+         "Chặn fact cũ đã bị đính chính ở lượt sau — Khắc phục điểm mù RAG thông thường", C_DANGER),
     ]
     for x, y, w, h, td, nd, col in cac_cong:
         hop(ax, x, y, w, h, td, nd, vien=col, nen=C_DANGER_BG if col==C_DANGER else "white",
@@ -164,7 +164,7 @@ def ve_tong_the():
     hop(ax, 6.65, 0.62, 5.95, 1.15, "NGUYÊN TẮC AN TOÀN LÂM SÀNG",
         "• Vi phạm rõ ràng -> CHẶN (Chuyển mục Cần xác nhận)\n"
         "• Thiếu khẳng định -> CẢNH BÁO (Ưu tiên bác sĩ duyệt)\n"
-        "• False-block rate <= 1.0% (Thực nghiệm kiểm chứng 0/30.136 dòng bị chặn oan)",
+        "• Chặn nhầm 0/30.136 chỉ vì đáp án chép nguyên văn; đầu ra thật: 8,0-10,0%",
         vien=C_DANGER, nen=C_DANGER_BG, co_td=9.2, co_nd=8.0, can="left", dy_text=0.46)
 
     # --- KHUNG CON 3: TANG 5 (PHAN LUONG XUAT BAN & XEP CHO) ---

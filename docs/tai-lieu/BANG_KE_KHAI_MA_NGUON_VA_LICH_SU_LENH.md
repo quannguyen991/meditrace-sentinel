@@ -4,7 +4,7 @@
 **Mã nguồn Repository:** `https://github.com/quannguyen991/meditrace-sentinel` (Nhánh: `main`)  
 **Tác giả:** Nguyễn Minh Quân (Tech Lead / Kiến trúc phần mềm)  
 **Thời gian đối soát toàn diện:** 05/09/2026 – 18/10/2026  
-**Quy chuẩn:** 302 tệp mã nguồn sạch · 1.330 bài test tự động (100% PASSED) · 8 Chốt an toàn Guardrails
+**Quy chuẩn:** 302 tệp mã nguồn sạch · bài test tự động: 1.330 tại thời điểm 17/10/2026; lần chạy 26/11/2026 (`README.md`): 1.942 qua, 27 bỏ qua · 8 Chốt an toàn Guardrails
 
 ---
 
@@ -15,7 +15,7 @@
 | Phân hệ thư mục | Quy mô | Nội dung đảm nhiệm chính | Nghiệm thu |
 | :--- | :---: | :--- | :---: |
 | `src/` (Mô-đun Thuật toán & 8 Chốt) | 114 tệp | Qwen3-4B QLoRA, K1-K8, Dược lý DDI, Lọc cầu thận eGFR, Khử PII NĐ13, SOCRATES | 100% Sạch |
-| `tests/` (Bộ Kiểm thử Tự động) | 103 tệp | 1.330 bài test tự động bao phủ toàn diện bẫy lâm sàng và hồi quy logic | 1.330 PASS |
+| `tests/` (Bộ Kiểm thử Tự động) | 103 tệp | Bài test tự động cho bẫy lâm sàng và hồi quy logic | 1.330 qua (17/10/2026); 1.942 qua, 27 bỏ qua (26/11/2026, `README.md`) |
 | `tools/` (Công cụ Kỹ thuật & Đồ họa) | 49 tệp | Sinh 7 sơ đồ Flow 4K, đo độ đa dạng ngữ liệu, nạp ca bẫy lâm sàng BGK, xuất báo cáo | Hoàn tất |
 | `web/` (Giao diện Doctor-in-the-Loop) | 51 tệp | Bàn làm việc SOAP, Terminal viễn thám AI Dark Console, Tờ dặn dò A4 chuẩn quốc tế | Production Ready |
 
@@ -27,7 +27,7 @@
 | `src/thuc_the.py` | `src/` | 2 | **AI viết + Quân:** Bổ sung luật nhận diện đại từ tự xưng phương ngữ Nam Bộ 'tui' tương đương 'tôi' |
 | `src/duoc_ly_lam_sang.py` | `src/` | 5 | **AI viết + Quân:** Thiết kế Chốt 5 DDI: Tra cứu tương tác nguy cơ cao (Clopidogrel + Omeprazole) và cảnh báo quá liều |
 | `src/hieu_chinh_lieu.py` | `src/` | 3 | **AI viết + Quân:** Hiện thực hóa công thức tính eGFR và thuật toán cảnh báo giảm liều suy thận cho Metformin |
-| `src/khu_dinh_danh.py` | `src/` | 3 | **AI viết + Quân:** Xây dựng thuật toán khử định danh PII 2 chiều tuân thủ Nghị định 13/2023/NĐ-CP |
+| `src/khu_dinh_danh.py` | `src/` | 3 | **AI viết + Quân:** Xây dựng thuật toán khử định danh PII 2 chiều (dữ liệu nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15) |
 | `src/dieu_phoi_ha_tang.py` | `src/` | 6 | **AI viết + Quân:** Thiết kế kiến trúc điều phối Orchestrator kết nối liên hoàn toàn bộ 8 chốt phòng vệ an toàn |
 | `src/can_lam_sang.py` | `src/` | 4 | **AI viết + Quân:** Tích hợp bảng giá trị tham chiếu cận lâm sàng (Troponin I, men gan, Creatinine) |
 | `src/thang_diem_lam_sang.py` | `src/` | 4 | **AI viết + Quân:** Xây dựng 9 thang điểm nguy cơ CDSS (CHA2DS2-VASc, HAS-BLED, Wells...) hỗ trợ bác sĩ |
@@ -135,4 +135,4 @@
 
 2. **Minh bạch Nghiên cứu:** Toàn bộ lời nhắc (prompt) thực tế của tác giả, lịch sử câu lệnh, các bài test thất bại và giải pháp khắc phục đều được lưu trữ trung thực làm minh chứng cho quá trình nghiên cứu khoa học nghiêm túc.
 
-3. **Bảo mật An toàn:** Đã làm sạch 100% mật khẩu thô, API key và dữ liệu định danh cá nhân, tuân thủ nghiêm ngặt Nghị định 13/2023/NĐ-CP.
+3. **Bảo mật An toàn:** Đã làm sạch mật khẩu thô, API key và dữ liệu định danh cá nhân khỏi kho mã.

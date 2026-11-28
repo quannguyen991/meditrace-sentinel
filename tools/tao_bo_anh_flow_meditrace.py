@@ -12,8 +12,8 @@ Danh sách 7 ảnh:
   Flow 3: Quy trình kiểm tra tự động 7 bước (K1-K7) — Loại bỏ thông tin sai lệch
   Flow 4: Kiểm soát an toàn đơn thuốc, hiệu chỉnh liều và tính điểm lâm sàng (CDSS)
   Flow 5: So sánh phương pháp: Mô hình ngôn ngữ tự do (ChatGPT) vs. MediTrace Sentinel
-  Flow 6: Dữ liệu thực nghiệm và quy trình kiểm thử tự động (1.330 trường hợp kiểm thử)
-  Flow 7: Quy trình bác sĩ sử dụng hệ thống trong ca khám bệnh (< 60 giây thao tác)
+  Flow 6: Dữ liệu thực nghiệm và kiểm thử tự động (1.942 bài pytest qua, theo README 26/11/2026)
+  Flow 7: Quy trình bác sĩ sử dụng hệ thống trong ca khám bệnh (thời gian thao tác chưa đo)
 
 Chạy:
     python tools/tao_bo_anh_flow_meditrace.py
@@ -190,9 +190,9 @@ def ve_flow_1_nhan_dien_va_rut_tin():
                   badge_buoc="BƯỚC 01", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
                       "• THU ÂM TẠI PHÒNG KHÁM:\n"
-                      "  - Thời lượng trung bình: 3 - 5 phút/ca khám\n"
+                      "  - Ghi âm trọn cuộc khám\n"
                       "  - Xử lý 100% nội bộ trên máy trạm (On-premise)\n"
-                      "  - Tuân thủ bảo mật dữ liệu y tế (Nghị định 13/CP)\n\n"
+                      "  - Dữ liệu người bệnh không cần rời phòng khám\n    (Luật BVDLCN 91/2025/QH15, NĐ 356/2025/NĐ-CP)\n\n"
                       "• PHIÊN ÂM TIẾNG NÓI (PhoWhisper):\n"
                       "  - Mô hình tinh chỉnh cho ngữ cảnh y tế tiếng Việt\n"
                       "  - Nhận diện giọng nói đa dạng các vùng miền\n"
@@ -226,7 +226,7 @@ def ve_flow_1_nhan_dien_va_rut_tin():
                       "  - Hiển thị gợi ý trên màn hình để bác sĩ duyệt\n\n"
                       "• XỬ LÝ LỖI LẶP TỪ & PHƯƠNG NGỮ:\n"
                       "  - Ngăn chặn lỗi lặp từ vô nghĩa của mô hình âm thanh\n"
-                      "  - Chuẩn hóa hơn 60 từ ngữ địa phương thông dụng."
+                      "  - Chuẩn hóa từ ngữ địa phương thông dụng."
                   ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x2 + w_col + 0.05, 5.0, x2 + w_col + 0.35, mau=C_TEAL)
@@ -238,7 +238,7 @@ def ve_flow_1_nhan_dien_va_rut_tin():
                   noi_dung=(
                       "• MÔ HÌNH XỬ LÝ: Qwen3-4B QLoRA (Local GPU):\n"
                       "  - Vận hành trên máy tính phòng khám (RTX 3050/3060)\n"
-                      "  - Tốc độ xử lý: 30 - 45 giây cho mỗi ca khám\n\n"
+                      "  - Tốc độ: khoảng 3,5 phút/bản nháp trên RTX 3060\n\n"
                       "• QUY ĐỊNH TRÍCH XUẤT CÓ CẤU TRÚC:\n"
                       "  Không để AI tự do viết đoạn văn (tránh sai lệch).\n"
                       "  Chỉ trích xuất các trường thông tin có cấu trúc JSON:\n\n"
@@ -275,8 +275,8 @@ def ve_flow_1_nhan_dien_va_rut_tin():
                       "    Không đưa vào bệnh sử của bệnh nhân,\n"
                       "    chuyển sang mục TIỀN SỬ GIA ĐÌNH.\n\n"
                       "• KẾT QUẢ ĐO ĐẠC THỰC TẾ:\n"
-                      "  - Giảm tỷ lệ nhầm chủ thể từ 12.4% xuống còn 2.1%\n"
-                      "  - Đảm bảo hồ sơ phản ánh đúng người bệnh\n\n"
+                      "  - Nhầm người 22,0% -> 17,9% (bộ đổi chủ thể 80 ca)\n  - Sinh thẳng vẫn ghi đúng người cao hơn (0,939 / 0,748)\n"
+                      "\n"
                       "• CHUYỂN GIAO DỮ LIỆU:\n"
                       "  Dữ liệu hợp lệ được chuyển sang bước đính chính."
                   ), co_td=9.8, co_nd=8.4)
@@ -315,7 +315,7 @@ def ve_flow_2_dinh_chinh_fsm_va_soap():
                       "  3. Người nhà mô tả hộ bệnh nhân ('cháu bị sốt')\n"
                       "  4. Người nhà kể về người khác ('ông nhà tôi...')\n"
                       "     -> Tự động phân vào Tiền sử gia đình\n\n"
-                      "• BẢO MẬT DỮ LIỆU CÁ NHÂN (Nghị định 13/CP):\n"
+                      "• BẢO VỆ DỮ LIỆU CÁ NHÂN (Luật 91/2025/QH15):\n"
                       "  - Tự động che họ tên, SĐT, số CCCD, địa chỉ\n"
                       "  - Thay thế bằng mã ẩn danh [BENH_NHAN_001]\n"
                       "  - Dữ liệu hoàn toàn ẩn danh trước khi lưu trữ\n\n"
@@ -344,8 +344,8 @@ def ve_flow_2_dinh_chinh_fsm_va_soap():
                       "  - NHÁNH MÂU THUẪN: Chưa rõ ý nào đúng\n"
                       "    -> Đưa sang mục [Cần bác sĩ xác nhận]\n\n"
                       "• HIỆU QUẢ THỰC NGHIỆM:\n"
-                      "  Giảm 14 lần sai sót do giữ nhầm thông tin cũ\n"
-                      "  (từ 11.5% xuống còn 0.8%)."
+                      "  Bản cũ còn giữ giảm từ 11,48% xuống 0,80%\n"
+                      "  (bộ tự sửa 60 ca, dữ liệu mô phỏng)."
                   ), co_td=9.8, co_nd=8.4)
 
     mui_ten_ngang(ax, x2 + w_col + 0.05, 5.0, x2 + w_col + 0.35, mau=C_SAFE)
@@ -384,7 +384,7 @@ def ve_flow_2_dinh_chinh_fsm_va_soap():
                       "• MỤC RIÊNG 'CẦN BÁC SĨ XÁC NHẬN':\n"
                       "  - Tập trung toàn bộ các cảnh báo BÔI ĐỎ\n"
                       "    (tên thuốc nghi ngờ, tương tác thuốc...)\n"
-                      "  - Bác sĩ rà soát nhanh trong khoảng 20 giây\n\n"
+                      "  - Bác sĩ rà soát từng mục (thời gian chưa đo)\n\n"
                       "• BẤM XEM VÀ ĐỐI CHIẾU NGUỒN GỐC THÔNG TIN:\n"
                       "  Bấm vào từng câu trên bệnh án để xem ngay\n"
                       "  câu thoại tương ứng trong cuộc khám."
@@ -488,8 +488,8 @@ def ve_flow_3_khoa_bang_chung():
                       "• Điền trực tiếp vào các mục SOAP\n"
                       "• Lưu kèm mã số câu thoại [Ti] để tra cứu\n"
                       "• Bác sĩ dễ dàng kiểm tra đối chiếu nhanh\n"
-                      "• Kết quả thực nghiệm đo đạc:\n"
-                      "  0.0% bị chặn nhầm (0 / 30.136 dòng dữ liệu)!"
+                      "• Chặn nhầm 0/30.136 chỉ vì đáp án chép gần\n"
+                      "  nguyên văn; đầu ra thật chặn thừa 8,0-10,0%"
                   ), co_td=9.8, co_nd=8.4)
     badge_ok = FancyBboxPatch((x_out + 0.25, 5.50), w_out - 0.5, 0.40,
                               boxstyle="round,pad=0.02,rounding_size=0.08",
@@ -512,7 +512,7 @@ def ve_flow_3_khoa_bang_chung():
                       "  'trích dẫn chưa khớp', 'câu giả định',\n"
                       "  'tên thuốc nhận diện chưa rõ'...\n"
                       "• Bác sĩ kiểm tra nhanh và bấm duyệt hoặc sửa lại\n"
-                      "• Đảm bảo không bỏ sót thông tin quan trọng."
+                      "• Lỗi nguy hiểm vẫn lọt vào thân: 11,8% (tập p.triển)"
                   ), co_td=9.8, co_nd=8.3)
     badge_dang = FancyBboxPatch((x_out + 0.25, 1.68), w_out - 0.5, 0.40,
                                 boxstyle="round,pad=0.02,rounding_size=0.08",
@@ -687,8 +687,9 @@ def ve_flow_5_so_sanh_doi_dau():
                       "[!] Nhầm lẫn đối tượng người nói: Ghi bệnh hen của người bố vào bệnh án của người con gái!\n"
                       "[!] Lưu giữ thông tin đã bị sửa: Vẫn ghi 'ho 1 tuần' dù bệnh nhân đã đính chính 'mới 3 hôm'.\n"
                       "[!] Nhầm lẫn câu dặn dò tương lai: Ghi 'Đã chụp X-quang' dù bác sĩ dặn 'Nếu mai sốt mới chụp'.\n"
-                      "[!] Không kiểm tra an toàn thuốc: Không tự phát hiện đơn thuốc có 2 hoạt chất tương tác bất lợi.\n"
-                      "[!] Khó kiểm tra lại nguồn: Bác sĩ muốn xác minh phải nghe lại toàn bộ đoạn ghi âm rất mất thời gian."
+                      "[!] Khó kiểm tra lại nguồn: Bác sĩ muốn xác minh phải nghe lại toàn bộ đoạn ghi âm.\n"
+                      "[i] Chưa chạy so sánh với mô hình thương mại; phép đo duy nhất: mô hình thương mại ghi nhầm người\n"
+                      "    1,4% so với 7,6% của mô hình dự án (bộ tự sửa) — mô hình thương mại tốt hơn."
                   ), co_td=9.5, co_nd=8.2)
 
     # Nửa dưới: Nhánh B - MediTrace Sentinel
@@ -702,7 +703,7 @@ def ve_flow_5_so_sanh_doi_dau():
                   badge_buoc="XỬ LÝ TẠI CHỖ", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
                       "• Vận hành tại máy tính phòng khám\n"
-                      "• Tự động ẩn danh hóa theo Nghị định 13\n"
+                      "• Dữ liệu không cần rời phòng khám\n"
                       "• Đánh số từng câu thoại [T1], [T2]...\n"
                       "• Chuẩn hóa từ ngữ địa phương 3 miền\n"
                       "• Nhận diện tên thuốc gọi dân gian."
@@ -726,9 +727,9 @@ def ve_flow_5_so_sanh_doi_dau():
     the_chuc_nang(ax, 10.2, 0.65, 8.1, 3.75, "3. BỆNH ÁN SOAP MINH BẠCH, CHUẨN XÁC & DỄ KIỂM TRA",
                   badge_buoc="KẾT QUẢ ĐẠT ĐƯỢC", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG, max_char_td=45,
                   noi_dung=(
-                      "[OK] Loại bỏ thông tin suy diễn: Không có trong lời thoại gốc thì không được đưa vào bệnh án.\n"
-                      "[OK] Phân định đúng đối tượng: Giảm 6 lần tỷ lệ nhầm triệu chứng của người nhà (từ 12.4% xuống 2.1%).\n"
-                      "[OK] Cập nhật đúng nội dung đính chính: Giảm 14 lần lỗi nhớ nhầm thông tin cũ (từ 11.5% xuống 0.8%).\n"
+                      "[OK] Mỗi dòng phải có câu trích trong lời thoại gốc; dòng không có căn cứ chuyển sang Cần xác nhận.\n"
+                      "[OK] Nhầm người 22,0% -> 17,9% so với chỉ tách thông tin (đổi chủ thể 80 ca, dữ liệu mô phỏng).\n"
+                      "[OK] Bản cũ còn giữ 11,48% -> 0,80% (bộ tự sửa 60 ca). Sinh thẳng vẫn ghi đúng người cao hơn (0,939 / 0,748).\n"
                       "[OK] Bấm xem lại nguồn tức thì: Bấm vào từng câu để nghe lại đúng đoạn âm thanh tương ứng trong cuộc khám.\n"
                       "[OK] Hỗ trợ an toàn đơn thuốc: Tự động cảnh báo tương tác thuốc và liều dùng theo chức năng thận.\n"
                       "[OK] Tối ưu hóa thời gian: Bác sĩ chỉ cần kiểm tra các mục được bôi đỏ cảnh báo trước khi duyệt."
@@ -738,7 +739,7 @@ def ve_flow_5_so_sanh_doi_dau():
 
 
 # ==============================================================================
-# HÌNH 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.330 TEST)
+# HÌNH 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (PYTEST, SỐ LIỆU THEO README)
 # ==============================================================================
 def ve_flow_6_ma_tran_test():
     fig, ax = plt.subplots(figsize=(19.2, 10.8), facecolor=C_BG)
@@ -748,9 +749,9 @@ def ve_flow_6_ma_tran_test():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 6: DỮ LIỆU THỰC NGHIỆM VÀ QUY TRÌNH KIỂM THỬ TỰ ĐỘNG (1.330 TRƯỜNG HỢP KIỂM THỬ)",
+              "FLOW 6: DỮ LIỆU THỰC NGHIỆM VÀ KIỂM THỬ TỰ ĐỘNG (1.942 BÀI PYTEST QUA)",
               "Phương pháp đánh giá độc lập, bộ dữ liệu kiểm nghiệm đa dạng và kết quả kiểm thử tự động toàn diện hệ thống",
-              badge_text="1.330 BÀI KIỂM THỬ ĐẠT 100%", badge_color=C_SAFE)
+              badge_text="SỐ ĐO CÓ NGUỒN", badge_color=C_SAFE)
 
     w_box1 = 5.1
     w_box2 = 7.2
@@ -764,45 +765,44 @@ def ve_flow_6_ma_tran_test():
     the_chuc_nang(ax, x1, y_bot, w_box1, h_all, "TẬP DỮ LIỆU ĐÁNH GIÁ ĐỘC LẬP",
                   badge_buoc="DỮ LIỆU TEST", mau_chinh=C_NAVY, mau_nen="white",
                   noi_dung=(
-                      "• 200 KHUÔN CA BỆNH ĐỘC LẬP (Template-Disjoint):\n"
-                      "  Bao phủ 10 chuyên khoa nội, ngoại, nhi, truyền nhiễm...\n"
-                      "  Tập kiểm thử gồm các ca bệnh độc lập mà mô hình AI\n"
-                      "  chưa từng gặp trong quá trình huấn luyện (đảm bảo khách quan).\n\n"
+                      "• 657 KHUÔN CA BỆNH, CHIA THEO KHUÔN (Template-Disjoint):\n"
+                      "  21 hệ cơ quan; 515 khuôn huấn luyện / 72 phát triển / 70 kiểm tra,\n"
+                      "  không khuôn nào dùng chung giữa các tập.\n"
+                      "  Toàn bộ là dữ liệu mô phỏng, chưa có hội thoại thật.\n\n"
                       "• 5.000 ĐOẠN HỘI THOẠI MÔ PHỎNG ĐA DẠNG (BỘ V2 MỞ RỘNG):\n"
                       "  45.835 câu duy nhất (+127%), tỷ lệ lặp 47.37%, MTLD 145.4\n"
-                      "  100% trích dẫn chuỗi con nguyên văn (52.634/52.634 đoạn trích).\n\n"
+                      "  Trích dẫn nguyên văn 52.634/52.634 (kiểm dữ liệu tự sinh,\n"
+                      "  không phải đầu ra mô hình).\n\n"
                       "• 300 CA THỬ NGHIỆM BẪY SAI SÓT (Adversarial Testing):\n"
                       "  Thiết kế các cặp tình huống so sánh ranh giới dễ nhầm:\n"
                       "  - Ca A: Bệnh nhân có tiền sử dị ứng Penicillin\n"
                       "  - Ca B: Người nhà có tiền sử dị ứng Penicillin (đổi đối tượng)\n"
                       "  - Người bệnh đính chính mốc thời gian sau một vài câu thoại\n"
                       "  - Chèn thêm tiếng ồn môi trường và cách phát âm 3 miền\n\n"
-                      "-> ĐẢM BẢO TÍNH ĐỘC LẬP VÀ ĐÁNH GIÁ TOÀN DIỆN."
+                      "-> Bộ thử thách: đổi chủ thể 80, đính chính 60,\n   nhiễu giọng nói 80, vùng miền 80."
                   ), co_td=10.0, co_nd=8.5)
 
     mui_ten_ngang(ax, x1 + w_box1 + 0.05, 5.0, x1 + w_box1 + 0.40, mau=C_PURPLE)
 
-    # Khối 2: Đường ống 1.330 Bài Test CI/CD
+    # Khối 2: Kiểm thử tự động (số liệu theo README)
     x2 = 6.15
-    the_chuc_nang(ax, x2, y_bot, w_box2, h_all, "1.330 TRƯỜNG HỢP KIỂM THỬ TỰ ĐỘNG (CI/CD PIPELINE)",
-                  badge_buoc="PYTEST 100% PASS", mau_chinh=C_PURPLE, mau_nen=C_PURPLE_BG, max_char_td=42,
+    the_chuc_nang(ax, x2, y_bot, w_box2, h_all, "KIỂM THỬ TỰ ĐỘNG (PYTEST)",
+                  badge_buoc="1.942 QUA / 27 BỎ QUA", mau_chinh=C_PURPLE, mau_nen=C_PURPLE_BG, max_char_td=42,
                   noi_dung=(
-                      "Toàn bộ mã nguồn hệ thống được kiểm định tự động qua 1.330 bài test:\n\n"
-                      "• NHÓM 0: NHẬN DẠNG TIẾNG NÓI & TÊN THUỐC (62 tests)\n"
-                      "  - Kiểm tra quét lặp từ ASR, từ vựng phương ngữ 3 miền\n"
-                      "  - Kiểm tra cơ chế BÔI ĐỎ cảnh báo tên thuốc gọi dân gian\n\n"
-                      "• NHÓM 1: TRÍCH XUẤT THÔNG TIN JSON (145 tests)\n"
-                      "  - Kiểm tra tính hợp lệ của JSON, không sinh văn tự do, lưu câu thoại gốc [Ti]\n\n"
-                      "• NHÓM 2: PHÂN BIỆT ĐẠI TỪ & BẢO MẬT DỮ LIỆU (120 tests)\n"
-                      "  - Kiểm tra đại từ tiếng Việt, chức năng ẩn danh hóa theo Nghị định 13/CP\n\n"
-                      "• NHÓM 3: XỬ LÝ ĐÍNH CHÍNH & LỌC CÂU GIẢ ĐỊNH (98 tests)\n"
-                      "  - Kiểm tra loại bỏ thông tin cũ khi người nói sửa lời, phân loại câu dặn dò\n\n"
-                      "• NHÓM 4: QUY TRÌNH KIỂM TRA LOGIC 7 BƯỚC K1-K7 (280 tests)\n"
-                      "  - Kiểm tra việc ngăn chặn số liệu huyết áp hoặc trích dẫn tự suy diễn\n\n"
-                      "• NHÓM 5: AN TOÀN ĐƠN THUỐC & 9 THANG ĐIỂM LÂM SÀNG (310 tests)\n"
-                      "  - Kiểm tra 30 cặp thuốc tương tác, liều tối đa Paracetamol, tính độ lọc thận\n\n"
-                      "• NHÓM TÍCH HỢP HỆ THỐNG VÀ BẢO MẬT (315 tests)\n"
-                      "  - Kiểm tra xuất hồ sơ theo chuẩn HL7 FHIR và xác thực toàn vẹn dữ liệu."
+                      "Chạy lại ngày 26/11/2026 (README.md, mục Cấu trúc thư mục):\n\n"
+                      "• 1.942 bài pytest qua, 27 bỏ qua theo môi trường phần cứng.\n"
+                      "• 3 bài hỏng khi chạy cả bộ trên Windows không bật UTF-8\n"
+                      "  hoặc khi máy bận; bật PYTHONUTF8=1 và chạy riêng thì qua.\n"
+                      "• Phần web/: 96 bài kiểm thử TypeScript, đều qua.\n\n"
+                      "Các nhóm kiểm thử chính:\n"
+                      "• Nhận dạng tiếng nói, tên thuốc dân gian, phương ngữ\n"
+                      "• Trích xuất JSON, câu trích phải có trong lượt thoại [Ti]\n"
+                      "• Phân biệt đại từ, ẩn danh hoá dữ liệu cá nhân\n"
+                      "• Đính chính, lọc câu giả định, 7 bước K1-K7\n"
+                      "• Luật đơn thuốc và thang điểm lâm sàng\n"
+                      "• Xuất HL7 FHIR, chuỗi băm ký duyệt\n\n"
+                      "Kiểm thử đơn vị chỉ cho biết mã chạy đúng trên ca tự viết,\n"
+                      "không phải tỷ lệ chính xác trên bệnh nhân thật."
                   ), co_td=10.0, co_nd=8.5)
 
     mui_ten_ngang(ax, x2 + w_box2 + 0.05, 5.0, x2 + w_box2 + 0.40, mau=C_SAFE)
@@ -812,28 +812,28 @@ def ve_flow_6_ma_tran_test():
     the_chuc_nang(ax, x3, y_bot, w_box3, h_all, "KẾT QUẢ THỰC NGHIỆM ĐO ĐẠC",
                   badge_buoc="KẾT QUẢ ĐO ĐẠC", mau_chinh=C_SAFE, mau_nen=C_SAFE_BG,
                   noi_dung=(
-                      "KẾT QUẢ VƯỢT TRỘI SO VỚI MÔ HÌNH AI THÔNG THƯỜNG:\n\n"
-                      "• ĐỘ CHÍNH XÁC TRÍCH XUẤT ĐÚNG NGUỒN (Attribution F1):\n"
-                      "  Tăng từ 66.1% lên 70.8% (+4.7% F1)\n\n"
-                      "• TỶ LỆ LỖI GÁN THUỘC TÍNH (Slot Error Rate):\n"
-                      "  Giảm từ 45.4% xuống 36.9% (-8.5% SER)\n\n"
-                      "• LỖI NHẦM NGƯỜI NHÀ SANG BỆNH NHÂN:\n"
-                      "  Giảm hơn 6 lần (từ 12.4% xuống còn 2.1%)\n\n"
-                      "• LỖI GIỮ LẠI THÔNG TIN NÓI NHẦM ĐÃ BỊ SỬA:\n"
-                      "  Giảm hơn 14 lần (từ 11.5% xuống còn 0.8%)\n\n"
-                      "• TỶ LỆ BỎ SÓT DỊ ỨNG THUỐC:\n"
-                      "  0.0% (Toàn bộ cảnh báo dị ứng đều được ghi nhận)\n\n"
-                      "• THÔNG TIN ĐÚNG BỊ CHẶN NHẦM:\n"
-                      "  0.0% (0 / 30.136 dòng dữ liệu kiểm thử)\n\n"
-                      "• TỔNG KẾT KIỂM THỬ MÃ NGUỒN:\n"
-                      "  1.330 / 1.330 BÀI TEST ĐẠT KẾT QUẢ 100%!"
+                      "Dữ liệu mô phỏng, so với bộ chấm tự động:\n\n"
+                      "• F1 (đổi chủ thể 80 ca):\n"
+                      "  66,1 -> 70,8\n"
+                      "• SER cùng bộ: 45,4 -> 36,9\n"
+                      "• Nhầm người: 22,0% -> 17,9%\n"
+                      "  (sinh thẳng vẫn tốt hơn: 0,939 / 0,748)\n\n"
+                      "• Bản cũ còn giữ (tự sửa 60 ca):\n"
+                      "  11,48% -> 0,80%\n\n"
+                      "• Bỏ sót (30 ca phát triển):\n"
+                      "  43,1% -> 11,5%\n\n"
+                      "• Lỗi nguy hiểm lọt vào thân (D):\n"
+                      "  11,8% trên tập phát triển\n\n"
+                      "• Bỏ sót dị ứng: chưa đo riêng\n"
+                      "• Chặn nhầm 0/30.136 chỉ vì đáp án\n"
+                      "  chép nguyên văn; đầu ra thật 8-10%"
                   ), co_td=10.0, co_nd=8.6)
 
     badge_test = FancyBboxPatch((x3 + 0.3, 0.95), w_box3 - 0.6, 0.46,
                                 boxstyle="round,pad=0.02,rounding_size=0.08",
                                 facecolor=C_SAFE, edgecolor="none")
     ax.add_patch(badge_test)
-    ax.text(x3 + w_box3/2, 1.18, "[PASS] 1.330 / 1.330 TEST ĐẠT 100%", ha="center", va="center",
+    ax.text(x3 + w_box3/2, 1.18, "1.942 PYTEST QUA (26/11/2026)", ha="center", va="center",
             fontsize=9.2, fontweight="bold", color="white")
 
     luu_anh(fig, "flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png")
@@ -850,8 +850,8 @@ def ve_flow_7_quy_trinh_bac_si():
     ax.axis("off")
 
     ve_header(ax,
-              "FLOW 7: QUY TRÌNH BÁC SĨ SỬ DỤNG HỆ THỐNG TRONG CA KHÁM BỆNH (< 60 GIÂY THAO TÁC)",
-              "Bác sĩ làm chủ toàn bộ quy trình, giảm thao tác gõ phím thủ công và tiết kiệm 5–7 phút cho mỗi lượt khám",
+              "FLOW 7: QUY TRÌNH BÁC SĨ SỬ DỤNG HỆ THỐNG TRONG CA KHÁM BỆNH",
+              "Bác sĩ làm chủ toàn bộ quy trình. Thời gian thao tác và thời gian tiết kiệm CHƯA ĐO với bác sĩ thật",
               badge_text="BÁC SĨ KIỂM SOÁT", badge_color=C_CYAN)
 
     cac_buoc = [
@@ -862,16 +862,16 @@ def ve_flow_7_quy_trinh_bac_si():
          "  Lắng nghe, giao tiếp và thăm khám\n"
          "  trực tiếp cho người bệnh\n"
          "• Không cần vừa khám vừa gõ phím!",
-         "[ 0 GIÂY THAO TÁC ]"),
+         "[ 1 NÚT BẤM ]"),
 
         ("BƯỚC 02", "TỰ ĐỘNG LẬP HỒ SƠ BỆNH ÁN", C_TEAL, C_TEAL_BG,
          "• Khi kết thúc lượt khám bệnh\n"
-         "• Sau khoảng 30-45 giây xử lý:\n"
+         "• Sau khoảng 3,5 phút xử lý (RTX 3060):\n"
          "  Bản nháp bệnh án chuẩn SOAP đã\n"
          "  chuẩn bị sẵn trên màn hình\n"
          "• Mỗi thông tin đều lưu kèm số thứ tự\n"
          "  câu thoại [Ti] trong đoạn ghi âm.",
-         "[ 30s CÓ BẢN NHÁP ]"),
+         "[ ~3,5 PHÚT CÓ BẢN NHÁP ]"),
 
         ("BƯỚC 03", "RÀ SOÁT CÁC CẢNH BÁO BÔI ĐỎ", C_DANGER, C_DANGER_BG,
          "• Bác sĩ xem nhanh mục\n"
@@ -879,17 +879,17 @@ def ve_flow_7_quy_trinh_bac_si():
          "  - Tên thuốc nhận diện chưa chắc chắn\n"
          "  - Cảnh báo tương tác thuốc cần lưu ý\n"
          "  - Thông tin bệnh nhân đã tự sửa lại\n"
-         "• Thời gian rà soát khoảng 20 giây.",
-         "[ 20s RÀ SOÁT CẢNH BÁO ]"),
+         "• Thời gian rà soát: chưa đo.",
+         "[ RÀ SOÁT CẢNH BÁO ]"),
 
         ("BƯỚC 04", "KIỂM TRA LẠI ÂM THANH GỐC", C_WARN, C_WARN_BG,
          "• Với thông tin cần nghe lại đối chứng:\n"
          "  Bác sĩ bấm vào số thứ tự câu thoại\n"
-         "• Hệ thống phát lại ngay đoạn âm thanh 2s\n"
+         "• Hệ thống phát lại đúng đoạn âm thanh\n"
          "  đúng giọng người bệnh nói\n"
          "• Bác sĩ bấm xác nhận hoặc chỉnh sửa\n"
-         "  trực tiếp trên màn hình trong 1 giây!",
-         "[ 1s NGHE ĐỐI SOÁT ]"),
+         "  trực tiếp trên màn hình.",
+         "[ NGHE ĐỐI SOÁT ]"),
 
         ("BƯỚC 05", "KÝ DUYỆT & IN HƯỚNG DẪN", C_SAFE, C_SAFE_BG,
          "• Bác sĩ bấm nút 'Ký duyệt':\n"
@@ -897,9 +897,9 @@ def ve_flow_7_quy_trinh_bac_si():
          "  - Chuyển vào phần mềm viện (EMR)\n"
          "• Tự động in Phiếu hướng dẫn dùng thuốc\n"
          "  (chia 4 khung giờ Sáng - Trưa - Chiều - Tối)\n"
-         "• TIẾT KIỆM 5-7 PHÚT\n"
-         "  CHO MỖI LƯỢT KHÁM!",
-         "[ TIẾT KIỆM 5-7 PHÚT ]")
+         "• Thời gian tiết kiệm:\n"
+         "  CHƯA ĐO.",
+         "[ KÝ DUYỆT ]")
     ]
 
     w_card = 3.35
@@ -929,7 +929,7 @@ def ve_flow_7_quy_trinh_bac_si():
                                   facecolor=C_HEADER_BG, edgecolor=C_SAFE, linewidth=1.2)
     ax.add_patch(summary_bar)
     ax.text(9.6, 0.45,
-            "TỔNG KẾT: BÁC SĨ CHỈ MẤT DƯỚI 60 GIÂY THAO TÁC TRÊN MÀN HÌNH — TẬP TRUNG THỜI GIAN VÀO VIỆC THĂM KHÁM VÀ CHĂM SÓC NGƯỜI BỆNH!",
+            "BÁC SĨ LUÔN DUYỆT VÀ KÝ CUỐI CÙNG. THỜI GIAN THAO TÁC CHƯA ĐO VỚI BÁC SĨ THẬT (NHÁNH D CHƯA CHẠY).",
             ha="center", va="center", fontsize=9.6, fontweight="bold", color="white")
 
     luu_anh(fig, "flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png")

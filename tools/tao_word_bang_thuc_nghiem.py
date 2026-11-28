@@ -185,7 +185,7 @@ def tao_word_bang_thuc_nghiem():
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_sub.paragraph_format.space_after = Pt(12)
-    r_sub = p_sub.add_run("Hệ thống 6 Bảng Định lượng Chuyên sâu Chứng minh Đóng góp Kỹ thuật & Lâm sàng\nDự án: MediTrace Sentinel — Bản nháp Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa")
+    r_sub = p_sub.add_run("Số đo có nguồn và các phần chưa đo, ghi rõ từng mục\nDự án: MediTrace Sentinel — Bản nháp Hồ sơ Lâm sàng Có căn cứ & Phòng vệ An toàn Y khoa")
     r_sub.font.name = "Segoe UI"
     r_sub.font.size = Pt(10.5)
     r_sub.font.italic = True
@@ -193,105 +193,103 @@ def tao_word_bang_thuc_nghiem():
 
     add_callout(
         doc,
-        "LỜI CAM KẾT KHOA HỌC DÀNH CHO HỘI ĐỒNG GIÁM KHẢO",
-        "Tập tài liệu này tổng hợp toàn bộ 6 bảng số liệu thực nghiệm khoa học độc lập của MediTrace Sentinel. "
-        "Mọi số liệu (Ablation study, đối đầu mô hình thương mại, chống nhiễu ASR, khái quát hóa ngoài khuôn Template-Disjoint, "
-        "an toàn dược lý và khảo sát bác sĩ) đều được đo đạc tự động trên 1.330 bài test và có mã nguồn tái lập 100%.",
+        "CÁCH ĐỌC TÀI LIỆU NÀY",
+        "Chỉ những con số có tệp kết quả đo mới được ghi. Nguồn: README.md mục \"Kết quả đo\", "
+        "docs/final/Báo cáo dự án.md mục 4 và thư mục docs/ket-qua/. Mọi số đo là trên dữ liệu MÔ PHỎNG, "
+        "so với bộ chấm tự động, chưa có nhãn của người và chưa có hội thoại thật. Phần nào chưa đo thì ghi \"chưa đo\".",
         "F0FDF4", "16A34A"
     )
 
     # BẢNG 1
-    add_heading_1(doc, "BẢNG 1: Thí nghiệm Cắt bỏ Từng tầng (Ablation Study Matrix)")
-    add_heading_2(doc, "Mục tiêu: Chứng minh tính tất yếu của kiến trúc Neuro-Symbolic so với Prompting thông thường")
-    h1 = ["Nhánh Thử nghiệm", "Cấu trúc Can thiệp", "Sai chủ thể (%)", "Lỗi tự sửa (%)", "Lỗi giả định (%)", "Chặn oan (%)", "F1-Score (%)", "Mức An toàn"]
+    add_heading_1(doc, "BẢNG 1: So sánh ba phương án có cấu trúc (đã đo)")
+    add_heading_2(doc, "F1 / SER / tỷ lệ ghi nhầm người trên 4 bộ thử thách — docs/final/Báo cáo dự án.md mục 4.1")
+    h1 = ["Bộ thử thách (số ca)", "Chỉ tách thông tin", "+ Xử lý lời sửa", "+ Kiểm bằng chứng (C_khoá)"]
     d1 = [
-        ["Nhánh A (Baseline)", "Sinh thẳng văn xuôi LLM", "12.4%", "11.5%", "14.8%", "0.0%", "51.4%", "RẤT NGUY HIỂM"],
-        ["Nhánh A+ (Prompting)", "Sinh thẳng + Prompt soát lỗi", "9.8%", "10.2%", "12.1%", "0.0%", "56.2%", "NGUY HIỂM"],
-        ["Nhánh B (Extraction)", "Rút mệnh đề JSON + Mẫu câu", "11.8%", "11.5%", "14.2%", "0.0%", "61.8%", "TRUNG BÌNH"],
-        ["Nhánh C (State FSM)", "Nhánh B + Gom người + FSM", "3.5%", "0.8%", "8.6%", "0.0%", "66.1%", "AN TOÀN"],
-        ["Nhánh C_KHOÁ (Chính)", "Nhánh C + 7 trạm K1-K7 + Cổng rủi ro", "2.1%", "0.8%", "0.4%", "0.0%", "70.8%", "AN TOÀN CAO NHẤT"],
-        ["Nhánh D (Interactive)", "C_khoá + Hỏi lại bác sĩ", "2.1%", "0.8%", "0.4%", "0.0%", "76.5%", "TỐI ƯU TOÀN DIỆN"],
+        ["Đổi chủ thể (80)", "66,1 / 45,4 / 22,0%", "69,2 / 38,2 / 20,0%", "70,8 / 36,9 / 17,9%"],
+        ["Đính chính (60)", "80,9 / 29,9 / 7,6%", "85,9 / 17,4 / 6,8%", "87,0 / 17,4 / 5,5%"],
+        ["Nhiễu giọng nói (80)", "63,2 / 63,7 / 3,7%", "64,9 / 58,4 / 3,3%", "64,8 / 58,6 / 3,5%"],
+        ["Vùng miền (80)", "85,8 / 21,5 / 1,7%", "87,8 / 16,9 / 1,5%", "88,0 / 16,3 / 1,5%"],
     ]
-    build_table(doc, h1, d1, highlight_row=4)
-    add_callout(doc, "KẾT LUẬN BẢNG 1", "Prompting 'hãy soát lại' (A+) chỉ giảm lỗi nhẹ từ 12.4% xuống 9.8%. Chỉ khi có cấu trúc Gom chủ thể (T2), FSM đính chính (T3) và 7 Trạm K1-K7 (T4), lỗi sai chủ thể mới giảm 83% và lỗi tự sửa giảm 93%, chặn oan đúng 0.0% (0/30.136 dòng).", "F0F9FF", "0284C7")
+    build_table(doc, h1, d1, highlight_col=3)
+    h1b = ["Phép đo khác", "Kết quả", "Nguồn"]
+    d1b = [
+        ["Thông tin đã bị sửa vẫn còn trong bản nháp (bộ tự sửa 60 ca)", "11,48% → 0,80%", "README.md, Báo cáo dự án mục 4.2"],
+        ["Bỏ sót khi thêm kiểm bằng chứng (bộ đổi chủ thể)", "4,5% → 7,7% (tăng)", "Báo cáo dự án mục 4.3"],
+        ["Nhánh A sinh thẳng: điểm ghi đúng người (bộ đổi chủ thể)", "0,939 so với 0,748 của pipeline — nhánh A CAO HƠN", "README.md"],
+        ["Nhánh A+ (prompt tự soát lỗi)", "Chưa đo", "—"],
+        ["Nhánh D (hỏi lại bác sĩ)", "Chưa đo, chưa từng chạy với bác sĩ thật", "—"],
+    ]
+    build_table(doc, h1b, d1b)
+    add_callout(doc, "KẾT LUẬN BẢNG 1",
+                "Ở bộ đổi chủ thể, các bước phía sau giảm ghi nhầm người từ 22,0% xuống 17,9% và tăng F1 từ 66,1 lên 70,8. "
+                "Ở bộ nhiễu giọng nói gần như không cải thiện. Cách sinh thẳng ghi đúng người cao hơn pipeline, nên dự án không "
+                "khẳng định MediTrace chính xác hơn; điểm mạnh là mỗi dòng kiểm tra được về lượt nói gốc. "
+                "Chặn nhầm 0/30.136 chỉ đúng vì đáp án chép gần nguyên văn hội thoại (độ phủ 0,95); trên đầu ra mô hình thật, "
+                "chặn thừa là 8,0% (C) / 10,0% (D) (docs/ket-qua/canh-bao.json).", "F0F9FF", "0284C7")
 
     # BẢNG 2
-    add_heading_1(doc, "BẢNG 2: Thí nghiệm Đối đầu Trực diện Đa mô hình (Head-to-Head Benchmark)")
-    add_heading_2(doc, "Mục tiêu: Đối chứng năng lực lâm sàng thực tế với GPT-4o, Gemini 1.5 Pro và Llama-3-8B")
-    h2 = ["Mô hình Đối đầu", "Tỷ lệ Ảo giác (%)", "Khóa bằng chứng (Turn ID)", "Lọt lỗi nói nhầm (%)", "Bỏ sót trần Paracetamol", "Pháp lý NĐ 13/2023", "Chi phí API / 1.000 ca"]
-    d2 = [
-        ["GPT-4o (OpenAI Cloud)", "5.2%", "0% (Không trích)", "18.3%", "32.0% bỏ sót", "VI PHẠM (Gửi ra ngoài)", "~350 USD"],
-        ["Gemini 1.5 Pro (Google)", "4.8%", "12.5% (Trích dài)", "16.7%", "28.5% bỏ sót", "VI PHẠM (Gửi ra ngoài)", "~280 USD"],
-        ["Claude 3.5 Sonnet", "3.9%", "15.0% (Trích đoạn)", "14.2%", "21.0% bỏ sót", "VI PHẠM (Gửi ra ngoài)", "~420 USD"],
-        ["Llama-3-8B Instruct (Local)", "8.4%", "0% (Không có)", "24.5%", "45.0% bỏ sót", "Tuân thủ (Chạy tại máy)", "0 USD"],
-        ["MediTrace Sentinel (Local)", "0.0% (Chặn cứng)", "100% (Claim-to-Turn)", "0.8% (FSM bắt)", "0.0% (Khóa trần liều)", "TUÂN THỦ TUYỆT ĐỐI", "0 USD (Miễn phí)"],
-    ]
-    build_table(doc, h2, d2, highlight_row=4)
-    add_callout(doc, "KẾT LUẬN BẢNG 2", "Các mô hình thương mại Cloud viết văn rất trôi chảy nhưng thiếu cơ chế kiểm chứng claim-to-turn, vi phạm bảo mật Nghị định 13 và dễ bị lừa khi bệnh nhân nói nhầm. MediTrace giải quyết triệt để 100% các tử huyệt này.", "F0F9FF", "0284C7")
+    add_heading_1(doc, "BẢNG 2: So sánh với mô hình thương mại")
+    add_heading_2(doc, "Chưa chạy so sánh với mô hình thương mại")
+    add_callout(doc, "TRẠNG THÁI",
+                "Chưa chạy so sánh với mô hình thương mại. Phép đo duy nhất có thật: mô hình thương mại ghi nhầm người 1,4% "
+                "so với 7,6% của mô hình dự án (bộ tự sửa) — mô hình thương mại tốt hơn. Kế hoạch đo: "
+                "docs/superpowers/plans/2026-11-27-nang-cap-toan-dien-bgk.md, Task 6.", "FFFBEB", "D97706")
+    add_callout(doc, "VỀ DỮ LIỆU CÁ NHÂN",
+                "Từ 01/01/2026, dữ liệu cá nhân chịu điều chỉnh của Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và "
+                "Nghị định 356/2025/NĐ-CP. Dự án chạy tại chỗ nên dữ liệu người bệnh không cần rời phòng khám.", "F0F9FF", "0284C7")
 
     # BẢNG 3
-    add_heading_1(doc, "BẢNG 3: Thí nghiệm Chống nhiễu Âm thanh & Tên thuốc Dân gian ASR")
-    add_heading_2(doc, "Mục tiêu: Đánh giá độ bền vững âm học trong môi trường phòng khám và cấp cứu thực tế")
-    h3 = ["Môi trường / Thử nghiệm", "Mô hình ASR", "Word Error (WER %)", "Clinical Entity WER (%)", "Nhận diện đúng thuốc (%)", "Cơ chế Xử lý Lệch âm"]
-    d3 = [
-        ["Phòng khám yên tĩnh (SNR 25dB)", "OpenAI Whisper-base", "14.2%", "18.5%", "76.2%", "Tự chép từ gần giống"],
-        ["Phòng khám yên tĩnh (SNR 25dB)", "PhoWhisper + MediTrace", "5.2%", "4.1%", "96.8%", "So khớp từ điển lâm sàng"],
-        ["Phòng cấp cứu ồn (SNR 10dB)", "OpenAI Whisper-base", "38.6%", "42.1%", "48.0%", "Bỏ sót hoặc nghe nhầm"],
-        ["Phòng cấp cứu ồn (SNR 10dB)", "PhoWhisper + MediTrace", "14.1%", "9.6%", "88.2%", "Kích hoạt lọc nhiễu thích ứng"],
-        ["Tên thuốc dân gian ('a móc', 'ô mê')", "Whisper thuần (Đoán mò)", "62.4%", "68.9%", "24.1%", "Âm thầm đoán mò (RẤT NGUY HIỂM)"],
-        ["Tên thuốc dân gian ('a móc', 'ô mê')", "MediTrace Phonetic Quarantine", "--/--", "--/--", "100% BẮT GIỮ", "Bôi đỏ & Chuyển sang Cần xác nhận"],
-    ]
-    build_table(doc, h3, d3, highlight_row=5)
-    add_callout(doc, "KẾT LUẬN BẢNG 3", "MediTrace áp dụng nguyên lý Zero Silent Normalization: Khi gặp từ chệch âm hoặc tên thuốc dân gian, hệ thống bôi đỏ và cách ly sang mục Cần bác sĩ xác nhận, triệt tiêu 100% nguy cơ kê nhầm đơn thuốc.", "F0FDF4", "16A34A")
+    add_heading_1(doc, "BẢNG 3: Chống nhiễu âm thanh & tên thuốc dân gian")
+    add_heading_2(doc, "Chưa đo trên âm thanh thu thực tế")
+    add_callout(doc, "TRẠNG THÁI",
+                "Chưa có bộ âm thanh phòng khám thật để đo WER. Số đo duy nhất liên quan: bộ thử thách \"nhiễu giọng nói\" 80 ca "
+                "(lỗi do chép giọng nói được mô phỏng trên văn bản): F1 63,2 → 64,8, ghi nhầm người 3,7% → 3,5% (Bảng 1). "
+                "Cơ chế bôi đỏ tên thuốc dân gian có trong mã và có kiểm thử đơn vị, chưa đo tỷ lệ trên dữ liệu thật.",
+                "FFFBEB", "D97706")
 
     # BẢNG 4
-    add_heading_1(doc, "BẢNG 4: Thí nghiệm Khái quát hóa Ngoài khuôn (Template-Disjoint Generalization)")
-    add_heading_2(doc, "Mục tiêu: Chứng minh hệ thống không bị học vẹt khi gặp các ca bệnh hoàn toàn mới")
-    h4 = ["Tập Ca bệnh Đánh giá", "Số ca kiểm thử", "Đa dạng từ vựng", "Extraction F1 (%)", "Gán đúng chủ thể (%)", "Đúng dị ứng & bệnh nền (%)", "Mức suy giảm (Drop Rate)"]
+    add_heading_1(doc, "BẢNG 4: Dữ liệu, chia tập và đo lớp cảnh báo")
+    add_heading_2(doc, "Số đo từ README.md \"Kết quả đo\" và docs/ket-qua/cay-loi.md")
+    h4 = ["Phép đo", "Kết quả", "Ghi chú"]
     d4 = [
-        ["Trong khuôn (In-Template Test)", "500 ca", "74.2%", "72.4%", "98.1%", "99.2%", "Mốc cơ sở (Baseline)"],
-        ["Ngoài khuôn (Template-Disjoint)", "500 ca", "86.8%", "70.8%", "97.9%", "98.8%", "Chỉ giảm 1.6% (Cực nhỏ)"],
-        ["Đơn bệnh lý (Single Morbidity)", "300 ca", "76.5%", "73.1%", "98.4%", "99.4%", "--"],
-        ["Đa bệnh lý (Multimorbidity)", "200 ca", "89.4%", "68.9%", "96.8%", "97.6%", "Giảm 4.2% (Vẫn rất cao)"],
-        ["Phương ngữ miền Bắc", "350 ca", "81.2%", "71.5%", "98.0%", "99.1%", "--"],
-        ["Phương ngữ miền Trung (Nghệ An/Huế)", "350 ca", "84.6%", "69.8%", "97.4%", "98.2%", "Giảm 1.7%"],
-        ["Phương ngữ miền Nam", "350 ca", "82.5%", "71.1%", "97.8%", "98.9%", "--"],
+        ["Bộ dữ liệu v2", "5.000 hội thoại, 657 khuôn, 21 hệ cơ quan", "Mô phỏng; chia theo khuôn bệnh"],
+        ["Tỷ lệ lặp câu", "76,92% (v1) → 47,37% (v2)", "Câu khác nhau 45.835 (+127%)"],
+        ["Trích dẫn nguyên văn", "52.634 / 52.634", "Kiểm dữ liệu huấn luyện tự sinh, không phải đầu ra mô hình"],
+        ["Bỏ sót mệnh đề (30 ca phát triển, 304 mệnh đề)", "43,1% → 11,5%", "So với bộ chấm tự động, đáp án v1"],
+        ["Cấy lỗi: 16 loại cơ bản (400 ca tập điều chỉnh)", "0,801 → 0,871", "Đo khả năng bắt lỗi cố ý cấy"],
+        ["Cấy lỗi: tập giữ kín (240 ca, chạy 1 lần)", "0,871; báo nhầm 8,0 cảnh báo/ca sạch", "Lỗi cấy đều đặn hơn lỗi thật"],
+        ["Cấy lỗi: 14 loại khó (400 ca)", "0,682 → 0,889", "Số lạc quan: luật vòng 6 chỉ đo trên tập điều chỉnh"],
+        ["Lỗi nguy hiểm lọt vào thân, chính sách D", "11,8%", "Tập phát triển đã dùng để chỉnh luật (docs/ket-qua/canh-bao.json)"],
+        ["Khái quát hoá theo vùng miền, đa bệnh lý trên 500 ca", "Chưa đo", "—"],
     ]
-    build_table(doc, h4, d4, highlight_row=1)
-    add_callout(doc, "KẾT LUẬN BẢNG 4", "Hiệu năng khi gặp khuôn bệnh hoàn toàn mới chỉ giảm 1.6% (từ 72.4% xuống 70.8%), chứng minh mô hình học được quy luật cấu trúc lâm sàng và khái quát hóa xuất sắc trên cả 3 miền.", "F0F9FF", "0284C7")
+    build_table(doc, h4, d4)
 
     # BẢNG 5
-    add_heading_1(doc, "BẢNG 5: Thí nghiệm An toàn Dược lý & 9 Thang điểm Nguy cơ CDSS")
-    add_heading_2(doc, "Mục tiêu: Đánh giá độ chính xác của các chốt kiểm soát liều trần, DDI và thang điểm lâm sàng")
-    h5 = ["Chức năng An toàn & Thang điểm", "Số ca test", "Độ nhạy (Sensitivity %)", "Độ đặc hiệu (Specificity %)", "Báo động rác (False Alert %)", "Thời gian xử lý", "Hành động Lâm sàng"]
+    add_heading_1(doc, "BẢNG 5: An toàn dược lý & thang điểm lâm sàng")
+    add_heading_2(doc, "Kiểm bằng phép thử đơn vị với ca tự viết, không phải tỷ lệ trên dữ liệu thật")
+    h5 = ["Chức năng", "Cách kiểm", "Độ nhạy / độ đặc hiệu trên dữ liệu thật"]
     d5 = [
-        ["Trần liều Paracetamol (> 4g/ngày)", "50 ca", "100.0%", "99.5%", "0.5%", "1.2 ms", "BÔI ĐỎ & CHẶN KÊ ĐƠN"],
-        ["Tương tác thuốc tử vong (DDI Level 3)", "50 ca", "98.0%", "98.8%", "1.2%", "2.5 ms", "Cảnh báo toan lactic / xuất huyết"],
-        ["Chống chỉ định suy thận (eGFR < 30)", "50 ca", "100.0%", "100.0%", "0.0%", "0.8 ms", "Ngừng thuốc độc thận ngay"],
-        ["Thang điểm CURB-65 (Viêm phổi)", "30 ca", "100.0%", "100.0%", "0.0%", "1.5 ms", "Phân tầng nhập viện / ngoại trú"],
-        ["Thang điểm CHA2DS2-VASc (Rung nhĩ)", "30 ca", "96.7%", "98.2%", "1.8%", "1.8 ms", "Chỉ định thuốc chống đông"],
-        ["Thang điểm HAS-BLED (Xuất huyết)", "30 ca", "96.7%", "97.5%", "2.5%", "1.6 ms", "Cảnh báo nguy cơ chảy máu cao"],
-        ["Thang điểm Child-Pugh (Xơ gan)", "30 ca", "100.0%", "100.0%", "0.0%", "2.1 ms", "Điều chỉnh liều chuyển hóa gan"],
-        ["Tờ dặn dò bệnh nhân 4 khung giờ", "30 ca", "100.0%", "99.0%", "1.0%", "5.0 ms", "Chia Sáng - Trưa - Chiều - Tối"],
+        ["Trần liều Paracetamol (> 4 g/ngày)", "Phép thử đơn vị (pytest)", "Chưa đo"],
+        ["Tương tác thuốc nguy hiểm", "Phép thử đơn vị (pytest)", "Chưa đo"],
+        ["Chống chỉ định theo eGFR", "Phép thử đơn vị (pytest)", "Chưa đo"],
+        ["Thang điểm CURB-65, CHA2DS2-VASc, HAS-BLED, Child-Pugh...", "Phép thử đơn vị (pytest)", "Chưa đo"],
+        ["Tờ dặn dò 4 khung giờ", "Phép thử đơn vị (pytest)", "Chưa đo"],
     ]
-    build_table(doc, h5, d5, highlight_row=0)
-    add_callout(doc, "KẾT LUẬN BẢNG 5", "Tỷ lệ báo động rác (Alert Fatigue) được khống chế dưới 2%, tránh gây khó chịu cho bác sĩ. 100% các vi phạm liều trần Paracetamol và chống chỉ định suy thận đều bị chặn đứng tức thì trong < 3ms.", "F0FDF4", "16A34A")
+    build_table(doc, h5, d5)
+    add_callout(doc, "GHI CHÚ BẢNG 5",
+                "Toàn bộ kho mã có 1.942 bài pytest qua (README.md, chạy lại 26/11/2026). Bảng tri thức thuốc đi kèm chưa được "
+                "chuyên gia duyệt.", "F0FDF4", "16A34A")
 
     # BẢNG 6
-    add_heading_1(doc, "BẢNG 6: Thí nghiệm Đánh giá Lâm sàng Thực tế bởi Bác sĩ (User Study)")
-    add_heading_2(doc, "Mục tiêu: Đo lường thời gian, sự hài lòng và mức độ giải phóng áp lực cho bác sĩ thực tế")
-    h6 = ["Tiêu chí Đánh giá Lâm sàng", "Gõ tay truyền thống", "Dùng ChatGPT hỗ trợ", "MediTrace Sentinel (Click-to-Verify)", "Mức độ Cải thiện Thực tế"]
+    add_heading_1(doc, "BẢNG 6: Đánh giá bởi bác sĩ (đề xuất, chưa thực hiện)")
+    add_heading_2(doc, "Không có dữ liệu bác sĩ nào trong dự án")
+    h6 = ["Tiêu chí dự kiến đo", "Kết quả"]
     d6 = [
-        ["Thời gian làm bệnh án (phút/ca)", "8.5 phút", "4.2 phút (mất 3p dò lỗi)", "0.8 phút (48 giây)", "Giảm 90.6% thời gian gõ máy"],
-        ["Thời gian nhìn mắt bệnh nhân (%)", "28.5%", "45.0%", "88.5%", "Tăng gấp 3.1 lần sự kết nối y đức"],
-        ["Tỷ lệ phát hiện lỗi nguy cơ cao", "82.0%", "76.0% (chủ quan tin AI)", "99.5% (nhờ cột bôi đỏ)", "Tăng 17.5% độ an toàn lâm sàng"],
-        ["Điểm hài lòng sử dụng (SUS Score)", "42.5 / 100 (Khó chịu)", "68.0 / 100 (Tạm ổn)", "91.5 / 100 (Xuất sắc / Grade A+)", "Trải nghiệm mượt mà, chuyên nghiệp"],
-        ["Mức giảm kiệt sức nghề nghiệp", "0% (Baseline)", "Giảm 25%", "Giảm 78.5% áp lực", "Bác sĩ không phải làm thêm giờ"],
-        ["Thời gian niêm phong hồ sơ EMR", "1.5 phút", "Không hỗ trợ", "1.0 giây (SHA-256 + HL7 FHIR)", "Tức thì, chống giả mạo pháp lý"],
+        ["Thời gian hoàn thành bệnh án (phút/ca)", "Chưa đo"],
+        ["Tỷ lệ bác sĩ phát hiện lỗi nguy cơ cao", "Chưa đo"],
+        ["Điểm khả dụng SUS", "Chưa đo"],
     ]
-    build_table(doc, h6, d6, highlight_row=2)
-    add_callout(doc, "KẾT LUẬN BẢNG 6", "MediTrace Sentinel giải phóng hơn 90% thời gian hành chính của bác sĩ, nâng tỷ lệ nhìn mắt bệnh nhân từ 28.5% lên 88.5%, đạt điểm hài lòng SUS 91.5/100 (Hạng A+ xuất sắc).", "F0F9FF", "0284C7")
-
+    build_table(doc, h6, d6)
     out_name = "Bang_So_Lieu_Thuc_Nghiem_Va_Doi_Chung_Chi_Tiet.docx"
     doc.save(out_name)
     print(f"[OK] Da xuat bao cao Word: {out_name}")

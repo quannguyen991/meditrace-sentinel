@@ -88,17 +88,15 @@ def ve_bang_doi_chung():
     h_cot_td = 0.55
 
     # Cac cot: (X_offset, Width, Title, Align)
+    # So lieu lay tu docs/final/Bao cao du an.md muc 4.1-4.4 va README.md "Ket qua do".
     cac_cot = [
-        (0.0, 2.7, "Nhánh Thử Nghiệm", "left"),
-        (2.7, 4.3, "Bản Chất Kiến Trúc / Can Thiệp", "left"),
-        (7.0, 2.5, "Sai Chủ Thể\n(Wrong-subject)", "center"),
-        (9.5, 2.5, "Lỗi Tự Sửa\n(Superseded info)", "center"),
-        (12.0, 2.3, "Tỷ Lệ Chặn Oan\n(False-block)", "center"),
-        (14.3, 2.1, "Điểm Khách Quan\n(F1 / Lỗi SER)", "center"),
-        (16.4, 1.6, "Mức An Toàn\nLâm Sàng", "center"),
+        (0.0, 3.2, "Bộ thử thách (số ca)", "left"),
+        (3.2, 3.6, "Chỉ tách thông tin\nF1 / SER / nhầm người", "center"),
+        (6.8, 3.6, "+ Xử lý lời sửa\nF1 / SER / nhầm người", "center"),
+        (10.4, 3.8, "+ Kiểm bằng chứng (C_khoá)\nF1 / SER / nhầm người", "center"),
+        (14.2, 3.8, "Đọc kết quả", "left"),
     ]
 
-    # Header Row
     box_th = FancyBboxPatch((x_bang, y_dau - h_cot_td), w_bang, h_cot_td,
                             boxstyle="round,pad=0.01,rounding_size=0.04",
                             linewidth=1.2, edgecolor="#94A3B8", facecolor="#1E293B")
@@ -108,104 +106,98 @@ def ve_bang_doi_chung():
         ax.text(x_chu, y_dau - h_cot_td / 2, c_td, ha=can, va="center",
                 fontsize=9.2, fontweight="bold", color="white", linespacing=1.15)
 
-    # Du lieu cac hang
     hang_data = [
-        # (Ten nhanh, Kien truc, Sai chu the, Tu sua, Chan oan, Diem, Muc an toan, Vien, Nen, La_chinh)
-        ("Nhánh A (Baseline)",
-         "Sinh trực tiếp cả bài văn xuôi\n(Cách làm thông thường)",
-         "12.4%", "11.5%", "0.0%", "SER cao\n(ROUGE mù lỗi)", "RẤT NGUY HIỂM\n(Bị mù tráo người)",
-         "#CBD5E1", "white", False),
-
-        ("Nhánh A+ (Self-Review)",
-         "Sinh thẳng + Prompt \"Check your answer\"\n(Bảo mô hình tự soát lại lỗi)",
-         "9.8%", "10.2%", "0.0%", "SER cao\n(Vẫn lọt lỗi)", "NGUY HIỂM\n(Mù trước ảo giác)",
-         "#FDE68A", C_WARN_BG, False),
-
-        ("Nhánh B",
-         "Rút mệnh đề AI (Tầng 1) +\nGhép bệnh án theo luật mẫu câu",
-         "11.8%", "11.5%", "0.0%", "Bắt đầu\ntruy vết được", "TRUNG BÌNH\n(Chưa gom người)",
-         "#CBD5E1", "white", False),
-
-        ("Nhánh C",
-         "Nhánh B + Gom chủ thể (Tầng 2) +\nCập nhật trạng thái tự sửa (Tầng 3)",
-         "3.5%", "0.8%", "0.0%", "F1: 66.1%\nSER: 45.4%", "AN TOÀN\n(Giảm 93% tự sửa)",
-         "#CBD5E1", "white", False),
-
-        ("Nhánh C_KHOÁ (Bản chính)",
-         "Nhánh C + Khóa bằng chứng 7 cổng K1-K7 (T4)\n+ Cổng rủi ro lâm sàng & Xếp chỗ (T5)",
-         "2.1%\n(-83% rò rỉ)", "0.8%\n(-93% lọt lỗi)", "<= 1.0%\n(0/30.136 dòng)", "F1: 70.8%\nSER: 36.9%", "AN TOÀN CAO NHẤT\n(Đạt chuẩn bệnh án)",
-         C_SAFE, C_SAFE_BG, True),
-
-        ("Nhánh D (C_khoa_hoi)",
-         "Nhánh C_khoá + Hỏi lại bác sĩ (Khâu 6)\n(Gợi ý tối đa 3 câu làm rõ mâu thuẫn)",
-         "2.1%", "0.8%", "<= 1.0%", "Hoàn thiện\nlâm sàng", "TỐI ƯU TOÀN DIỆN\n(Có tương tác duyệt)",
-         C_PURPLE, C_PURPLE_BG, False),
+        ("Đổi chủ thể (80 ca)", "66,1 / 45,4 / 22,0%", "69,2 / 38,2 / 20,0%", "70,8 / 36,9 / 17,9%",
+         "Cải thiện rõ nhất", C_SAFE),
+        ("Đính chính / tự sửa (60 ca)", "80,9 / 29,9 / 7,6%", "85,9 / 17,4 / 6,8%", "87,0 / 17,4 / 5,5%",
+         "Bản cũ còn giữ: 11,48% → 0,80%", C_SAFE),
+        ("Nhiễu giọng nói (80 ca)", "63,2 / 63,7 / 3,7%", "64,9 / 58,4 / 3,3%", "64,8 / 58,6 / 3,5%",
+         "Kiểm bằng chứng gần như\nkhông cải thiện", C_WARN),
+        ("Vùng miền (80 ca)", "85,8 / 21,5 / 1,7%", "87,8 / 16,9 / 1,5%", "88,0 / 16,3 / 1,5%",
+         "Cải thiện rất nhỏ", C_WARN),
     ]
 
     y_cur = y_dau - h_cot_td - 0.1
-    h_hang = 0.82
-    for ten, kt, sct, ts, co, diem, safe, vien, nen, la_chinh in hang_data:
+    h_hang = 0.78
+    for ten, v1, v2, v3, doc, mau_doc in hang_data:
         box_tr = FancyBboxPatch((x_bang, y_cur - h_hang), w_bang, h_hang,
                                 boxstyle="round,pad=0.01,rounding_size=0.04",
-                                linewidth=1.8 if la_chinh else 1.1,
-                                edgecolor=C_SAFE if la_chinh else vien,
-                                facecolor=nen)
+                                linewidth=1.1, edgecolor="#CBD5E1", facecolor="white")
         ax.add_patch(box_tr)
-
-        # In noi dung tung cot
         cot_vals = [
-            (ten, "left", C_SAFE if la_chinh else C_TEXT_MAIN, True, 9.5),
-            (kt, "left", C_TEXT_MUTED, False, 8.5),
-            (sct, "center", C_DANGER if "12.4%" in sct or "9.8%" in sct else C_SAFE, True, 9.5),
-            (ts, "center", C_DANGER if "11.5%" in ts or "10.2%" in ts else C_SAFE, True, 9.5),
-            (co, "center", C_SAFE if "0.0%" in co or "<= 1.0%" in co else C_TEXT_MAIN, False, 8.5),
-            (diem, "center", C_RULE, True if "70.8%" in diem else False, 8.8),
-            (safe, "center", C_SAFE if "AN TOÀN" in safe or "TỐI ƯU" in safe else (C_WARN if "TRUNG BÌNH" in safe else C_DANGER), True, 8.5),
+            (ten, "left", C_TEXT_MAIN, True, 9.6),
+            (v1, "center", C_TEXT_MUTED, False, 9.6),
+            (v2, "center", C_TEXT_MUTED, False, 9.6),
+            (v3, "center", C_RULE, True, 9.6),
+            (doc, "left", mau_doc, True, 8.8),
         ]
-
         for idx, (val, can, mau, dam, sz) in enumerate(cot_vals):
             x_off, w_c, _, _ = cac_cot[idx]
             x_chu = x_bang + x_off + (w_c / 2 if can == "center" else 0.2)
             ax.text(x_chu, y_cur - h_hang / 2, val, ha=can, va="center",
                     fontsize=sz, fontweight="bold" if dam else "normal", color=mau, linespacing=1.2)
-
         y_cur -= h_hang + 0.08
 
-    # ========================== 3. PANEL DƯỚI: PHÂN TÍCH ABLATION & KẾT LUẬN ==========================
-    y_panel = 2.45
-    h_panel = 2.25
+    # Hang canh bao: nhanh A (sinh thang) va nhanh D (hoi lai bac si)
+    for ten, noi_dung, vien, nen in [
+        ("Nhánh A (sinh thẳng bản nháp)",
+         "Ghi đúng người CAO HƠN pipeline: 0,939 so với 0,748 (bộ đổi chủ thể). Dự án không khẳng định MediTrace chính xác hơn cách sinh thẳng;\n"
+         "điểm mạnh là mỗi dòng kiểm tra được về lượt nói gốc. Một phần điểm của nhánh A do chép giống văn mẫu ở 30–63% số ca.",
+         C_DANGER, C_DANGER_BG),
+        ("Nhánh D (hỏi lại bác sĩ)",
+         "CHƯA ĐO. Chưa từng chạy với bác sĩ thật.",
+         C_PURPLE, C_PURPLE_BG),
+    ]:
+        h_r = 0.78 if "\n" in noi_dung else 0.5
+        box_tr = FancyBboxPatch((x_bang, y_cur - h_r), w_bang, h_r,
+                                boxstyle="round,pad=0.01,rounding_size=0.04",
+                                linewidth=1.4, edgecolor=vien, facecolor=nen)
+        ax.add_patch(box_tr)
+        ax.text(x_bang + 0.2, y_cur - h_r / 2, ten, ha="left", va="center",
+                fontsize=9.6, fontweight="bold", color=vien)
+        ax.text(x_bang + 3.4, y_cur - h_r / 2, noi_dung, ha="left", va="center",
+                fontsize=8.8, color=C_TEXT_MAIN, linespacing=1.3)
+        y_cur -= h_r + 0.08
 
-    # Panel Trái: Ablation Component Breakdown
+    # ========================== 3. PANEL DƯỚI ==========================
+    y_panel = 2.75
+    h_panel = 2.45
+
     khung_p1 = FancyBboxPatch((0.6, y_panel - h_panel), 8.8, h_panel,
                               boxstyle="round,pad=0.02,rounding_size=0.06",
-                              linewidth=1.3, edgecolor=C_RULE, facecolor="white")
+                              linewidth=1.3, edgecolor=C_WARN, facecolor="white")
     ax.add_patch(khung_p1)
-    ax.text(0.85, y_panel - 0.22, "[1] BÓC TÁCH ĐÓNG GÓP TỪNG TẦNG (COMPONENT ABLATION)",
-            fontsize=10.2, fontweight="bold", color=C_RULE, va="top")
+    ax.text(0.85, y_panel - 0.22, "[1] KẾT QUẢ KHÔNG CÓ LỢI (GHI ĐÚNG NHƯ ĐO)",
+            fontsize=10.2, fontweight="bold", color=C_WARN, va="top")
     ablation_text = (
-        "• Bỏ Tầng 2 (Gom chủ thể): Tỷ lệ sai chủ thể vọt từ 2.1% lên 11.8% (mù lời người nhà kể).\n"
-        "• Bỏ Tầng 3 (Cập nhật trạng thái): Lỗi giữ thông tin cũ đã bị sửa tăng từ 0.8% lên 11.5%.\n"
-        "• Bỏ Tầng 4 (Khóa 7 cổng K1-K7): Lỗi câu điều kiện/phòng ngừa lọt vào thân bệnh án tăng lên 14.2%.\n"
-        "• Bỏ Tầng 5 (Cổng rủi ro): 100% các câu nguy cơ cao (dị ứng, tim mạch) bị trộn vào bản nháp.\n"
-        "-> Kết luận: Mỗi tầng phụ trách đúng 1 failure mode, thiếu bất kỳ tầng nào độ an toàn đều sụp đổ!"
+        "• Kiểm bằng chứng làm tăng bỏ sót: 4,5% → 7,7% (bộ đổi chủ thể).\n"
+        "• Lỗi nguy hiểm lọt vào thân bản nháp, chính sách D: 11,8% trên tập phát triển\n"
+        "   đã dùng để chỉnh luật (docs/ket-qua/canh-bao.json), nên số này lạc quan.\n"
+        "• Chặn thừa trên đầu ra mô hình thật: 8,0% (C) / 10,0% (D).\n"
+        "• Chưa chạy so sánh với mô hình thương mại; phép đo duy nhất: mô hình thương mại\n"
+        "   ghi nhầm người 1,4% so với 7,6% của mô hình dự án (bộ tự sửa) — thương mại tốt hơn."
     )
     ax.text(0.85, y_panel - 0.58, ablation_text, fontsize=8.6, color=C_TEXT_MAIN, linespacing=1.32, va="top")
 
-    # Panel Phải: Câu trả lời khẳng định cho Hội đồng Giám khảo
     khung_p2 = FancyBboxPatch((9.7, y_panel - h_panel), 8.9, h_panel,
                               boxstyle="round,pad=0.02,rounding_size=0.06",
                               linewidth=1.3, edgecolor=C_SAFE, facecolor=C_SAFE_BG)
     ax.add_patch(khung_p2)
-    ax.text(9.95, y_panel - 0.22, "[2] CÂU TRẢ LỜI ĐANH THÉP CHO CÂU HỎI NGHIÊN CỨU",
+    ax.text(9.95, y_panel - 0.22, "[2] TRẢ LỜI CÂU HỎI NGHIÊN CỨU",
             fontsize=10.2, fontweight="bold", color=C_SAFE, va="top")
     conclusion_text = (
-        "CÂU TRẢ LỜI LÀ: CÓ, GIẢM LỖI ĐỘT PHÁ VÀ HOÀN TOÀN ĐO ĐẠC ĐƯỢC!\n\n"
-        "1. Vượt trội hơn Prompting: Prompt 'Check your answer' (A+) chỉ giảm lỗi nhẹ (12.4% -> 9.8%).\n"
-        "2. Rào chắn cấu trúc hiệu quả: MediTrace (C_khoá) giảm sai chủ thể xuống 2.1% (giảm 83% rò rỉ).\n"
-        "3. Không gây hại (No trade-off penalty): Chặn oan đúng <= 1.0% (0/30.136 dòng thực nghiệm).\n"
-        "-> \"When the same model and data are used, structural safeguards reduced error by 83%.\""
+        "Có giảm lỗi so với chỉ tách thông tin, nhưng không đều giữa các bộ:\n"
+        "• Đổi chủ thể: nhầm người 22,0% → 17,9%; F1 66,1 → 70,8; SER 45,4 → 36,9.\n"
+        "• Tự sửa: thông tin cũ còn giữ 11,48% → 0,80%.\n"
+        "• Chặn nhầm 0/30.136 chỉ đúng vì đáp án chép gần nguyên văn hội thoại\n"
+        "   (độ phủ 0,95); trên đầu ra mô hình thật chặn thừa 8,0–10,0%.\n"
+        "• Kết quả chỉ có hiệu lực trên dữ liệu mô phỏng, chưa đo trên hội thoại thật."
     )
     ax.text(9.95, y_panel - 0.58, conclusion_text, fontsize=8.6, color=C_TEXT_MAIN, linespacing=1.32, va="top")
+
+    ax.text(9.6, 0.05, "Nguồn: docs/final/Báo cáo dự án.md mục 4.1–4.4; README.md \"Kết quả đo\"; docs/ket-qua/canh-bao.json. "
+            "Số ca là bộ thử thách, không phải 5.000 ca dữ liệu.",
+            ha="center", va="bottom", fontsize=8, color=C_TEXT_MUTED)
 
     p1 = RA_DOCS / "bang-doi-chung-thuc-nghiem.png"
     p2 = RA_ARTIFACT / "bang-doi-chung-thuc-nghiem.png"

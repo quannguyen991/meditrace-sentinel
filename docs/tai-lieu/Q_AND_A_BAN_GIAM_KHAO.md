@@ -52,7 +52,7 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 | **`src/huan_luyen/`** | Huấn luyện & so sánh mô hình SFT / DPO / RLVR trên Qwen3-4B QLoRA | `chon_mo_hinh_bakeoff.py`, `huan_luyen_sft.py`, `huan_luyen_dpo.py`, `loss_theo_doan.py` |
 | **`web/may-chu/`** | Backend BFF (Node.js/Express + TypeScript + SQLite WAL) | `csdl.ts`, `hang-doi.ts` (xử lý nền `202 Accepted`), `worm.ts` (chuỗi băm SHA-256 + `.anchor.json`), `routes/ca-kham.ts`, `routes/sign-off.ts`, `tro-ly/an-danh.ts` (allowlist khi bật trợ lý ngoài), `tra-cuu/kiem-dinh-so.ts` |
 | **`web/src/`** | Giao diện bác sĩ, điều hành bệnh viện & cổng bệnh nhân (React 19 + TS) | `TranscriptView.tsx`, `VerificationView.tsx` (phím tắt `J/K/Enter/Space`, `Giữ nhanh`), `DuyetBenCanh.tsx`, `NoteEditorView.tsx`, `HisSmartCopyPopover.tsx`, `BhytPrecheckModal.tsx`, `HospitalCommandCenterView.tsx`, `PatientPortalView.tsx`, `hooks/useTurnAudioPlayer.ts` |
-| **`tools/`, `tests/`, `docs/`** | Kịch bản đo đạc, sinh tài liệu & bộ kiểm thử hồi quy | `tools/do_da_nguon_doc_lap.py` (5 bộ dữ liệu độc lập), `tools/tao_word_qna_giam_khao.py`, `tests/` (**1.974 pytest pass, 25 skip** + **96/96 TS tests**), `docs/ket-qua/` |
+| **`tools/`, `tests/`, `docs/`** | Kịch bản đo đạc, sinh tài liệu & bộ kiểm thử hồi quy | `tools/do_da_nguon_doc_lap.py` (5 bộ dữ liệu độc lập), `tools/tao_word_qna_giam_khao.py`, `tests/` (**1.942 pytest qua, 27 bỏ qua**, lần chạy 26/11/2026 ghi ở `README.md`, + **96 bài TS** qua), `docs/ket-qua/` |
 
 ---
 
@@ -69,8 +69,8 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 
 ### [DỄ] Câu 2: Tại sao không dùng luôn ChatGPT, Claude hay Gemini cho nhanh và rẻ?
 * **Trả lời:**  
-  Có 3 lý do sống còn khiến việc dùng chatbot đám mây trực tiếp tại bệnh viện tiềm ẩn rủi ro pháp lý và an toàn lâm sàng:
-  1. **Bảo vệ dữ liệu nhạy cảm (Nghị định 13/2023/NĐ-CP):** Gửi nguyên văn lời thoại có họ tên, địa chỉ, số điện thoại, số CCCD, mã bệnh nhân ra máy chủ bên ngoài vi phạm nguyên tắc kiểm soát dữ liệu y tế. MediTrace mặc định chạy **100% On-premise nội bộ** (`PhoWhisper` + `Qwen3-4B` + `SQLite`). Chế độ trợ lý bên ngoài mặc định **TẮT** (`MEDITRACE_TRO_LY_NGOAI=tat`), và ngay cả khi cơ sở y tế chủ động bật, bộ lọc allowlist tại [`web/may-chu/tro-ly/an-danh.ts`](file:///d:/Claude/meditrace-ma-nguon/web/may-chu/tro-ly/an-danh.ts) kết hợp [`src/he_thong/khu_dinh_danh.py`](file:///d:/Claude/meditrace-ma-nguon/src/he_thong/khu_dinh_danh.py) vẫn bắt buộc khử định danh trước khi rời máy chủ nội bộ.
+  Trước hết, cần nói thẳng: dự án **chưa chạy so sánh đầy đủ** với mô hình thương mại. Phép đo duy nhất có thật (173/300 ca, dừng do hết số dư) cho thấy mô hình thương mại **ghi nhầm người ít hơn** mô hình nhỏ của dự án: 1,4% so với 7,6% ở bộ đính chính, 15,4% so với 22,9% ở bộ đổi chủ thể (`docs/final/Báo cáo dự án.md`, `README.md`). Kế hoạch đo đầy đủ ở `docs/superpowers/plans/2026-11-27-nang-cap-toan-dien-bgk.md` (Task 6). Lý do dự án vẫn chọn cách làm riêng:
+  1. **Dữ liệu người bệnh không cần rời phòng khám:** Lời thoại có họ tên, địa chỉ, số điện thoại, số CCCD, mã bệnh nhân là dữ liệu cá nhân nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026). Dự án không đánh giá việc dùng dịch vụ đám mây là đúng hay sai luật; MediTrace mặc định chạy **100% On-premise nội bộ** (`PhoWhisper` + `Qwen3-4B` + `SQLite`). Chế độ trợ lý bên ngoài mặc định **TẮT** (`MEDITRACE_TRO_LY_NGOAI=tat`), và ngay cả khi cơ sở y tế chủ động bật, bộ lọc allowlist tại [`web/may-chu/tro-ly/an-danh.ts`](file:///d:/Claude/meditrace-ma-nguon/web/may-chu/tro-ly/an-danh.ts) kết hợp [`src/he_thong/khu_dinh_danh.py`](file:///d:/Claude/meditrace-ma-nguon/src/he_thong/khu_dinh_danh.py) vẫn bắt buộc khử định danh trước khi rời máy chủ nội bộ.
   2. **Rủi ro ảo giác AI (Hallucination):** Chatbot tổng quát có thể viết trơn tru những thông tin bệnh nhân không nói hoặc trộn bệnh của người nhà thành của bệnh nhân. MediTrace áp dụng 7 cổng khóa căn cứ **K1–K7** tại [`src/duong_ong/b4_kiem_can_cu.py`](file:///d:/Claude/meditrace-ma-nguon/src/duong_ong/b4_kiem_can_cu.py) để chặn và gắn cờ các mệnh đề không có trích dẫn nguyên văn hoặc sai chủ thể/liều/thời gian.
   3. **Khả năng kiểm chứng tức thì:** Chatbot trả ra một khối văn xuôi khó đối chiếu. MediTrace liên kết từng dòng bệnh án ngược về đúng lượt thoại `[T_i]` và đoạn âm thanh gốc qua [`web/src/hooks/useTurnAudioPlayer.ts`](file:///d:/Claude/meditrace-ma-nguon/web/src/hooks/useTurnAudioPlayer.ts) (*Click-to-Verify*).
 
@@ -103,8 +103,8 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
     * Với nhóm nguy cấp (Dị ứng, Thuốc có khoảng điều trị hẹp `thuoc_nti` như Digoxin/Warfarin, Đe dọa tính mạng, Lẫn người nhà, Bất đồng liều): Áp dụng nguyên tắc **không âm thầm xoá bỏ**, định tuyến giữ lại trong mục *"CẦN BÁC SĨ XÁC NHẬN"* kèm cờ đỏ/vàng. Chốt chặn ký duyệt khóa không cho hoàn tất hồ sơ khi còn mục chưa được bác sĩ xử lý (`Xác nhận / Sửa / Bỏ`).
   * **Kết quả thực nghiệm đã đo và minh bạch phạm vi:**
     * Trên phép đo cấy lỗi có đăng ký trước ([`docs/ket-qua/cay-loi.md`](file:///d:/Claude/meditrace-ma-nguon/docs/ket-qua/cay-loi.md)), độ nhạy bắt lỗi xoá dị ứng (`xoa_di_ung`) đạt **98,3%** trên tập điều chỉnh (400 ca) và **97,2%** trên tập giữ kín (240 ca).
-    * Ở bước khóa căn cứ K1–K7 trên đáp án chuẩn, tỷ lệ chặn nhầm là **$0 / 30.136$ dòng**.
-    * Trên **4 bộ thử thách phát triển** (`300 ca`, `2.789 phát biểu` đối chiếu bộ chấm tự động dùng để tinh chỉnh luật), khi nâng cấp từ **Chính sách C** lên **Chính sách D** (bổ sung phát hiện `thuoc_nti`, thiếu liều, lẫn họ thuốc, ASR mất dấu), tỷ lệ **lọt lỗi nguy hiểm vào thân bệnh án (`lot_nguy_hiem`) giảm từ 45,9% (101/220) xuống còn 11,8% (26/220)** — tương ứng **chặn được 88,2% (194/220)** các trường hợp lỗi nguy hiểm mà bộ chấm gắn nhãn, trong khi tỷ lệ chặn thừa tăng nhẹ từ **8,0%** (C) lên **10,0%** (D). Trên tập giữ kín `thach_thuc_v2` (240 ca), độ nhạy phát hiện đạt **0,871**, độ nhạy đổi chủ thể đạt **0,946**.
+    * Ở bước khóa căn cứ K1–K7 trên đáp án chuẩn, tỷ lệ chặn nhầm là **$0 / 30.136$ dòng**. Số này chỉ đúng vì đáp án mô phỏng chép gần nguyên văn hội thoại (độ phủ 0,95); trên đầu ra mô hình thật, chặn thừa là **8,0%** (C) / **10,0%** (D) (`docs/ket-qua/canh-bao.json`).
+    * Trên **4 bộ thử thách phát triển** (`300 ca`, `2.789 phát biểu` đối chiếu bộ chấm tự động dùng để tinh chỉnh luật), khi nâng cấp từ **Chính sách C** lên **Chính sách D** (bổ sung phát hiện `thuoc_nti`, thiếu liều, lẫn họ thuốc, ASR mất dấu), tỷ lệ **lọt lỗi nguy hiểm vào thân bệnh án (`lot_nguy_hiem`) giảm từ 45,9% (101/220) xuống còn 11,8% (26/220)** — tương ứng **chặn được 88,2% (194/220)** các trường hợp lỗi nguy hiểm mà bộ chấm gắn nhãn, trong khi tỷ lệ chặn thừa tăng từ **8,0%** (C) lên **10,0%** (D). Vì luật được chỉnh khi nhìn chính các tập này, 11,8% là số **lạc quan** (`docs/ket-qua/canh-bao.json`). Trên tập giữ kín `thach_thuc_v2` (240 ca), độ nhạy phát hiện đạt **0,871**, độ nhạy đổi chủ thể đạt **0,946**.
 
 ---
 
@@ -136,7 +136,7 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 * **Trả lời:**  
   1. **Khả năng triển khai tại phòng khám (Hardware Feasibility):** Máy trạm phòng khám phổ thông thường chỉ có **6GB–8GB VRAM** (như RTX 3050/3060). Mô hình 8B trở lên yêu cầu VRAM và RAM lớn hơn đáng kể khi nạp trọng số lẫn KV cache, làm đội chi phí đầu tư phòng khám. **Qwen3-4B QLoRA 4-bit** gọn nhẹ đủ để chạy cục bộ trên GPU 8GB VRAM tại phòng khám.
   2. **Kiến trúc bất đồng bộ cho bài toán thời gian suy luận:** Nhóm trình bày trung thực thực tế đo đạc: khi chạy bằng PyTorch (`transformers`) mặc định chưa tăng tốc trên RTX 3060 8GB, thời gian suy luận một ca đầy đủ khoảng **~3,5 phút/ca** (chưa phải *30–45 giây*). Thay vì phóng đại con số, MediTrace giải quyết trực tiếp trên luồng làm việc qua **hàng đợi nền `202 Accepted`** trong SQLite ([`web/may-chu/hang-doi.ts`](file:///d:/Claude/meditrace-ma-nguon/web/may-chu/hang-doi.ts)): bác sĩ bấm kết thúc ghi âm là quay sang khám bệnh nhân tiếp theo ngay với **0 giây đứng chờ UI**, bản nháp được xử lý ngầm và báo sẵn khi hoàn tất; hướng tối ưu phần mềm tiếp theo là chuyển engine suy luận sang `vLLM` / `llama.cpp` + `XGrammar` để kéo độ trễ xuống mục tiêu **15–25 giây/ca**.
-  3. **Chất lượng trích xuất chuyên biệt qua QLoRA:** Sau tinh chỉnh QLoRA trên dữ liệu hội thoại tiếng Việt lâm sàng, trên 30 ca phát triển độc lập (304 mệnh đề), adapter Qwen3-4B kéo tỷ lệ bỏ sót xuống **11,5%** (khoảng tin cậy 95%: 8,4%–15,6%) với **0 ca lỗi cấu trúc JSON** (so với **43,1%** bỏ sót trước huấn luyện).
+  3. **Chất lượng trích xuất chuyên biệt qua QLoRA:** Sau tinh chỉnh QLoRA trên dữ liệu hội thoại tiếng Việt mô phỏng, trên 30 ca tập phát triển (304 mệnh đề, so với bộ chấm tự động, đáp án v1), adapter Qwen3-4B kéo tỷ lệ bỏ sót xuống **11,5%** (khoảng tin cậy 95%: 8,4%–15,6%) với **0 ca lỗi cấu trúc JSON** (so với **43,1%** bỏ sót trước huấn luyện).
 
 ---
 
@@ -148,7 +148,7 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
     3. Nhờ chuẩn hóa đầu ra B1 thành danh sách các `PhatBieu` nguyên tử, máy trạng thái B3 mới đánh dấu chính xác riêng ý *"đau dạ dày"* thành `DA_THAY_THE` khi có câu siêu âm đính chính, các cổng K1–K7 ở B4 mới kiểm tra từng câu trích nguyên văn, và B5 mới chỉ tách riêng mệnh đề nghi ngờ sang *"Cần xác nhận"* mà vẫn giữ nguyên các thông tin sạch khác.
   * **Lý do kiến trúc Lai Neuro-Symbolic (AI ở B1 + Rule ở B2–B5):**
     * AI (LLM) giỏi hiểu ngữ nghĩa tự do, từ đồng nghĩa và bóc tách mệnh đề; nhưng yếu ở tính nhất quán logic, đếm liều và kiểm soát ranh giới.
-    * Tách phần B2–B5 thành thuật toán Python xác định giúp mọi quy tắc (gom chủ thể, máy trạng thái đính chính, tra 158 hoạt chất, đối soát K1–K7) **minh bạch 100%**, truy vết được lỗi sai ở đúng mô-đun và kiểm thử được bằng **1.974 unit/integration tests** mà không cần huấn luyện lại mô hình.
+    * Tách phần B2–B5 thành thuật toán Python xác định giúp mọi quy tắc (gom chủ thể, máy trạng thái đính chính, tra 158 hoạt chất, đối soát K1–K7) **minh bạch 100%**, truy vết được lỗi sai ở đúng mô-đun và kiểm thử được bằng **1.942 bài `pytest`** (`README.md`) mà không cần huấn luyện lại mô hình.
 
 ---
 
@@ -173,7 +173,7 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
     Nguyên nhân: ROUGE chỉ đếm trùng lặp túi từ (bag-of-words), không phân biệt chủ thể gắn với từng triệu chứng.
   * **Thước đo thay thế của dự án (`src/do_luong/cham_he_thong.py`):**  
     1. **Entity Slot Error Rate (SER)** và **Attribution F1:** Chấm trực tiếp trên từng bộ giá trị `(Chủ thể, Nội dung/Thuốc, Trạng thái, Mốc thời gian)`.
-    2. **Tỷ lệ sót thông tin bị thay thế (Superseded Retention):** Nhờ Cổng K7 và máy trạng thái B3, tỷ lệ sót thông tin cũ đã bị người nói tự đính chính giảm từ **11,48% xuống 0,80%** (giảm hơn **14 lần**).
+    2. **Tỷ lệ sót thông tin bị thay thế (Superseded Retention):** Nhờ Cổng K7 và máy trạng thái B3, tỷ lệ sót thông tin cũ đã bị người nói tự đính chính giảm từ **11,48% xuống 0,80%** trên bộ đính chính 60 ca (trên mẫu 240 ca tập phát triển: 5,21% xuống 0,36%).
 
 ---
 
@@ -181,8 +181,8 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 * **Trả lời:**  
   Dự án kiểm soát rủi ro rò rỉ dữ liệu qua 4 lớp độc lập:
   1. **Chia tách không trùng khuôn (Template-Disjoint Split):** **657 khuôn ca bệnh** thuộc **21 hệ cơ quan lâm sàng** (`src/bo_du_lieu/kho_khuon.py`) được tách độc lập thành **515 khuôn Train / 72 khuôn Dev / 70 khuôn Test** (`chia_tap_theo_khuon.py`). Độ tương đồng Jaccard từ khóa triệu chứng trung bình giữa Train và Test chỉ **5,87%**, bảo đảm tập Test kiểm tra trên các mẫu ca chưa từng xuất hiện khi huấn luyện.
-  2. **Kiểm chứng đa dạng ngôn ngữ (`src/do_luong/do_lap_cau.py`):** Kho hội thoại mô phỏng v2 (**5.000 hội thoại**) đạt **45.835 câu duy nhất** (+127% so với v1), giảm tỷ lệ lặp câu từ 76,92% xuống **47,37%** (với câu $\ge 8$ từ còn **42,19%**), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%) và **52.634/52.634 (100%)** trích dẫn đều là chuỗi con nguyên văn.
-  3. **Tập thách thức đối lập (Adversarial Contrastive Pairs):** Trên các cặp ca bệnh đổi duy nhất một yếu tố ranh giới (đổi người mang dị ứng, tự đính chính, nhiễu ASR, phương ngữ 3 miền), nhánh C cải thiện $F_1$ từ **66,1% lên 70,8%** và giảm SER từ **45,4% xuống 36,9%**.
+  2. **Kiểm chứng đa dạng ngôn ngữ (`src/do_luong/do_lap_cau.py`):** Kho hội thoại mô phỏng v2 (**5.000 hội thoại**) đạt **45.835 câu duy nhất** (+127% so với v1), giảm tỷ lệ lặp câu từ 76,92% xuống **47,37%** (với câu $\ge 8$ từ còn **42,19%**), MTLD đạt **145,4** (+56,3%), Distinct-2 đạt **0,0468** (+148,9%) và **52.634/52.634 (100%)** trích dẫn trong dữ liệu huấn luyện tự sinh là chuỗi con nguyên văn (đây là kiểm dữ liệu, không phải đầu ra mô hình).
+  3. **Tập thách thức đối lập (Adversarial Contrastive Pairs):** Trên các cặp ca bệnh đổi duy nhất một yếu tố ranh giới (đổi người mang dị ứng, tự đính chính, nhiễu ASR, phương ngữ 3 miền), ở bộ đổi chủ thể 80 ca, các bước kiểm tra phía sau cải thiện $F_1$ từ **66,1% lên 70,8%**, giảm SER từ **45,4% xuống 36,9%** và ghi nhầm người từ **22,0% xuống 17,9%**. Ở bộ nhiễu giọng nói gần như không cải thiện. Cần nói rõ: cách để mô hình **viết thẳng** bản nháp ghi đúng người **cao hơn** đường ống (0,939 so với 0,748 ở bộ đổi chủ thể, `README.md`).
   4. **Kiểm nghiệm ngoài khuôn & dữ liệu công khai bên thứ ba:** Bổ sung **10 kịch bản bệnh hiếm ngoài khuôn** (`src/do_luong/kiem_nghiem_ngoai_khuon.py`) và đối chiếu độc lập trên **5 bộ dữ liệu tiếng Việt bên ngoài** (`tools/do_da_nguon_doc_lap.py` — xem chi tiết ở Câu 18).
 
 ---
@@ -230,8 +230,8 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 ### [KHÓ] Câu 17: *"Dự án đã kiểm thử tự động trên bao nhiêu ca bệnh, bộ test chạy thực tế thế nào?"*
 * **🎯 Phản biện tự tin:**  
   *"Toàn hệ thống hiện được bảo vệ bởi bộ kiểm thử hồi quy hai tầng chạy sau các đợt tinh chỉnh cuối cùng:*
-  1. **Kiểm thử tự động phần mềm:** **1.974 bài test Python passed, 25 skipped** (trong tổng số 1.999 tests thu thập qua `pytest`, các bài bỏ qua phụ thuộc phần cứng/sidecar GPU ngoài môi trường CI CPU) và **96/96 bài kiểm thử TypeScript/BFF passed** (`web/`).
-  2. **Kiểm thử dữ liệu và an toàn lâm sàng:** **657 khuôn ca bệnh** (21 hệ cơ quan) chia độc lập 515/72/70, **5.000 hội thoại mô phỏng v2** (100% trích dẫn chuỗi con nguyên văn), **4 bộ thử thách phát triển** (300 ca: Chính sách D giảm `lot_nguy_hiem` từ 45,9% xuống **11,8%**, chặn **88,2%** lỗi nguy hiểm với chặn thừa **10,0%**), **240 ca giữ kín `thach_thuc_v2`** (nhạy **0,871**, đổi chủ thể **0,946**, bắt xoá dị ứng **97,2%**), và **10 ca bệnh hiếm ngoài khuôn** (`kiem_nghiem_ngoai_khuon.py`)."*
+  1. **Kiểm thử tự động phần mềm:** **1.942 bài test Python qua, 27 bỏ qua** theo môi trường phần cứng (lần chạy 26/11/2026 ghi ở `README.md`) và **96 bài kiểm thử TypeScript/BFF** qua (`web/`).
+  2. **Kiểm thử dữ liệu và an toàn lâm sàng:** **657 khuôn ca bệnh** (21 hệ cơ quan) chia độc lập 515/72/70, **5.000 hội thoại mô phỏng v2** (100% trích dẫn trong dữ liệu huấn luyện tự sinh là chuỗi con nguyên văn), **4 bộ thử thách phát triển** (300 ca, đã dùng để chỉnh luật: Chính sách D giảm `lot_nguy_hiem` từ 45,9% xuống **11,8%** với chặn thừa **10,0%**; số lạc quan), **240 ca giữ kín `thach_thuc_v2`** (nhạy **0,871**, đổi chủ thể **0,946**, bắt xoá dị ứng **97,2%**), và **10 ca bệnh hiếm ngoài khuôn** (`kiem_nghiem_ngoai_khuon.py`)."*
 
 ---
 
@@ -239,7 +239,7 @@ Khi Ban Giám khảo hỏi về **tổ chức mã nguồn, luồng dữ liệu v
 * **🎯 Phản biện tự tin:**  
   *"Đội ngũ đã viết kịch bản [`tools/do_da_nguon_doc_lap.py`](file:///d:/Claude/meditrace-ma-nguon/tools/do_da_nguon_doc_lap.py) để chạy kiểm nghiệm trên **5 bộ dữ liệu tiếng Việt công khai bên ngoài** (kết quả lưu tại `docs/ket-qua/da-nguon-doc-lap.json`) và báo cáo thẳng cả điểm mạnh lẫn giới hạn:*
   1. **`ViDia2Std/test.csv`** (1.603 câu có nhãn chuẩn hóa phương ngữ người thật): Chặn giữ ngữ cảnh chuẩn, chuẩn hóa đúng hoàn toàn **28,0%** (1.192/4.264 cặp thay thế), đạt tổng độ phủ **37,1%**, giúp kéo tỷ lệ lỗi từ (WER) trên bộ phương ngữ giảm từ **30,1% xuống 21,9%**.
-  2. **`ViHealthQA`** (2.013 mẫu hỏi đáp sức khỏe): Ghi nhận 14/42 câu hỏi/đáp xuất hiện hoạt chất nằm trong Dược thư **158 hoạt chất** hiện tại.
+  2. **`ViHealthQA`** (2.013 mẫu hỏi đáp sức khỏe): Bắt được hoạt chất thuộc Dược thư **158 hoạt chất** ở 14 câu hỏi và 42 câu trả lời trên 2.013 mẫu.
   3. **`ViMedAQA`** (500 mẫu hỏi đáp y khoa): Bắt khớp **87** lượt nhắc hoạt chất chuẩn trên mẫu văn bản thực tế.
   4. **`ViMQ`** (1.000 câu hỏi ý định y khoa): Khớp 10 lượt thuốc (9/334 thực thể `MED` có nhãn), cho thấy phần lớn câu hỏi của bệnh nhân đại chúng dùng triệu chứng/tên bệnh hơn là tên hoạt chất Tây y chuẩn.
   5. **`PhoNER_COVID19`** (1.000 câu tin tức dịch tễ — **điểm giới hạn minh bạch**): So với nhãn vàng `NAME` và `PATIENT_ID`, bộ `khu_dinh_danh.py` chỉ đạt **10/847 (1,2%)** vì bộ khử định danh được thiết kế theo cấu trúc hội thoại y tế (*"tên tôi là...", "bác sĩ...", mã hồ sơ phòng khám*) chứ chưa mang mô hình NER tin tức để bắt tên riêng tiếng Việt xuất hiện tự do không tiền tố (*"Bệnh nhân 45 tuổi ở Hải Dương..."*). Đây là giới hạn rõ ràng được đội ngũ đưa vào lộ trình bổ sung NER tiếng Việt cho văn bản tự do."*

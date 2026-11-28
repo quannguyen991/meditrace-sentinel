@@ -145,7 +145,7 @@ Bảng dưới nói về việc gõ mã. Các quyết định thiết kế đế
 | fhir_exporter.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Chuẩn hóa lược đồ ánh xạ dữ liệu bệnh án SOAP sang chuẩn liên thông y tế quốc tế HL7 FHIR R4) |
 | guardrails.py | 4 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Xây dựng 8 chốt chặn an toàn lâm sàng, kiểm soát ranh giới liều và ngăn chặn ảo giác y khoa) |
 | hieu_chinh_lieu.py | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa công thức tính eGFR theo CKD-EPI 2021 và thuật toán cảnh báo giảm liều suy thận) |
-| khu_dinh_danh.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Đặc tả bộ quy tắc ẩn danh dữ liệu sức khỏe tuân thủ nghiêm ngặt Nghị định 13/2023/NĐ-CP) |
+| khu_dinh_danh.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Đặc tả bộ quy tắc ẩn danh dữ liệu sức khỏe; khung pháp lý hiện hành: Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15) |
 | kiem_khuon.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Thiết kế bộ kiểm tra tính toàn vẹn cấu trúc 4 phần Subjective-Objective-Assessment-Plan) |
 | thang_diem_lam_sang.py | 4 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa các thang điểm lâm sàng CKD-EPI, Cockcroft-Gault, CHA2DS2-VASc và HAS-BLED) |
 | tro_ly_lam_sang.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng khi thiếu dữ kiện) |
@@ -253,7 +253,7 @@ Bảng dưới nói về việc gõ mã. Các quyết định thiết kế đế
 | test_fhir_exporter.py | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử tính hợp lệ JSON Bundle của tài nguyên FHIR Encounter, Condition, MedicationRequest) |
 | test_guardrails.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử đơn vị và kịch bản tấn công bypass 8 chốt an toàn lâm sàng) |
 | test_hieu_chinh_lieu.py | 2 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Kiểm thử các mốc giảm liều kháng sinh và thuốc hạ đường huyết theo độ lọc cầu thận) |
-| test_khu_dinh_danh.py | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử thuật toán bóc tách và che giấu thông tin định danh cá nhân theo Nghị định 13) |
+| test_khu_dinh_danh.py | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử thuật toán bóc tách và che giấu thông tin định danh cá nhân) |
 | test_kiem_khuon.py | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử bẫy định dạng cấu trúc bệnh án khi thiếu mục khám thực thể hoặc chẩn đoán) |
 | test_thang_diem_lam_sang.py | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Bộ test case đối soát độ chính xác tính toán eGFR và phân tầng nguy cơ đột quỵ) |
 | test_tro_ly_lam_sang.py | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử kịch bản SOCRATES chủ động gợi mở câu hỏi khi bệnh sử thiếu tính chất đau) |

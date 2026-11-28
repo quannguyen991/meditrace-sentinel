@@ -212,7 +212,7 @@ def tao_bao_cao_nang_cap():
     tbl_metrics = doc.add_table(rows=2, cols=2)
     tbl_metrics.alignment = WD_TABLE_ALIGNMENT.CENTER
     metrics_data = [
-        ("KIỂM THỬ TỰ ĐỘNG", "100% VƯỢT QUA", "Đang cần tái kiểm tra bài kiểm tra chạy trơn tru, không lỗi", "059669", "ECFDF5"),
+        ("KIỂM THỬ TỰ ĐỘNG", "1.942 PYTEST QUA", "Đang cần tái kiểm tra bài kiểm tra chạy trơn tru, không lỗi", "059669", "ECFDF5"),
         ("DỮ LIỆU CA BỆNH", "200 LOẠI BỆNH", "Gấp đôi số lượng ca mẫu, mô phỏng đúng đời thực", "0D5C54", "F0FDFA"),
         ("AN TOÀN KÊ ĐƠN", "5 BƯỚC KIỂM TRA", "Tự động soi tương tác thuốc, chặn câu nói sai", "D97706", "FFFBEB"),
         ("KẾT NỐI BỆNH VIỆN", "CHUẨN QUỐC TẾ", "Xuất file chuẩn HL7 FHIR để cắm vào máy bệnh viện", "1E3A5F", "F1F5F9")
@@ -293,9 +293,9 @@ def tao_bao_cao_nang_cap():
     them_doan_van(doc,
         "Tại các bệnh viện công lập và phòng khám đa khoa ở Việt Nam hiện nay, thực trạng khám chữa bệnh "
         "đang đối mặt với những áp lực vô cùng khốc liệt:\n\n"
-        "• Quá tải bệnh nhân cực độ: Một bác sĩ ngoại trú thường phải tiếp nhận từ 50 đến 80 bệnh nhân mỗi ngày. "
-        "Thời gian dành cho mỗi ca khám chỉ vỏn vẹn từ 3 đến 5 phút.\n\n"
-        "• Bác sĩ bị 'trói tay vào bàn phím': Trong 3–5 phút ngắn ngủi đó, bác sĩ phải dành tới hơn 50% thời gian "
+        "• Quá tải bệnh nhân: Một bác sĩ ngoại trú thường phải tiếp nhận nhiều bệnh nhân mỗi ngày, "
+        "thời gian cho mỗi ca khám ngắn (dự án chưa đo số liệu này).\n\n"
+        "• Bác sĩ bị 'trói tay vào bàn phím': Trong thời gian ngắn đó, bác sĩ phải dành một phần đáng kể thời gian "
         "để vừa hỏi vừa cắm cúi gõ bàn phím, điền thông tin vào phần mềm quản lý bệnh viện. Hiện tượng này làm mất đi "
         "sự kết nối mắt (eye-contact) giữa thầy thuốc và người bệnh, người bệnh cảm thấy không được lắng nghe thấu đáo.\n\n"
         "• Kiệt sức nghề nghiệp (Doctor Burnout): Hàng giờ gõ máy tính lặp đi lặp lại khiến bác sĩ kiệt quệ thể chất lẫn tinh thần. "
@@ -317,7 +317,7 @@ def tao_bao_cao_nang_cap():
     them_tieu_de_1(doc, "PHẦN 2: SỰ KHÁC BIỆT ĐỘC NHẤT — VÌ SAO PHẢI DÙNG MEDITRACE MÀ KHÔNG DÙNG CHATGPT?")
     them_doan_van(doc,
         "Nhiều người thường thắc mắc: 'Ngày nay đã có ChatGPT rất thông minh, tại sao không dùng luôn để tóm tắt bệnh án mà phải xây dựng MediTrace?'\n\n"
-        "Câu trả lời: Trong y tế, dùng ChatGPT để viết hồ sơ bệnh án là việc cực kỳ nguy hiểm và vi phạm pháp luật nghiêm trọng. "
+        "Câu trả lời: Chưa chạy so sánh với mô hình thương mại; phép đo duy nhất cho thấy mô hình thương mại ghi nhầm người 1,4% so với 7,6% của mô hình dự án (bộ tự sửa), tức mô hình thương mại tốt hơn. Khác biệt của MediTrace là chạy tại chỗ và kiểm được từng dòng. "
         "Dưới đây là bảng so sánh 5 điểm khác biệt sống còn giữa hai giải pháp:")
 
     tbl_vs = doc.add_table(rows=6, cols=3)
@@ -337,14 +337,14 @@ def tao_bao_cao_nang_cap():
 
     so_sanh_gpt = [
         ("1. Trách nhiệm pháp lý & Bảo mật dữ liệu",
-         "Vi phạm pháp luật. Gửi dữ liệu bệnh tật, tên tuổi người bệnh lên máy chủ nước ngoài. Vi phạm Nghị định 13/2023/NĐ-CP.",
+         "Gửi dữ liệu bệnh tật, tên tuổi người bệnh lên máy chủ bên ngoài; phải đáp ứng Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP.",
          "Bản hiện tại là bản trình diễn. Có che một số mẫu định danh trực tiếp trước khi gọi mô hình; chưa bảo đảm ẩn danh hoàn toàn hay triển khai nội bộ. Cần đánh giá luồng dữ liệu, quyền truy cập và cấu hình triển khai trước khi dùng thực tế."),
         ("2. Độ tin cậy (Ảo giác AI bịa đặt)",
          "Rất hay bịa đặt thông tin. AI luôn có xu hướng viết văn trôi chảy, sẵn sàng tự điền huyết áp, tiền sử bệnh mà bệnh nhân không hề nói.",
-         "Triệt tiêu hoàn toàn ảo giác (Zero Hallucination). Có 7 cổng khóa bằng chứng (K1–K7). Mẩu tin nào không có trong lời thoại gốc bị chặn ngay."),
+         "Có 7 cổng khóa bằng chứng (K1–K7): mẩu tin không có câu trích trong lời thoại gốc bị chuyển sang Cần xác nhận. Vẫn còn lỗi lọt: lỗi nguy hiểm lọt vào thân 11,8% trên tập phát triển."),
         ("3. Khả năng kiểm chứng của bác sĩ",
-         "Không thể kiểm chứng nhanh. Trả ra một đoạn văn xuôi dài. Bác sĩ muốn kiểm tra phải tự đọc lại toàn bộ băng ghi âm 15 phút.",
-         "Bấm là thấy căn cứ ngay trong 1 giây. Bấm vào bất kỳ dòng nào trong bệnh án, màn hình hiện đường nối trỏ đúng vào câu nói và giây ghi âm tương ứng."),
+         "Không thể kiểm chứng nhanh. Trả ra một đoạn văn xuôi dài. Bác sĩ muốn kiểm tra phải tự đọc lại toàn bộ băng ghi âm.",
+         "Bấm là thấy căn cứ. Bấm vào bất kỳ dòng nào trong bệnh án, màn hình hiện đường nối trỏ đúng vào câu nói và giây ghi âm tương ứng."),
         ("4. Hiểu đúng ngữ cảnh tiếng Việt",
          "Rất hay nhầm người nói. Người nhà bảo: 'Bố em bị hen', ChatGPT ghi: 'Bệnh nhân có tiền sử hen'. Không hiểu cách nói nuốt chủ ngữ.",
          "Bộ luật đại từ nhân xưng chuyên biệt. Tách bạch chính xác giữa bệnh nhân và người nhà. Bệnh của bố chuyển đúng vào mục Tiền sử gia đình."),
@@ -405,14 +405,14 @@ def tao_bao_cao_nang_cap():
         ("2. 'Dữ liệu 5.000 mẫu lấy từ 100 khuôn bệnh dễ bị trùng lặp'",
          "Nếu chỉ có 100 bài mẫu rồi sinh ra 5.000 ca khám, các ca bệnh sẽ nói những câu giông giống nhau, không giống thực tế ngoài đời.",
          "Nhóm nâng gấp đôi lên 200 loại bệnh khác nhau. Đồng thời cho phép ghép 1 bệnh cấp tính (như viêm phổi) với bệnh mạn tính có sẵn (như tiểu đường, huyết áp). "
-         "Đo bằng công thức toán cho thấy các ca bệnh khác biệt nhau gần 80%, không hề bị lặp lại một bài mẫu."),
+         "Bộ v2: tỷ lệ lặp câu 47,37% (giảm từ 76,92%), 45.835 câu khác nhau; câu thoại vẫn lặp nhiều."),
         ("3. 'Làm rõ lỗi nghiêm trọng là gì, tại sao giảm lỗi này lại tăng sót tin khác'",
          "Trong y khoa có sự đánh đổi: Nếu kiểm tra quá gắt gao để không bao giờ viết sai, máy sẽ tự ý vứt bỏ những câu nói lấp lửng của bệnh nhân, dẫn đến bỏ sót thông tin quan trọng.",
          "Nhóm giải thích rõ: Lỗi nghiêm trọng là ghi sai tên thuốc độc, nhầm tiền sử người nhà thành của bệnh nhân. "
          "Thông tin quan trọng là dị ứng thuốc, bệnh tim thận. Để không bị đánh đổi, cái gì chưa chắc chắn thì máy giữ lại đưa cho bác sĩ tự nhìn và quyết định."),
         ("4. 'Thà bắt nhầm còn hơn bỏ sót'",
          "Bỏ sót tiền sử dị ứng thuốc Penicillin có thể làm bệnh nhân sốc thuốc tử vong. Thà báo nhầm để bác sĩ liếc mắt kiểm tra lại còn hơn là tự xóa mất.",
-         "Nhóm chia bệnh án làm 2 phần: Phần chắc chắn 100% thì ghi vào bệnh án chính. "
+         "Nhóm chia bệnh án làm 2 phần: Phần đã qua kiểm căn cứ thì ghi vào bệnh án chính. "
          "Phần còn nghi ngờ thì xếp riêng vào mục 'Cần bác sĩ bấm xác nhận'. Bác sĩ không bao giờ bị mất bất kỳ thông tin nguy hiểm nào."),
         ("5. 'Cần có các bước kiểm tra (Guardrails) giữa các khâu'",
          "Nếu đoạn ghi âm nghe nhầm tên thuốc ngay từ đầu, các khâu sau cứ thế chép theo sẽ dẫn tới kê sai đơn thuốc cho người bệnh.",
@@ -482,19 +482,19 @@ def tao_bao_cao_nang_cap():
          "src/cong_cu_lam_sang/doi_soat_can_lam_sang.py",
          "Nó đọc kết quả từ máy xét nghiệm gửi về. Nếu thấy chỉ số nào chạm ngưỡng nguy hiểm đến tính mạng (ví dụ men tim tăng vọt báo hiệu nhồi máu cơ tim, kali trong máu quá cao làm ngừng tim) thì lập tức nhấp nháy báo động đỏ. Đồng thời, máy tự phát hiện mâu thuẫn: nếu xét nghiệm thấy nhiễm trùng rất nặng mà bệnh nhân lại bảo 'tôi bình thường, không sốt' thì máy nhắc bác sĩ kiểm tra lại ngay.",
          "Kết quả xét nghiệm in ra giấy thường bị để lẫn trong tập hồ sơ. Bác sĩ bận có thể chưa kịp đọc ngay, làm trễ giờ vàng cấp cứu.",
-         "Bảo đảm bác sĩ nhìn thấy ngay các chỉ số nguy kịch chỉ trong 1 giây; không bao giờ bỏ lọt ca cấp cứu."),
+         "Hiển thị nổi bật các chỉ số nguy kịch để bác sĩ thấy ngay (chưa đo trên dữ liệu thật)."),
 
         ("6. Trợ lý nhắc bác sĩ hỏi thêm các câu còn thiếu (SOCRATES)",
          "src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py",
          "Một trợ lý ảo ngồi nghe ca khám bệnh. Nếu thấy bệnh nhân than 'tôi bị đau bụng', mà bác sĩ bận quá quên chưa hỏi 'đau ở chỗ nào (trên rốn hay dưới rốn)? đau quặn từng cơn hay đau âm ỉ? có nôn không?', thì máy sẽ hiện sẵn các nút bấm nhỏ trên màn hình để bác sĩ chỉ cần liếc mắt là nhớ ra hỏi ngay trước khi bệnh nhân bước ra về.",
-         "Một ca khám ở viện công thường chỉ có 5 phút. Bác sĩ rất dễ quên hỏi kỹ các triệu chứng quan trọng, dẫn đến hồ sơ bệnh án sơ sài và khó chẩn đoán đúng bệnh.",
+         "Một ca khám ở viện công thường rất ngắn. Bác sĩ rất dễ quên hỏi kỹ các triệu chứng quan trọng, dẫn đến hồ sơ bệnh án sơ sài và khó chẩn đoán đúng bệnh.",
          "Giúp bệnh án luôn đầy đủ chi tiết, nhắc bác sĩ hỏi đúng và đủ các thông tin cần thiết."),
 
         ("7. Tự động giấu thông tin cá nhân của người bệnh (Bảo mật riêng tư)",
          "src/he_thong/khu_dinh_danh.py",
          "Tự động tìm và thay thế tên thật, số điện thoại, số căn cước công dân, số thẻ bảo hiểm y tế, địa chỉ nhà của bệnh nhân thành các mã an toàn (ví dụ: [BENH_NHAN_1], [SDT_1]) trước khi đưa vào máy tính xử lý. Chỉ có bác sĩ tại phòng khám mới có chìa khóa để nhìn lại tên thật của bệnh nhân.",
          "Luật pháp Việt Nam và quốc tế nghiêm cấm để lộ thông tin bệnh tật và đời tư của bệnh nhân lên mạng hoặc các hệ thống AI.",
-         "Bảo vệ 100% quyền riêng tư của người bệnh; bệnh viện yên tâm sử dụng phần mềm mà không lo vi phạm luật pháp."),
+         "Chạy tại chỗ nên dữ liệu người bệnh không cần rời phòng khám (Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP)."),
 
         ("8. Xuất bệnh án theo định dạng chuẩn quốc tế (HL7 FHIR R4)",
          "src/cong_cu_lam_sang/xuat_fhir_r4.py",
@@ -510,23 +510,23 @@ def tao_bao_cao_nang_cap():
 
         ("10. Tăng lên 200 loại bệnh và kết hợp nhiều bệnh cùng lúc",
          "src/bo_du_lieu/sinh_ca_da_benh_ly.py, src/bo_du_lieu/ngu_lieu_viet.py",
-         "Nhóm nâng gấp đôi số lượng ca bệnh mẫu từ 100 lên 200 bệnh của 10 chuyên khoa khác nhau. Đồng thời cho phép ghép nhiều bệnh cùng lúc: ví dụ một người vừa bị viêm phổi mới phát lại vừa bị bệnh tiểu đường và huyết áp từ trước. Đo bằng công thức toán học chứng minh các ca bệnh khác biệt nhau gần 80%.",
+         "Bộ v2 có 657 khuôn ca bệnh trên 21 hệ cơ quan. Đồng thời cho phép ghép nhiều bệnh cùng lúc: ví dụ một người vừa bị viêm phổi mới phát lại vừa bị bệnh tiểu đường và huyết áp từ trước. Tỷ lệ lặp câu bộ v2 là 47,37%.",
          "Ban giám khảo lo ngại 5.000 ca bệnh sinh ra bị lặp đi lặp lại một kiểu nói giống nhau, không thực tế.",
          "Chứng minh rõ ràng bằng số liệu rằng dữ liệu rất phong phú, đa dạng và giống hệt như các ca bệnh phức tạp ngoài đời thực."),
 
         ("11. Tự động nhận biết bệnh nhân đính chính lời nói (Cổng K7)",
          "src/duong_ong/b4_kiem_can_cu.py, src/duong_ong/b5_xep_cho_cong_rui_ro.py",
          "Theo dõi cuộc nói chuyện từ đầu đến cuối để nhận ra lúc bệnh nhân đính chính lại lời mình. Ví dụ lúc đầu bệnh nhân bảo 'tôi sốt 1 tuần rồi', nhưng nói chuyện một lúc sau nhớ lại bảo 'à không, tôi mới sốt từ hôm qua thôi'. Máy sẽ tự động gạch bỏ tin cũ '1 tuần' và chỉ ghi nhận tin đúng là 'hôm qua'. Đồng thời, thông tin nào chưa chắc chắn thì máy giữ lại đưa cho bác sĩ xem riêng, tuyệt đối không tự ý xóa bỏ.",
-         "AI thông thường hay bị 'lú', khi bệnh nhân sửa lời thì AI vẫn nhớ câu nói cũ, làm sai lệch thời gian mắc bệnh (tỷ lệ lỗi trước đây lên tới 11.5%).",
-         "Báo cáo nêu kết quả 11.5% xuống 0.8%; cần xác minh tập dữ liệu, phương pháp và khả năng tái lập. Không bảo đảm mọi hồ sơ chính xác tuyệt đối."),
+         "AI thông thường hay bị 'lú', khi bệnh nhân sửa lời thì AI vẫn nhớ câu nói cũ, làm sai lệch thời gian mắc bệnh (bộ tự sửa 60 ca: 11,48% bản cũ còn bị giữ khi chỉ tách thông tin).",
+         "Đo được 11,48% xuống 0,80% trên bộ tự sửa 60 ca (dữ liệu mô phỏng, bộ chấm tự động). Không bảo đảm mọi hồ sơ chính xác."),
 
         ("12. Đóng dấu chống sửa đổi hồ sơ bệnh án (Chữ ký SHA-256)",
          "src/he_thong/dieu_phoi_cac_chot_an_toan.py",
          "Mã băm SHA-256 có thể giúp đối chiếu nội dung nếu được lưu và xác minh qua một quy trình tin cậy. Mã băm đơn lẻ không phải chữ ký số, không tự phát hiện sửa đổi nếu không có bản đối chiếu đáng tin cậy, và không tự tạo giá trị pháp lý.",
          "Hồ sơ bệnh án là giấy tờ pháp lý trước tòa án. Nếu phần mềm không có khóa niêm phong thì rất dễ bị nghi ngờ là có người vào sửa chữa hồ sơ để che giấu sai sót.",
-         "Bảo đảm tính minh bạch và giá trị pháp lý 100% cho bệnh viện và bác sĩ."),
+         "Lưu vết quyết định của bác sĩ bằng chuỗi băm."),
 
-        ("13. Màn hình làm việc 30 giây cho bác sĩ (Doctor-in-the-loop)",
+        ("13. Màn hình làm việc cho bác sĩ (Doctor-in-the-loop)",
          "src/giao_dien_copilot.html",
          "Bản trình diễn có giao diện ba cột để xem nội dung ghi âm, căn cứ và bản nháp. Cần xác minh quy trình tích hợp, lưu trữ và duyệt trên môi trường triển khai trước khi sử dụng thực tế.",
          "Ban giám khảo lo thí sinh để cho AI tự tung tự tác làm hết mà không có bác sĩ kiểm tra.",
@@ -579,10 +579,10 @@ def tao_bao_cao_nang_cap():
 
     so_lieu_ss = [
         ("Kiểm tra phần mềm tự động (Test Cases)", "Chưa làm đầy đủ", "Số liệu cần tái kiểm tra trên revision hiện tại", "Kết quả test không chứng minh không còn lỗi ngoài phạm vi đã kiểm tra"),
-        ("Lỗi nhớ thông tin cũ khi bệnh nhân đính chính", "11.5% (Cứ 100 ca thì 11 ca bị nhớ nhầm)", "0.8% (Gần như không còn bị nhầm)", "Giảm lỗi nhớ nhầm hơn 14 lần nhờ Cổng K7"),
-        ("Lỗi nhầm bệnh của người nhà thành của bệnh nhân", "12.4% (Thường xuyên nhầm lời người nhà)", "2.1% (Tách biệt rành mạch)", "Giảm nhầm lẫn gần 6 lần nhờ Tầng 2"),
-        ("Tỷ lệ thông tin đúng mà bị máy chặn nhầm", "Chưa kiểm soát được", "0.0% (0 / 30.136 dòng bị chặn oan)", "Không bao giờ chặn oan thông tin đúng"),
-        ("Độ phong phú và câu duy nhất (5.000 ca)", "v1: 20.190 câu duy nhất (lặp 76.92%)", "v2: 45.835 câu duy nhất (lặp 47.37%)", "657 khuôn 21 hệ cơ quan, MTLD 145.4 (+56.3%), 100% trích dẫn chuỗi con [đã rút số 78.3%]")
+        ("Thông tin cũ còn giữ khi người nói đính chính (bộ tự sửa 60 ca)", "11,48% (chỉ tách thông tin)", "0,80%", "README.md"),
+        ("Ghi nhầm người (bộ đổi chủ thể 80 ca)", "22,0% (chỉ tách thông tin)", "17,9%", "Sinh thẳng vẫn ghi đúng người cao hơn (0,939 / 0,748)"),
+        ("Thông tin đúng bị chặn nhầm", "—", "0 / 30.136 trên đáp án; 8,0–10,0% trên đầu ra mô hình thật", "0/30.136 chỉ đúng vì đáp án chép gần nguyên văn (độ phủ 0,95)"),
+        ("Độ phong phú và câu duy nhất (5.000 ca)", "v1: 20.190 câu duy nhất (lặp 76.92%)", "v2: 45.835 câu duy nhất (lặp 47.37%)", "657 khuôn 21 hệ cơ quan, MTLD 145,4; trích dẫn nguyên văn 52.634/52.634 (kiểm dữ liệu tự sinh)")
     ]
 
     for i, hang in enumerate(so_lieu_ss, start=1):
@@ -617,9 +617,9 @@ def tao_bao_cao_nang_cap():
     them_tieu_de_1(doc, "PHẦN 6: TÓM TẮT KẾT LUẬN — GIÁ TRỊ THỰC TẾ CHO NỀN Y TẾ VIỆT NAM")
     them_doan_van(doc,
         "Tóm lại, toàn bộ các tính năng nâng cấp mới của MediTrace Sentinel tập trung vào 3 giá trị thực tế lớn nhất:\n\n"
-        "1. Đối với Bác sĩ: Tiết kiệm từ 5 đến 7 phút gõ máy tính cho mỗi ca khám. Bác sĩ không phải tự cộng điểm nguy cơ, "
+        "1. Đối với Bác sĩ: Giảm gõ máy tính (thời gian tiết kiệm chưa đo). Bác sĩ không phải tự cộng điểm nguy cơ, "
         "có thể hỗ trợ rà soát thông tin, nhưng bác sĩ vẫn cần kiểm tra căn cứ và quyết định chuyên môn. Thời gian duyệt cần được đo trong thử nghiệm thực tế.\n\n"
-        "2. Đối với Người bệnh: Được an toàn tuyệt đối. Đơn thuốc được máy soi kỵ nhau và soi quá liều; khi ra về có ngay một tờ giấy in dặn dò "
+        "2. Đối với Người bệnh: Đơn thuốc được máy soi kỵ nhau và soi quá liều; khi ra về có ngay một tờ giấy in dặn dò "
         "viết bằng tiếng Việt bình dân, dặn rõ giờ uống thuốc và khi nào nguy hiểm phải đi viện ngay.\n\n"
         "3. Đối với Bệnh viện: Bệnh án xuất ra theo đúng chuẩn quốc tế của Bộ Y tế, cắm thẳng vào máy tính bệnh viện mà không cần gõ lại; "
         "thông tin cá nhân của bệnh nhân được giấu kín đúng luật; hồ sơ được đóng dấu số chống sửa đổi để bảo đảm an toàn pháp lý.")

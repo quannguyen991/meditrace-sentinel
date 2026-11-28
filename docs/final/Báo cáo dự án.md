@@ -9,7 +9,7 @@
 
 MediTrace Sentinel nghiên cứu cách tạo bản nháp hồ sơ khám bệnh từ hội thoại tiếng Việt theo từng thông tin nhỏ có thể kiểm tra. Một thông tin như “bệnh nhân ho khan, hai tuần” được gọi là một mệnh đề. Mỗi mệnh đề giữ người nói, người mà thông tin nói về, mức chắc chắn, phủ định, thời gian, quan hệ với thông tin trước và câu nói gốc làm bằng chứng. Mô hình Qwen3-4B chỉ đề xuất danh sách mệnh đề. Chương trình sau đó xử lý thông tin đã được sửa lại, kiểm tra bằng chứng và quyết định thông tin nằm ở phần chính hay mục Cần xác nhận. Dữ liệu gồm 5.000 hội thoại do chương trình tự tạo từ 100 mẫu bệnh; 634 ca thuộc tập phát triển được dùng cho các kết quả trong báo cáo. Trên mẫu 240 ca, tỷ lệ bản cũ vẫn bị giữ sau khi người nói sửa giảm từ 5,21% xuống 0,36%. Ở bộ đổi chủ thể 80 ca, thêm bước kiểm tra bằng chứng làm lỗi nghiêm trọng giảm từ 43,0% xuống 36,2%, nhưng bỏ sót tăng từ 4,5% lên 7,7%. Cách viết trực tiếp có điểm quy gán cao hơn MediTrace ở cả bốn bộ thử thách, nên dữ liệu hiện tại không ủng hộ kết luận rằng MediTrace tạo bản nháp chính xác hơn. Kết quả phù hợp hơn là kiến trúc có cấu trúc giúp truy lại từng thông tin, xử lý lời đính chính và đo rõ sự đánh đổi giữa lỗi và bỏ sót. Hệ thống chưa được thử trên hội thoại bệnh nhân thật và không thay thế quyết định của bác sĩ.
 
-Đợt nâng cấp kỹ thuật (nghiệm thu ngày 18/10/2026): Để giải quyết các ranh giới an toàn y khoa và yêu cầu ứng dụng thực tế, hệ thống được mở rộng từ 6 kiểm tra căn cứ ban đầu lên Kiến trúc Điều phối 8 Chốt An toàn Lâm sàng (8 Clinical Guardrails Orchestrator). Hệ thống tích hợp bộ phát hiện tương tác thuốc nguy cơ cao DDI Black-box (cặp Clopidogrel + Omeprazole), hiệu chỉnh liều theo chức năng thận suy eGFR (Metformin cutoff < 45 / < 30 mL/min/1.73m2), bộ lọc khử định danh PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP, tác tử chủ động gợi mở triệu chứng lâm sàng SOCRATES và xuất dữ liệu liên thông y tế HL7 FHIR R4. Toàn bộ hệ sinh thái đã hoàn thành nghiệm thu kỹ thuật qua chuỗi 1.330 bài kiểm thử tự động (tỷ lệ đạt 100%), hoàn thiện giao diện Tờ dặn dò người bệnh xuất viện 4 khung giờ chuẩn quốc tế JCI và Bảng kiểm toán tiến trình AI trực quan hóa chuỗi bóc tách mệnh đề.
+Đợt nâng cấp kỹ thuật (nghiệm thu ngày 18/10/2026): Để giải quyết các ranh giới an toàn y khoa và yêu cầu ứng dụng thực tế, hệ thống được mở rộng từ 6 kiểm tra căn cứ ban đầu lên Kiến trúc Điều phối 8 Chốt An toàn Lâm sàng (8 Clinical Guardrails Orchestrator). Hệ thống tích hợp bộ phát hiện tương tác thuốc nguy cơ cao DDI Black-box (cặp Clopidogrel + Omeprazole), hiệu chỉnh liều theo chức năng thận suy eGFR (Metformin cutoff < 45 / < 30 mL/min/1.73m2), bộ lọc khử định danh PII/PHI (khung pháp lý hiện hành: Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP), tác tử chủ động gợi mở triệu chứng lâm sàng SOCRATES và xuất dữ liệu liên thông y tế HL7 FHIR R4. Toàn bộ hệ sinh thái đã hoàn thành nghiệm thu kỹ thuật qua chuỗi 1.330 bài kiểm thử tự động (lần chạy 18/10/2026; lần chạy 26/11/2026: 1.942 bài qua, 27 bỏ qua), hoàn thiện giao diện Tờ dặn dò người bệnh xuất viện 4 khung giờ chuẩn quốc tế JCI và Bảng kiểm toán tiến trình AI trực quan hóa chuỗi bóc tách mệnh đề.
 
 Từ khóa: hội thoại lâm sàng; bản nháp hồ sơ; truy vết bằng chứng; xử lý đính chính; tiếng Việt; mô hình ngôn ngữ.
 
@@ -204,7 +204,7 @@ Hai thông tin được ghép với nhau khi mức giống nhau về từ ngữ 
 ## 3.9. Giai đoạn nâng cấp kỹ thuật (nghiệm thu ngày 18/10/2026): Kiến trúc 8 Chốt An toàn Lâm sàng liên hoàn (Clinical Guardrails)
 
 Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/dieu_phoi_ha_tang.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
-• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
+• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI (src/khu_dinh_danh.py; dữ liệu sức khỏe là dữ liệu nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
 • Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
 • Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
 • Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/thang_diem_lam_sang.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
@@ -215,7 +215,7 @@ Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và 
 
 | Chốt | Tên thành phần | Mô-đun phụ trách | Cơ chế kỹ thuật | Quy chuẩn đối chiếu |
 | :--- | :--- | :--- | :--- | :--- |
-| Chốt 1 | Khử định danh PII/PHI | src/khu_dinh_danh.py | Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều | Nghị định 13/2023/NĐ-CP |
+| Chốt 1 | Khử định danh PII/PHI | src/khu_dinh_danh.py | Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều | Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP |
 | Chốt 2 | Kiểm khuôn bệnh án SOAP | src/kiem_khuon.py | Kiểm tra tính toàn vẹn 4 phần Subjective-Objective-Assessment-Plan | Chuẩn cấu trúc SOAP quốc tế |
 | Chốt 3 | Cảnh báo cận lâm sàng | src/can_lam_sang.py | Phát hiện chỉ số sinh hóa, huyết học, điện giải vượt ngưỡng | Khoảng tham chiếu sinh lý Bộ Y tế |
 | Chốt 4 | Thang điểm lâm sàng CDSS | src/thang_diem_lam_sang.py | Tính điểm eGFR, Cockcroft-Gault, CHA2DS2-VASc, HAS-BLED | Hướng dẫn ESC / KDIGO |
@@ -228,7 +228,7 @@ Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và 
 ## 3.10. Chuẩn hóa liên thông dữ liệu y tế quốc tế HL7 FHIR R4
 
 Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/fhir_exporter.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
-• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng bảo mật theo Nghị định 13.
+• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng.
 • Encounter: Định danh phiên khám, thời gian thực hiện và tài khoản bác sĩ chủ trì.
 • Condition: Danh mục mã hóa bệnh lý chẩn đoán theo danh pháp quốc tế ICD-10.
 • Observation: Các dấu hiệu sinh tồn, chỉ số xét nghiệm và kết quả tính toán độ lọc cầu thận eGFR.
@@ -242,7 +242,7 @@ Mở rộng trải nghiệm lâm sàng từ góc độ an toàn người bệnh 
 2. Bảng kiểm toán tiến trình AI (NhatKyTienTrinhAIModal.tsx): Thiết kế giao diện Terminal kỹ thuật cao hiển thị độ trễ suy luận (đạt 379.4 ms trên ca khám mẫu), trực quan hóa chi tiết luồng bóc tách 5 mệnh đề [P1..P5] từ 8 lượt thoại nguồn [T1..T8] của mô hình Qwen3-4B QLoRA và trạng thái kiểm duyệt của 8 chốt phòng vệ trước khi bác sĩ ký số xuất bản.
 
 Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe người bệnh, hệ thống được tái cấu trúc từ các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/dieu_phoi_ha_tang.py). Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:
-• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
+• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI (src/khu_dinh_danh.py; dữ liệu sức khỏe là dữ liệu nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].
 • Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).
 • Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.
 • Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/thang_diem_lam_sang.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).
@@ -252,7 +252,7 @@ Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và 
 • Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/tro_ly_lam_sang.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ.
 
 Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, MediTrace bổ sung module xuất dữ liệu src/fhir_exporter.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:
-• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng bảo mật theo Nghị định 13.
+• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng.
 • Encounter: Định danh phiên khám, thời gian thực hiện và tài khoản bác sĩ chủ trì.
 • Condition: Danh mục mã hóa bệnh lý chẩn đoán theo danh pháp quốc tế ICD-10.
 • Observation: Các dấu hiệu sinh tồn, chỉ số xét nghiệm và kết quả tính toán độ lọc cầu thận eGFR.
@@ -360,10 +360,10 @@ Trong các thử nghiệm ban đầu (tháng 09/2026), bước câu hỏi làm r
 ## 4.8. Kết quả nghiệm thu thực nghiệm đợt nâng cấp ngày 18/10/2026
 
 Đợt nâng cấp kỹ thuật nghiệm thu ngày 18/10/2026 được đánh giá độc lập thông qua chuỗi kiểm thử kỹ thuật và đối soát lâm sàng chuyên sâu:
-1. Kết quả kiểm thử tự động toàn diện: Chuỗi 1.330 bài kiểm thử đơn vị và tích hợp (pytest tests/) đạt tỷ lệ thành công 100% (1.330 passed, 27 skipped, 0 failed trong 120,35 giây), bao phủ toàn diện 8 chốt an toàn và các cơ chế xử lý ngoại lệ.
-2. Nghiệm thu Chốt 5 (DDI Black-box): Trên tập thử nghiệm tương tác thuốc, hệ thống phát hiện chính xác 100% đơn thuốc có cặp Clopidogrel + Omeprazole, tự động kích hoạt cảnh báo mức độ 1 và đề xuất thuốc thay thế nhóm PPI an toàn (Pantoprazole/Esomeprazole).
-3. Nghiệm thu Chốt 6 (eGFR & Suy thận): Đối soát với công thức chuẩn CKD-EPI 2021, hệ thống tính toán sai số tuyệt đối bằng 0; phát hiện và đưa ra cảnh báo chính xác 100% các trường hợp kê liều Metformin khi eGFR < 45 mL/min/1.73m2.
-4. Nghiệm thu Chốt 1 (Nghị định 13): Đạt tỷ lệ nhận dạng và ẩn danh 100% các thực thể CCCD, SĐT và mã thẻ BHYT trên tập kiểm tra, bảo đảm không có thông tin định danh y tế nào bị rò rỉ qua các cổng gọi API hay nhật ký lưu trữ.
+1. Kết quả kiểm thử tự động: lần chạy ngày 18/10/2026 ghi nhận 1.330 bài kiểm thử đơn vị và tích hợp qua, 27 bỏ qua; lần chạy 26/11/2026 (README.md) ghi nhận 1.942 bài qua, 27 bỏ qua. Đây là kiểm tra mã chạy đúng trên ca do nhóm tự viết, không phải tỷ lệ đúng trên dữ liệu thật.
+2. Chốt 5 (DDI Black-box): vượt qua các phép thử đơn vị với đơn thuốc do nhóm tự viết có cặp Clopidogrel + Omeprazole (chưa đo trên tập đơn thuốc độc lập), tự động kích hoạt cảnh báo mức độ 1 và đề xuất thuốc thay thế nhóm PPI an toàn (Pantoprazole/Esomeprazole).
+3. Chốt 6 (eGFR & Suy thận): phép thử đơn vị đối chiếu với công thức CKD-EPI 2021 cho kết quả trùng khớp trên các ca tự viết; cảnh báo kê liều Metformin khi eGFR < 45 mL/min/1.73m2 vượt qua phép thử đơn vị (chưa đo trên tập độc lập).
+4. Chốt 1 (khử định danh): vượt qua phép thử đơn vị với CCCD, SĐT và mã thẻ BHYT theo mẫu do nhóm viết. Trên văn bản báo chí PhoNER_COVID19, bộ khử định danh chỉ che được 10/847 (1,2%) nhãn tên và mã bệnh nhân (docs/ket-qua/da-nguon-doc-lap.json), nên chưa thể khẳng định không có thông tin định danh bị rò rỉ.
 5. Thử nghiệm trên 3 ca bệnh khó bẫy lâm sàng đối phó câu hỏi Ban Giám khảo:
 • Ca 1 (Lão khoa - Viêm phổi hít / Suy thận): Hệ thống tính chính xác eGFR = 38 mL/min, cảnh báo đình chỉ Metformin và đề xuất chuyển sang phác đồ Insulin nội viện.
 • Ca 2 (Tim mạch - Sau can thiệp mạch vành / Xuất huyết tiêu hóa): Hệ thống phát hiện ngay tương tác chống chỉ định Clopidogrel + Omeprazole, cảnh báo nguy cơ huyết khối tắc stent và đề xuất đổi sang Pantoprazole.
@@ -393,7 +393,7 @@ Kết quả hiện tại không ủng hộ H1: điểm quy gán của MediTrace 
 
 Ưu tiên tiếp theo là tạo dữ liệu khó hơn và ít sao chép nguyên văn; thêm các cặp chỉ khác người, thời gian hoặc phủ định; cải thiện nhận người và quan hệ họ hàng; hoàn thành chấm tay hai người; đo trên tập kiểm tra cuối 590 ca đúng một lần; sau đó mới chuyển sang hội thoại mô phỏng do người nói và nghiên cứu có giám sát với bác sĩ. Khi có người dùng thật, cần đo thêm thời gian duyệt, số cảnh báo thừa, tỷ lệ sửa của bác sĩ và mức chấp nhận sử dụng.
 
-Bước tiến đến ngày 18/10/2026 đưa MediTrace Sentinel từ một khung trích xuất mệnh đề lý thuyết trở thành một giải pháp trợ lý lâm sàng hoàn chỉnh. Hệ sinh thái hiện đã sẵn sàng tích hợp với bệnh án điện tử HIS/EMR thông qua chuẩn quốc tế HL7 FHIR R4, đồng thời bảo đảm an toàn dữ liệu theo Nghị định 13/2023/NĐ-CP và nâng cao an toàn người bệnh theo chuẩn JCI.
+Bước tiến đến ngày 18/10/2026 đưa MediTrace Sentinel từ một khung trích xuất mệnh đề lý thuyết trở thành một giải pháp trợ lý lâm sàng hoàn chỉnh. Hệ sinh thái hiện đã sẵn sàng tích hợp với bệnh án điện tử HIS/EMR thông qua chuẩn quốc tế HL7 FHIR R4, đồng thời chạy tại chỗ nên dữ liệu người bệnh không cần rời phòng khám.
 
 
 # 7. HẠN CHẾ VÀ NGUYÊN TẮC SỬ DỤNG
@@ -411,7 +411,7 @@ Bước tiến đến ngày 18/10/2026 đưa MediTrace Sentinel từ một khung
 1. Phương án viết trực tiếp và mô hình tách thông tin không dùng hoàn toàn cùng bộ trọng số và thiết lập số học, có thể gây nhiễu cho so sánh.
 Nguyên tắc sử dụng: sản phẩm chỉ tạo bản nháp để bác sĩ kiểm tra. Không dùng đầu ra như hồ sơ chính thức nếu chưa được người có chuyên môn duyệt. Hệ thống không tự chẩn đoán, kê đơn, thay đổi thuốc, ra y lệnh hoặc đưa ra hướng xử trí khẩn cấp.
 
-Ghi nhận đợt nâng cấp ngày 18/10/2026: Các hạn chế kỹ thuật ban đầu về mặt an toàn đơn thuốc, thiếu cơ chế khử định danh người bệnh, chưa có chuẩn kết nối dữ liệu và thiếu tương tác làm rõ triệu chứng đã được giải quyết trực tiếp qua việc bổ sung 8 chốt an toàn lâm sàng, mô-đun khử định danh theo Nghị định 13, cổng xuất HL7 FHIR R4 và tác tử SOCRATES. Tuy nhiên, nguyên tắc cốt lõi vẫn không thay đổi: hệ thống giữ vai trò trợ lý hỗ trợ bác sĩ duyệt (Human-in-the-loop), bác sĩ luôn là người chịu trách nhiệm y khoa cuối cùng.
+Ghi nhận đợt nâng cấp ngày 18/10/2026: Các hạn chế kỹ thuật ban đầu về mặt an toàn đơn thuốc, thiếu cơ chế khử định danh người bệnh, chưa có chuẩn kết nối dữ liệu và thiếu tương tác làm rõ triệu chứng đã được giải quyết trực tiếp qua việc bổ sung 8 chốt an toàn lâm sàng, mô-đun khử định danh, cổng xuất HL7 FHIR R4 và tác tử SOCRATES. Tuy nhiên, nguyên tắc cốt lõi vẫn không thay đổi: hệ thống giữ vai trò trợ lý hỗ trợ bác sĩ duyệt (Human-in-the-loop), bác sĩ luôn là người chịu trách nhiệm y khoa cuối cùng.
 
 Bộ chấm tay gồm 36 phiếu; hai người chấm đã hoàn thành 16/36 phiếu. Do chưa chấm hết bộ, báo cáo này chưa trình bày hệ số kappa hoặc kết luận về độ đồng thuận giữa hai người chấm.
 

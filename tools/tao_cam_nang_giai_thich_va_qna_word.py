@@ -570,15 +570,15 @@ BANG_KHA_THI = [
     ],
     [
         "2. Quy trình Khám Ngoại trú\n(50–80 ca/ngày, 3–5 phút/ca)",
-        "Giải quyết bài toán độ trễ `~3,5 phút` bằng **xử lý nền bất đồng bộ theo từng ca (`202 Accepted` + `generatingSessionId`)**:\n• Kết thúc khám Ca A, bác sĩ bấm tạo nháp rồi gọi ngay bệnh nhân Ca B vào khám — màn hình Ca B hoàn toàn không bị khóa.\n• Khi khám xong Ca B, bản nháp Ca A đã dựng xong ở nền. Bác sĩ chỉ mất `15–30 giây` duyệt các dòng đỏ ở mục `Cần xác nhận` bằng phím tắt `J/K/Enter` rồi bấm `Chép HIS`.",
+        "Giải quyết bài toán độ trễ `~3,5 phút` bằng **xử lý nền bất đồng bộ theo từng ca (`202 Accepted` + `generatingSessionId`)**:\n• Kết thúc khám Ca A, bác sĩ bấm tạo nháp rồi gọi ngay bệnh nhân Ca B vào khám — màn hình Ca B hoàn toàn không bị khóa.\n• Khi khám xong Ca B, bản nháp Ca A đã dựng xong ở nền. Bác sĩ duyệt các dòng đỏ ở mục `Cần xác nhận` bằng phím tắt `J/K/Enter` rồi bấm `Chép HIS` (thời gian duyệt **chưa đo** với bác sĩ thật).",
     ],
     [
         "3. Tích hợp Phần mềm Bệnh viện\n(VNPT-HIS, Viettel HIS, FPT.eHospital)",
         "Không đòi hỏi bệnh viện phải sửa mã HIS ngay từ ngày đầu nhờ **lộ trình 2 bước thực tế**:\n• **Bước 1 (Áp dụng ngay, 0 chi phí tích hợp):** Nút `Chép HIS` (`HisSmartCopyPopover.tsx`) tách sẵn đúng từng ô (*Lý do khám, Bệnh sử, Khám thực thể, Chẩn đoán, Hướng xử trí*) để dán 1 chạm vào cửa sổ HIS đang mở.\n• **Bước 2 (Liên thông chuẩn hóa):** Xuất gói JSON chuẩn quốc tế `HL7 FHIR R4` và bộ thẻ `XML1–XML5` theo Quyết định 130/QĐ-BYT & 4750/QĐ-BYT.",
     ],
     [
-        "4. Pháp lý, Bảo mật & Đạo đức\n(NĐ 13/2023 & TT 46/2018)",
-        "Thiết kế bám sát hành lang pháp lý y tế Việt Nam:\n• **Nghị định 13/2023/NĐ-CP:** Ghi âm và tạo bản nháp chạy 100% nội bộ tại chỗ, `0 byte` hội thoại gửi lên đám mây mặc định; công tắc mô hình ngoài mặc định **TẮT**; trợ lý tra cứu chỉ gửi allowlist ẩn danh và chặn câu hỏi chứa tên/SĐT/CCCD.\n• **Luật Khám bệnh, chữa bệnh 2023:** Phần mềm chỉ tạo **bản nháp**, khóa cứng không tự hoàn tất khi thiếu căn cứ, lưu vết quyết định bác sĩ bằng chuỗi băm WORM `SHA-256`.",
+        "4. Pháp lý, Bảo mật & Đạo đức\n(Luật 91/2025/QH15, NĐ 356/2025 & TT 46/2018)",
+        "Thiết kế bám sát hành lang pháp lý y tế Việt Nam:\n• **Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026, thay Nghị định 13/2023):** dữ liệu người bệnh không cần rời phòng khám. Ghi âm và tạo bản nháp chạy 100% nội bộ tại chỗ, `0 byte` hội thoại gửi lên đám mây mặc định; công tắc mô hình ngoài mặc định **TẮT**; trợ lý tra cứu chỉ gửi allowlist ẩn danh và chặn câu hỏi chứa tên/SĐT/CCCD.\n• **Luật Khám bệnh, chữa bệnh 2023:** Phần mềm chỉ tạo **bản nháp**, khóa cứng không tự hoàn tất khi thiếu căn cứ, lưu vết quyết định bác sĩ bằng chuỗi băm WORM `SHA-256`.",
     ],
     [
         "5. Chi phí & Bản quyền\n(Tài chính bền vững)",
@@ -598,7 +598,7 @@ BO_22_CAU_HOI_BGK = [
         "Nhận xét vòng trước chỉ ra sự đánh đổi giữa giảm lỗi nghiêm trọng và tỷ lệ bỏ sót thông tin. Nhóm đã định nghĩa lại lỗi và giải quyết sự đánh đổi này như thế nào?",
         "Thay vì dùng một ngưỡng cắt bỏ cứng (hoặc cho vào bệnh án, hoặc xoá mất), MediTrace tách đánh giá thành **2 trục độc lập** (mức nghiêm trọng lâm sàng × độ bất định căn cứ) và định tuyến vào **3 vùng**: thông tin chưa chắc được giữ nguyên trong mục **`CẦN XÁC NHẬN`** kèm lý do chứ tuyệt đối không âm thầm loại bỏ.",
         "Định nghĩa 13 nhóm lỗi (56 mã) tại `src/canh_bao/loai.py` (hàm `muc_do()` tự nâng bậc cho `di_ung`, `thuoc_nti`, tập `LUON_CAO`). Định tuyến tại `src/duong_ong/b5_xep_cho_cong_rui_ro.py` (`dua_sang_xac_nhan`) và `src/duong_ong/b5_viet_ban_nhap.py` (`_muc_cho`).",
-        "Tỷ lệ bỏ sót ở khâu trích xuất (30 ca phát triển độc lập, 304 mệnh đề) giảm từ **43,1%** (Qwen3-4B chưa train) xuống **11,5%** (Qwen3-4B + adapter QLoRA, khoảng tin cậy 95%: `8,4%–15,6%`, `0` ca lỗi JSON — `docs/ket-qua/bo-sot-qwen3-4b.md`). Ở khâu khóa căn cứ, tỷ lệ thông tin không vào thân tăng từ `4,5%` lên `7,7%` ở bộ đổi người, nhưng toàn bộ số bị chặn đều nằm ở mục `CẦN XÁC NHẬN` để bác sĩ thấy ngay.",
+        "Tỷ lệ bỏ sót ở khâu trích xuất (30 ca phát triển, 304 mệnh đề, so với bộ chấm tự động) giảm từ **43,1%** (Qwen3-4B chưa train) xuống **11,5%** (Qwen3-4B + adapter QLoRA, khoảng tin cậy 95%: `8,4%–15,6%`, `0` ca lỗi JSON — `docs/ket-qua/bo-sot-qwen3-4b.md`). Ở khâu khóa căn cứ, tỷ lệ thông tin không vào thân tăng từ `4,5%` lên `7,7%` ở bộ đổi người, nhưng toàn bộ số bị chặn đều nằm ở mục `CẦN XÁC NHẬN` để bác sĩ thấy ngay.",
     ),
     (
         2, "XOÁY SÂU / BẮT BẺ", "Yêu cầu 1 BGK · Chốt chặn hoàn tất hồ sơ",
@@ -626,14 +626,14 @@ BO_22_CAU_HOI_BGK = [
         "Bộ 5.000 mẫu sinh từ khuôn có nguy cơ trùng lặp ngữ nghĩa giữa tập huấn luyện và kiểm thử. Nhóm chứng minh tính độc lập và công khai cách kiểm soát mẫu tổng hợp như thế nào?",
         "Dự án đã mở rộng kho khuôn từ 200 lên **657 khuôn ca bệnh trên 21 hệ cơ quan**, ngữ cảnh hóa câu hỏi bác sĩ, và **chia tách tập theo đơn vị KHUÔN BỆNH (`benh`) theo từng đợt** — tuyệt đối không chia ngẫu nhiên theo dòng hội thoại, nên **0 khuôn bệnh nào xuất hiện ở cả Train lẫn Dev/Test**.",
         "Hợp nhất kho khuôn tại `src/bo_du_lieu/kho_khuon.py`; chia tập tất định không rò rỉ tại `src/bo_du_lieu/chia_tap_theo_khuon.py` (kiểm chứng bằng `tests/test_chia_khuon_mo_rong_khong_doi.py` giữ nguyên mã băm vàng 200 khuôn gốc); kiểm chất lượng câu tại `tools/kiem_chat_luong_cau.py`; đo ma trận trùng lặp tại `src/do_luong/kiem_nghiem_ngoai_khuon.py`; công khai danh sách tên khuôn từng tập tại `data/manifest_v2_mo_rong_5000.json`.",
-        "Chia `515` khuôn Train (`3.925` ca) / `72` khuôn Dev (`551` ca) / `70` khuôn Test (`524` ca), giao tên khuôn = **`0`**. Trên `36.050` cặp khuôn Train–Test, Jaccard từ khóa triệu chứng trung bình chỉ **0,0587** (`p95 = 0,1172`, cặp ≥ 0,20 chỉ **0,17%**), Trigram Jaccard **0,0287**. Câu duy nhất tăng **+127%** (`20.190 -> 45.835`), lặp mọi câu giảm từ `76,92%` xuống **47,37%** (câu ≥ 8 từ: **42,19%**), trích dẫn khớp chuỗi con `52.634/52.634 (100%)`.",
+        "Chia `515` khuôn Train (`3.925` ca) / `72` khuôn Dev (`551` ca) / `70` khuôn Test (`524` ca), giao tên khuôn = **`0`**. Trên `36.050` cặp khuôn Train–Test, Jaccard từ khóa triệu chứng trung bình chỉ **0,0587** (`p95 = 0,1172`, cặp ≥ 0,20 chỉ **0,17%**), Trigram Jaccard **0,0287**. Câu duy nhất tăng **+127%** (`20.190 -> 45.835`), lặp mọi câu giảm từ `76,92%` xuống **47,37%** (câu ≥ 8 từ: **42,19%**), trích dẫn trong dữ liệu tự sinh khớp chuỗi con `52.634/52.634 (100%)` (kiểm dữ liệu huấn luyện, không phải đầu ra mô hình).",
     ),
     (
         6, "CHUYÊN SÂU", "Yêu cầu 3 BGK · Thử ngoài khuôn & ngoài nguồn",
         "Khi đem hệ thống thử trên kịch bản bệnh mới hoàn toàn ngoài kho khuôn và văn bản thực tế từ nguồn bên ngoài, kết quả ra sao và phát hiện lỗi gì?",
         "Nhóm đã thử trên 3 mức kiểm nghiệm: (1) Tập giữ lại chưa từng học (`thach_thuc_v2`; còn `viet_phat_trien` là tập phát triển); (2) 10 kịch bản bệnh hiếm ngoài kho 657 khuôn (`OOT_01..10`); và (3) 5 bộ dữ liệu tiếng Việt công khai từ bên ngoài (`ViDia2Std`, `ViHealthQA`, `ViMedAQA`, `ViMQ`, `PhoNER_COVID19`). Lưu ý rõ: bảng phương ngữ có mở rộng từ tập train `ViDia2Std` rồi đo trên `ViDia2Std/test.csv`, còn các phép đo PII/Aho-Corasick trên 4 bộ kia để phát hiện lỗ hổng thực tế.",
         "Bộ đo đa nguồn tại `tools/do_da_nguon_doc_lap.py` (lưu tại `docs/ket-qua/da-nguon-doc-lap.json`); kiểm nghiệm ngoài khuôn tại `src/do_luong/kiem_nghiem_ngoai_khuon.py`; nạp `ViMQ` tại `src/bo_du_lieu/nap_vimq.py`; đối chiếu phương ngữ `ViDia2Std` tại `src/do_luong/do_vidia2std.py` và chuẩn hóa ngữ cảnh tại `src/duong_ong/b0_chuan_hoa_phuong_ngu.py` (bảo vệ chặt thuật ngữ y khoa chuẩn như `tứ chi`, `mô mềm`, `cấy ghép`, `vô kinh`, `bờ mi`).",
-        "• **`ViDia2Std/test.csv` (1.603 câu phương ngữ 63 tỉnh, 4.264 chỗ thay từ):** đổi đúng chữ đạt **28,0% (`1.192/4.264`)**, thêm `392` chỗ khác chữ thành tổng phủ **37,1%**, lỗi từ giảm từ `30,1%` xuống **21,9%** (`doi_thua` chỉ `44`), vẫn giữ nguyên các cụm y khoa chuẩn.\n• **`ViHealthQA` (2.013), `ViMedAQA` (500), `ViMQ` (1.000), `PhoNER_COVID19` (1.000):** nạp `158` hoạt chất `tri_thuc_thuoc` giúp Aho-Corasick bắt thuốc trên `14/42` câu hỏi/đáp `ViHealthQA` và `87` mẫu `ViMedAQA` (nhãn `MED` của `ViMQ` khớp `9/334` vì đa số là thủ thuật/xét nghiệm). **Giới hạn thực tế phát hiện được trên `PhoNER_COVID19`:** đối chiếu với `847` nhãn vàng `NAME`/`PATIENT_ID`, `ClinicalDeidentifier` mới che được **`10/847` (`1,2%`)** do `PhoNER` viết mã bệnh nhân/tên viết tắt (*'bệnh nhân 416', 'bà H.T.P'*) không có khung SĐT/CCCD.\n• **Ngoài khuôn 657 bệnh:** `OOT_01..10` đúng chủ thể **52/52**, tập giữ kín `thach_thuc_v2` giữ độ nhạy **0,871**.",
+        "• **`ViDia2Std/test.csv` (1.603 câu phương ngữ 63 tỉnh, 4.264 chỗ thay từ):** đổi đúng chữ đạt **28,0% (`1.192/4.264`)**, thêm `392` chỗ khác chữ thành tổng phủ **37,1%**, lỗi từ giảm từ `30,1%` xuống **21,9%** (`doi_thua` chỉ `44`), vẫn giữ nguyên các cụm y khoa chuẩn.\n• **`ViHealthQA` (2.013), `ViMedAQA` (500), `ViMQ` (1.000), `PhoNER_COVID19` (1.000):** nạp `158` hoạt chất `tri_thuc_thuoc` giúp Aho-Corasick bắt thuốc ở `14` câu hỏi và `42` câu trả lời trên `2.013` mẫu `ViHealthQA` và `87` mẫu `ViMedAQA` (nhãn `MED` của `ViMQ` khớp `9/334` vì đa số là thủ thuật/xét nghiệm). **Giới hạn thực tế phát hiện được trên `PhoNER_COVID19`:** đối chiếu với `847` nhãn vàng `NAME`/`PATIENT_ID`, `ClinicalDeidentifier` mới che được **`10/847` (`1,2%`)** do `PhoNER` viết mã bệnh nhân/tên viết tắt (*'bệnh nhân 416', 'bà H.T.P'*) không có khung SĐT/CCCD.\n• **Ngoài khuôn 657 bệnh:** `OOT_01..10` đúng chủ thể **52/52**, tập giữ kín `thach_thuc_v2` giữ độ nhạy **0,871**.",
     ),
 
     # --- NHÓM B: KIẾN TRÚC KỸ THUẬT, MÔ HÌNH AI & MÃ NGUỒN ---
@@ -716,7 +716,7 @@ BO_22_CAU_HOI_BGK = [
         "README ghi tạo một bản nháp mất khoảng 3,5 phút trên card RTX 3060, trong khi một ca khám ngoại trú ở Việt Nam chỉ kéo dài 3–5 phút. Vậy bác sĩ có phải ngồi chờ 3,5 phút mới khám được ca tiếp theo không?",
         "**Bác sĩ chờ 0 giây để chuyển sang ca khám tiếp theo!** 3,5 phút là thời gian GPU chạy ngầm ở hậu trường, còn giao diện đã được kiến trúc bất đồng bộ theo từng mã ca (`generatingSessionId`), cho phép bác sĩ khám cuốn chiếu liên tục.",
         "Khi bác sĩ bấm tạo nháp cho Ca 1, `POST /api/generate-note` (`web/may-chu/routes/asr.ts`) đưa việc vào hàng đợi SQLite `hang-doi.ts` và trả mã `202 Accepted` kèm `jobId`. Ở `web/src/App.tsx`, tiến độ chỉ gắn với `generatingSessionId = Ca 1`; bác sĩ bấm tạo ngay Ca 2 để thu âm khám cho người tiếp theo bình thường, trên đầu trang chỉ hiện thanh báo nhỏ *'Đang tạo bản nháp nền cho một ca khám khác'*. Khi xong, kết quả tự gắn về đúng `targetId = Ca 1` (chống stale closure).",
-        "Ngoài ra, về lộ trình tối ưu kỹ thuật: 3,5 phút hiện tại là chạy qua `transformers.generate` tuần tự trên Python; khi chuyển sang engine `vLLM` hoặc `llama.cpp` với giải mã bitmask `XGrammar` cho mô hình 4B, tốc độ sinh ~800 token JSON giảm xuống còn **15–25 giây/ca** trên cùng phần cứng.",
+        "Ngoài ra, về lộ trình tối ưu kỹ thuật: 3,5 phút hiện tại là chạy qua `transformers.generate` tuần tự trên Python; khi chuyển sang engine `vLLM` hoặc `llama.cpp` với giải mã bitmask `XGrammar` cho mô hình 4B, **mục tiêu** là **15–25 giây/ca** trên cùng phần cứng (ước tính, **chưa đo**).",
     ),
     (
         18, "TRỌNG TÂM", "Tích hợp HIS bệnh viện thực tế",
@@ -753,7 +753,7 @@ BO_22_CAU_HOI_BGK = [
         "Nhóm đã sử dụng các công cụ AI hỗ trợ lập trình (Claude Code, Antigravity, Codex) như thế nào và làm sao đảm bảo mã nguồn do AI hỗ trợ không có lỗ hổng an toàn y khoa?",
         "Nhóm khai báo minh bạch trong `README.md`: phần lớn mã nguồn được viết với sự hỗ trợ của trợ lý lập trình AI **dưới sự chỉ đạo kiến trúc, đặt bất biến an toàn và kiểm tra chéo nghiêm ngặt của tác giả**.",
         "Quy trình kiểm soát gồm 3 vòng: (1) Mọi quy tắc lâm sàng đều phải có phép thử đơn vị trượt trước – qua sau (`pytest` và `tsx --test`); (2) Thực hiện các đợt **rà soát độc lập chéo** (như đợt rà soát 25/11 tìm và vá 9 lỗi che dị ứng/phủ định trong `tests/test_ra_soat_cuoi.py`, và đợt kiểm toán kiến trúc toàn diện sửa các lỗi khử định danh, FHIR, BHYT, đơn vị liều `kiem-dinh-so.ts`, khóa WORM `.anchor.json`); (3) Đối chiếu lại toàn bộ con số trong tài liệu với tệp JSON đầu ra thực tế (`docs/doi-chieu-so-lieu-bao-cao.md`).",
-        "Toàn bộ kho mã hiện vượt qua **1.960 bài kiểm thử `pytest`** (`0` lỗi) và **96 bài kiểm thử TypeScript** (`0` lỗi kiểu `tsc --noEmit`), mọi thí nghiệm đều có lệnh chạy tái lập rõ ràng.",
+        "Toàn bộ kho mã vượt qua **1.942 bài kiểm thử `pytest`**, 27 bỏ qua theo phần cứng (lần chạy 26/11/2026, `README.md`) và **96 bài kiểm thử TypeScript** (`0` lỗi kiểu `tsc --noEmit`), mọi thí nghiệm đều có lệnh chạy tái lập rõ ràng.",
     ),
 
     # --- NHÓM F: MEDITRACE BOOST — CHỐNG BURNOUT BÁC SĨ & BỆNH VIỆN VN (CÂU 23 - 28) ---
@@ -824,8 +824,8 @@ MINH_CHUNG_GIAI_QUYET = {
     19: "Thử ngay kịch bản kiểm chứng trong `NoteEditorView.tsx`: ký duyệt WORM xong (hiện `Đã ký #1`), sau đó vào sửa 1 chữ trong bệnh án hoặc đổi 1 quyết định `Giữ -> Bỏ` → `isSignOffStale()` đổi nút ngay thành **`Đã sửa · Ký lại`** vì mã băm `SHA-256` đã lệch so với bản đã ký.",
     20: "Toàn bộ hệ thống chạy cục bộ qua `python -m src.he_thong.dich_vu_http --nghi-sau-phut 10 --tran-ram-gb 10` (tự giải phóng VRAM khi nghỉ) kết hợp `node dist/server.cjs` (`< 150 MB` RAM). Không cần thuê bao GPU đám mây hay gọi API trả phí theo ca cho luồng bệnh án chính.",
     21: "Đọc trực tiếp mục *Giới hạn & Thành thật khoa học* trong `README.md` và `docs/ket-qua/canh-bao-moc-0.md`: dự án công khai cả tỷ lệ sót (`11,5%` ở bước trích) và độ phủ từ khóa thô (`12,5%`) thay vì giấu lỗi, đồng thời bổ sung Tầng 4.5 (`ActiveOmissionRecoveryEngine`) để bác sĩ khôi phục 1 chạm ngay trên ngăn duyệt.",
-    22: "Chạy trực tiếp 2 lệnh kiểm chứng độc lập trên toàn kho mã: `pytest --basetemp=D:\\temp\\pytest -q` (**1.960 passed, 27 skipped**) và `cd web; npm run lint; npm test; npm run build` (**96/96 passed, 0 lỗi TypeScript**).",
-    23: "Chứng minh ở `TranscriptView.tsx` & `DuyetBenCanh.tsx`: tải băng 15 lượt không `pyannote` → bấm **`Áp dụng vai gợi ý`** 1 lần thay vì 15 lần bấm tay; nhấn `F2` đọc *'Bụng mềm, ấn đau nhẹ hố chậu phải'* → `PhoWhisper` nội bộ chép thẳng vào `KHÁM LÂM SÀNG`; nhấn `Giữ nhanh` + `J/K/Enter` duyệt xong cả ca trong 20 giây.",
+    22: "Chạy trực tiếp 2 lệnh kiểm chứng độc lập trên toàn kho mã: `pytest --basetemp=D:\\temp\\pytest -q` (lần chạy 26/11/2026 ghi ở `README.md`: **1.942 passed, 27 skipped**) và `cd web; npm run lint; npm test; npm run build` (**96/96 passed, 0 lỗi TypeScript**).",
+    23: "Chứng minh ở `TranscriptView.tsx` & `DuyetBenCanh.tsx`: tải băng 15 lượt không `pyannote` → bấm **`Áp dụng vai gợi ý`** 1 lần thay vì 15 lần bấm tay; nhấn `F2` đọc *'Bụng mềm, ấn đau nhẹ hố chậu phải'* → `PhoWhisper` nội bộ chép thẳng vào `KHÁM LÂM SÀNG`; nhấn `Giữ nhanh` + `J/K/Enter` để duyệt (thời gian duyệt chưa đo với bác sĩ thật).",
     24: "Ví dụ thực tế: bác sĩ chỉ định *'Chụp MRI sọ não'* nhưng trong thoại chưa ghi triệu chứng thần kinh khu trú hay đau đầu → bấm **`BHYT / ICD-10`** (`BhytPrecheckModal.tsx`), hệ thống bật cảnh báo đỏ `[CẢNH BÁO XUẤT TOÁN CLS - XML3/XML5]` trước khi ký; nếu có triệu chứng `[T3]`, hệ thống tự dựng sẵn câu biện luận gắn `[T3]` để đưa vào XML5.",
     25: "Ví dụ bệnh nhân cao tuổi mang 2 vỏ thuốc `Panadol 500mg` và `Hapacol 500mg` cùng toa mới `Clopidogrel + Omeprazol`: mở **`Đơn thuốc TT26 / DDI`** → Bảng 1 báo đỏ trùng hoạt chất `Paracetamol` + tương tác `Clopidogrel ↔ Omeprazol` + điểm gánh nặng `ACB`; Bảng 2 tách riêng đơn mới chuẩn TT 26/2025 và chừa vàng `[cần bổ sung]` cho ô thiếu.",
     26: "Tắt hoàn toàn công tắc *'Mô hình ngoài'* rồi bấm nút **Tạo** (`TaoVanBanModal.tsx`) → cả 8 mẫu (*Phiếu chuyển cơ sở KCB TT 01/2025, Giấy nghỉ BHXH TT 25/2025, Tóm tắt HSBA TT 32/2023, Nhi/Sản/Cấp cứu*) đều mở sáng nhãn **`100% tại chỗ · Luật BYT`** và sinh văn bản trong `< 10 ms` (kiểm chứng tại `meditraceBoostLib.test.ts`).",
@@ -910,7 +910,7 @@ def xuat_word():
 
     # Lưới 6 ô chỉ số thực nghiệm cốt lõi (3x2)
     kpis = [
-        ("KIỂM THỬ TỰ ĐỘNG", "1.960 & 96 PASS", "1.960 bài pytest Python (27 skip tự chọn) + 96 bài test TypeScript & BFF (0 lỗi)", HEX_SAFE, HEX_BG_TEAL),
+        ("KIỂM THỬ TỰ ĐỘNG", "1.942 & 96 PASS", "1.942 bài pytest Python qua, 27 bỏ qua (lần chạy 26/11/2026) + 96 bài test TypeScript & BFF", HEX_SAFE, HEX_BG_TEAL),
         ("GIẢM TỶ LỆ BỎ SÓT", "43,1% → 11,5%", "Đo trên 30 ca phát triển ngoài khuôn (304 mệnh đề, 0 ca lỗi JSON)", HEX_BLUE, HEX_BG_BLUE),
         ("BỘ DỮ LIỆU ĐỘC LẬP V2", "657 KHUÔN BỆNH", "21 hệ cơ quan · 515 Train / 72 Dev / 70 Test · 0 khuôn giao nhau (Jaccard 5,87%)", HEX_TEAL, HEX_BG_TEAL),
         ("LỚP CẢNH BÁO LỖI", "13 NHÓM · 56 MÃ", "Độ nhạy cấy lỗi cơ bản giữ nguyên 0,871 trên 240 ca giữ kín; lỗi khó 0,889", HEX_AMBER, HEX_BG_AMBER),
@@ -993,11 +993,11 @@ def xuat_word():
 
     # Chèn bộ ảnh sơ đồ kiến trúc & minh họa giao diện nếu tồn tại trên đĩa
     cac_hinh = [
-        ("flow-1-tong-the-5-tang-guardrails.png", "Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic và các chốt kiểm soát của MediTrace Sentinel."),
+        ("so-do-flow-5-tang-meditrace.png", "Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic và các chốt kiểm soát của MediTrace Sentinel."),
         ("h13-audio-pipeline.png", "Hình 2. Đường ống xử lý âm thanh tại chỗ (VAD, PyAnnote, PhoWhisper & Trie 600 dược thư)."),
-        ("flow-2-khoa-bang-chung-k1-k7.png", "Hình 3. Cơ chế Khóa bằng chứng K1–K7 chống ảo giác và đẩy câu nghi ngờ sang CẦN XÁC NHẬN."),
-        ("flow-3-an-toan-duoc-ly-cdss.png", "Hình 4. Tầng an toàn dược lý, dị ứng chéo ATC, hiệu chỉnh liều thận CrCl/eGFR và 9 thang điểm CDSS."),
-        ("flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png", "Hình 5. Quy trình bác sĩ khám, kiểm chứng Click-to-Verify và ký duyệt bất biến WORM (< 60 giây)."),
+        ("flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png", "Hình 3. Cơ chế Khóa bằng chứng K1–K7 chống ảo giác và đẩy câu nghi ngờ sang CẦN XÁC NHẬN."),
+        ("flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png", "Hình 4. Tầng an toàn dược lý, dị ứng chéo ATC, hiệu chỉnh liều thận CrCl/eGFR và 9 thang điểm CDSS."),
+        ("flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png", "Hình 5. Quy trình bác sĩ khám, kiểm chứng Click-to-Verify và ký duyệt bất biến WORM."),
         ("giao-dien-ban-lam-viec-bac-si-nut-moi.png", "Hình 6. Minh họa giao diện làm việc của bác sĩ với các công cụ hỗ trợ lâm sàng & kiểm chứng."),
     ]
     for ten_hinh, chu_thich in cac_hinh:
@@ -1038,7 +1038,7 @@ def xuat_word():
         "Tra cứu nhanh tệp nguồn, hàm/lớp xử lý và cơ chế bên trong khi Ban Giám khảo hỏi sâu vào code",
     )
 
-    them_muc_con(doc, "2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.960 bài kiểm thử pytest)")
+    them_muc_con(doc, "2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.942 bài kiểm thử pytest qua, lần chạy 26/11/2026)")
     them_bang(
         doc,
         ["Phân hệ chức năng", "Đường dẫn tệp mã nguồn", "Lớp / Hàm cốt lõi", "Giải thích cơ chế hoạt động trong code"],
@@ -1201,13 +1201,13 @@ def xuat_markdown():
         "",
         "### 1.1. Sơ đồ kiến trúc & Ảnh minh họa giao diện",
         "",
-        "![Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic](hinh/flow-1-tong-the-5-tang-guardrails.png)",
+        "![Hình 1. Sơ đồ tổng thể đường ống tách bước Neuro-Symbolic](hinh/so-do-flow-5-tang-meditrace.png)",
         "",
         "![Hình 2. Đường ống xử lý âm thanh tại chỗ](hinh/h13-audio-pipeline.png)",
         "",
-        "![Hình 3. Cơ chế Khóa bằng chứng K1–K7](hinh/flow-2-khoa-bang-chung-k1-k7.png)",
+        "![Hình 3. Cơ chế Khóa bằng chứng K1–K7](hinh/flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png)",
         "",
-        "![Hình 4. Tầng an toàn dược lý & CDSS](hinh/flow-3-an-toan-duoc-ly-cdss.png)",
+        "![Hình 4. Tầng an toàn dược lý & CDSS](hinh/flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png)",
         "",
         "![Hình 5. Quy trình bác sĩ khám & Click-to-Verify](hinh/flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png)",
         "",
@@ -1220,7 +1220,7 @@ def xuat_markdown():
         "",
         "## PHẦN 2: BẢN ĐỒ MÃ NGUỒN CHI TIẾT (\"CHỨC NĂNG NÀY ĐỂ CODE Ở ĐÂU?\")",
         "",
-        "### 2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.960 bài kiểm thử `pytest`)",
+        "### 2.1. Tầng Lõi Python (`src/`, `tools/`, `tests/` — 1.942 bài kiểm thử `pytest` qua, lần chạy 26/11/2026)",
         "",
         "| Phân hệ chức năng | Đường dẫn tệp mã nguồn | Lớp / Hàm cốt lõi | Giải thích cơ chế hoạt động trong code |",
         "| :--- | :--- | :--- | :--- |",

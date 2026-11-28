@@ -40,3 +40,49 @@ và câu "các tỷ lệ 100% đo khả năng bắt lỗi có chủ đích". Đ�
   ban giám khảo, cần sửa Mức 1 trước.
 - Các tệp `.docx` ở gốc repo và trong `docs/tai-lieu/` được sinh bằng `tools/tao_*.py`, trong đó số được gõ
   thẳng vào mã. Sửa `.md` mà không sửa mã sinh Word thì `.docx` vẫn giữ số cũ.
+
+## Đã áp dụng (28/11/2026)
+
+Nguồn số thay thế: `README.md` mục "Kết quả đo", `docs/final/Báo cáo dự án.md` mục 4.1–4.4, `docs/ket-qua/canh-bao.json`,
+`docs/ket-qua/cay-loi.md`, `docs/ket-qua/da-nguon-doc-lap.json`. Số không có nguồn bị gỡ hoặc ghi "chưa đo".
+
+### Tài liệu chữ
+
+| Tệp | Đã sửa |
+|---|---|
+| `docs/tai-lieu/BANG_SO_LIEU_THUC_NGHIEM_CHI_TIET.md` + bản ở gốc repo | Viết lại. Bảng 1: bỏ nhánh A/A+/B/C/C_KHOÁ/D bịa (12,4% → 2,1%, 11,5% → 0,8%, 14,8% → 0,4%, SER 68,2/31,2, F1 51,4 → 76,5, "5.000 ca độc lập", "an toàn tuyệt đối", "giảm 93%"); thay bằng bảng 3 phương án × 4 bộ đã đo, 11,48% → 0,80%, bỏ sót 4,5% → 7,7%, nhánh A ghi đúng người cao hơn (0,939 so với 0,748), nhánh D "chưa đo"; 0/30.136 kèm điều kiện (độ phủ 0,95; chặn thừa 8,0% C / 10,0% D); lọt lỗi nguy hiểm D 11,8% trên tập phát triển. Bảng 2: bỏ cột GPT-4o/Gemini/Claude/Llama, chi phí API, "0,0% ảo giác", "0,8% lọt", "Paracetamol 0,0% bỏ sót", "vi phạm Nghị định 13"; thay bằng phép đo duy nhất (173/300 ca: 1,4% so với 7,6%; 15,4% so với 22,9% — thương mại tốt hơn) và kế hoạch Task 6. Bảng 3 (ASR 500 đoạn) bỏ, thay bằng số VietMed có nguồn. Bảng 4 (ngoài khuôn 72,4/70,8/97,9…) bỏ. Bảng 5 bỏ % độ nhạy/đặc hiệu, ghi "phép thử đơn vị". Bảng 6 bỏ mọi số, giữ thiết kế. "Triệt tiêu 100% ảo giác trích dẫn" → kiểm dữ liệu tự sinh, `FABRICATED_QUOTE` 17 lần. |
+| `docs/tai-lieu/Q_AND_A_BAN_GIAM_KHAO.md` + bản ở gốc | Câu 2: thêm phép đo thương mại 1,4%/7,6%, bỏ "vi phạm Nghị định 13" → Luật 91/2025/QH15 + NĐ 356/2025. 0/30.136 kèm điều kiện; 11,8% ghi "lạc quan"; 1.974/25 → 1.942/27 (README); F1 66,1 → 70,8 ghi rõ bộ đổi chủ thể + nhánh A 0,939/0,748; ViHealthQA "14/42" → 14 câu hỏi và 42 câu trả lời trên 2.013 mẫu; 52.634/52.634 ghi là kiểm dữ liệu tự sinh. |
+| `docs/tai-lieu/SO_DO_FLOW_HE_THONG_MEDITRACE.md` | Bỏ 12,4% → 2,1% ("giảm 6 lần"), 11,5% → 0,8%, "0,0% chặn nhầm" không điều kiện, "bỏ sót dị ứng 0,0%" (→ chưa đo), 1.528/1.330 tests và các nhóm số test bịa (→ 1.942/27 + 96 TS), "30–45 giây" (→ ~3,5 phút RTX 3060), "20s/1s/<60 giây/5–7 phút" (→ chưa đo), NĐ 13. Thêm kết quả không có lợi (thương mại 1,4%/7,6%, nhánh A 0,939/0,748). |
+| `docs/tai-lieu/GIAI_THICH_TOAN_DIEN_DU_AN_MEDITRACE_SENTINEL.md`, `GIAI_THICH_DU_AN_MEDITRACE_SENTINEL.md` | Thêm đoạn "bảng so sánh là thiết kế, không phải đo" + 1,4%/7,6%, 15,4%/22,9%, 0,939/0,748; 1.960+ → 1.942/27; ViHealthQA 14/42 sửa; 100% trích dẫn ghi là dữ liệu tự sinh; NĐ 13 → luật mới. |
+| `docs/tai-lieu/CAM_NANG_KIEN_TRUC_MA_NGUON_VA_PHAN_BIEN_BGK_2026.md` | 1.960 → 1.942; "15–30 giây", "20 giây" duyệt → chưa đo; "15–25 giây/ca" → mục tiêu chưa đo; NĐ 13 → luật mới; ViHealthQA sửa; 52.634 kèm điều kiện; ảnh trỏ sang `so-do-flow-5-tang-meditrace.png`, `flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png`, `flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png`. |
+| `docs/tai-lieu/HANDOVER.md`, `MINH_CHUNG_NANG_CAP_VA_LICH_SU_LENH.md`, `BANG_KE_KHAI_MA_NGUON_VA_LICH_SU_LENH.md` (+ bản ở gốc), `NHAT_KY_LOI_NHAC_VA_KHAI_MA_NGUON.md` (cả 2 bản), `docs/tai-lieu/Kê khai mã nguồn.md`, `docs/final/Kê khai mã nguồn.md` | NĐ 13 như luật hiện hành → Luật 91/2025/QH15 + NĐ 356/2025 hoặc bỏ; "1.330 (100% PASSED)" → ghi rõ là lần chạy 17/10 kèm 1.942/27 của 26/11; "1.779 test, 43 TS" → 1.942 + 96; "làm sạch 100%" bỏ chữ 100%. |
+| `docs/final/Báo cáo dự án.md` | Mục 4.8: "1.330 … 100%" → lần chạy 18/10 + 26/11; "phát hiện chính xác 100%" DDI/eGFR, "sai số tuyệt đối bằng 0" → "vượt qua phép thử đơn vị, chưa đo trên tập độc lập"; "ẩn danh 100%, không rò rỉ" → phép thử đơn vị + PhoNER 10/847 (1,2%). NĐ 13 (6 chỗ) → luật mới. |
+| `docs/GIOI-THIEU-DU-AN-MEDITRACE.md` | Ghi Bảng 2/Bảng 6 đã gỡ; "0,0% ảo giác" → không có phép đo (`FABRICATED_QUOTE` 17 lần); thêm số test 26/11. |
+| `docs/HO_SO_DU_LIEU_DATASHEET.md`, `docs/HOI_DAP_BGK.md` | NĐ 13 → Luật 91/2025/QH15 + NĐ 356/2025, bỏ ý "vi phạm". |
+
+### Mã sinh ảnh/Word và ảnh
+
+Đã sửa số trong `tools/tao_word_bang_thuc_nghiem.py`, `ve_bang_doi_chung_thuc_nghiem.py`, `tao_bo_anh_flow_meditrace.py`,
+`ve_so_do_flow_5_tang_meditrace.py`, `ve_so_do_so_sanh_nhanh.py`, `ve_so_do_tong_the_cac_tang.py`,
+`ve_slide_problem_evidence_meditrace.py`, `tao_word_so_do_flow.py`, `tao_bao_cao_word_chi_tiet.py`,
+`tao_bao_cao_nang_cap_word.py`, `tao_word_minh_chung_lenh.py`, và `tao_cam_nang_giai_thich_va_qna_word.py` (mã này cũng ghi
+đè `CAM_NANG….md`, nên đã sửa cùng nội dung). Đã sinh lại và xem từng ảnh trong `docs/tai-lieu/hinh/`:
+`bang-doi-chung-thuc-nghiem.png`, `so-do-so-sanh-cac-nhanh.png`, `so-do-flow-5-tang-meditrace.png` (+ `h1-duong-ong.png`),
+`so-do-tong-the-cac-tang.png`, `slide-problem-evidence-meditrace.png`, 7 ảnh `flow-1…flow-7`. Ba ảnh không có mã sinh
+(`flow-1-tong-the-5-tang-guardrails.png`, `flow-2-khoa-bang-chung-k1-k7.png`, `flow-3-an-toan-duoc-ly-cdss.png`) và ảnh
+thừa `flow-4-so-sanh-doi-dau-chatgpt-vs-meditrace.png` được chép đè bằng ảnh đã sửa tương ứng.
+
+### Chưa sửa được
+
+- 5 tệp do phiên khác đang sửa: `BAO_CAO_CAI_TIEN_CHANG_1.md` (dòng 20: "100% trích dẫn chuỗi con" thiếu điều kiện dữ liệu
+  tự sinh; dòng 241: "1.960+" khác README 1.942), `docs/tai-lieu/Bao_Cao_Nghien_Cuu_Khoa_Hoc_MediTrace_Sentinel.md`
+  (dòng 21, 153, 167, 180, 319, 362: NĐ 13; 21, 316: "1.330 … 100%"; 317–319: "chính xác 100%" DDI/eGFR/ẩn danh),
+  `docs/tai-lieu/Báo cáo dự án.md` (dòng 8, 203, 214, 227, 241, 251, 362, 392, 410: NĐ 13; 8, 359: "1.330 … 100%";
+  360–362: "chính xác 100%"), `tools/bo_sung_nckh_thang_10.py` (191–193, 224, 241, 261, 301–307, 329) và
+  `tools/nang_cap_bao_cao_chuan.py` (18, 205–207, 231, 246, 265, 316–322, 357, 372) — cùng các câu trên. Sửa theo
+  mục 4.8 của `docs/final/Báo cáo dự án.md` bản mới.
+- Nhật ký lệnh/lời nhắc (câu người dùng gõ "theo nghị định 13", thông điệp commit "1.330 automated tests", dòng nhật ký
+  I2 "78.3%" ở `BANG_KE_KHAI…:125`, `NHAT_KY_MA_NGUON…:30`) giữ nguyên vì là trích dẫn lịch sử.
+- Số liệu từ tài liệu ngoài trong `ve_slide_problem_evidence_meditrace.py` (70%, 18%/11,5%, 5,3%, 44%, 1,47%) chưa kiểm được
+  với bài gốc. Các số "43/43 test TS", "< 10 ms" trong `CAM_NANG…` chưa đối chiếu với lần chạy.
+- Tệp `.docx` đã nộp trong `docs/final/` và `docs/tai-lieu/` chưa sinh lại hết; chạy lại các mã `tools/tao_*.py` trước khi nộp.

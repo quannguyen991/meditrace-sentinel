@@ -205,7 +205,7 @@ def tao_word_so_do_flow():
         "TỔNG QUAN KIẾN TRÚC HỆ THỐNG",
         "Tài liệu này tập hợp đầy đủ Bộ 7 Sơ đồ lưu đồ quy trình xử lý (16:9 Full HD) "
         "mô tả chi tiết đường ống dữ liệu: từ khi thu nhận tín hiệu âm thanh cuộc khám, "
-        "qua các bước ẩn danh hóa thông tin theo Nghị định 13/2023/NĐ-CP, xử lý đính chính khi người nói sửa lời, "
+        "qua các bước ẩn danh hóa thông tin cá nhân, xử lý đính chính khi người nói sửa lời, "
         "quy trình kiểm tra logic 7 bước (K1-K7) chống sai lệch thông tin, "
         "đến các bước kiểm soát an toàn đơn thuốc, đối chứng thực nghiệm và quy trình bác sĩ kiểm tra, ký duyệt.",
         "F0FDF4", "16A34A"
@@ -231,11 +231,11 @@ def tao_word_so_do_flow():
         
     toc_data = [
         ("Flow 1", "Thu âm, Phiên âm Tiếng nói (ASR) & Trích xuất JSON", "Bôi đỏ cảnh báo tên thuốc nhận diện chưa chắc chắn, yêu cầu bác sĩ duyệt"),
-        ("Flow 2", "Ẩn danh hóa NĐ 13, Xử lý Đính chính & Dựng SOAP", "Tự động thay thế thông tin cũ khi người nói sửa lời, lọc câu dặn dò tương lai"),
+        ("Flow 2", "Ẩn danh hóa, Xử lý Đính chính & Dựng SOAP", "Tự động thay thế thông tin cũ khi người nói sửa lời, lọc câu dặn dò tương lai"),
         ("Flow 3", "Quy trình Kiểm tra Tự động 7 Bước (K1-K7)", "Xác minh nguồn gốc từng câu trích dẫn, phân luồng: Đạt chuẩn vs. Bôi đỏ chờ duyệt"),
         ("Flow 4", "Kiểm soát An toàn Đơn thuốc, Liều tối đa & CDSS", "Kiểm tra tương tác thuốc (DDI), liều tối đa Paracetamol (4g/ngày), tính eGFR thận"),
         ("Flow 5", "So sánh Phương pháp: Mô hình Tự do vs. MediTrace", "Phân tích khác biệt về an toàn, bảo mật dữ liệu tại chỗ, độ chính xác và kiểm tra nguồn"),
-        ("Flow 6", "Dữ liệu Thực nghiệm & Quy trình Kiểm thử 1.330 Test", "200 khuôn ca bệnh độc lập, 5.000 hội thoại mô phỏng, 100% bài kiểm thử đạt kết quả"),
+        ("Flow 6", "Dữ liệu Thực nghiệm & Kiểm thử Tự động", "657 khuôn ca bệnh chia theo khuôn, 5.000 hội thoại mô phỏng, 1.942 bài pytest qua (README.md)"),
         ("Flow 7", "Quy trình Bác sĩ Sử dụng trong Ca khám (< 60 Giây)", "5 bước thuận tiện, rà soát cảnh báo bôi đỏ 20s, nghe lại âm thanh gốc 1s, ký duyệt EMR"),
     ]
     for i, (f_id, f_name, f_safe) in enumerate(toc_data):
@@ -286,7 +286,7 @@ def tao_word_so_do_flow():
 
     # ========================== FLOW 2 ==========================
     doc.add_page_break()
-    add_heading_1(doc, "FLOW 2: Ẩn danh hóa Dữ liệu NĐ 13, Xử lý Đính chính Lời nói & Dựng Bệnh án SOAP")
+    add_heading_1(doc, "FLOW 2: Ẩn danh hóa Dữ liệu, Xử lý Đính chính Lời nói & Dựng Bệnh án SOAP")
     f2_img = hinh_dir / "flow-2-dinh-chinh-fsm-va-benh-an-soap.png"
     if f2_img.is_file():
         doc.add_picture(str(f2_img), width=Inches(6.8))
@@ -295,7 +295,7 @@ def tao_word_so_do_flow():
     add_callout(
         doc,
         "ĐIỂM TRỌNG TÂM CỦA FLOW 2 (XỬ LÝ ĐÍNH CHÍNH & BẢO MẬT)",
-        "1. Bảo vệ dữ liệu cá nhân: Tự động che số CCCD, họ tên, số điện thoại, địa chỉ theo Nghị định 13/2023/NĐ-CP.\n"
+        "1. Bảo vệ dữ liệu cá nhân: Tự động che số CCCD, họ tên, số điện thoại, địa chỉ trước khi lưu (Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP).\n"
         "2. Xử lý khi bệnh nhân sửa lại lời nói: Khi người bệnh nói nhầm rồi sửa lại ('Uống 3 viên... à nhầm 1 viên thôi'), "
         "hệ thống tự động loại bỏ thông tin cũ đã bị thay thế, giảm 14 lần sai sót do lưu nhầm thông tin cũ.",
         "F0F9FF", "0284C7"
@@ -371,25 +371,26 @@ def tao_word_so_do_flow():
     add_callout(
         doc,
         "ĐIỂM TRỌNG TÂM CỦA FLOW 5 (SO SÁNH HAI PHƯƠNG PHÁP XỬ LÝ)",
-        "So sánh trên các tiêu chí quan trọng trong y tế: Nguy cơ sinh thông tin sai lệch (0.0% vs 5.2%), "
-        "Lưu vết nguồn gốc câu thoại (100% có mã câu thoại vs không có), "
-        "Bảo vệ dữ liệu y tế (xử lý tại chỗ theo NĐ 13 vs gửi dữ liệu lên máy chủ nước ngoài), "
+        "Chưa chạy so sánh với mô hình thương mại; phép đo duy nhất: mô hình thương mại ghi nhầm người 1,4% so với 7,6% "
+        "của mô hình dự án (bộ tự sửa) — mô hình thương mại tốt hơn. So sánh dưới đây là về cách thiết kế: "
+        "Lưu vết nguồn gốc câu thoại (mỗi dòng có mã câu thoại vs văn xuôi không có), "
+        "Dữ liệu cá nhân (chạy tại chỗ nên dữ liệu không cần rời phòng khám vs gửi lên máy chủ bên ngoài), "
         "Kiểm tra an toàn đơn thuốc (tự động kiểm tra liều tối đa và tương tác vs không kiểm tra), "
-        "Xử lý khi bệnh nhân sửa lời (tự động thay thế 0.8% sai sót vs giữ nhầm tin cũ 18.3%).",
+        "Xử lý khi bệnh nhân sửa lời (bản cũ còn giữ 11,48% -> 0,80% so với chỉ tách thông tin, bộ tự sửa 60 ca).",
         "F0F9FF", "0284C7"
     )
     
     f5_steps = [
         ("Nguồn gốc thông tin", "Mô hình đám mây không chỉ ra được dòng nào do ai nói; MediTrace lưu rõ mã số câu thoại [Ti] cho từng nội dung.", "Lưu vết câu thoại gốc (Turn ID)", "Dễ dàng tra cứu lại câu nói gốc"),
         ("Kiểm soát thông tin sai", "Mô hình tự do dễ tự điền số liệu khi gặp ca phức tạp; MediTrace kiểm định qua quy trình 7 bước.", "Kiểm tra logic xác định độc lập", "Đảm bảo tính xác thực của hồ sơ"),
-        ("Bảo mật dữ liệu y tế", "Mô hình đám mây gửi dữ liệu ra máy chủ bên ngoài; MediTrace xử lý hoàn toàn tại máy tính phòng khám.", "Vận hành cục bộ (On-premise)", "Bảo mật thông tin người bệnh theo NĐ 13"),
+        ("Bảo mật dữ liệu y tế", "Mô hình đám mây gửi dữ liệu ra máy chủ bên ngoài; MediTrace xử lý hoàn toàn tại máy tính phòng khám.", "Vận hành cục bộ (On-premise)", "Dữ liệu người bệnh không cần rời phòng khám"),
         ("An toàn đơn thuốc", "Mô hình tự do không tự cộng dồn liều khi kê nhiều biệt dược; MediTrace có module dược lý tự động kiểm tra.", "Module kiểm soát an toàn đơn thuốc", "Ngăn ngừa nguy cơ quá liều thuốc"),
     ]
     add_step_table(doc, f5_steps)
 
     # ========================== FLOW 6 ==========================
     doc.add_page_break()
-    add_heading_1(doc, "FLOW 6: Dữ liệu Thực nghiệm & Quy trình Kiểm thử Tự động (1.330 Trường hợp Kiểm thử)")
+    add_heading_1(doc, "FLOW 6: Dữ liệu Thực nghiệm & Kiểm thử Tự động")
     f6_img = hinh_dir / "flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png"
     if f6_img.is_file():
         doc.add_picture(str(f6_img), width=Inches(6.8))
@@ -398,8 +399,8 @@ def tao_word_so_do_flow():
     add_callout(
         doc,
         "ĐIỂM TRỌNG TÂM CỦA FLOW 6 (KẾT QUẢ KIỂM ĐỊNH TOÀN DIỆN)",
-        "Toàn bộ 1.330 trường hợp kiểm thử tự động (Unit, Integration, Regression Tests) chạy tự động qua đường ống CI/CD "
-        "đạt kết quả thành công 100%. Bộ dữ liệu thiết kế theo nguyên tắc độc lập (200 khuôn ca bệnh độc lập), "
+        "Lần chạy 26/11/2026: 1.942 bài pytest qua, 27 bỏ qua theo phần cứng (README.md). Kiểm thử đơn vị không phải tỷ lệ chính xác "
+        "trên bệnh nhân thật. Bộ dữ liệu chia theo khuôn bệnh (657 khuôn: 515 huấn luyện / 72 phát triển / 70 kiểm tra), "
         "chứng minh hệ thống vận hành ổn định và có khả năng khái quát tốt trên các ca bệnh mới.",
         "F0FDF4", "16A34A"
     )
@@ -408,7 +409,7 @@ def tao_word_so_do_flow():
         ("200 Khuôn Ca bệnh Độc lập", "Tách biệt hoàn toàn ca bệnh kiểm thử với dữ liệu huấn luyện", "Nguyên tắc thiết kế Template-Disjoint", "Đảm bảo tính khách quan khi đánh giá"),
         ("5.000 Hội thoại Mô phỏng", "Tổ hợp bệnh nền, từ ngữ địa phương 3 miền, cách gọi thuốc dân gian", "Mô phỏng đa biến thể ngữ cảnh", "Phản ánh sát thực tế giao tiếp khám bệnh"),
         ("300 Ca Bẫy Sai sót", "Kiểm thử các tình huống nói nhầm, tiếng ồn, tương tác thuốc nguy hiểm", "Khung kiểm thử thử thách (Adversarial Testing)", "Đo lường độ chịu lỗi và tính ổn định"),
-        ("Quy trình CI/CD 1.330 Test", "Tự động chạy kiểm thử hồi quy trước mỗi lần cập nhật mã nguồn", "Hệ thống kiểm thử tự động PyTest", "1.330 PASSED (100% đạt kết quả)"),
+        ("Kiểm thử tự động", "Chạy kiểm thử hồi quy trước mỗi lần cập nhật mã nguồn", "Hệ thống kiểm thử tự động PyTest", "1.942 qua / 27 bỏ qua (README.md, 26/11/2026)"),
     ]
     add_step_table(doc, f6_steps)
 
@@ -423,16 +424,16 @@ def tao_word_so_do_flow():
     add_callout(
         doc,
         "ĐIỂM TRỌNG TÂM CỦA FLOW 7 (TỐI ƯU HÓA QUY TRÌNH LÀM VIỆC CỦA BÁC SĨ)",
-        "Bác sĩ chỉ cần dành khoảng 20 giây xem cột BÔI ĐỎ cảnh báo và 1 giây bấm nghe lại âm thanh gốc khi cần đối chiếu. "
+        "Bác sĩ xem cột BÔI ĐỎ cảnh báo và bấm nghe lại âm thanh gốc khi cần đối chiếu (thời gian thao tác chưa đo với bác sĩ thật). "
         "Giảm đáng kể thời gian nhập liệu thủ công, giúp bác sĩ tập trung thăm khám người bệnh, "
         "hồ sơ được niêm phong mã hóa SHA-256 trước khi chuyển sang hệ thống quản lý bệnh viện (EMR).",
         "F0F9FF", "0284C7"
     )
     
     f7_steps = [
-        ("Bước 1: Khám bệnh (3-5 phút)", "Bác sĩ tập trung giao tiếp và khám cho người bệnh, hệ thống tự động tiếp nhận âm thanh", "Thu âm thụ động tại chỗ trên máy tính", "Thu nhận đầy đủ ngữ cảnh cuộc khám"),
-        ("Bước 2: Lập Bản nháp (30 giây)", "Hệ thống tự động dựng bản nháp SOAP có cấu trúc kèm số thứ tự câu thoại", "Đường ống xử lý tự động đa tầng", "Bản nháp SOAP hiển thị sẵn sàng"),
-        ("Bước 3: Rà soát Cảnh báo (20 giây)", "Bác sĩ xem nhanh mục CẦN BÁC SĨ XÁC NHẬN (tên thuốc nghi ngờ, cảnh báo tương tác)", "Giao diện hiển thị trực quan các điểm bôi đỏ", "Phát hiện ngay điểm cần lưu ý"),
+        ("Bước 1: Khám bệnh", "Bác sĩ tập trung giao tiếp và khám cho người bệnh, hệ thống tự động tiếp nhận âm thanh", "Thu âm thụ động tại chỗ trên máy tính", "Thu nhận đầy đủ ngữ cảnh cuộc khám"),
+        ("Bước 2: Lập Bản nháp (~3,5 phút trên RTX 3060)", "Hệ thống tự động dựng bản nháp SOAP có cấu trúc kèm số thứ tự câu thoại", "Đường ống xử lý tự động đa tầng", "Bản nháp SOAP hiển thị sẵn sàng"),
+        ("Bước 3: Rà soát Cảnh báo", "Bác sĩ xem nhanh mục CẦN BÁC SĨ XÁC NHẬN (tên thuốc nghi ngờ, cảnh báo tương tác)", "Giao diện hiển thị trực quan các điểm bôi đỏ", "Phát hiện ngay điểm cần lưu ý"),
         ("Bước 4-5: Ký duyệt & In hướng dẫn", "Bác sĩ bấm nghe lại âm thanh đối soát nếu cần, bấm ký duyệt và in phiếu hướng dẫn", "Mã hóa băm SHA-256 & Chuẩn tích hợp HL7 FHIR", "Bệnh án điện tử chính thức hoàn tất"),
     ]
     add_step_table(doc, f7_steps)
@@ -450,7 +451,7 @@ def tao_word_so_do_flow():
         "KẾT LUẬN TOÀN BỘ BÁO CÁO SƠ ĐỒ FLOW",
         "Bộ 7 Sơ đồ Lưu đồ quy trình cùng bảng đối chứng thực nghiệm cung cấp bằng chứng kỹ thuật và trực quan toàn diện "
         "về tính khả thi, độ tin cậy và mức độ an toàn của hệ thống MediTrace Sentinel. "
-        "Hệ thống đã sẵn sàng 100% để báo cáo trước Hội đồng Giám khảo và triển khai ứng dụng thực tế.",
+        "Các số đo và giới hạn được ghi tại README.md mục 'Kết quả đo'; hệ thống chưa được thử với bác sĩ và hội thoại thật.",
         "F0FDF4", "16A34A"
     )
 

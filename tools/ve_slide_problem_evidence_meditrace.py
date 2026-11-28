@@ -133,13 +133,13 @@ def ve_slide_thuyet_trinh():
     # Hộp bóc mẽ cạm bẫy lâm sàng
     hop(ax, 6.75, 1.65, 5.2, 3.65, "CÁC CẠM BẪY LÂM SÀNG BỊ 'GIẤU' KÍN",
         "Mô hình viết cả bài văn dài khiến bác sĩ đọc lướt không thể nhận ra:\n\n"
-        "• Tráo đổi chủ thể (12.4%): Tiền sử người nhà bị gán thành của bệnh nhân\n"
+        "• Tráo đổi chủ thể: Tiền sử người nhà bị gán thành của bệnh nhân\n"
         "   ('Bố em bị hen' -> ghi thành 'Bệnh nhân có tiền sử hen phế quản')\n"
-        "• Đảo ngược khẳng định/phủ định: 30% ảo giác thuộc nhóm phủ định\n"
+        "• Đảo ngược khẳng định/phủ định ( 'không sốt' -> 'sốt')\n"
         "• Biến câu điều kiện thành sự thật: 'Nếu sốt thì uống' -> ghi 'đang sốt'\n"
         "• Giữ lại thông tin đã đính chính: Giữ thuốc cũ dù lượt sau đã đổi\n"
-        "• Mù câu hỏi tự soát: Thêm prompt 'Check your answer' vẫn lọt 9.8% lỗi\n"
-        "• ROUGE cao giả tạo: Vẫn đạt ~1.0000 dù bệnh án sai chết người!",
+        "• Tự soát bằng prompt 'Check your answer': dự án chưa đo\n"
+        "• ROUGE mù lỗi: đổi chỗ bệnh nhân và người nhà vẫn đạt ROUGE-1 1,0000",
         vien=C_DANGER, nen=C_DANGER_BG, co_td=10, co_nd=8.2, mau_td=C_DANGER)
 
     # ========================== 4. CỘT 3 (PHẢI): GIẢI PHÁP ĐƯỜNG ỐNG 5 TẦNG MEDITRACE ==========================
@@ -153,7 +153,7 @@ def ve_slide_thuyet_trinh():
     cac_tang = [
         ("TẦNG 1: Rút mệnh đề nguyên tử (AI)", "AI không viết văn xuôi; chỉ trích JSON + câu trích bằng chứng", C_AI, C_AI_BG),
         ("TẦNG 2: Gom & Gán chủ thể (Luật)", "Định danh Bệnh nhân vs Người nhà (chặn lỗi tráo tiền sử)", C_RULE, C_RULE_BG),
-        ("TẦNG 3: Cập nhật & Quan hệ (Luật)", "Theo dõi đính chính, tự sửa (11.5% lỗi tự sửa giảm còn 0.8%)", C_RULE, C_RULE_BG),
+        ("TẦNG 3: Cập nhật & Quan hệ (Luật)", "Theo dõi đính chính, tự sửa (bản cũ còn giữ 11,48% -> 0,80%)", C_RULE, C_RULE_BG),
         ("TẦNG 4: Khóa bằng chứng (7 cổng K1-K7)", "Chặn điều kiện & K7 chặn thông tin cũ bị đè (Superseded)", C_DANGER, C_DANGER_BG),
         ("TẦNG 5: Cổng rủi ro lâm sàng & Xếp chỗ", "Tách bạch: Thân bản nháp vs Mục Cần bác sĩ xác nhận", C_SAFE, C_SAFE_BG),
     ]
@@ -167,7 +167,7 @@ def ve_slide_thuyet_trinh():
 
     # Output Card
     hop(ax, 12.75, 1.65, 5.7, 1.05, "ĐẦU RA BỆNH ÁN MINH BẠCH & AUDIT TRAIL",
-        "• Bác sĩ duyệt bệnh án trong 30 giây (mỏ neo câu trích đến từng lượt nói)\n"
+        "• Bác sĩ duyệt từng dòng nhờ mỏ neo câu trích đến từng lượt nói\n"
         "• Khâu 6: Gợi ý tối đa 3 câu hỏi làm rõ nếu có mâu thuẫn cần xác nhận.",
         vien=C_SAFE, nen=C_SAFE_BG, co_td=9.5, co_nd=8.2, mau_td=C_SAFE)
 
@@ -177,9 +177,9 @@ def ve_slide_thuyet_trinh():
     ax.add_patch(khung_bot)
 
     so_sanh_text = (
-        "[*] ĐỐI CHỨNG THỰC NGHIỆM (KHI DÙNG CÙNG MÔ HÌNH VÀ CÙNG BỘ CA BỆNH):\n"
-        "• Rò rỉ sai chủ thể (Wrong-subject): Sinh thẳng A (12.4%) -> Tự soát A+ (9.8%) -> MediTrace C_khoá (2.1% — Giảm 83% rủi ro!)\n"
-        "• F1 đạt 70.8%, SER giảm từ 45.4% xuống 36.9% | Tỷ lệ chặn oan (False-block rate) cực thấp <= 1% (0/30.136 dòng kiểm thử)."
+        "[*] SỐ ĐO CỦA DỰ ÁN (dữ liệu mô phỏng, bộ chấm tự động; nguồn: docs/final/Báo cáo dự án.md mục 4.1):\n"
+        "• Bộ đổi chủ thể 80 ca: nhầm người 22,0% -> 17,9%, F1 66,1 -> 70,8, SER 45,4 -> 36,9 so với chỉ tách thông tin. Sinh thẳng (A) vẫn ghi đúng người cao hơn: 0,939 so với 0,748.\n"
+        "• Chặn nhầm 0/30.136 chỉ đúng vì đáp án chép gần nguyên văn hội thoại (độ phủ 0,95); trên đầu ra mô hình thật chặn thừa 8,0-10,0%."
     )
     ax.text(0.75, 0.72, so_sanh_text, ha="left", va="center", fontsize=9.2, color="#F8FAFC", linespacing=1.35)
 

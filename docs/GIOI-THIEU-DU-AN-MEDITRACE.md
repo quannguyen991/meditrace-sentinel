@@ -85,13 +85,13 @@ Trình duyệt ──> web/server.ts (Express, cổng 3000)
 - Các số trong nhật ký và bảng 6 bảng thực nghiệm chỉ là bản ghi của các lần chạy trước 03/10 trên dữ liệu mô phỏng. Chưa đo lại sau các nâng cấp 04–06/10.
 
 **Chưa đủ căn cứ trong repo:**
-- **Bảng 2 của `BANG_SO_LIEU_THUC_NGHIEM_CHI_TIET.md`** so MediTrace với GPT-4o, Gemini 1.5 Pro, Claude 3.5 Sonnet và Llama-3-8B, kèm tỉ lệ ảo giác và chi phí API. Không có tệp nào trong `src/` hay `tests/` chạy các mô hình này. Các con số này chỉ xuất hiện trong tài liệu và `tools/tao_word_bang_thuc_nghiem.py`. **Không nên đưa ra trình bày khi chưa có lần chạy ghi lại.**
-- **Bảng 6** mô tả thử nghiệm lâm sàng với 10 bác sĩ. Trong dự án không có dữ liệu hay tệp nào tương ứng. **Cần sửa thành đề xuất, không phải kết quả.**
-- Tỉ lệ "0,0% ảo giác" của MediTrace đúng theo thiết kế của cổng K1 (trích dẫn phải khớp lượt thoại), nhưng chưa đo trên bộ dữ liệu độc lập có nhãn người.
+- **Bảng 2 của `BANG_SO_LIEU_THUC_NGHIEM_CHI_TIET.md`** so MediTrace với GPT-4o, Gemini 1.5 Pro, Claude 3.5 Sonnet và Llama-3-8B, kèm tỉ lệ ảo giác và chi phí API. Không có tệp nào trong `src/` hay `tests/` chạy các mô hình này. Các con số này chỉ xuất hiện trong tài liệu và `tools/tao_word_bang_thuc_nghiem.py`. **Đã gỡ ngày 28/11/2026**, thay bằng phép đo duy nhất có thật: mô hình thương mại ghi nhầm người 1,4% so với 7,6% của mô hình dự án (bộ tự sửa), tức mô hình thương mại tốt hơn.
+- **Bảng 6** mô tả thử nghiệm lâm sàng với 10 bác sĩ. Trong dự án không có dữ liệu hay tệp nào tương ứng. **Đã gỡ số liệu ngày 28/11/2026, chỉ giữ thiết kế dự kiến.**
+- Tỉ lệ "0,0% ảo giác" của MediTrace **không có phép đo**: cổng K1 chỉ kiểm câu trích có khớp lượt thoại, và lớp cảnh báo vẫn bắt câu trích bịa (`FABRICATED_QUOTE`) 17 lần trên đầu ra mô hình. Đã gỡ khỏi các tài liệu ngày 28/11/2026 (`docs/doi-chieu-so-lieu-bao-cao.md`).
 
 ## 9. Trạng thái chạy thử
 
-- Một lượt chạy đầy đủ `pytest` bị dừng ở khoảng 47% (ngày 17/11). Lượt không có test âm thanh chạy đến khoảng 51% trong 280 giây rồi bị hết thời gian. Chưa có kết quả xanh toàn bộ.
+- Một lượt chạy đầy đủ `pytest` bị dừng ở khoảng 47% (ngày 17/11). Lượt không có test âm thanh chạy đến khoảng 51% trong 280 giây rồi bị hết thời gian. Chưa có kết quả xanh toàn bộ. (Cập nhật: lần chạy 26/11/2026 ghi ở `README.md` là 1.942 bài qua, 27 bỏ qua.)
 - `HANDOVER.md` đã được sửa ngày 17/11: bỏ dòng "tất cả đều đạt 100%", thay `SoapNote.tsx` bằng tệp thật. Lưu ý: lần sửa đó đã đổi 200 thành 100 khuôn là sai; mã hiện có 200 khuôn (đã đếm lại ngày 18/11/2026).
 
 ## 10. Đã làm và chưa làm

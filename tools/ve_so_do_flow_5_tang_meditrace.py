@@ -136,7 +136,7 @@ def ve_flow_5_tang():
         vien=C_AI, nen=C_AI_BG, co_td=8.8, co_nd=7.6, mau_td=C_AI, dy_text=0.45)
 
     hop(ax, x1 + 0.12, y_bot + 0.22, w1 - 0.24, 2.25, "Ý NGHĨA KHOA HỌC",
-        "• Biến hội thoại thành dữ liệu\n  có cấu trúc nguyên tử\n• Tạo mỏ neo bằng chứng để\n  kiểm tra chéo từng câu\n• Dập tắt Failure Mode:\n  Hallucination & Omission",
+        "• Biến hội thoại thành dữ liệu\n  có cấu trúc nguyên tử\n• Tạo mỏ neo bằng chứng để\n  kiểm tra chéo từng câu\n• Bỏ sót vẫn còn 11,5%\n  (30 ca phát triển)",
         vien=C_AI, nen="white", co_td=8.8, co_nd=7.6, dy_text=0.45)
 
     mui_ten(ax, x1 + w1 + 0.04, 5.5, x1 + w1 + 0.21, 5.5, mau="#1E3A5F", day=2.0)
@@ -167,7 +167,7 @@ def ve_flow_5_tang():
         vien=C_RULE, nen=C_RULE_BG, co_td=8.8, co_nd=7.6, mau_td=C_RULE, dy_text=0.45)
 
     hop(ax, x2 + 0.12, y_bot + 0.22, w2 - 0.24, 2.25, "KẾT QUẢ ĐẠT ĐƯỢC",
-        "• Sai chủ thể giảm từ\n  12.4% xuống 2.1%\n• Giảm 83% nguy cơ nhầm người\n• Minh chứng thực nghiệm:\n  Bám sát JAMA Open 2026",
+        "• Nhầm người 22,0% -> 17,9%\n  (bộ đổi chủ thể 80 ca)\n• Sinh thẳng (nhánh A) vẫn ghi\n  đúng người cao hơn:\n  0,939 so với 0,748",
         vien=C_SAFE, nen=C_SAFE_BG, co_td=8.8, co_nd=7.6, mau_td=C_SAFE, dy_text=0.45)
 
     mui_ten(ax, x2 + w2 + 0.04, 5.5, x2 + w2 + 0.21, 5.5, mau="#1E3A5F", day=2.0)
@@ -198,7 +198,7 @@ def ve_flow_5_tang():
         vien=C_RULE, nen=C_RULE_BG, co_td=8.8, co_nd=7.6, mau_td=C_RULE, dy_text=0.45)
 
     hop(ax, x3 + 0.12, y_bot + 0.22, w3 - 0.24, 2.25, "KẾT QUẢ ĐẠT ĐƯỢC",
-        "• Giữ tin cũ giảm từ\n  11.5% xuống 0.8%\n• Giảm 93% lỗi đè dữ liệu\n• Giữ trọn Audit Trail\n  (Không xóa vết lịch sử)",
+        "• Bản cũ còn giữ giảm từ\n  11,48% xuống 0,80%\n  (bộ tự sửa 60 ca)\n• Giữ trọn Audit Trail\n  (Không xóa vết lịch sử)",
         vien=C_SAFE, nen=C_SAFE_BG, co_td=8.8, co_nd=7.6, mau_td=C_SAFE, dy_text=0.45)
 
     mui_ten(ax, x3 + w3 + 0.04, 5.5, x3 + w3 + 0.21, 5.5, mau="#DC2626", day=2.0)
@@ -232,8 +232,9 @@ def ve_flow_5_tang():
     hop(ax, x4 + 0.12, y_bot + 0.22, w4 - 0.24, 2.25, "NGUYÊN TẮC PHÁN QUYẾT",
         "• Vi phạm rõ ràng -> CHẶN (Vào mục Xác nhận)\n"
         "• Thiếu khẳng định -> CẢNH BÁO (Bác sĩ duyệt)\n"
-        "• Tỷ lệ chặn oan (False-block) <= 1.0%\n"
-        "  (Thực nghiệm: 0/30.136 dòng bị chặn oan)",
+        "• Chặn nhầm 0/30.136 chỉ vì đáp án chép\n"
+        "  gần nguyên văn (độ phủ 0,95); trên đầu ra\n"
+        "  mô hình thật chặn thừa 8,0-10,0%",
         vien=C_RULE, nen="white", co_td=8.8, co_nd=7.6, dy_text=0.45)
 
     mui_ten(ax, x4 + w4 + 0.04, 5.5, x4 + w4 + 0.21, 5.5, mau="#059669", day=2.0)
@@ -260,7 +261,7 @@ def ve_flow_5_tang():
     hop(ax, x5 + 0.12, y_top - 4.15, w5 - 0.24, 1.65, "[2] MỤC CẦN BÁC SĨ XÁC NHẬN (CÁCH LY)",
         "• Gom toàn bộ mệnh đề BỊ CHẶN hoặc CẢNH BÁO\n"
         "• Chứa rủi ro cao: dị ứng, nghi vấn, mâu thuẫn\n"
-        "• Bác sĩ duyệt trong 30 giây bằng nút [Duyệt / Sửa]",
+        "• Bác sĩ duyệt bằng nút [Duyệt / Sửa]",
         vien=C_DANGER, nen=C_DANGER_BG, co_td=9.0, co_nd=7.8, mau_td=C_DANGER, dy_text=0.45)
 
     # Nhanh 3: Khau 6 Hoi lai
@@ -274,7 +275,7 @@ def ve_flow_5_tang():
     hop(ax, x5 + 0.12, y_bot + 0.22, w5 - 0.24, 1.45, "BÁC SĨ DUYỆT & KÝ BỆNH ÁN ĐIỆN TỬ (EMR)",
         "• Bác sĩ toàn quyền quyết định chuyên môn và pháp lý\n"
         "• Hệ thống lưu trọn vẹn Audit Trail bảo vệ an toàn\n"
-        "• Giảm 60-70% thời gian gõ văn bản, 0% rủi ro ảo giác",
+        "• Thời gian tiết kiệm cho bác sĩ: CHƯA ĐO",
         vien=C_RULE, nen=C_RULE_BG, co_td=9.0, co_nd=7.8, mau_td=C_RULE, dy_text=0.45)
 
     # ========================== 8. FOOTER BAR: KẾT LUẬN THUYẾT PHỤC ==========================
@@ -284,8 +285,8 @@ def ve_flow_5_tang():
 
     footer_text = (
         "[*] BẢN CHẤT HỌC THUẬT: Mỗi tầng của MediTrace Sentinel giải quyết trực tiếp một Failure Mode đã được Y văn Quốc tế ghi nhận (JMIR 2025, npj Digital Medicine 2025, JAMA 2026).\n"
-        "• Rào chắn cấu trúc giúp giảm hơn 80% rò rỉ rủi ro lâm sàng (sai chủ thể: 12.4% -> 2.1%; thông tin cũ: 11.5% -> 0.8%), trong khi bảo toàn 99% thông tin đúng (chặn oan <= 1.0%).\n"
-        "• Không bắt bác sĩ sửa cả bài văn dài; bác sĩ chỉ cần duyệt 1-2 điểm nghi vấn tại Mục Cần Xác Nhận trong vòng 30 giây."
+        "• Số đo (dữ liệu mô phỏng, bộ chấm tự động): nhầm người 22,0% -> 17,9%, F1 66,1 -> 70,8 (đổi chủ thể 80 ca); bản cũ còn giữ 11,48% -> 0,80% (tự sửa 60 ca); bỏ sót tăng 4,5% -> 7,7%.\n"
+        "• Lỗi nguy hiểm vẫn lọt vào thân bản nháp 11,8% (chính sách D, tập phát triển đã dùng chỉnh luật). Thời gian bác sĩ duyệt: chưa đo."
     )
     ax.text(0.75, 0.78, footer_text, ha="left", va="center", fontsize=9.2, color="#F8FAFC", linespacing=1.35)
 

@@ -6,7 +6,7 @@ Mã nguồn của hệ thống **MediTrace Sentinel** được hình thành theo
 
 1. **Học sinh (Nguyễn Thế Quân — Kiến trúc sư trưởng & Tác giả thuật toán y khoa):**
    - Đảm nhận toàn bộ khâu khởi xướng ý tưởng khoa học, thiết kế kiến trúc hệ thống tổng thể và đặc tả bài toán truy vết quy gán thông tin y tế.
-   - Trực tiếp xây dựng các thuật toán lâm sàng trọng yếu: Khóa mỏ neo bằng chứng (`khoa_bang_chung.py`), Bộ 8 chốt chặn an toàn lâm sàng (`guardrails.py`, `dieu_phoi_ha_tang.py`), Tương tác thuốc DDI (`duoc_ly_lam_sang.py`), Tính mức lọc cầu thận eGFR và chỉnh liều suy thận (`hieu_chinh_lieu.py`), Bộ gợi mở lâm sàng SOCRATES (`tro_ly_lam_sang.py`), Khử định danh PII tuân thủ Nghị định 13/2023/NĐ-CP (`khu_dinh_danh.py`), và Xuất dữ liệu chuẩn quốc tế HL7 FHIR R4 (`fhir_exporter.py`).
+   - Trực tiếp xây dựng các thuật toán lâm sàng trọng yếu: Khóa mỏ neo bằng chứng (`khoa_bang_chung.py`), Bộ 8 chốt chặn an toàn lâm sàng (`guardrails.py`, `dieu_phoi_ha_tang.py`), Tương tác thuốc DDI (`duoc_ly_lam_sang.py`), Tính mức lọc cầu thận eGFR và chỉnh liều suy thận (`hieu_chinh_lieu.py`), Bộ gợi mở lâm sàng SOCRATES (`tro_ly_lam_sang.py`), Khử định danh PII (`khu_dinh_danh.py`), và Xuất dữ liệu chuẩn quốc tế HL7 FHIR R4 (`fhir_exporter.py`).
    - Biên soạn bộ ngữ liệu 1.000 ca hội thoại lâm sàng thực tế, các bộ bẫy lâm sàng phức tạp cho Hội đồng giám khảo kiểm thử, từ điển 1.200 thuật ngữ y khoa trọng yếu và từ điển phương ngữ 3 miền.
    - Thiết kế trải nghiệm người dùng (UI/UX) bàn làm việc bác sĩ, trực quan hóa dây nối đối soát bằng chứng (`VerificationView.tsx`), Tờ dặn dò người bệnh xuất viện (`ToDanDoBenhNhanModal.tsx`), và Bảng kiểm toán tiến trình AI (`NhatKyTienTrinhAIModal.tsx`).
    - Xây dựng hệ thống 1.330 kịch bản kiểm thử tự động (Unit test, Integration test, Bypass guardrail test) và chỉ đạo từng câu lệnh kỹ thuật.
@@ -59,7 +59,7 @@ Nhật ký lời nhắc chi tiết kèm theo: `Lịch sử câu lệnh.md` (ho�
 | `fhir_exporter.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Chuẩn hóa lược đồ ánh xạ dữ liệu bệnh án SOAP sang chuẩn liên thông y tế quốc tế HL7 FHIR R4) |
 | `guardrails.py` | 4 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Xây dựng 8 chốt chặn an toàn lâm sàng, kiểm soát ranh giới liều và ngăn chặn ảo giác y khoa) |
 | `hieu_chinh_lieu.py` | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa công thức tính eGFR theo CKD-EPI 2021 và thuật toán cảnh báo giảm liều suy thận) |
-| `khu_dinh_danh.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Đặc tả bộ quy tắc ẩn danh dữ liệu sức khỏe tuân thủ nghiêm ngặt Nghị định 13/2023/NĐ-CP) |
+| `khu_dinh_danh.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Đặc tả bộ quy tắc ẩn danh dữ liệu sức khỏe) |
 | `kiem_khuon.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Thiết kế bộ kiểm tra tính toàn vẹn cấu trúc 4 phần Subjective-Objective-Assessment-Plan) |
 | `thang_diem_lam_sang.py` | 4 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Hiện thực hóa các thang điểm lâm sàng CKD-EPI, Cockcroft-Gault, CHA2DS2-VASc và HAS-BLED) |
 | `tro_ly_lam_sang.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Hiện thực hóa Chốt 8 SOCRATES: Tác tử chủ động gợi mở câu hỏi lâm sàng khi thiếu dữ kiện) |
@@ -159,7 +159,7 @@ Nhật ký lời nhắc chi tiết kèm theo: `Lịch sử câu lệnh.md` (ho�
 | `test_fhir_exporter.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử tính hợp lệ JSON Bundle của tài nguyên FHIR Encounter, Condition, MedicationRequest) |
 | `test_guardrails.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử đơn vị và kịch bản tấn công bypass 8 chốt an toàn lâm sàng) |
 | `test_hieu_chinh_lieu.py` | 2 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Kiểm thử các mốc giảm liều kháng sinh và thuốc hạ đường huyết theo độ lọc cầu thận) |
-| `test_khu_dinh_danh.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử thuật toán bóc tách và che giấu thông tin định danh cá nhân theo Nghị định 13) |
+| `test_khu_dinh_danh.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử thuật toán bóc tách và che giấu thông tin định danh cá nhân) |
 | `test_kiem_khuon.py` | 2 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử bẫy định dạng cấu trúc bệnh án khi thiếu mục khám thực thể hoặc chẩn đoán) |
 | `test_thang_diem_lam_sang.py` | 3 | 2026-10-15 | 2026-10-18 | AI viết + Quân (Bộ test case đối soát độ chính xác tính toán eGFR và phân tầng nguy cơ đột quỵ) |
 | `test_tro_ly_lam_sang.py` | 3 | 2026-10-16 | 2026-10-18 | AI viết + Quân (Kiểm thử kịch bản SOCRATES chủ động gợi mở câu hỏi khi bệnh sử thiếu tính chất đau) |

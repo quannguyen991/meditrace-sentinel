@@ -5,7 +5,7 @@
 
 ## 1. Động cơ & Mục đích Xây dựng (Motivation)
 - **Mục đích:** Xây dựng bộ ngữ liệu hội thoại khám bệnh tiếng Việt có nhãn mệnh đề lâm sàng nguyên tử (`PhatBieu`) và trích dẫn nguyên văn hai chiều (`trich_dan`, `luot_thoai`) để huấn luyện và đánh giá hệ thống dựng bản nháp bệnh án kiểm chứng được.
-- **Lý do dùng dữ liệu mô phỏng (Synthetic Data):** Theo Nghị định 13/2023/NĐ-CP và Luật Khám bệnh, chữa bệnh 2023, dữ liệu ghi âm khám bệnh thật là dữ liệu cá nhân nhạy cảm tuyệt đối không được công bố hoặc chia sẻ tự do khi chưa có phê duyệt Hội đồng Đạo đức (IRB). Dữ liệu tổng hợp cho phép kiểm soát chính xác đáp án gốc (Ground Truth) và tái lập thí nghiệm 100% bằng `seed=42`.
+- **Lý do dùng dữ liệu mô phỏng (Synthetic Data):** Theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15, Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026) và Luật Khám bệnh, chữa bệnh 2023, dữ liệu ghi âm khám bệnh thật là dữ liệu cá nhân nhạy cảm, không được công bố hoặc chia sẻ tự do khi chưa có phê duyệt Hội đồng Đạo đức (IRB). Dữ liệu tổng hợp cho phép kiểm soát chính xác đáp án gốc (Ground Truth) và tái lập thí nghiệm 100% bằng `seed=42`.
 
 ## 2. Thành phần & Quy mô Bộ Dữ liệu (Composition)
 | Thuộc tính | Bộ gốc v1 (`mo_rong=False`) | Bộ mở rộng v2 (`mo_rong=True`) | Bộ Thử thách Đối kháng (`thach_thuc`) |

@@ -194,7 +194,7 @@ def tao_bao_cao_word():
         doc,
         "CHỨNG NHẬN NGHIỆM THU HỆ THỐNG",
         "Tài liệu này xác lập bằng chứng kỹ thuật về đợt nâng cấp toàn diện của hệ thống MediTrace Sentinel. "
-        "Toàn bộ 1.330 bài kiểm thử tự động (Automated Unit & Integration Tests) đã vượt qua 100% không lỗi. "
+        "Lần chạy lúc commit ce886d5: 1.330 qua, 27 bỏ qua. Lần chạy mới nhất (26/11/2026, README.md): 1.942 bài pytest qua, 27 bỏ qua. "
         "Mã nguồn đã được đẩy lên GitHub commit 'ce886d5' và '73b5a3b', đồng thời triển khai thành công lên Vercel Production "
         "tại https://meditrace-sentinel.vercel.app với lớp bảo vệ CSRF và giao diện chuẩn mực.",
         "F0FDF4", "16A34A"
@@ -211,8 +211,8 @@ def tao_bao_cao_word():
         ("Mã nguồn Repository", "https://github.com/quannguyen991/meditrace-sentinel.git (Nhánh: main)"),
         ("Môi trường Production (Vercel)", "https://meditrace-sentinel.vercel.app (Status: Ready)"),
         ("Môi trường Reverse Proxy", "https://edge-tunnel.meditrace.vn (Cloudflare Zero-Trust Secure Tunnel)"),
-        ("Quy mô nâng cấp", "102 files thay đổi/thêm mới | +13.812 dòng code sạch | 0 lỗi linter"),
-        ("Kết quả Kiểm thử CI/CD", "1.330 PASSED / 27 SKIPPED / 0 FAILED (Thời gian chạy: 120.35s)"),
+        ("Quy mô nâng cấp", "Commit ce886d5: 101 tệp thay đổi, +13.794 / -400 dòng (git show --stat)"),
+        ("Kết quả Kiểm thử CI/CD", "Lúc ce886d5: 1.330 qua / 27 bỏ qua. Mới nhất 26/11/2026: 1.942 qua / 27 bỏ qua (README.md)"),
     ]
     for i, (k, v) in enumerate(meta_data):
         row = meta_table.rows[i]
@@ -258,10 +258,10 @@ def tao_bao_cao_word():
         r.font.color.rgb = RGBColor(255, 255, 255)
         
     matrix_rows = [
-        ("Số lượng bài Test tự động", "370 tests đơn lẻ", "1.330 automated tests (Phủ 100% ca biên, đa phương ngữ, tương tác thuốc)"),
+        ("Số lượng bài Test tự động", "370 tests đơn lẻ", "1.330 bài kiểm thử tự động lúc ce886d5 (nay 1.942, README.md)"),
         ("Xử lý tên thuốc dân gian ASR", "Dễ nhận nhầm hoặc bỏ sót", "Cơ chế cách ly âm vị: Tự động bôi đỏ & chuyển sang 'Cần bác sĩ xác nhận'"),
-        ("Khử định danh bệnh nhân", "Chưa chặt chẽ", "Bảo vệ thông tin cá nhân tuân thủ nghiêm ngặt Nghị định 13/2023/NĐ-CP"),
-        ("Khóa bằng chứng lâm sàng", "Kiểm tra cơ bản", "7 Trạm an ninh K1–K7 liên hoàn, triệt tiêu 100% hiện tượng ảo giác AI"),
+        ("Khử định danh bệnh nhân", "Chưa chặt chẽ", "Che họ tên, SĐT, CCCD trước khi lưu; chạy tại chỗ nên dữ liệu không cần rời phòng khám"),
+        ("Khóa bằng chứng lâm sàng", "Kiểm tra cơ bản", "7 bước K1–K7 kiểm câu trích; vẫn còn lỗi lọt (lỗi nguy hiểm lọt vào thân 11,8% trên tập phát triển)"),
         ("An toàn Dược lý & Liều trần", "Chưa kiểm tra", "3 Chốt an toàn: Trần liều Paracetamol (4g/ngày), eGFR Cockcroft-Gault, DDI"),
         ("Hỗ trợ Quyết định (CDSS)", "Không có", "Tích hợp 9 thang điểm lâm sàng quốc tế (CURB-65, CHA2DS2-VASc, Child-Pugh...)"),
         ("Bộ Sơ đồ Kiến trúc & Flow", "Sơ đồ vẽ tay đơn giản", "Bộ 7 Master Flow Diagrams độ phân giải cao 4K UHD chuẩn Executive"),
@@ -335,7 +335,7 @@ def tao_bao_cao_word():
     # 5. NHẬT KÝ THỰC THI LỆNH TERMINAL
     add_heading_1(doc, "4. Nhật ký Thực thi Lệnh Kỹ thuật (Terminal Command Execution Logs)")
     
-    add_heading_2(doc, "4.1. Lệnh Kiểm thử Hồi quy Toàn diện (1.330 Test Cases)")
+    add_heading_2(doc, "4.1. Lệnh Kiểm thử Hồi quy Toàn diện — lần chạy lúc commit ce886d5")
     add_code_block(
         doc,
         "PS D:\\Claude\\meditrace-ma-nguon> pytest tests/\n"
@@ -375,15 +375,15 @@ def tao_bao_cao_word():
         "    -> Da luu: docs/tai-lieu/hinh/flow-1-nhan-dien-giong-noi-va-rut-tin.png\n"
         "[+] Dang ve Flow 2: Đính chính FSM & Dựng bệnh án SOAP chuẩn...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-2-dinh-chinh-fsm-va-benh-an-soap.png\n"
-        "[+] Dang ve Flow 3: Khóa bằng chứng 7 trạm K1-K7 chống ảo giác 100%...\n"
+        "[+] Dang ve Flow 3: Khóa bằng chứng 7 trạm K1-K7...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-3-khoa-bang-chung-k1-k7-chong-ao-giac.png\n"
         "[+] Dang ve Flow 4: Dược lý lâm sàng, kiểm soát liều trần & 9 thang điểm CDSS...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-4-duoc-ly-lam-sang-va-cdss-thang-diem.png\n"
         "[+] Dang ve Flow 5: Đối đầu trực diện ChatGPT vs MediTrace Sentinel...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-5-so-sanh-doi-dau-chatgpt-vs-meditrace.png\n"
-        "[+] Dang ve Flow 6: Đường ống kiểm thử thực nghiệm 1.330 Test CI/CD...\n"
+        "[+] Dang ve Flow 6: Dữ liệu thực nghiệm và kiểm thử tự động...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-6-duong-ong-kiem-thu-thuc-nghiem-1330-test.png\n"
-        "[+] Dang ve Flow 7: Quy trình Bác sĩ khám lâm sàng & Click-to-Verify < 60s...\n"
+        "[+] Dang ve Flow 7: Quy trình Bác sĩ khám lâm sàng & Click-to-Verify...\n"
         "    -> Da luu: docs/tai-lieu/hinh/flow-7-quy-trinh-bac-si-kham-va-click-to-verify.png\n"
         "[OK] Đã hoàn tất xuất 7 sơ đồ Flow và đồng bộ ra Desktop/Downloads!",
         "FLOW GENERATOR LOG"
@@ -470,7 +470,7 @@ def tao_bao_cao_word():
         "1. Hệ thống máy cục bộ (Root, Desktop, Downloads).\n"
         "2. GitHub Repository chính thức (Commit ce886d5, 73b5a3b).\n"
         "3. Môi trường Production Vercel (https://meditrace-sentinel.vercel.app).\n\n"
-        "Dự án MediTrace Sentinel đã sẵn sàng 100% để bảo vệ và thuyết trình trước Hội đồng Giám khảo.",
+        "Các số đo và giới hạn của dự án được ghi tại README.md mục 'Kết quả đo'.",
         "F0F9FF", "0284C7"
     )
 
