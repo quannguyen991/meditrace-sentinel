@@ -66,7 +66,7 @@ export const NOI_LUU_DU_LIEU: ReadonlyArray<NoiLuu> = [
     noiDung: "Tệp ghi âm gốc và bản 16 kHz, lời thoại chép, nhật ký sự kiện",
     coDinhDanh: "co",
     aiDoc: "Dịch vụ Python tại chỗ",
-    giu: "CHƯA có hạn giữ hay tự xóa âm thanh — việc tiếp theo (Task 11)",
+    giu: "Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên, tối đa 1 lần/ngày, và khi api.py khởi động. Phiên chưa duyệt chưa có hạn tự xóa",
   },
   {
     noi: "Sổ WORM của dịch vụ Python (data/audit_log_worm.db)",
@@ -90,6 +90,6 @@ export const NOI_LUU_DU_LIEU: ReadonlyArray<NoiLuu> = [
     noiDung: "Bản sao danh sách ca khám và các kho (có lời thoại, tên bệnh nhân) để mở nhanh khi tải lại trang; đặc trưng giọng bác sĩ",
     coDinhDanh: "co",
     aiDoc: "Chỉ máy của bác sĩ",
-    giu: "Đến khi xóa dữ liệu trình duyệt",
+    giu: "Xóa mọi khóa meditrace_ (ca khám, các kho, mẫu giọng, công tắc gửi ra ngoài) khi đăng xuất, khi hết phiên (401) và khi người khác đăng nhập trên máy đó (web/src/lib/xoaDuLieuTrinhDuyet.ts); chỉ giữ vị trí thanh tác vụ. Đóng trình duyệt mà không đăng xuất thì bản sao còn đến lần đăng nhập sau",
   },
 ];

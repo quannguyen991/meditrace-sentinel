@@ -51,10 +51,10 @@ test `tests/test_loi_ra_mang_python.py`).
 | Bảng nhat_ky (nhật ký hoạt động) | Hành động, mã phiên, số đếm, địa chỉ IP; không có nội dung ca khám | không | Quản trị | Không giới hạn | `web/may-chu/csdl.ts` |
 | Bảng worm_signoff (sổ ký duyệt không sửa được) | Băm SHA-256 nội dung đã ký, HMAC, số mệnh đề giữ/sửa/bỏ, người ký, thời điểm; không có nội dung | không | Quản trị, người ký | Vĩnh viễn (sổ chỉ được thêm) | `web/may-chu/worm.ts` |
 | Bảng viec_nen, viec_tro_ly (hàng đợi việc) | Tải trọng và kết quả của việc dựng bản nháp / trợ lý (có lời thoại) | có | Người dùng tạo việc | Việc quá 30 phút bị đánh dấu thất bại; hạn dọn bảng chưa kiểm | `web/may-chu/hang-doi.ts` |
-| Thư mục phiên âm thanh (dịch vụ Python) | Tệp ghi âm gốc và bản 16 kHz, lời thoại chép, nhật ký sự kiện | có | Dịch vụ Python tại chỗ | CHƯA có hạn giữ hay tự xóa âm thanh — việc tiếp theo (Task 11) | `src/audio/storage.py` |
+| Thư mục phiên âm thanh (dịch vụ Python) | Tệp ghi âm gốc và bản 16 kHz, lời thoại chép, nhật ký sự kiện | có | Dịch vụ Python tại chỗ | Tệp ghi âm gốc và bản 16 kHz của phiên đã duyệt (gửi sang MediTrace) bị xóa sau 30 ngày kể từ lúc duyệt (MEDITRACE_GIU_AM_THANH_NGAY), ghi sự kiện am_thanh_da_xoa; lời thoại và nhật ký giữ lại. Dọn khi tạo phiên, tối đa 1 lần/ngày, và khi api.py khởi động. Phiên chưa duyệt chưa có hạn tự xóa | `src/audio/storage.py` |
 | Sổ WORM của dịch vụ Python (data/audit_log_worm.db) | Sự kiện dựng bản nháp: nhánh, nguồn, số mệnh đề; không có lời thoại | không | Quản trị | Vĩnh viễn | `src/he_thong/nhat_ky_ky_duyet_worm.py` |
 | Log tiến trình (cửa sổ dòng lệnh máy chủ) | Thông báo lỗi, đã cắt ngắn và che định danh (cheLog / che_log) | đã che | Người vận hành máy chủ | Theo cách người vận hành lưu log | `web/may-chu/che-log.ts` |
-| Trình duyệt của bác sĩ (localStorage) | Bản sao danh sách ca khám và các kho (có lời thoại, tên bệnh nhân) để mở nhanh khi tải lại trang; đặc trưng giọng bác sĩ | có | Chỉ máy của bác sĩ | Đến khi xóa dữ liệu trình duyệt | `web/src/lib/useKho.ts` |
+| Trình duyệt của bác sĩ (localStorage) | Bản sao danh sách ca khám và các kho (có lời thoại, tên bệnh nhân) để mở nhanh khi tải lại trang; đặc trưng giọng bác sĩ | có | Chỉ máy của bác sĩ | Xóa mọi khóa meditrace_ (ca khám, các kho, mẫu giọng, công tắc gửi ra ngoài) khi đăng xuất, khi hết phiên (401) và khi người khác đăng nhập trên máy đó (web/src/lib/xoaDuLieuTrinhDuyet.ts); chỉ giữ vị trí thanh tác vụ. Đóng trình duyệt mà không đăng xuất thì bản sao còn đến lần đăng nhập sau | `web/src/lib/useKho.ts` |
 
 ## Dữ liệu dùng khi phát triển
 

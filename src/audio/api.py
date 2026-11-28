@@ -106,6 +106,7 @@ class Handler(BaseHTTPRequestHandler):
 # Đọc cổng, địa chỉ và thư mục dữ liệu từ dòng lệnh.
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--host",default="127.0.0.1"); parser.add_argument("--port",type=int,default=8765); parser.add_argument("--data-dir",default="data/audio"); args=parser.parse_args()
-    store=SessionStore(args.data_dir); Handler.store=store; Handler.pipeline=AudioPipeline(store); server=ThreadingHTTPServer((args.host,args.port),Handler); print(f"MediTrace Audio Intake: http://{args.host}:{args.port}"); server.serve_forever()
+    store=SessionStore(args.data_dir); store.don_dinh_ky()  # hạn giữ âm thanh: dọn ngay khi khởi động, sau đó tối đa 1 lần/ngày khi tạo phiên
+    Handler.store=store; Handler.pipeline=AudioPipeline(store); server=ThreadingHTTPServer((args.host,args.port),Handler); print(f"MediTrace Audio Intake: http://{args.host}:{args.port}"); server.serve_forever()
 
 if __name__ == "__main__": main()

@@ -15,7 +15,7 @@ Biến ghi âm buổi khám thành lời thoại theo lượt. Chép lời và t
 | [alignment.py](alignment.py) | Gán người nói cho từng đoạn chép lời bằng cách đối chiếu mốc thời gian, không đổi chữ đã chép. |
 | [adapter.py](adapter.py) | Đổi bản chép lời đã được duyệt sang dạng hội thoại mà đường ống dựng bản nháp đọc được. |
 | [preprocessing.py](preprocessing.py) | Đưa âm thanh về WAV 16 kHz mono để bộ chép dùng, vẫn giữ nguyên tệp gốc. |
-| [storage.py](storage.py) | Lưu phiên âm thanh vào đĩa tại chỗ, bền vững qua các lần chạy, kèm nhật ký sự kiện để kiểm toán. |
+| [storage.py](storage.py) | Lưu phiên âm thanh vào đĩa tại chỗ, bền vững qua các lần chạy, kèm nhật ký sự kiện để kiểm toán; xoá tệp ghi âm của phiên đã duyệt sau `MEDITRACE_GIU_AM_THANH_NGAY` ngày (mặc định 30). |
 | [api.py](api.py) | Mở máy chủ HTTP nhỏ để tải ghi âm lên, xử lý và cho bác sĩ duyệt, sửa lời thoại trên trình duyệt. |
 | [sim2real_v2.py](sim2real_v2.py) | Mô phỏng nhiễu, vọng, mất gói trên chữ để thử độ bền chép lời với bộ dữ liệu v2; là mô phỏng, không phải đo ASR thật. |
 

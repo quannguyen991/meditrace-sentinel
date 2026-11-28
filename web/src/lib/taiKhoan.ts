@@ -1,5 +1,6 @@
 /** Phía giao diện của đăng ký/đăng nhập. Máy chủ: may-chu/tai-khoan.ts. */
 import { clearAllPersistedAudio, setUserScope } from "../services/realAudioService";
+import { xoaDuLieuTrinhDuyet } from "./xoaDuLieuTrinhDuyet";
 
 export type NguoiDung = { id: number; email: string; hoTen: string; vai: "quan_tri" | "bac_si" };
 export type TinhTrangToi = { nguoiDung: NguoiDung | null; canMaMoi: boolean; taoQuanTriDuocTuDay: boolean };
@@ -32,31 +33,11 @@ const KHO_DONG_BO: [string, string, string][] = [
   ["/api/kho/mau-van-ban", "meditrace_kho_mau-van-ban", "meditrace_kho_mau-van-ban_luc"],
 ];
 
-const KHO_PHI_BAT_BUOC_XOA = [
-  "meditrace_sessions",
-  "meditrace_sessions_luc",
-  "meditrace_kho_ca-kham",
-  "meditrace_kho_ca-kham_luc",
-  "meditrace_ca_dang_mo",
-  "meditrace_kho_tra-cuu",
-  "meditrace_kho_tra-cuu_luc",
-  "meditrace_kho_mau-van-ban",
-  "meditrace_kho_mau-van-ban_luc",
-];
-
+// Danh sách khoá xoá / giữ lại nằm ở xoaDuLieuTrinhDuyet.ts (giữ tuỳ chọn giao diện thuần).
 function xoaBanSaoMay() {
   try {
-    if (typeof localStorage !== "undefined") {
-      for (const k of KHO_PHI_BAT_BUOC_XOA) localStorage.removeItem(k);
-      for (const k of Object.keys(localStorage)) {
-        if (k.startsWith("meditrace_")) localStorage.removeItem(k);
-      }
-    }
-    if (typeof sessionStorage !== "undefined") {
-      for (const k of Object.keys(sessionStorage)) {
-        if (k.startsWith("meditrace_")) sessionStorage.removeItem(k);
-      }
-    }
+    xoaDuLieuTrinhDuyet(typeof localStorage !== "undefined" ? localStorage : undefined);
+    xoaDuLieuTrinhDuyet(typeof sessionStorage !== "undefined" ? sessionStorage : undefined);
   } catch {}
 }
 
