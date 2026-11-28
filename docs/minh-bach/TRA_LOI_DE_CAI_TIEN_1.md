@@ -140,7 +140,7 @@ Công cụ cho phần cần người thật đã sẵn: phiếu gán nhãn mù c
 - Bộ che đạt 94,0% / 93,8% trên tập test, chưa tới ngưỡng 95%. Phần lọt chủ yếu là tên một tiếng đứng trơ. Sau rà soát độc lập có vá thêm luật; chỉ đo lại trên tập dev (không đổi: 97,5% / 97,3%), **không** đo tập test lần ba.
 - Trình duyệt của bác sĩ giữ bản sao danh sách ca khám trong `localStorage` để mở nhanh khi tải lại trang; dữ liệu này tự xóa khi đăng xuất, hết phiên `401` hoặc đổi tài khoản (`web/src/lib/xoaDuLieuTrinhDuyet.ts`), nhưng nếu bác sĩ đóng tab không đăng xuất thì bản sao cục bộ trên máy đó chưa mã hóa.
 - 34 commit cũ chưa xác định công cụ (trong đó có các commit Antigravity 25–27/11). Tác giả sẽ xác nhận dần, máy không đoán.
-- Trên máy chủ chạy bản demo, việc tự xóa âm thanh **đang tạm tắt** (hạn giữ đặt rất dài) cho tới khi chốt chính sách với âm thanh chưa duyệt; mã tự xóa và test đã có.
+- Trên máy chủ chạy bản demo, việc tự xóa âm thanh **đang tạm tắt** (hạn giữ đặt rất dài). Chính sách đã chốt là 30/30/7 ngày (`fb6ef97`). Đội quyết định giữ tắt tới sau buổi thi để không mất âm thanh của 8 phiên demo từ tháng 9; sau đó gỡ biến môi trường để bật lại.
 - Chưa thử với bác sĩ thật xem họ có duyệt bừa không, và chưa chặn được thao tác bôi đen Ctrl+C hoặc Ctrl+P trên trình duyệt (bản in khi chưa ký tự mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT").
 
 ## Kết quả kiểm thử toàn bộ
