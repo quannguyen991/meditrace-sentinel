@@ -36,7 +36,9 @@ from .models import new_session, now_iso
 BIEN_GIU_AM_THANH = "MEDITRACE_GIU_AM_THANH_NGAY"
 GIU_AM_THANH_MAC_DINH = 30
 BIEN_GIU_AM_THANH_CHUA_DUYET = "MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY"
-GIU_AM_THANH_CHUA_DUYET_MAC_DINH = 7
+GIU_AM_THANH_CHUA_DUYET_MAC_DINH = 30  # chính sách 28/11: bản chờ bác sĩ nghe kiểm giữ như bản đã duyệt
+BIEN_GIU_AM_THANH_BO_DO = "MEDITRACE_GIU_AM_THANH_BO_DO_NGAY"
+GIU_AM_THANH_BO_DO_MAC_DINH = 7  # phiên bỏ dở: chưa có lời thoại nào
 _DUOI_AM_THANH = {".webm", ".wav", ".mp3", ".m4a", ".ogg", ".flac"}
 _MOT_NGAY = 86400.0
 
@@ -54,6 +56,10 @@ def _so_ngay_giu() -> float:
 
 def _so_ngay_giu_chua_duyet() -> float:
     return _doc_so_ngay_env(BIEN_GIU_AM_THANH_CHUA_DUYET, GIU_AM_THANH_CHUA_DUYET_MAC_DINH)
+
+
+def _so_ngay_giu_bo_do() -> float:
+    return _doc_so_ngay_env(BIEN_GIU_AM_THANH_BO_DO, GIU_AM_THANH_BO_DO_MAC_DINH)
 
 
 # Phiên đang ghi/xử lý thì không bao giờ xoá âm thanh.
@@ -215,12 +221,15 @@ class SessionStore:
         so_ngay: float | None = None,
         bay: float | None = None,
         so_ngay_chua_duyet: float | None = None,
+        so_ngay_bo_do: float | None = None,
     ) -> list[str]:
         """Xoá tệp ghi âm gốc và bản WAV 16 kHz của phiên quá hạn:
         - Đã duyệt (meditrace_status == "ready"): quá ``so_ngay`` ngày (mặc định 30) kể từ lúc duyệt,
           chỉ xoá khi có ``approved_audio`` và dấu vân tay âm thanh hiện tại trùng bản đã duyệt.
-        - Chưa duyệt (meditrace_status != "ready"): quá ``so_ngay_chua_duyet`` ngày (mặc định 7)
-          tính từ ``updated_at`` (fallback ``created_at``), ghi log với ``status="chua_duyet"``.
+        - Chưa duyệt, đã có lời thoại: quá ``so_ngay_chua_duyet`` ngày (mặc định 30) tính từ
+          ``updated_at`` (fallback ``created_at``), ghi log với ``status="chua_duyet"``.
+        - Bỏ dở (chưa duyệt, transcript.json thiếu hoặc rỗng): quá ``so_ngay_bo_do`` ngày
+          (mặc định 7), ghi log với ``status="bo_do"``.
 
         Luôn bỏ qua liên kết/junction, phiên đang bận hoặc đang giữ khoá; chỉ xoá tệp nằm trong
         thư mục phiên; giữ session.json, transcript.json, audit.jsonl. Trả về mã phiên vừa xoá."""
@@ -228,9 +237,12 @@ class SessionStore:
             so_ngay = _so_ngay_giu()
         if so_ngay_chua_duyet is None:
             so_ngay_chua_duyet = _so_ngay_giu_chua_duyet()
+        if so_ngay_bo_do is None:
+            so_ngay_bo_do = _so_ngay_giu_bo_do()
         bay = time.time() if bay is None else bay
         han_da_duyet = bay - float(so_ngay) * _MOT_NGAY
         han_chua_duyet = bay - float(so_ngay_chua_duyet) * _MOT_NGAY
+        han_bo_do = bay - float(so_ngay_bo_do) * _MOT_NGAY
         goc_kho = self.sessions_dir.resolve()
         da_xoa: list[str] = []
         for thu_muc in sorted(self.sessions_dir.iterdir()):
@@ -247,7 +259,9 @@ class SessionStore:
                 if not khoa.acquire(blocking=False):
                     continue  # đang tải lên / xử lý / duyệt
                 try:
-                    if self._xoa_mot_phien(sid, goc, han_da_duyet, so_ngay, han_chua_duyet, so_ngay_chua_duyet):
+                    if self._xoa_mot_phien(
+                        sid, goc, han_da_duyet, so_ngay, han_chua_duyet, so_ngay_chua_duyet, han_bo_do, so_ngay_bo_do
+                    ):
                         da_xoa.append(sid)
                 finally:
                     khoa.release()
@@ -263,6 +277,8 @@ class SessionStore:
         so_ngay: float,
         han_chua_duyet: float,
         so_ngay_chua_duyet: float,
+        han_bo_do: float,
+        so_ngay_bo_do: float,
     ) -> bool:
         phien = self.load(sid)
         if phien.get("status") in _TRANG_THAI_BAN:
@@ -282,7 +298,9 @@ class SessionStore:
         else:
             moc = _giay(phien.get("updated_at"))
             moc = moc if moc is not None else _giay(phien.get("created_at"))
-            if moc is None or moc > han_chua_duyet:
+            bo_do = not self._co_loi_thoai(goc)
+            han, han_ngay = (han_bo_do, so_ngay_bo_do) if bo_do else (han_chua_duyet, so_ngay_chua_duyet)
+            if moc is None or moc > han:
                 return False
             ung_vien = set()
             for khoa in ("raw_audio_path", "processed_audio_path"):
@@ -290,7 +308,6 @@ class SessionStore:
                     ung_vien.add(Path(phien[khoa]).resolve())
             ung_vien.update(p.resolve() for p in goc.glob("raw.*") if p.suffix.lower() in _DUOI_AM_THANH)
             ung_vien.add((goc / "processed.wav").resolve())
-            han_ngay = so_ngay_chua_duyet
 
         tep_xoa: list[str] = []
         for tep in sorted(ung_vien):
@@ -304,8 +321,23 @@ class SessionStore:
         if da_duyet:
             self.log(sid, "am_thanh_da_xoa", files=tep_xoa, retention_days=han_ngay)
         else:
-            self.log(sid, "am_thanh_da_xoa", files=tep_xoa, retention_days=han_ngay, status="chua_duyet")
+            self.log(
+                sid, "am_thanh_da_xoa", files=tep_xoa, retention_days=han_ngay,
+                status="bo_do" if bo_do else "chua_duyet",
+            )
         return True
+
+    @staticmethod
+    def _co_loi_thoai(goc: Path) -> bool:
+        """Phiên có lời thoại khi transcript.json đọc được và không rỗng. Lỗi đọc → coi như CÓ
+        (giữ lâu hơn là an toàn hơn so với xoá nhầm căn cứ bác sĩ cần nghe lại)."""
+        tep = goc / "transcript.json"
+        if not tep.is_file():
+            return False
+        try:
+            return bool(json.loads(tep.read_text(encoding="utf-8")))
+        except Exception:
+            return True
 
 
 # ═══ don_am_thanh_nen() — Dọn hạn giữ âm thanh ở luồng nền khi dịch vụ khởi động ══════

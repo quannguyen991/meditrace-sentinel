@@ -38,6 +38,7 @@ def _phien(
     da_duyet: bool,
     raw_path: Path | None = None,
     updated_at_ngay_truoc: float | None = None,
+    co_loi_thoai: bool = True,
 ) -> str:
     """Phiên có raw.webm + processed.wav + transcript hợp lệ; da_duyet → duyệt qua pipeline thật."""
     sid = store.create()["session_id"]
@@ -45,8 +46,9 @@ def _phien(
     raw.write_bytes(b"giong-noi-goc")
     processed = store.path(sid, "processed.wav")
     processed.write_bytes(b"RIFF16k")
-    transcript = [{"segment_id": "s1", "speaker_id": "speaker_1", "speaker_role": "doctor", "text_original": "chào bác"}]
-    store.path(sid, "transcript.json").write_text(json.dumps(transcript, ensure_ascii=False), encoding="utf-8")
+    if co_loi_thoai:
+        transcript = [{"segment_id": "s1", "speaker_id": "speaker_1", "speaker_role": "doctor", "text_original": "chào bác"}]
+        store.path(sid, "transcript.json").write_text(json.dumps(transcript, ensure_ascii=False), encoding="utf-8")
     cap_nhat = {
         "created_at": _iso(ngay_truoc),
         "raw_audio_path": str(raw_path or raw),
@@ -96,8 +98,15 @@ def test_phien_chua_duyet_3_ngay_giu_nguyen(store):
     assert (store.sessions_dir / sid / "processed.wav").exists()
 
 
-def test_phien_chua_duyet_8_ngay_xoa_am_thanh_giu_nhat_ky(store):
+def test_phien_chua_duyet_co_loi_thoai_8_ngay_van_giu(store):
+    # Chính sách 28/11: âm thanh chưa duyệt là căn cứ để bác sĩ nghe kiểm, giữ 30 ngày như bản đã duyệt
     sid = _phien(store, 8, False, updated_at_ngay_truoc=8)
+    assert store.xoa_am_thanh_qua_han(30, bay=BAY) == []
+    assert (store.sessions_dir / sid / "raw.webm").exists()
+
+
+def test_phien_chua_duyet_co_loi_thoai_31_ngay_xoa_am_thanh_giu_nhat_ky(store):
+    sid = _phien(store, 31, False, updated_at_ngay_truoc=31)
     xoa = store.xoa_am_thanh_qua_han(30, bay=BAY)
     assert xoa == [sid]
     thu_muc = store.sessions_dir / sid
@@ -111,12 +120,25 @@ def test_phien_chua_duyet_8_ngay_xoa_am_thanh_giu_nhat_ky(store):
     nhat_ky = store.read_jsonl(sid, "audit.jsonl")
     assert nhat_ky[-1]["event"] == "am_thanh_da_xoa"
     assert nhat_ky[-1]["status"] == "chua_duyet"
-    assert nhat_ky[-1]["retention_days"] == 7
+    assert nhat_ky[-1]["retention_days"] == 30
     assert store.xoa_am_thanh_qua_han(30, bay=BAY) == []
 
 
+def test_phien_bo_do_khong_loi_thoai_8_ngay_xoa(store):
+    sid = _phien(store, 8, False, updated_at_ngay_truoc=8, co_loi_thoai=False)
+    assert store.xoa_am_thanh_qua_han(30, bay=BAY) == [sid]
+    nhat_ky = store.read_jsonl(sid, "audit.jsonl")
+    assert nhat_ky[-1]["status"] == "bo_do" and nhat_ky[-1]["retention_days"] == 7
+
+
+def test_phien_bo_do_khong_loi_thoai_6_ngay_giu(store):
+    sid = _phien(store, 6, False, updated_at_ngay_truoc=6, co_loi_thoai=False)
+    assert store.xoa_am_thanh_qua_han(30, bay=BAY) == []
+    assert (store.sessions_dir / sid / "raw.webm").exists()
+
+
 def test_phien_chua_duyet_fallback_created_at_khi_khong_co_updated_at(store):
-    sid = _phien(store, 8, False, updated_at_ngay_truoc=None)
+    sid = _phien(store, 31, False, updated_at_ngay_truoc=None)
     assert store.xoa_am_thanh_qua_han(bay=BAY) == [sid]
     nhat_ky = store.read_jsonl(sid, "audit.jsonl")
     assert nhat_ky[-1]["event"] == "am_thanh_da_xoa"
@@ -206,12 +228,12 @@ def test_mac_dinh_doc_bien_moi_truong(store, monkeypatch):
     assert sorted(store.xoa_am_thanh_qua_han(bay=BAY)) == sorted([sid, sid_chua_duyet])
 
 
-def test_bien_moi_truong_chua_duyet_loi_thi_fallback_7_ngay(store, monkeypatch):
+def test_bien_moi_truong_chua_duyet_loi_thi_fallback_30_ngay(store, monkeypatch):
     monkeypatch.setenv("MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY", "khong-phai-so")
-    sid_3 = _phien(store, 3, False, updated_at_ngay_truoc=3)
     sid_8 = _phien(store, 8, False, updated_at_ngay_truoc=8)
-    assert store.xoa_am_thanh_qua_han(bay=BAY) == [sid_8]
-    assert (store.sessions_dir / sid_3 / "raw.webm").exists()
+    sid_31 = _phien(store, 31, False, updated_at_ngay_truoc=31)
+    assert store.xoa_am_thanh_qua_han(bay=BAY) == [sid_31]
+    assert (store.sessions_dir / sid_8 / "raw.webm").exists()
 
 
 def test_mac_dinh_30_ngay(store, monkeypatch):
@@ -249,10 +271,13 @@ def test_am_thanh_pipeline_tu_don_am_thanh_qua_han(tmp_path, monkeypatch):
 
     monkeypatch.delenv("MEDITRACE_GIU_AM_THANH_NGAY", raising=False)
     monkeypatch.delenv("MEDITRACE_GIU_AM_THANH_CHUA_DUYET_NGAY", raising=False)
+    monkeypatch.delenv("MEDITRACE_GIU_AM_THANH_BO_DO_NGAY", raising=False)
     thu_muc_phien = tmp_path / "phien-dich-vu"
     store = SessionStore(thu_muc_phien)
     sid_da_duyet_cu = _phien(store, 31, True)
-    sid_chua_duyet_cu = _phien(store, 8, False, updated_at_ngay_truoc=8)
+    sid_chua_duyet_cu = _phien(store, 31, False, updated_at_ngay_truoc=31)
+    sid_bo_do_cu = _phien(store, 8, False, updated_at_ngay_truoc=8, co_loi_thoai=False)
+    sid_cho_duyet_8 = _phien(store, 8, False, updated_at_ngay_truoc=8)
     sid_chua_duyet_moi = _phien(store, 2, False, updated_at_ngay_truoc=2)
 
     monkeypatch.setattr(dich_vu_http, "THU_MUC_PHIEN", thu_muc_phien)
@@ -262,3 +287,5 @@ def test_am_thanh_pipeline_tu_don_am_thanh_qua_han(tmp_path, monkeypatch):
     assert not (store.sessions_dir / sid_chua_duyet_cu / "raw.webm").exists()
     assert not (store.sessions_dir / sid_chua_duyet_cu / "processed.wav").exists()
     assert (store.sessions_dir / sid_chua_duyet_moi / "raw.webm").exists()
+    assert not (store.sessions_dir / sid_bo_do_cu / "raw.webm").exists()
+    assert (store.sessions_dir / sid_cho_duyet_8 / "raw.webm").exists()
