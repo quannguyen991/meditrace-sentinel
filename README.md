@@ -236,7 +236,18 @@ Rà soát độc lập ngày 26/11/2026 (hai lượt, Python và web) tìm ra 9 
 
 ## Công cụ AI đã dùng để làm dự án
 
-Phần lớn mã nguồn do trợ lý lập trình AI (Claude Code của Anthropic, và Codex cho một mô-đun âm thanh) viết **theo chỉ đạo, yêu cầu và sự kiểm tra của tác giả**. Tác giả chọn hướng làm, đặt yêu cầu, đọc và chạy lại các kết quả. Mô hình trong sản phẩm: Qwen3-4B (huấn luyện thêm bằng QLoRA), PhoWhisper, pyannote.audio.
+Phần lớn mã nguồn do trợ lý lập trình AI viết **theo chỉ đạo, yêu cầu và sự kiểm tra của tác giả**. Tác giả chọn hướng làm, đặt yêu cầu, đọc và chạy lại các kết quả. Mô hình trong sản phẩm: Qwen3-4B (huấn luyện thêm bằng QLoRA), PhoWhisper, pyannote.audio.
+
+| Công cụ | Đã làm gì |
+|---|---|
+| Claude Code (Anthropic) | Phần lớn mã Python và giao diện, phép đo, tài liệu; rà soát độc lập |
+| Codex (OpenAI) | Một mô-đun âm thanh |
+| Antigravity | Một số commit 25–27/11/2026, gồm sắp xếp lại `src/` thành 6 gói và mở rộng phương ngữ; đội đã rà và sửa 3 lỗi trong đó (`2fc4eba`) |
+| ChatGPT | Ảnh minh họa |
+
+Chưa từng đưa hồ sơ bệnh nhân thật vào công cụ AI nào: khi phát triển chỉ dùng dữ liệu mô phỏng và bộ dữ liệu công khai. Chi tiết việc AI hỗ trợ và chỗ đội tự sửa: [docs/minh-bach/](docs/minh-bach/).
+
+**Ghi công cụ trong lịch sử sửa đổi.** Từ 28/11/2026 mọi commit kết thúc bằng một dòng `Cong-cu-AI: <claude_code|antigravity|codex|chatgpt|khong>`. Bật kiểm tự động bằng `git config core.hooksPath .githooks`. Bảng truy nguồn: [docs/minh-bach/truy-nguon-commit.md](docs/minh-bach/truy-nguon-commit.md) (sinh bằng `python -m tools.truy_nguon_commit`); commit cũ không ghi công cụ được để `chua_xac_dinh`, không đoán.
 
 ---
 
