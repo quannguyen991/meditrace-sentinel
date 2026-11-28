@@ -34,6 +34,8 @@ import {
 } from "../lib/nguoiNoi";
 import { quetRadarCoDo } from "../lib/radarCoDo";
 import { loaiTepDauVao } from "../lib/loaiTepDauVao";
+import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
+import { khoangPhatLaiLuot } from "../lib/asrHighlight";
 
 const KHOA_MAU_GIONG_BS = "meditrace_doctor_voiceprint_v1";
 
@@ -97,6 +99,8 @@ interface TranscriptViewProps {
   /** Nạp một ca đã chạy trước từ dịch vụ tại chỗ (dùng khi GPU đang bận). */
   onLoadSample?: () => void;
   audioUrl?: string;
+  /** Mốc thời gian từng lượt (từ bản chép PhoWhisper) để nghe lại đúng đoạn trong bản ghi. */
+  segments?: import("../types").TranscriptSegment[];
   /** Tệp âm thanh vừa tải lên: giữ lại để nghe lại từng lượt / từng mệnh đề. */
   onDatAmThanh?: (url: string) => void;
 }
@@ -138,8 +142,10 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   onOpenTemplates,
   onLoadSample,
   audioUrl,
+  segments,
   onDatAmThanh,
 }) => {
+  const { dangPhatLuot, phatDoanLuot } = useTurnAudioPlayer(audioUrl, segments);
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<boolean | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -1014,6 +1020,23 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
                           </span>
                         )}
                       </div>
+
+                      {/* Nghe lại lượt này từ CHÍNH bản ghi (có tệp âm thanh + mốc thời gian) */}
+                      {audioUrl && khoangPhatLaiLuot(luot, segments) && (
+                        <button
+                          type="button"
+                          onClick={() => phatDoanLuot(luot)}
+                          title={dangPhatLuot === luot ? "Dừng" : "Nghe lại đúng đoạn này trong bản ghi âm"}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold flex-shrink-0 ${
+                            dangPhatLuot === luot
+                              ? "bg-[#0284C7] text-white border-[#0284C7]"
+                              : "bg-[#F0F9FF] text-[#0369A1] border-[#BAE6FD] hover:bg-[#E0F2FE]"
+                          }`}
+                        >
+                          {dangPhatLuot === luot ? <Square size={11} /> : <Volume2 size={12} />}
+                          {dangPhatLuot === luot ? "Dừng" : "Nghe lại"}
+                        </button>
+                      )}
 
                       {/* Nghe lượt này: đọc to lời thoại (ca không có tệp ghi âm) */}
                       {!audioUrl && text && (

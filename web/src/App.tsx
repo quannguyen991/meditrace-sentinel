@@ -1325,6 +1325,7 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
                               }}
                               isRecording={currentSession.isRecording}
                               audioUrl={currentSession.audioUrl}
+                              segments={currentSession.transcriptSegments}
                               onDatAmThanh={(url) => handleUpdateSession({ audioUrl: url })}
                               onStartRecording={() => handleUpdateSession({ isRecording: true })}
                               onOpenTemplates={() => setIsTemplateModalOpen(true)}
