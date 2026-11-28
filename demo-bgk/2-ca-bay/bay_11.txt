@@ -1,0 +1,14 @@
+Bác sĩ: Em tiểu buốt mấy ngày rồi?
+Bệnh nhân: Ba ngày, à không, năm ngày. Ơ mà thôi, đúng là ba ngày, vì thứ Bảy em mới bị.
+Bác sĩ: Có sốt, đau lưng không?
+Bệnh nhân: Đau lưng bên phải một chút, sốt thì không ạ.
+Bác sĩ: Em có dị ứng thuốc gì không?
+Bệnh nhân: Em dị ứng cephalexin, à không phải, là amoxicillin, uống vào nổi mề đay.
+Bác sĩ: Em có đang mang thai không?
+Bệnh nhân: Không ạ, em vừa có kinh tuần trước.
+Bác sĩ: Trước đây em bị lần nào chưa?
+Bệnh nhân: Năm ngoái bị một lần, uống kháng sinh ba ngày là khỏi.
+Bác sĩ: Khám lâm sàng: nhiệt độ 37 độ 2, ấn đau nhẹ góc sườn lưng phải.
+Bác sĩ: Chẩn đoán: viêm bàng quang cấp, theo dõi viêm thận bể thận phải.
+Bác sĩ: Tổng phân tích và cấy nước tiểu. Dùng fosfomycin 3 g liều duy nhất, tránh nhóm penicillin.
+Bệnh nhân: Vâng ạ.

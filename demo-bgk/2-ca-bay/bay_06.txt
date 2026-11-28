@@ -1,0 +1,14 @@
+Bác sĩ: Chị có ho, sốt, hay khó thở không?
+Bệnh nhân: Có ạ.
+Bác sĩ: Chị bị cái nào?
+Bệnh nhân: Ho thôi ạ, ho có đờm vàng, năm ngày nay.
+Bác sĩ: Còn sốt thì sao?
+Bệnh nhân: Hôm đầu có sốt nhẹ, giờ hết rồi.
+Bác sĩ: Chị có dị ứng thuốc gì không?
+Bệnh nhân: Bác sĩ ơi, em có phải nghỉ làm không ạ?
+Bác sĩ: Chị vẫn đi làm được. Chị có đang cho con bú không?
+Bệnh nhân: Dạ đang cho bé bú, bé được bốn tháng.
+Bác sĩ: Khám lâm sàng: nhiệt độ 37 độ, phổi có ran ngáy rải rác.
+Bác sĩ: Chẩn đoán: viêm phế quản cấp.
+Bác sĩ: Chưa dùng kháng sinh, uống nhiều nước. Nếu sốt lại trên 38 độ 5 hoặc khó thở thì quay lại để xem xét kháng sinh.
+Bệnh nhân: Vâng ạ.

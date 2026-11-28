@@ -1,0 +1,89 @@
+{
+ "id": "bay_12",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 43.5,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.92,
+   "loi": "Chị kể cho tôi nghe chị bị làm sao?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 2.72,
+   "ket_thuc": 12.08,
+   "loi": "Em bị đau đầu ba ngày nay, uống panadol 500 mg ngày hai viên không đỡ, em bị đau nửa đầu từ năm hai mươi tuổi, mẹ em cũng bị, em dị ứng ibuprofen, và em đang cho con bú."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 12.88,
+   "ket_thuc": 15.12,
+   "loi": "Chị có buồn nôn, sợ ánh sáng hay nhìn mờ không?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 15.92,
+   "ket_thuc": 17.84,
+   "loi": "Sợ ánh sáng thì có, còn lại không ạ."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 18.64,
+   "ket_thuc": 20.56,
+   "loi": "Đau đầu lần này có khác mọi khi không?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 21.36,
+   "ket_thuc": 23.52,
+   "loi": "Giống mọi lần thôi ạ, đau giật giật bên trái."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 24.32,
+   "ket_thuc": 29.44,
+   "loi": "Khám lâm sàng: tỉnh, huyết áp 120 trên 75, không dấu thần kinh khu trú, cổ mềm."
+  },
+  {
+   "luot": 8,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 29.79,
+   "ket_thuc": 32.35,
+   "loi": "Chẩn đoán: cơn đau nửa đầu không có tiền triệu."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 32.7,
+   "ket_thuc": 42.14,
+   "loi": "Không dùng ibuprofen. Paracetamol 1 g khi đau, tối đa 3 g một ngày, nghỉ trong phòng tối. Nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu."
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 42.94,
+   "ket_thuc": 43.5,
+   "loi": "Vâng ạ."
+  }
+ ]
+}

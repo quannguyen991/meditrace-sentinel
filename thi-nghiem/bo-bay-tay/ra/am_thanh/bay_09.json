@@ -1,0 +1,121 @@
+{
+ "id": "bay_09",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 46.7,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.2,
+   "loi": "Anh ho bao lâu rồi?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 2.0,
+   "ket_thuc": 5.04,
+   "loi": "Ho khoảng ba tuần, có lúc ra ít máu lẫn trong đờm."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 5.84,
+   "ket_thuc": 7.52,
+   "loi": "Trước đây anh bị lao bao giờ chưa?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 8.32,
+   "ket_thuc": 12.4,
+   "loi": "Mười năm trước tôi bị lao phổi, điều trị đủ sáu tháng, bác sĩ bảo khỏi rồi."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 13.2,
+   "ket_thuc": 14.72,
+   "loi": "Anh có sụt cân không?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 15.52,
+   "ket_thuc": 19.76,
+   "loi": "Tôi thấy quần rộng ra, chắc sụt vài cân, nhưng không cân nên không biết chính xác."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 20.56,
+   "ket_thuc": 22.24,
+   "loi": "Anh có ra mồ hôi đêm không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 23.04,
+   "ket_thuc": 24.72,
+   "loi": "Không, đêm tôi ngủ bình thường."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 25.52,
+   "ket_thuc": 27.04,
+   "loi": "Anh đã đi khám ở đâu chưa?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 27.84,
+   "ket_thuc": 31.84,
+   "loi": "Phòng khám tư bảo có thể là viêm phổi, cho uống kháng sinh năm ngày nhưng không đỡ."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 32.64,
+   "ket_thuc": 36.4,
+   "loi": "Khám lâm sàng: ran nổ đỉnh phổi phải, cân nặng 58 kg."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 36.75,
+   "ket_thuc": 39.63,
+   "loi": "Chẩn đoán: nghi lao phổi tái phát, chưa loại trừ u phổi."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 39.98,
+   "ket_thuc": 45.42,
+   "loi": "Chụp X quang ngực, xét nghiệm đờm AFB và GeneXpert. Nếu dương tính sẽ chuyển chương trình chống lao."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 46.22,
+   "ket_thuc": 46.7,
+   "loi": "Vâng."
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+Bác sĩ: Cháu chào cô, cô ngồi đây ạ. Cô đi tái khám tiểu đường phải không ạ?
+Bệnh nhân: Ừ, cô đến lĩnh thuốc tháng này, tiện cho cháu xem kết quả xét nghiệm sáng nay luôn.
+Bác sĩ: Vâng. Ở nhà cô có thử đường máu không ạ?
+Bệnh nhân: Có, cô thử buổi sáng lúc chưa ăn, toàn tám, chín. Sáng nay thử được chín phẩy hai... à không, tám phẩy hai, cô nhìn nhầm.
+Bác sĩ: Cô có hay khát nước, tiểu nhiều, hay tê bì chân tay không ạ?
+Bệnh nhân: Khát thì cũng hơi khát. Còn tê chân thì cô không bị. Ông nhà cô mới bị tê chân, đi khám bảo biến chứng tiểu đường, chứ cô thì không.
+Bác sĩ: Thuốc cô đang uống vẫn là metformin tám trăm năm mươi, sáng một viên, tối một viên ạ?
+Bệnh nhân: Ừ đúng rồi, uống sau ăn. Còn thuốc mỡ máu thì cô vẫn uống atorvastatin mười mi li gam buổi tối.
+Bác sĩ: Cô có hay quên thuốc không, có dị ứng thuốc gì không ạ?
+Bệnh nhân: Cô uống đều lắm. Dị ứng thì không có.
+Bác sĩ: Vâng. Kết quả sáng nay: đường máu lúc đói tám phẩy một, HbA1c tám phẩy tư phần trăm, chức năng thận bình thường. Huyết áp một trăm ba mươi trên tám mươi, cảm giác hai bàn chân bình thường.
+Bệnh nhân: Thế là cao hay sao cháu?
+Bác sĩ: Vẫn cao cô ạ, mục tiêu của cô là dưới bảy phần trăm. Cháu giữ nguyên metformin, thêm gliclazid ba mươi mi li gam loại giải phóng chậm, mỗi sáng một viên, uống trước bữa sáng.
+Bệnh nhân: Thêm thuốc thì có bị hạ đường không?
+Bác sĩ: Có thể có cô ạ. Nếu run tay, vã mồ hôi, đói cồn cào thì cô ăn ngay mấy viên kẹo hoặc uống cốc nước đường. Không được bỏ bữa sáng.
+Bệnh nhân: Ừ, cô nhớ rồi. Đi bộ thì sáng nào cô cũng đi với mấy bà trong xóm.
+Bác sĩ: Thế thì tốt quá. Cô bớt cơm trắng, bớt đồ ngọt. Hôm nay cô đi soi đáy mắt luôn, một tháng nữa quay lại, ba tháng thì làm lại HbA1c.
+Bệnh nhân: Ừ, cảm ơn cháu nhé.

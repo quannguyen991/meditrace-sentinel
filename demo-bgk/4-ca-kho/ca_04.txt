@@ -1,0 +1,24 @@
+Bác sĩ: Chào chị, chị ngồi đi. Chị khám chi rứa?
+Bệnh nhân: Dạ tui bị khò khè, khó thở mấy bữa ni, đêm nằm ho sù sụ, ngủ không được.
+Bác sĩ: Chị bị từ khi mô?
+Bệnh nhân: Dạ từ hôm thứ tư, tức là năm bữa rồi. Bữa nớ trời trở lạnh, tui đi chợ về là bắt đầu khò khè.
+Bác sĩ: Có sốt, đau ngực, ho ra đờm vàng không chị?
+Bệnh nhân: Dạ không sốt, không đau ngực chi hết. Ho thì ho khan, không có đờm. Chỉ khò khè với tức ngực về đêm.
+Bác sĩ: Chị bị hen từ trước phải không? Thuốc xịt chị đang dùng là chi?
+Bệnh nhân: Dạ tui bị hen từ nhỏ. Tui xịt ống màu đỏ, budesonid formoterol, sáng hai nhát, tối hai nhát, xịt đều lắm.
+Bác sĩ: Còn ống xịt cắt cơn, chị dùng mấy lần một ngày?
+Bệnh nhân: Dạ ống xanh salbutamol, mấy bữa ni ngày xịt bốn, năm lần. Mà nói thiệt với bác sĩ, ống đỏ hết thuốc cả tuần ni rồi, tui chưa đi mua.
+Bác sĩ: Rứa là mấy bữa ni chị không xịt thuốc dự phòng. Chị có dị ứng thuốc chi không?
+Bệnh nhân: Dạ thuốc thì tui không rõ. Mà hồi trước nhức đầu tui uống viên aspirin, uống vô chừng nửa tiếng là nghẹt mũi, thở không được, phải đi cấp cứu.
+Bác sĩ: Trong nhà có ai bị hen hay hút thuốc không chị?
+Bệnh nhân: Dạ mạ tui cũng bị hen. Bọ tui hút thuốc nhiều, mất vì ung thư phổi rồi. Tui thì không hút, mà anh nhà tui hay hút ngoài hiên.
+Bác sĩ: Chị ngồi thẳng lưng cho tôi nghe phổi. Ran rít, ran ngáy rải rác hai phổi. Nhịp thở hai mươi hai lần một phút, độ bão hòa oxy chín mươi lăm phần trăm. Lưu lượng đỉnh hai trăm tám mươi, khoảng bảy mươi phần trăm so với mức tốt nhất của chị.
+Bệnh nhân: Dạ, rứa có phải nhập viện không bác sĩ?
+Bác sĩ: Chị bị đợt cấp hen mức trung bình, do bỏ thuốc dự phòng và trời lạnh, chưa cần nhập viện. Tôi cho chị khí dung salbutamol ở đây trước, rồi đo lại.
+Bệnh nhân: Dạ. Rồi về nhà tui uống thuốc chi?
+Bác sĩ: Chị uống prednisolon năm mi-li-gam, mỗi sáng tám viên sau ăn, trong năm ngày. Mua lại ống budesonid formoterol, sáng hai nhát, tối hai nhát, xịt xong súc miệng. Salbutamol thì chỉ xịt khi khò khè.
+Bệnh nhân: Dạ. Rứa nhức đầu thì tui uống chi được?
+Bác sĩ: Chị dị ứng aspirin nên không được uống aspirin, ibuprofen hay các thuốc kháng viêm giảm đau khác. Nhức đầu thì uống paracetamol năm trăm mi-li-gam, mỗi lần một viên thôi.
+Bệnh nhân: Dạ. Chừ bao lâu tui quay lại?
+Bác sĩ: Một tuần nữa chị quay lại. Nếu xịt cắt cơn mà không đỡ, nói không thành câu, hay môi tím thì vô cấp cứu liền, đừng chờ.
+Bệnh nhân: Dạ, cảm ơn bác sĩ nhiều hỉ.

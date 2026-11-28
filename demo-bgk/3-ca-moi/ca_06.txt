@@ -1,0 +1,20 @@
+Bác sĩ: Chào anh, anh ngồi đi. Anh bị sao vậy?
+Bệnh nhân: Dạ tui bị đau lưng bác sĩ ơi, đau ngay thắt lưng nè, cúi xuống là nhói.
+Bác sĩ: Bị từ hồi nào anh?
+Bệnh nhân: Dạ từ bữa thứ hai... à hông, chủ nhật. Bữa chủ nhật tui khiêng bao xi măng thì nghe cái nhói, tới nay bốn ngày rồi.
+Bác sĩ: Đau có lan xuống chân không? Có tê chân, yếu chân gì không?
+Bệnh nhân: Dạ hông lan, tê chân cũng hổng có. Đi đứng vẫn bình thường, chỉ là ngồi lâu đứng dậy thì đau.
+Bác sĩ: Đi tiểu, đi cầu có bình thường không anh? Có sốt không?
+Bệnh nhân: Dạ bình thường hết, hổng có sốt.
+Bác sĩ: Anh có uống thuốc gì chưa?
+Bệnh nhân: Dạ có ra tiệm mua thuốc, mà uống vô thấy ngứa, nổi mề đay hết hai cánh tay, nên tui ngưng rồi. Trên vỉ ghi là ibuprofen.
+Bác sĩ: Vậy là anh dị ứng ibuprofen. Ngoài cái đó còn dị ứng gì nữa không? Có bệnh gì từ trước không?
+Bệnh nhân: Dạ hết rồi. Tui cũng hổng có bệnh gì, chưa mổ bao giờ.
+Bác sĩ: Anh nằm sấp xuống cho tôi khám. Ấn đau cơ cạnh cột sống thắt lưng hai bên, không đau chói trên cột sống. Nâng chân thẳng hai bên âm tính, sức cơ hai chân bình thường.
+Bệnh nhân: Có bị thoát vị đĩa đệm hông bác sĩ?
+Bác sĩ: Chưa có dấu hiệu thoát vị anh ơi. Anh bị đau lưng cơ học do căng cơ, chưa cần chụp phim.
+Bệnh nhân: Dạ, vậy tui uống thuốc gì?
+Bác sĩ: Anh dị ứng ibuprofen nên tôi không cho thuốc kháng viêm nhóm đó. Anh uống paracetamol năm trăm, mỗi lần hai viên, ngày ba lần sau ăn. Thêm eperison năm mươi mi li gam, ngày ba lần, uống trong năm ngày.
+Bệnh nhân: Có cần nằm nghỉ luôn hông bác sĩ?
+Bác sĩ: Hông cần nằm hoài đâu, cứ đi lại nhẹ nhàng, chườm ấm. Một tuần đừng khiêng đồ nặng. Hai tuần chưa đỡ thì quay lại, còn tê yếu chân hay bí tiểu thì vô viện liền nha.
+Bệnh nhân: Dạ, cám ơn bác sĩ nhiều.

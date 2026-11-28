@@ -1,0 +1,121 @@
+{
+ "id": "bay_08",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 43.9,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.2,
+   "loi": "Bác bị làm sao ạ?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 2.0,
+   "ket_thuc": 5.04,
+   "loi": "Bố cháu dạo này hay quên, có lần đi lạc, khoảng ba tháng nay."
+  },
+  {
+   "luot": 3,
+   "vai": "BN",
+   "giong": "Phạm Tuyên",
+   "bat_dau": 5.84,
+   "ket_thuc": 8.72,
+   "loi": "Tôi có quên gì đâu, con bé nó nói quá lên đấy."
+  },
+  {
+   "luot": 4,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 9.52,
+   "ket_thuc": 10.72,
+   "loi": "Bác có uống rượu không?"
+  },
+  {
+   "luot": 5,
+   "vai": "BN",
+   "giong": "Phạm Tuyên",
+   "bat_dau": 11.52,
+   "ket_thuc": 12.64,
+   "loi": "Tôi không uống."
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 13.44,
+   "ket_thuc": 15.84,
+   "loi": "Bố cháu vẫn uống mỗi tối hai chén đấy bác sĩ ạ."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 16.64,
+   "ket_thuc": 18.16,
+   "loi": "Bác có đang uống thuốc gì không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 18.96,
+   "ket_thuc": 22.48,
+   "loi": "Bố cháu uống thuốc mỡ máu atorvastatin 20 mg buổi tối."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 23.28,
+   "ket_thuc": 24.96,
+   "loi": "Trong nhà có ai bị lú lẫn không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 25.76,
+   "ket_thuc": 29.28,
+   "loi": "Bà nội cháu, tức là mẹ của bố cháu, ngày xưa cũng lẫn lúc về già."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 30.08,
+   "ket_thuc": 34.08,
+   "loi": "Khám lâm sàng: tỉnh, MMSE 22 trên 30, không yếu liệt."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 34.43,
+   "ket_thuc": 37.39,
+   "loi": "Chẩn đoán: suy giảm nhận thức nhẹ, chưa loại trừ sa sút trí tuệ."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 37.74,
+   "ket_thuc": 42.3,
+   "loi": "Chụp CT sọ não, xét nghiệm vitamin B12 và chức năng tuyến giáp. Khuyên bác bỏ rượu."
+  },
+  {
+   "luot": 14,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 43.1,
+   "ket_thuc": 43.9,
+   "loi": "Dạ vâng ạ."
+  }
+ ]
+}

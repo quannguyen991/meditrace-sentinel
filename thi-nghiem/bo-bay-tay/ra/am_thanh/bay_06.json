@@ -1,0 +1,121 @@
+{
+ "id": "bay_06",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 39.9,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 2.08,
+   "loi": "Chị có ho, sốt, hay khó thở không?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 2.88,
+   "ket_thuc": 3.6,
+   "loi": "Có ạ."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 4.4,
+   "ket_thuc": 5.28,
+   "loi": "Chị bị cái nào?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 6.08,
+   "ket_thuc": 8.88,
+   "loi": "Ho thôi ạ, ho có đờm vàng, năm ngày nay."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 9.68,
+   "ket_thuc": 10.72,
+   "loi": "Còn sốt thì sao?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 11.52,
+   "ket_thuc": 13.84,
+   "loi": "Hôm đầu có sốt nhẹ, giờ hết rồi."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 14.64,
+   "ket_thuc": 16.16,
+   "loi": "Chị có dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 16.96,
+   "ket_thuc": 19.6,
+   "loi": "Bác sĩ ơi, em có phải nghỉ làm không ạ?"
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 20.4,
+   "ket_thuc": 23.2,
+   "loi": "Chị vẫn đi làm được. Chị có đang cho con bú không?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 24.0,
+   "ket_thuc": 26.4,
+   "loi": "Dạ đang cho bé bú, bé được bốn tháng."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 27.2,
+   "ket_thuc": 30.24,
+   "loi": "Khám lâm sàng: nhiệt độ 37 độ, phổi có ran ngáy rải rác."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 30.59,
+   "ket_thuc": 32.11,
+   "loi": "Chẩn đoán: viêm phế quản cấp."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 32.46,
+   "ket_thuc": 38.38,
+   "loi": "Chưa dùng kháng sinh, uống nhiều nước. Nếu sốt lại trên 38 độ 5 hoặc khó thở thì quay lại để xem xét kháng sinh."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 39.18,
+   "ket_thuc": 39.9,
+   "loi": "Vâng ạ."
+  }
+ ]
+}

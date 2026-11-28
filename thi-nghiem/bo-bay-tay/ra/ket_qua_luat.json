@@ -1,0 +1,2642 @@
+{
+ "ghi_chu": "16 ca viết tay, bản sạch = đáp án. Không phải độ chính xác thực tế.",
+ "loi_thoai": "gốc",
+ "tong": {
+  "ban_sai": 91,
+  "bat_dung": 66,
+  "bao_nham_sach": 120
+ },
+ "theo_loai": {
+  "ban_cu_con_hieu_luc": {
+   "n": 5,
+   "dung": 1,
+   "bat_ky": 1
+  },
+  "qua_khu_hien_tai": {
+   "n": 10,
+   "dung": 3,
+   "bat_ky": 8
+  },
+  "dao_phu_dinh": {
+   "n": 20,
+   "dung": 17,
+   "bat_ky": 18
+  },
+  "doi_so": {
+   "n": 6,
+   "dung": 5,
+   "bat_ky": 5
+  },
+  "gia_dinh_thanh_that": {
+   "n": 6,
+   "dung": 6,
+   "bat_ky": 6
+  },
+  "doi_chu_the": {
+   "n": 11,
+   "dung": 6,
+   "bat_ky": 8
+  },
+  "xoa_di_ung": {
+   "n": 3,
+   "dung": 3,
+   "bat_ky": 3
+  },
+  "doi_ben": {
+   "n": 7,
+   "dung": 5,
+   "bat_ky": 5
+  },
+  "nang_chac_chan": {
+   "n": 5,
+   "dung": 4,
+   "bat_ky": 5
+  },
+  "bia_menh_de": {
+   "n": 3,
+   "dung": 3,
+   "bat_ky": 3
+  },
+  "doi_thoi_gian": {
+   "n": 2,
+   "dung": 2,
+   "bat_ky": 2
+  },
+  "doi_lieu": {
+   "n": 6,
+   "dung": 5,
+   "bat_ky": 6
+  },
+  "bia_phu_dinh": {
+   "n": 1,
+   "dung": 1,
+   "bat_ky": 1
+  },
+  "doi_thuoc": {
+   "n": 1,
+   "dung": 1,
+   "bat_ky": 1
+  },
+  "xoa_thuoc": {
+   "n": 3,
+   "dung": 3,
+   "bat_ky": 3
+  },
+  "dinh_chinh_nguoc": {
+   "n": 1,
+   "dung": 0,
+   "bat_ky": 1
+  },
+  "xoa_phu_dinh": {
+   "n": 1,
+   "dung": 1,
+   "bat_ky": 1
+  }
+ },
+ "theo_ca": [
+  {
+   "id": "bay_01",
+   "ten": "Chóng mặt tư thế, đổi thuốc huyết áp",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 4,
+     "ma": "DISCONTINUED_AS_CURRENT",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt 6: “từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi, amlodipin tôi bỏ hẳn” — thuốc đã ngừng, bản ghi ghi đang dùng."
+    },
+    {
+     "dong": 10,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “Trước tôi uống amlodipin 10 mg” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “Trước tôi uống amlodipin 10 mg” — không dòng nào dẫn tới (“Trước tôi uống amlodipin 10 mg”)."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “amlodipin tôi bỏ hẳn” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 10 (bệnh nhân): “nhưng lâu lắm rồi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 11 (bác sĩ): “Bác có đau ngực” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'một tuần' dù đã sửa thành mười ngày",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CORRECTION_NOT_APPLIED",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "Lượt 4: “Khoảng một tuần, à không, phải mười ngày rồi bác sĩ ạ.” — người nói sửa “một tuần” thành “mười ngày”, bản ghi còn giữ “một tuần”."
+      },
+      {
+       "ma": "APPROXIMATION_LOST",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Câu gốc nói con số ước chừng quanh “một tuần”."
+      },
+      {
+       "ma": "DUPLICATE_INFORMATION",
+       "nhom": "QUALITY",
+       "ly_do": "Giống dòng #1 “chóng mặt khi đứng lên lúc sáng ngủ dậy”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi amlodipin vẫn đang dùng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DISCONTINUED_AS_CURRENT",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 6: “từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi, amlodipin tôi bỏ hẳn” — thuốc đã ngừng, bản ghi ghi đang dùng."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi 'không dị ứng penicillin' (lấy chữ 'Không' đầu câu)",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NEGATION_FLIP",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi huyết áp đứng 150/90",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi như bệnh nhân đã ngất và vào viện",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi 'có đau ngực'",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_02",
+   "ten": "Trẻ sốt ho, mẹ cũng ốm",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 3,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 4,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 4,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "Người nhà nhắc 'bố' trên thông tin trọng yếu; cần xác nhận là bệnh nhân hay người thân."
+    },
+    {
+     "dong": 6,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 6,
+     "ma": "EVIDENCE_CONTEXT_MISSING",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "Lượt 10 là câu trả lời ngắn; câu hỏi ở lượt 9 cần được dẫn cùng."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 10 (người nhà): “nhưng ông mất rồi” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu nôn ba lần",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu dị ứng aspirin",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "INTERNAL_CONTRADICTION",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "“dị ứng aspirin, uống vào khó thở” trái với dòng #4 “dị ứng thuốc”."
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi cháu có nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi sốt cao nhất 38,5 độ",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “38.5 độ”, câu gốc nói “39 độ 5”."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi như đã sốt quá ba ngày",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    },
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng aspirin của bố",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 8 (người nhà): “nhưng bố cháu dị ứng aspirin” — không dòng nào dẫn tới (“bố cháu dị ứng aspirin”) — có thể là của người nhà, không phải người bệnh."
+      },
+      {
+       "ma": "POSSIBLE_IMPORTANT_OMISSION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 8 (người nhà): “uống vào là khó thở” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_03",
+   "ten": "Đau hố chậu, phủ định kép",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 5,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 7,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 9,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: câu hỏi/câu gốc nói chuyện trước đây; bản ghi ghi như hiện tại."
+    },
+    {
+     "dong": 9,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “Có sốt” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau bên phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'bên phải' dù đã sửa",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có buồn nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi kinh không đều (đọc sai phủ định kép)",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn đang mang thai",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân đã mổ ruột thừa",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_04",
+   "ten": "Đau gối, giọng Huế, kể hộ",
+   "phuong_ngu": "hue",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 0,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 3,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Lượt 8: “Mạ em uống cái thuốc giảm đau mua ở tiệm thuốc, em không nhớ tên, ngày hai viên” — người nói không chắc, bản ghi lại ghi chắc chắn."
+    },
+    {
+     "dong": 4,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 5,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc 'con gái'."
+    },
+    {
+     "dong": 5,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 6,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 6,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “Dạ em đưa mạ em đi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “mạ em năm ni bảy mươi hai tuổi” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi gối vẫn đang sưng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi mẹ bị tiểu đường",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONTRADICTORY_INFORMATION",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "“tiểu đường” trái với dòng #6 “tiểu đường”."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi bệnh nhân có tiểu đường",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "bịa tên thuốc là meloxicam",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “meloxicam” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau gối trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “trái”, câu gốc chỉ có “phải”."
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_05",
+   "ten": "Đái tháo đường, bẫy số liệu",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “12,5” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 1,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi “2 hôm”, câu gốc nói “5 hôm”."
+    },
+    {
+     "dong": 1,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “lúc đói”, bản ghi không có."
+    },
+    {
+     "dong": 2,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+    },
+    {
+     "dong": 3,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 4,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [6]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 5,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “hai tháng”."
+    },
+    {
+     "dong": 7,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_CORRECTION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “hôm trước cô y tá ghi nhầm” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi 1,25 thay cho 12,5",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi có số “1,25” không thấy trong lượt được dẫn."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi đang tiêm insulin",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_thoi_gian",
+     "mo_ta": "ghi phát hiện ba tháng (bản y tá ghi nhầm)",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [6]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang hút một bao/ngày",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có tê tay",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi metformin 1000 mg (liều mới của kế hoạch) vào thuốc đang dùng",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_06",
+   "ten": "Ho đờm, hỏi gộp và hỏi không đáp",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 3,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “nhẹ”, bản ghi không có."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ANSWER",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 hỏi về triệu chứng: “Chị có ho, sốt, hay khó thở không?”; lượt 2 trả lời “Có ạ.” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “Chị có ho” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “sốt” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_PLAN",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “Chị vẫn đi làm được” — không dòng nào dẫn tới (“Chị vẫn đi làm được”)."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "bia_phu_dinh",
+     "mo_ta": "ghi 'không dị ứng thuốc' dù câu hỏi không được trả lời",
+     "nhom_dung": [
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "ghi có sốt và khó thở từ câu 'Có ạ'",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "EVIDENCE_CONTEXT_MISSING",
+       "nhom": "EVIDENCE_PROVENANCE",
+       "ly_do": "Lượt 2 là câu trả lời ngắn; câu hỏi ở lượt 1 cần được dẫn cùng."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang sốt",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã kê kháng sinh",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có khó thở",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_07",
+   "ten": "Suy tim, nhiều thuốc",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 1,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 2,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_thuoc",
+     "mo_ta": "ghi fluoxetin thay furosemid",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “fluoxetin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi kali đang dùng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi chân phải nhiều hơn",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có dị ứng thuốc",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi bisoprolol 5 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót omeprazol",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_MEDICATION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 4 (bệnh nhân): “omeprazol 20 mg trước ăn sáng” — không dòng nào dẫn tới."
+      },
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 4 (bệnh nhân): “omeprazol 20 mg trước ăn sáng” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_08",
+   "ten": "Hay quên, hai người kể mâu thuẫn",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 0,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “ba tháng”."
+    },
+    {
+     "dong": 1,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 1,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 2,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 3,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 3,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 4,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bệnh nhân): “con bé nó nói quá lên đấy” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "chỉ ghi 'không uống rượu', bỏ lời con gái",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NEGATION_FLIP",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+      },
+      {
+       "ma": "CONTRADICTION_UNRESOLVED",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi người nhà hay quên",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "APPROXIMATION_LOST",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Câu gốc nói con số ước chừng quanh “ba tháng”."
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi MMSE 28/30",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi có số “28” không thấy trong lượt được dẫn."
+      }
+     ]
+    },
+    {
+     "loai": "doi_thoi_gian",
+     "mo_ta": "ghi ba tuần",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DURATION_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “ba tuần”, câu gốc “ba tháng” — cùng số, khác đơn vị."
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn sa sút trí tuệ",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “nhẹ”, bản ghi không có."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_09",
+   "ten": "Ho kéo dài, lao cũ",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “ba tuần”."
+    },
+    {
+     "dong": 4,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “Tôi thấy quần rộng ra” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang mắc lao phổi",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn lao phổi tái phát",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi viêm phổi như đã chẩn đoán xác định",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có ra mồ hôi đêm",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "bịa con số 5 kg",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“5 kg” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã chuyển chương trình chống lao",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_10",
+   "ten": "Trẻ đau tai, đổi bên",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 2,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 2,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 3,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 5,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt 10: “Cháu dị ứng amoxicillin, năm ngoái uống bị nổi mề đay” — nói chuyện trước đây; bản ghi ghi như hiện tại."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'tai phải'",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi viêm tai giữa phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “tai phải”, câu gốc “tai trái”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi cháu đang sốt",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu đang uống kháng sinh",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã kê azithromycin",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    },
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng amoxicillin",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 10 (người nhà): “Cháu dị ứng amoxicillin” — không dòng nào dẫn tới."
+      },
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 10 (người nhà): “năm ngoái uống bị nổi mề đay” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_11",
+   "ten": "Tiểu buốt, đính chính ngược",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "CORRECTION_NOT_APPLIED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "Lượt 2: “Ba ngày, à không, năm ngày. Ơ mà thôi, đúng là ba ngày, vì thứ Bảy em mới bị.” — người nói sửa “ba ngày” thành “năm ngày”, bản ghi còn giữ “ba ngày”."
+    },
+    {
+     "dong": 6,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (bệnh nhân): “Ơ mà thôi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “Có sốt” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “Em dị ứng cephalexin” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dinh_chinh_nguoc",
+     "mo_ta": "giữ 'năm ngày' (bản bị bỏ)",
+     "nhom_dung": [
+      "STATE_UPDATE",
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ dị ứng cephalexin",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có sốt",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi fosfomycin 3 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "UNIT_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “3 mg”, câu gốc “3 g” — cùng số, khác đơn vị."
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau lưng bên trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “bên trái”, câu gốc “bên phải”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang uống kháng sinh",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 10: “Năm ngoái bị một lần, uống kháng sinh ba ngày là khỏi” — nói chuyện trước đây; bản ghi ghi như hiện tại."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_12",
+   "ten": "Đau đầu, lượt dồn thông tin",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 1,
+     "ma": "MEDICATION_ENTITY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Tên thuốc “paracetamol” có ở lượt 9, không ở lượt được dẫn."
+    },
+    {
+     "dong": 3,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "WRONG_EVIDENCE",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+    },
+    {
+     "dong": 8,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 8,
+     "ma": "WRONG_EVIDENCE",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “Giống mọi lần thôi ạ” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng ibuprofen (nằm giữa lượt dồn)",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “em dị ứng ibuprofen” — không dòng nào dẫn tới."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót panadol",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_MEDICATION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “uống panadol 500 mg ngày hai viên không đỡ” — không dòng nào dẫn tới."
+      },
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “uống panadol 500 mg ngày hai viên không đỡ” — không dòng nào dẫn tới."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có nhìn mờ",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "WRONG_EVIDENCE",
+       "nhom": "EVIDENCE_PROVENANCE",
+       "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị đau nửa đầu do mẹ kể (gán nhầm)",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi paracetamol 10 g",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DECIMAL_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “10 g”, câu gốc “1 g” — lệch 10 lần."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_phu_dinh",
+     "mo_ta": "bỏ sót 'không buồn nôn'",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_IMPORTANT_OMISSION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 3 (bác sĩ): “Chị có buồn nôn” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_13",
+   "ten": "Nam Bộ: bả, hổng, bữa giờ",
+   "phuong_ngu": "nam_bo",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “một tuần”."
+    },
+    {
+     "dong": 1,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 2,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 5,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 5,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“170 /10” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “Dạ tui dẫn má tui đi” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (người nhà): “uống thuốc hổng đều” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (người nhà): “Dạ amlodipin 5 mg” — không dòng nào dẫn tới (“Dạ amlodipin 5 mg”)."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 10 (người nhà): “Tui mới bị dị ứng tôm cua” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "đọc 'hổng có ói' thành có nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi mẹ dị ứng tôm cua",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "WRONG_SUBJECT",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nói về chính người kể, không phải bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi amlodipin đang dùng đều",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "DISCONTINUED_AS_CURRENT",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 6: “Bả bị cao máu mấy năm nay, uống thuốc hổng đều, hết thuốc là bả nghỉ luôn, cả tháng nay hổng uống” — thuốc đã ngừng, bản ghi ghi đang dùng."
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi trầy chân phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “chân phải”, câu gốc “chân trái”."
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi bệnh nhân đã yếu tay chân",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_14",
+   "ten": "Nghệ Tĩnh: nỏ, chi, mô",
+   "phuong_ngu": "nghe_tinh",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“một tuần” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 2,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 3,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 4,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 7,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “Chú có ợ chua” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “Chú có uống rượu” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "không hiểu 'nỏ', ghi có phân đen",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có uống rượu",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'mười điếu'",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang uống diclofenac",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị loét dạ dày",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn loét dạ dày",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_15",
+   "ten": "Nam Bộ: ổng, hổng phải hổng",
+   "phuong_ngu": "nam_bo",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 3,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc 'vợ'."
+    },
+    {
+     "dong": 4,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 5,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 5,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "EVIDENCE_CONTEXT_MISSING",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "Lượt 10 là câu trả lời ngắn; câu hỏi ở lượt 9 cần được dẫn cùng."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “Dạ ông xã em” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (người nhà): “nói hoài hổng bỏ” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "đọc 'hổng phải hổng sốt' thành không sốt",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NEGATION_FLIP",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân đang điều trị lao",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi nhịp thở 12 lần/phút",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “12 lần”, câu gốc nói “22 lần”."
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi ran nổ đáy phổi trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “phổi trái”, câu gốc “phổi phải”."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi bệnh nhân có bệnh mạn tính",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi amoxicillin clavulanat 1 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "UNIT_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “1 mg”, câu gốc “1 g” — cùng số, khác đơn vị."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_16",
+   "ten": "Bắc quê: u, thầy",
+   "phuong_ngu": "bac_que",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 3,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [6]: câu hỏi/câu gốc nói chuyện trước đây; bản ghi ghi như hiện tại."
+    },
+    {
+     "dong": 4,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 5,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 5,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 6,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 6,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 6,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 8,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “Dạ cháu đưa u cháu đi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “u cháu sáu mươi tám tuổi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (người nhà): “thầy cháu là bố cháu ạ” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị nhồi máu cơ tim",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi digoxin 2,5 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "DECIMAL_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “2.5 mg”, câu gốc “0.25 mg” — lệch 10 lần."
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi ho có đờm",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi mạch 70 lần/phút",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “70 lần”, câu gốc nói “110 lần”."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót furosemid",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_MEDICATION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 10 (người nhà): “với furosemid buổi sáng” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

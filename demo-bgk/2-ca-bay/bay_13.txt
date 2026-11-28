@@ -1,0 +1,14 @@
+Bác sĩ: Chào anh, anh dẫn ai đi khám vậy?
+Người nhà: Dạ tui dẫn má tui đi, bả bị nhức đầu chóng mặt bữa giờ, chừng một tuần rồi bác sĩ.
+Bác sĩ: Bác có ói không anh?
+Người nhà: Dạ bả hổng có ói, mà bữa hổm bả té trong nhà tắm, trầy cái chân trái.
+Bác sĩ: Bác có bệnh gì từ trước không?
+Người nhà: Bả bị cao máu mấy năm nay, uống thuốc hổng đều, hết thuốc là bả nghỉ luôn, cả tháng nay hổng uống.
+Bác sĩ: Thuốc tên gì anh nhớ không?
+Người nhà: Dạ amlodipin 5 mg, ngày một viên.
+Bác sĩ: Bác có dị ứng thuốc gì không?
+Người nhà: Bả thì hổng có. Tui mới bị dị ứng tôm cua, ăn vô là nổi mề đay.
+Bác sĩ: Khám lâm sàng: huyết áp 170 trên 100, tỉnh, nói rõ, không yếu liệt, vết trầy cẳng chân trái đã khô.
+Bác sĩ: Chẩn đoán: tăng huyết áp chưa kiểm soát do bỏ thuốc.
+Bác sĩ: Uống lại amlodipin 5 mg mỗi sáng, không tự ý ngưng. Nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền.
+Người nhà: Dạ, cám ơn bác sĩ.

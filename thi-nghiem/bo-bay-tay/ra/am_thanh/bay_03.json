@@ -1,0 +1,121 @@
+{
+ "id": "bay_03",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 44.5,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 0.88,
+   "loi": "Em đau ở đâu?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 1.68,
+   "ket_thuc": 4.8,
+   "loi": "Em đau bụng dưới bên phải, à không, bên trái chứ ạ, em chỉ nhầm."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 5.6,
+   "ket_thuc": 7.92,
+   "loi": "Đau mấy ngày rồi? Có sốt, buồn nôn không?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 8.72,
+   "ket_thuc": 11.68,
+   "loi": "Hai ngày nay. Không sốt, không buồn nôn, chỉ hơi đầy bụng thôi ạ."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 12.48,
+   "ket_thuc": 13.84,
+   "loi": "Kinh nguyệt em có đều không?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 14.64,
+   "ket_thuc": 17.92,
+   "loi": "Không phải là không đều đâu ạ, nhưng tháng này em bị chậm năm ngày."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 18.72,
+   "ket_thuc": 20.24,
+   "loi": "Em có đang mang thai không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 21.04,
+   "ket_thuc": 22.8,
+   "loi": "Em chưa thử que, cũng không chắc nữa."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 23.6,
+   "ket_thuc": 24.96,
+   "loi": "Trước đây em mổ gì chưa?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 25.76,
+   "ket_thuc": 29.28,
+   "loi": "Em mổ ruột thừa rồi, à không, đấy là chồng em mổ, em chưa mổ bao giờ."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 30.08,
+   "ket_thuc": 33.28,
+   "loi": "Khám lâm sàng: ấn đau hố chậu trái, không có phản ứng thành bụng."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 33.63,
+   "ket_thuc": 37.63,
+   "loi": "Chẩn đoán: đau hố chậu trái chưa rõ nguyên nhân, chưa loại trừ thai ngoài tử cung."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 37.98,
+   "ket_thuc": 43.1,
+   "loi": "Làm que thử thai, siêu âm ổ bụng, tổng phân tích nước tiểu. Nếu que thử dương tính thì chuyển khám sản ngay."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Trúc Ly",
+   "bat_dau": 43.9,
+   "ket_thuc": 44.46,
+   "loi": "Vâng ạ."
+  }
+ ]
+}

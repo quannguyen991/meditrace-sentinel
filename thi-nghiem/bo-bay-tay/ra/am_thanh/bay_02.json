@@ -1,0 +1,137 @@
+{
+ "id": "bay_02",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 51.7,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.68,
+   "loi": "Chào chị, cháu bị làm sao?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 2.48,
+   "ket_thuc": 5.92,
+   "loi": "Dạ, cháu nhà em sốt từ tối hôm kia, cao nhất 39 độ 5."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 6.72,
+   "ket_thuc": 7.76,
+   "loi": "Cháu có ho không?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 8.56,
+   "ket_thuc": 10.48,
+   "loi": "Có ho, ho khan, đêm ho nhiều hơn."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 11.28,
+   "ket_thuc": 12.4,
+   "loi": "Cháu có nôn không chị?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 13.2,
+   "ket_thuc": 16.8,
+   "loi": "Cháu thì không nôn, em mới là người nôn, từ sáng nay em nôn ba lần rồi."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 17.6,
+   "ket_thuc": 19.12,
+   "loi": "Cháu có dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 19.92,
+   "ket_thuc": 23.36,
+   "loi": "Cháu thì chưa thấy, nhưng bố cháu dị ứng aspirin, uống vào là khó thở."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 24.16,
+   "ket_thuc": 25.68,
+   "loi": "Trong nhà có ai bị hen không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 26.48,
+   "ket_thuc": 28.8,
+   "loi": "Ông nội cháu bị hen, nhưng ông mất rồi."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 29.6,
+   "ket_thuc": 30.96,
+   "loi": "Cháu đã uống thuốc gì chưa?"
+  },
+  {
+   "luot": 12,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 31.76,
+   "ket_thuc": 35.76,
+   "loi": "Em cho cháu uống paracetamol gói 250 mg, ngày ba lần."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 36.56,
+   "ket_thuc": 40.24,
+   "loi": "Khám lâm sàng: nhiệt độ 38 độ 7, họng đỏ, phổi không có ran."
+  },
+  {
+   "luot": 14,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 40.59,
+   "ket_thuc": 42.51,
+   "loi": "Chẩn đoán: viêm họng cấp do virus."
+  },
+  {
+   "luot": 15,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 42.86,
+   "ket_thuc": 49.18,
+   "loi": "Tiếp tục paracetamol khi sốt, cho cháu uống nhiều nước. Nếu sốt quá ba ngày hoặc thở nhanh thì đưa cháu đi khám lại."
+  },
+  {
+   "luot": 16,
+   "vai": "NN",
+   "giong": "Trúc Ly",
+   "bat_dau": 49.98,
+   "ket_thuc": 51.66,
+   "loi": "Dạ vâng, em cảm ơn bác sĩ."
+  }
+ ]
+}

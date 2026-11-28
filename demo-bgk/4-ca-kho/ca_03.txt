@@ -1,0 +1,28 @@
+Bác sĩ: Chào anh, anh ngồi đi. Anh bị sao vậy?
+Bệnh nhân: Dạ tui bị sưng đau ngón chân cái bên phải nè bác sĩ, đỏ lên, đụng nhẹ cũng đau.
+Bác sĩ: Anh bị mấy bữa rồi?
+Bệnh nhân: Dạ ba bữa, à hông, năm bữa... à mà tính ra từ thứ bảy tuần rồi, cả tuần rồi đó bác sĩ.
+Bác sĩ: Trước khi đau anh có ăn uống gì đặc biệt không?
+Bệnh nhân: Dạ tối thứ bảy đám giỗ, tui nhậu bia với ăn đồ biển nhiều lắm. Sáng ra là sưng.
+Bác sĩ: Có sốt, có ho, có đau khớp nào khác không anh?
+Bệnh nhân: Dạ hổng sốt, hổng ho, mấy khớp khác cũng hổng sao. Chỉ có ngón chân cái thôi.
+Bác sĩ: Bị vầy lần đầu hay từng bị rồi?
+Bệnh nhân: Dạ hai năm trước bị một lần, bác sĩ nói gút. Ba tui cũng bị gút, còn anh hai tui thì mổ sỏi thận. Tui thì chưa có sỏi.
+Bác sĩ: Hồi đó anh có uống thuốc hạ axit uric không?
+Bệnh nhân: Dạ có uống allopurinol, mà uống được chừng hai tuần thì sốt, nổi bóng nước, tróc da khắp người, phải nằm viện cả tuần.
+Bác sĩ: Vậy là anh dị ứng nặng với allopurinol, thuốc đó anh không bao giờ được uống lại. Hiện giờ anh có uống thuốc gì không?
+Bệnh nhân: Dạ mấy bữa nay đau quá, tui mua thuốc giảm đau ngoài tiệm, hổng nhớ tên, uống hổng đỡ nên ngưng rồi. Thuốc huyết áp thì tui uống amlodipin năm mi-li-gam mỗi sáng.
+Bác sĩ: Anh có bệnh tiểu đường, bệnh bao tử gì không?
+Bệnh nhân: Dạ hổng có tiểu đường. Bao tử thì hồi trước có bị loét, uống thuốc hết rồi.
+Bác sĩ: Anh để chân lên đây cho tôi khám. Khớp bàn ngón chân cái phải sưng, nóng, đỏ, ấn đau nhiều. Các khớp khác bình thường. Nhiệt độ ba mươi bảy độ hai, huyết áp một trăm năm mươi trên chín mươi.
+Bệnh nhân: Dạ, vậy là bị gút lại phải hông bác sĩ?
+Bác sĩ: Đúng rồi, nghĩ nhiều là cơn gút cấp tái phát. Xét nghiệm lúc anh mới tới: axit uric bốn trăm tám mươi micromol một lít, creatinin bình thường.
+Bệnh nhân: Dạ, rồi tui uống thuốc gì?
+Bác sĩ: Anh đau đã cả tuần, lại từng loét bao tử, nên tôi không cho thuốc kháng viêm. Anh uống prednisolon năm mi-li-gam, mỗi sáng sáu viên sau ăn, trong năm ngày. Uống kèm omeprazol hai mươi mi-li-gam mỗi sáng trước ăn, trong năm ngày đó.
+Bệnh nhân: Còn thuốc hạ axit uric thì sao bác sĩ?
+Bác sĩ: Chưa uống bây giờ. Hết sưng chừng hai tuần anh quay lại, tôi tính dùng febuxostat. Tuyệt đối không dùng lại allopurinol.
+Bệnh nhân: Dạ. Huyết áp tui một trăm năm mươi vậy có sao hông?
+Bác sĩ: Lúc đau huyết áp hay lên. Anh cứ uống amlodipin như cũ, ở nhà đo thêm, lần tái khám mình coi lại. Bớt bia, bớt đồ biển, đồ lòng, uống nhiều nước.
+Bệnh nhân: Dạ, lỡ uống thuốc rồi mà vẫn đau thì sao?
+Bác sĩ: Ba ngày mà không đỡ, hoặc sốt trên ba mươi tám độ rưỡi, khớp sưng thêm thì anh quay lại liền, có khi phải chọc hút dịch khớp.
+Bệnh nhân: Dạ, cám ơn bác sĩ.

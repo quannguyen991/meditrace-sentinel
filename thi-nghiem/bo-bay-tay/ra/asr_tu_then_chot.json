@@ -1,0 +1,596 @@
+{
+ "giu_lai": {
+  "bac": {
+   "so": {
+    "goc": 67,
+    "con": 46
+   },
+   "phu_dinh": {
+    "goc": 84,
+    "con": 83
+   },
+   "ben": {
+    "goc": 25,
+    "con": 23
+   },
+   "thuoc": {
+    "goc": 31,
+    "con": 11
+   }
+  },
+  "hue": {
+   "so": {
+    "goc": 5,
+    "con": 5
+   },
+   "ben": {
+    "goc": 4,
+    "con": 3
+   },
+   "phu_dinh": {
+    "goc": 9,
+    "con": 9
+   },
+   "thuoc": {
+    "goc": 1,
+    "con": 1
+   }
+  },
+  "nam_bo": {
+   "so": {
+    "goc": 16,
+    "con": 13
+   },
+   "phu_dinh": {
+    "goc": 20,
+    "con": 16
+   },
+   "ben": {
+    "goc": 4,
+    "con": 4
+   },
+   "thuoc": {
+    "goc": 3,
+    "con": 0
+   }
+  },
+  "nghe_tinh": {
+   "so": {
+    "goc": 4,
+    "con": 4
+   },
+   "phu_dinh": {
+    "goc": 10,
+    "con": 8
+   },
+   "thuoc": {
+    "goc": 3,
+    "con": 0
+   }
+  },
+  "bac_que": {
+   "so": {
+    "goc": 6,
+    "con": 4
+   },
+   "ben": {
+    "goc": 1,
+    "con": 1
+   },
+   "phu_dinh": {
+    "goc": 5,
+    "con": 5
+   },
+   "thuoc": {
+    "goc": 3,
+    "con": 0
+   }
+  }
+ },
+ "mat": [
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "thuoc",
+   "tu": "losartan",
+   "ban_chep": "trước tôi uống amlodipin mườimilygam nhưng từ tháng trước bác sĩ ở huyện đổi sang lốt sắt toàn năm mươimilygam rồi amlodipin tôi bỏ hẳn."
+  },
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "so",
+   "tu": "10.0",
+   "ban_chep": "trước tôi uống amlodipin mườimilygam nhưng từ tháng trước bác sĩ ở huyện đổi sang lốt sắt toàn năm mươimilygam rồi amlodipin tôi bỏ hẳn."
+  },
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "so",
+   "tu": "50.0",
+   "ban_chep": "trước tôi uống amlodipin mườimilygam nhưng từ tháng trước bác sĩ ở huyện đổi sang lốt sắt toàn năm mươimilygam rồi amlodipin tôi bỏ hẳn."
+  },
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 7,
+   "nhom": "thuoc",
+   "tu": "losartan",
+   "ban_chep": "nó sẵn sàng bác uống mấy lần một ngày."
+  },
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 10,
+   "nhom": "thuoc",
+   "tu": "penicillin",
+   "ban_chep": "không à có hồi trước tim pên ních xilin bị nổi mẩn khắp người nhưng lâu lắm rồi."
+  },
+  {
+   "ca": "bay_01",
+   "vung": "bac",
+   "luot": 15,
+   "nhom": "thuoc",
+   "tu": "losartan",
+   "ban_chep": "giảm nốt saston xuống 25mg mỗi sáng hẹn khám lại sau hai tuần nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay."
+  },
+  {
+   "ca": "bay_02",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "so",
+   "tu": "39.5",
+   "ban_chep": "dạ cháu nhà em sốt từ tối hôm kia cao nhất cao cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất cao nhất"
+  },
+  {
+   "ca": "bay_02",
+   "vung": "bac",
+   "luot": 15,
+   "nhom": "so",
+   "tu": "3",
+   "ban_chep": "tiếp tục paracetamol khi sốt cho cháu uống nhiều nước nếu sốt quá ngày hoặc thở nhanh thì đưa cháu đi khám lại."
+  },
+  {
+   "ca": "bay_04",
+   "vung": "hue",
+   "luot": 14,
+   "nhom": "ben",
+   "tu": "phải",
+   "ban_chep": "chẩn đoán thoái hòa khớp gối phạch."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 4,
+   "nhom": "thuoc",
+   "tu": "metformin",
+   "ban_chep": "mết phồm linh tám trăm năm mươi mi li gam ngay hai lần sau ăn sáng và tối in su lin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 4,
+   "nhom": "thuoc",
+   "tu": "insulin",
+   "ban_chep": "mết phồm linh tám trăm năm mươi mi li gam ngay hai lần sau ăn sáng và tối in su lin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 4,
+   "nhom": "so",
+   "tu": "850.0",
+   "ban_chep": "mết phồm linh tám trăm năm mươi mi li gam ngay hai lần sau ăn sáng và tối in su lin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 11,
+   "nhom": "so",
+   "tu": "78.0",
+   "ban_chep": "khám lâm sàng cân nặng bảy mươi tám kilôgam huyết áp một trăm ba mươi lăm trên tám mươi lăm mất cảm giác rung hai bàn chân."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "metformin",
+   "ban_chep": "xét nghiệm hb a c tăng mbp lên mg g lần ngày khám lại sau tháng."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "1000.0",
+   "ban_chep": "xét nghiệm hb a c tăng mbp lên mg g lần ngày khám lại sau tháng."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "2",
+   "ban_chep": "xét nghiệm hb a c tăng mbp lên mg g lần ngày khám lại sau tháng."
+  },
+  {
+   "ca": "bay_05",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "1",
+   "ban_chep": "xét nghiệm hb a c tăng mbp lên mg g lần ngày khám lại sau tháng."
+  },
+  {
+   "ca": "bay_06",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "38.5",
+   "ban_chep": "chưa dùng kháng sinh uống nhiều nước nếu sốt lại trên độ hoặc khó thở thì quay lại để xem xét kháng sinh."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "thuoc",
+   "tu": "furosemid",
+   "ban_chep": "tôi uống phurox miết 40mg buổi sáng với bisopro loa 2.5mg."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "thuoc",
+   "tu": "bisoprolol",
+   "ban_chep": "tôi uống phurox miết 40mg buổi sáng với bisopro loa 2.5mg."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "so",
+   "tu": "5.0",
+   "ban_chep": "tôi uống phurox miết 40mg buổi sáng với bisopro loa 2.5mg."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 4,
+   "nhom": "thuoc",
+   "tu": "kali",
+   "ban_chep": "có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 4,
+   "nhom": "thuoc",
+   "tu": "omeprazol",
+   "ban_chep": "có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "ben",
+   "tu": "trái",
+   "ban_chep": "phủ cả hai chân chân cháy nhiều hơn chân phải."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 8,
+   "nhom": "ben",
+   "tu": "phải",
+   "ban_chep": "với thế hai gối mới ngủ được nằm thấp là khó thở."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 11,
+   "nhom": "so",
+   "tu": "3.0",
+   "ban_chep": "khám lâm sàng phủ mềm hai chân ấn lõm răn ẩm hai đáy phổi cân nặng tăng ba ki lô gam so với lần trước."
+  },
+  {
+   "ca": "bay_07",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "furosemid",
+   "ban_chep": "tăng philip smith lên 40mg hai lần một ngày trong ba ngày mua lại kali uống cùng cân mỗi sáng nếu tăng quá hai kg thì báo ngay."
+  },
+  {
+   "ca": "bay_08",
+   "vung": "bac",
+   "luot": 8,
+   "nhom": "thuoc",
+   "tu": "atorvastatin",
+   "ban_chep": "bộ trào uống thuốc mỡ màu ato vắt tritin mg bữa tối."
+  },
+  {
+   "ca": "bay_08",
+   "vung": "bac",
+   "luot": 8,
+   "nhom": "so",
+   "tu": "20.0",
+   "ban_chep": "bộ trào uống thuốc mỡ màu ato vắt tritin mg bữa tối."
+  },
+  {
+   "ca": "bay_09",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "so",
+   "tu": "3",
+   "ban_chep": "họ khoảng tuần có lúc ra ít máu lẫn trong đờm."
+  },
+  {
+   "ca": "bay_09",
+   "vung": "bac",
+   "luot": 3,
+   "nhom": "phu_dinh",
+   "tu": "chưa",
+   "ban_chep": "trước đây anh bị lao báo giờ trưa."
+  },
+  {
+   "ca": "bay_09",
+   "vung": "bac",
+   "luot": 11,
+   "nhom": "so",
+   "tu": "58.0",
+   "ban_chep": "khám lâm sàng ronaldo đình phối phải cân nặng năm mươi tám ki lô gam."
+  },
+  {
+   "ca": "bay_10",
+   "vung": "bac",
+   "luot": 10,
+   "nhom": "thuoc",
+   "tu": "amoxicillin",
+   "ban_chep": "cháu dị ứng amethy selen năm ngoái uống bị nổi mề đay."
+  },
+  {
+   "ca": "bay_10",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "azithromycin",
+   "ban_chep": "giảm đau bằng paracetamol nếu sau h không đỡ thì dùng kháng sinh axitromycin không dùng amocicilin vì cháu dị ứng."
+  },
+  {
+   "ca": "bay_10",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "amoxicillin",
+   "ban_chep": "giảm đau bằng paracetamol nếu sau h không đỡ thì dùng kháng sinh axitromycin không dùng amocicilin vì cháu dị ứng."
+  },
+  {
+   "ca": "bay_10",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "48.0",
+   "ban_chep": "giảm đau bằng paracetamol nếu sau h không đỡ thì dùng kháng sinh axitromycin không dùng amocicilin vì cháu dị ứng."
+  },
+  {
+   "ca": "bay_11",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "thuoc",
+   "tu": "amoxicillin",
+   "ban_chep": "em dị ứng sếp alexis à không phải là amosicil uống vào nổi mề đay."
+  },
+  {
+   "ca": "bay_11",
+   "vung": "bac",
+   "luot": 6,
+   "nhom": "thuoc",
+   "tu": "cephalexin",
+   "ban_chep": "em dị ứng sếp alexis à không phải là amosicil uống vào nổi mề đay."
+  },
+  {
+   "ca": "bay_11",
+   "vung": "bac",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "fosfomycin",
+   "ban_chep": "tổng phân tích và kế nhiệt tiểu dùng phphoenicin ba gam liều duy nhất tránh nhóm penicillin."
+  },
+  {
+   "ca": "bay_12",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "so",
+   "tu": "500.0",
+   "ban_chep": "em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú."
+  },
+  {
+   "ca": "bay_12",
+   "vung": "bac",
+   "luot": 2,
+   "nhom": "so",
+   "tu": "2",
+   "ban_chep": "em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú."
+  },
+  {
+   "ca": "bay_12",
+   "vung": "bac",
+   "luot": 9,
+   "nhom": "thuoc",
+   "tu": "paracetamol",
+   "ban_chep": "không dùng ibuprofen parastamol g gần khi đau tối đa gần một ngày nghỉ trong phòng tối nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu."
+  },
+  {
+   "ca": "bay_12",
+   "vung": "bac",
+   "luot": 9,
+   "nhom": "so",
+   "tu": "1.0",
+   "ban_chep": "không dùng ibuprofen parastamol g gần khi đau tối đa gần một ngày nghỉ trong phòng tối nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu."
+  },
+  {
+   "ca": "bay_12",
+   "vung": "bac",
+   "luot": 9,
+   "nhom": "so",
+   "tu": "3.0",
+   "ban_chep": "không dùng ibuprofen parastamol g gần khi đau tối đa gần một ngày nghỉ trong phòng tối nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 4,
+   "nhom": "phu_dinh",
+   "tu": "hổng",
+   "ban_chep": "dạ bà hồng có ói mà bữa hôm bà té trong nhà tắm chày cái chân trái."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 6,
+   "nhom": "phu_dinh",
+   "tu": "hổng",
+   "ban_chep": "bà bị cao máu mấy năm nay uống thuốc hồng đều hết thuốc là bà nghỉ luôn cả tháng nay hồng uống."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 8,
+   "nhom": "thuoc",
+   "tu": "amlodipin",
+   "ban_chep": "dạ amlo điếc pin năm mi li gam ngày một viên."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 8,
+   "nhom": "so",
+   "tu": "5.0",
+   "ban_chep": "dạ amlo điếc pin năm mi li gam ngày một viên."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 10,
+   "nhom": "phu_dinh",
+   "tu": "hổng",
+   "ban_chep": "bà thì hồng có tôi mới bị dị ứng tôm cua ăn vô là nổi mề đay."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "amlodipin",
+   "ban_chep": "uống lại amloor đi bình năm mươi ly gam mỗi sáng không tự ý ngưng nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền."
+  },
+  {
+   "ca": "bay_13",
+   "vung": "nam_bo",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "5.0",
+   "ban_chep": "uống lại amloor đi bình năm mươi ly gam mỗi sáng không tự ý ngưng nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền."
+  },
+  {
+   "ca": "bay_14",
+   "vung": "nghe_tinh",
+   "luot": 4,
+   "nhom": "phu_dinh",
+   "tu": "nỏ",
+   "ban_chep": "ở chùa thì cỏ phấn đen thì nọ cỏ."
+  },
+  {
+   "ca": "bay_14",
+   "vung": "nghe_tinh",
+   "luot": 8,
+   "nhom": "phu_dinh",
+   "tu": "nỏ",
+   "ban_chep": "túi đau lưng nên uống dicrophânax uống hai tuần rồi ba bữa đi thì nó uống nữa."
+  },
+  {
+   "ca": "bay_14",
+   "vung": "nghe_tinh",
+   "luot": 8,
+   "nhom": "thuoc",
+   "tu": "diclofenac",
+   "ban_chep": "túi đau lưng nên uống dicrophânax uống hai tuần rồi ba bữa đi thì nó uống nữa."
+  },
+  {
+   "ca": "bay_14",
+   "vung": "nghe_tinh",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "diclofenac",
+   "ban_chep": "nồi soi dạ dày dùng om apple a dồn 20mg hai lần một ngày không dùng lại đích lốp nắt bỏ thuốc lào."
+  },
+  {
+   "ca": "bay_14",
+   "vung": "nghe_tinh",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "omeprazol",
+   "ban_chep": "nồi soi dạ dày dùng om apple a dồn 20mg hai lần một ngày không dùng lại đích lốp nắt bỏ thuốc lào."
+  },
+  {
+   "ca": "bay_15",
+   "vung": "nam_bo",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "amoxicillin",
+   "ban_chep": "chụp ất quan phổi xét nghiệm đàm tiền lào dùng amosicillin clavul a nát một cam hai lần một ngày trong bảy ngày."
+  },
+  {
+   "ca": "bay_15",
+   "vung": "nam_bo",
+   "luot": 13,
+   "nhom": "so",
+   "tu": "1.0",
+   "ban_chep": "chụp ất quan phổi xét nghiệm đàm tiền lào dùng amosicillin clavul a nát một cam hai lần một ngày trong bảy ngày."
+  },
+  {
+   "ca": "bay_16",
+   "vung": "bac_que",
+   "luot": 10,
+   "nhom": "thuoc",
+   "tu": "furosemid",
+   "ban_chep": "đi gót xin không phẩy hai lăm mi li gam ngày một viên với phu rô sờ mít buổi sáng."
+  },
+  {
+   "ca": "bay_16",
+   "vung": "bac_que",
+   "luot": 10,
+   "nhom": "thuoc",
+   "tu": "digoxin",
+   "ban_chep": "đi gót xin không phẩy hai lăm mi li gam ngày một viên với phu rô sờ mít buổi sáng."
+  },
+  {
+   "ca": "bay_16",
+   "vung": "bac_que",
+   "luot": 10,
+   "nhom": "so",
+   "tu": "0.25",
+   "ban_chep": "đi gót xin không phẩy hai lăm mi li gam ngày một viên với phu rô sờ mít buổi sáng."
+  },
+  {
+   "ca": "bay_16",
+   "vung": "bac_que",
+   "luot": 11,
+   "nhom": "so",
+   "tu": "110.0",
+   "ban_chep": "khám lâm sàng phủ hai chân tĩnh mạch cổ nổi gian ấm hai đái phổi mạch không đều một trăm mười lần một phút."
+  },
+  {
+   "ca": "bay_16",
+   "vung": "bac_que",
+   "luot": 13,
+   "nhom": "thuoc",
+   "tu": "digoxin",
+   "ban_chep": "nhập viện theo dõi làm điện tim siêu âm tim định lượng đường gốc xin máu."
+  }
+ ]
+}

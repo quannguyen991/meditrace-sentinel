@@ -1,0 +1,14 @@
+Bác sĩ: Anh ho bao lâu rồi?
+Bệnh nhân: Ho khoảng ba tuần, có lúc ra ít máu lẫn trong đờm.
+Bác sĩ: Trước đây anh bị lao bao giờ chưa?
+Bệnh nhân: Mười năm trước tôi bị lao phổi, điều trị đủ sáu tháng, bác sĩ bảo khỏi rồi.
+Bác sĩ: Anh có sụt cân không?
+Bệnh nhân: Tôi thấy quần rộng ra, chắc sụt vài cân, nhưng không cân nên không biết chính xác.
+Bác sĩ: Anh có ra mồ hôi đêm không?
+Bệnh nhân: Không, đêm tôi ngủ bình thường.
+Bác sĩ: Anh đã đi khám ở đâu chưa?
+Bệnh nhân: Phòng khám tư bảo có thể là viêm phổi, cho uống kháng sinh năm ngày nhưng không đỡ.
+Bác sĩ: Khám lâm sàng: ran nổ đỉnh phổi phải, cân nặng 58 kg.
+Bác sĩ: Chẩn đoán: nghi lao phổi tái phát, chưa loại trừ u phổi.
+Bác sĩ: Chụp X quang ngực, xét nghiệm đờm AFB và GeneXpert. Nếu dương tính sẽ chuyển chương trình chống lao.
+Bệnh nhân: Vâng.

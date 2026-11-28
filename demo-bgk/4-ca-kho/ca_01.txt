@@ -1,0 +1,26 @@
+Bác sĩ: Cháu chào bác, bác ngồi xuống đây ạ. Hôm nay bác tái khám tim phải không ạ?
+Bệnh nhân: Ừ, hẹn ba tháng nhưng tôi đi sớm, vì dạo này hơi khó thở.
+Bác sĩ: Bác khó thở lúc nào ạ, lúc đi lại hay cả lúc nằm?
+Bệnh nhân: Đi nhanh thì mệt. Mấy đêm nay nằm thấp là khó thở, phải kê hai cái gối mới ngủ được.
+Bác sĩ: Bác có đau ngực, ngất, hay ho ra bọt hồng không ạ?
+Bệnh nhân: Không đau ngực, không ngất, ho cũng không. Chỉ khó thở với hai chân sưng thôi.
+Bác sĩ: Ở nhà bác có cân hằng ngày không ạ?
+Bệnh nhân: Có. Tuần trước sáu mươi hai cân, sáng nay lên sáu mươi tư... à không, sáu mươi lăm, tôi đọc nhầm.
+Bác sĩ: Cháu đọc lại thuốc của bác nhé: furosemid bốn mươi mi-li-gam buổi sáng, bisoprolol hai phẩy năm mi-li-gam buổi sáng, apixaban năm mi-li-gam ngày hai lần, và aspirin tám mươi mốt mi-li-gam. Đúng không ạ?
+Bệnh nhân: Ừ, đúng rồi. Tôi uống đều cả, không bỏ hôm nào.
+Bác sĩ: Cả thuốc lợi tiểu bác cũng uống đều chứ ạ?
+Bệnh nhân: À... nói thật với bác sĩ, tuần trước về quê ăn cỗ, sợ đi tiểu dọc đường nên tôi bỏ thuốc lợi tiểu ba hôm. Ăn cỗ thì mặn nữa.
+Bác sĩ: Vâng, cái đó quan trọng đấy ạ. Bác có dị ứng thuốc gì không ạ?
+Bệnh nhân: Không, tôi chưa dị ứng thuốc gì bao giờ.
+Bác sĩ: Bác cởi áo, nằm lên giường cho cháu khám. Huyết áp một trăm ba mươi lăm trên tám mươi, mạch không đều, khoảng chín mươi hai lần một phút. Ran ẩm hai đáy phổi. Phù hai chân, ấn lõm đến giữa cẳng chân. Độ bão hòa oxy chín mươi bốn phần trăm.
+Bệnh nhân: Thế có phải nằm viện không bác sĩ?
+Bác sĩ: Chưa phải nằm viện bác ạ. Bác bị suy tim nặng lên do bỏ thuốc lợi tiểu và ăn mặn. Lần siêu âm trước, phân suất tống máu của bác là ba mươi lăm phần trăm. Máu sáng nay: kali bốn phẩy hai, creatinin chín mươi hai micromol một lít.
+Bệnh nhân: Vâng. Thế thuốc thay đổi thế nào?
+Bác sĩ: Bác nghe kỹ nhé. Thứ nhất, bỏ aspirin, vì bác đã uống apixaban chống đông rồi, uống cả hai dễ chảy máu. Thứ hai, thêm thuốc mới là spironolacton, mỗi sáng một viên hai mươi lăm mi-li-gam. Bisoprolol giữ nguyên, khi nào hết phù mới tính tăng.
+Bệnh nhân: Tức là bỏ aspirin, thêm spironolacton. Còn thuốc lợi tiểu thì sao?
+Bác sĩ: Ba ngày tới bác uống furosemid buổi sáng hai viên, tức là gấp đôi, sau đó về lại một viên bốn mươi như cũ. Apixaban thì giữ nguyên liều cũ, sáng một viên, tối một viên.
+Bệnh nhân: Vâng. Ăn uống thì tôi phải kiêng gì?
+Bác sĩ: Bác ăn nhạt, uống nước không quá một lít rưỡi, tức là khoảng sáu cốc một ngày, sáng nào cũng cân. Nếu ba ngày tăng quá hai cân, hoặc phải ngồi dậy mới thở được, thì bác vào viện ngay.
+Bệnh nhân: Ừ. Bao giờ tôi quay lại?
+Bác sĩ: Một tuần nữa bác quay lại, xét nghiệm lại kali với chức năng thận vì có thuốc mới. Cháu hẹn siêu âm tim luôn hôm đó.
+Bệnh nhân: Ừ, cảm ơn bác sĩ nhé.

@@ -1,0 +1,121 @@
+{
+ "id": "bay_05",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 55.1,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.92,
+   "loi": "Anh đo đường huyết ở nhà được bao nhiêu?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 2.72,
+   "ket_thuc": 6.32,
+   "loi": "Sáng nay lúc đói đo được 12 phẩy 5, hôm qua thì 8 phẩy 2."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 7.12,
+   "ket_thuc": 8.24,
+   "loi": "Anh đang dùng thuốc gì?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 9.04,
+   "ket_thuc": 16.48,
+   "loi": "Metformin 850 mg, ngày hai lần sau ăn sáng và tối. Insulin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 17.28,
+   "ket_thuc": 18.88,
+   "loi": "Anh bị tiểu đường bao lâu rồi?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 19.68,
+   "ket_thuc": 23.6,
+   "loi": "Phát hiện được ba năm, không phải ba tháng đâu, hôm trước cô y tá ghi nhầm."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 24.4,
+   "ket_thuc": 26.0,
+   "loi": "Anh có tê bì chân tay không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 26.8,
+   "ket_thuc": 29.36,
+   "loi": "Tê hai bàn chân khoảng hai tháng nay, tay thì không."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 30.16,
+   "ket_thuc": 31.52,
+   "loi": "Anh có hút thuốc lá không?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 32.32,
+   "ket_thuc": 35.76,
+   "loi": "Tôi bỏ thuốc lá được năm năm rồi, trước hút một bao một ngày."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 36.56,
+   "ket_thuc": 43.12,
+   "loi": "Khám lâm sàng: cân nặng 78 kg, huyết áp 135 trên 85, mất cảm giác rung hai bàn chân."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 43.47,
+   "ket_thuc": 47.55,
+   "loi": "Chẩn đoán: đái tháo đường type 2 chưa kiểm soát, biến chứng thần kinh ngoại biên."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 47.9,
+   "ket_thuc": 53.74,
+   "loi": "Xét nghiệm HbA1c, tăng metformin lên 1000 mg hai lần một ngày, khám lại sau một tháng."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 54.54,
+   "ket_thuc": 55.1,
+   "loi": "Vâng."
+  }
+ ]
+}

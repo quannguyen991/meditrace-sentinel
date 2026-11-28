@@ -1,0 +1,14 @@
+Bác sĩ: Bác đang uống những thuốc gì ạ?
+Bệnh nhân: Tôi uống furosemid 40 mg buổi sáng, với bisoprolol 2 phẩy 5 mg.
+Bác sĩ: Bác có uống thêm thuốc dạ dày không?
+Bệnh nhân: Có, omeprazol 20 mg trước ăn sáng. Còn viên kali thì hết từ tuần trước, chưa mua lại.
+Bác sĩ: Bác có phù chân không?
+Bệnh nhân: Phù cả hai chân, chân trái nhiều hơn chân phải.
+Bác sĩ: Bác nằm có phải kê gối cao không?
+Bệnh nhân: Phải kê hai gối mới ngủ được, nằm thấp là khó thở.
+Bác sĩ: Bác có bị dị ứng gì không?
+Bệnh nhân: Tôi dị ứng hải sản, ăn tôm là ngứa. Thuốc thì không dị ứng gì.
+Bác sĩ: Khám lâm sàng: phù mềm hai chân, ấn lõm, ran ẩm hai đáy phổi, cân nặng tăng 3 kg so với lần trước.
+Bác sĩ: Chẩn đoán: đợt cấp suy tim.
+Bác sĩ: Tăng furosemid lên 40 mg hai lần một ngày trong ba ngày, mua lại kali uống cùng, cân mỗi sáng. Nếu tăng quá 2 kg thì báo ngay.
+Bệnh nhân: Vâng.

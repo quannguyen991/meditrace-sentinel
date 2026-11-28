@@ -1,0 +1,121 @@
+{
+ "id": "bay_10",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 49.2,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 0.96,
+   "loi": "Cháu bị sao chị?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 1.76,
+   "ket_thuc": 4.32,
+   "loi": "Cháu kêu đau tai phải từ hôm qua bác sĩ ạ."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 5.12,
+   "ket_thuc": 6.16,
+   "loi": "Cháu có sốt không?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 6.96,
+   "ket_thuc": 11.04,
+   "loi": "Không ạ, à đêm qua có sốt 38 độ, sáng nay thì hết rồi."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 11.84,
+   "ket_thuc": 13.04,
+   "loi": "Tai có chảy dịch không?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 13.84,
+   "ket_thuc": 18.08,
+   "loi": "Không chảy. Mà em nhìn lại thì cháu cứ cầm tai trái, tai trái mới đúng ạ."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 18.88,
+   "ket_thuc": 20.4,
+   "loi": "Ở nhà có ai đang ốm không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 21.2,
+   "ket_thuc": 24.4,
+   "loi": "Anh trai cháu cũng đang viêm tai, đang uống kháng sinh."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 25.2,
+   "ket_thuc": 26.48,
+   "loi": "Cháu có dị ứng thuốc không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 27.28,
+   "ket_thuc": 31.04,
+   "loi": "Cháu dị ứng amoxicillin, năm ngoái uống bị nổi mề đay."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 31.84,
+   "ket_thuc": 36.8,
+   "loi": "Khám lâm sàng: màng nhĩ trái đỏ, phồng nhẹ; màng nhĩ phải bình thường; nhiệt độ 37 độ 3."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 37.15,
+   "ket_thuc": 39.31,
+   "loi": "Chẩn đoán: viêm tai giữa cấp tai trái."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 39.66,
+   "ket_thuc": 47.5,
+   "loi": "Giảm đau bằng paracetamol. Nếu sau 48 giờ không đỡ thì dùng kháng sinh azithromycin, không dùng amoxicillin vì cháu dị ứng."
+  },
+  {
+   "luot": 14,
+   "vai": "NN",
+   "giong": "Đoan Trang",
+   "bat_dau": 48.3,
+   "ket_thuc": 49.18,
+   "loi": "Dạ vâng."
+  }
+ ]
+}

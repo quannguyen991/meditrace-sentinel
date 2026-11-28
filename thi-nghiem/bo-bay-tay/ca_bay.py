@@ -1,0 +1,771 @@
+# -*- coding: utf-8 -*-
+"""Bộ ca bẫy viết tay để kiểm thử MediTrace (28/11/2026).
+
+12 cuộc khám mô phỏng giữa bác sĩ và bệnh nhân/người nhà. Mỗi ca cài sẵn chỗ khó:
+đổi chủ thể, đổi trạng thái, đính chính (cả đính chính ngược), phủ định trong chuỗi,
+phủ định kép, giả định/kế hoạch, câu hỏi không được trả lời, số/đơn vị/bên trái-phải,
+thuốc không rõ tên, mâu thuẫn giữa hai người kể.
+
+NGUỒN: do Claude (mô hình ngôn ngữ thương mại) viết theo yêu cầu tác giả. CHỈ DÙNG ĐỂ ĐO,
+KHÔNG DÙNG ĐỂ HUẤN LUYỆN. Chưa có bác sĩ duyệt nội dung lâm sàng. Không có dữ liệu người thật.
+
+Mỗi ca có:
+  - `dap_an`   : mệnh đề đúng (cùng định dạng data/thach_thuc_v2).
+  - `ban_sai`  : các bản ghi SAI cố ý, mỗi bản đúng MỘT lỗi; `nhom_dung` là nhóm cảnh báo
+                 mà lớp cảnh báo phải bật trên dòng đó (theo tools.cay_loi / cay_loi_kho).
+"""
+
+VAI = {"BS": "Bác sĩ", "BN": "Bệnh nhân", "NN": "Người nhà"}
+
+NHOM = {
+    "doi_chu_the": {"SUBJECT_ATTRIBUTION"},
+    "dao_phu_dinh": {"NEGATION_ASSERTION"},
+    "nang_chac_chan": {"NEGATION_ASSERTION"},
+    "gia_dinh_thanh_that": {"PLAN_FACT_CONDITIONAL"},
+    "ban_cu_con_hieu_luc": {"STATE_UPDATE"},
+    "dinh_chinh_nguoc": {"STATE_UPDATE", "TEMPORAL"},
+    "qua_khu_hien_tai": {"TEMPORAL"},
+    "doi_lieu": {"ENTITY_VALUE"},
+    "doi_so": {"ENTITY_VALUE", "TEMPORAL"},
+    "doi_ben": {"ENTITY_VALUE"},
+    "doi_thuoc": {"ENTITY_VALUE", "UNSUPPORTED"},
+    "doi_thoi_gian": {"TEMPORAL", "ENTITY_VALUE"},
+    "bia_menh_de": {"UNSUPPORTED", "ENTITY_VALUE", "EVIDENCE_PROVENANCE"},
+    "bia_phu_dinh": {"UNSUPPORTED", "EVIDENCE_PROVENANCE"},
+    "xoa_di_ung": {"OMISSION"},
+    "xoa_thuoc": {"OMISSION"},
+    "xoa_phu_dinh": {"OMISSION"},
+}
+
+
+def M(k, chu_the, noi_dung, muc, luot, trich, **kw):
+    d = {"k": k, "chu_the": chu_the, "noi_dung": noi_dung, "muc": muc,
+         "moc_thoi_gian": None, "phu_dinh": False, "tinh_huong": "thực tế", "luot": luot,
+         "thoi_gian_su_kien": "hiện tại", "quan_he": None, "quan_he_voi": None,
+         "trang_thai": "còn hiệu lực", "do_chac_chan": "chắc chắn", "hanh_vi": None,
+         "thuoc": None, "trich_dan": trich if isinstance(trich, list) else [trich]}
+    d.update(kw)
+    return d
+
+
+def T(ten, lieu, so_lan, bat_dau=None, ngung=None, dang="đang dùng", duong="uống"):
+    return {"ten": ten, "lieu": lieu, "so_lan": so_lan, "duong_dung": duong,
+            "bat_dau": bat_dau, "ngung": ngung, "trang_thai_dung": dang}
+
+
+def S(loai, k, mo_ta, **doi):
+    """Bản sai: sửa trường của mệnh đề `k`; `xoa=True` thì xoá hẳn mệnh đề."""
+    return {"loai": loai, "k": k, "mo_ta": mo_ta, "doi": doi}
+
+
+LD, BS_, TS, GD, TH, DU, KH, CD, KE = ("LÝ DO KHÁM BỆNH", "BỆNH SỬ HIỆN TẠI", "TIỀN SỬ BỆNH",
+                                       "TIỀN SỬ GIA ĐÌNH VÀ XÃ HỘI", "THUỐC ĐANG DÙNG", "DỊ ỨNG",
+                                       "KHÁM LÂM SÀNG", "CHẨN ĐOÁN", "KẾ HOẠCH ĐIỀU TRỊ")
+
+CA = []
+
+# ─── 1. Đính chính thời gian, đổi thuốc (thuốc cũ đã ngừng), phủ định rồi tự sửa thành có ───
+CA.append(dict(
+    id="bay_01", nguoi_ke="bệnh nhân", ten="Chóng mặt tư thế, đổi thuốc huyết áp",
+    bay=["dinh_chinh", "doi_trang_thai_thuoc", "phu_dinh_roi_sua", "phu_dinh_trong_chuoi", "gia_dinh"],
+    luot=[
+        ("a", "BS", "Chào bác, hôm nay bác đi khám vì sao ạ?"),
+        ("b", "BN", "Dạ, mấy hôm nay tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên."),
+        ("c", "BS", "Chóng mặt từ bao giờ hả bác?"),
+        ("d", "BN", "Khoảng một tuần, à không, phải mười ngày rồi bác sĩ ạ."),
+        ("e", "BS", "Bác đang uống thuốc huyết áp gì?"),
+        ("f", "BN", "Trước tôi uống amlodipin 10 mg, nhưng từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi, amlodipin tôi bỏ hẳn."),
+        ("g", "BS", "Losartan bác uống mấy lần một ngày?"),
+        ("h", "BN", "Ngày một viên buổi sáng."),
+        ("i", "BS", "Bác có bị dị ứng thuốc gì không?"),
+        ("j", "BN", "Không, à có, hồi trước tiêm penicillin bị nổi mẩn khắp người, nhưng lâu lắm rồi."),
+        ("k", "BS", "Bác có đau ngực, khó thở không?"),
+        ("l", "BN", "Đau ngực thì không, nhưng leo cầu thang thì hơi hụt hơi."),
+        ("m", "BS", "Khám lâm sàng: huyết áp tư thế nằm 150 trên 90, đứng dậy còn 120 trên 80, mạch 88 lần một phút."),
+        ("n", "BS", "Chẩn đoán: hạ huyết áp tư thế, nghi do thuốc hạ áp."),
+        ("o", "BS", "Giảm losartan xuống 25 mg mỗi sáng, hẹn khám lại sau hai tuần. Nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay."),
+        ("p", "BN", "Vâng, tôi nhớ rồi."),
+    ],
+    dap_an=[
+        M("ld", "bệnh nhân", "chóng mặt khi đứng lên lúc sáng ngủ dậy", LD, ["b"], "mấy hôm nay tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên", hanh_vi="tự kể"),
+        M("cm_moi", "bệnh nhân", "chóng mặt khi đứng lên lúc sáng ngủ dậy", BS_, ["b", "d"], ["tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên", "phải mười ngày rồi bác sĩ ạ"], moc_thoi_gian="mười ngày", quan_he="đính chính", quan_he_voi="cm_cu", hanh_vi="trả lời"),
+        M("cm_cu", "bệnh nhân", "chóng mặt khi đứng lên lúc sáng ngủ dậy", BS_, ["b", "d"], ["tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên", "Khoảng một tuần"], moc_thoi_gian="một tuần", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("amlo", "bệnh nhân", "amlodipin", TH, ["f"], "Trước tôi uống amlodipin 10 mg", thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", hanh_vi="trả lời",
+          thuoc=T("amlodipin", "10 mg", None, ngung="từ tháng trước", dang="đã ngừng")),
+        M("losa", "bệnh nhân", "losartan", TH, ["f", "h"], ["từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi", "Ngày một viên buổi sáng"], quan_he="diễn biến", quan_he_voi="amlo", hanh_vi="trả lời",
+          thuoc=T("losartan", "50 mg", "ngày một viên buổi sáng", bat_dau="từ tháng trước")),
+        M("du_co", "bệnh nhân", "dị ứng penicillin, tiêm vào nổi mẩn khắp người", DU, ["j"], "à có, hồi trước tiêm penicillin bị nổi mẩn khắp người", quan_he="đính chính", quan_he_voi="du_khong", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("du_khong", "bệnh nhân", "dị ứng thuốc", DU, ["j"], "Không", phu_dinh=True, trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("dau_nguc", "bệnh nhân", "đau ngực", BS_, ["l"], "Đau ngực thì không", phu_dinh=True, hanh_vi="trả lời"),
+        M("hut_hoi", "bệnh nhân", "hụt hơi khi leo cầu thang", BS_, ["l"], "leo cầu thang thì hơi hụt hơi", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "huyết áp nằm 150/90, đứng 120/80, mạch 88 lần/phút", KE, ["m"], "huyết áp tư thế nằm 150 trên 90, đứng dậy còn 120 trên 80, mạch 88 lần một phút", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "hạ huyết áp tư thế, nghi do thuốc hạ áp", CD, ["n"], "hạ huyết áp tư thế, nghi do thuốc hạ áp", hanh_vi="nhận định"),
+        M("kh_giam", "bệnh nhân", "giảm losartan xuống 25 mg mỗi sáng, khám lại sau hai tuần", KH, ["o"], "Giảm losartan xuống 25 mg mỗi sáng, hẹn khám lại sau hai tuần", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "vào viện ngay nếu chóng mặt tăng hoặc ngất", KH, ["o"], "Nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("ban_cu_con_hieu_luc", "cm_cu", "giữ 'một tuần' dù đã sửa thành mười ngày", trang_thai="còn hiệu lực"),
+        S("qua_khu_hien_tai", "amlo", "ghi amlodipin vẫn đang dùng", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực",
+          thuoc=T("amlodipin", "10 mg", None, dang="đang dùng")),
+        S("dao_phu_dinh", "du_co", "ghi 'không dị ứng penicillin' (lấy chữ 'Không' đầu câu)", phu_dinh=True),
+        S("doi_so", "kham", "ghi huyết áp đứng 150/90", noi_dung="huyết áp nằm 120/80, đứng 150/90, mạch 88 lần/phút"),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi như bệnh nhân đã ngất và vào viện", tinh_huong="thực tế"),
+        S("dao_phu_dinh", "dau_nguc", "ghi 'có đau ngực'", phu_dinh=False),
+    ],
+))
+
+# ─── 2. Mẹ đưa con đi khám: mẹ kể bệnh của chính mình, dị ứng của bố, tiền sử ông nội ───
+CA.append(dict(
+    id="bay_02", nguoi_ke="mẹ", ten="Trẻ sốt ho, mẹ cũng ốm",
+    bay=["nguoi_ke_benh_minh", "di_ung_nguoi_nha", "tien_su_gia_dinh", "gia_dinh", "phu_dinh_doi_chu_the"],
+    luot=[
+        ("a", "BS", "Chào chị, cháu bị làm sao?"),
+        ("b", "NN", "Dạ, cháu nhà em sốt từ tối hôm kia, cao nhất 39 độ 5."),
+        ("c", "BS", "Cháu có ho không?"),
+        ("d", "NN", "Có ho, ho khan, đêm ho nhiều hơn."),
+        ("e", "BS", "Cháu có nôn không chị?"),
+        ("f", "NN", "Cháu thì không nôn, em mới là người nôn, từ sáng nay em nôn ba lần rồi."),
+        ("g", "BS", "Cháu có dị ứng thuốc gì không?"),
+        ("h", "NN", "Cháu thì chưa thấy, nhưng bố cháu dị ứng aspirin, uống vào là khó thở."),
+        ("i", "BS", "Trong nhà có ai bị hen không?"),
+        ("j", "NN", "Ông nội cháu bị hen, nhưng ông mất rồi."),
+        ("k", "BS", "Cháu đã uống thuốc gì chưa?"),
+        ("l", "NN", "Em cho cháu uống paracetamol gói 250 mg, ngày ba lần."),
+        ("m", "BS", "Khám lâm sàng: nhiệt độ 38 độ 7, họng đỏ, phổi không có ran."),
+        ("n", "BS", "Chẩn đoán: viêm họng cấp do virus."),
+        ("o", "BS", "Tiếp tục paracetamol khi sốt, cho cháu uống nhiều nước. Nếu sốt quá ba ngày hoặc thở nhanh thì đưa cháu đi khám lại."),
+        ("p", "NN", "Dạ vâng, em cảm ơn bác sĩ."),
+    ],
+    dap_an=[
+        M("sot", "bệnh nhân", "sốt, cao nhất 39,5 độ", BS_, ["b"], "cháu nhà em sốt từ tối hôm kia, cao nhất 39 độ 5", moc_thoi_gian="từ tối hôm kia", hanh_vi="tự kể"),
+        M("ho", "bệnh nhân", "ho khan, đêm ho nhiều hơn", BS_, ["d"], "Có ho, ho khan, đêm ho nhiều hơn", hanh_vi="trả lời"),
+        M("khong_non", "bệnh nhân", "nôn", BS_, ["f"], "Cháu thì không nôn", phu_dinh=True, hanh_vi="trả lời"),
+        M("me_non", "mẹ", "nôn ba lần từ sáng nay", GD, ["f"], "em mới là người nôn, từ sáng nay em nôn ba lần rồi", hanh_vi="tự kể"),
+        M("du_chau", "bệnh nhân", "dị ứng thuốc", DU, ["h"], "Cháu thì chưa thấy", phu_dinh=True, do_chac_chan="chưa ghi nhận", hanh_vi="trả lời"),
+        M("du_bo", "bố", "dị ứng aspirin, uống vào khó thở", GD, ["h"], "bố cháu dị ứng aspirin, uống vào là khó thở", hanh_vi="trả lời"),
+        M("hen_ong", "ông nội", "hen", GD, ["j"], "Ông nội cháu bị hen", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("para", "bệnh nhân", "paracetamol", TH, ["l"], "Em cho cháu uống paracetamol gói 250 mg, ngày ba lần", hanh_vi="trả lời",
+          thuoc=T("paracetamol", "250 mg", "ngày ba lần")),
+        M("kham", "bệnh nhân", "nhiệt độ 38,7 độ, họng đỏ, phổi không có ran", KE, ["m"], "nhiệt độ 38 độ 7, họng đỏ, phổi không có ran", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "viêm họng cấp do virus", CD, ["n"], "viêm họng cấp do virus", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "tiếp tục paracetamol khi sốt, uống nhiều nước", KH, ["o"], "Tiếp tục paracetamol khi sốt, cho cháu uống nhiều nước", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "khám lại nếu sốt quá ba ngày hoặc thở nhanh", KH, ["o"], "Nếu sốt quá ba ngày hoặc thở nhanh thì đưa cháu đi khám lại", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("doi_chu_the", "me_non", "ghi cháu nôn ba lần", chu_the="bệnh nhân", muc=BS_),
+        S("doi_chu_the", "du_bo", "ghi cháu dị ứng aspirin", chu_the="bệnh nhân", muc=DU),
+        S("dao_phu_dinh", "khong_non", "ghi cháu có nôn", phu_dinh=False),
+        S("doi_so", "sot", "ghi sốt cao nhất 38,5 độ", noi_dung="sốt, cao nhất 38,5 độ"),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi như đã sốt quá ba ngày", tinh_huong="thực tế"),
+        S("xoa_di_ung", "du_bo", "bỏ sót dị ứng aspirin của bố", xoa=True),
+    ],
+))
+
+# ─── 3. Đổi bên, phủ định chuỗi, phủ định kép, chưa chắc có thai, mổ của chồng ───
+CA.append(dict(
+    id="bay_03", nguoi_ke="bệnh nhân", ten="Đau hố chậu, phủ định kép",
+    bay=["doi_ben", "phu_dinh_trong_chuoi", "phu_dinh_kep", "chua_ro", "nguoi_khac_trong_cau"],
+    luot=[
+        ("a", "BS", "Em đau ở đâu?"),
+        ("b", "BN", "Em đau bụng dưới bên phải, à không, bên trái chứ ạ, em chỉ nhầm."),
+        ("c", "BS", "Đau mấy ngày rồi? Có sốt, buồn nôn không?"),
+        ("d", "BN", "Hai ngày nay. Không sốt, không buồn nôn, chỉ hơi đầy bụng thôi ạ."),
+        ("e", "BS", "Kinh nguyệt em có đều không?"),
+        ("f", "BN", "Không phải là không đều đâu ạ, nhưng tháng này em bị chậm năm ngày."),
+        ("g", "BS", "Em có đang mang thai không?"),
+        ("h", "BN", "Em chưa thử que, cũng không chắc nữa."),
+        ("i", "BS", "Trước đây em mổ gì chưa?"),
+        ("j", "BN", "Em mổ ruột thừa rồi, à không, đấy là chồng em mổ, em chưa mổ bao giờ."),
+        ("k", "BS", "Khám lâm sàng: ấn đau hố chậu trái, không có phản ứng thành bụng."),
+        ("l", "BS", "Chẩn đoán: đau hố chậu trái chưa rõ nguyên nhân, chưa loại trừ thai ngoài tử cung."),
+        ("m", "BS", "Làm que thử thai, siêu âm ổ bụng, tổng phân tích nước tiểu. Nếu que thử dương tính thì chuyển khám sản ngay."),
+        ("n", "BN", "Vâng ạ."),
+    ],
+    dap_an=[
+        M("dau_moi", "bệnh nhân", "đau bụng dưới bên trái", BS_, ["b", "d"], ["bên trái chứ ạ, em chỉ nhầm", "Hai ngày nay"], moc_thoi_gian="hai ngày", quan_he="đính chính", quan_he_voi="dau_cu", hanh_vi="trả lời"),
+        M("dau_cu", "bệnh nhân", "đau bụng dưới bên phải", BS_, ["b"], "Em đau bụng dưới bên phải", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("sot", "bệnh nhân", "sốt", BS_, ["d"], "Không sốt", phu_dinh=True, hanh_vi="trả lời"),
+        M("non", "bệnh nhân", "buồn nôn", BS_, ["d"], "không buồn nôn", phu_dinh=True, hanh_vi="trả lời"),
+        M("day", "bệnh nhân", "đầy bụng nhẹ", BS_, ["d"], "chỉ hơi đầy bụng thôi ạ", hanh_vi="trả lời"),
+        M("kinh_deu", "bệnh nhân", "kinh nguyệt đều", TS, ["f"], "Không phải là không đều đâu ạ", hanh_vi="trả lời"),
+        M("cham", "bệnh nhân", "chậm kinh năm ngày", BS_, ["f"], "tháng này em bị chậm năm ngày", hanh_vi="trả lời"),
+        M("thai", "bệnh nhân", "mang thai", TS, ["h"], "Em chưa thử que, cũng không chắc nữa", do_chac_chan="chưa ghi nhận", thoi_gian_su_kien="chưa rõ", hanh_vi="trả lời"),
+        M("chong_mo", "chồng", "mổ ruột thừa", GD, ["j"], "đấy là chồng em mổ", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("chua_mo", "bệnh nhân", "phẫu thuật trước đây", TS, ["j"], "em chưa mổ bao giờ", phu_dinh=True, hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "ấn đau hố chậu trái, không có phản ứng thành bụng", KE, ["k"], "ấn đau hố chậu trái, không có phản ứng thành bụng", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "đau hố chậu trái chưa rõ nguyên nhân, chưa loại trừ thai ngoài tử cung", CD, ["l"], "đau hố chậu trái chưa rõ nguyên nhân, chưa loại trừ thai ngoài tử cung", do_chac_chan="nghi ngờ", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "que thử thai, siêu âm ổ bụng, tổng phân tích nước tiểu", KH, ["m"], "Làm que thử thai, siêu âm ổ bụng, tổng phân tích nước tiểu", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "chuyển khám sản ngay nếu que thử dương tính", KH, ["m"], "Nếu que thử dương tính thì chuyển khám sản ngay", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("doi_ben", "dau_moi", "ghi đau bên phải", noi_dung="đau bụng dưới bên phải"),
+        S("ban_cu_con_hieu_luc", "dau_cu", "giữ 'bên phải' dù đã sửa", trang_thai="còn hiệu lực"),
+        S("dao_phu_dinh", "non", "ghi có buồn nôn", phu_dinh=False),
+        S("dao_phu_dinh", "kinh_deu", "ghi kinh không đều (đọc sai phủ định kép)", phu_dinh=True),
+        S("nang_chac_chan", "thai", "ghi chắc chắn đang mang thai", do_chac_chan="chắc chắn"),
+        S("doi_chu_the", "chong_mo", "ghi bệnh nhân đã mổ ruột thừa", chu_the="bệnh nhân", muc=TS),
+    ],
+))
+
+# ─── 4. Giọng Huế, con gái kể hộ mẹ: hết sưng, thuốc không rõ tên, tiểu đường của người kể ───
+CA.append(dict(
+    id="bay_04", nguoi_ke="con gái", ten="Đau gối, giọng Huế, kể hộ", phuong_ngu="hue",
+    bay=["phuong_ngu_hue", "nguoi_nha_ke_ho", "doi_trang_thai", "thuoc_khong_ro_ten", "nguoi_ke_benh_minh"],
+    luot=[
+        ("a", "BS", "Chào chị, chị đưa ai đi khám rứa?"),
+        ("b", "NN", "Dạ em đưa mạ em đi, mạ em năm ni bảy mươi hai tuổi."),
+        ("c", "BS", "Bác bị răng?"),
+        ("d", "NN", "Mạ em đau đầu gối bên phải, đi mô cũng phải chống gậy, cả tháng ni rồi."),
+        ("e", "BS", "Gối có sưng không chị?"),
+        ("f", "NN", "Tuần trước sưng to lắm, chừ thì hết sưng rồi, còn đau thôi."),
+        ("g", "BS", "Bác có uống thuốc chi không?"),
+        ("h", "NN", "Mạ em uống cái thuốc giảm đau mua ở tiệm thuốc, em không nhớ tên, ngày hai viên."),
+        ("i", "BS", "Bác có đau dạ dày không?"),
+        ("j", "NN", "Có, mạ em đau dạ dày lâu rồi. Còn em thì bị tiểu đường."),
+        ("k", "BS", "Rứa bác có bị tiểu đường không?"),
+        ("l", "NN", "Không, mạ em không bị, chỉ em thôi."),
+        ("m", "BS", "Khám lâm sàng: khớp gối phải không sưng, có tiếng lạo xạo khi gấp duỗi, ấn đau khe khớp trong."),
+        ("n", "BS", "Chẩn đoán: thoái hoá khớp gối phải."),
+        ("o", "BS", "Ngưng thuốc giảm đau không rõ tên, chụp X quang gối hai tư thế, dùng paracetamol 500 mg khi đau, tối đa bốn viên một ngày."),
+        ("p", "NN", "Dạ, em cảm ơn bác sĩ."),
+    ],
+    dap_an=[
+        M("dau_goi", "bệnh nhân", "đau đầu gối phải, phải chống gậy", BS_, ["d"], "Mạ em đau đầu gối bên phải, đi mô cũng phải chống gậy, cả tháng ni rồi", moc_thoi_gian="cả tháng nay", hanh_vi="tự kể"),
+        M("sung_cu", "bệnh nhân", "sưng gối phải", BS_, ["f"], "Tuần trước sưng to lắm", thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", moc_thoi_gian="tuần trước", hanh_vi="trả lời"),
+        M("het_sung", "bệnh nhân", "gối phải hết sưng, còn đau", BS_, ["f"], "chừ thì hết sưng rồi, còn đau thôi", quan_he="diễn biến", quan_he_voi="sung_cu", hanh_vi="trả lời"),
+        M("thuoc_la", "bệnh nhân", "thuốc giảm đau không rõ tên mua ở tiệm thuốc", TH, ["h"], "Mạ em uống cái thuốc giảm đau mua ở tiệm thuốc, em không nhớ tên, ngày hai viên", hanh_vi="trả lời",
+          thuoc=T("thuốc giảm đau không rõ tên", None, "ngày hai viên")),
+        M("da_day", "bệnh nhân", "đau dạ dày lâu năm", TS, ["j"], "mạ em đau dạ dày lâu rồi", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("con_dtd", "con gái", "tiểu đường", GD, ["j", "l"], ["Còn em thì bị tiểu đường", "chỉ em thôi"], hanh_vi="tự kể"),
+        M("me_ko_dtd", "bệnh nhân", "tiểu đường", TS, ["l"], "mạ em không bị", phu_dinh=True, hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "khớp gối phải không sưng, lạo xạo khi gấp duỗi, ấn đau khe khớp trong", KE, ["m"], "khớp gối phải không sưng, có tiếng lạo xạo khi gấp duỗi, ấn đau khe khớp trong", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "thoái hoá khớp gối phải", CD, ["n"], "thoái hoá khớp gối phải", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "ngưng thuốc giảm đau không rõ tên, X quang gối hai tư thế, paracetamol 500 mg khi đau, tối đa bốn viên/ngày", KH, ["o"], "Ngưng thuốc giảm đau không rõ tên, chụp X quang gối hai tư thế, dùng paracetamol 500 mg khi đau, tối đa bốn viên một ngày", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("qua_khu_hien_tai", "sung_cu", "ghi gối vẫn đang sưng", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực"),
+        S("doi_chu_the", "con_dtd", "ghi mẹ bị tiểu đường", chu_the="bệnh nhân", muc=TS),
+        S("dao_phu_dinh", "me_ko_dtd", "ghi bệnh nhân có tiểu đường", phu_dinh=False),
+        S("bia_menh_de", "thuoc_la", "bịa tên thuốc là meloxicam", noi_dung="meloxicam",
+          thuoc=T("meloxicam", "7,5 mg", "ngày hai viên")),
+        S("doi_ben", "dau_goi", "ghi đau gối trái", noi_dung="đau đầu gối trái, phải chống gậy"),
+    ],
+))
+
+# ─── 5. Số và đơn vị: đường huyết, liều, năm/tháng, thuốc chưa tiêm, đã bỏ thuốc lá ───
+CA.append(dict(
+    id="bay_05", nguoi_ke="bệnh nhân", ten="Đái tháo đường, bẫy số liệu",
+    bay=["so_lieu", "chua_dung_thuoc", "dinh_chinh_ho_so", "phu_dinh_trong_chuoi", "qua_khu"],
+    luot=[
+        ("a", "BS", "Anh đo đường huyết ở nhà được bao nhiêu?"),
+        ("b", "BN", "Sáng nay lúc đói đo được 12 phẩy 5, hôm qua thì 8 phẩy 2."),
+        ("c", "BS", "Anh đang dùng thuốc gì?"),
+        ("d", "BN", "Metformin 850 mg, ngày hai lần sau ăn sáng và tối. Insulin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào."),
+        ("e", "BS", "Anh bị tiểu đường bao lâu rồi?"),
+        ("f", "BN", "Phát hiện được ba năm, không phải ba tháng đâu, hôm trước cô y tá ghi nhầm."),
+        ("g", "BS", "Anh có tê bì chân tay không?"),
+        ("h", "BN", "Tê hai bàn chân khoảng hai tháng nay, tay thì không."),
+        ("i", "BS", "Anh có hút thuốc lá không?"),
+        ("j", "BN", "Tôi bỏ thuốc lá được năm năm rồi, trước hút một bao một ngày."),
+        ("k", "BS", "Khám lâm sàng: cân nặng 78 kg, huyết áp 135 trên 85, mất cảm giác rung hai bàn chân."),
+        ("l", "BS", "Chẩn đoán: đái tháo đường type 2 chưa kiểm soát, biến chứng thần kinh ngoại biên."),
+        ("m", "BS", "Xét nghiệm HbA1c, tăng metformin lên 1000 mg hai lần một ngày, khám lại sau một tháng."),
+        ("n", "BN", "Vâng."),
+    ],
+    dap_an=[
+        M("dh_nay", "bệnh nhân", "đường huyết lúc đói sáng nay 12,5", BS_, ["b"], "Sáng nay lúc đói đo được 12 phẩy 5", moc_thoi_gian="sáng nay", hanh_vi="trả lời"),
+        M("dh_qua", "bệnh nhân", "đường huyết hôm qua 8,2", BS_, ["b"], "hôm qua thì 8 phẩy 2", moc_thoi_gian="hôm qua", hanh_vi="trả lời"),
+        M("met", "bệnh nhân", "metformin", TH, ["d"], "Metformin 850 mg, ngày hai lần sau ăn sáng và tối", hanh_vi="trả lời",
+          thuoc=T("metformin", "850 mg", "ngày hai lần sau ăn sáng và tối")),
+        M("insulin", "bệnh nhân", "insulin", TH, ["d"], "Insulin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào", phu_dinh=True, hanh_vi="trả lời",
+          thuoc=T("insulin", None, None, dang="được kê, chưa dùng", duong=None)),
+        M("dtd", "bệnh nhân", "đái tháo đường phát hiện ba năm", TS, ["f"], "Phát hiện được ba năm, không phải ba tháng đâu", moc_thoi_gian="ba năm", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("te_chan", "bệnh nhân", "tê hai bàn chân", BS_, ["h"], "Tê hai bàn chân khoảng hai tháng nay", moc_thoi_gian="hai tháng", hanh_vi="trả lời"),
+        M("te_tay", "bệnh nhân", "tê tay", BS_, ["h"], "tay thì không", phu_dinh=True, hanh_vi="trả lời"),
+        M("hut", "bệnh nhân", "hút thuốc lá một bao/ngày, đã bỏ năm năm", GD, ["j"], "Tôi bỏ thuốc lá được năm năm rồi, trước hút một bao một ngày", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "cân nặng 78 kg, huyết áp 135/85, mất cảm giác rung hai bàn chân", KE, ["k"], "cân nặng 78 kg, huyết áp 135 trên 85, mất cảm giác rung hai bàn chân", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "đái tháo đường type 2 chưa kiểm soát, biến chứng thần kinh ngoại biên", CD, ["l"], "đái tháo đường type 2 chưa kiểm soát, biến chứng thần kinh ngoại biên", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "HbA1c, tăng metformin lên 1000 mg hai lần/ngày, khám lại sau một tháng", KH, ["m"], "Xét nghiệm HbA1c, tăng metformin lên 1000 mg hai lần một ngày, khám lại sau một tháng", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("doi_so", "dh_nay", "ghi 1,25 thay cho 12,5", noi_dung="đường huyết lúc đói sáng nay 1,25"),
+        S("dao_phu_dinh", "insulin", "ghi đang tiêm insulin", phu_dinh=False,
+          thuoc=T("insulin", None, None, dang="đang dùng", duong=None)),
+        S("doi_thoi_gian", "dtd", "ghi phát hiện ba tháng (bản y tá ghi nhầm)", noi_dung="đái tháo đường phát hiện ba tháng", moc_thoi_gian="ba tháng"),
+        S("qua_khu_hien_tai", "hut", "ghi đang hút một bao/ngày", noi_dung="hút thuốc lá một bao/ngày", thoi_gian_su_kien="hiện tại"),
+        S("dao_phu_dinh", "te_tay", "ghi có tê tay", phu_dinh=False),
+        S("doi_lieu", "met", "ghi metformin 1000 mg (liều mới của kế hoạch) vào thuốc đang dùng",
+          thuoc=T("metformin", "1000 mg", "ngày hai lần sau ăn sáng và tối")),
+    ],
+))
+
+# ─── 6. Câu trả lời "Có ạ" cho câu hỏi gộp, câu hỏi dị ứng không được trả lời ───
+CA.append(dict(
+    id="bay_06", nguoi_ke="bệnh nhân", ten="Ho đờm, hỏi gộp và hỏi không đáp",
+    bay=["tra_loi_ngan", "hoi_gop", "hoi_khong_dap", "doi_trang_thai", "gia_dinh"],
+    luot=[
+        ("a", "BS", "Chị có ho, sốt, hay khó thở không?"),
+        ("b", "BN", "Có ạ."),
+        ("c", "BS", "Chị bị cái nào?"),
+        ("d", "BN", "Ho thôi ạ, ho có đờm vàng, năm ngày nay."),
+        ("e", "BS", "Còn sốt thì sao?"),
+        ("f", "BN", "Hôm đầu có sốt nhẹ, giờ hết rồi."),
+        ("g", "BS", "Chị có dị ứng thuốc gì không?"),
+        ("h", "BN", "Bác sĩ ơi, em có phải nghỉ làm không ạ?"),
+        ("i", "BS", "Chị vẫn đi làm được. Chị có đang cho con bú không?"),
+        ("j", "BN", "Dạ đang cho bé bú, bé được bốn tháng."),
+        ("k", "BS", "Khám lâm sàng: nhiệt độ 37 độ, phổi có ran ngáy rải rác."),
+        ("l", "BS", "Chẩn đoán: viêm phế quản cấp."),
+        ("m", "BS", "Chưa dùng kháng sinh, uống nhiều nước. Nếu sốt lại trên 38 độ 5 hoặc khó thở thì quay lại để xem xét kháng sinh."),
+        ("n", "BN", "Vâng ạ."),
+    ],
+    dap_an=[
+        M("ho", "bệnh nhân", "ho có đờm vàng", BS_, ["d"], "Ho thôi ạ, ho có đờm vàng, năm ngày nay", moc_thoi_gian="năm ngày", hanh_vi="trả lời"),
+        M("kho_tho", "bệnh nhân", "khó thở", BS_, ["d"], "Ho thôi ạ", phu_dinh=True, hanh_vi="trả lời"),
+        M("sot_cu", "bệnh nhân", "sốt nhẹ hôm đầu", BS_, ["f"], "Hôm đầu có sốt nhẹ", thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("het_sot", "bệnh nhân", "hết sốt", BS_, ["f"], "giờ hết rồi", quan_he="diễn biến", quan_he_voi="sot_cu", hanh_vi="trả lời"),
+        M("cho_bu", "bệnh nhân", "đang cho con bú, bé bốn tháng", GD, ["j"], "Dạ đang cho bé bú, bé được bốn tháng", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "nhiệt độ 37 độ, ran ngáy rải rác hai phổi", KE, ["k"], "nhiệt độ 37 độ, phổi có ran ngáy rải rác", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "viêm phế quản cấp", CD, ["l"], "viêm phế quản cấp", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "chưa dùng kháng sinh, uống nhiều nước", KH, ["m"], "Chưa dùng kháng sinh, uống nhiều nước", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "quay lại xem xét kháng sinh nếu sốt trên 38,5 độ hoặc khó thở", KH, ["m"], "Nếu sốt lại trên 38 độ 5 hoặc khó thở thì quay lại để xem xét kháng sinh", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("bia_phu_dinh", "_moi", "ghi 'không dị ứng thuốc' dù câu hỏi không được trả lời",
+          moi=M("_moi", "bệnh nhân", "dị ứng thuốc", DU, ["h"], "Bác sĩ ơi, em có phải nghỉ làm không ạ", phu_dinh=True, hanh_vi="trả lời")),
+        S("bia_menh_de", "_moi", "ghi có sốt và khó thở từ câu 'Có ạ'",
+          moi=M("_moi", "bệnh nhân", "sốt, khó thở", BS_, ["b"], "Có ạ", hanh_vi="trả lời")),
+        S("qua_khu_hien_tai", "sot_cu", "ghi đang sốt", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực"),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi đã kê kháng sinh", tinh_huong="thực tế"),
+        S("dao_phu_dinh", "kho_tho", "ghi có khó thở", phu_dinh=False),
+    ],
+))
+
+# ─── 7. Suy tim: thuốc dễ nhầm tên, kali đang tạm ngừng, chân trái nặng hơn, dị ứng thức ăn ───
+CA.append(dict(
+    id="bay_07", nguoi_ke="bệnh nhân", ten="Suy tim, nhiều thuốc",
+    bay=["thuoc_gan_giong", "tam_ngung_thuoc", "doi_ben", "di_ung_thuc_an", "gia_dinh"],
+    luot=[
+        ("a", "BS", "Bác đang uống những thuốc gì ạ?"),
+        ("b", "BN", "Tôi uống furosemid 40 mg buổi sáng, với bisoprolol 2 phẩy 5 mg."),
+        ("c", "BS", "Bác có uống thêm thuốc dạ dày không?"),
+        ("d", "BN", "Có, omeprazol 20 mg trước ăn sáng. Còn viên kali thì hết từ tuần trước, chưa mua lại."),
+        ("e", "BS", "Bác có phù chân không?"),
+        ("f", "BN", "Phù cả hai chân, chân trái nhiều hơn chân phải."),
+        ("g", "BS", "Bác nằm có phải kê gối cao không?"),
+        ("h", "BN", "Phải kê hai gối mới ngủ được, nằm thấp là khó thở."),
+        ("i", "BS", "Bác có bị dị ứng gì không?"),
+        ("j", "BN", "Tôi dị ứng hải sản, ăn tôm là ngứa. Thuốc thì không dị ứng gì."),
+        ("k", "BS", "Khám lâm sàng: phù mềm hai chân, ấn lõm, ran ẩm hai đáy phổi, cân nặng tăng 3 kg so với lần trước."),
+        ("l", "BS", "Chẩn đoán: đợt cấp suy tim."),
+        ("m", "BS", "Tăng furosemid lên 40 mg hai lần một ngày trong ba ngày, mua lại kali uống cùng, cân mỗi sáng. Nếu tăng quá 2 kg thì báo ngay."),
+        ("n", "BN", "Vâng."),
+    ],
+    dap_an=[
+        M("furo", "bệnh nhân", "furosemid", TH, ["b"], "Tôi uống furosemid 40 mg buổi sáng", hanh_vi="trả lời", thuoc=T("furosemid", "40 mg", "buổi sáng")),
+        M("biso", "bệnh nhân", "bisoprolol", TH, ["b"], "bisoprolol 2 phẩy 5 mg", hanh_vi="trả lời", thuoc=T("bisoprolol", "2,5 mg", None)),
+        M("ome", "bệnh nhân", "omeprazol", TH, ["d"], "omeprazol 20 mg trước ăn sáng", hanh_vi="trả lời", thuoc=T("omeprazol", "20 mg", "trước ăn sáng")),
+        M("kali", "bệnh nhân", "kali", TH, ["d"], "Còn viên kali thì hết từ tuần trước, chưa mua lại", thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", hanh_vi="trả lời",
+          thuoc=T("kali", None, None, ngung="từ tuần trước", dang="đã ngừng")),
+        M("phu", "bệnh nhân", "phù hai chân, chân trái nhiều hơn chân phải", BS_, ["f"], "Phù cả hai chân, chân trái nhiều hơn chân phải", hanh_vi="trả lời"),
+        M("kho_tho", "bệnh nhân", "khó thở khi nằm thấp, phải kê hai gối", BS_, ["h"], "Phải kê hai gối mới ngủ được, nằm thấp là khó thở", hanh_vi="trả lời"),
+        M("du_tom", "bệnh nhân", "dị ứng hải sản, ăn tôm bị ngứa", DU, ["j"], "Tôi dị ứng hải sản, ăn tôm là ngứa", hanh_vi="trả lời"),
+        M("du_thuoc", "bệnh nhân", "dị ứng thuốc", DU, ["j"], "Thuốc thì không dị ứng gì", phu_dinh=True, hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "phù mềm hai chân ấn lõm, ran ẩm hai đáy phổi, tăng 3 kg", KE, ["k"], "phù mềm hai chân, ấn lõm, ran ẩm hai đáy phổi, cân nặng tăng 3 kg so với lần trước", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "đợt cấp suy tim", CD, ["l"], "đợt cấp suy tim", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "furosemid 40 mg hai lần/ngày trong ba ngày, mua lại kali, cân mỗi sáng", KH, ["m"], "Tăng furosemid lên 40 mg hai lần một ngày trong ba ngày, mua lại kali uống cùng, cân mỗi sáng", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "báo ngay nếu tăng quá 2 kg", KH, ["m"], "Nếu tăng quá 2 kg thì báo ngay", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("doi_thuoc", "furo", "ghi fluoxetin thay furosemid", noi_dung="fluoxetin", thuoc=T("fluoxetin", "40 mg", "buổi sáng")),
+        S("qua_khu_hien_tai", "kali", "ghi kali đang dùng", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực",
+          thuoc=T("kali", None, None, dang="đang dùng")),
+        S("doi_ben", "phu", "ghi chân phải nhiều hơn", noi_dung="phù hai chân, chân phải nhiều hơn chân trái"),
+        S("dao_phu_dinh", "du_thuoc", "ghi có dị ứng thuốc", phu_dinh=False),
+        S("doi_lieu", "biso", "ghi bisoprolol 5 mg", thuoc=T("bisoprolol", "5 mg", None)),
+        S("xoa_thuoc", "ome", "bỏ sót omeprazol", xoa=True),
+    ],
+))
+
+# ─── 8. Con gái và bố kể ngược nhau (hay quên, uống rượu), bà nội của người kể = mẹ bệnh nhân ───
+CA.append(dict(
+    id="bay_08", nguoi_ke="con gái", ten="Hay quên, hai người kể mâu thuẫn",
+    bay=["mau_thuan", "nguon_khac_nhau", "dai_tu_ho_hang", "nguoi_nha_ke_ho"],
+    luot=[
+        ("a", "BS", "Bác bị làm sao ạ?"),
+        ("b", "NN", "Bố cháu dạo này hay quên, có lần đi lạc, khoảng ba tháng nay."),
+        ("c", "BN", "Tôi có quên gì đâu, con bé nó nói quá lên đấy."),
+        ("d", "BS", "Bác có uống rượu không?"),
+        ("e", "BN", "Tôi không uống."),
+        ("f", "NN", "Bố cháu vẫn uống mỗi tối hai chén đấy bác sĩ ạ."),
+        ("g", "BS", "Bác có đang uống thuốc gì không?"),
+        ("h", "NN", "Bố cháu uống thuốc mỡ máu atorvastatin 20 mg buổi tối."),
+        ("i", "BS", "Trong nhà có ai bị lú lẫn không?"),
+        ("j", "NN", "Bà nội cháu, tức là mẹ của bố cháu, ngày xưa cũng lẫn lúc về già."),
+        ("k", "BS", "Khám lâm sàng: tỉnh, MMSE 22 trên 30, không yếu liệt."),
+        ("l", "BS", "Chẩn đoán: suy giảm nhận thức nhẹ, chưa loại trừ sa sút trí tuệ."),
+        ("m", "BS", "Chụp CT sọ não, xét nghiệm vitamin B12 và chức năng tuyến giáp. Khuyên bác bỏ rượu."),
+        ("n", "NN", "Dạ vâng ạ."),
+    ],
+    dap_an=[
+        M("quen", "bệnh nhân", "hay quên, có lần đi lạc", BS_, ["b"], "Bố cháu dạo này hay quên, có lần đi lạc, khoảng ba tháng nay", moc_thoi_gian="ba tháng", hanh_vi="tự kể"),
+        M("phu_nhan_quen", "bệnh nhân", "hay quên", BS_, ["c"], "Tôi có quên gì đâu", phu_dinh=True, quan_he="mâu thuẫn", quan_he_voi="quen", trang_thai="chưa giải quyết", hanh_vi="tự kể"),
+        M("ruou_khong", "bệnh nhân", "uống rượu", GD, ["e"], "Tôi không uống", phu_dinh=True, trang_thai="chưa giải quyết", hanh_vi="trả lời"),
+        M("ruou_co", "bệnh nhân", "uống rượu mỗi tối hai chén", GD, ["f"], "Bố cháu vẫn uống mỗi tối hai chén", quan_he="mâu thuẫn", quan_he_voi="ruou_khong", trang_thai="chưa giải quyết", hanh_vi="tự kể"),
+        M("ator", "bệnh nhân", "atorvastatin", TH, ["h"], "Bố cháu uống thuốc mỡ máu atorvastatin 20 mg buổi tối", hanh_vi="trả lời", thuoc=T("atorvastatin", "20 mg", "buổi tối")),
+        M("me_lan", "mẹ", "lú lẫn lúc về già", GD, ["j"], "Bà nội cháu, tức là mẹ của bố cháu, ngày xưa cũng lẫn lúc về già", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "tỉnh, MMSE 22/30, không yếu liệt", KE, ["k"], "tỉnh, MMSE 22 trên 30, không yếu liệt", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "suy giảm nhận thức nhẹ, chưa loại trừ sa sút trí tuệ", CD, ["l"], "suy giảm nhận thức nhẹ, chưa loại trừ sa sút trí tuệ", do_chac_chan="nghi ngờ", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "CT sọ não, vitamin B12, chức năng tuyến giáp, khuyên bỏ rượu", KH, ["m"], "Chụp CT sọ não, xét nghiệm vitamin B12 và chức năng tuyến giáp. Khuyên bác bỏ rượu", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("dao_phu_dinh", "ruou_co", "chỉ ghi 'không uống rượu', bỏ lời con gái", phu_dinh=True),
+        S("doi_chu_the", "quen", "ghi người nhà hay quên", chu_the="con gái", muc=GD),
+        S("doi_so", "kham", "ghi MMSE 28/30", noi_dung="tỉnh, MMSE 28/30, không yếu liệt"),
+        S("doi_thoi_gian", "quen", "ghi ba tuần", moc_thoi_gian="ba tuần", noi_dung="hay quên, có lần đi lạc, ba tuần"),
+        S("nang_chac_chan", "cd", "ghi chắc chắn sa sút trí tuệ", noi_dung="sa sút trí tuệ", do_chac_chan="chắc chắn"),
+    ],
+))
+
+# ─── 9. Lao cũ đã khỏi, chẩn đoán nghi ngờ, ý kiến phòng khám khác, sụt cân không rõ số ───
+CA.append(dict(
+    id="bay_09", nguoi_ke="bệnh nhân", ten="Ho kéo dài, lao cũ",
+    bay=["qua_khu", "nghi_ngo", "nguon_khac_nhau", "khong_ro_so", "phu_dinh"],
+    luot=[
+        ("a", "BS", "Anh ho bao lâu rồi?"),
+        ("b", "BN", "Ho khoảng ba tuần, có lúc ra ít máu lẫn trong đờm."),
+        ("c", "BS", "Trước đây anh bị lao bao giờ chưa?"),
+        ("d", "BN", "Mười năm trước tôi bị lao phổi, điều trị đủ sáu tháng, bác sĩ bảo khỏi rồi."),
+        ("e", "BS", "Anh có sụt cân không?"),
+        ("f", "BN", "Tôi thấy quần rộng ra, chắc sụt vài cân, nhưng không cân nên không biết chính xác."),
+        ("g", "BS", "Anh có ra mồ hôi đêm không?"),
+        ("h", "BN", "Không, đêm tôi ngủ bình thường."),
+        ("i", "BS", "Anh đã đi khám ở đâu chưa?"),
+        ("j", "BN", "Phòng khám tư bảo có thể là viêm phổi, cho uống kháng sinh năm ngày nhưng không đỡ."),
+        ("k", "BS", "Khám lâm sàng: ran nổ đỉnh phổi phải, cân nặng 58 kg."),
+        ("l", "BS", "Chẩn đoán: nghi lao phổi tái phát, chưa loại trừ u phổi."),
+        ("m", "BS", "Chụp X quang ngực, xét nghiệm đờm AFB và GeneXpert. Nếu dương tính sẽ chuyển chương trình chống lao."),
+        ("n", "BN", "Vâng."),
+    ],
+    dap_an=[
+        M("ho", "bệnh nhân", "ho ba tuần, có lúc ra ít máu lẫn đờm", BS_, ["b"], "Ho khoảng ba tuần, có lúc ra ít máu lẫn trong đờm", moc_thoi_gian="ba tuần", hanh_vi="trả lời"),
+        M("lao_cu", "bệnh nhân", "lao phổi, điều trị đủ sáu tháng, đã khỏi", TS, ["d"], "Mười năm trước tôi bị lao phổi, điều trị đủ sáu tháng, bác sĩ bảo khỏi rồi", moc_thoi_gian="mười năm trước", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("sut_can", "bệnh nhân", "sụt cân, không rõ bao nhiêu", BS_, ["f"], "chắc sụt vài cân, nhưng không cân nên không biết chính xác", do_chac_chan="nghi ngờ", hanh_vi="trả lời"),
+        M("mo_hoi", "bệnh nhân", "ra mồ hôi đêm", BS_, ["h"], "Không, đêm tôi ngủ bình thường", phu_dinh=True, hanh_vi="trả lời"),
+        M("pk_tu", "bệnh nhân", "phòng khám tư nghĩ viêm phổi, đã uống kháng sinh năm ngày không đỡ", BS_, ["j"], "Phòng khám tư bảo có thể là viêm phổi, cho uống kháng sinh năm ngày nhưng không đỡ", do_chac_chan="nghi ngờ", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "ran nổ đỉnh phổi phải, cân nặng 58 kg", KE, ["k"], "ran nổ đỉnh phổi phải, cân nặng 58 kg", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "nghi lao phổi tái phát, chưa loại trừ u phổi", CD, ["l"], "nghi lao phổi tái phát, chưa loại trừ u phổi", do_chac_chan="nghi ngờ", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "X quang ngực, đờm AFB và GeneXpert", KH, ["m"], "Chụp X quang ngực, xét nghiệm đờm AFB và GeneXpert", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "chuyển chương trình chống lao nếu dương tính", KH, ["m"], "Nếu dương tính sẽ chuyển chương trình chống lao", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("qua_khu_hien_tai", "lao_cu", "ghi đang mắc lao phổi", noi_dung="lao phổi", thoi_gian_su_kien="hiện tại", muc=BS_),
+        S("nang_chac_chan", "cd", "ghi chắc chắn lao phổi tái phát", noi_dung="lao phổi tái phát", do_chac_chan="chắc chắn"),
+        S("nang_chac_chan", "pk_tu", "ghi viêm phổi như đã chẩn đoán xác định", do_chac_chan="chắc chắn"),
+        S("dao_phu_dinh", "mo_hoi", "ghi có ra mồ hôi đêm", phu_dinh=False),
+        S("bia_menh_de", "sut_can", "bịa con số 5 kg", noi_dung="sụt 5 kg", do_chac_chan="chắc chắn"),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi đã chuyển chương trình chống lao", tinh_huong="thực tế"),
+    ],
+))
+
+# ─── 10. Trẻ đau tai: mẹ sửa bên tai, sốt hôm qua đã hết, anh trai cũng viêm tai ───
+CA.append(dict(
+    id="bay_10", nguoi_ke="mẹ", ten="Trẻ đau tai, đổi bên",
+    bay=["doi_ben", "dinh_chinh", "doi_trang_thai", "nguoi_khac_trong_cau", "gia_dinh"],
+    luot=[
+        ("a", "BS", "Cháu bị sao chị?"),
+        ("b", "NN", "Cháu kêu đau tai phải từ hôm qua bác sĩ ạ."),
+        ("c", "BS", "Cháu có sốt không?"),
+        ("d", "NN", "Không ạ, à đêm qua có sốt 38 độ, sáng nay thì hết rồi."),
+        ("e", "BS", "Tai có chảy dịch không?"),
+        ("f", "NN", "Không chảy. Mà em nhìn lại thì cháu cứ cầm tai trái, tai trái mới đúng ạ."),
+        ("g", "BS", "Ở nhà có ai đang ốm không?"),
+        ("h", "NN", "Anh trai cháu cũng đang viêm tai, đang uống kháng sinh."),
+        ("i", "BS", "Cháu có dị ứng thuốc không?"),
+        ("j", "NN", "Cháu dị ứng amoxicillin, năm ngoái uống bị nổi mề đay."),
+        ("k", "BS", "Khám lâm sàng: màng nhĩ trái đỏ, phồng nhẹ; màng nhĩ phải bình thường; nhiệt độ 37 độ 3."),
+        ("l", "BS", "Chẩn đoán: viêm tai giữa cấp tai trái."),
+        ("m", "BS", "Giảm đau bằng paracetamol. Nếu sau 48 giờ không đỡ thì dùng kháng sinh azithromycin, không dùng amoxicillin vì cháu dị ứng."),
+        ("n", "NN", "Dạ vâng."),
+    ],
+    dap_an=[
+        M("tai_moi", "bệnh nhân", "đau tai trái", BS_, ["b", "f"], ["đau tai phải từ hôm qua", "tai trái mới đúng ạ"], moc_thoi_gian="từ hôm qua", quan_he="đính chính", quan_he_voi="tai_cu", hanh_vi="tự kể"),
+        M("tai_cu", "bệnh nhân", "đau tai phải", BS_, ["b"], "Cháu kêu đau tai phải từ hôm qua", trang_thai="bị thay thế", hanh_vi="tự kể"),
+        M("sot", "bệnh nhân", "sốt 38 độ đêm qua, sáng nay hết", BS_, ["d"], "à đêm qua có sốt 38 độ, sáng nay thì hết rồi", thoi_gian_su_kien="quá khứ", moc_thoi_gian="đêm qua", hanh_vi="trả lời"),
+        M("chay_dich", "bệnh nhân", "chảy dịch tai", BS_, ["f"], "Không chảy", phu_dinh=True, hanh_vi="trả lời"),
+        M("anh_trai", "anh trai", "viêm tai, đang uống kháng sinh", GD, ["h"], "Anh trai cháu cũng đang viêm tai, đang uống kháng sinh", hanh_vi="trả lời"),
+        M("du", "bệnh nhân", "dị ứng amoxicillin, nổi mề đay", DU, ["j"], "Cháu dị ứng amoxicillin, năm ngoái uống bị nổi mề đay", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "màng nhĩ trái đỏ phồng nhẹ, màng nhĩ phải bình thường, nhiệt độ 37,3 độ", KE, ["k"], "màng nhĩ trái đỏ, phồng nhẹ; màng nhĩ phải bình thường; nhiệt độ 37 độ 3", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "viêm tai giữa cấp tai trái", CD, ["l"], "viêm tai giữa cấp tai trái", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "giảm đau bằng paracetamol", KH, ["m"], "Giảm đau bằng paracetamol", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "azithromycin nếu sau 48 giờ không đỡ, không dùng amoxicillin", KH, ["m"], "Nếu sau 48 giờ không đỡ thì dùng kháng sinh azithromycin, không dùng amoxicillin vì cháu dị ứng", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("ban_cu_con_hieu_luc", "tai_cu", "giữ 'tai phải'", trang_thai="còn hiệu lực"),
+        S("doi_ben", "cd", "ghi viêm tai giữa phải", noi_dung="viêm tai giữa cấp tai phải"),
+        S("qua_khu_hien_tai", "sot", "ghi cháu đang sốt", noi_dung="sốt 38 độ", thoi_gian_su_kien="hiện tại"),
+        S("doi_chu_the", "anh_trai", "ghi cháu đang uống kháng sinh", chu_the="bệnh nhân", muc=BS_),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi đã kê azithromycin", tinh_huong="thực tế"),
+        S("xoa_di_ung", "du", "bỏ sót dị ứng amoxicillin", xoa=True),
+    ],
+))
+
+# ─── 11. Đính chính ngược (sửa rồi quay lại bản đầu), đổi tên thuốc dị ứng, liều g/mg ───
+CA.append(dict(
+    id="bay_11", nguoi_ke="bệnh nhân", ten="Tiểu buốt, đính chính ngược",
+    bay=["dinh_chinh_nguoc", "dinh_chinh_di_ung", "don_vi", "phu_dinh", "qua_khu"],
+    luot=[
+        ("a", "BS", "Em tiểu buốt mấy ngày rồi?"),
+        ("b", "BN", "Ba ngày, à không, năm ngày. Ơ mà thôi, đúng là ba ngày, vì thứ Bảy em mới bị."),
+        ("c", "BS", "Có sốt, đau lưng không?"),
+        ("d", "BN", "Đau lưng bên phải một chút, sốt thì không ạ."),
+        ("e", "BS", "Em có dị ứng thuốc gì không?"),
+        ("f", "BN", "Em dị ứng cephalexin, à không phải, là amoxicillin, uống vào nổi mề đay."),
+        ("g", "BS", "Em có đang mang thai không?"),
+        ("h", "BN", "Không ạ, em vừa có kinh tuần trước."),
+        ("i", "BS", "Trước đây em bị lần nào chưa?"),
+        ("j", "BN", "Năm ngoái bị một lần, uống kháng sinh ba ngày là khỏi."),
+        ("k", "BS", "Khám lâm sàng: nhiệt độ 37 độ 2, ấn đau nhẹ góc sườn lưng phải."),
+        ("l", "BS", "Chẩn đoán: viêm bàng quang cấp, theo dõi viêm thận bể thận phải."),
+        ("m", "BS", "Tổng phân tích và cấy nước tiểu. Dùng fosfomycin 3 g liều duy nhất, tránh nhóm penicillin."),
+        ("n", "BN", "Vâng ạ."),
+    ],
+    dap_an=[
+        M("buot", "bệnh nhân", "tiểu buốt ba ngày", BS_, ["b"], ["Ba ngày", "đúng là ba ngày, vì thứ Bảy em mới bị"], moc_thoi_gian="ba ngày", quan_he="đính chính", quan_he_voi="buot_5", hanh_vi="trả lời"),
+        M("buot_5", "bệnh nhân", "tiểu buốt năm ngày", BS_, ["b"], "à không, năm ngày", moc_thoi_gian="năm ngày", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("dau_lung", "bệnh nhân", "đau lưng bên phải nhẹ", BS_, ["d"], "Đau lưng bên phải một chút", hanh_vi="trả lời"),
+        M("sot", "bệnh nhân", "sốt", BS_, ["d"], "sốt thì không ạ", phu_dinh=True, hanh_vi="trả lời"),
+        M("du_amox", "bệnh nhân", "dị ứng amoxicillin, nổi mề đay", DU, ["f"], "à không phải, là amoxicillin, uống vào nổi mề đay", quan_he="đính chính", quan_he_voi="du_ceph", hanh_vi="trả lời"),
+        M("du_ceph", "bệnh nhân", "dị ứng cephalexin", DU, ["f"], "Em dị ứng cephalexin", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("thai", "bệnh nhân", "mang thai", TS, ["h"], "Không ạ, em vừa có kinh tuần trước", phu_dinh=True, hanh_vi="trả lời"),
+        M("lan_truoc", "bệnh nhân", "nhiễm trùng tiểu năm ngoái, kháng sinh ba ngày khỏi", TS, ["j"], "Năm ngoái bị một lần, uống kháng sinh ba ngày là khỏi", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "nhiệt độ 37,2 độ, ấn đau nhẹ góc sườn lưng phải", KE, ["k"], "nhiệt độ 37 độ 2, ấn đau nhẹ góc sườn lưng phải", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "viêm bàng quang cấp, theo dõi viêm thận bể thận phải", CD, ["l"], "viêm bàng quang cấp, theo dõi viêm thận bể thận phải", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "tổng phân tích và cấy nước tiểu, fosfomycin 3 g liều duy nhất, tránh nhóm penicillin", KH, ["m"], "Dùng fosfomycin 3 g liều duy nhất, tránh nhóm penicillin", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("dinh_chinh_nguoc", "buot_5", "giữ 'năm ngày' (bản bị bỏ)", trang_thai="còn hiệu lực"),
+        S("ban_cu_con_hieu_luc", "du_ceph", "giữ dị ứng cephalexin", trang_thai="còn hiệu lực"),
+        S("dao_phu_dinh", "sot", "ghi có sốt", phu_dinh=False),
+        S("doi_lieu", "kh", "ghi fosfomycin 3 mg", noi_dung="tổng phân tích và cấy nước tiểu, fosfomycin 3 mg liều duy nhất, tránh nhóm penicillin"),
+        S("doi_ben", "dau_lung", "ghi đau lưng bên trái", noi_dung="đau lưng bên trái nhẹ"),
+        S("qua_khu_hien_tai", "lan_truoc", "ghi đang uống kháng sinh", noi_dung="đang uống kháng sinh", thoi_gian_su_kien="hiện tại", muc=TH),
+    ],
+))
+
+# ─── 12. Một lượt dồn rất nhiều thông tin + phủ định lược ("còn lại không ạ") ───
+CA.append(dict(
+    id="bay_12", nguoi_ke="bệnh nhân", ten="Đau đầu, lượt dồn thông tin",
+    bay=["luot_don", "phu_dinh_luoc", "tien_su_gia_dinh", "bo_sot"],
+    luot=[
+        ("a", "BS", "Chị kể cho tôi nghe chị bị làm sao?"),
+        ("b", "BN", "Em bị đau đầu ba ngày nay, uống panadol 500 mg ngày hai viên không đỡ, em bị đau nửa đầu từ năm hai mươi tuổi, mẹ em cũng bị, em dị ứng ibuprofen, và em đang cho con bú."),
+        ("c", "BS", "Chị có buồn nôn, sợ ánh sáng hay nhìn mờ không?"),
+        ("d", "BN", "Sợ ánh sáng thì có, còn lại không ạ."),
+        ("e", "BS", "Đau đầu lần này có khác mọi khi không?"),
+        ("f", "BN", "Giống mọi lần thôi ạ, đau giật giật bên trái."),
+        ("g", "BS", "Khám lâm sàng: tỉnh, huyết áp 120 trên 75, không dấu thần kinh khu trú, cổ mềm."),
+        ("h", "BS", "Chẩn đoán: cơn đau nửa đầu không có tiền triệu."),
+        ("i", "BS", "Không dùng ibuprofen. Paracetamol 1 g khi đau, tối đa 3 g một ngày, nghỉ trong phòng tối. Nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu."),
+        ("j", "BN", "Vâng ạ."),
+    ],
+    dap_an=[
+        M("dau", "bệnh nhân", "đau đầu ba ngày, giật giật bên trái", BS_, ["b", "f"], ["Em bị đau đầu ba ngày nay", "đau giật giật bên trái"], moc_thoi_gian="ba ngày", hanh_vi="tự kể"),
+        M("pana", "bệnh nhân", "paracetamol (panadol)", TH, ["b"], "uống panadol 500 mg ngày hai viên không đỡ", hanh_vi="tự kể", thuoc=T("paracetamol", "500 mg", "ngày hai viên")),
+        M("migraine", "bệnh nhân", "đau nửa đầu từ năm hai mươi tuổi", TS, ["b"], "em bị đau nửa đầu từ năm hai mươi tuổi", thoi_gian_su_kien="quá khứ", hanh_vi="tự kể"),
+        M("me", "mẹ", "đau nửa đầu", GD, ["b"], "mẹ em cũng bị", hanh_vi="tự kể"),
+        M("du", "bệnh nhân", "dị ứng ibuprofen", DU, ["b"], "em dị ứng ibuprofen", hanh_vi="tự kể"),
+        M("bu", "bệnh nhân", "đang cho con bú", GD, ["b"], "em đang cho con bú", hanh_vi="tự kể"),
+        M("anh_sang", "bệnh nhân", "sợ ánh sáng", BS_, ["d"], "Sợ ánh sáng thì có", hanh_vi="trả lời"),
+        M("non", "bệnh nhân", "buồn nôn", BS_, ["c", "d"], "còn lại không ạ", phu_dinh=True, hanh_vi="trả lời"),
+        M("mo", "bệnh nhân", "nhìn mờ", BS_, ["c", "d"], "còn lại không ạ", phu_dinh=True, hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "tỉnh, huyết áp 120/75, không dấu thần kinh khu trú, cổ mềm", KE, ["g"], "tỉnh, huyết áp 120 trên 75, không dấu thần kinh khu trú, cổ mềm", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "cơn đau nửa đầu không có tiền triệu", CD, ["h"], "cơn đau nửa đầu không có tiền triệu", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "không dùng ibuprofen, paracetamol 1 g khi đau, tối đa 3 g/ngày, nghỉ phòng tối", KH, ["i"], "Không dùng ibuprofen. Paracetamol 1 g khi đau, tối đa 3 g một ngày, nghỉ trong phòng tối", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "vào cấp cứu nếu đau đầu dữ dội đột ngột hoặc yếu tay chân", KH, ["i"], "Nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("xoa_di_ung", "du", "bỏ sót dị ứng ibuprofen (nằm giữa lượt dồn)", xoa=True),
+        S("xoa_thuoc", "pana", "bỏ sót panadol", xoa=True),
+        S("dao_phu_dinh", "mo", "ghi có nhìn mờ", phu_dinh=False),
+        S("doi_chu_the", "me", "ghi bệnh nhân bị đau nửa đầu do mẹ kể (gán nhầm)", chu_the="bệnh nhân", muc=TS),
+        S("doi_lieu", "kh", "ghi paracetamol 10 g", noi_dung="không dùng ibuprofen, paracetamol 10 g khi đau, tối đa 3 g/ngày, nghỉ phòng tối"),
+        S("xoa_phu_dinh", "non", "bỏ sót 'không buồn nôn'", xoa=True),
+    ],
+))
+
+# ══════════════════════ CA PHƯƠNG NGỮ (13–16) ══════════════════════
+# Mỗi ca giữ MỘT vùng cho cả cuộc (không trộn giọng). Từ địa phương là từ thông dụng,
+# vẫn cần người nói vùng đó đọc lại trước khi dùng cho kết luận.
+
+# ─── 13. Nam Bộ (miền Tây): "hổng", "bữa giờ", "bả" = mẹ, mẹ kể bệnh của mình ───
+CA.append(dict(
+    id="bay_13", nguoi_ke="con trai", ten="Nam Bộ: bả, hổng, bữa giờ", phuong_ngu="nam_bo",
+    bay=["phuong_ngu_nam_bo", "dai_tu_ba", "phu_dinh_hong", "nguoi_ke_benh_minh", "doi_trang_thai"],
+    luot=[
+        ("a", "BS", "Chào anh, anh dẫn ai đi khám vậy?"),
+        ("b", "NN", "Dạ tui dẫn má tui đi, bả bị nhức đầu chóng mặt bữa giờ, chừng một tuần rồi bác sĩ."),
+        ("c", "BS", "Bác có ói không anh?"),
+        ("d", "NN", "Dạ bả hổng có ói, mà bữa hổm bả té trong nhà tắm, trầy cái chân trái."),
+        ("e", "BS", "Bác có bệnh gì từ trước không?"),
+        ("f", "NN", "Bả bị cao máu mấy năm nay, uống thuốc hổng đều, hết thuốc là bả nghỉ luôn, cả tháng nay hổng uống."),
+        ("g", "BS", "Thuốc tên gì anh nhớ không?"),
+        ("h", "NN", "Dạ amlodipin 5 mg, ngày một viên."),
+        ("i", "BS", "Bác có dị ứng thuốc gì không?"),
+        ("j", "NN", "Bả thì hổng có. Tui mới bị dị ứng tôm cua, ăn vô là nổi mề đay."),
+        ("k", "BS", "Khám lâm sàng: huyết áp 170 trên 100, tỉnh, nói rõ, không yếu liệt, vết trầy cẳng chân trái đã khô."),
+        ("l", "BS", "Chẩn đoán: tăng huyết áp chưa kiểm soát do bỏ thuốc."),
+        ("m", "BS", "Uống lại amlodipin 5 mg mỗi sáng, không tự ý ngưng. Nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền."),
+        ("n", "NN", "Dạ, cám ơn bác sĩ."),
+    ],
+    dap_an=[
+        M("nhuc_dau", "bệnh nhân", "đau đầu, chóng mặt một tuần", BS_, ["b"], "bả bị nhức đầu chóng mặt bữa giờ, chừng một tuần rồi bác sĩ", moc_thoi_gian="một tuần", hanh_vi="tự kể"),
+        M("oi", "bệnh nhân", "nôn", BS_, ["d"], "bả hổng có ói", phu_dinh=True, hanh_vi="trả lời"),
+        M("te", "bệnh nhân", "ngã trong nhà tắm, trầy chân trái", BS_, ["d"], "bữa hổm bả té trong nhà tắm, trầy cái chân trái", thoi_gian_su_kien="quá khứ", moc_thoi_gian="mấy hôm trước", hanh_vi="trả lời"),
+        M("tha", "bệnh nhân", "tăng huyết áp nhiều năm", TS, ["f"], "Bả bị cao máu mấy năm nay", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("amlo", "bệnh nhân", "amlodipin", TH, ["f", "h"], ["hết thuốc là bả nghỉ luôn, cả tháng nay hổng uống", "amlodipin 5 mg, ngày một viên"], thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", hanh_vi="trả lời",
+          thuoc=T("amlodipin", "5 mg", "ngày một viên", ngung="cả tháng nay", dang="đã ngừng")),
+        M("du_me", "bệnh nhân", "dị ứng thuốc", DU, ["j"], "Bả thì hổng có", phu_dinh=True, hanh_vi="trả lời"),
+        M("du_con", "con trai", "dị ứng tôm cua, nổi mề đay", GD, ["j"], "Tui mới bị dị ứng tôm cua, ăn vô là nổi mề đay", hanh_vi="tự kể"),
+        M("kham", "bệnh nhân", "huyết áp 170/100, tỉnh, không yếu liệt, vết trầy cẳng chân trái đã khô", KE, ["k"], "huyết áp 170 trên 100, tỉnh, nói rõ, không yếu liệt, vết trầy cẳng chân trái đã khô", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "tăng huyết áp chưa kiểm soát do bỏ thuốc", CD, ["l"], "tăng huyết áp chưa kiểm soát do bỏ thuốc", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "uống lại amlodipin 5 mg mỗi sáng", KH, ["m"], "Uống lại amlodipin 5 mg mỗi sáng, không tự ý ngưng", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+        M("kh_neu", "bệnh nhân", "vào cấp cứu nếu yếu tay chân hoặc nói đớ", KH, ["m"], "Nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền", tinh_huong="giả định", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("dao_phu_dinh", "oi", "đọc 'hổng có ói' thành có nôn", phu_dinh=False),
+        S("doi_chu_the", "du_con", "ghi mẹ dị ứng tôm cua", chu_the="bệnh nhân", muc=DU),
+        S("qua_khu_hien_tai", "amlo", "ghi amlodipin đang dùng đều", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực",
+          thuoc=T("amlodipin", "5 mg", "ngày một viên", dang="đang dùng")),
+        S("doi_ben", "te", "ghi trầy chân phải", noi_dung="ngã trong nhà tắm, trầy chân phải"),
+        S("gia_dinh_thanh_that", "kh_neu", "ghi bệnh nhân đã yếu tay chân", tinh_huong="thực tế"),
+    ],
+))
+
+# ─── 14. Nghệ Tĩnh: "nỏ" = không, "chi" = gì, "mô" = đâu, "o" = cô, "eng" = anh ───
+CA.append(dict(
+    id="bay_14", nguoi_ke="bệnh nhân", ten="Nghệ Tĩnh: nỏ, chi, mô", phuong_ngu="nghe_tinh",
+    bay=["phuong_ngu_nghe_tinh", "phu_dinh_no", "nguoi_khac_trong_cau", "dinh_chinh", "doi_trang_thai"],
+    luot=[
+        ("a", "BS", "Chào chú, chú đau ở mô?"),
+        ("b", "BN", "Tui đau bụng trên rốn, đau rát, cả tuần ni rồi bác sĩ."),
+        ("c", "BS", "Chú có ợ chua, đi ngoài phân đen không?"),
+        ("d", "BN", "Ợ chua thì có, phân đen thì nỏ có."),
+        ("e", "BS", "Chú có uống rượu, hút thuốc chi không?"),
+        ("f", "BN", "Rượu thì tui nỏ uống, thuốc lào thì có, ngày chừng mười điếu. À nỏ, ngày hai chục điếu."),
+        ("g", "BS", "Chú có uống thuốc giảm đau chi không?"),
+        ("h", "BN", "Tui đau lưng nên uống diclofenac, uống hai tuần rồi, ba bữa ni thì nỏ uống nữa."),
+        ("i", "BS", "Trong nhà có ai bị bệnh dạ dày không?"),
+        ("j", "BN", "O tui, tức là em gái của bố tui, bị ung thư dạ dày mất rồi. Eng tui thì bị loét dạ dày."),
+        ("k", "BS", "Khám lâm sàng: ấn đau vùng thượng vị, bụng mềm, không có phản ứng thành bụng."),
+        ("l", "BS", "Chẩn đoán: nghi loét dạ dày do thuốc giảm đau."),
+        ("m", "BS", "Nội soi dạ dày, dùng omeprazol 20 mg hai lần một ngày, không dùng lại diclofenac, bỏ thuốc lào."),
+        ("n", "BN", "Dạ, tui nhớ rồi."),
+    ],
+    dap_an=[
+        M("dau", "bệnh nhân", "đau rát bụng trên rốn một tuần", BS_, ["b"], "Tui đau bụng trên rốn, đau rát, cả tuần ni rồi bác sĩ", moc_thoi_gian="một tuần", hanh_vi="trả lời"),
+        M("o_chua", "bệnh nhân", "ợ chua", BS_, ["d"], "Ợ chua thì có", hanh_vi="trả lời"),
+        M("phan_den", "bệnh nhân", "đi ngoài phân đen", BS_, ["d"], "phân đen thì nỏ có", phu_dinh=True, hanh_vi="trả lời"),
+        M("ruou", "bệnh nhân", "uống rượu", GD, ["f"], "Rượu thì tui nỏ uống", phu_dinh=True, hanh_vi="trả lời"),
+        M("thuoc_lao", "bệnh nhân", "hút thuốc lào ngày hai chục điếu", GD, ["f"], "À nỏ, ngày hai chục điếu", quan_he="đính chính", quan_he_voi="thuoc_lao_cu", hanh_vi="trả lời"),
+        M("thuoc_lao_cu", "bệnh nhân", "hút thuốc lào ngày mười điếu", GD, ["f"], "thuốc lào thì có, ngày chừng mười điếu", trang_thai="bị thay thế", hanh_vi="trả lời"),
+        M("diclo", "bệnh nhân", "diclofenac", TH, ["h"], "uống diclofenac, uống hai tuần rồi, ba bữa ni thì nỏ uống nữa", thoi_gian_su_kien="quá khứ", trang_thai="bị thay thế", hanh_vi="trả lời",
+          thuoc=T("diclofenac", None, None, bat_dau="hai tuần", ngung="ba hôm nay", dang="đã ngừng")),
+        M("co", "cô", "ung thư dạ dày, đã mất", GD, ["j"], "O tui, tức là em gái của bố tui, bị ung thư dạ dày mất rồi", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("anh", "anh trai", "loét dạ dày", GD, ["j"], "Eng tui thì bị loét dạ dày", hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "ấn đau thượng vị, bụng mềm, không phản ứng thành bụng", KE, ["k"], "ấn đau vùng thượng vị, bụng mềm, không có phản ứng thành bụng", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "nghi loét dạ dày do thuốc giảm đau", CD, ["l"], "nghi loét dạ dày do thuốc giảm đau", do_chac_chan="nghi ngờ", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "nội soi dạ dày, omeprazol 20 mg hai lần/ngày, không dùng lại diclofenac, bỏ thuốc lào", KH, ["m"], "Nội soi dạ dày, dùng omeprazol 20 mg hai lần một ngày, không dùng lại diclofenac, bỏ thuốc lào", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("dao_phu_dinh", "phan_den", "không hiểu 'nỏ', ghi có phân đen", phu_dinh=False),
+        S("dao_phu_dinh", "ruou", "ghi có uống rượu", phu_dinh=False),
+        S("ban_cu_con_hieu_luc", "thuoc_lao_cu", "giữ 'mười điếu'", trang_thai="còn hiệu lực"),
+        S("qua_khu_hien_tai", "diclo", "ghi đang uống diclofenac", thoi_gian_su_kien="hiện tại", trang_thai="còn hiệu lực",
+          thuoc=T("diclofenac", None, None, dang="đang dùng")),
+        S("doi_chu_the", "anh", "ghi bệnh nhân bị loét dạ dày", chu_the="bệnh nhân", muc=TS),
+        S("nang_chac_chan", "cd", "ghi chắc chắn loét dạ dày", noi_dung="loét dạ dày do thuốc giảm đau", do_chac_chan="chắc chắn"),
+    ],
+))
+
+# ─── 15. Nam Bộ: vợ kể hộ chồng ("ổng"), tự kể bệnh mình, phủ định kép "hổng phải hổng" ───
+CA.append(dict(
+    id="bay_15", nguoi_ke="vợ", ten="Nam Bộ: ổng, hổng phải hổng", phuong_ngu="nam_bo",
+    bay=["phuong_ngu_nam_bo", "dai_tu_ong", "phu_dinh_kep", "nguoi_ke_benh_minh", "so_lieu"],
+    luot=[
+        ("a", "BS", "Chị dẫn ai đi khám vậy chị?"),
+        ("b", "NN", "Dạ ông xã em. Ổng ho dữ lắm, ho ra đàm xanh, hơn một tuần nay."),
+        ("c", "BS", "Anh có sốt không?"),
+        ("d", "NN", "Hổng phải hổng sốt đâu bác sĩ, tối nào ổng cũng hâm hấp, đo 38 độ."),
+        ("e", "BS", "Anh có hút thuốc không chị?"),
+        ("f", "NN", "Ổng hút một ngày một gói, nói hoài hổng bỏ."),
+        ("g", "BS", "Anh có bệnh gì khác không?"),
+        ("h", "NN", "Ổng hổng có bệnh gì. Em thì mới bị lao, đang uống thuốc lao được hai tháng."),
+        ("i", "BS", "Anh có dị ứng thuốc gì không?"),
+        ("j", "NN", "Dạ hổng có."),
+        ("k", "BS", "Khám lâm sàng: nhiệt độ 38 độ 2, ran nổ đáy phổi phải, nhịp thở 22 lần một phút."),
+        ("l", "BS", "Chẩn đoán: viêm phổi cộng đồng, cần loại trừ lao vì có người nhà đang điều trị lao."),
+        ("m", "BS", "Chụp X quang phổi, xét nghiệm đàm tìm lao. Dùng amoxicillin clavulanat 1 g hai lần một ngày trong bảy ngày."),
+        ("n", "NN", "Dạ."),
+    ],
+    dap_an=[
+        M("ho", "bệnh nhân", "ho nhiều, đờm xanh, hơn một tuần", BS_, ["b"], "Ổng ho dữ lắm, ho ra đàm xanh, hơn một tuần nay", moc_thoi_gian="hơn một tuần", hanh_vi="tự kể"),
+        M("sot", "bệnh nhân", "sốt về tối, 38 độ", BS_, ["d"], "Hổng phải hổng sốt đâu bác sĩ, tối nào ổng cũng hâm hấp, đo 38 độ", hanh_vi="trả lời"),
+        M("hut", "bệnh nhân", "hút thuốc lá một gói/ngày", GD, ["f"], "Ổng hút một ngày một gói", hanh_vi="trả lời"),
+        M("ko_benh", "bệnh nhân", "bệnh mạn tính", TS, ["h"], "Ổng hổng có bệnh gì", phu_dinh=True, hanh_vi="trả lời"),
+        M("vo_lao", "vợ", "lao, đang điều trị hai tháng", GD, ["h"], "Em thì mới bị lao, đang uống thuốc lao được hai tháng", hanh_vi="tự kể"),
+        M("du", "bệnh nhân", "dị ứng thuốc", DU, ["j"], "Dạ hổng có", phu_dinh=True, hanh_vi="trả lời"),
+        M("kham", "bệnh nhân", "nhiệt độ 38,2 độ, ran nổ đáy phổi phải, nhịp thở 22 lần/phút", KE, ["k"], "nhiệt độ 38 độ 2, ran nổ đáy phổi phải, nhịp thở 22 lần một phút", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "viêm phổi cộng đồng, cần loại trừ lao", CD, ["l"], "viêm phổi cộng đồng, cần loại trừ lao vì có người nhà đang điều trị lao", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "X quang phổi, đờm tìm lao, amoxicillin clavulanat 1 g hai lần/ngày bảy ngày", KH, ["m"], "Chụp X quang phổi, xét nghiệm đàm tìm lao. Dùng amoxicillin clavulanat 1 g hai lần một ngày trong bảy ngày", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("dao_phu_dinh", "sot", "đọc 'hổng phải hổng sốt' thành không sốt", phu_dinh=True),
+        S("doi_chu_the", "vo_lao", "ghi bệnh nhân đang điều trị lao", chu_the="bệnh nhân", muc=TS),
+        S("doi_so", "kham", "ghi nhịp thở 12 lần/phút", noi_dung="nhiệt độ 38,2 độ, ran nổ đáy phổi phải, nhịp thở 12 lần/phút"),
+        S("doi_ben", "kham", "ghi ran nổ đáy phổi trái", noi_dung="nhiệt độ 38,2 độ, ran nổ đáy phổi trái, nhịp thở 22 lần/phút"),
+        S("dao_phu_dinh", "ko_benh", "ghi bệnh nhân có bệnh mạn tính", phu_dinh=False),
+        S("doi_lieu", "kh", "ghi amoxicillin clavulanat 1 mg", noi_dung="X quang phổi, đờm tìm lao, amoxicillin clavulanat 1 mg hai lần/ngày bảy ngày"),
+    ],
+))
+
+# ─── 16. Bắc Bộ vùng quê: "u" = mẹ, "thầy" = bố (dễ hiểu nhầm là thầy thuốc), "bu" ───
+CA.append(dict(
+    id="bay_16", nguoi_ke="con gái", ten="Bắc quê: u, thầy", phuong_ngu="bac_que",
+    bay=["phuong_ngu_bac_que", "thay_la_bo", "nguoi_nha_ke_ho", "tien_su_gia_dinh", "doi_trang_thai"],
+    luot=[
+        ("a", "BS", "Chào chị, chị đưa ai đi khám?"),
+        ("b", "NN", "Dạ cháu đưa u cháu đi, u cháu sáu mươi tám tuổi, dạo này u cháu khó thở, đi lại vài bước đã phải nghỉ, được hai tuần rồi ạ."),
+        ("c", "BS", "Bác có ho không?"),
+        ("d", "NN", "U cháu ho húng hắng về đêm, không có đờm."),
+        ("e", "BS", "Bác có bệnh gì trước đây không?"),
+        ("f", "NN", "U cháu bị tim, thầy cháu dặn uống thuốc đều, nhưng tuần này u cháu quên uống mấy hôm."),
+        ("g", "BS", "Thầy của chị là bác sĩ nào vậy?"),
+        ("h", "NN", "Dạ không, thầy cháu là bố cháu ạ. Thầy cháu ngày xưa mất vì nhồi máu cơ tim."),
+        ("i", "BS", "Bác uống thuốc tim gì?"),
+        ("j", "NN", "Digoxin 0,25 mg ngày một viên, với furosemid buổi sáng."),
+        ("k", "BS", "Khám lâm sàng: phù hai chân, tĩnh mạch cổ nổi, ran ẩm hai đáy phổi, mạch không đều 110 lần một phút."),
+        ("l", "BS", "Chẩn đoán: đợt cấp suy tim, rung nhĩ, nghi do bỏ thuốc."),
+        ("m", "BS", "Nhập viện theo dõi, làm điện tim, siêu âm tim, định lượng digoxin máu."),
+        ("n", "NN", "Dạ vâng ạ."),
+    ],
+    dap_an=[
+        M("kho_tho", "bệnh nhân", "khó thở khi gắng sức nhẹ, hai tuần", BS_, ["b"], "dạo này u cháu khó thở, đi lại vài bước đã phải nghỉ, được hai tuần rồi ạ", moc_thoi_gian="hai tuần", hanh_vi="tự kể"),
+        M("ho", "bệnh nhân", "ho khan về đêm", BS_, ["d"], "U cháu ho húng hắng về đêm, không có đờm", hanh_vi="trả lời"),
+        M("tim", "bệnh nhân", "bệnh tim", TS, ["f"], "U cháu bị tim", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("quen_thuoc", "bệnh nhân", "quên uống thuốc tim mấy hôm tuần này", BS_, ["f"], "tuần này u cháu quên uống mấy hôm", hanh_vi="trả lời"),
+        M("bo_mat", "bố", "mất vì nhồi máu cơ tim", GD, ["h"], "Thầy cháu ngày xưa mất vì nhồi máu cơ tim", thoi_gian_su_kien="quá khứ", hanh_vi="trả lời"),
+        M("digo", "bệnh nhân", "digoxin", TH, ["j"], "Digoxin 0,25 mg ngày một viên", hanh_vi="trả lời", thuoc=T("digoxin", "0,25 mg", "ngày một viên")),
+        M("furo", "bệnh nhân", "furosemid", TH, ["j"], "với furosemid buổi sáng", hanh_vi="trả lời", thuoc=T("furosemid", None, "buổi sáng")),
+        M("kham", "bệnh nhân", "phù hai chân, tĩnh mạch cổ nổi, ran ẩm hai đáy phổi, mạch không đều 110 lần/phút", KE, ["k"], "phù hai chân, tĩnh mạch cổ nổi, ran ẩm hai đáy phổi, mạch không đều 110 lần một phút", hanh_vi="quan sát"),
+        M("cd", "bệnh nhân", "đợt cấp suy tim, rung nhĩ, nghi do bỏ thuốc", CD, ["l"], "đợt cấp suy tim, rung nhĩ, nghi do bỏ thuốc", hanh_vi="nhận định"),
+        M("kh", "bệnh nhân", "nhập viện, điện tim, siêu âm tim, định lượng digoxin máu", KH, ["m"], "Nhập viện theo dõi, làm điện tim, siêu âm tim, định lượng digoxin máu", tinh_huong="kế hoạch", hanh_vi="kế hoạch"),
+    ],
+    ban_sai=[
+        S("doi_chu_the", "bo_mat", "ghi bệnh nhân bị nhồi máu cơ tim", chu_the="bệnh nhân", muc=TS, thoi_gian_su_kien="quá khứ"),
+        S("doi_lieu", "digo", "ghi digoxin 2,5 mg", thuoc=T("digoxin", "2,5 mg", "ngày một viên")),
+        S("dao_phu_dinh", "ho", "ghi ho có đờm", noi_dung="ho có đờm về đêm"),
+        S("doi_so", "kham", "ghi mạch 70 lần/phút", noi_dung="phù hai chân, tĩnh mạch cổ nổi, ran ẩm hai đáy phổi, mạch không đều 70 lần/phút"),
+        S("xoa_thuoc", "furo", "bỏ sót furosemid", xoa=True),
+    ],
+))

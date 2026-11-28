@@ -1,0 +1,121 @@
+{
+ "id": "bay_11",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 47.7,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.6,
+   "loi": "Em tiểu buốt mấy ngày rồi?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 2.4,
+   "ket_thuc": 7.36,
+   "loi": "Ba ngày, à không, năm ngày. Ơ mà thôi, đúng là ba ngày, vì thứ Bảy em mới bị."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 8.16,
+   "ket_thuc": 9.52,
+   "loi": "Có sốt, đau lưng không?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 10.32,
+   "ket_thuc": 12.96,
+   "loi": "Đau lưng bên phải một chút, sốt thì không ạ."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 13.76,
+   "ket_thuc": 15.36,
+   "loi": "Em có dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 16.16,
+   "ket_thuc": 21.52,
+   "loi": "Em dị ứng cephalexin, à không phải, là amoxicillin, uống vào nổi mề đay."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 22.32,
+   "ket_thuc": 23.68,
+   "loi": "Em có đang mang thai không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 24.48,
+   "ket_thuc": 26.8,
+   "loi": "Không ạ, em vừa có kinh tuần trước."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 27.6,
+   "ket_thuc": 29.28,
+   "loi": "Trước đây em bị lần nào chưa?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 30.08,
+   "ket_thuc": 33.12,
+   "loi": "Năm ngoái bị một lần, uống kháng sinh ba ngày là khỏi."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 33.92,
+   "ket_thuc": 37.68,
+   "loi": "Khám lâm sàng: nhiệt độ 37 độ 2, ấn đau nhẹ góc sườn lưng phải."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 38.03,
+   "ket_thuc": 40.75,
+   "loi": "Chẩn đoán: viêm bàng quang cấp, theo dõi viêm thận bể thận phải."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 41.1,
+   "ket_thuc": 46.22,
+   "loi": "Tổng phân tích và cấy nước tiểu. Dùng fosfomycin 3 g liều duy nhất, tránh nhóm penicillin."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 47.02,
+   "ket_thuc": 47.74,
+   "loi": "Vâng ạ."
+  }
+ ]
+}

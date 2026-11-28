@@ -1,0 +1,137 @@
+{
+ "id": "bay_04",
+ "phuong_ngu": "hue",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 64.8,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 0.0,
+   "ket_thuc": 2.32,
+   "loi": "Chào chị, chị đưa ai đi khám rứa?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 3.12,
+   "ket_thuc": 6.96,
+   "loi": "Dạ em đưa mạ em đi, mạ em năm ni bảy mươi hai tuổi."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 7.76,
+   "ket_thuc": 8.96,
+   "loi": "Bác bị răng?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 9.76,
+   "ket_thuc": 14.32,
+   "loi": "Mạ em đau đầu gối bên phải, đi mô cũng phải chống gậy, cả tháng ni rồi."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 15.12,
+   "ket_thuc": 16.96,
+   "loi": "Gối có sưng không chị?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 17.76,
+   "ket_thuc": 21.52,
+   "loi": "Tuần trước sưng to lắm, chừ thì hết sưng rồi, còn đau thôi."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 22.32,
+   "ket_thuc": 24.08,
+   "loi": "Bác có uống thuốc chi không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 24.88,
+   "ket_thuc": 29.84,
+   "loi": "Mạ em uống cái thuốc giảm đau mua ở tiệm thuốc, em không nhớ tên, ngày hai viên."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 30.64,
+   "ket_thuc": 32.4,
+   "loi": "Bác có đau dạ dày không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 33.2,
+   "ket_thuc": 37.28,
+   "loi": "Có, mạ em đau dạ dày lâu rồi. Còn em thì bị tiểu đường."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 38.08,
+   "ket_thuc": 40.0,
+   "loi": "Rứa bác có bị tiểu đường không?"
+  },
+  {
+   "luot": 12,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 40.8,
+   "ket_thuc": 43.28,
+   "loi": "Không, mạ em không bị, chỉ em thôi."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 44.08,
+   "ket_thuc": 49.92,
+   "loi": "Khám lâm sàng: khớp gối phải không sưng, có tiếng lạo xạo khi gấp duỗi, ấn đau khe khớp trong."
+  },
+  {
+   "luot": 14,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 50.27,
+   "ket_thuc": 52.67,
+   "loi": "Chẩn đoán: thoái hoá khớp gối phải."
+  },
+  {
+   "luot": 15,
+   "vai": "BS",
+   "giong": "Quang Sơn",
+   "bat_dau": 53.02,
+   "ket_thuc": 61.82,
+   "loi": "Ngưng thuốc giảm đau không rõ tên, chụp X quang gối hai tư thế, dùng paracetamol 500 mg khi đau, tối đa bốn viên một ngày."
+  },
+  {
+   "luot": 16,
+   "vai": "NN",
+   "giong": "Ngọc Trân",
+   "bat_dau": 62.62,
+   "ket_thuc": 64.78,
+   "loi": "Dạ, em cảm ơn bác sĩ."
+  }
+ ]
+}

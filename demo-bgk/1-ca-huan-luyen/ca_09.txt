@@ -1,0 +1,19 @@
+Điều dưỡng: Em chào bác sĩ. Chú này chờ từ nãy, cập nhật sinh hiệu xong ạ.
+Bác sĩ: Tôi rõ rồi, cảm ơn em. Chú thấy sức khỏe có gì bất thường mấy hôm nay?
+Bác sĩ: Chú ngồi nghỉ đỡ mệt chưa?
+Bệnh nhân: Tôi đỡ mệt rồi.
+Bác sĩ: Chú thấy trong người dịu bớt chưa ạ?
+Bệnh nhân: Đỡ nhiều rồi ạ.
+Bệnh nhân: Tôi bị teo mỏng da và niêm mạc vùng sinh dục ngoài tạo mảng xơ hóa trắng ngà như vỏ xà cừ liên tục mấy tháng nay.
+Bệnh nhân: Xin lỗi bác sĩ, tôi nhớ lại rồi, nửa năm rồi chứ không phải mấy tháng nay.
+Bác sĩ: Còn triệu chứng nào khác không thế?
+Bệnh nhân: Dạ đúng rồi bác sĩ, cùng lúc đó tôi cũng xuất hiện cảm giác bức bối khô khốc khó chịu ảnh hưởng nghiêm trọng đến tâm lý sinh hoạt.
+Bác sĩ: Bản thân có đang uống thuốc theo đơn của bệnh viện nào không?
+Bệnh nhân: Tôi ít khi đau bệnh lắm ạ.
+Bác sĩ: Chú có dị ứng thuốc gì không vậy ạ?
+Bệnh nhân: Dạ chưa, tôi không dị ứng kháng sinh nào.
+Bác sĩ: Để bác sĩ ấn nhẹ kiểm tra gan lách nghen.
+Điều dưỡng: Mảng xơ teo trắng ngà phân bố dạng hình số 8 quanh âm hộ và hậu môn, co kéo mất ranh giới môi bé, nhiều vết nứt nông.
+Bác sĩ: Tôi chẩn đoán: Lichen xơ teo âm hộ mạn tính thể teo hẹp.
+Bác sĩ: Chỉ định bôi corticosteroid nhóm rất mạnh clobetasol propionate theo phác đồ hạ bậc dần, dùng chất làm mềm da và theo dõi nguy cơ ung thư biểu mô.
+Bệnh nhân: Dạ bác sĩ, tôi sẽ theo dõi kỹ nghen bác sĩ.

@@ -1,0 +1,121 @@
+{
+ "id": "bay_16",
+ "phuong_ngu": "bac_que",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 53.1,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.6,
+   "loi": "Chào chị, chị đưa ai đi khám?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 2.4,
+   "ket_thuc": 9.44,
+   "loi": "Dạ cháu đưa u cháu đi, u cháu sáu mươi tám tuổi, dạo này u cháu khó thở, đi lại vài bước đã phải nghỉ, được hai tuần rồi ạ."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 10.24,
+   "ket_thuc": 11.36,
+   "loi": "Bác có ho không?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 12.16,
+   "ket_thuc": 14.8,
+   "loi": "U cháu ho húng hắng về đêm, không có đờm."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 15.6,
+   "ket_thuc": 17.2,
+   "loi": "Bác có bệnh gì trước đây không?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 18.0,
+   "ket_thuc": 22.8,
+   "loi": "U cháu bị tim, thầy cháu dặn uống thuốc đều, nhưng tuần này u cháu quên uống mấy hôm."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 23.6,
+   "ket_thuc": 25.28,
+   "loi": "Thầy của chị là bác sĩ nào vậy?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 26.08,
+   "ket_thuc": 30.4,
+   "loi": "Dạ không, thầy cháu là bố cháu ạ. Thầy cháu ngày xưa mất vì nhồi máu cơ tim."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 31.2,
+   "ket_thuc": 32.56,
+   "loi": "Bác uống thuốc tim gì?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 33.36,
+   "ket_thuc": 37.92,
+   "loi": "Digoxin 0,25 mg ngày một viên, với furosemid buổi sáng."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 38.72,
+   "ket_thuc": 44.08,
+   "loi": "Khám lâm sàng: phù hai chân, tĩnh mạch cổ nổi, ran ẩm hai đáy phổi, mạch không đều 110 lần một phút."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 44.43,
+   "ket_thuc": 47.15,
+   "loi": "Chẩn đoán: đợt cấp suy tim, rung nhĩ, nghi do bỏ thuốc."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 47.5,
+   "ket_thuc": 51.42,
+   "loi": "Nhập viện theo dõi, làm điện tim, siêu âm tim, định lượng digoxin máu."
+  },
+  {
+   "luot": 14,
+   "vai": "NN",
+   "giong": "Ngọc Huyền",
+   "bat_dau": 52.22,
+   "ket_thuc": 53.1,
+   "loi": "Dạ vâng ạ."
+  }
+ ]
+}

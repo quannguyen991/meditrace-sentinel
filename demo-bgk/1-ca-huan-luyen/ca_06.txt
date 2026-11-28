@@ -1,0 +1,18 @@
+Điều dưỡng: Em chào bác sĩ. Chị này vào sảnh chờ, đo huyết áp, SpO2 rồi ạ.
+Bác sĩ: Cảm ơn em điều dưỡng nhiều. Chị kể từ đầu xem tình trạng dạo này thế nào nhé.
+Bác sĩ: Hôm nay bác sĩ khám cho chính chị đúng không?
+Bệnh nhân: Đúng tôi rồi.
+Bệnh nhân: Cơn sốt cao liên tục này tôi bị năm hôm.
+Bệnh nhân: Tôi nói lại cho đúng, hơn một tuần chứ không phải năm hôm.
+Bác sĩ: Bên cạnh sốt cao, có bị đau ở đâu nữa không thế ạ?
+Bệnh nhân: Dạ vâng, tôi có thêm triệu chứng bứt rứt li bì.
+Bác sĩ: Bản thân chị có tiền sử dị ứng thuốc gì không thế ạ?
+Bệnh nhân: Tôi uống thuốc rất êm nha bác sĩ.
+Bác sĩ: Hiện tại có đang duy trì đơn thuốc mạn tính nào không vậy ạ?
+Bệnh nhân: Dạ vâng, tôi có uống amoxicillin 250 mg, à nhầm, 500 mg mới đúng, ngày ba lần.
+Bác sĩ: Chị hít thở sâu bằng miệng một chút nhé.
+Điều dưỡng: Dấu hiệu cứng gáy dương tính rõ, dấu hiệu Kernig và Brudzinski dương tính, tri giác tỉnh táo chậm chạp.
+Bác sĩ: Kết luận: Hội chứng màng não nghi do virus (viêm màng não nước trong).
+Bác sĩ: Chỉ định chọc dò dịch não tủy cấp cứu xét nghiệm tế bào, sinh hóa, PCR virus. Nhập viện theo dõi sát dấu hiệu tăng áp lực nội sọ.
+Bác sĩ: Tôi chỉ định ngừng uống amoxicillin kể từ hôm nay nghen.
+Bệnh nhân: Tôi sẽ tái khám đúng hẹn nha bác sĩ.

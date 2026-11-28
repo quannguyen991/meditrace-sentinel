@@ -1,0 +1,121 @@
+{
+ "id": "bay_13",
+ "phuong_ngu": "nam_bo",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 62.5,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.84,
+   "loi": "Chào anh, anh dẫn ai đi khám vậy?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 2.64,
+   "ket_thuc": 9.12,
+   "loi": "Dạ tui dẫn má tui đi, bả bị nhức đầu chóng mặt bữa giờ, chừng một tuần rồi bác sĩ."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 9.92,
+   "ket_thuc": 11.28,
+   "loi": "Bác có ói không anh?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 12.08,
+   "ket_thuc": 17.68,
+   "loi": "Dạ bả hổng có ói, mà bữa hổm bả té trong nhà tắm, trầy cái chân trái."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 18.48,
+   "ket_thuc": 20.08,
+   "loi": "Bác có bệnh gì từ trước không?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 20.88,
+   "ket_thuc": 27.52,
+   "loi": "Bả bị cao máu mấy năm nay, uống thuốc hổng đều, hết thuốc là bả nghỉ luôn, cả tháng nay hổng uống."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 28.32,
+   "ket_thuc": 29.92,
+   "loi": "Thuốc tên gì anh nhớ không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 30.72,
+   "ket_thuc": 34.72,
+   "loi": "Dạ amlodipin 5 mg, ngày một viên."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 35.52,
+   "ket_thuc": 37.36,
+   "loi": "Bác có dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 38.16,
+   "ket_thuc": 43.44,
+   "loi": "Bả thì hổng có. Tui mới bị dị ứng tôm cua, ăn vô là nổi mề đay."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 44.24,
+   "ket_thuc": 50.48,
+   "loi": "Khám lâm sàng: huyết áp 170 trên 100, tỉnh, nói rõ, không yếu liệt, vết trầy cẳng chân trái đã khô."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 50.83,
+   "ket_thuc": 53.63,
+   "loi": "Chẩn đoán: tăng huyết áp chưa kiểm soát do bỏ thuốc."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 53.98,
+   "ket_thuc": 59.98,
+   "loi": "Uống lại amlodipin 5 mg mỗi sáng, không tự ý ngưng. Nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền."
+  },
+  {
+   "luot": 14,
+   "vai": "NN",
+   "giong": "Đức Trí",
+   "bat_dau": 60.78,
+   "ket_thuc": 62.54,
+   "loi": "Dạ, cám ơn bác sĩ."
+  }
+ ]
+}

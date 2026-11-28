@@ -1,0 +1,28 @@
+Bác sĩ: Cháu chào bác, chào chị. Hôm nay bác đi khám vì chuyện gì ạ?
+Người nhà: Dạ sáng hôm qua em sang thì thấy mẹ em nằm dưới sàn bếp, gọi mãi mẹ mới thưa, người vã hết mồ hôi.
+Bệnh nhân: Tôi có ngất đâu, tôi chỉ trượt chân ngồi xuống thôi.
+Bác sĩ: Bác có nhớ lúc ngã thế nào không ạ? Trước đó bác có hoa mắt, run tay không?
+Bệnh nhân: Ừ thì có hơi run tay, đói cồn cào. Còn ngã thế nào thì tôi không nhớ rõ.
+Bác sĩ: Lúc đó chị có thử đường máu cho bác không?
+Người nhà: Dạ có, máy ở nhà đo được hai phẩy tám. Em cho mẹ uống cốc nước đường, mười lăm phút sau đo lại được sáu phẩy một thì mẹ tỉnh hẳn.
+Bác sĩ: Bác đang uống những thuốc gì ạ?
+Bệnh nhân: Tôi uống metformin năm trăm, sáng một viên, tối một viên. Với cả gliclazid ba mươi mi-li-gam, sáng uống hai viên.
+Người nhà: Dạ nhưng mấy hôm nay mẹ em ăn ít lắm, mỗi bữa lưng bát cơm, mà thuốc thì vẫn uống đủ.
+Bác sĩ: Sau khi ngã bác có đau đầu, yếu tay chân hay đau chỗ nào không ạ?
+Bệnh nhân: Đầu thì không đau, tay chân vẫn cử động bình thường. Chỉ đau ở hông bên trái thôi.
+Bác sĩ: Bác có dị ứng thuốc gì không ạ?
+Bệnh nhân: Không, tôi chẳng dị ứng gì.
+Người nhà: Có đấy mẹ. Năm ngoái mẹ uống cefalexin chữa viêm bàng quang, được hai hôm thì sưng môi, sưng mắt, phải đi tiêm.
+Bệnh nhân: À ừ, cái lần ấy. Thế thì có.
+Bác sĩ: Trong nhà còn ai bị tiểu đường nữa không ạ?
+Người nhà: Dạ em cũng bị, em đang tiêm insulin. Còn bố em thì mất vì đột quỵ ba năm trước.
+Bác sĩ: Bác nằm xuống cho cháu khám. Bác tỉnh, trả lời đúng, không yếu liệt. Đầu không có vết bầm, không sưng. Huyết áp một trăm bốn mươi trên tám mươi. Hông trái có vết bầm, ấn đau nhẹ, chân không ngắn, không xoay ngoài, tự đi lại được. Đường máu mao mạch bây giờ bảy phẩy tám.
+Người nhà: Thế mẹ em có gãy xương không bác sĩ?
+Bác sĩ: Khám thì chưa nghĩ đến gãy, nhưng cháu vẫn cho chụp phim khung chậu và hông trái hôm nay cho chắc. Bác bị hạ đường huyết do gliclazid trong lúc ăn kém, nên mới ngã.
+Bệnh nhân: Thế tôi có phải bỏ thuốc không?
+Bác sĩ: Bác ngừng hẳn gliclazid từ hôm nay. Metformin giữ nguyên năm trăm mi-li-gam, sáng một viên, tối một viên, uống sau ăn. Cháu cho làm thêm HbA1c với chức năng thận.
+Người nhà: Dạ. Nếu đường lại xuống thấp thì em làm thế nào ạ?
+Bác sĩ: Nếu đường máu dưới bốn, hoặc bác run tay, vã mồ hôi, chị cho uống ngay nửa cốc nước đường hoặc nước cam, mười lăm phút sau đo lại. Còn lơ mơ, không uống được thì gọi cấp cứu.
+Bệnh nhân: Ừ. Bao giờ tôi phải quay lại?
+Bác sĩ: Một tuần nữa bác quay lại, mang sổ đường máu. Chị đo cho bác ngày hai lần, trước ăn sáng và trước ăn tối. Cháu ghi vào hồ sơ là bác dị ứng cefalexin.
+Người nhà: Dạ, em cảm ơn bác sĩ.

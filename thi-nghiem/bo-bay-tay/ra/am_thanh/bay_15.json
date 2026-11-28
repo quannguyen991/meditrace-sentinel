@@ -1,0 +1,121 @@
+{
+ "id": "bay_15",
+ "phuong_ngu": "nam_bo",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 56.7,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.92,
+   "loi": "Chị dẫn ai đi khám vậy chị?"
+  },
+  {
+   "luot": 2,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 2.72,
+   "ket_thuc": 8.56,
+   "loi": "Dạ ông xã em. Ổng ho dữ lắm, ho ra đàm xanh, hơn một tuần nay."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 9.36,
+   "ket_thuc": 10.64,
+   "loi": "Anh có sốt không?"
+  },
+  {
+   "luot": 4,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 11.44,
+   "ket_thuc": 17.12,
+   "loi": "Hổng phải hổng sốt đâu bác sĩ, tối nào ổng cũng hâm hấp, đo 38 độ."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 17.92,
+   "ket_thuc": 19.6,
+   "loi": "Anh có hút thuốc không chị?"
+  },
+  {
+   "luot": 6,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 20.4,
+   "ket_thuc": 23.6,
+   "loi": "Ổng hút một ngày một gói, nói hoài hổng bỏ."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 24.4,
+   "ket_thuc": 25.84,
+   "loi": "Anh có bệnh gì khác không?"
+  },
+  {
+   "luot": 8,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 26.64,
+   "ket_thuc": 32.08,
+   "loi": "Ổng hổng có bệnh gì. Em thì mới bị lao, đang uống thuốc lao được hai tháng."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 32.88,
+   "ket_thuc": 34.64,
+   "loi": "Anh có dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 10,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 35.44,
+   "ket_thuc": 36.56,
+   "loi": "Dạ hổng có."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 37.36,
+   "ket_thuc": 42.56,
+   "loi": "Khám lâm sàng: nhiệt độ 38 độ 2, ran nổ đáy phổi phải, nhịp thở 22 lần một phút."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 42.91,
+   "ket_thuc": 47.71,
+   "loi": "Chẩn đoán: viêm phổi cộng đồng, cần loại trừ lao vì có người nhà đang điều trị lao."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Adam",
+   "bat_dau": 48.06,
+   "ket_thuc": 55.1,
+   "loi": "Chụp X quang phổi, xét nghiệm đàm tìm lao. Dùng amoxicillin clavulanat 1 g hai lần một ngày trong bảy ngày."
+  },
+  {
+   "luot": 14,
+   "vai": "NN",
+   "giong": "Mỹ Duyên",
+   "bat_dau": 55.9,
+   "ket_thuc": 56.7,
+   "loi": "Dạ."
+  }
+ ]
+}

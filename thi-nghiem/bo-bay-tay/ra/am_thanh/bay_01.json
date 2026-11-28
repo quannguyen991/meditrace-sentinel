@@ -1,0 +1,137 @@
+{
+ "id": "bay_01",
+ "phuong_ngu": "bac",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 62.4,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 0.0,
+   "ket_thuc": 2.0,
+   "loi": "Chào bác, hôm nay bác đi khám vì sao ạ?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 2.8,
+   "ket_thuc": 6.72,
+   "loi": "Dạ, mấy hôm nay tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 7.52,
+   "ket_thuc": 9.04,
+   "loi": "Chóng mặt từ bao giờ hả bác?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 9.84,
+   "ket_thuc": 12.64,
+   "loi": "Khoảng một tuần, à không, phải mười ngày rồi bác sĩ ạ."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 13.44,
+   "ket_thuc": 15.2,
+   "loi": "Bác đang uống thuốc huyết áp gì?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 16.0,
+   "ket_thuc": 23.6,
+   "loi": "Trước tôi uống amlodipin 10 mg, nhưng từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi, amlodipin tôi bỏ hẳn."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 24.4,
+   "ket_thuc": 26.32,
+   "loi": "Losartan bác uống mấy lần một ngày?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 27.12,
+   "ket_thuc": 28.4,
+   "loi": "Ngày một viên buổi sáng."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 29.2,
+   "ket_thuc": 30.88,
+   "loi": "Bác có bị dị ứng thuốc gì không?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 31.68,
+   "ket_thuc": 36.24,
+   "loi": "Không, à có, hồi trước tiêm penicillin bị nổi mẩn khắp người, nhưng lâu lắm rồi."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 37.04,
+   "ket_thuc": 38.88,
+   "loi": "Bác có đau ngực, khó thở không?"
+  },
+  {
+   "luot": 12,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 39.68,
+   "ket_thuc": 42.64,
+   "loi": "Đau ngực thì không, nhưng leo cầu thang thì hơi hụt hơi."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 43.44,
+   "ket_thuc": 50.32,
+   "loi": "Khám lâm sàng: huyết áp tư thế nằm 150 trên 90, đứng dậy còn 120 trên 80, mạch 88 lần một phút."
+  },
+  {
+   "luot": 14,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 50.67,
+   "ket_thuc": 53.47,
+   "loi": "Chẩn đoán: hạ huyết áp tư thế, nghi do thuốc hạ áp."
+  },
+  {
+   "luot": 15,
+   "vai": "BS",
+   "giong": "Hải Đăng",
+   "bat_dau": 53.82,
+   "ket_thuc": 60.46,
+   "loi": "Giảm losartan xuống 25 mg mỗi sáng, hẹn khám lại sau hai tuần. Nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay."
+  },
+  {
+   "luot": 16,
+   "vai": "BN",
+   "giong": "Quốc Tuấn",
+   "bat_dau": 61.26,
+   "ket_thuc": 62.38,
+   "loi": "Vâng, tôi nhớ rồi."
+  }
+ ]
+}

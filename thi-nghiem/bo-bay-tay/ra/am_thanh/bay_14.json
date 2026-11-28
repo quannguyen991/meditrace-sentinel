@@ -1,0 +1,121 @@
+{
+ "id": "bay_14",
+ "phuong_ngu": "nghe_tinh",
+ "may_doc": "VieNeu-TTS-v3-Turbo (ONNX/CPU)",
+ "ghi_chu": "giọng máy, chỉ để thử",
+ "do_dai_s": 62.3,
+ "luot": [
+  {
+   "luot": 1,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 0.0,
+   "ket_thuc": 1.92,
+   "loi": "Chào chú, chú đau ở mô?"
+  },
+  {
+   "luot": 2,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 2.72,
+   "ket_thuc": 6.96,
+   "loi": "Tui đau bụng trên rốn, đau rát, cả tuần ni rồi bác sĩ."
+  },
+  {
+   "luot": 3,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 7.76,
+   "ket_thuc": 10.08,
+   "loi": "Chú có ợ chua, đi ngoài phân đen không?"
+  },
+  {
+   "luot": 4,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 10.88,
+   "ket_thuc": 13.52,
+   "loi": "Ợ chua thì có, phân đen thì nỏ có."
+  },
+  {
+   "luot": 5,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 14.32,
+   "ket_thuc": 16.48,
+   "loi": "Chú có uống rượu, hút thuốc chi không?"
+  },
+  {
+   "luot": 6,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 17.28,
+   "ket_thuc": 23.52,
+   "loi": "Rượu thì tui nỏ uống, thuốc lào thì có, ngày chừng mười điếu. À nỏ, ngày hai chục điếu."
+  },
+  {
+   "luot": 7,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 24.32,
+   "ket_thuc": 26.56,
+   "loi": "Chú có uống thuốc giảm đau chi không?"
+  },
+  {
+   "luot": 8,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 27.36,
+   "ket_thuc": 32.72,
+   "loi": "Tui đau lưng nên uống diclofenac, uống hai tuần rồi, ba bữa ni thì nỏ uống nữa."
+  },
+  {
+   "luot": 9,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 33.52,
+   "ket_thuc": 35.76,
+   "loi": "Trong nhà có ai bị bệnh dạ dày không?"
+  },
+  {
+   "luot": 10,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 36.56,
+   "ket_thuc": 43.04,
+   "loi": "O tui, tức là em gái của bố tui, bị ung thư dạ dày mất rồi. Eng tui thì bị loét dạ dày."
+  },
+  {
+   "luot": 11,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 43.84,
+   "ket_thuc": 48.24,
+   "loi": "Khám lâm sàng: ấn đau vùng thượng vị, bụng mềm, không có phản ứng thành bụng."
+  },
+  {
+   "luot": 12,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 48.59,
+   "ket_thuc": 51.55,
+   "loi": "Chẩn đoán: nghi loét dạ dày do thuốc giảm đau."
+  },
+  {
+   "luot": 13,
+   "vai": "BS",
+   "giong": "Ngọc Trân",
+   "bat_dau": 51.9,
+   "ket_thuc": 59.66,
+   "loi": "Nội soi dạ dày, dùng omeprazol 20 mg hai lần một ngày, không dùng lại diclofenac, bỏ thuốc lào."
+  },
+  {
+   "luot": 14,
+   "vai": "BN",
+   "giong": "Quang Sơn",
+   "bat_dau": 60.46,
+   "ket_thuc": 62.3,
+   "loi": "Dạ, tui nhớ rồi."
+  }
+ ]
+}

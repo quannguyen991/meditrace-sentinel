@@ -1,0 +1,14 @@
+Bác sĩ: Bác bị làm sao ạ?
+Người nhà: Bố cháu dạo này hay quên, có lần đi lạc, khoảng ba tháng nay.
+Bệnh nhân: Tôi có quên gì đâu, con bé nó nói quá lên đấy.
+Bác sĩ: Bác có uống rượu không?
+Bệnh nhân: Tôi không uống.
+Người nhà: Bố cháu vẫn uống mỗi tối hai chén đấy bác sĩ ạ.
+Bác sĩ: Bác có đang uống thuốc gì không?
+Người nhà: Bố cháu uống thuốc mỡ máu atorvastatin 20 mg buổi tối.
+Bác sĩ: Trong nhà có ai bị lú lẫn không?
+Người nhà: Bà nội cháu, tức là mẹ của bố cháu, ngày xưa cũng lẫn lúc về già.
+Bác sĩ: Khám lâm sàng: tỉnh, MMSE 22 trên 30, không yếu liệt.
+Bác sĩ: Chẩn đoán: suy giảm nhận thức nhẹ, chưa loại trừ sa sút trí tuệ.
+Bác sĩ: Chụp CT sọ não, xét nghiệm vitamin B12 và chức năng tuyến giáp. Khuyên bác bỏ rượu.
+Người nhà: Dạ vâng ạ.

@@ -1,0 +1,22 @@
+Bác sĩ: Chào em, em ngồi đi. Em bị làm sao?
+Bệnh nhân: Dạ em đau họng quá bác sĩ ạ, nuốt nước bọt cũng đau.
+Bác sĩ: Em bị mấy hôm rồi?
+Bệnh nhân: Dạ hai hôm... à không, bốn hôm rồi ạ, em bị từ đầu tuần.
+Bác sĩ: Có sốt không em?
+Bệnh nhân: Dạ có, tối qua em cặp nhiệt được ba mươi tám độ rưỡi. Em uống một viên panadol năm trăm thì đỡ.
+Bác sĩ: Có ho, chảy mũi gì không?
+Bệnh nhân: Dạ ho thì không ạ, mũi cũng không chảy. Chỉ đau họng với mệt thôi.
+Bác sĩ: Em có dị ứng thuốc gì không?
+Bệnh nhân: Dạ có ạ. Năm ngoái em uống amoxicillin bị nổi mẩn ngứa khắp người, phải đi cấp cứu.
+Bác sĩ: À, cái này quan trọng đấy. Em có bệnh gì mạn tính, hay đang uống thuốc gì thường xuyên không?
+Bệnh nhân: Dạ không ạ, em khỏe, ngoài viên panadol hôm qua thì không uống gì.
+Bác sĩ: Em há miệng ra, nói "a" nào. Amidan hai bên sưng đỏ, có mủ trắng. Hạch dưới hàm hai bên to, ấn đau. Nhiệt độ ba mươi tám độ hai.
+Bệnh nhân: Có nặng không bác sĩ?
+Bác sĩ: Em bị viêm amidan cấp, nhiều khả năng do vi khuẩn. Anh lấy dịch họng làm test nhanh liên cầu luôn, khoảng mười lăm phút có kết quả.
+Bệnh nhân: Dạ. Thế em uống thuốc gì ạ?
+Bác sĩ: Vì em dị ứng amoxicillin nên anh không dùng nhóm penicillin. Em uống azithromycin, ngày đầu năm trăm mi li gam, bốn ngày sau mỗi ngày hai trăm năm mươi mi li gam.
+Bệnh nhân: Còn sốt thì em vẫn uống panadol được không ạ?
+Bác sĩ: Được. Paracetamol năm trăm, sốt trên ba mươi tám rưỡi thì uống một viên, cách nhau ít nhất sáu tiếng. Em súc họng nước muối, ăn đồ mềm, uống nhiều nước.
+Bệnh nhân: Dạ. Bao giờ em phải khám lại ạ?
+Bác sĩ: Năm ngày nữa quay lại. Nếu khó thở, không há được miệng hay sốt cao không hạ thì đến ngay.
+Bệnh nhân: Dạ, em cảm ơn bác sĩ ạ.

@@ -1,0 +1,16 @@
+Bác sĩ: Chào chị, cháu bị làm sao?
+Người nhà: Dạ, cháu nhà em sốt từ tối hôm kia, cao nhất 39 độ 5.
+Bác sĩ: Cháu có ho không?
+Người nhà: Có ho, ho khan, đêm ho nhiều hơn.
+Bác sĩ: Cháu có nôn không chị?
+Người nhà: Cháu thì không nôn, em mới là người nôn, từ sáng nay em nôn ba lần rồi.
+Bác sĩ: Cháu có dị ứng thuốc gì không?
+Người nhà: Cháu thì chưa thấy, nhưng bố cháu dị ứng aspirin, uống vào là khó thở.
+Bác sĩ: Trong nhà có ai bị hen không?
+Người nhà: Ông nội cháu bị hen, nhưng ông mất rồi.
+Bác sĩ: Cháu đã uống thuốc gì chưa?
+Người nhà: Em cho cháu uống paracetamol gói 250 mg, ngày ba lần.
+Bác sĩ: Khám lâm sàng: nhiệt độ 38 độ 7, họng đỏ, phổi không có ran.
+Bác sĩ: Chẩn đoán: viêm họng cấp do virus.
+Bác sĩ: Tiếp tục paracetamol khi sốt, cho cháu uống nhiều nước. Nếu sốt quá ba ngày hoặc thở nhanh thì đưa cháu đi khám lại.
+Người nhà: Dạ vâng, em cảm ơn bác sĩ.

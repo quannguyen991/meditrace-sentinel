@@ -1,0 +1,28 @@
+Bác sĩ: Chào anh chị. Anh đến khám trước mổ túi mật phải không?
+Bệnh nhân: Vâng. Tuần sau tôi mổ, bác sĩ ngoại hẹn tôi sang đây khám trước.
+Bác sĩ: Anh đau bụng từ bao giờ?
+Bệnh nhân: Đau khoảng ba tháng nay. Cứ ăn đồ mỡ là đau ở dưới sườn phải, lan ra sau lưng, mỗi cơn chừng một, hai tiếng.
+Bác sĩ: Gần đây anh có sốt, vàng da hay nước tiểu sẫm màu không?
+Bệnh nhân: Không sốt, không vàng da, nước tiểu vẫn bình thường.
+Người nhà: Nhưng tuần trước có một đêm anh ấy rét run đấy, em cặp nhiệt được ba mươi tám độ, sáng ra lại hết.
+Bác sĩ: Anh có nhớ đêm hôm ấy không?
+Bệnh nhân: À, có. Tôi tưởng cảm lạnh nên không kể.
+Bác sĩ: Anh đang uống thuốc gì không?
+Bệnh nhân: Tôi uống aspirin tám mươi mốt mi-li-gam mỗi sáng, bác sĩ ở phường cho uống phòng tai biến từ năm ngoái. Thế thôi.
+Bác sĩ: Anh có dị ứng thuốc gì không?
+Bệnh nhân: Không, tôi không dị ứng gì cả.
+Người nhà: Có mà anh. Hồi anh bị viêm đường tiết niệu, uống biseptol vào là nổi mẩn đỏ khắp người, ngứa mấy ngày liền.
+Bệnh nhân: À đúng rồi, cái viên to to ấy. Tôi quên mất.
+Bác sĩ: Anh có bệnh gì khác không? Rượu, thuốc lá thế nào?
+Bệnh nhân: Không có bệnh gì. Thuốc lá thì không, rượu thỉnh thoảng thôi.
+Người nhà: Thỉnh thoảng gì anh, tối nào cũng ba, bốn chén. Bố anh ấy trước cũng mổ sỏi mật, còn mẹ anh ấy thì bị tiểu đường.
+Bác sĩ: Anh nằm xuống cho tôi khám. Không vàng da, không vàng mắt. Bụng mềm, ấn hạ sườn phải hơi tức, dấu Murphy âm tính. Nhiệt độ ba mươi sáu độ tám, huyết áp một trăm ba mươi trên tám mươi lăm.
+Bệnh nhân: Thế tuần sau tôi có mổ được không bác sĩ?
+Bác sĩ: Siêu âm của anh có nhiều sỏi túi mật, thành túi mật không dày. Nhưng vì tuần trước có cơn sốt, tôi cho xét nghiệm máu hôm nay: công thức máu, men gan, bilirubin, đông máu. Nếu kết quả ổn thì vẫn mổ thứ ba tuần sau như dự kiến.
+Người nhà: Thế thuốc aspirin anh ấy có phải dừng không ạ?
+Bác sĩ: Có. Anh ngừng aspirin từ hôm nay, tức là bảy ngày trước mổ. Mổ xong bác sĩ sẽ hẹn khi nào uống lại. Tôi ghi rõ anh dị ứng co-trimoxazol, tức biseptol, và chuyện uống rượu hằng ngày, để bên gây mê biết.
+Bệnh nhân: Vâng. Nếu đau trước ngày mổ thì tôi uống gì?
+Bác sĩ: Đau thì uống paracetamol năm trăm mi-li-gam, mỗi lần một viên, cách nhau ít nhất sáu tiếng. Còn nếu sốt trên ba mươi tám độ rưỡi, rét run, vàng da hay đau không đỡ thì vào cấp cứu ngay, không đợi đến ngày mổ.
+Người nhà: Dạ. Trước mổ anh ấy phải nhịn ăn thế nào ạ?
+Bác sĩ: Nhịn ăn từ mười giờ tối hôm trước. Từ giờ đến lúc mổ anh cố bớt rượu. Hai hôm nữa anh quay lại xem kết quả máu.
+Bệnh nhân: Vâng, cảm ơn bác sĩ.

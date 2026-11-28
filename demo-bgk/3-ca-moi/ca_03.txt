@@ -1,0 +1,22 @@
+Bác sĩ: Chào anh, anh khám gì nhỉ?
+Bệnh nhân: Dạ em bị đau bụng chỗ này, trên rốn ấy bác sĩ, khoảng hai tuần nay rồi.
+Bác sĩ: Đau kiểu gì anh, nóng rát hay quặn từng cơn?
+Bệnh nhân: Dạ nóng rát, cồn cào. Hay đau lúc đói, ăn vào thì đỡ một tí, nhưng đêm cũng hay đau tỉnh dậy.
+Bác sĩ: Có ợ chua, buồn nôn không?
+Bệnh nhân: Ợ chua thì có. Buồn nôn thì thỉnh thoảng thôi, chưa nôn lần nào.
+Bác sĩ: Đi ngoài phân có màu đen không anh?
+Bệnh nhân: Dạ không, phân vẫn vàng bình thường ạ.
+Bác sĩ: Trước khi đau anh có uống thuốc gì không, thuốc giảm đau chẳng hạn?
+Bệnh nhân: À có ạ. Em đau khớp gối, uống diclofenac khoảng một tháng, ngày hai viên. Nhưng tuần trước thấy đau bụng quá em bỏ rồi.
+Bác sĩ: Tức là bây giờ không uống nữa?
+Bệnh nhân: Dạ, bỏ hẳn rồi ạ. Giờ em chỉ uống mấy gói thuốc dạ dày mua ở hiệu thuốc, cái gói màu trắng ấy... à, phosphalugel.
+Bác sĩ: Anh có dị ứng thuốc gì không? Rượu bia, thuốc lá thế nào?
+Bệnh nhân: Dị ứng thì không ạ. Bia thì tuần em uống hai, ba buổi. Thuốc lá em không hút.
+Bác sĩ: Anh nằm lên giường cho tôi khám bụng. Bụng mềm, ấn đau vùng thượng vị, không có phản ứng thành bụng. Huyết áp một trăm hai mươi trên tám mươi.
+Bệnh nhân: Có phải em bị dạ dày không bác sĩ?
+Bác sĩ: Tôi nghĩ nhiều đến viêm loét dạ dày tá tràng, có thể do thuốc giảm đau anh uống trước đó. Anh làm test hơi thở tìm vi khuẩn HP hôm nay, trước khi uống thuốc. Nếu cần thì nội soi dạ dày.
+Bệnh nhân: Dạ. Thế thuốc thì sao ạ?
+Bác sĩ: Omeprazol hai mươi mi li gam, ngày hai lần, trước ăn sáng và trước ăn tối ba mươi phút, uống bốn tuần. Không uống lại diclofenac, đau khớp thì dùng paracetamol. Hạn chế bia rượu, đồ chua cay.
+Bệnh nhân: Dạ. Bao giờ em quay lại ạ?
+Bác sĩ: Hai tuần nữa, mang kết quả HP theo. Nếu đi ngoài phân đen hoặc nôn ra máu thì vào viện ngay.
+Bệnh nhân: Dạ vâng, em cảm ơn bác sĩ.

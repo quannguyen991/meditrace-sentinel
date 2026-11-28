@@ -1,0 +1,16 @@
+Bác sĩ: Chào bác, hôm nay bác đi khám vì sao ạ?
+Bệnh nhân: Dạ, mấy hôm nay tôi hay chóng mặt, nhất là lúc sáng ngủ dậy đứng lên.
+Bác sĩ: Chóng mặt từ bao giờ hả bác?
+Bệnh nhân: Khoảng một tuần, à không, phải mười ngày rồi bác sĩ ạ.
+Bác sĩ: Bác đang uống thuốc huyết áp gì?
+Bệnh nhân: Trước tôi uống amlodipin 10 mg, nhưng từ tháng trước bác sĩ ở huyện đổi sang losartan 50 mg rồi, amlodipin tôi bỏ hẳn.
+Bác sĩ: Losartan bác uống mấy lần một ngày?
+Bệnh nhân: Ngày một viên buổi sáng.
+Bác sĩ: Bác có bị dị ứng thuốc gì không?
+Bệnh nhân: Không, à có, hồi trước tiêm penicillin bị nổi mẩn khắp người, nhưng lâu lắm rồi.
+Bác sĩ: Bác có đau ngực, khó thở không?
+Bệnh nhân: Đau ngực thì không, nhưng leo cầu thang thì hơi hụt hơi.
+Bác sĩ: Khám lâm sàng: huyết áp tư thế nằm 150 trên 90, đứng dậy còn 120 trên 80, mạch 88 lần một phút.
+Bác sĩ: Chẩn đoán: hạ huyết áp tư thế, nghi do thuốc hạ áp.
+Bác sĩ: Giảm losartan xuống 25 mg mỗi sáng, hẹn khám lại sau hai tuần. Nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay.
+Bệnh nhân: Vâng, tôi nhớ rồi.

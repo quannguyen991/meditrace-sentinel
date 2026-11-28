@@ -1,0 +1,22 @@
+Bác sĩ: Chào em, gia đình thấy em phát bệnh từ hôm nào thế?
+Bác sĩ: Cho bác sĩ hỏi, mình có quan hệ gia đình thế nào với em ấy?
+Người nhà: Dạ thưa bác sĩ, em là người nhà, cụ thể là chồng của em ấy.
+Bác sĩ: Em ngồi ghế này có thoải mái không?
+Người nhà: Cảm ơn bác sĩ.
+Người nhà: Vợ em thấy ho kéo dài trên ba tuần có đờm trắng đục hoặc ho ra máu tươi rõ rệt mấy tháng nay ạ.
+Bệnh nhân: Không đúng đâu, em ho kéo dài trên ba tuần có đờm trắng đục hoặc ho ra máu tươi nửa năm rồi ạ.
+Bác sĩ: Để tôi ghi là chưa rõ mấy tháng nay hay nửa năm rồi, mình xác nhận lại sau nhé.
+Bác sĩ: Có thấy mệt mỏi hay nôn nao không?
+Người nhà: Vâng, chưa kể vợ em còn bị khó thở nhẹ khi lao động gắng sức, đau tức ngực âm ỉ một bên tăng khi ho sâu nữa.
+Người nhà: Khó thở nhẹ khi lao động gắng sức thì chỉ bị lúc sáng sớm ạ.
+Người nhà: Hôm kia thì sốt nhẹ về chiều kèm gai rét ớn lạnh ướt hết áo trộm ban đêm, sáng nay thì đỡ hẳn rồi.
+Bác sĩ: Trong nhà có ai đang bị sốt hay có triệu chứng tương tự không?
+Người nhà: Dạ thưa bác sĩ, bố bị loạn thị.
+Người nhà: Em thì bụi phổi, nói thêm để bác sĩ biết ạ.
+Bác sĩ: Em có dị ứng thuốc gì không vậy ạ?
+Người nhà: Bình thường ạ.
+Bác sĩ: Giờ em ngồi thẳng lưng tôi nghe phổi nhé ạ.
+Bác sĩ: Tôi ghi nhận: Thể trạng gầy yếu, nghe phổi có giảm rì rào phế nang và rải rác ran ẩm nhỏ hạt ở vùng đỉnh phổi bên phải.
+Bác sĩ: Khả năng cao là: Lao phổi AFB dương tính thùy trên phổi phải.
+Bác sĩ: Chuyển phòng khám chuyên khoa Lao và Bệnh phổi đăng ký phác đồ chuẩn quốc gia 2RHZE/4RHE, xét nghiệm đờm GeneXpert và chụp X-quang phổi.
+Người nhà: Em rõ hết phác đồ rồi ạ.

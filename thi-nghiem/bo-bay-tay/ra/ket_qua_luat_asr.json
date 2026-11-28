@@ -1,0 +1,4626 @@
+{
+ "ghi_chu": "16 ca viết tay, bản sạch = đáp án. Không phải độ chính xác thực tế.",
+ "loi_thoai": "thi-nghiem\\bo-bay-tay\\ra\\loi_thoai_asr.jsonl",
+ "tong": {
+  "ban_sai": 91,
+  "bat_dung": 63,
+  "bao_nham_sach": 370
+ },
+ "theo_loai": {
+  "ban_cu_con_hieu_luc": {
+   "n": 5,
+   "dung": 1,
+   "bat_ky": 3
+  },
+  "qua_khu_hien_tai": {
+   "n": 10,
+   "dung": 3,
+   "bat_ky": 10
+  },
+  "dao_phu_dinh": {
+   "n": 20,
+   "dung": 14,
+   "bat_ky": 20
+  },
+  "doi_so": {
+   "n": 6,
+   "dung": 6,
+   "bat_ky": 6
+  },
+  "gia_dinh_thanh_that": {
+   "n": 6,
+   "dung": 6,
+   "bat_ky": 6
+  },
+  "doi_chu_the": {
+   "n": 11,
+   "dung": 5,
+   "bat_ky": 10
+  },
+  "xoa_di_ung": {
+   "n": 3,
+   "dung": 3,
+   "bat_ky": 3
+  },
+  "doi_ben": {
+   "n": 7,
+   "dung": 6,
+   "bat_ky": 7
+  },
+  "nang_chac_chan": {
+   "n": 5,
+   "dung": 4,
+   "bat_ky": 5
+  },
+  "bia_menh_de": {
+   "n": 3,
+   "dung": 2,
+   "bat_ky": 2
+  },
+  "doi_thoi_gian": {
+   "n": 2,
+   "dung": 2,
+   "bat_ky": 2
+  },
+  "doi_lieu": {
+   "n": 6,
+   "dung": 6,
+   "bat_ky": 6
+  },
+  "bia_phu_dinh": {
+   "n": 1,
+   "dung": 1,
+   "bat_ky": 1
+  },
+  "doi_thuoc": {
+   "n": 1,
+   "dung": 1,
+   "bat_ky": 1
+  },
+  "xoa_thuoc": {
+   "n": 3,
+   "dung": 3,
+   "bat_ky": 3
+  },
+  "dinh_chinh_nguoc": {
+   "n": 1,
+   "dung": 0,
+   "bat_ky": 1
+  },
+  "xoa_phu_dinh": {
+   "n": 1,
+   "dung": 0,
+   "bat_ky": 0
+  }
+ },
+ "theo_ca": [
+  {
+   "id": "bay_01",
+   "ten": "Chóng mặt tư thế, đổi thuốc huyết áp",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “losartan” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 4,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “penicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_ALLERGY",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Chất gây dị ứng “penicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 5,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “150” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 10,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “losartan” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 11,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 15 là kế hoạch có điều kiện: “giảm nốt saston xuống 25mg mỗi sáng hẹn khám lại sau hai tuần nếu chóng mặt tăng hoặc ngất thì bác phải vào viện ngay”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “chó mặt từ bao giờ hả bát” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “bắt đang uống thuốc huyết áp gì” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “trước tôi uống amlodipin mườimilygam nhưng từ tháng trước bác sĩ ở huyện đổi sang lốt sắt toàn năm mươimilygam rồi amlodipin tôi bỏ hẳn” — không dòng nào dẫn tới (“trước tôi uống amlodipin mườimilygam”)."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_DURATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “nó sẵn sàng bác uống mấy lần một ngày” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “bác có bị dị ứng thuốc gì không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 11 (bác sĩ): “bác có đau ngực khó thở không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'một tuần' dù đã sửa thành mười ngày",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CORRECTION_NOT_APPLIED",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "Lượt 4: “khoảng một tuần à không phải mười ngày rồi bác sĩ ạ.” — người nói sửa “một tuần” thành “mười ngày”, bản ghi còn giữ “một tuần”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "APPROXIMATION_LOST",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Câu gốc nói con số ước chừng quanh “một tuần”."
+      },
+      {
+       "ma": "DUPLICATE_INFORMATION",
+       "nhom": "QUALITY",
+       "ly_do": "Giống dòng #1 “chóng mặt khi đứng lên lúc sáng ngủ dậy”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi amlodipin vẫn đang dùng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "DISCONTINUED_AS_CURRENT",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 6: “từ tháng trước bác sĩ ở huyện đổi sang lốt sắt toàn năm mươimilygam rồi amlodipin tôi bỏ hẳn” — thuốc đã ngừng, bản ghi ghi đang dùng."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi 'không dị ứng penicillin' (lấy chữ 'Không' đầu câu)",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “penicillin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi huyết áp đứng 150/90",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi có số “120” không thấy trong lượt được dẫn."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi như bệnh nhân đã ngất và vào viện",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi 'có đau ngực'",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_02",
+   "ten": "Trẻ sốt ho, mẹ cũng ốm",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“39.5 độ” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 3,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 4,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 4,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "Người nhà nhắc 'bố' trên thông tin trọng yếu; cần xác nhận là bệnh nhân hay người thân."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 10,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 15 là kế hoạch có điều kiện: “tiếp tục paracetamol khi sốt cho cháu uống nhiều nước nếu sốt quá ngày hoặc thở nhanh thì đưa cháu đi khám lại”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“ba ngày” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “cháu có ho không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “chó có nôn không chị” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “trong nhà có ai bị hen không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 11 (bác sĩ): “cháu đã uống thuốc gì chưa” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu nôn ba lần",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu dị ứng aspirin",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "INTERNAL_CONTRADICTION",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "“dị ứng aspirin, uống vào khó thở” trái với dòng #4 “dị ứng thuốc”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi cháu có nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi sốt cao nhất 38,5 độ",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“38.5 độ” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi như đã sốt quá ba ngày",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "DURATION_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“ba ngày” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng aspirin của bố",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 8 (người nhà): “cháu thì chưa thấy nhưng bố cháu dị ứng aspirin uống vào là khó thở” — không dòng nào dẫn tới (“bố cháu dị ứng aspirin uống vào là khó thở”) — có thể là của người nhà, không phải người bệnh."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_03",
+   "ten": "Đau hố chậu, phủ định kép",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 9,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: câu hỏi/câu gốc nói chuyện trước đây; bản ghi ghi như hiện tại."
+    },
+    {
+     "dong": 9,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 12,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “làm que thử thai siêu âm mồ bụng tổng phân tích nước tiểu nếu que thử dương tính thì chuyển khám sản ngay”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 12,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “en đau ở đâu” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “đóng mấy ngày rồi có sốt buồn nôn không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “tinh nguyệt em có điều không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “em có đang mang thai không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_UNCERTAINTY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (bệnh nhân): “em chưa thử que cũng không chắc nữa” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “chưa đây em mổ gì chưa” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau bên phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'bên phải' dù đã sửa",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có buồn nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi kinh không đều (đọc sai phủ định kép)",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn đang mang thai",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân đã mổ ruột thừa",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_04",
+   "ten": "Đau gối, giọng Huế, kể hộ",
+   "phuong_ngu": "hue",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 3,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Lượt 8: “mà em uống cái thuốc giảm đau mưa ở tiệm thuốc em không nhớ tên ngay hai viên” — người nói không chắc, bản ghi lại ghi chắc chắn."
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "Câu gốc nói ngôi thứ nhất ('tôi/em'), không nhắc 'con gái'."
+    },
+    {
+     "dong": 5,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (người nhà): “dạ em đưa mà em đi mà em năm nay bảy mươi hai tuổi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “bạc bị răng” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “vội cột sứng không chi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “bạn có uống thuốc chí không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “và có nấu da dây không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 11 (bác sĩ): “rồi bạc có bị tiểu đường không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi gối vẫn đang sưng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi mẹ bị tiểu đường",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONTRADICTORY_INFORMATION",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "“tiểu đường” trái với dòng #6 “tiểu đường”."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi bệnh nhân có tiểu đường",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "bịa tên thuốc là meloxicam",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “meloxicam” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau gối trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “trái”, câu gốc chỉ có “phải”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_05",
+   "ten": "Đái tháo đường, bẫy số liệu",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “12,5” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 1,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi “2 hôm”, câu gốc nói “năm hôm”."
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “lúc đói”, bản ghi không có."
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “metformin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 2,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 2,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “insulin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 3,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [6]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 5,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “hai tháng”."
+    },
+    {
+     "dong": 7,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“78 kg” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “2” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “metformin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 10,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“1000 mg” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 10,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“hai lần” có ở lượt 4, không có ở lượt được dẫn."
+    },
+    {
+     "dong": 10,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“một tháng” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “anh đo đường huyết ở nhà được bao nhiêu” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “anh đang dùng thuốc gì” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 4 (bệnh nhân): “mết phồm linh tám trăm năm mươi mi li gam ngay hai lần sau ăn sáng và tối in su lin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “anh bị tiểu đường bao lâu rồi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “anh có tê bì chân tay không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “anh có hút thuốc là không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi 1,25 thay cho 12,5",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi có số “1,25” không thấy trong lượt được dẫn."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi đang tiêm insulin",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “insulin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "doi_thoi_gian",
+     "mo_ta": "ghi phát hiện ba tháng (bản y tá ghi nhầm)",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [6]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang hút một bao/ngày",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có tê tay",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi metformin 1000 mg (liều mới của kế hoạch) vào thuốc đang dùng",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “metformin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “sau ăn”, bản ghi không có."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_06",
+   "ten": "Ho đờm, hỏi gộp và hỏi không đáp",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 3,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “nhẹ”, bản ghi không có."
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “chưa dùng kháng sinh uống nhiều nước nếu sốt lại trên độ hoặc khó thở thì quay lại để xem xét kháng sinh”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“38.5 độ” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ANSWER",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 hỏi về triệu chứng: “chị có ho sốt hay khó thật không.”; lượt 2 trả lời “có ạ.” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “chị có ho sốt hay khó thật không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “chị bị cái nào” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “còn sốt thì sao” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “chị có dị ứng thuốc gì không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (bệnh nhân): “bác sĩ ơi em có phải nghỉ làm không ạ” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_PLAN",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “chị vẫn đi làm được chị có đăng cho con bú không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "bia_phu_dinh",
+     "mo_ta": "ghi 'không dị ứng thuốc' dù câu hỏi không được trả lời",
+     "nhom_dung": [
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "ghi có sốt và khó thở từ câu 'Có ạ'",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang sốt",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã kê kháng sinh",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“38.5 độ” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có khó thở",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_07",
+   "ten": "Suy tim, nhiều thuốc",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “furosemid” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 0,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “omeprazol” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 2,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 2,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 2,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "LATERALITY_CHANGED",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi “chân trái”, câu gốc “chân phải”."
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“3 kg” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 10,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “tăng philip smith lên 40mg hai lần một ngày trong ba ngày mua lại kali uống cùng cân mỗi sáng nếu tăng quá hai kg thì báo ngay”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “bác đang uống những thuốc gì ạ” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (bệnh nhân): “tôi uống phurox miết 40mg buổi sáng với bisopro loa 2.5mg” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 2 (bệnh nhân): “tôi uống phurox miết 40mg buổi sáng với bisopro loa 2.5mg” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “bác có uống thêm thuốc dạ dày không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 4 (bệnh nhân): “có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại” — không dòng nào dẫn tới (“có bỏ mếp với azo 20mg trước ăn sáng”)."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 4 (bệnh nhân): “có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “bác có phủ chân không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “bắc nằm có phải kêu gối cao không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_thuoc",
+     "mo_ta": "ghi fluoxetin thay furosemid",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “fluoxetin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi kali đang dùng",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "MEDICATION_ENTITY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Tên thuốc “kali” có ở lượt 13, không ở lượt được dẫn."
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi chân phải nhiều hơn",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “chân trái”, câu gốc “chân phải”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có dị ứng thuốc",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi bisoprolol 5 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót omeprazol",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_MEDICATION",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 4 (bệnh nhân): “có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại” — không dòng nào dẫn tới (“có bỏ mếp với azo 20mg trước ăn sáng”)."
+      },
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 4 (bệnh nhân): “có bỏ mếp với azo 20mg trước ăn sáng còn vinh cao ly thì hết từ tuần trước chưa mua lại” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_08",
+   "ten": "Hay quên, hai người kể mâu thuẫn",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “ba tháng”."
+    },
+    {
+     "dong": 1,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 1,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 2,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 3,
+     "ma": "CONTRADICTION_UNRESOLVED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “atorvastatin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 4,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 4,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “22” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “bác bị làm sao ạ” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 4 (bác sĩ): “bác có uống rượu không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “bác có đang uống thuốc gì không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (người nhà): “bộ trào uống thuốc mỡ màu ato vắt tritin mg bữa tối” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “trong nhà có ai bị nhủ lẫn không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "chỉ ghi 'không uống rượu', bỏ lời con gái",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NEGATION_FLIP",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+      },
+      {
+       "ma": "CONTRADICTION_UNRESOLVED",
+       "nhom": "STATE_UPDATE",
+       "ly_do": "nguồn mâu thuẫn, chưa xác nhận"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi người nhà hay quên",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "SUBJECT_AMBIGUOUS",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chưa rõ chủ thể"
+      },
+      {
+       "ma": "APPROXIMATION_LOST",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Câu gốc nói con số ước chừng quanh “ba tháng”."
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi MMSE 28/30",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi có số “28” không thấy trong lượt được dẫn."
+      }
+     ]
+    },
+    {
+     "loai": "doi_thoi_gian",
+     "mo_ta": "ghi ba tuần",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "DURATION_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “ba tuần”, câu gốc “ba tháng” — cùng số, khác đơn vị."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn sa sút trí tuệ",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “nhẹ”, bản ghi không có."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_09",
+   "ten": "Ho kéo dài, lao cũ",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“ba tuần” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“58 kg” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “chú bích qua ngực xét niệm đờm a f b và ginex pờn nếu dương tính sẽ chuyển chương trình chống lào”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “anh ho bao lâu rồi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “trước đây anh bị lao báo giờ trưa” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “anh có sụt cân không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “anh có da mồ hôi đêm không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “anh đã đi khám ở đâu chưa” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang mắc lao phổi",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn lao phổi tái phát",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi viêm phổi như đã chẩn đoán xác định",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có ra mồ hôi đêm",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "bia_menh_de",
+     "mo_ta": "bịa con số 5 kg",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "EVIDENCE_PROVENANCE",
+      "UNSUPPORTED"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "NUMERIC_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“5 kg” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã chuyển chương trình chống lao",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_10",
+   "ten": "Trẻ đau tai, đổi bên",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "LATERALITY_CHANGED",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi “tai trái”, câu gốc “tai phải”."
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 2,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 2,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 2,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 3,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_ALLERGY",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Chất gây dị ứng “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 5,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt 10: “cháu dị ứng amethy selen năm ngoái uống bị nổi mề đay” — nói chuyện trước đây; bản ghi ghi như hiện tại."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “giảm đau bằng paracetamol nếu sau h không đỡ thì dùng kháng sinh axitromycin không dùng amocicilin vì cháu dị ứng”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “azithromycin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“48 giờ” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “cháu bị xào trị” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “cháu có sốt không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “tai có chảy dịch không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “ở nhà có ai đâm ốm không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “cháu có dị ứng thuốc không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'tai phải'",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi viêm tai giữa phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “tai phải”, câu gốc “tai trái”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi cháu đang sốt",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi cháu đang uống kháng sinh",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi đã kê azithromycin",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “azithromycin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "DURATION_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“48 giờ” không có ở đâu trong hội thoại."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng amoxicillin",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 10 (người nhà): “cháu dị ứng amethy selen năm ngoái uống bị nổi mề đay” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_11",
+   "ten": "Tiểu buốt, đính chính ngược",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "CORRECTION_NOT_APPLIED",
+     "nhom": "STATE_UPDATE",
+     "ly_do": "Lượt 2: “ba ngày à không năm ngày ơ mà thôi đúng là ba ngày vì thứ bảy em mới bị.” — người nói sửa “ba ngày” thành “năm ngày”, bản ghi còn giữ “ba ngày”."
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_ALLERGY",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Chất gây dị ứng “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “fosfomycin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “em tiểu bút mấy ngày rồi” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “có sốt đau lưng không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “em có dị ứng thuốc gì không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_ALLERGY",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 6 (bệnh nhân): “em dị ứng sếp alexis à không phải là amosicil uống vào nổi mề đay” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “em có đang mang thai không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (bệnh nhân): “không ạ em vừa có kinh tuyển trước” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “trước đây em bị lần nào chưa” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dinh_chinh_nguoc",
+     "mo_ta": "giữ 'năm ngày' (bản bị bỏ)",
+     "nhom_dung": [
+      "STATE_UPDATE",
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ dị ứng cephalexin",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “cephalexin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_ALLERGY",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Chất gây dị ứng “cephalexin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có sốt",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi fosfomycin 3 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “fosfomycin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "UNIT_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “3 mg”, câu gốc “ba gam” — cùng số, khác đơn vị."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi đau lưng bên trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “bên trái”, câu gốc “bên phải”."
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang uống kháng sinh",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 10: “năm ngoái bị một lần uống kháng sinh ba ngày là khỏi” — nói chuyện trước đây; bản ghi ghi như hiện tại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_12",
+   "ten": "Đau đầu, lượt dồn thông tin",
+   "phuong_ngu": "bac",
+   "bao_nham_sach": [
+    {
+     "dong": 1,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “paracetamol” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 1,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "số lần dùng, lúc bắt đầu hoặc lúc ngừng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 7,
+     "ma": "WRONG_EVIDENCE",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+    },
+    {
+     "dong": 8,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 8,
+     "ma": "WRONG_EVIDENCE",
+     "nhom": "EVIDENCE_PROVENANCE",
+     "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi có số “120” không thấy trong lượt được dẫn."
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “paracetamol” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 11,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“1 g” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 11,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 9 là kế hoạch có điều kiện: “không dùng ibuprofen parastamol g gần khi đau tối đa gần một ngày nghỉ trong phòng tối nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “chị kể cho tôi nghe chị bị làm sao” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “đau đầu lần này có khác mọi khi không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "xoa_di_ung",
+     "mo_ta": "bỏ sót dị ứng ibuprofen (nằm giữa lượt dồn)",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú” — không dòng nào dẫn tới (“em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen”) — có thể là của người nhà, không phải người bệnh."
+      },
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót panadol",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_ALLERGY",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú” — không dòng nào dẫn tới (“em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen”) — có thể là của người nhà, không phải người bệnh."
+      },
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 2 (bệnh nhân): “em bị đau đầu ba ngày nay uống panadol mg ngày viên không đỡ em bị đau nửa đầu từ năm hai mươi tuổi mẹ em cũng bị em dị ứng ibuprofen và em đang cho con bú” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có nhìn mờ",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "WRONG_EVIDENCE",
+       "nhom": "EVIDENCE_PROVENANCE",
+       "ly_do": "trích dẫn nằm ở lượt khác lượt được dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị đau nửa đầu do mẹ kể (gán nhầm)",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi paracetamol 10 g",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “paracetamol” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“10 g” không có ở đâu trong hội thoại."
+      },
+      {
+       "ma": "CONDITION_AS_CONFIRMED_PLAN",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "Lượt 9 là kế hoạch có điều kiện: “không dùng ibuprofen parastamol g gần khi đau tối đa gần một ngày nghỉ trong phòng tối nếu đau đầu dữ dội đột ngột hoặc yếu tay chân thì vào cấp cứu”; bản ghi bỏ mất điều kiện."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "xoa_phu_dinh",
+     "mo_ta": "bỏ sót 'không buồn nôn'",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    }
+   ]
+  },
+  {
+   "id": "bay_13",
+   "ten": "Nam Bộ: bả, hổng, bữa giờ",
+   "phuong_ngu": "nam_bo",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nói về chính người kể, không phải bệnh nhân"
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "APPROXIMATION_LOST",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Câu gốc nói con số ước chừng quanh “một tuần”."
+    },
+    {
+     "dong": 1,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 2,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 2,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "FAMILY_PATIENT_MIXUP",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+    },
+    {
+     "dong": 3,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nói về chính người kể, không phải bệnh nhân"
+    },
+    {
+     "dong": 5,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "NUMERIC_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“170 /10” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “amlodipin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“5 mg” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "CONDITION_AS_CONFIRMED_PLAN",
+     "nhom": "PLAN_FACT_CONDITIONAL",
+     "ly_do": "Lượt 13 là kế hoạch có điều kiện: “uống lại amloor đi bình năm mươi ly gam mỗi sáng không tự ý ngưng nếu yếu tay chân hoặc nói đớ thì vô cấp cứu liền”; bản ghi bỏ mất điều kiện."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “và có ỏi không anh” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “bé có bệnh gì từ trước không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “thuốc tên gì anh nhỡ không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (người nhà): “dạ amlo điếc pin năm mi li gam ngày một viên” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "đọc 'hổng có ói' thành có nôn",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi mẹ dị ứng tôm cua",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "WRONG_SUBJECT",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nói về chính người kể, không phải bệnh nhân"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi amlodipin đang dùng đều",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “amlodipin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "DISCONTINUED_AS_CURRENT",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt 6: “bà bị cao máu mấy năm nay uống thuốc hồng đều hết thuốc là bà nghỉ luôn cả tháng nay hồng uống” — thuốc đã ngừng, bản ghi ghi đang dùng."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi trầy chân phải",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “chân phải”, câu gốc “chân trái”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "FAMILY_PATIENT_MIXUP",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "đoạn dẫn nhắc người nhà — có thể không phải của bệnh nhân"
+      },
+      {
+       "ma": "TEMPORAL_MISMATCH",
+       "nhom": "TEMPORAL",
+       "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+      },
+      {
+       "ma": "PAST_CURRENT_CONFUSION",
+       "nhom": "TEMPORAL",
+       "ly_do": "Lượt [4]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+      }
+     ]
+    },
+    {
+     "loai": "gia_dinh_thanh_that",
+     "mo_ta": "ghi bệnh nhân đã yếu tay chân",
+     "nhom_dung": [
+      "PLAN_FACT_CONDITIONAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CONDITION_AS_FACT",
+       "nhom": "PLAN_FACT_CONDITIONAL",
+       "ly_do": "câu điều kiện hoặc giả định/phòng ngừa ghi như sự thật"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_14",
+   "ten": "Nghệ Tĩnh: nỏ, chi, mô",
+   "phuong_ngu": "nghe_tinh",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "DURATION_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“một tuần” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 0,
+     "ma": "TEMPORAL_MISMATCH",
+     "nhom": "TEMPORAL",
+     "ly_do": "mốc thời gian không thấy trong lượt dẫn"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 2,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 2,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 3,
+     "ma": "NEGATION_FLIP",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+    },
+    {
+     "dong": 3,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [10]: không có dấu hiệu nào là chuyện trước đây; bản ghi ghi như đã qua."
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 10,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “omeprazol” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 11,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “chủ có ở chúa bên ngoài phân đen không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “chủ có uống rượu hút thuốc ký không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “chổ có uống thuốc giảm đau trí không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_DURATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 8 (bệnh nhân): “túi đau lưng nên uống dicrophânax uống hai tuần rồi ba bữa đi thì nó uống nữa” — không dòng nào dẫn tới — có thể là của người nhà, không phải người bệnh."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “trong nhà có ai định bình dạy dạy không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 14 (bệnh nhân): “dạ tôi nhử rồi” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "không hiểu 'nỏ', ghi có phân đen",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi có uống rượu",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "ban_cu_con_hieu_luc",
+     "mo_ta": "giữ 'mười điếu'",
+     "nhom_dung": [
+      "STATE_UPDATE"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "qua_khu_hien_tai",
+     "mo_ta": "ghi đang uống diclofenac",
+     "nhom_dung": [
+      "TEMPORAL"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “diclofenac” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị loét dạ dày",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "nang_chac_chan",
+     "mo_ta": "ghi chắc chắn loét dạ dày",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "CERTAINTY_INCREASED",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_15",
+   "ten": "Nam Bộ: ổng, hổng phải hổng",
+   "phuong_ngu": "nam_bo",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 3,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 4,
+     "ma": "WRONG_SUBJECT",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "đoạn dẫn nói về bệnh nhân, không phải người nhà"
+    },
+    {
+     "dong": 4,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 4,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 5,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 8,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "“1 g” không có ở đâu trong hội thoại."
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 1 (bác sĩ): “chị dẫn ai đi khám về chị” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “anh có số không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “anh có hút thuốc không chị” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “anh có bệnh gì khác không” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "đọc 'hổng phải hổng sốt' thành không sốt",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "NEGATION_FLIP",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "Bản ghi phủ định, nhưng lời được dẫn khẳng định và không có từ phủ định nào."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân đang điều trị lao",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi nhịp thở 12 lần/phút",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “12 lần”, câu gốc nói “hai mươi hai lần”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "doi_ben",
+     "mo_ta": "ghi ran nổ đáy phổi trái",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "LATERALITY_CHANGED",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “phổi trái”, câu gốc “phổi phải”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi bệnh nhân có bệnh mạn tính",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      }
+     ]
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi amoxicillin clavulanat 1 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “amoxicillin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "“1 mg” không có ở đâu trong hội thoại."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bay_16",
+   "ten": "Bắc quê: u, thầy",
+   "phuong_ngu": "bac_que",
+   "bao_nham_sach": [
+    {
+     "dong": 0,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 1,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 3,
+     "ma": "PAST_CURRENT_CONFUSION",
+     "nhom": "TEMPORAL",
+     "ly_do": "Lượt [6]: câu hỏi/câu gốc nói chuyện trước đây; bản ghi ghi như hiện tại."
+    },
+    {
+     "dong": 4,
+     "ma": "SUBJECT_AMBIGUOUS",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chưa rõ chủ thể"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “digoxin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 5,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 5,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 5,
+     "ma": "DOSE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "liều thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 5,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 5,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “furosemid” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 6,
+     "ma": "SPEAKER_SUBJECT_MISMATCH",
+     "nhom": "SUBJECT_ATTRIBUTION",
+     "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+    },
+    {
+     "dong": 6,
+     "ma": "POSSIBLE_NEGATION_ERROR",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "đoạn dẫn có từ phủ định"
+    },
+    {
+     "dong": 6,
+     "ma": "ROUTE_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+    },
+    {
+     "dong": 6,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 6,
+     "ma": "UNSUPPORTED_INFORMATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+    },
+    {
+     "dong": 6,
+     "ma": "IMPORTANT_MODIFIER_DROPPED",
+     "nhom": "QUALITY",
+     "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+    },
+    {
+     "dong": 7,
+     "ma": "FREQUENCY_MISMATCH",
+     "nhom": "ENTITY_VALUE",
+     "ly_do": "Bản ghi “110 lần”, câu gốc nói “mười lần”."
+    },
+    {
+     "dong": 7,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 8,
+     "ma": "CERTAINTY_INCREASED",
+     "nhom": "NEGATION_ASSERTION",
+     "ly_do": "câu gốc chỉ nghi ngờ, bản ghi khẳng định"
+    },
+    {
+     "dong": 8,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_MEDICATION",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "Tên thuốc “digoxin” không xuất hiện ở lượt nào trong hội thoại."
+    },
+    {
+     "dong": 9,
+     "ma": "FABRICATED_QUOTE",
+     "nhom": "UNSUPPORTED",
+     "ly_do": "trích dẫn không có trong hội thoại"
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 3 (bác sĩ): “mắc có ho không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 5 (bác sĩ): “bác có bệnh gì trước đây không” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "POSSIBLE_IMPORTANT_OMISSION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 7 (bác sĩ): “thầy của chị là bác sĩ nào vậy” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_MEDICATION",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 9 (bác sĩ): “bác uống thuốc tiêm gì” — không dòng nào dẫn tới."
+    },
+    {
+     "dong": null,
+     "ma": "OMITTED_NUMERIC_VALUE",
+     "nhom": "OMISSION",
+     "ly_do": "Lượt 10 (người nhà): “đi gót xin không phẩy hai lăm mi li gam ngày một viên với phu rô sờ mít buổi sáng” — không dòng nào dẫn tới."
+    }
+   ],
+   "ban_sai": [
+    {
+     "loai": "doi_chu_the",
+     "mo_ta": "ghi bệnh nhân bị nhồi máu cơ tim",
+     "nhom_dung": [
+      "SUBJECT_ATTRIBUTION"
+     ],
+     "bat_dung": false,
+     "bat_bat_ky": false,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": []
+    },
+    {
+     "loai": "doi_lieu",
+     "mo_ta": "ghi digoxin 2,5 mg",
+     "nhom_dung": [
+      "ENTITY_VALUE"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_MEDICATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "Tên thuốc “digoxin” không xuất hiện ở lượt nào trong hội thoại."
+      },
+      {
+       "ma": "SPEAKER_SUBJECT_MISMATCH",
+       "nhom": "SUBJECT_ATTRIBUTION",
+       "ly_do": "chủ thể chỉ suy từ người nói — đoạn dẫn không có từ chỉ người"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      },
+      {
+       "ma": "DOSE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "liều thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "ROUTE_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "đường dùng thuốc không có trong lượt được dẫn"
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "UNSUPPORTED_INFORMATION",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "nội dung không trùng từ nào với đoạn dẫn"
+      },
+      {
+       "ma": "IMPORTANT_MODIFIER_DROPPED",
+       "nhom": "QUALITY",
+       "ly_do": "Câu gốc có “buổi sáng”, bản ghi không có."
+      }
+     ]
+    },
+    {
+     "loai": "dao_phu_dinh",
+     "mo_ta": "ghi ho có đờm",
+     "nhom_dung": [
+      "NEGATION_ASSERTION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      },
+      {
+       "ma": "POSSIBLE_NEGATION_ERROR",
+       "nhom": "NEGATION_ASSERTION",
+       "ly_do": "đoạn dẫn có từ phủ định"
+      }
+     ]
+    },
+    {
+     "loai": "doi_so",
+     "mo_ta": "ghi mạch 70 lần/phút",
+     "nhom_dung": [
+      "ENTITY_VALUE",
+      "TEMPORAL"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": true,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "FREQUENCY_MISMATCH",
+       "nhom": "ENTITY_VALUE",
+       "ly_do": "Bản ghi “70 lần”, câu gốc nói “mười lần”."
+      },
+      {
+       "ma": "FABRICATED_QUOTE",
+       "nhom": "UNSUPPORTED",
+       "ly_do": "trích dẫn không có trong hội thoại"
+      }
+     ]
+    },
+    {
+     "loai": "xoa_thuoc",
+     "mo_ta": "bỏ sót furosemid",
+     "nhom_dung": [
+      "OMISSION"
+     ],
+     "bat_dung": true,
+     "bat_bat_ky": true,
+     "can_xac_nhan_D": false,
+     "canh_bao_tren_dong": [
+      {
+       "ma": "OMITTED_NUMERIC_VALUE",
+       "nhom": "OMISSION",
+       "ly_do": "Lượt 10 (người nhà): “đi gót xin không phẩy hai lăm mi li gam ngày một viên với phu rô sờ mít buổi sáng” — không dòng nào dẫn tới."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

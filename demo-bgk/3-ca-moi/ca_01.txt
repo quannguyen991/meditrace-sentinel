@@ -1,0 +1,22 @@
+Bác sĩ: Cháu chào chú, chú ngồi đi ạ. Hôm nay chú đi khám lại huyết áp phải không ạ?
+Bệnh nhân: Ừ, đúng rồi. Tháng trước bác sĩ hẹn tôi một tháng thì quay lại.
+Bác sĩ: Dạo này ở nhà chú có đo huyết áp không ạ?
+Bệnh nhân: Có, sáng nào tôi cũng đo. Toàn một trăm năm mươi, một trăm sáu mươi, hôm nào cao thì thấy nặng đầu.
+Bác sĩ: Chú có đau ngực, khó thở hay hoa mắt gì không ạ?
+Bệnh nhân: Đau ngực thì không. Leo cầu thang thì hơi mệt tí thôi, chứ khó thở thì cũng không.
+Bác sĩ: Thuốc chú đang uống vẫn là amlodipin năm mi li gam, mỗi sáng một viên, đúng không ạ?
+Bệnh nhân: Ừ, đúng rồi, ngày một viên, tôi uống đều, không quên hôm nào.
+Bác sĩ: Chú có bị tiểu đường, mỡ máu hay bệnh gì khác không ạ?
+Bệnh nhân: Tôi thì chưa ai bảo bị gì. Bố tôi ngày trước bị tai biến, năm bảy mươi tuổi, chứ tôi thì không.
+Bác sĩ: Chú có dị ứng thuốc gì không ạ?
+Bệnh nhân: Không, tôi chưa dị ứng thuốc gì bao giờ.
+Bác sĩ: Chú còn hút thuốc lá không ạ?
+Bệnh nhân: Bỏ được hai năm rồi. Rượu thì thỉnh thoảng đám cưới làm một, hai chén thôi.
+Bác sĩ: Vâng, để cháu đo lại cho chú. Huyết áp một trăm năm mươi trên chín mươi, mạch tám mươi hai, tim đều, phổi không có ran.
+Bệnh nhân: Vẫn cao à bác sĩ?
+Bác sĩ: Vẫn cao hơn mục tiêu chú ạ, mình cần dưới một trăm ba mươi trên tám mươi. Cháu tăng amlodipin lên mười mi li gam, vẫn mỗi sáng một viên.
+Bệnh nhân: Tức là thôi viên năm, chuyển hẳn sang viên mười à?
+Bác sĩ: Vâng, bỏ viên năm, uống viên mười. Chú làm thêm xét nghiệm máu: mỡ máu, đường máu, chức năng thận, với điện tâm đồ nữa ạ.
+Bệnh nhân: Ừ. Thế bao giờ tôi quay lại?
+Bác sĩ: Hai tuần nữa chú quay lại, mang theo sổ ghi huyết áp ở nhà. Nếu đau ngực, yếu tay chân hay méo miệng thì chú đi cấp cứu ngay nhé.
+Bệnh nhân: Ừ, cảm ơn bác sĩ nhé.

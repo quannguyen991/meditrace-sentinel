@@ -1,0 +1,14 @@
+Bác sĩ: Anh đo đường huyết ở nhà được bao nhiêu?
+Bệnh nhân: Sáng nay lúc đói đo được 12 phẩy 5, hôm qua thì 8 phẩy 2.
+Bác sĩ: Anh đang dùng thuốc gì?
+Bệnh nhân: Metformin 850 mg, ngày hai lần sau ăn sáng và tối. Insulin thì bác sĩ có bảo tiêm nhưng tôi chưa tiêm lần nào.
+Bác sĩ: Anh bị tiểu đường bao lâu rồi?
+Bệnh nhân: Phát hiện được ba năm, không phải ba tháng đâu, hôm trước cô y tá ghi nhầm.
+Bác sĩ: Anh có tê bì chân tay không?
+Bệnh nhân: Tê hai bàn chân khoảng hai tháng nay, tay thì không.
+Bác sĩ: Anh có hút thuốc lá không?
+Bệnh nhân: Tôi bỏ thuốc lá được năm năm rồi, trước hút một bao một ngày.
+Bác sĩ: Khám lâm sàng: cân nặng 78 kg, huyết áp 135 trên 85, mất cảm giác rung hai bàn chân.
+Bác sĩ: Chẩn đoán: đái tháo đường type 2 chưa kiểm soát, biến chứng thần kinh ngoại biên.
+Bác sĩ: Xét nghiệm HbA1c, tăng metformin lên 1000 mg hai lần một ngày, khám lại sau một tháng.
+Bệnh nhân: Vâng.

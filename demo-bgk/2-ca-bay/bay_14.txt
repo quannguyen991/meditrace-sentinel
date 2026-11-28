@@ -1,0 +1,14 @@
+Bác sĩ: Chào chú, chú đau ở mô?
+Bệnh nhân: Tui đau bụng trên rốn, đau rát, cả tuần ni rồi bác sĩ.
+Bác sĩ: Chú có ợ chua, đi ngoài phân đen không?
+Bệnh nhân: Ợ chua thì có, phân đen thì nỏ có.
+Bác sĩ: Chú có uống rượu, hút thuốc chi không?
+Bệnh nhân: Rượu thì tui nỏ uống, thuốc lào thì có, ngày chừng mười điếu. À nỏ, ngày hai chục điếu.
+Bác sĩ: Chú có uống thuốc giảm đau chi không?
+Bệnh nhân: Tui đau lưng nên uống diclofenac, uống hai tuần rồi, ba bữa ni thì nỏ uống nữa.
+Bác sĩ: Trong nhà có ai bị bệnh dạ dày không?
+Bệnh nhân: O tui, tức là em gái của bố tui, bị ung thư dạ dày mất rồi. Eng tui thì bị loét dạ dày.
+Bác sĩ: Khám lâm sàng: ấn đau vùng thượng vị, bụng mềm, không có phản ứng thành bụng.
+Bác sĩ: Chẩn đoán: nghi loét dạ dày do thuốc giảm đau.
+Bác sĩ: Nội soi dạ dày, dùng omeprazol 20 mg hai lần một ngày, không dùng lại diclofenac, bỏ thuốc lào.
+Bệnh nhân: Dạ, tui nhớ rồi.
