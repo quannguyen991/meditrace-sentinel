@@ -1,0 +1,243 @@
+{
+ "ngay": "2026-11-28",
+ "mo_hinh_goc": "vinai/PhoWhisper-small",
+ "lora": {
+  "r": 16,
+  "alpha": 32,
+  "dropout": 0.05,
+  "muc_tieu": [
+   "q_proj",
+   "k_proj",
+   "v_proj",
+   "out_proj"
+  ],
+  "lr": 0.0001,
+  "batch": 4,
+  "tich_luy": 4,
+  "fp16": true,
+  "vram_gioi_han": 0.7
+ },
+ "du_lieu": {
+  "nguon": "VNMed_Speech reviewed-merged (CC BY 4.0)",
+  "so_dong": 2887,
+  "huan_luyen": 2732,
+  "theo_doi_loss": 155,
+  "phien_theo_doi": 5,
+  "so_phien_tong": 107,
+  "gio_audio_tong": 8.36
+ },
+ "kiem_ro_ri": {
+  "ViMedCSS-test": {
+   "exact": 0,
+   "near_ge0.9": 0
+  },
+  "VietMed-test": {
+   "exact": 0,
+   "near_ge0.9": 0
+  },
+  "VietMed-train": {
+   "exact": 0,
+   "near_ge0.9": 0
+  },
+  "VietMed-dev": {
+   "exact": 0,
+   "near_ge0.9": 0
+  },
+  "drop_total": 0
+ },
+ "huan_luyen": {
+  "train": 2732,
+  "val": 155,
+  "tong_buoc_ke_hoach": 512,
+  "val_loss_truoc": 0.5428516820073128,
+  "epochs": [
+   {
+    "epoch": 1,
+    "buoc": 170,
+    "loss_train_tb": 0.28243410009699893,
+    "val_loss": 0.14305344372987747,
+    "giay": 1235.7732329368591,
+    "dung_som": false
+   },
+   {
+    "epoch": 2,
+    "buoc": 340,
+    "loss_train_tb": 0.138394083953183,
+    "val_loss": 0.12517755907028913,
+    "giay": 1635.036170721054,
+    "dung_som": false
+   },
+   {
+    "epoch": 3,
+    "buoc": 510,
+    "loss_train_tb": 0.10819702470841468,
+    "val_loss": 0.12447959780693055,
+    "giay": 1961.4559562206268,
+    "dung_som": false
+   }
+  ],
+  "buoc_da_chay": 510,
+  "tong_giay": 1962.0082705020905
+ },
+ "danh_gia": {
+  "goc": {
+   "ViMedCSS-test-shard0": {
+    "tap": "ViMedCSS-test-shard0",
+    "so_cau": 323,
+    "wer": 0.3165,
+    "cs_recall_trung_binh": 0.1053,
+    "so_cau_lap_vo_han": 0,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.808,
+     "wer>=0.5": 0.8204
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 224,
+     "wer>=0.5": 69
+    }
+   },
+   "VietMed-test-500": {
+    "tap": "VietMed-test-500",
+    "so_cau": 500,
+    "wer": 0.355,
+    "cs_recall_trung_binh": null,
+    "so_cau_lap_vo_han": 0,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.8547,
+     "wer>=0.5": 0.796
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 426,
+     "wer>=0.5": 111
+    }
+   }
+  },
+  "epoch1": {
+   "ViMedCSS-test-shard0": {
+    "tap": "ViMedCSS-test-shard0",
+    "so_cau": 323,
+    "wer": 0.3381,
+    "cs_recall_trung_binh": 0.1718,
+    "so_cau_lap_vo_han": 1,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.7883,
+     "wer>=0.5": 0.8291
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 212,
+     "wer>=0.5": 60
+    }
+   },
+   "VietMed-test-500": {
+    "tap": "VietMed-test-500",
+    "so_cau": 500,
+    "wer": 0.3295,
+    "cs_recall_trung_binh": null,
+    "so_cau_lap_vo_han": 0,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.759,
+     "wer>=0.5": 0.8085
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 406,
+     "wer>=0.5": 91
+    }
+   }
+  },
+  "epoch3": {
+   "ViMedCSS-test-shard0": {
+    "tap": "ViMedCSS-test-shard0",
+    "so_cau": 323,
+    "wer": 0.261,
+    "cs_recall_trung_binh": 0.1904,
+    "so_cau_lap_vo_han": 0,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.7887,
+     "wer>=0.5": 0.8444
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 205,
+     "wer>=0.5": 51
+    }
+   },
+   "VietMed-test-500": {
+    "tap": "VietMed-test-500",
+    "so_cau": 500,
+    "wer": 0.3201,
+    "cs_recall_trung_binh": null,
+    "so_cau_lap_vo_han": 0,
+    "auroc_tin_cay_du_doan_cau_sai": {
+     "wer>=0.2": 0.7696,
+     "wer>=0.5": 0.817
+    },
+    "so_cau_sai": {
+     "wer>=0.2": 397,
+     "wer>=0.5": 85
+    }
+   }
+  }
+ },
+ "bootstrap_2000_theo_cau": {
+  "ViMedCSS-test-shard0:goc->epoch3": {
+   "so_cau": 323,
+   "wer_A": 0.3165,
+   "wer_B": 0.261,
+   "hieu_B_minus_A": -0.0555,
+   "khoang_tin_cay_95": [
+    -0.0689,
+    -0.0425
+   ]
+  },
+  "ViMedCSS-test-shard0:goc->epoch1": {
+   "so_cau": 323,
+   "wer_A": 0.3165,
+   "wer_B": 0.3381,
+   "hieu_B_minus_A": 0.0216,
+   "khoang_tin_cay_95": [
+    -0.0423,
+    0.14
+   ]
+  },
+  "VietMed-test-500:goc->epoch3": {
+   "so_cau": 500,
+   "wer_A": 0.355,
+   "wer_B": 0.3201,
+   "hieu_B_minus_A": -0.035,
+   "khoang_tin_cay_95": [
+    -0.0454,
+    -0.0249
+   ]
+  },
+  "VietMed-test-500:goc->epoch1": {
+   "so_cau": 500,
+   "wer_A": 0.355,
+   "wer_B": 0.3295,
+   "hieu_B_minus_A": -0.0255,
+   "khoang_tin_cay_95": [
+    -0.037,
+    -0.0138
+   ]
+  },
+  "term:epoch3": {
+   "n": 323,
+   "goc": 0.10526315789473684,
+   "epoch3": 0.19040247678018576,
+   "hieu": 0.08513931888544891,
+   "ci": [
+    0.05572755417956656,
+    0.11609907120743033
+   ]
+  },
+  "term:epoch1": {
+   "n": 323,
+   "goc": 0.10526315789473684,
+   "epoch1": 0.17182662538699692,
+   "hieu": 0.06656346749226007,
+   "ci": [
+    0.04024767801857585,
+    0.09442724458204334
+   ]
+  }
+ },
+ "ghi_chu": "greedy, ngon ngu vi; epoch3 la ban cuoi; VietMed-test-500 = 500 cau dau cua tap test"
+}
