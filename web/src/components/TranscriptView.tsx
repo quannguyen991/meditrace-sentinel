@@ -33,7 +33,7 @@ import {
   type VaiChuan,
 } from "../lib/nguoiNoi";
 import { quetRadarCoDo } from "../lib/radarCoDo";
-import { loaiTepDauVao } from "../lib/loaiTepDauVao";
+import { layLoiThoaiTuTep, loaiTepDauVao, NHAN_TEP_DAU_VAO } from "../lib/loaiTepDauVao";
 import { useTurnAudioPlayer } from "../hooks/useTurnAudioPlayer";
 import { khoangPhatLaiLuot } from "../lib/asrHighlight";
 
@@ -468,12 +468,12 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
   const xuLyTep = async (file: File) => {
     const loai = loaiTepDauVao(file);
     if (loai === "khong_ho_tro") {
-      setUploadError(`Chưa đọc được tệp "${file.name}". Thả tệp âm thanh (mp3, wav, m4a, webm, ogg) hoặc lời thoại .txt.`);
+      setUploadError(`Chưa đọc được tệp "${file.name}". Dùng tệp âm thanh (mp3, wav, m4a, webm, ogg) hoặc văn bản (txt, md, srt, vtt).`);
       return;
     }
     if (loai === "loi_thoai") {
       setUploadError(null);
-      const chu = (await file.text()).replace(/\r\n/g, "\n").trim();
+      const chu = layLoiThoaiTuTep(file.name, await file.text());
       if (!chu) {
         setUploadError("Tệp lời thoại trống.");
         return;
@@ -573,12 +573,10 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
             <Mic size={24} className="text-[#0284C7]" />
           </div>
 
-          <h2 className="font-serif text-base font-semibold text-[#0F172A] mb-1">
-            Chưa có bản ghi âm
+          <h2 className="text-base font-semibold text-[#0F172A] mb-1">
+            Chưa có lời thoại
           </h2>
-          <p className="text-[11.5px] text-[#475569] mb-4">
-            {dangKeoTep ? "Thả tệp vào đây để phân tích" : "Kéo-thả tệp mp3, wav, m4a hoặc lời thoại .txt vào khung này"}
-          </p>
+          <p className="text-[11.5px] text-[#475569] mb-4">Ghi âm trực tiếp hoặc tải tệp lên</p>
 
           <div className="w-full flex flex-col gap-2.5">
             {onStartRecording && (
@@ -595,20 +593,33 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.txt,.md,text/plain"
+              accept={NHAN_TEP_DAU_VAO}
               className="hidden"
             />
+            {/* Một ô duy nhất: bấm để chọn tệp hoặc kéo thả tệp âm thanh / văn bản vào */}
             <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#BAE6FD] hover:border-[#0284C7] hover:bg-[#F0F9FF] transition-all flex items-center justify-center gap-2 text-xs font-medium text-[#0C4A6E] shadow-tactile-doctor-card"
+              className={`w-full py-4 px-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-1 text-[#0C4A6E] disabled:opacity-60 ${
+                dangKeoTep
+                  ? "border-[#0284C7] bg-[#E0F2FE]"
+                  : "border-[#BAE6FD] bg-white hover:border-[#0284C7] hover:bg-[#F0F9FF]"
+              }`}
             >
-              {isUploading ? (
-                <Loader2 size={13} className="animate-spin text-[#0284C7]" />
-              ) : (
-                <Upload size={13} className="text-[#0284C7]" />
+              <span className="flex items-center gap-2 text-xs font-semibold">
+                {isUploading ? (
+                  <Loader2 size={14} className="animate-spin text-[#0284C7]" />
+                ) : (
+                  <Upload size={14} className="text-[#0284C7]" />
+                )}
+                {isUploading ? "Đang xử lý..." : dangKeoTep ? "Thả tệp vào đây" : "Tải tệp lên"}
+              </span>
+              {!isUploading && (
+                <span className="text-[10.5px] text-[#64748B]">
+                  Âm thanh (mp3, wav, m4a…) hoặc văn bản (txt, md, srt, vtt) · kéo thả được
+                </span>
               )}
-              <span>{isUploading ? "Đang xử lý..." : "Tải tệp âm thanh"}</span>
             </button>
 
             <button
@@ -709,21 +720,21 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.txt,.md,text/plain"
+              accept={NHAN_TEP_DAU_VAO}
               className="hidden"
             />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
               className="text-xs px-2.5 py-1 rounded-lg bg-[#E0F2FE] text-[#0369A1] hover:bg-[#BAE6FD] transition-colors flex items-center gap-1.5 font-medium disabled:opacity-50"
-              title="Tải thêm tệp ghi âm âm thanh (.mp3, .wav)"
+              title="Tải thêm tệp âm thanh hoặc văn bản (cũng có thể kéo thả vào khung lời thoại)"
             >
               {isUploading ? (
                 <Loader2 size={12} className="animate-spin text-[#0284C7]" />
               ) : (
                 <Upload size={12} />
               )}
-              <span>{isUploading ? "Đang giải mã..." : "Tải tệp âm thanh"}</span>
+              <span>{isUploading ? "Đang giải mã..." : "Tải tệp lên"}</span>
             </button>
 
             {/* Bật tắt chế độ sửa tay */}
