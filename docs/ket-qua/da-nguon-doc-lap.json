@@ -3,13 +3,13 @@
     "co_du_lieu": true,
     "so_cau": 1603,
     "cho_thay_tu": 4264,
-    "doi_dung": 1192,
-    "ty_le_doi_dung_pct": 28.0,
+    "doi_dung": 1185,
+    "ty_le_doi_dung_pct": 27.8,
     "doi_khac_chu": 392,
-    "tong_phu_pct": 37.1,
-    "doi_thua": 44,
+    "tong_phu_pct": 37.0,
+    "doi_thua": 43,
     "loi_tu_goc_pct": 30.1,
-    "loi_tu_sau_pct": 21.9
+    "loi_tu_sau_pct": 22.0
   },
   "ViHealthQA_test": {
     "co_du_lieu": true,
@@ -17,7 +17,7 @@
     "mau_chuan_hoa_phuong_ngu": 96,
     "mau_phat_hien_thuoc_aho_corasick": 14,
     "mau_trich_so_lieu_lam_sang": 459,
-    "mau_che_pii": 0,
+    "mau_che_pii": 21,
     "pii_con_sot": 0,
     "mau_phat_hien_thuoc_trong_cau_tra_loi": 42
   },
@@ -27,7 +27,7 @@
     "mau_chuan_hoa_phuong_ngu": 17,
     "mau_phat_hien_thuoc_aho_corasick": 87,
     "mau_trich_so_lieu_lam_sang": 49,
-    "mau_che_pii": 1,
+    "mau_che_pii": 7,
     "pii_con_sot": 0
   },
   "ViMQ_test": {
@@ -36,7 +36,7 @@
     "mau_chuan_hoa_phuong_ngu": 49,
     "mau_phat_hien_thuoc_aho_corasick": 10,
     "mau_trich_so_lieu_lam_sang": 164,
-    "mau_che_pii": 0,
+    "mau_che_pii": 4,
     "pii_con_sot": 0,
     "tong_thuc_the_thuoc_vimq": 334,
     "khop_aho_corasick": 9
@@ -47,10 +47,10 @@
     "mau_chuan_hoa_phuong_ngu": 5,
     "mau_phat_hien_thuoc_aho_corasick": 0,
     "mau_trich_so_lieu_lam_sang": 297,
-    "mau_che_pii": 92,
-    "pii_con_sot": 0,
+    "mau_che_pii": 559,
+    "pii_con_sot": 2,
     "gold_pii_name_id_tong": 847,
-    "gold_pii_name_id_che_duoc": 10,
-    "gold_pii_name_id_recall_pct": 1.2
+    "gold_pii_name_id_che_duoc": 775,
+    "gold_pii_name_id_recall_pct": 91.5
   }
 }

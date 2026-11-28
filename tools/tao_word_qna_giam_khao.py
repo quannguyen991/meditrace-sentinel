@@ -255,9 +255,9 @@ def tao_word_qna():
     tbl_stats = doc.add_table(rows=1, cols=4)
     tbl_stats.alignment = WD_TABLE_ALIGNMENT.CENTER
     stats = [
-        ("KIỂM THỬ TỰ ĐỘNG", "1.974 & 96 PASS", "Pytest (25 skip) + Web TS", HEX_SAFE, "ECFDF5"),
-        ("CHẶN LỖI NGUY HIỂM", "88,2% (CHÍNH SÁCH D)", "11,8% lọt dev | Giữ kín 0,946", HEX_DANGER, "FEF2F2"),
-        ("CHẶN ẢO GIÁC", "7 CỔNG K1–K7", "0 / 30.136 chặn nhầm đáp án chuẩn", HEX_TEAL, "F0FDFA"),
+        ("KIỂM THỬ TỰ ĐỘNG", "1.942 & 96 PASS", "Pytest (27 skip, 26/11) + Web TS", HEX_SAFE, "ECFDF5"),
+        ("CHẶN LỖI NGUY HIỂM", "88,2% (CHÍNH SÁCH D)", "11,8% lọt dev (lạc quan) | Giữ kín 0,946", HEX_DANGER, "FEF2F2"),
+        ("CHẶN ẢO GIÁC", "7 CỔNG K1–K7", "Chặn thừa 8,0–10,0% trên đầu ra mô hình", HEX_TEAL, "F0FDFA"),
         ("GIẢM SÓT ĐÍNH CHÍNH", "11,48% -> 0,80%", "Giảm > 14 lần tin cũ bị thay thế", HEX_WARN, "FFFBEB")
     ]
     for idx, (label, val, desc, border_c, bg_c) in enumerate(stats):
@@ -312,7 +312,7 @@ def tao_word_qna():
         "Mọi câu hỏi phản biện của Ban Giám khảo đều tuân theo công thức trả lời 3 bước:\n"
         "1. Trực diện khẳng định: Trả lời thẳng trọng tâm câu hỏi, không vòng vo.\n"
         "2. Bản chất kỹ thuật/lâm sàng: Gắn đúng tên mô-đun thật trong mã nguồn (src/ và web/).\n"
-        "3. Số liệu trung thực: Dùng đúng các con số đã đo (1.974 pytest + 96 TS tests, Chính sách D chặn 88,2% lỗi nguy hiểm / còn 11,8% trên 4 tập dev, giữ kín 0,946/0,871, giảm >14 lần lỗi đính chính) và chủ động nêu cả giới hạn còn lại."
+        "3. Số liệu trung thực: Dùng đúng các con số đã đo (1.942 pytest + 96 TS tests, Chính sách D chặn 88,2% lỗi nguy hiểm / còn 11,8% trên 4 tập dev — số lạc quan vì luật chỉnh trên chính các tập này, giữ kín 0,946/0,871, giảm >14 lần lỗi đính chính) và chủ động nêu cả giới hạn còn lại."
     )
     r_g2.font.size = Pt(8.8)
     r_g2.font.name = "Segoe UI"
@@ -351,7 +351,7 @@ def tao_word_qna():
         ("src/huan_luyen/", "Huấn luyện SFT / DPO / RLVR cho Qwen3-4B", "chon_mo_hinh_bakeoff.py, huan_luyen_sft.py, huan_luyen_dpo.py, loss_theo_doan.py"),
         ("web/may-chu/", "Node/Express BFF + SQLite WAL + WORM", "csdl.ts, hang-doi.ts (202 Accepted), worm.ts (SHA-256 + .anchor.json), tro-ly/an-danh.ts"),
         ("web/src/", "Giao diện React 19 + TS + Tailwind", "TranscriptView, VerificationView (J/K/Enter/Space), DuyetBenCanh, HisSmartCopyPopover, BhytPrecheckModal, useTurnAudioPlayer"),
-        ("tools/, tests/, docs/", "Đo đa nguồn, xuất báo cáo & kiểm thử", "do_da_nguon_doc_lap.py (5 nguồn ngoài), tao_word_qna_giam_khao.py, 1.974 pytest + 96 TS tests")
+        ("tools/, tests/, docs/", "Đo đa nguồn, xuất báo cáo & kiểm thử", "do_da_nguon_doc_lap.py (5 nguồn ngoài), tao_word_qna_giam_khao.py, 1.942 pytest + 96 TS tests")
     ]
     them_bang_cau_truc(doc, cau_truc_rows)
 
@@ -380,8 +380,8 @@ def tao_word_qna():
         doc, "q2",
         "Câu 2: Tại sao không dùng luôn ChatGPT, Claude hay Gemini cho nhanh và rẻ?",
         [
-            "Có 3 lý do sống còn khiến việc dùng chatbot đám mây trực tiếp tại bệnh viện tiềm ẩn rủi ro pháp lý và an toàn lâm sàng:",
-            "1. **Bảo vệ dữ liệu nhạy cảm (Nghị định 13/2023/NĐ-CP):** Gửi nguyên văn lời thoại có họ tên, địa chỉ, số điện thoại, số CCCD ra máy chủ nước ngoài vi phạm kiểm soát dữ liệu y tế. MediTrace mặc định chạy **100% On-premise nội bộ** (`PhoWhisper` + `Qwen3-4B` + `SQLite`). Chế độ trợ lý bên ngoài mặc định **TẮT** (`MEDITRACE_TRO_LY_NGOAI=tat`); nếu bật vẫn phải đi qua bộ lọc allowlist khử định danh (`web/may-chu/tro-ly/an-danh.ts` & `src/he_thong/khu_dinh_danh.py`).",
+            "Trước hết, cần nói thẳng: dự án **chưa chạy so sánh đầy đủ** với mô hình thương mại. Phép đo duy nhất có thật (173/300 ca, dừng do hết số dư) cho thấy mô hình thương mại **ghi nhầm người ít hơn** mô hình nhỏ của dự án: 1,4% so với 7,6% ở bộ đính chính, 15,4% so với 22,9% ở bộ đổi chủ thể (`README.md`). Lý do dự án vẫn chọn cách làm riêng:",
+            "1. **Dữ liệu người bệnh không cần rời phòng khám:** Lời thoại có họ tên, địa chỉ, số điện thoại, số CCCD là dữ liệu cá nhân nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định 356/2025/NĐ-CP (hiệu lực 01/01/2026). Dự án không đánh giá việc dùng dịch vụ đám mây là đúng hay sai luật. MediTrace mặc định chạy **100% On-premise nội bộ** (`PhoWhisper` + `Qwen3-4B` + `SQLite`). Chế độ trợ lý bên ngoài mặc định **TẮT** (`MEDITRACE_TRO_LY_NGOAI=tat`); nếu bật vẫn phải đi qua bộ lọc allowlist khử định danh (`web/may-chu/tro-ly/an-danh.ts` & `src/he_thong/khu_dinh_danh.py`).",
             "2. **Rủi ro ảo giác AI (Hallucination):** Chatbot tổng quát có thể tự điền thông tin bệnh nhân không nói hoặc trộn bệnh của người nhà thành của bệnh nhân. MediTrace áp dụng 7 cổng khóa căn cứ **K1–K7** (`src/duong_ong/b4_kiem_can_cu.py`) để chặn và gắn cờ các mệnh đề sai nguồn.",
             "3. **Khả năng kiểm chứng tức thì:** Thay vì trả một đoạn văn xuôi dài khó dò, MediTrace gắn từng dòng với lượt thoại `[T_i]` và đoạn âm thanh gốc qua `useTurnAudioPlayer.ts` (Click-to-Verify)."
         ],
@@ -425,8 +425,8 @@ def tao_word_qna():
             "  - Với thông tin nhẹ: Ưu tiên độ chính xác (Precision), trượt K1–K7 thì không đưa vào thân bệnh án sạch.",
             "  - Với nhóm nguy cấp (Dị ứng, Thuốc khoảng điều trị hẹp `thuoc_nti` như Digoxin/Warfarin, Đe dọa tính mạng, Lẫn người nhà, Bất đồng liều): Giữ lại trong mục 'CẦN BÁC SĨ XÁC NHẬN' kèm cờ đỏ/vàng, khóa ký duyệt cho tới khi bác sĩ quyết định.",
             "• **Kết quả thực nghiệm đã đo & minh bạch phạm vi:**",
-            "  - Trên phép đo cấy lỗi có đăng ký trước (`docs/ket-qua/cay-loi.md`), độ nhạy bắt lỗi xoá dị ứng đạt **98,3%** (tập điều chỉnh 400 ca) và **97,2%** (tập giữ kín 240 ca). Chặn nhầm đáp án chuẩn ở K1–K7 là **0 / 30.136 dòng**.",
-            "  - Trên **4 bộ thử thách phát triển** (300 ca, 2.789 phát biểu dùng để tinh chỉnh luật), khi nâng cấp từ Chính sách C lên **Chính sách D**, tỷ lệ lọt lỗi nguy hiểm vào thân (`lot_nguy_hiem`) giảm từ **45,9% (101/220) xuống 11,8% (26/220)** — tức **chặn được 88,2% (194/220)** lỗi nguy hiểm bộ chấm gắn nhãn, với chặn thừa tăng từ 8,0% lên **10,0%**. Trên tập giữ kín `thach_thuc_v2` (240 ca), độ nhạy phát hiện đạt **0,871**, đổi chủ thể đạt **0,946**."
+            "  - Trên phép đo cấy lỗi có đăng ký trước (`docs/ket-qua/cay-loi.md`), độ nhạy bắt lỗi xoá dị ứng đạt **98,3%** (tập điều chỉnh 400 ca) và **97,2%** (tập giữ kín 240 ca). Chặn nhầm đáp án chuẩn ở K1–K7 là **0 / 30.136 dòng**, nhưng số này chỉ đúng vì đáp án mô phỏng chép gần nguyên văn hội thoại (độ phủ 0,95); trên đầu ra mô hình thật, chặn thừa là **8,0%** (C) / **10,0%** (D).",
+            "  - Trên **4 bộ thử thách phát triển** (300 ca, 2.789 phát biểu dùng để tinh chỉnh luật), khi nâng cấp từ Chính sách C lên **Chính sách D**, tỷ lệ lọt lỗi nguy hiểm vào thân (`lot_nguy_hiem`) giảm từ **45,9% (101/220) xuống 11,8% (26/220)** — tức **chặn được 88,2% (194/220)** lỗi nguy hiểm bộ chấm gắn nhãn, với chặn thừa tăng từ 8,0% lên **10,0%**. Vì luật được chỉnh khi nhìn chính các tập này, 11,8% là số **lạc quan**. Trên tập giữ kín `thach_thuc_v2` (240 ca), độ nhạy phát hiện đạt **0,871**, đổi chủ thể đạt **0,946**."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
     )
@@ -439,7 +439,7 @@ def tao_word_qna():
             "Gồm 4 lớp bản địa hóa phối hợp:",
             "1. **Gom nhóm chủ thể xưng hô tiếng Việt (`b2_gom_nguoi_thuc_the.py`):** Tách rạch ròi `nguoi_noi` với `chu_the_id` (mẹ nói 'Cháu nhà em sốt' -> gán chủ thể là con/cháu, không lẫn sang mẹ).",
             "2. **Bù chủ ngữ tỉnh lược (`b2_bu_chu_ngu_tinh_luoc.py`):** Câu cụt không chủ ngữ được đối chiếu vai `nguoi_noi` và bối cảnh lượt thoại liền kề.",
-            "3. **Chuẩn hóa phương ngữ 3 miền có khóa bảo vệ ngữ cảnh (`b0_chuan_hoa_phuong_ngu.py` & `tu_dien_phuong_ngu_lam_sang.py`):** Quy đổi từ Bắc–Trung–Nam kèm guard tránh sửa nhầm cụm y khoa ('tứ chi', 'mô mềm', 'cấy ghép', 'vô kinh', 'bờ mi'). Đo trên `ViDia2Std/test.csv` (1.603 câu): đúng chuẩn xác **28,0%**, tổng độ phủ **37,1%**, kéo WER giảm từ **30,1% xuống 21,9%**.",
+            "3. **Chuẩn hóa phương ngữ 3 miền có khóa bảo vệ ngữ cảnh (`b0_chuan_hoa_phuong_ngu.py` & `tu_dien_phuong_ngu_lam_sang.py`):** Quy đổi từ Bắc–Trung–Nam kèm guard tránh sửa nhầm cụm y khoa ('tứ chi', 'mô mềm', 'cấy ghép', 'vô kinh', 'bờ mi'). Đo trên `ViDia2Std/test.csv` (1.603 câu): đúng chuẩn xác **27,8%** (1.185/4.264), tổng độ phủ **37,0%**, kéo WER giảm từ **30,1% xuống 22,0%** (43 đổi thừa).",
             "4. **Gợi ý âm vị G2P (`contextual_trie_600.py`) & Dược thư (`tra_duoc_thu_aho_corasick.py`):** **65+** ánh xạ phiên âm thuốc dân gian kèm khóa ngữ cảnh thuốc ('uống/viên/mg/đơn') và **158 hoạt chất** chuẩn, luôn ở dạng gợi ý chờ bác sĩ xác nhận."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
@@ -488,7 +488,7 @@ def tao_word_qna():
             "  1. Trong hội thoại tự nhiên, một lượt nói thường **trộn nhiều chủ thể, nhiều thời điểm và lời tự đính chính** (vd: 'Hôm qua tôi tưởng đau dạ dày, sáng nay siêu âm ra sỏi mật; còn mẹ tôi dị ứng penicillin').",
             "  2. Nếu gộp nguyên đoạn văn dài, không thể gán rạch ròi `chu_the_id`, `phu_dinh`, `tinh_huong` hay `moc_thoi_gian` cho từng sự kiện lâm sàng.",
             "  3. Tách thành từng `PhatBieu` cho phép B3 đánh dấu đúng ý 'đau dạ dày' thành `DA_THAY_THE`, B4 soi nguyên văn từng câu trích bằng K1–K7, và B5 chỉ đẩy riêng mệnh đề nghi ngờ sang 'Cần xác nhận' mà không bỏ phí phần thông tin sạch.",
-            "• **Tại sao kiến trúc Lai Neuro-Symbolic (AI ở B1 + Rule ở B2–B5):** AI giỏi hiểu ngôn ngữ tự do nhưng dễ bịa và yếu logic nhất quán; còn B2–B5 viết bằng Python xác định nên **minh bạch 100%**, dễ truy lỗi đúng mô-đun và kiểm thử được bằng **1.974 unit/integration tests** mà không phải huấn luyện lại LLM."
+            "• **Tại sao kiến trúc Lai Neuro-Symbolic (AI ở B1 + Rule ở B2–B5):** AI giỏi hiểu ngôn ngữ tự do nhưng dễ bịa và yếu logic nhất quán; còn B2–B5 viết bằng Python xác định nên **minh bạch 100%**, dễ truy lỗi đúng mô-đun và kiểm thử được bằng **1.942 unit/integration tests** mà không phải huấn luyện lại LLM."
         ],
         mau_vien=HEX_NAVY, badge_text="Trung bình"
     )
@@ -531,7 +531,7 @@ def tao_word_qna():
             "Dự án kiểm soát rò rỉ dữ liệu qua 4 lớp độc lập:",
             "1. **Chia tách không trùng khuôn (`chia_tap_theo_khuon.py`):** **657 khuôn ca bệnh** (21 hệ cơ quan) chia độc lập thành **515 Train / 72 Dev / 70 Test**. Độ tương đồng Jaccard từ khóa triệu chứng trung bình giữa Train và Test chỉ **5,87%**.",
             "2. **Đo đa dạng từ vựng (`src/do_luong/do_lap_cau.py`):** Bộ 5.000 hội thoại mô phỏng v2 đạt **45.835 câu duy nhất** (+127% so với v1), lặp câu giảm từ 76,92% xuống **47,37%** (câu >= 8 từ: **42,19%**), MTLD đạt **145,4**, Distinct-2 đạt **0,0468**, và **52.634/52.634 (100%)** trích dẫn đều là chuỗi con nguyên văn.",
-            "3. **Tập thách thức đối lập (Adversarial Contrastive Pairs):** Trên các cặp ca bệnh đổi duy nhất một ranh giới, nhánh C tăng F1 từ 66,1% lên **70,8%** và giảm SER từ 45,4% xuống **36,9%**.",
+            "3. **Tập thách thức đối lập (Adversarial Contrastive Pairs):** Trên các cặp ca bệnh đổi duy nhất một ranh giới, ở bộ đổi chủ thể 80 ca, các bước kiểm tra phía sau tăng F1 từ 66,1% lên **70,8%**, giảm SER từ 45,4% xuống **36,9%** và ghi nhầm người từ 22,0% xuống **17,9%**. Cần nói rõ: cách để mô hình viết thẳng bản nháp ghi đúng người **cao hơn** đường ống (0,939 so với 0,748).",
             "4. **Ngoài khuôn & dữ liệu công khai:** Bổ sung **10 kịch bản bệnh hiếm ngoài khuôn** (`kiem_nghiem_ngoai_khuon.py`) và đối chiếu **5 bộ dữ liệu tiếng Việt công khai bên ngoài** (xem Câu 18)."
         ],
         mau_vien=HEX_PURPLE, badge_text="Khó"
@@ -605,8 +605,8 @@ def tao_word_qna():
         [
             "🎯 **Phản biện tự tin:**",
             "Toàn hệ thống được bảo vệ bởi bộ kiểm thử hồi quy hai tầng chạy sau các đợt tinh chỉnh cuối cùng:",
-            "1. **Kiểm thử phần mềm tự động:** **1.974 bài test Python passed, 25 skipped** (trong 1.999 tests thu thập qua `pytest`, các bài skip phụ thuộc phần cứng/sidecar GPU ngoài môi trường CPU) và **96/96 bài kiểm thử TypeScript/BFF passed** (`web/`).",
-            "2. **Kiểm thử dữ liệu & an toàn lâm sàng:** **657 khuôn ca bệnh** (21 hệ cơ quan, chia 515/72/70), **5.000 hội thoại mô phỏng v2** (100% trích dẫn chuỗi con nguyên văn), **4 bộ thử thách phát triển** (300 ca: Chính sách D giảm `lot_nguy_hiem` từ 45,9% xuống **11,8%**, chặn **88,2%** lỗi nguy hiểm, chặn thừa **10,0%**), **240 ca giữ kín `thach_thuc_v2`** (nhạy **0,871**, đổi chủ thể **0,946**, bắt xoá dị ứng **97,2%**), và **10 ca bệnh hiếm ngoài khuôn**."
+            "1. **Kiểm thử phần mềm tự động:** **1.942 bài test Python qua, 27 bỏ qua** (lần chạy 26/11/2026 ghi ở `README.md`; các bài skip phụ thuộc phần cứng/sidecar GPU ngoài môi trường CPU) và **96/96 bài kiểm thử TypeScript/BFF passed** (`web/`).",
+            "2. **Kiểm thử dữ liệu & an toàn lâm sàng:** **657 khuôn ca bệnh** (21 hệ cơ quan, chia 515/72/70), **5.000 hội thoại mô phỏng v2** (100% trích dẫn trong dữ liệu huấn luyện tự sinh là chuỗi con nguyên văn), **4 bộ thử thách phát triển** (300 ca: Chính sách D giảm `lot_nguy_hiem` từ 45,9% xuống **11,8%**, chặn **88,2%** lỗi nguy hiểm, chặn thừa **10,0%**; số lạc quan), **240 ca giữ kín `thach_thuc_v2`** (nhạy **0,871**, đổi chủ thể **0,946**, bắt xoá dị ứng **97,2%**), và **10 ca bệnh hiếm ngoài khuôn**."
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
     )
@@ -614,14 +614,18 @@ def tao_word_qna():
     # Cau 18
     them_hop_cau_hoi(
         doc, "q18",
-        "❓ Câu 18: 'Đã đo trên bộ dữ liệu tiếng Việt công khai độc lập nào chưa? Có điểm yếu nào được phát hiện không?'",
+        "❓ Câu 18: 'Đã đo trên bộ dữ liệu tiếng Việt công khai độc lập nào chưa? Sau khi đo có bổ sung sửa phần còn sai không?'",
         [
-            "🎯 **Phản biện tự tin (Minh bạch 5 nguồn ngoài tại `tools/do_da_nguon_doc_lap.py` & `docs/ket-qua/da-nguon-doc-lap.json`):**",
-            "1. **`ViDia2Std/test.csv`** (1.603 câu chuẩn hóa phương ngữ người thật): Chuẩn hóa đúng hoàn toàn **28,0%** (1.192/4.264), tổng độ phủ **37,1%**, kéo WER giảm từ **30,1% xuống 21,9%**.",
-            "2. **`ViHealthQA`** (2.013 mẫu hỏi đáp): Khớp 14/42 câu hỏi/đáp nhắc hoạt chất trong Dược thư **158 hoạt chất**.",
-            "3. **`ViMedAQA`** (500 mẫu hỏi đáp y khoa): Bắt khớp **87** lượt nhắc hoạt chất chuẩn.",
-            "4. **`ViMQ`** (1.000 câu hỏi ý định y khoa): Khớp 10 lượt thuốc (9/334 thực thể `MED` có nhãn) do bệnh nhân đại chúng ít gọi tên hoạt chất Tây y.",
-            "5. **`PhoNER_COVID19`** (1.000 câu tin tức dịch tễ — **giới hạn được báo cáo thẳng**): Đối chiếu nhãn vàng `NAME` và `PATIENT_ID`, `khu_dinh_danh.py` chỉ đạt **10/847 (1,2%)** vì được thiết kế theo mẫu hội thoại y tế ('tên tôi là...', 'bác sĩ...', mã hồ sơ) chứ chưa có mô hình NER tin tức cho tên riêng không tiền tố ('Bệnh nhân 45 tuổi ở Hải Dương...'). Đội ngũ đưa thẳng điểm này vào lộ trình nâng cấp NER."
+            "🎯 **Phản biện tự tin (Chu trình Đo -> Vá luật -> Đo lại trên 5 nguồn ngoài tại `tools/do_da_nguon_doc_lap.py` & `tools/do_an_danh_phoner.py`):**",
+            "1. **`ViDia2Std/test.csv`** (1.603 câu phương ngữ 63 tỉnh): Sau khi siết khóa bảo vệ từ y khoa ('bờ mi, tứ chi, mô mềm, vô kinh, cấy ghép'), đạt **27,8%** đúng chuẩn xác (1.185/4.264), tổng độ phủ **37,0%**, đổi thừa chỉ **43**, kéo WER giảm từ **30,1% xuống 22,0%**; đồng thời bổ sung đại từ Nam Bộ 'tui' từ tập `dev` vào `b2_gom_nguoi_thuc_the.py`.",
+            "2. **`ViHealthQA`** (2.013 cặp hỏi đáp): Khớp Dược thư **158 hoạt chất** ở **14 câu hỏi** và **42 câu trả lời** trên 2.013 mẫu (cùng 459 mẫu trích số liệu lâm sàng).",
+            "3. **`ViMedAQA`** (500 mẫu hỏi đáp y khoa): Bắt khớp **87** lượt nhắc hoạt chất chuẩn; 300 câu đầu dùng làm chuẩn chống che nhầm PII với tỷ lệ che nhầm chỉ **0,7%–1,3%**.",
+            "4. **`ViMQ`** (1.000 câu hỏi ý định y khoa): Khớp 10 mẫu thuốc (9/334 thực thể `MED` có nhãn) do bệnh nhân ít gọi tên hoạt chất Tây y; đồng thời dùng làm nguồn tiền gán nhãn qua `gan_nhan_truoc.py`.",
+            "5. **`PhoNER_COVID19` — Trước khi vá -> Sau khi vá:**",
+            "   - **Trước khi vá (Mốc 0):** Bộ che Python chỉ đạt **10/847 (1,2%)** trên 1.000 câu đầu; đo đủ 3.000 câu test (`an-danh-phoner.md`) chỉ đạt **0,8% (19/2.323)** ở Python và **7,5% (174/2.323)** ở TypeScript.",
+            "   - **Đã vá vào dự án:** Thêm luật `MA_CA_BENH`, `TEN_VIET_TAT`, họ tên viết thường và xưng hô + tên viết hoa (né 'thứ 2', '65 tuổi', 'Vitamin B.', tên thuốc) vào `khu_dinh_danh.py` và `an-danh-ngoai.ts`.",
+            "   - **Sau khi vá:** Trên 1.000 câu đầu (`da-nguon-doc-lap.json`) tăng vọt lên **91,5% (775/847)**; trên toàn bộ 3.000 câu test (`an-danh-phoner.md`) đạt **93,8% (2.178/2.323)** ở Python và **94,0% (2.183/2.323)** ở TypeScript (tập `dev` đạt **97,3%–97,5%**). Phần ~6% tên 1 tiếng đứng trơ ('Nhung, Oanh, Kim') giữ nguyên không ép regex để tránh che nhầm thuật ngữ y khoa.",
+            "*(Ngoài ra kho `data/ngoai/` còn có `VNMed_Speech` — 2.887 đoạn âm thanh CC BY 4.0 — và `VietMed-NER` phục vụ bóc mẫu chạy thử ASR; chưa đưa vào train Qwen3-4B hiện tại.)*"
         ],
         mau_vien=HEX_DANGER, mau_nen="FFF1F2", badge_text="Stress-Test"
     )
