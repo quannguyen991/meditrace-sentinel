@@ -8,14 +8,25 @@ Sinh bằng `python -m tools.truy_nguon_commit`. Thứ tự xác định công c
 
 | Công cụ | Số commit |
 |---|---|
-| claude_code | 47 |
+| claude_code | 58 |
 | chua_xac_dinh | 34 |
-| **Tổng** | **81** |
+| **Tổng** | **92** |
 
 ## Từng commit
 
 | Ngày | Commit | Tóm tắt | Công cụ | Số tệp | Chạm test |
 |---|---|---|---|---|---|
+| 2026-11-28 | `b4b3633` | fix: sua theo ra soat doc lap - log con tho, che truoc khi cat, bo che (ten chu thuong, thu N, chu tat y khoa), loc tu khoa tra cuu, hook macOS/Linux, sua loi tai lieu noi qua | claude_code | 27 | có |
+| 2026-11-28 | `2f41851` | fix(web): khoa them BHYT/XML, don thuoc TT26, cam doan PTTT, di buong truoc khi ky; test quet moi loi xuat ho so | claude_code | 3 | có |
+| 2026-11-28 | `93ad035` | docs: tra loi De cai tien 1 (md; docx sinh bang tools/xuat_minh_bach_docx.py), hoi quy toan bo xanh | claude_code | 5 | có |
+| 2026-11-28 | `867a783` | docs: so quyet dinh thiet ke va bang AI ho tro/doi tu sua (moi dong co commit kiem duoc) | claude_code | 4 | có |
+| 2026-11-28 | `6bd6377` | test+docs: quy trinh bac si phe duyet truoc khi dung ho so | claude_code | 3 | có |
+| 2026-11-28 | `586e066` | docs: so do du lieu sinh tu danh sach loi ra va noi luu (co test khop) | claude_code | 5 | có |
+| 2026-11-28 | `a4fb3d6` | fix: bo che dinh danh nhan ma ca benh va ten viet tat (TS + Python), bo ca ro ri dung chung, do PhoNER | claude_code | 10 | có |
+| 2026-11-28 | `8b752da` | fix: duong ra mo hinh ben thu ba mac dinh tat ca hai lop; canh bao ban demo | claude_code | 8 | có |
+| 2026-11-28 | `054c8b3` | fix: che log, chan tu khoa PubMed co danh tinh, danh sach loi ra mang co test quet | claude_code | 15 | có |
+| 2026-11-28 | `9f290d2` | feat: truy nguon commit theo cong cu AI va hook bat buoc trailer | claude_code | 9 | có |
+| 2026-11-28 | `f111b14` | feat(web): khoa chep/in/xuat ho so truoc khi bac si ky duyet | claude_code | 8 | có |
 | 2026-11-28 | `f406b81` | docs: implementation plan for BTC brief 1 (health data protection, AI transparency), 10 tasks for 6-hour hackathon | claude_code | 1 | không |
 | 2026-11-28 | `bfdb58b` | docs: plan for BTC improvement brief 1 (health data), 6-hour hackathon schedule, drop clinical-team claim | claude_code | 8 | không |
 | 2026-11-28 | `13cd479` | docs: cap nhat Q&A Ban Giam khao ro cau truc du an va so lieu da kiem chung | chua_xac_dinh | 3 | không |
