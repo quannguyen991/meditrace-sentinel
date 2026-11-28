@@ -31,6 +31,7 @@ import { bienDichBieuMauPhapLyTaiCho } from "./lib/bieuMauPhapLyOffline";
 import { taoDaiTomTatTruocKham } from "./lib/trichNhiemVuVaTomTat";
 import { useSessionsStore } from "./hooks/useSessionsStore";
 import { kiemVaBatMoHinhNgoai } from "./lib/moHinhNgoai";
+import { docJsonHoacNull } from "./lib/docJson";
 
 const VerificationView = React.lazy(() =>
   import("./components/VerificationView").then((m) => ({ default: m.VerificationView })),
@@ -291,12 +292,26 @@ export default function App({ nguoiDung, onDangXuat }: AppProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ branch: "C_khoa_hoi", ...nguCanhPayload, ...than }),
       });
-      let data = await res.json();
-      while (res.status === 202 && data?.jobId) {
-        setTienDoNhap({ batDau: data.startedAt || Date.now(), truoc: data.queued || 0 });
+      let data = await docJsonHoacNull(res);
+      if (data === null) {
+        throw new Error("Máy chủ đang khởi động lại hoặc cổng mạng tạm lỗi — chờ vài giây rồi bấm tạo lại.");
+      }
+      // Đang chờ: máy chủ khởi động lại / cổng mạng trả trang lỗi HTML trong lúc chờ thì hỏi lại,
+      // không bỏ việc (hàng đợi phía máy chủ tự chạy lại việc dở dang). Tối đa ~3 phút lỗi liên tiếp.
+      const jobId = data?.jobId;
+      let loiLienTiep = 0;
+      while (jobId && (res.status === 202 || data === null)) {
+        if (data) setTienDoNhap({ batDau: data.startedAt || Date.now(), truoc: data.queued || 0 });
         await new Promise((r) => setTimeout(r, 4000));
-        res = await fetch(`/api/generate-note/${data.jobId}`);
-        data = await res.json();
+        try {
+          res = await fetch(`/api/generate-note/${jobId}`);
+          data = res.status >= 500 ? null : await docJsonHoacNull(res);
+        } catch {
+          data = null;
+        }
+        if (data === null) {
+          if (++loiLienTiep > 45) throw new Error("Mất kết nối tới máy chủ quá lâu khi chờ bản nháp. Thử tạo lại.");
+        } else loiLienTiep = 0;
       }
       if (!res.ok) throw new Error(data?.error || `Dịch vụ trả mã ${res.status}`);
       const meta: NoteMeta = data;
