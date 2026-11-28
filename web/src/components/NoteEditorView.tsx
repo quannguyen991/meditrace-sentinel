@@ -1469,6 +1469,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
                       ),
                     transcript,
                     thong_tin_benh_nhan: patientInfo || null,
+                    sessionId,
                   }),
                 });
                 if (r.ok) setKqBhyt(await r.json());
@@ -2000,6 +2001,7 @@ export const NoteEditorView: React.FC<NoteEditorViewProps> = ({
         patientName={tenBenhNhanHienThi}
         noteContent={effectiveContent}
         hoSo={savedLeaflet ?? hoSoDanDo[khoaHoSoDanDo] ?? hoSoDanDoTuCa}
+        sessionId={sessionId}
         onDoiHoSo={(hoSo) => {
           setHoSoDanDo((cu) => ({ ...cu, [khoaHoSoDanDo]: hoSo }));
           onSaveLeaflet?.(hoSo);

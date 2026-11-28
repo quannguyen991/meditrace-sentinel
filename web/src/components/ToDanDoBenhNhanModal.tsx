@@ -294,6 +294,8 @@ interface ToDanDoBenhNhanModalProps {
   /** Nội dung tờ dặn dò của ca này. Trang cha giữ để không mất khi đổi tab. */
   hoSo: HoSoDD;
   onDoiHoSo: (hoSo: HoSoDD) => void;
+  /** Mã ca khám đã lưu — máy chủ chỉ tạo cổng/QR khi ca này đã ký duyệt và chưa sửa sau ký. */
+  sessionId?: string;
 }
 
 export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
@@ -302,6 +304,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   patientName,
   hoSo,
   onDoiHoSo,
+  sessionId,
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [sua, setSua] = useState(false);
@@ -310,6 +313,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   const [portalToken, setPortalToken] = useState<string | null>(null);
   const [dangTaoPortal, setDangTaoPortal] = useState(false);
   const [daChepLink, setDaChepLink] = useState(false);
+  const [loiPortal, setLoiPortal] = useState<string | null>(null);
   const laHoSoMau = hoSo === HO_SO_MAU;
 
   const maKiemChungNgan = useMemo(() => {
@@ -325,11 +329,13 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
   const taoCongTheoDoi = async () => {
     if (dangTaoPortal) return;
     setDangTaoPortal(true);
+    setLoiPortal(null);
     try {
       const res = await fetch("/api/benh-nhan-portal/tao-ma", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId,
           tenBenhNhan: patientName,
           chanDoan: hoSo.chanDoan,
           thuoc: hoSo.thuoc,
@@ -339,6 +345,12 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
           diaDiemTaiKham: hoSo.diaDiemTaiKham,
         }),
       });
+      if (res.status === 409) {
+        // Máy chủ chặn vì chưa ký / sửa sau ký: không tạo mã ngoại tuyến thay thế.
+        const loi = (await res.json().catch(() => ({}))) as { error?: string };
+        setLoiPortal(loi.error || "Bác sĩ chưa ký duyệt hồ sơ này — chưa được xuất.");
+        return;
+      }
       if (res.ok) {
         const data = (await res.json()) as { token?: string; url?: string };
         if (data.token && data.url) {
@@ -828,6 +840,7 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
                       >
                         {dangTaoPortal ? "Đang tạo..." : "Tạo mã QR Cổng theo dõi 48h/7d"}
                       </button>
+                      {loiPortal && <span className="text-[10.5px] font-semibold text-red-700">{loiPortal}</span>}
                       <button
                         type="button"
                         onClick={() => {

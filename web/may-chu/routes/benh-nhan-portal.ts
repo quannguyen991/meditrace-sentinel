@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import express from "express";
 import { db as defaultDb } from "../csdl";
+import { chanNeuChuaKy } from "../kiem-ky-may-chu";
 
 export interface NguoiDungReq {
   id: number;
@@ -244,6 +245,8 @@ export function taoRouterBenhNhanPortal(ctx?: TaoRouterBenhNhanPortalCtx): expre
     const tenBenhNhan = String(body.tenBenhNhan || body.ten_benh_nhan || body.patientIdentifier || "Quý khách / Người bệnh").trim();
     const chanDoan = String(body.chanDoan || body.chan_doan || "").trim();
     const sessionId = body.sessionId ? String(body.sessionId).trim() : null;
+    // Cổng/QR đưa hồ sơ ra ngoài phần mềm: chỉ khi bác sĩ đã ký và chưa sửa sau khi ký (kiểm trên máy chủ).
+    if (chanNeuChuaKy(req, res, sessionId || "")) return;
 
     const dsThuoc = Array.isArray(body.thuoc)
       ? body.thuoc

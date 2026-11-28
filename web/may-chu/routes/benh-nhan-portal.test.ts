@@ -8,9 +8,11 @@ import express from "express";
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "meditrace-portal-"));
 process.env.MEDITRACE_DB = path.join(tmpDir, "portal.db");
+process.env.MEDITRACE_WORM_KEY = "khoa-worm-kiem-thu-portal-0123456789abcdef";
 
 const { db } = await import("../csdl");
 const { taoRouterBenhNhanPortal } = await import("./benh-nhan-portal");
+const { taoCaDaKy, luuCaMau, caMauDuDieuKienKy } = await import("../ho-tro-kiem-thu-ky-duyet");
 
 let base = "";
 let server: http.Server;
@@ -19,6 +21,9 @@ test.before(async () => {
   db.prepare(
     "INSERT OR IGNORE INTO nguoi_dung (id, email, ho_ten, mat_khau_bam, vai, tao_luc) VALUES (1, 'bs@t.vn', 'BS Test', 'h', 'bac_si', ?)"
   ).run(Date.now());
+  // Cổng người bệnh là đường XUẤT hồ sơ: các ca dùng trong kiểm thử phải đã được bác sĩ ký duyệt.
+  taoCaDaKy(1, "sess_123");
+  taoCaDaKy(1, "sess_rf_1");
 
   const app = express();
   app.use(express.json());
@@ -49,6 +54,39 @@ test("POST /api/benh-nhan-portal/tao-ma yêu cầu đăng nhập", async () => {
     body: JSON.stringify({ tenBenhNhan: "BN A", chanDoan: "Tăng huyết áp" }),
   });
   assert.equal(res.status, 401);
+});
+
+const taoMa = (body: Record<string, unknown>) =>
+  fetch(`${base}/api/benh-nhan-portal/tao-ma`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-test-uid": "1" },
+    body: JSON.stringify({ tenBenhNhan: "BN Chốt", chanDoan: "Tăng huyết áp", thuoc: [], ...body }),
+  });
+const soMaCong = () => (db.prepare("SELECT COUNT(*) AS n FROM cong_benh_nhan").get() as { n: number }).n;
+
+test("tao-ma: thiếu mã ca hoặc ca chưa ký -> 409 chua_ky_duyet, không tạo mã", async () => {
+  luuCaMau(1, caMauDuDieuKienKy("ca_portal_chua_ky"));
+  const truoc = soMaCong();
+  for (const body of [{}, { sessionId: "ca_portal_chua_ky" }, { sessionId: "ca_khong_ton_tai" }]) {
+    const r = await taoMa(body);
+    assert.equal(r.status, 409, JSON.stringify(body));
+    const j = (await r.json()) as any;
+    assert.equal(j.code, "chua_ky_duyet");
+    assert.equal(j.error, "Bác sĩ chưa ký duyệt hồ sơ này (hoặc đã sửa sau khi ký) — chưa được xuất.");
+  }
+  assert.equal(soMaCong(), truoc);
+});
+
+test("tao-ma: ca đã ký rồi sửa -> 409; ca đã ký -> 201", async () => {
+  taoCaDaKy(1, "ca_portal_sua", { suaSauKy: true });
+  const sua = await taoMa({ sessionId: "ca_portal_sua" });
+  assert.equal(sua.status, 409);
+  assert.equal(((await sua.json()) as any).code, "chua_ky_duyet");
+
+  taoCaDaKy(1, "ca_portal_ky");
+  const ok = await taoMa({ sessionId: "ca_portal_ky" });
+  assert.equal(ok.status, 201);
+  assert.ok(((await ok.json()) as any).token);
 });
 
 test("Bác sĩ tạo mã cổng, lọc dữ liệu nội bộ, gắn cờ thuốc mơ hồ và đọc công khai qua GET", async () => {

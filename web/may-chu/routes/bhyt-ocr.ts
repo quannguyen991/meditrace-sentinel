@@ -1,4 +1,5 @@
 import type express from "express";
+import { chanNeuChuaKy, layMaCaTuYeuCau } from "../kiem-ky-may-chu";
 import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 
 export function dangKyBhytOcrRoutes(app: express.Express) {
@@ -39,6 +40,8 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
    */
   app.post("/api/bhyt/precheck", async (req, res) => {
     try {
+      // Kết quả có gói XML1–XML5 để nộp BHYT = xuất hồ sơ: phải ký và chưa sửa sau ký (`sessionId` = mã ca).
+      if (chanNeuChuaKy(req, res, layMaCaTuYeuCau(req, "sessionId", "caseId"))) return;
       const { propositions = [], transcript = "", thong_tin_benh_nhan = null, patientInfo = null } = req.body || {};
       const payload = {
         propositions,
@@ -68,6 +71,8 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
    */
   app.post(["/api/bhyt/recompile", "/api/fhir/recompile"], async (req, res) => {
     try {
+      // Gói XML 1–5 / FHIR xuất bản: phải ký và chưa sửa sau ký (`sessionId`, hoặc `caseId` = mã ca đã lưu).
+      if (chanNeuChuaKy(req, res, layMaCaTuYeuCau(req, "sessionId", "caseId"))) return;
       const {
         caseId = "web",
         propositions = [],

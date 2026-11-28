@@ -137,6 +137,7 @@ process.env.MEDITRACE_API = `http://127.0.0.1:${mockPyPort}`;
 
 const { db, damBaoKhoMoRong, TEN_KHO } = await import("../csdl");
 const { taoUngDung } = await import("../../server");
+const { caMauDuDieuKienKy } = await import("../ho-tro-kiem-thu-ky-duyet");
 
 test.after(() => {
   mockPyServer.closeAllConnections?.();
@@ -308,6 +309,25 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
   assert.equal(getNvA.savedAt, 1730000222000);
 
   // 3. Boost 5 — `/api/bhyt/precheck` truyền `thong_tin_benh_nhan` (cân nặng & tuổi nhi khoa) + `/api/ocr/phieu-cu` không bịa tuổi 50
+  // Xuất gói BHYT chỉ được khi ca đã ký duyệt: bác sĩ A lưu ca rồi ký qua đúng API thật.
+  const luuCaBhyt = await fetch(`${baseUrl}/api/ca-kham/ca_bhyt_a`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    body: JSON.stringify({ session: caMauDuDieuKienKy("ca_bhyt_a") }),
+  });
+  assert.equal(luuCaBhyt.status, 200);
+  const kyCaBhyt = await fetch(`${baseUrl}/api/sessions/ca_bhyt_a/sign-off`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    body: JSON.stringify({}),
+  });
+  assert.equal(kyCaBhyt.status, 200);
+  const bhytChuaKy = await fetch(`${baseUrl}/api/bhyt/precheck`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookieBsA, Origin: baseUrl },
+    body: JSON.stringify({ propositions: [], transcript: "BS: chưa ký." }),
+  });
+  assert.equal(bhytChuaKy.status, 409, "không gửi mã ca đã ký thì không được xuất gói BHYT");
   capturedPyRequests.length = 0;
   const bhytRes = await fetch(`${baseUrl}/api/bhyt/precheck`, {
     method: "POST",
@@ -316,6 +336,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       propositions: [{ id: 1, text: "viêm họng cấp, kê Amoxicillin 1000mg/lần", evidenceTurns: [1] }],
       transcript: "BS: Cháu viêm họng cấp, kê Amoxicillin.",
       thong_tin_benh_nhan: { tuoi: 4, can_nang_kg: 15, gioi_tinh: "nam" },
+      sessionId: "ca_bhyt_a",
     }),
   });
   assert.equal(bhytRes.status, 200);
@@ -332,6 +353,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       propositions: [],
       transcript: "BS: Khám nhi.",
       patientInfo: { tuoi: 2, can_nang_kg: 11.5 },
+      sessionId: "ca_bhyt_a",
     }),
   });
   assert.equal(bhytAliasRes.status, 200);
@@ -346,6 +368,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       propositions: [{ id: 1, text: "viêm họng cấp", evidenceTurns: [1] }],
       transcript: "BS: Viêm họng cấp.",
       thong_tin_benh_nhan: { tuoi: 4, can_nang_kg: 15 },
+      sessionId: "ca_bhyt_a",
     }),
   });
   assert.equal(recompileRes.status, 200);
@@ -489,6 +512,7 @@ test("Boost 5, 8, 10, 11, 12 tren HTTP server.ts: Xac thuc 401, CRUD kho benh-nh
       ],
       transcript: "BS: Cháu viêm họng cấp, uống Paracetamol 1000 mg 4 lần một ngày.",
       thong_tin_benh_nhan: { tuoi: 3, can_nang_kg: 12, gioi_tinh: "nam" },
+      sessionId: "ca_bhyt_a",
     }),
   });
   assert.equal(fbBhytRes.status, 200);
