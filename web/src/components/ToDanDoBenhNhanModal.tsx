@@ -334,19 +334,11 @@ export const ToDanDoBenhNhanModal: React.FC<ToDanDoBenhNhanModalProps> = ({
       const res = await fetch("/api/benh-nhan-portal/tao-ma", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          tenBenhNhan: patientName,
-          chanDoan: hoSo.chanDoan,
-          thuoc: hoSo.thuoc,
-          anUong: hoSo.anUong,
-          dauHieu: hoSo.dauHieu,
-          ngayTaiKham: hoSo.ngayTaiKham,
-          diaDiemTaiKham: hoSo.diaDiemTaiKham,
-        }),
+        // Chỉ gửi mã ca: máy chủ dựng gói cổng từ bản bác sĩ đã ký (không nhận nội dung từ trình duyệt).
+        body: JSON.stringify({ sessionId }),
       });
-      if (res.status === 409) {
-        // Máy chủ chặn vì chưa ký / sửa sau ký: không tạo mã ngoại tuyến thay thế.
+      if (res.status === 409 || res.status === 422) {
+        // Máy chủ chặn vì chưa ký / sửa sau ký / lệch bản đã ký: không tạo mã ngoại tuyến thay thế.
         const loi = (await res.json().catch(() => ({}))) as { error?: string };
         setLoiPortal(loi.error || "Bác sĩ chưa ký duyệt hồ sơ này — chưa được xuất.");
         return;

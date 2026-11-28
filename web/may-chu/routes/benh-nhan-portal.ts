@@ -2,7 +2,10 @@ import crypto from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import express from "express";
 import { db as defaultDb } from "../csdl";
-import { chanNeuChuaKy } from "../kiem-ky-may-chu";
+import { goiCongTuBanKy, layBanKyDeXuat } from "../kiem-ky-may-chu";
+
+/** Trường trình duyệt được gửi khi tạo cổng; mọi nội dung hồ sơ do máy chủ dựng từ bản đã ký. */
+const TRUONG_DUOC_GUI_TAO_MA = new Set(["sessionId", "caseId", "tabId", "ttlDays"]);
 
 export interface NguoiDungReq {
   id: number;
@@ -234,19 +237,32 @@ export function taoRouterBenhNhanPortal(ctx?: TaoRouterBenhNhanPortalCtx): expre
 
   const router = express.Router();
 
-  // 1. Bác sĩ tạo mã QR & gói theo dõi an toàn (đã lọc bỏ ghi chú nội bộ)
+  // 1. Bác sĩ tạo mã QR & gói theo dõi an toàn (đã lọc bỏ ghi chú nội bộ).
+  //    Gói là BẢN ĐÃ KÝ TẠI THỜI ĐIỂM PHÁT HÀNH: dựng từ bản chụp máy chủ ghi lúc ký, không nhận nội dung
+  //    hồ sơ từ trình duyệt. Mã đã phát hành vẫn mở được dù ca sửa sau đó (chưa có thu hồi).
   router.post("/api/benh-nhan-portal/tao-ma", (req, res) => {
     const uid = (req as express.Request & { nguoiDung?: NguoiDungReq }).nguoiDung?.id;
     if (typeof uid !== "number") {
       return res.status(401).json({ error: "Chưa đăng nhập" });
     }
 
-    const body = req.body && typeof req.body === "object" ? req.body : {};
-    const tenBenhNhan = String(body.tenBenhNhan || body.ten_benh_nhan || body.patientIdentifier || "Quý khách / Người bệnh").trim();
-    const chanDoan = String(body.chanDoan || body.chan_doan || "").trim();
-    const sessionId = body.sessionId ? String(body.sessionId).trim() : null;
     // Cổng/QR đưa hồ sơ ra ngoài phần mềm: chỉ khi bác sĩ đã ký và chưa sửa sau khi ký (kiểm trên máy chủ).
-    if (chanNeuChuaKy(req, res, sessionId || "")) return;
+    const banKy = layBanKyDeXuat(req, res);
+    if (!banKy) return;
+    const than = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
+    const truongLa = Object.keys(than).filter((k) => !TRUONG_DUOC_GUI_TAO_MA.has(k));
+    if (truongLa.length) {
+      return res.status(422).json({
+        error: "Cổng người bệnh dựng từ bản bác sĩ đã ký — không nhận nội dung hồ sơ từ trình duyệt.",
+        code: "noi_dung_tu_trinh_duyet",
+        truongLa,
+      });
+    }
+    // Từ đây mọi nội dung lấy từ bản đã ký; các mục chung (dấu hiệu báo động, chế độ sinh hoạt) dùng mặc định.
+    const body: Record<string, any> = { ...goiCongTuBanKy(banKy), ttlDays: than.ttlDays };
+    const tenBenhNhan = String(body.tenBenhNhan).trim();
+    const chanDoan = String(body.chanDoan || "").trim();
+    const sessionId = banKy.sessionId;
 
     const dsThuoc = Array.isArray(body.thuoc)
       ? body.thuoc
@@ -337,7 +353,7 @@ export function taoRouterBenhNhanPortal(ctx?: TaoRouterBenhNhanPortalCtx): expre
     });
   });
 
-  // 2. Cổng công khai cho người bệnh quét QR xem lịch uống thuốc & cảnh báo
+  // 2. Cổng công khai cho người bệnh quét QR xem lịch uống thuốc & cảnh báo — trả bản đã ký tại thời điểm phát hành.
   router.get("/api/benh-nhan-portal/:token", (req, res) => {
     const token = String(req.params.token || "").trim();
     const row = targetDb

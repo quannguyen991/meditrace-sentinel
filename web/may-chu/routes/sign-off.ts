@@ -1,6 +1,7 @@
 import type express from "express";
 import { tinhKyDuyetTuCa } from "../../src/lib/kyDuyet";
 import { caKhamThuocNguoiKhac, docMotCaKham, ghiNhatKy, khoWorm } from "../csdl";
+import { ghiBanKyDuyet } from "../kiem-ky-may-chu";
 import { traLoi } from "./dung-chung";
 
 export function dangKySignOffRoutes(app: express.Express) {
@@ -58,6 +59,17 @@ export function dangKySignOffRoutes(app: express.Express) {
         tyLeCoNguon: kq.tyLeCoNguon,
         contentHash: kq.contentHash,
         soChuaXacNhan: kq.soChuaXacNhan,
+      });
+
+      // Bản chụp do MÁY CHỦ ghi: đúng tab đã ký + dữ liệu ca lúc ký. Chốt xuất chỉ tin bản này,
+      // không tin `signOff.tabId` trình duyệt lưu trong ca.
+      ghiBanKyDuyet({
+        uid,
+        sessionId,
+        wormSeq: ketQua.wormSeq,
+        tabId: kq.tabId,
+        contentHash: kq.contentHash,
+        duLieu: ca.duLieu,
       });
 
       ghiNhatKy(uid, "ky_duyet_worm", `session=${sessionId} seq=${ketQua.wormSeq} tab=${kq.tabId ?? "-"}`);

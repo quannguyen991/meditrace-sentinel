@@ -1,5 +1,5 @@
 import type express from "express";
-import { chanNeuChuaKy, layMaCaTuYeuCau } from "../kiem-ky-may-chu";
+import { chanNeuNoiDungKhacBanKy, goiBhytTuBanKy, layBanKyDeXuat } from "../kiem-ky-may-chu";
 import { chayPythonJson, goiDichVu, traLoi } from "./dung-chung";
 
 export function dangKyBhytOcrRoutes(app: express.Express) {
@@ -41,12 +41,15 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
   app.post("/api/bhyt/precheck", async (req, res) => {
     try {
       // Kết quả có gói XML1–XML5 để nộp BHYT = xuất hồ sơ: phải ký và chưa sửa sau ký (`sessionId` = mã ca).
-      if (chanNeuChuaKy(req, res, layMaCaTuYeuCau(req, "sessionId", "caseId"))) return;
-      const { propositions = [], transcript = "", thong_tin_benh_nhan = null, patientInfo = null } = req.body || {};
+      // Nội dung gửi dịch vụ dựng từ bản chụp lúc ký; nội dung trình duyệt gửi kèm chỉ để đối chiếu.
+      const banKy = layBanKyDeXuat(req, res);
+      if (!banKy) return;
+      const goi = goiBhytTuBanKy(banKy);
+      if (chanNeuNoiDungKhacBanKy(req, res, goi)) return;
       const payload = {
-        propositions,
-        transcript,
-        thong_tin_benh_nhan: thong_tin_benh_nhan || patientInfo || undefined,
+        propositions: goi.propositions,
+        transcript: goi.transcript,
+        thong_tin_benh_nhan: goi.thong_tin_benh_nhan || undefined,
       };
       try {
         const kqHttp = await goiDichVu("/api/bhyt/precheck", {
@@ -71,28 +74,19 @@ export function dangKyBhytOcrRoutes(app: express.Express) {
    */
   app.post(["/api/bhyt/recompile", "/api/fhir/recompile"], async (req, res) => {
     try {
-      // Gói XML 1–5 / FHIR xuất bản: phải ký và chưa sửa sau ký (`sessionId`, hoặc `caseId` = mã ca đã lưu).
-      if (chanNeuChuaKy(req, res, layMaCaTuYeuCau(req, "sessionId", "caseId"))) return;
-      const {
-        caseId = "web",
-        propositions = [],
-        transcript = "",
-        noteSections = null,
-        thong_tin_benh_nhan = null,
-        patientInfo = null,
-        du_lieu_xet_nghiem = null,
-      } = req.body || {};
-      if (!Array.isArray(propositions)) {
-        return res.status(400).json({ error: "propositions phải là mảng" });
-      }
+      // Gói XML 1–5 / FHIR xuất bản: phải ký và chưa sửa sau ký (`sessionId`, hoặc `caseId` = mã ca đã lưu;
+      // gửi cả hai mà khác nhau -> 422). Gói dựng hoàn toàn từ bản chụp lúc ký.
+      const banKy = layBanKyDeXuat(req, res);
+      if (!banKy) return;
+      const goi = goiBhytTuBanKy(banKy);
+      if (chanNeuNoiDungKhacBanKy(req, res, goi)) return;
       const payload = {
-        caseId: String(caseId || "web"),
-        ma_ca: String(caseId || "web"),
-        propositions,
-        transcript: String(transcript || ""),
-        ...(noteSections && typeof noteSections === "object" ? { noteSections, ban_nhap: noteSections } : {}),
-        thong_tin_benh_nhan: thong_tin_benh_nhan || patientInfo || undefined,
-        ...(du_lieu_xet_nghiem && typeof du_lieu_xet_nghiem === "object" ? { du_lieu_xet_nghiem } : {}),
+        caseId: banKy.sessionId,
+        ma_ca: banKy.sessionId,
+        propositions: goi.propositions,
+        transcript: goi.transcript,
+        thong_tin_benh_nhan: goi.thong_tin_benh_nhan || undefined,
+        ...(goi.du_lieu_xet_nghiem ? { du_lieu_xet_nghiem: goi.du_lieu_xet_nghiem } : {}),
       };
       try {
         const kqHttp = await goiDichVu("/api/bhyt/recompile", {

@@ -140,3 +140,20 @@ test("số liệu và băm do máy chủ tính; số client gửi bị bỏ qua;
   assert.equal(soap.status, 200);
   assert.equal(soap.body.tabId, "tab-soap");
 });
+
+test("ký duyệt ghi bản chụp máy chủ đúng tab đã ký; chốt xuất đối chiếu đúng tab đó", async () => {
+  const { kiemDaKyChoXuat } = await import("../kiem-ky-may-chu");
+  await luu(ca("ca_ban_chup", { 1: "giu", 2: "giu" }));
+  const r = await ky("ca_ban_chup", { tabId: "tab-soap" });
+  assert.equal(r.status, 200);
+  const kq = kiemDaKyChoXuat(1, "ca_ban_chup") as any;
+  assert.equal(kq.duoc, true, JSON.stringify(kq));
+  assert.equal(kq.banKy?.tabId, "tab-soap");
+  assert.equal(kq.banKy?.wormSeq, r.body.wormSeq);
+
+  // Sửa đúng tab đã ký (SOAP) dù tab bản nháp còn nguyên: không được xuất.
+  const sua = ca("ca_ban_chup", { 1: "giu", 2: "giu" });
+  sua.tabs[1].content = "S: sửa sau khi ký";
+  await luu(sua);
+  assert.equal(kiemDaKyChoXuat(1, "ca_ban_chup").duoc, false);
+});

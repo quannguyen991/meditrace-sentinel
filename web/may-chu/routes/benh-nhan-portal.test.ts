@@ -22,8 +22,8 @@ test.before(async () => {
     "INSERT OR IGNORE INTO nguoi_dung (id, email, ho_ten, mat_khau_bam, vai, tao_luc) VALUES (1, 'bs@t.vn', 'BS Test', 'h', 'bac_si', ?)"
   ).run(Date.now());
   // Cổng người bệnh là đường XUẤT hồ sơ: các ca dùng trong kiểm thử phải đã được bác sĩ ký duyệt.
-  taoCaDaKy(1, "sess_123");
-  taoCaDaKy(1, "sess_rf_1");
+  taoCaDaKy(1, "sess_123", { ten: "Nguyễn Văn An" });
+  taoCaDaKy(1, "sess_rf_1", { ten: "Trần Thị Bình" });
 
   const app = express();
   app.use(express.json());
@@ -60,7 +60,7 @@ const taoMa = (body: Record<string, unknown>) =>
   fetch(`${base}/api/benh-nhan-portal/tao-ma`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-test-uid": "1" },
-    body: JSON.stringify({ tenBenhNhan: "BN Chốt", chanDoan: "Tăng huyết áp", thuoc: [], ...body }),
+    body: JSON.stringify(body),
   });
 const soMaCong = () => (db.prepare("SELECT COUNT(*) AS n FROM cong_benh_nhan").get() as { n: number }).n;
 
@@ -89,21 +89,49 @@ test("tao-ma: ca đã ký rồi sửa -> 409; ca đã ký -> 201", async () => {
   assert.ok(((await ok.json()) as any).token);
 });
 
+test("tao-ma: trộn hai ca (mã ca A đã ký + tên/chẩn đoán/thuốc của ca B) -> 422, không tạo mã", async () => {
+  taoCaDaKy(1, "ca_portal_a", { ten: "BN A đã ký" });
+  const truoc = soMaCong();
+  for (const them of [
+    { tenBenhNhan: "BN B" },
+    { chanDoan: "Ca B: viêm phổi" },
+    { thuoc: ["Ca B: Ceftriaxon 2g sáng"] },
+    { dauHieu: ["ca B"] },
+    { ngayTaiKham: "mai" },
+    { ghiChuNoiBo: "x" },
+    { caseId: "ca_portal_b" },
+  ]) {
+    const r = await taoMa({ sessionId: "ca_portal_a", ...them });
+    assert.equal(r.status, 422, JSON.stringify(them));
+    assert.match(((await r.json()) as any).code, /^(noi_dung_tu_trinh_duyet|lech_ma_ca)$/);
+  }
+  assert.equal(soMaCong(), truoc);
+});
+
+test("tao-ma: xuất tab khác tab đã ký -> 422", async () => {
+  taoCaDaKy(1, "ca_portal_tab");
+  const r = await taoMa({ sessionId: "ca_portal_tab", tabId: "tab-soap" });
+  assert.equal(r.status, 422);
+  assert.equal(((await r.json()) as any).code, "lech_tab_da_ky");
+  assert.equal((await taoMa({ sessionId: "ca_portal_tab", tabId: "tab-doc", ttlDays: 7 })).status, 201);
+});
+
+test("tao-ma: gói dựng từ bản đã ký, không theo dữ liệu đổi sau khi ký (ngoài băm)", async () => {
+  taoCaDaKy(1, "ca_portal_doi_ten", { ten: "Tên lúc ký" });
+  luuCaMau(1, caMauDuDieuKienKy("ca_portal_doi_ten", { ten: "Tên đổi sau ký" }));
+  const r = await taoMa({ sessionId: "ca_portal_doi_ten" });
+  assert.equal(r.status, 201);
+  const { goi } = (await r.json()) as any;
+  assert.equal(goi.tenBenhNhan, "Tên lúc ký");
+  assert.match(goi.chanDoan, /Rối loạn mỡ máu/);
+});
+
 test("Bác sĩ tạo mã cổng, lọc dữ liệu nội bộ, gắn cờ thuốc mơ hồ và đọc công khai qua GET", async () => {
   const createRes = await fetch(`${base}/api/benh-nhan-portal/tao-ma`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-test-uid": "1" },
-    body: JSON.stringify({
-      sessionId: "sess_123",
-      tenBenhNhan: "Nguyễn Văn An",
-      chanDoan: "Rối loạn mỡ máu / Tăng huyết áp",
-      thuoc: [
-        { ten: "Atorvastatin 20mg", sang: "—", trua: "—", chieu: "—", toi: "1 viên", loiDan: "Uống tối" },
-        { ten: "Furosemide 40mg", sang: "—", trua: "—", chieu: "—", toi: "—", loiDan: "" },
-      ],
-      ghiChuNoiBo: "Nghi ngờ bệnh nhân không tuân thủ, cần lưu ý nội bộ",
-      rawTranscript: "BS: ...",
-    }),
+    // Chỉ gửi mã ca: máy chủ tự dựng gói từ bản đã ký (tên, chẩn đoán, thuốc).
+    body: JSON.stringify({ sessionId: "sess_123" }),
   });
   assert.equal(createRes.status, 201);
   const created = (await createRes.json()) as any;
@@ -121,8 +149,8 @@ test("Bác sĩ tạo mã cổng, lọc dữ liệu nội bộ, gắn cờ thuố
   assert.ok(portal.tuongTacThucAn.some((tt: any) => tt.noi_dung.includes("bưởi chùm")));
 
   const serialized = JSON.stringify(portal);
-  assert.ok(!serialized.includes("lưu ý nội bộ"));
-  assert.ok(!serialized.includes("rawTranscript"));
+  assert.ok(!serialized.includes("đau ngực từ hôm qua"), "lời thoại không lọt ra cổng công khai");
+  assert.ok(!serialized.includes("Creatinine"), "ngữ cảnh nội bộ không lọt ra cổng công khai");
 });
 
 test("GET trả 404 khi thiếu token và 410 khi hết hạn", async () => {
@@ -141,12 +169,7 @@ test("POST /bao-cao tạo nhiệm vụ ưu tiên cao trong muc_kho khi có dấu
   const createRes = await fetch(`${base}/api/benh-nhan-portal/tao-ma`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-test-uid": "1" },
-    body: JSON.stringify({
-      sessionId: "sess_rf_1",
-      tenBenhNhan: "Trần Thị Bình",
-      chanDoan: "Suy tim",
-      thuoc: ["Perindopril 5mg sáng 1 viên"],
-    }),
+    body: JSON.stringify({ sessionId: "sess_rf_1" }),
   });
   const { token } = (await createRes.json()) as any;
 
