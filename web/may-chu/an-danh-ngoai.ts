@@ -21,6 +21,43 @@ const TU_DIA_CHI = "ngõ|ngách|hẻm|kiệt|phố|đường|phường|quận|hu
 const NOI_TIEP_DIA_CHI = `(?:[\\s,]+(?:\\d+[\\p{L}\\d/-]*|\\p{Lu}\\p{Ll}*|(?:${TU_DIA_CHI})(?=\\s)))*`;
 const NGAY_SO = "\\d{1,2}[/.-]\\d{1,2}[/.-]\\d{2,4}";
 
+// MA_CA_BENH: "bệnh nhân 416", "BN416", "bệnh nhân số 91", "ca bệnh 950", "bệnh nhân 861, 862 và 863".
+// Chỉ che phần số (giữ chữ "bệnh nhân"). Không có "số"/"thứ" mà số theo sau là đơn vị ("bệnh nhân 3 ngày",
+// "BN 2 lần", "bệnh nhân 65 tuổi") thì không phải mã. "thứ 2" chỉ tính sau "bệnh nhân"/"ca"/"COVID-19" (tránh thứ trong tuần).
+const BAO_MA_CA =
+  "(?:[Bb]ệnh\\s+nhân|BỆNH\\s+NHÂN|[Nn]gười\\s+bệnh|[Cc]a\\s+(?:bệnh|nhiễm|mắc|dương\\s+tính)|CA\\s+BỆNH|[Cc]a|BN)";
+const BAO_MA_CA_MANH = `(?:${BAO_MA_CA}|(?:COVID|Covid|covid)\\s*-\\s*19|nCoV|CoV\\s*-\\s*2|từ|gồm|các|là|nhận|thân)(?:\\s+từ)?\\s+(?:thứ|số)`;
+const SO_CA = "(?:\\d{1,3}(?:\\.\\d{3})+|\\d{1,6})(?![\\d.,/]?\\d)";
+const DON_VI_SAU_SO =
+  "\\s*(?:tuổi|ngày(?!\\s*\\d)|tuần|tháng|năm|giờ|h|phút|giây|tiếng|buổi|lần|lượt|đợt|ca|trường\\s+hợp|%|mg|mcg|µg|ml|mmol|kg|g|độ|viên|ống|gói|mũi|liều|cữ|giọt|xịt|đơn\\s+vị|UI|IU|mmHg|lít|l|cm|mm|m)(?![\\p{L}\\d])";
+const MUC_CA = `(?:BN\\s*)?${SO_CA}(?!${DON_VI_SAU_SO})`;
+const NOI_MA_CA = `\\s*["”“]?\\s*(?:\\([^()]{0,80}\\)\\s*)?(?:,|;|-|–|và|đến|tới)\\s*["”“]?\\s*(?:(?:bệnh\\s+nhân|BN|số|ca)\\s*)?`;
+const MUC_DAU_CA = `(?:${KHONG_CHU_TRUOC}${BAO_MA_CA_MANH}\\s*(?:BN\\s*)?${SO_CA}|${KHONG_CHU_TRUOC}${BAO_MA_CA}(?:\\s+từ)?\\s*${MUC_CA})`;
+// Mỗi số trong danh sách là một token riêng; chữ chen giữa ("(nam, 59 tuổi)") vẫn giữ nguyên.
+const MA_CA_BENH = new RegExp(
+  `(?<=${KHONG_CHU_TRUOC}${BAO_MA_CA_MANH}\\s*)(?:BN\\s*)?${SO_CA}` +
+    `|(?<=${KHONG_CHU_TRUOC}${BAO_MA_CA}(?:\\s+từ)?\\s*)${MUC_CA}` +
+    `|(?<=${MUC_DAU_CA}(?:${NOI_MA_CA}${MUC_CA})*${NOI_MA_CA})${MUC_CA}`,
+  "gu",
+);
+
+// TEN_VIET_TAT: "bà H.T.P", "ông N.V.A", "anh Q.", "bệnh nhân T.V.D.". Chỉ che phần chữ tắt (giữ xưng hô).
+// Sau xưng hô: 1–5 chữ tắt có dấu chấm, hoặc một chữ hoa đứng riêng ("bệnh nhân G").
+// Đứng một mình: từ hai chữ tắt nối bằng dấu chấm ("N.V.A"), trừ khi dính tên thương mại viết hoa
+// ("Alsiful S.R", "A.T Desloratadin"); hoặc một chữ hoa + dấu chấm giữa câu ("T. ăn sáng").
+const XUNG_HO_TAT =
+  "[Ôô]ng|[Bb]à|[Aa]nh|[Cc]hị|[Cc]ô(?:\\s+giáo)?|[Cc]hú|[Bb]ác|[Cc]háu|[Ee]m|[Bb]é|[Cc]ụ(?:\\s+(?:ông|bà))?|[Tt]hầy(?:\\s+giáo)?|[Đđ]iều\\s+dưỡng|[Tt]ên(?:\\s+là)?|[Bb]ệnh\\s+nhân|[Nn]gười\\s+bệnh|BN|[Cc]a\\s+bệnh|[Cc]on|[Vv]ợ|[Cc]hồng|[Mm]ẹ|[Bb]ố|[Ss]ản\\s+phụ|[Tt]hai\\s+phụ";
+const CHU_TAT = "\\p{Lu}\\p{Ll}?";
+const TEN_VIET_TAT_SAU_XUNG_HO = new RegExp(
+  `(?<=${KHONG_CHU_TRUOC}(?:${XUNG_HO_TAT})\\s+)(?:${CHU_TAT}\\s?\\.(?:\\s?${CHU_TAT}(?:\\s?\\.)?){0,4}|\\p{Lu})${KHONG_CHU_SAU}`,
+  "gu",
+);
+const TEN_VIET_TAT_RIENG = new RegExp(
+  `(?<!\\p{Lu}[\\p{L}\\d]*\\s)${KHONG_CHU_TRUOC}${CHU_TAT}\\.\\s?${CHU_TAT}(?:\\.\\s?${CHU_TAT})*\\.?${KHONG_CHU_SAU}(?!\\s+\\p{Lu})`,
+  "gu",
+);
+const TEN_VIET_TAT_MOT_CHU = /(?<=[\p{L}\d,;:()"“”]\s)\p{Lu}\.(?=\s+\p{Ll})/gu;
+
 /** Luật che theo thứ tự: số liên lạc / mã trước, rồi ngày, địa chỉ, nơi học/làm, tên. */
 const LUAT: RegExp[] = [
   // Email
@@ -35,6 +72,8 @@ const LUAT: RegExp[] = [
   /(?<![\p{L}])(?:CCCD|CMND|[Cc]ăn\s+cước(?:\s+công\s+dân)?|[Ss]ố\s+định\s+danh)\s*(?:số|là|:)?\s*\d(?:[\s.]*\d){7,13}/gu,
   // Điện thoại: 0xxx xxx xxx, 0xxx.xxx.xxx, +84 xxx xxx xxx, 84xxxxxxxxx, máy bàn 0xx xxxx xxxx
   /(?<![\d\p{L}+])(?:\+?84[\s.-]?|0)\d{1,3}(?:[\s.-]?\d){6,8}(?!\d)/gu,
+  // MA_CA_BENH: mã ca bệnh ngắn đứng sau "bệnh nhân" / "BN" / "ca bệnh" (đặt trước luật chuỗi 8 chữ số)
+  MA_CA_BENH,
   // Chuỗi 8 chữ số trở lên (mã bệnh nhân, mã hồ sơ, số giấy tờ), kể cả viết cách
   /(?<!\d)\d(?:[\s.-]?\d){7,}(?!\d)/gu,
   // Ngày sinh và ngày đầy đủ
@@ -70,6 +109,10 @@ const LUAT: RegExp[] = [
     `${KHONG_CHU_TRUOC}(?:[Hh]ọ\\s+(?:và\\s+)?tên|[Tt]ên(?:\\s+(?:tôi|cháu|bé|em|con|bệnh\\s+nhân))?|[Tt]ôi\\s+tên|[Cc]háu\\s+tên|[Bb]é\\s+tên|[Ee]m\\s+tên|[Cc]on\\s+tên)\\s*(?:là|:)\\s*(?!(?:gì|thuốc|bệnh|hội\\s+chứng)(?![\\p{L}]))\\p{L}+(?:\\s+\\p{Lu}\\p{Ll}*){0,3}`,
     "gu",
   ),
+  // TEN_VIET_TAT: tên viết tắt có dấu chấm (đặt trước luật xưng hô + tên viết hoa)
+  TEN_VIET_TAT_SAU_XUNG_HO,
+  TEN_VIET_TAT_RIENG,
+  TEN_VIET_TAT_MOT_CHU,
   // Xưng hô + tên viết hoa: "Bà Hoa", "ông Nam", "Bác sĩ Minh", "con gái là Ngọc"
   new RegExp(`${KHONG_CHU_TRUOC}(?:${XUNG_HO})\\s+${TEN_HOA}${KHONG_CHU_SAU}`, "gu"),
   // Họ + tên viết hoa: "Nguyễn Văn Nam", "Trần Thị Hoa"

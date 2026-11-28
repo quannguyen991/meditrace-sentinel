@@ -214,6 +214,112 @@ def tim_so_dai(van_ban: str) -> List[Tuple[int, int, str]]:
     return ra
 
 
+# ─── Luật dùng chung tên với bộ che TypeScript (web/may-chu/an-danh-ngoai.ts) ─────────
+# Đo chung bằng tests/fixtures/ro_ri_dinh_danh.json và tools/do_an_danh_phoner.py.
+_HOA = "A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ"
+_THUONG = "a-zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ"
+_CHU_HOA = f"[{_HOA}]"
+_CHU_THUONG = f"[{_THUONG}]"
+
+# MA_CA_BENH: "bệnh nhân 416", "BN416", "bệnh nhân số 91", "ca bệnh 950", "bệnh nhân 861, 862 và 863".
+# Chỉ che phần số. Không có "số"/"thứ" mà số theo sau là đơn vị ("bệnh nhân 3 ngày", "BN 2 lần") thì bỏ qua.
+_BAO_MA_CA = r"(?:[Bb]ệnh\s+nhân|BỆNH\s+NHÂN|[Nn]gười\s+bệnh|[Cc]a\s+(?:bệnh|nhiễm|mắc|dương\s+tính)|CA\s+BỆNH|[Cc]a|BN)"
+_BAO_MA_CA_MANH = (
+    rf"(?:{_BAO_MA_CA}|(?:COVID|Covid|covid)\s*-\s*19|nCoV|CoV\s*-\s*2|từ|gồm|các|là|nhận|thân)"
+    r"(?:\s+từ)?\s+(?:thứ|số)"
+)
+_SO_CA = r"(?:\d{1,3}(?:\.\d{3})+|\d{1,6})(?![\d.,/]?\d)"
+_DON_VI_SAU_SO = (
+    r"\s*(?:tuổi|ngày(?!\s*\d)|tuần|tháng|năm|giờ|h|phút|giây|tiếng|buổi|lần|lượt|đợt|ca|trường\s+hợp|%|mg|mcg|µg|"
+    r"ml|mmol|kg|g|độ|viên|ống|gói|mũi|liều|cữ|giọt|xịt|đơn\s+vị|UI|IU|mmHg|lít|l|cm|mm|m)(?!\w)"
+)
+_MUC_CA = rf"(?:BN\s*)?{_SO_CA}(?!{_DON_VI_SAU_SO})"
+_NOI_MA_CA = r"\s*[\"”“]?\s*(?:\([^()]{0,80}\)\s*)?(?:,|;|-|–|và|đến|tới)\s*[\"”“]?\s*(?:(?:bệnh\s+nhân|BN|số|ca)\s*)?"
+RE_MA_CA_BENH = re.compile(
+    rf"(?<!\w)(?:{_BAO_MA_CA_MANH}\s*(?P<manh>(?:BN\s*)?{_SO_CA})|{_BAO_MA_CA}(?:\s+từ)?\s*(?P<yeu>{_MUC_CA}))"
+)
+_RE_MUC_NOI_CA = re.compile(rf"{_NOI_MA_CA}(?P<so>{_MUC_CA})")
+
+# TEN_VIET_TAT: "bà H.T.P", "ông N.V.A", "anh Q.", "bệnh nhân T.V.D.". Chỉ che phần chữ tắt.
+_XUNG_HO_TAT = (
+    r"[Ôô]ng|[Bb]à|[Aa]nh|[Cc]hị|[Cc]ô(?:\s+giáo)?|[Cc]hú|[Bb]ác|[Cc]háu|[Ee]m|[Bb]é|[Cc]ụ(?:\s+(?:ông|bà))?|"
+    r"[Tt]hầy(?:\s+giáo)?|[Đđ]iều\s+dưỡng|[Tt]ên(?:\s+là)?|[Bb]ệnh\s+nhân|[Nn]gười\s+bệnh|BN|[Cc]a\s+bệnh|[Cc]on|"
+    r"[Vv]ợ|[Cc]hồng|[Mm]ẹ|[Bb]ố|[Ss]ản\s+phụ|[Tt]hai\s+phụ"
+)
+_CHU_TAT = rf"{_CHU_HOA}{_CHU_THUONG}?"
+RE_TEN_VIET_TAT_SAU_XUNG_HO = re.compile(
+    rf"(?<!\w)(?:{_XUNG_HO_TAT})\s+(?P<ten>{_CHU_TAT}\s?\.(?:\s?{_CHU_TAT}(?:\s?\.)?){{0,4}}|{_CHU_HOA})(?!\w)"
+)
+RE_TEN_VIET_TAT_RIENG = re.compile(
+    rf"(?<!\w)(?P<ten>{_CHU_TAT}\.\s?{_CHU_TAT}(?:\.\s?{_CHU_TAT})*\.?)(?!\w)(?!\s+{_CHU_HOA})"
+)
+RE_TEN_VIET_TAT_MOT_CHU = re.compile(rf"(?<=[\w,;:()\"“”]\s)(?P<ten>{_CHU_HOA}\.)(?=\s+{_CHU_THUONG})")
+# Tên thương mại viết hoa đứng ngay trước chữ tắt ("Alsiful S.R") thì không phải tên người.
+_RE_TU_HOA_DUNG_TRUOC = re.compile(rf"{_CHU_HOA}\w*\s$")
+
+# Xưng hô + tên viết hoa ("Bà Hoa", "Chị Lan", "Bác sĩ Minh") và họ + tên viết hoa ("Nguyễn Hồng Nhung").
+_XUNG_HO_TEN = (
+    r"[Ôô]ng|[Bb]à|[Aa]nh|[Cc]hị|[Ee]m|[Cc]ô|[Cc]hú|[Bb]ác(?:\s+sĩ)?|[Cc]háu|[Bb]é|[Cc]ụ|[Dd]ì|[Cc]ậu|[Mm]ợ|[Tt]hím|"
+    r"[Vv]ợ|[Cc]hồng|BS\.?|[Bb]s\.?|[Tt]hầy|[Cc]on\s+(?:trai|gái|dâu|rể)(?:\s+(?:là|tên))?"
+)
+_TEN_HOA = rf"{_CHU_HOA}{_CHU_THUONG}*(?:\s+{_CHU_HOA}{_CHU_THUONG}*){{0,3}}"
+RE_TEN_SAU_XUNG_HO = re.compile(rf"(?<!\w)(?:{_XUNG_HO_TEN})\s+(?P<ten>{_TEN_HOA})(?!\w)")
+_HO_HOA = (
+    "Nguyễn|Trần|Lê|Phạm|Hoàng|Huỳnh|Phan|Vũ|Võ|Đặng|Bùi|Đỗ|Hồ|Ngô|Dương|Lý|Đinh|Trương|Đoàn|Lương|Trịnh|"
+    "Phùng|Quách|Vương|Nghiêm|Kiều|Mai|Đào|Tạ|Tô|Lâm|Châu|Thái|Hà|Cao|Đàm|Lại|Khúc|Kim|Triệu"
+)
+RE_HO_TEN_HOA = re.compile(rf"(?<!\w)(?P<ten>(?:{_HO_HOA})(?:\s+{_CHU_HOA}{_CHU_THUONG}*){{1,3}})(?!\w)")
+
+# Mã hồ sơ có từ báo trước ("Mã bệnh nhân 20261125", "PID: 12345678", "số hồ sơ BV-2026-00123").
+RE_MA_HO_SO = re.compile(
+    r"(?<!\w)(?:[Mm]ã\s+(?:số\s+)?(?:bệnh\s+nhân|người\s+bệnh|BN|hồ\s+sơ|bệnh\s+án|y\s+tế|lưu\s+trữ)|"
+    r"[Ss]ố\s+(?:hồ\s+sơ|bệnh\s+án|lưu\s+trữ|vào\s+viện)|PID|MRN|MSBN)\s*(?:là|:|số)?\s*"
+    r"(?P<ma>[A-Za-z0-9][A-Za-z0-9/-]{3,})"
+)
+
+
+def tim_ma_ca_benh(van_ban: str) -> List[Tuple[int, int]]:
+    """MA_CA_BENH: vị trí (đầu, cuối) từng số của mã ca bệnh (mỗi số trong danh sách một vị trí;
+    chữ chen giữa như "(nam, 59 tuổi)" giữ nguyên)."""
+    ra: List[Tuple[int, int]] = []
+    van_ban = van_ban or ""
+    for m in RE_MA_CA_BENH.finditer(van_ban):
+        nhom = "manh" if m.group("manh") is not None else "yeu"
+        ra.append((m.start(nhom), m.end(nhom)))
+        vt = m.end()
+        while True:
+            m2 = _RE_MUC_NOI_CA.match(van_ban, vt)
+            if not m2:
+                break
+            ra.append((m2.start("so"), m2.end("so")))
+            vt = m2.end()
+    gon: List[Tuple[int, int]] = []
+    for a, b in sorted(ra):
+        if not any(x < b and a < y for x, y in gon):
+            gon.append((a, b))
+    return gon
+
+
+def tim_ten_viet_tat(van_ban: str) -> List[Tuple[int, int]]:
+    """TEN_VIET_TAT: vị trí (đầu, cuối) tên viết tắt có dấu chấm ("H.T.P", "N.V.A", "Q.")."""
+    ra: List[Tuple[int, int]] = []
+    if not van_ban:
+        return ra
+    for m in RE_TEN_VIET_TAT_SAU_XUNG_HO.finditer(van_ban):
+        ra.append((m.start("ten"), m.end("ten")))
+    for m in RE_TEN_VIET_TAT_RIENG.finditer(van_ban):
+        if _RE_TU_HOA_DUNG_TRUOC.search(van_ban, max(0, m.start() - 40), m.start()):
+            continue
+        ra.append((m.start("ten"), m.end("ten")))
+    for m in RE_TEN_VIET_TAT_MOT_CHU.finditer(van_ban):
+        ra.append((m.start("ten"), m.end("ten")))
+    gon: List[Tuple[int, int]] = []
+    for a, b in sorted(ra, key=lambda x: (x[0], -(x[1] - x[0]))):
+        if not any(x < b and a < y for x, y in gon):
+            gon.append((a, b))
+    return gon
+
+
 # ═══ class ClinicalDeidentifier — Bộ khử định danh hội thoại lâm sàng tiếng Việt ══════
 # Che tên, số, địa chỉ bằng thẻ; có giải mã và kiểm tra còn sót.
 class ClinicalDeidentifier:
@@ -466,6 +572,44 @@ class ClinicalDeidentifier:
             bang_anh_xa[token] = val
             danh_sach_pii.append(ThucThePII("HO_TEN", val, token, a, b))
 
+        def _them_vi_tri(a: int, b: int, loai: str, loai_token: str) -> None:
+            if b <= a or _chong(a, b):
+                return
+            val = van_ban[a:b]
+            token = _lay_token(loai_token)
+            bang_anh_xa[token] = val
+            danh_sach_pii.append(ThucThePII(loai, val, token, a, b))
+
+        # 11. Mã hồ sơ có từ báo trước ("Mã bệnh nhân 20261125", "PID: 12345678")
+        for m in RE_MA_HO_SO.finditer(van_ban):
+            _them_vi_tri(m.start("ma"), m.end("ma"), "MA_HO_SO", "MA_HO_SO")
+
+        # 12. MA_CA_BENH: "bệnh nhân 416", "BN416", "bệnh nhân số 91" (chỉ che phần số)
+        for a, b in tim_ma_ca_benh(van_ban):
+            _them_vi_tri(a, b, "MA_CA_BENH", "MA_CA_BENH")
+
+        # 13. TEN_VIET_TAT: "bà H.T.P", "ông N.V.A", "anh Q." (chỉ che phần chữ tắt)
+        for a, b in tim_ten_viet_tat(van_ban):
+            _them_vi_tri(a, b, "TEN_VIET_TAT", "TEN_VIET_TAT")
+
+        # 14. Xưng hô + tên viết hoa ("Bà Hoa", "Chị Lan") và họ + tên viết hoa ("Nguyễn Hồng Nhung")
+        for re_ten in (RE_TEN_SAU_XUNG_HO, RE_HO_TEN_HOA):
+            for m in re_ten.finditer(van_ban):
+                a, b = m.start("ten"), m.end("ten")
+                tu = list(_RE_TU.finditer(van_ban, a, b))
+                while len(tu) > 1 and tu[-1].group(0).lower() in TU_DUNG_TEN:
+                    tu.pop()
+                if not tu or (len(tu) == 1 and tu[0].group(0).lower() in TU_DUNG_TEN):
+                    continue
+                b = tu[-1].end()
+                if _chong(a, b):
+                    continue
+                val = van_ban[a:b]
+                token = next((p.ma_the_the for p in danh_sach_pii
+                              if p.loai == "HO_TEN" and p.gia_tri_goc == val), None) or _lay_token("HO_TEN")
+                bang_anh_xa[token] = val
+                danh_sach_pii.append(ThucThePII("HO_TEN", val, token, a, b))
+
         # Thay thế: (1) đúng VỊ TRÍ đã phát hiện (kể cả tên viết thường / tên đơn sau tiền tố),
         # (2) rồi quét toàn văn theo GIÁ TRỊ để che các lần nhắc lại (ưu tiên chuỗi dài trước).
         da_lay: List[Tuple[int, int, str]] = []
@@ -483,6 +627,8 @@ class ClinicalDeidentifier:
             if _token_ten(token):
                 vb_xu_ly = cls._tao_regex_ten_nguoi(val_goc).sub(lambda _m, t=token: t, vb_xu_ly)
                 continue
+            if token.startswith("[MA_CA_BENH_") or token.startswith("[TEN_VIET_TAT_"):
+                continue  # mã ngắn / chữ tắt: chỉ che theo vị trí, không quét theo giá trị (tránh che nhầm "91 tuổi")
             left_b = r"(?<!\w)" if (val_goc[0].isalnum() or val_goc[0] == "_") else ""
             right_b = r"(?!\w)" if (val_goc[-1].isalnum() or val_goc[-1] == "_") else ""
             vb_xu_ly = re.sub(
@@ -514,6 +660,10 @@ class ClinicalDeidentifier:
             ra.append({"loai": loai, "vi_tri": [a, b]})
         for a, b in tim_ten_theo_tien_to(van_ban):
             ra.append({"loai": "HO_TEN", "vi_tri": [a, b]})
+        for a, b in tim_ma_ca_benh(van_ban):
+            ra.append({"loai": "MA_CA_BENH", "vi_tri": [a, b]})
+        for a, b in tim_ten_viet_tat(van_ban):
+            ra.append({"loai": "TEN_VIET_TAT", "vi_tri": [a, b]})
         return ra
 
     @classmethod

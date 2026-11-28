@@ -1,0 +1,211 @@
+{
+  "mo_ta": "Đo hai bộ che định danh trên PhoNER_COVID19 (nhãn NAME + PATIENT_ID) và che nhầm trên 300 câu hỏi đầu ViMedAQA test_sample_500. Cùng định nghĩa ở web/may-chu/do-an-danh-phoner.ts và tools/do_an_danh_phoner.py.",
+  "dinh_nghia": {
+    "bao_ve": "văn bản nhãn vàng không còn trong văn bản đã che (so khớp có ranh giới) HOẶC câu bị từ chối gửi (TS: ok===false; Python: kiem_tra_con_sot khác rỗng)",
+    "che_nham": "câu hỏi ViMedAQA bị đổi sau khi che HOẶC bị từ chối",
+    "nguong": {
+      "ty_le_bao_ve": ">= 0.95",
+      "ty_le_che_nham": "<= 0.05",
+      "dat_tren": "dev"
+    }
+  },
+  "ngay": "2026-11-28",
+  "so_lan_do_test": 2,
+  "moc_0": {
+    "typescript": {
+      "dev": {
+        "bo_che": "typescript_anDanhChoNgoai",
+        "tap": "dev",
+        "so_cau": 2000,
+        "so_nhan": 1464,
+        "bao_ve": 107,
+        "ty_le_bao_ve": 0.0731,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 188,
+            "bao_ve": 95
+          },
+          "PATIENT_ID": {
+            "so_nhan": 1276,
+            "bao_ve": 12
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 4,
+        "ty_le_che_nham": 0.0133
+      },
+      "test": {
+        "bo_che": "typescript_anDanhChoNgoai",
+        "tap": "test",
+        "so_cau": 3000,
+        "so_nhan": 2323,
+        "bao_ve": 174,
+        "ty_le_bao_ve": 0.0749,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 318,
+            "bao_ve": 169
+          },
+          "PATIENT_ID": {
+            "so_nhan": 2005,
+            "bao_ve": 5
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 4,
+        "ty_le_che_nham": 0.0133
+      }
+    },
+    "python": {
+      "dev": {
+        "bo_che": "python_ClinicalDeidentifier",
+        "tap": "dev",
+        "so_cau": 2000,
+        "so_nhan": 1464,
+        "bao_ve": 22,
+        "ty_le_bao_ve": 0.015,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 188,
+            "bao_ve": 10
+          },
+          "PATIENT_ID": {
+            "so_nhan": 1276,
+            "bao_ve": 12
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 1,
+        "ty_le_che_nham": 0.0033
+      },
+      "test": {
+        "bo_che": "python_ClinicalDeidentifier",
+        "tap": "test",
+        "so_cau": 3000,
+        "so_nhan": 2323,
+        "bao_ve": 19,
+        "ty_le_bao_ve": 0.0082,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 318,
+            "bao_ve": 13
+          },
+          "PATIENT_ID": {
+            "so_nhan": 2005,
+            "bao_ve": 6
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 1,
+        "ty_le_che_nham": 0.0033
+      }
+    }
+  },
+  "sau_khi_va": {
+    "typescript": {
+      "dev": {
+        "bo_che": "typescript_anDanhChoNgoai",
+        "tap": "dev",
+        "so_cau": 2000,
+        "so_nhan": 1464,
+        "bao_ve": 1427,
+        "ty_le_bao_ve": 0.9747,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 188,
+            "bao_ve": 173
+          },
+          "PATIENT_ID": {
+            "so_nhan": 1276,
+            "bao_ve": 1254
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 4,
+        "ty_le_che_nham": 0.0133
+      },
+      "test": {
+        "bo_che": "typescript_anDanhChoNgoai",
+        "tap": "test",
+        "so_cau": 3000,
+        "so_nhan": 2323,
+        "bao_ve": 2183,
+        "ty_le_bao_ve": 0.9397,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 318,
+            "bao_ve": 295
+          },
+          "PATIENT_ID": {
+            "so_nhan": 2005,
+            "bao_ve": 1888
+          }
+        },
+        "so_cau_tu_choi": 0,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 4,
+        "ty_le_che_nham": 0.0133
+      }
+    },
+    "python": {
+      "dev": {
+        "bo_che": "python_ClinicalDeidentifier",
+        "tap": "dev",
+        "so_cau": 2000,
+        "so_nhan": 1464,
+        "bao_ve": 1425,
+        "ty_le_bao_ve": 0.9734,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 188,
+            "bao_ve": 171
+          },
+          "PATIENT_ID": {
+            "so_nhan": 1276,
+            "bao_ve": 1254
+          }
+        },
+        "so_cau_tu_choi": 2,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 2,
+        "ty_le_che_nham": 0.0067
+      },
+      "test": {
+        "bo_che": "python_ClinicalDeidentifier",
+        "tap": "test",
+        "so_cau": 3000,
+        "so_nhan": 2323,
+        "bao_ve": 2178,
+        "ty_le_bao_ve": 0.9376,
+        "theo_loai": {
+          "NAME": {
+            "so_nhan": 318,
+            "bao_ve": 290
+          },
+          "PATIENT_ID": {
+            "so_nhan": 2005,
+            "bao_ve": 1888
+          }
+        },
+        "so_cau_tu_choi": 2,
+        "so_cau_hoi_vimedaqa": 300,
+        "che_nham": 2,
+        "ty_le_che_nham": 0.0067
+      }
+    }
+  },
+  "doi_chieu_so_cu": {
+    "tep": "docs/ket-qua/da-nguon-doc-lap.json",
+    "PhoNER_COVID19_test_1000": {
+      "gold_pii_name_id_tong": 847,
+      "gold_pii_name_id_che_duoc": 10,
+      "pct": 1.2
+    },
+    "khac_biet": "Bản cũ: 1.000 câu đầu của test, khớp chuỗi con không ranh giới, không tính câu bị từ chối, chỉ bộ Python. Bản này: cả 3.000 câu test, khớp có ranh giới, câu bị từ chối tính là được bảo vệ, đo cả hai bộ che."
+  }
+}
