@@ -670,7 +670,7 @@ BO_22_CAU_HOI_BGK = [
         "Cơ chế ký duyệt WORM SHA-256 của hệ thống chống sửa lén hoạt động cụ thể ra sao? Nếu kẻ có quyền quản trị máy chủ mở trực tiếp file SQLite xoá dòng cuối hoặc xoá trắng bảng thì sao?",
         "Nhóm đã thiết kế **3 lớp khóa chéo độc lập**: (1) Trigger SQLite chặn trực tiếp lệnh `UPDATE/DELETE`; (2) Chuỗi băm nối tiếp `prev_hash -> curr_hash` từ `GENESIS_HASH_WORM`; và (3) **Tệp neo ngoài `.anchor.json` + nhật ký `.jsonl`** để bắt quả tang cả tấn công cắt đuôi (tail truncation), cắt đầu hoặc xoá trắng bảng.",
         "Triển khai tại `web/may-chu/worm.ts` (`damBaoBangWorm`, `ghiSignOff`, `xacMinhChuoi`) và đối xứng ở tầng Python `src/he_thong/nhat_ky_ky_duyet_worm.py`. Trên trình duyệt, `compileEffectiveNote.ts` tính `SHA-256` chuẩn FIPS 180-4 trên cả nội dung SOAP gốc lẫn mảng quyết định `quyetDuyet/banSuaDuyet` — hễ sửa 1 chữ sau khi ký, `isSignOffStale()` đổi nút sang **`Đã sửa · Ký lại`**.",
-        "Kiểm thử tấn công giả lập trong `web/may-chu/worm.test.ts`: thử `DROP TRIGGER` rồi xoá dòng cuối `seq=3`, xoá dòng đầu `seq=1`, xoá trắng bảng hoặc ghi hỏng `.anchor.json` -> `xacMinhChuoi()` (`GET /api/worm/verify`) đều phát hiện chính xác 100% và chặn ghi đè làm sạch dấu vết (`HTTP 409 WORM Violation`).",
+        "Kiểm thử tấn công giả lập trong `web/may-chu/worm.test.ts`: thử `DROP TRIGGER` rồi xoá dòng cuối `seq=3`, xoá dòng đầu `seq=1`, xoá trắng bảng hoặc ghi hỏng `.anchor.json` -> `xacMinhChuoi()` (`GET /api/worm/verify`) đều bị phát hiện trong cả 4 phép thử và chặn ghi đè làm sạch dấu vết (`HTTP 409 WORM Violation`).",
     ),
     (
         12, "CHUYÊN SÂU", "Trợ lý đa tác tử & Chống lộ PII",

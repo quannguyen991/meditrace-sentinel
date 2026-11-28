@@ -72,9 +72,24 @@ Nguồn số thay thế: `README.md` mục "Kết quả đo", `docs/final/Báo c
 (`flow-1-tong-the-5-tang-guardrails.png`, `flow-2-khoa-bang-chung-k1-k7.png`, `flow-3-an-toan-duoc-ly-cdss.png`) và ảnh
 thừa `flow-4-so-sanh-doi-dau-chatgpt-vs-meditrace.png` được chép đè bằng ảnh đã sửa tương ứng.
 
-### Chưa sửa được
+### Đợt 2 (28/11/2026, chiều)
 
-- 5 tệp do phiên khác đang sửa: `BAO_CAO_CAI_TIEN_CHANG_1.md` (dòng 20: "100% trích dẫn chuỗi con" thiếu điều kiện dữ liệu
+- Đã sửa 5 tệp ghi ở mục dưới (`BAO_CAO_CAI_TIEN_CHANG_1.md`, `Bao_Cao_Nghien_Cuu…md`, `docs/tai-lieu/Báo cáo dự án.md`,
+  `tools/bo_sung_nckh_thang_10.py`, `tools/nang_cap_bao_cao_chuan.py`) theo mục 4.8 của bản nộp: NĐ 13 → Luật 91/2025/QH15 +
+  NĐ 356/2025; "1.330 … 100%" → lần chạy 18/10 + 1.942/27 của 26/11; "chính xác 100%", "sai số tuyệt đối bằng 0" → phép thử
+  đơn vị, chưa đo trên tập độc lập; ẩn danh 100% → PhoNER 10/847; 1.960+ → 1.942. Các tệp này còn thay đổi chưa commit của phiên
+  khác (đổi tên Chốt 2/Chốt 7), nên chưa commit.
+- `tools/tao_word_qna_giam_khao.py` (mã sinh Word bộ Q&A, chưa được sửa ở đợt 1): 1.974/25 → 1.942/27, 0/30.136 kèm điều kiện,
+  11,8% ghi "lạc quan", Câu 2 thêm phép đo thương mại 1,4%/7,6% + luật mới, F1 66,1 → 70,8 ghi bộ đổi chủ thể + 0,939/0,748,
+  ViHealthQA. `tao_cam_nang…py`: "phát hiện chính xác 100%" (WORM) → "4 phép thử". Đã sinh lại hai bộ Word này.
+- Các `.docx` không còn mã sinh chạy được (thiếu tệp gốc ở Downloads) được thay chữ trực tiếp: `docs/final/Báo cáo dự án*.docx`,
+  `Báo cáo nghiên cứu khoa học*.docx`, `Kê khai…`, `Nhật ký…`, và bản tương ứng ở `docs/tai-lieu/` + gốc repo. Bản trước khi sửa
+  lưu ở `scratch/sao-luu-docx-28-11/`. Chỉ còn "nghị định 13" viết thường trong lời nhắc người dùng gõ (trích dẫn lịch sử, giữ
+  nguyên) và câu "thay Nghị định 13/2023" (đúng).
+
+### Chưa sửa được (đợt 1)
+
+- 5 tệp do phiên khác đang sửa (đã sửa ở đợt 2): `BAO_CAO_CAI_TIEN_CHANG_1.md` (dòng 20: "100% trích dẫn chuỗi con" thiếu điều kiện dữ liệu
   tự sinh; dòng 241: "1.960+" khác README 1.942), `docs/tai-lieu/Bao_Cao_Nghien_Cuu_Khoa_Hoc_MediTrace_Sentinel.md`
   (dòng 21, 153, 167, 180, 319, 362: NĐ 13; 21, 316: "1.330 … 100%"; 317–319: "chính xác 100%" DDI/eGFR/ẩn danh),
   `docs/tai-lieu/Báo cáo dự án.md` (dòng 8, 203, 214, 227, 241, 251, 362, 392, 410: NĐ 13; 8, 359: "1.330 … 100%";

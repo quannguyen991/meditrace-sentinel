@@ -1,100 +1,139 @@
 # Bản đồ mã nguồn MediTrace Sentinel
 
-Tài liệu này giúp tìm nhanh **phần nào của hệ thống nằm ở tệp nào**. Mỗi tệp Python trong `src/` cũng có một khung ghi chú ở đầu tệp ghi: thuộc hệ thống nào, làm gì, gọi tới tệp nào, được tệp nào dùng, và tên cũ.
+> **Tài liệu này để làm gì?** Để tìm nhanh: *muốn xem phần X thì mở tệp nào*.
+> Muốn hiểu cả hệ thống chạy ra sao thì đọc [`docs/GIAI_THICH_CAU_TRUC_DU_AN.md`](docs/GIAI_THICH_CAU_TRUC_DU_AN.md). Muốn chuẩn bị trả lời giám khảo thì đọc [`docs/HOI_DAP_BGK.md`](docs/HOI_DAP_BGK.md).
+> Cập nhật: 28/11/2026.
+
+## Đọc bản đồ thế nào (30 giây)
+
+1. **Biết mình cần gì** → tra bảng [Giám khảo hỏi gì → mở tệp nào](#giám-khảo-hỏi-gì--mở-tệp-nào).
+2. **Biết thư mục** → tra bảng [8 thư mục trong `src/`](#8-thư-mục-trong-src).
+3. **Biết tên tệp cũ** → tra bảng [Đối chiếu tên cũ](#đối-chiếu-tên-cũ-trước-27112026) ở cuối.
+4. Mở tệp bất kỳ, **3 dòng đầu** cho biết: *Làm gì* · *Vào → Ra* · *Đọc từ hàm nào*.
+
+**Ký hiệu trong bảng `duong_ong/`:** ✅ = chạy trong luồng khám thật · 🧪 = chỉ dùng cho nhánh thử nghiệm, đo đạc hoặc chạy riêng.
+
+## Hệ thống trong một câu
+
+> **AI chỉ đọc hiểu, chương trình kiểm từng dòng, bác sĩ quyết định.**
+
+Hình dung MediTrace là **một phòng thư ký ghi hồ sơ cho bác sĩ**:
+
+| Bộ phận | Hình dung | Thư mục |
+|---|---|---|
+| Tai nghe | Ghi âm, chép thành chữ, biết ai đang nói | `src/audio/` |
+| **Dây chuyền** ★ | Biến lời nói thành bản nháp, từng trạm một (b0 → b7) | `src/duong_ong/` |
+| Người soát lỗi | Đọc lại từng dòng để bắt lỗi khó thấy | `src/canh_bao/` |
+| Quầy giao dịch | Cửa để giao diện web gọi vào; che danh tính; sổ ký | `src/he_thong/` |
+| Màn hình bác sĩ | Đọc, sửa, nghe lại, ký | `web/` |
+| Ngân hàng đề | Sinh cuộc khám giả lập để luyện và thi | `src/bo_du_lieu/` |
+| Lớp học cho AI | Dạy AI ở trạm b1 | `src/huan_luyen/` |
+| Phòng khảo thí | Chấm điểm, sinh mọi con số trong báo cáo | `src/do_luong/` |
+| Tủ dụng cụ bên cạnh | Thuốc, xét nghiệm, BHYT, giấy tờ — chỉ gợi ý | `src/cong_cu_lam_sang/` |
 
 ## Đường đi của một ca khám
 
 ```
-Lời nói / tệp âm thanh
-   │  src/audio/                      chép lời (PhoWhisper) + tách người nói — chạy tại chỗ
+🎤 Bác sĩ và người bệnh nói chuyện
+   │
+   │  src/audio/                     chép lời + tách người nói (tại máy, không gửi ra ngoài)
+   │                                 → bác sĩ xác nhận ai là ai; chưa xong thì chưa dựng nháp
    ▼
-Lời thoại theo lượt
-   │  src/duong_ong/b0_*              chuẩn hoá phương ngữ, cắt đoạn (giữ nguyên văn)
-   │  src/duong_ong/b1_*  ◄── AI      mô hình Qwen3-4B + adapter rút từng MỆNH ĐỀ kèm câu trích
-   │  src/duong_ong/b2_*              gom người: thông tin nói về ai
-   │  src/duong_ong/b3_*              cập nhật trạng thái: tự sửa, mâu thuẫn
-   │  src/duong_ong/b4_*              kiểm căn cứ: K1–K7 với đúng lượt nói  
-   │  src/canh_bao/                   lớp cảnh báo lỗi khó thấy
-   │  src/duong_ong/b5_*              xếp chỗ: thân bản nháp / Cần xác nhận / loại → viết bản nháp
-   │  src/duong_ong/b6_*              gợi ý câu hỏi lại
+📝 Lời thoại theo lượt
+   │
+   │  src/duong_ong/b0_*             hiểu từ địa phương, nhưng giữ nguyên lời gốc
+   │  src/duong_ong/b1_*   🤖 AI     rút từng thông tin nhỏ (MỆNH ĐỀ) kèm câu nói gốc
+   │  src/duong_ong/b2_*             thông tin này của ai? (bệnh nhân hay người nhà)
+   │  src/duong_ong/b3_*             người bệnh nói lại / hai người nói trái nhau
+   │  src/duong_ong/b4_*             kiểm 7 điều K1–K7: câu trích có thật, đúng người, đúng liều…
+   │  src/duong_ong/b5_*             chắc thì vào bản nháp, chưa chắc thì vào "Cần xác nhận"
+   │  src/duong_ong/b6_*             gợi ý tối đa 3 câu hỏi lại người bệnh
+   │
+   │  src/canh_bao/                  soát lại từng dòng lần nữa; dòng đáng ngờ bị kéo sang "Cần xác nhận"
    ▼
-Bản nháp + mục "Cần xác nhận"
-   │  src/he_thong/dich_vu_http.py    dịch vụ HTTP tại chỗ
-   │  web/                            giao diện bác sĩ: duyệt, sửa, ký (chặn ký khi còn mục chưa xác nhận)
+📄 Bản nháp + mục "Cần xác nhận"
+   │
+   │  src/he_thong/dich_vu_http.py   cửa vào của lõi Python
+   │  web/                           bác sĩ duyệt, sửa, nghe lại; còn mục chưa xác nhận thì không ký được
    ▼
-Bác sĩ ký duyệt → nhật ký WORM có chuỗi băm
+✍️ Bác sĩ ký → sổ ký chỉ ghi thêm, không sửa xoá được
 ```
 
-Điều phối toàn bộ các bước nằm ở `src/duong_ong/chay_duong_ong.py` (nhánh C). **Chỉ bước 1 dùng mô hình AI; mọi bước khác là luật đọc được.**
+Người điều khiển cả dây chuyền: `src/duong_ong/chay_duong_ong.py`. Dịch vụ chạy nhánh **`C_khoa_hoi`** (7 bước b0–b6; màn hình duyệt do web làm). **Chỉ bước b1 dùng AI; mọi bước khác là luật đọc được.**
 
 ## Giám khảo hỏi gì → mở tệp nào
 
-| Câu hỏi | Mở tệp |
-|---|---|
-| Mô hình AI nằm ở bước nào, nhận gì và trả gì? | src/duong_ong/chay_duong_ong.py (nhánh C), src/duong_ong/b1_cau_truc_menh_de.py, src/huan_luyen/huan_luyen_sft.py (lời nhắc hệ thống) |
-| Làm sao biết thông tin nói về ai (bệnh nhân hay người nhà)? | src/duong_ong/b2_gom_nguoi_thuc_the.py, src/duong_ong/b2_bu_chu_ngu_tinh_luoc.py |
-| Người bệnh tự sửa lời ("một tuần… à không, mười ngày") thì xử lý sao? | src/duong_ong/b3_cap_nhat_trang_thai.py |
-| Kiểm căn cứ / chống bịa đặt ở đâu? | src/duong_ong/b4_kiem_can_cu.py (K1–K6 kiểm căn cứ, K7 loại thông tin đã bị thay thế) |
-| Mục "Cần xác nhận" được quyết định thế nào? | src/duong_ong/b5_xep_cho_cong_rui_ro.py |
-| Bản nháp được viết ra bằng gì, có dùng AI không? | src/duong_ong/b5_viet_ban_nhap.py (mẫu câu cố định, không dùng mô hình) |
-| Lớp cảnh báo bắt những lỗi gì? | src/canh_bao/ (bắt đầu từ phat_hien.py và gop.py) |
-| Chặn ký duyệt khi còn mục chưa xác nhận ở đâu? | web/src/lib/kyDuyet.ts, web/may-chu/routes/sign-off.ts, web/may-chu/worm.ts |
-| Dữ liệu mô phỏng được sinh thế nào? Có trùng giữa train và test không? | src/bo_du_lieu/sinh_hoi_thoai_viet.py, src/bo_du_lieu/kho_khuon.py, src/bo_du_lieu/chia_tap_theo_khuon.py, src/do_luong/kiem_nghiem_ngoai_khuon.py |
-| Con số tỷ lệ bỏ sót / F1 / SER tính ở đâu? | src/do_luong/do_bo_sot.py, src/do_luong/cham_he_thong.py, src/do_luong/do_dac.py |
-| Vì sao ROUGE không đủ? Thước đo riêng là gì? | src/do_luong/thuoc_do_quy_gan.py, src/do_luong/chung_chi_thuoc_do.py |
-| Huấn luyện mô hình thế nào, tốn bao nhiêu VRAM? | src/huan_luyen/huan_luyen_sft.py, src/huan_luyen/loss_theo_doan.py |
-| Giọng nói được chép lời ở đâu, có gửi ra ngoài không? | src/audio/ (PhoWhisper chạy tại chỗ), web/may-chu/routes/asr.ts |
-| Phần nào gọi AI bên ngoài? Có lộ dữ liệu bệnh nhân không? | web/may-chu/routes/llm-ngoai.ts (mặc định tắt), web/may-chu/tro-ly/an-danh.ts, src/he_thong/khu_dinh_danh.py |
-| Tra cứu tài liệu y khoa lấy từ đâu? | web/may-chu/tra-cuu/nguon-ngoai.ts (PubMed, WHO, openFDA, kcb.vn…) |
-| Tiền kiểm BHYT / ICD-10? | src/cong_cu_lam_sang/tien_kiem_bhyt_va_khoi_phuc_bo_sot.py, src/cong_cu_lam_sang/kiem_toan_xml_bhyt.py |
-| Kiểm tương tác thuốc, dị ứng, chỉnh liều? | src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py, di_ung_cheo.py, hieu_chinh_lieu.py, tri_thuc_thuoc.py |
-| Giao diện web gọi lõi Python thế nào? | web/server.ts → src/he_thong/dich_vu_http.py (hợp đồng: src/he_thong/hop_dong_api.py ↔ web/src/types/api-contract.ts) |
+| Câu hỏi | Mở tệp | Trả lời một dòng |
+|---|---|---|
+| AI nằm ở đâu, nhận gì, trả gì? | `src/duong_ong/chay_duong_ong.py`, `src/duong_ong/b1_cau_truc_menh_de.py`, `src/huan_luyen/huan_luyen_sft.py` | Chỉ bước b1; nhận lời thoại, trả bảng mệnh đề kèm câu trích |
+| Làm sao bắt AI ra đúng khung, không viết lan man? | `src/huan_luyen/chon_mo_hinh_bakeoff.py` (hàm `_ep_json`) | Giải mã có ràng buộc: token sai khung bị đặt xác suất bằng 0 |
+| Thông tin nói về ai (bệnh nhân hay người nhà)? | `src/duong_ong/b2_gom_nguoi_thuc_the.py` | Tách riêng "ai nói" và "nói về ai" |
+| Người bệnh tự sửa lời ("một tuần… à không, mười ngày")? | `src/duong_ong/b3_cap_nhat_trang_thai.py` | Bản cũ thành "bị thay thế", không xoá |
+| Kiểm căn cứ, chống bịa ở đâu? | `src/duong_ong/b4_kiem_can_cu.py` | 7 phép kiểm K1–K7, giải thích ngay đầu tệp |
+| Mục "Cần xác nhận" được quyết định thế nào? | `src/duong_ong/b5_xep_cho_cong_rui_ro.py`, `src/canh_bao/gop.py` | Điểm rủi ro + chính sách D; dị ứng, thuốc chặt nhất |
+| Bản nháp viết bằng gì, có dùng AI không? | `src/duong_ong/b5_viet_ban_nhap.py` | Mẫu câu cố định, không dùng AI |
+| Lớp cảnh báo bắt những lỗi gì? | `src/canh_bao/` (bắt đầu từ `loai.py` và `gop.py`) | 13 nhóm, 56 mã lỗi |
+| Chặn ký khi còn mục chưa xác nhận ở đâu? | `web/src/lib/kyDuyet.ts`, `web/may-chu/routes/sign-off.ts`, `web/may-chu/worm.ts` | Khoá hai tầng: giao diện và máy chủ |
+| Hồ sơ bị sửa sau khi ký thì có xuất ra ngoài được không? | `web/may-chu/kiem-ky-may-chu.ts` | Không: xuất từ bản chụp lúc ký, đối chiếu băm với sổ WORM |
+| Máy chủ web gọi ra những địa chỉ mạng nào? | `web/may-chu/loi-ra-mang.ts`, `web/may-chu/noi-luu-du-lieu.ts` | Danh sách khai báo duy nhất; thêm lối ra mà không khai thì kiểm thử đỏ |
+| Dữ liệu sinh thế nào? Train và test có trùng không? | `src/bo_du_lieu/sinh_hoi_thoai_viet.py`, `src/bo_du_lieu/kho_khuon.py`, `src/bo_du_lieu/chia_tap_theo_khuon.py`, `src/do_luong/kiem_nghiem_ngoai_khuon.py` | 657 khuôn bệnh; chia theo khuôn, 0 khuôn trùng |
+| Tỷ lệ bỏ sót, F1, SER tính ở đâu? | `src/do_luong/do_bo_sot.py`, `src/do_luong/cham_he_thong.py`, `src/do_luong/do_dac.py` | Bỏ sót 43,1% → 11,5% |
+| Vì sao ROUGE không đủ? Thước đo riêng là gì? | `src/do_luong/thuoc_do_quy_gan.py`, `src/do_luong/chung_chi_thuoc_do.py` | ROUGE cho 100% khi ghi dị ứng của mẹ sang con; thước đo riêng chấm "cái gì" và "của ai" |
+| Huấn luyện thế nào, tốn bao nhiêu bộ nhớ GPU? | `src/huan_luyen/huan_luyen_sft.py`, `src/huan_luyen/loss_theo_doan.py` | Qwen3-4B + QLoRA, nạp 4-bit |
+| Giọng nói chép ở đâu, có gửi ra ngoài không? | `src/audio/`, `web/may-chu/routes/asr.ts` | PhoWhisper chạy tại máy |
+| Phần nào gọi AI bên ngoài? Có lộ dữ liệu không? | `web/may-chu/routes/llm-ngoai.ts`, `web/may-chu/tro-ly/an-danh.ts`, `src/he_thong/khu_dinh_danh.py` | Mặc định tắt; ẩn danh trước khi gửi; không dùng để viết bản nháp |
+| Tra cứu tài liệu y khoa lấy từ đâu, kiểm thế nào? | `web/may-chu/tra-cuu/nguon-ngoai.ts`, `web/may-chu/tra-cuu/kiem-dinh-so.ts` | PubMed, WHO, openFDA, kcb.vn…; chấm điểm tài liệu, kiểm con số trong câu trả lời |
+| Tiền kiểm BHYT / ICD-10? | `src/cong_cu_lam_sang/tien_kiem_bhyt_va_khoi_phuc_bo_sot.py`, `src/cong_cu_lam_sang/kiem_toan_xml_bhyt.py` | Rà gói XML1–XML5 trước khi gửi |
+| Kiểm tương tác thuốc, dị ứng, chỉnh liều? | `src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py`, `di_ung_cheo.py`, `hieu_chinh_lieu.py`, `tri_thuc_thuoc.py` | Chỉ gợi ý; bảng thuốc chưa có chuyên gia duyệt |
+| Giao diện web gọi lõi Python thế nào? | `web/server.ts` → `src/he_thong/dich_vu_http.py` (hợp đồng: `src/he_thong/hop_dong_api.py` ↔ `web/src/types/api-contract.ts`) | Qua dịch vụ HTTP tại chỗ |
 
-## Các thư mục trong `src/`
+## 8 thư mục trong `src/`
 
-| Thư mục | Hệ thống | Nội dung | Số tệp |
-|---|---|---|---|
-| [`src/duong_ong/`](src/duong_ong/) | **Đường ống dựng bản nháp** | Biến lời thoại thành bản nháp mà mỗi dòng đều có căn cứ. Tiền tố bN_ là số bước (b0 → b7); chỉ bước b1 dùng AI, các bước khác là luật. | 20 |
-| [`src/bo_du_lieu/`](src/bo_du_lieu/) | **Sinh, nạp và chia dữ liệu** | Sinh hội thoại khám bệnh mô phỏng và bộ thử thách, nạp dữ liệu ngoài, chia train / phát triển / kiểm tra theo khuôn bệnh. | 32 |
-| [`src/huan_luyen/`](src/huan_luyen/) | **Huấn luyện mô hình** | Huấn luyện adapter Qwen3 cho bước rút mệnh đề (b1) và chọn mô hình bằng số đo. | 6 |
-| [`src/do_luong/`](src/do_luong/) | **Đo lường và chấm điểm** | Sinh mọi con số trong báo cáo: cham_* là bộ chấm, do_* là các phép đo. | 34 |
-| [`src/cong_cu_lam_sang/`](src/cong_cu_lam_sang/) | **Công cụ lâm sàng hỗ trợ bác sĩ** | Công cụ trong menu Công cụ quanh bản nháp (BHYT, thuốc, xét nghiệm, giấy tờ). Chỉ là gợi ý, không đổi cách dựng bản nháp; bảng tri thức chưa được chuyên gia duyệt. | 20 |
-| [`src/he_thong/`](src/he_thong/) | **Dịch vụ, an toàn và minh bạch** | Dịch vụ HTTP mà web gọi vào, cùng các phần an toàn: khử định danh, rào chắn, nhật ký ký duyệt WORM, khai mã nguồn. | 10 |
-| [`src/canh_bao/`](src/canh_bao/) | **Lớp cảnh báo** | Chạy sau bước kiểm căn cứ: đối chiếu từng dòng với lời thoại để bắt lỗi khó thấy. Toàn bộ là luật. | 10 |
-| [`src/audio/`](src/audio/) | **Âm thanh** | Chép lời và tách người nói, chạy tại chỗ. | 14 |
+| Thư mục | Hình dung | Nội dung | Chạy lúc khám? | Số tệp |
+|---|---|---|---|---|
+| [`src/duong_ong/`](src/duong_ong/) | **Dây chuyền** ★ | Biến lời thoại thành bản nháp có bằng chứng. Tiền tố `bN_` là số trạm | ✅ (một số tệp 🧪) | 22 |
+| [`src/canh_bao/`](src/canh_bao/) | Người soát lỗi | Đối chiếu từng dòng với lời gốc, bắt lỗi khó thấy, quyết định dòng nào cần xác nhận | ✅ | 10 |
+| [`src/he_thong/`](src/he_thong/) | Quầy giao dịch | Dịch vụ HTTP cho web; che danh tính; sổ ký; khai mã nguồn | ✅ | 11 |
+| [`src/audio/`](src/audio/) | Tai nghe | Chép lời và tách người nói, tại máy | ✅ | 23 |
+| [`src/bo_du_lieu/`](src/bo_du_lieu/) | Ngân hàng đề | Sinh hội thoại mô phỏng, bộ thử thách, nạp dữ liệu ngoài, chia tập theo khuôn bệnh | Chạy trước | 32 |
+| [`src/huan_luyen/`](src/huan_luyen/) | Lớp học cho AI | Huấn luyện AI cho bước b1, chọn mô hình bằng số đo | Chạy trước | 6 |
+| [`src/do_luong/`](src/do_luong/) | Phòng khảo thí | `cham_*` là bộ chấm, `do_*` là phép đo | Chạy trước | 37 |
+| [`src/cong_cu_lam_sang/`](src/cong_cu_lam_sang/) | Tủ dụng cụ | Thuốc, xét nghiệm, BHYT, giấy tờ. Chỉ gợi ý, không đổi bản nháp | Khi bác sĩ mở | 20 |
 
 ## Danh sách tệp theo hệ thống
 
 ### Đường ống dựng bản nháp — `src/duong_ong/`
 
-Biến lời thoại thành bản nháp mà mỗi dòng đều có căn cứ. Tiền tố bN_ là số bước (b0 → b7); chỉ bước b1 dùng AI, các bước khác là luật.
+**Hình dung: dây chuyền nhiều trạm.** Biến lời thoại thành bản nháp mà mỗi dòng đều có căn cứ. Tiền tố `bN_` là số trạm (b0 → b7); chỉ trạm b1 dùng AI, các trạm khác là luật. ✅ = chạy trong luồng khám thật (nhánh `C_khoa_hoi`) · 🧪 = nhánh thử nghiệm, đo đạc hoặc chạy riêng.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
-| [b0_cat_doan_van.py](src/duong_ong/b0_cat_doan_van.py) | Bước 0 – Chuẩn hoá đầu vào | Cắt một lời nói thành các đoạn ngắn theo dấu câu, để nơi sinh dữ liệu và nơi kiểm căn cứ cùng dùng một cách cắt. | `src/doan_van.py` |
-| [b0_chuan_hoa_phuong_ngu.py](src/duong_ong/b0_chuan_hoa_phuong_ngu.py) | Bước 0 – Chuẩn hoá đầu vào | Hiểu từ địa phương và khẩu ngữ trong lời bệnh nhân nhưng vẫn giữ nguyên văn, để còn trích dẫn và đối chiếu. | `src/chuan_hoa.py` |
-| [b1_cau_truc_menh_de.py](src/duong_ong/b1_cau_truc_menh_de.py) | Bước 1 – Rút mệnh đề | Định nghĩa bản ghi một mệnh đề (nội dung, chủ thể, người nói, câu trích, lượt căn cứ) và đổi kết quả JSON của mô hình thành bản ghi đó. | `src/phat_bieu.py` |
-| [b1_ep_dau_ra_json.py](src/duong_ong/b1_ep_dau_ra_json.py) | Bước 1 – Rút mệnh đề | Ép mô hình trích mệnh đề đúng định dạng, câu trích khớp nguyên văn, rồi đổi đầu ra thành bản ghi mệnh đề. | `src/trich_xuat_thuc_the.py` |
-| [b1_vi_du_mau_loi_nhac.py](src/duong_ong/b1_vi_du_mau_loi_nhac.py) | Bước 1 – Rút mệnh đề | Giữ các ví dụ mẫu đặt vào lời nhắc để mô hình biết cách rút mệnh đề đúng chủ thể, đúng người nói, đúng định dạng. | `src/vi_du_mau.py` |
-| [b2_bu_chu_ngu_tinh_luoc.py](src/duong_ong/b2_bu_chu_ngu_tinh_luoc.py) | Bước 2 – Gom người | Bù chủ thể cho câu bị lược chủ ngữ theo ngữ cảnh hội thoại, và quản lý vòng đời mệnh đề khi có đính chính hay mâu thuẫn. | `src/may_trang_thai_hoi_thoai.py` |
-| [b2_gom_nguoi_thuc_the.py](src/duong_ong/b2_gom_nguoi_thuc_the.py) | Bước 2 – Gom người | Gom các cách gọi khác nhau (tôi, chồng tôi, thuốc đó) về cùng một chủ thể, phân biệt người nói với người được nói đến. | `src/thuc_the.py` |
-| [b3_cap_nhat_trang_thai.py](src/duong_ong/b3_cap_nhat_trang_thai.py) | Bước 3 – Cập nhật trạng thái | Cập nhật trạng thái mệnh đề bằng luật cố định: bản bị đính chính thì đánh dấu thay thế (không xoá), hai bên trái nhau thì đánh dấu mâu thuẫn. | `src/cap_nhat.py` |
-| [b3_phan_xu_quan_he.py](src/duong_ong/b3_phan_xu_quan_he.py) | Bước 3 – Cập nhật trạng thái | Quyết định quan hệ (bổ sung, đính chính, diễn biến, mâu thuẫn) cho từng cặp mệnh đề ứng viên, bằng luật hoặc bằng một lượt hỏi mô hình. | `src/phan_quan_he.py` |
-| [b3_sinh_cap_ung_vien_quan_he.py](src/duong_ong/b3_sinh_cap_ung_vien_quan_he.py) | Bước 3 – Cập nhật trạng thái | Tìm các cặp mệnh đề có thể liên quan (tự sửa, mâu thuẫn, nối tiếp theo thời gian) để đem đi phân xử quan hệ. | `src/ung_vien_quan_he.py` |
-| [b4_kiem_can_cu.py](src/duong_ong/b4_kiem_can_cu.py) | Bước 4 – Kiểm căn cứ | Kiểm mỗi mệnh đề có thật sự được nói trong lời thoại không — đúng câu, đúng người, đúng mức — trước khi cho vào bản nháp. | `src/khoa_bang_chung.py` |
-| [b4_kiem_day_du.py](src/duong_ong/b4_kiem_day_du.py) | Bước 4 – Kiểm căn cứ | Kiểm bản nháp có bỏ sót mệnh đề còn hiệu lực nào không, và thêm lại chỗ sót khi có căn cứ trong bảng mệnh đề. | `src/kiem_day_du.py` |
-| [b5_diem_rui_ro_quy_gan.py](src/duong_ong/b5_diem_rui_ro_quy_gan.py) | Bước 5 – Xếp chỗ | Chấm điểm rủi ro mệnh đề bị gán nhầm người và đẩy mệnh đề điểm cao sang mục chưa giải quyết theo ngưỡng. | `src/rui_ro_quy_gan.py` |
-| [b5_viet_ban_nhap.py](src/duong_ong/b5_viet_ban_nhap.py) | Bước 5 – Xếp chỗ | Viết bản nháp hồ sơ từ bảng mệnh đề bằng mẫu câu cố định, không dùng mô hình, mỗi mệnh đề vào đúng một mục. | `src/sinh_benh_an.py` |
-| [b5_xep_cho_cong_rui_ro.py](src/duong_ong/b5_xep_cho_cong_rui_ro.py) | Bước 5 – Xếp chỗ | Chấm rủi ro lâm sàng từng mệnh đề và quyết định đưa vào thân bản nháp, mục CẦN XÁC NHẬN kèm lý do, hay loại (vẫn lưu vết). | `src/cong_rui_ro.py` |
-| [b6_goi_y_hoi_lai.py](src/duong_ong/b6_goi_y_hoi_lai.py) | Bước 6 – Hỏi lại và sửa | Chọn ít câu hỏi nhất (tối đa 3) mà giải quyết được nhiều rủi ro nhất để bác sĩ hỏi lại người bệnh. | `src/hoi_lai.py` |
-| [b6_sua_cuc_bo.py](src/duong_ong/b6_sua_cuc_bo.py) | Bước 6 – Hỏi lại và sửa | Kiểm từng câu của bản nháp với bảng mệnh đề và chỉ chuyển chỗ hoặc sửa câu sai, không sinh lại cả bản. | `src/sua_cuc_bo.py` |
-| [b7_ban_duyet_html.py](src/duong_ong/b7_ban_duyet_html.py) | Bước 7 – Bản duyệt | Dựng trang duyệt ba cột (lời thoại, mệnh đề, bản nháp) thành một tệp HTML tự chứa, bấm dòng nào tô đoạn lời thoại dẫn của dòng đó. | `src/giao_dien_duyet.py` |
-| [chay_duong_ong.py](src/duong_ong/chay_duong_ong.py) | Điều phối | Chạy các nhánh so sánh trên tập ca: A và A+ (mốc đối chứng), các nhánh B, C, D qua đường ống b1–b6, rồi ghi kết quả. | `src/nhanh.py` |
-| [chay_nhanh_e.py](src/duong_ong/chay_nhanh_e.py) | Điều phối | Chạy nhánh E: lấy bản nháp của nhánh A, bổ sung chỗ sót và sửa cục bộ bằng bảng mệnh đề, không viết lại bản nháp. | `src/nhanh_e.py` |
+| ✅ [b0_cat_doan_van.py](src/duong_ong/b0_cat_doan_van.py) | Bước 0 – Chuẩn hoá đầu vào | Cắt một lời nói thành các đoạn ngắn theo dấu câu, để nơi sinh dữ liệu và nơi kiểm căn cứ cùng dùng một cách cắt. | `src/doan_van.py` |
+| ✅ [b0_chuan_hoa_phuong_ngu.py](src/duong_ong/b0_chuan_hoa_phuong_ngu.py) | Bước 0 – Chuẩn hoá đầu vào | Hiểu từ địa phương và khẩu ngữ trong lời bệnh nhân nhưng vẫn giữ nguyên văn, để còn trích dẫn và đối chiếu. | `src/chuan_hoa.py` |
+| ✅ [b1_cau_truc_menh_de.py](src/duong_ong/b1_cau_truc_menh_de.py) | Bước 1 – Rút mệnh đề | Định nghĩa bản ghi một mệnh đề (nội dung, chủ thể, người nói, câu trích, lượt căn cứ) và đổi kết quả JSON của mô hình thành bản ghi đó. | `src/phat_bieu.py` |
+| 🧪 [b1_ep_dau_ra_json.py](src/duong_ong/b1_ep_dau_ra_json.py) | Bước 1 – Rút mệnh đề | Ép mô hình trích mệnh đề đúng định dạng, câu trích khớp nguyên văn, rồi đổi đầu ra thành bản ghi mệnh đề. *(🧪 chưa nối vào lúc sinh; bộ ép thật là `_ep_json` trong `huan_luyen/chon_mo_hinh_bakeoff.py`)* | `src/trich_xuat_thuc_the.py` |
+| 🧪 [b1_quet_lai_ve.py](src/duong_ong/b1_quet_lai_ve.py) | Bước 1 – Rút mệnh đề | Tìm các vế hội thoại có tín hiệu lâm sàng mà chưa câu trích nào phủ, hỏi lại mô hình đúng các vế đó rồi gộp mệnh đề mới. *(🧪 tuỳ chọn `quet_lai`, mặc định tắt; thêm 28/11/2026)* | — |
+| ✅ [b1_vi_du_mau_loi_nhac.py](src/duong_ong/b1_vi_du_mau_loi_nhac.py) | Bước 1 – Rút mệnh đề | Giữ các ví dụ mẫu đặt vào lời nhắc để mô hình biết cách rút mệnh đề đúng chủ thể, đúng người nói, đúng định dạng. | `src/vi_du_mau.py` |
+| 🧪 [b2_bu_chu_ngu_tinh_luoc.py](src/duong_ong/b2_bu_chu_ngu_tinh_luoc.py) | Bước 2 – Gom người | Bù chủ thể cho câu bị lược chủ ngữ theo ngữ cảnh hội thoại, và quản lý vòng đời mệnh đề khi có đính chính hay mâu thuẫn. *(🧪 chỉ nhánh `C_khoa_v2` và phép thử 10 bệnh ngoài khuôn)* | `src/may_trang_thai_hoi_thoai.py` |
+| ✅ [b2_gom_nguoi_thuc_the.py](src/duong_ong/b2_gom_nguoi_thuc_the.py) | Bước 2 – Gom người | Gom các cách gọi khác nhau (tôi, chồng tôi, thuốc đó) về cùng một chủ thể, phân biệt người nói với người được nói đến. | `src/thuc_the.py` |
+| ✅ [b3_cap_nhat_trang_thai.py](src/duong_ong/b3_cap_nhat_trang_thai.py) | Bước 3 – Cập nhật trạng thái | Cập nhật trạng thái mệnh đề bằng luật cố định: bản bị đính chính thì đánh dấu thay thế (không xoá), hai bên trái nhau thì đánh dấu mâu thuẫn. | `src/cap_nhat.py` |
+| 🧪 [b3_phan_xu_quan_he.py](src/duong_ong/b3_phan_xu_quan_he.py) | Bước 3 – Cập nhật trạng thái | Quyết định quan hệ (bổ sung, đính chính, diễn biến, mâu thuẫn) cho từng cặp mệnh đề ứng viên, bằng luật hoặc bằng một lượt hỏi mô hình. *(🧪 các nhánh `C_quan_he…`)* | `src/phan_quan_he.py` |
+| 🧪 [b3_sinh_cap_ung_vien_quan_he.py](src/duong_ong/b3_sinh_cap_ung_vien_quan_he.py) | Bước 3 – Cập nhật trạng thái | Tìm các cặp mệnh đề có thể liên quan (tự sửa, mâu thuẫn, nối tiếp theo thời gian) để đem đi phân xử quan hệ. *(🧪 các nhánh `C_quan_he…`)* | `src/ung_vien_quan_he.py` |
+| 🧪 [b4_kiem_noi_dung_trich.py](src/duong_ong/b4_kiem_noi_dung_trich.py) | Bước 4 – Kiểm căn cứ | So nội dung mệnh đề với chính câu trích của nó, chặt hơn K2: chữ không có trong câu trích, chép nguyên lỗi chép âm, bỏ mất vế bổ nghĩa. *(🧪 chưa nối vào đường ống; thêm 28/11/2026)* | — |
+| ✅ [b4_kiem_can_cu.py](src/duong_ong/b4_kiem_can_cu.py) | Bước 4 – Kiểm căn cứ | Kiểm mỗi mệnh đề có thật sự được nói trong lời thoại không — đúng câu, đúng người, đúng mức — trước khi cho vào bản nháp. | `src/khoa_bang_chung.py` |
+| 🧪 [b4_kiem_day_du.py](src/duong_ong/b4_kiem_day_du.py) | Bước 4 – Kiểm căn cứ | Kiểm bản nháp có bỏ sót mệnh đề còn hiệu lực nào không, và thêm lại chỗ sót khi có căn cứ trong bảng mệnh đề. *(🧪 nhánh `D`)* | `src/kiem_day_du.py` |
+| 🧪 [b5_diem_rui_ro_quy_gan.py](src/duong_ong/b5_diem_rui_ro_quy_gan.py) | Bước 5 – Xếp chỗ | Chấm điểm rủi ro mệnh đề bị gán nhầm người và đẩy mệnh đề điểm cao sang mục chưa giải quyết theo ngưỡng. *(🧪 chỉ để đo đường đánh đổi)* | `src/rui_ro_quy_gan.py` |
+| ✅ [b5_viet_ban_nhap.py](src/duong_ong/b5_viet_ban_nhap.py) | Bước 5 – Xếp chỗ | Viết bản nháp hồ sơ từ bảng mệnh đề bằng mẫu câu cố định, không dùng mô hình, mỗi mệnh đề vào đúng một mục. | `src/sinh_benh_an.py` |
+| ✅ [b5_xep_cho_cong_rui_ro.py](src/duong_ong/b5_xep_cho_cong_rui_ro.py) | Bước 5 – Xếp chỗ | Chấm rủi ro lâm sàng từng mệnh đề và quyết định đưa vào thân bản nháp, mục CẦN XÁC NHẬN kèm lý do, hay loại (vẫn lưu vết). | `src/cong_rui_ro.py` |
+| ✅ [b6_goi_y_hoi_lai.py](src/duong_ong/b6_goi_y_hoi_lai.py) | Bước 6 – Hỏi lại và sửa | Chọn ít câu hỏi nhất (tối đa 3) mà giải quyết được nhiều rủi ro nhất để bác sĩ hỏi lại người bệnh. | `src/hoi_lai.py` |
+| 🧪 [b6_sua_cuc_bo.py](src/duong_ong/b6_sua_cuc_bo.py) | Bước 6 – Hỏi lại và sửa | Kiểm từng câu của bản nháp với bảng mệnh đề và chỉ chuyển chỗ hoặc sửa câu sai, không sinh lại cả bản. *(🧪 nhánh `D`)* | `src/sua_cuc_bo.py` |
+| 🧪 [b7_ban_duyet_html.py](src/duong_ong/b7_ban_duyet_html.py) | Bước 7 – Bản duyệt | Dựng trang duyệt ba cột (lời thoại, mệnh đề, bản nháp) thành một tệp HTML tự chứa, bấm dòng nào tô đoạn lời thoại dẫn của dòng đó. *(🧪 lệnh dựng HTML riêng; web làm việc này)* | `src/giao_dien_duyet.py` |
+| ✅ [chay_duong_ong.py](src/duong_ong/chay_duong_ong.py) | Điều phối | Chạy các nhánh so sánh trên tập ca: A và A+ (mốc đối chứng), các nhánh B, C, D qua đường ống b1–b6, rồi ghi kết quả. | `src/nhanh.py` |
+| 🧪 [chay_nhanh_e.py](src/duong_ong/chay_nhanh_e.py) | Điều phối | Chạy nhánh E: lấy bản nháp của nhánh A, bổ sung chỗ sót và sửa cục bộ bằng bảng mệnh đề, không viết lại bản nháp. *(🧪 nhánh so sánh E)* | `src/nhanh_e.py` |
 
 ### Sinh, nạp và chia dữ liệu — `src/bo_du_lieu/`
 
-Sinh hội thoại khám bệnh mô phỏng và bộ thử thách, nạp dữ liệu ngoài, chia train / phát triển / kiểm tra theo khuôn bệnh.
+**Hình dung: ngân hàng đề.** Chạy trước, không nằm trong lúc khám. Sinh hội thoại khám bệnh mô phỏng và bộ thử thách, nạp dữ liệu ngoài, chia train / phát triển / kiểm tra theo khuôn bệnh.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
@@ -133,7 +172,7 @@ Sinh hội thoại khám bệnh mô phỏng và bộ thử thách, nạp dữ li
 
 ### Huấn luyện mô hình — `src/huan_luyen/`
 
-Huấn luyện adapter Qwen3 cho bước rút mệnh đề (b1) và chọn mô hình bằng số đo.
+**Hình dung: lớp học cho AI.** Chạy trước, trên GPU Kaggle. Huấn luyện adapter Qwen3 cho bước rút mệnh đề (b1) và chọn mô hình bằng số đo.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
@@ -146,7 +185,7 @@ Huấn luyện adapter Qwen3 cho bước rút mệnh đề (b1) và chọn mô h
 
 ### Đo lường và chấm điểm — `src/do_luong/`
 
-Sinh mọi con số trong báo cáo: cham_* là bộ chấm, do_* là các phép đo.
+**Hình dung: phòng khảo thí.** Chạy trước, khi làm báo cáo. Sinh mọi con số trong báo cáo: cham_* là bộ chấm, do_* là các phép đo.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
@@ -184,10 +223,13 @@ Sinh mọi con số trong báo cáo: cham_* là bộ chấm, do_* là các phép
 | [nguon_lap_cau.py](src/do_luong/nguon_lap_cau.py) | Chất lượng dữ liệu | Truy mỗi câu lặp của bộ hội thoại về chỗ sinh ra nó trong bộ sinh: nhóm câu, mẫu f-string, câu cố định hay ghép. | `src/nguon_lap_cau.py` |
 | [quet_an_toan_duoc_ly_v2.py](src/do_luong/quet_an_toan_duoc_ly_v2.py) | Chất lượng dữ liệu | Quét bộ dữ liệu v2 tìm tương tác thuốc nguy hiểm, dị ứng người nhà bị gán cho bệnh nhân, đính chính hỏng và trích dẫn sai. | `src/quet_an_toan_duoc_ly_v2.py` |
 | [thuoc_do_quy_gan.py](src/do_luong/thuoc_do_quy_gan.py) | Thước đo | Đo mệnh đề có được gán đúng người không: ghép theo nội dung trước, rồi đếm cặp khớp luôn chủ thể, thứ ROUGE không thấy. | `src/thuoc_do_quy_gan.py` |
+| [cham_nhieu_nguong.py](src/do_luong/cham_nhieu_nguong.py) | Bộ chấm | Chấm ghép mệnh đề ở nhiều ngưỡng giống từ, để xem kết luận có phụ thuộc vào một ngưỡng duy nhất không (thêm 28/11/2026). | — |
+| [dong_thuan_nhan.py](src/do_luong/dong_thuan_nhan.py) | Chất lượng dữ liệu | Tính độ đồng thuận giữa hai người gán nhãn (Cohen κ); đo độ nhất quán của nhãn người, không đo độ đúng của hệ thống (thêm 28/11/2026). | — |
+| [do_sao_chep.py](src/do_luong/do_sao_chep.py) | Phép đo | Đo các mảnh chữ liên tiếp trùng giữa bản nháp và hội thoại, tức bản nháp chép lại lời gốc đến mức nào (thêm 28/11/2026). | — |
 
 ### Công cụ lâm sàng hỗ trợ bác sĩ — `src/cong_cu_lam_sang/`
 
-Công cụ trong menu Công cụ quanh bản nháp (BHYT, thuốc, xét nghiệm, giấy tờ). Chỉ là gợi ý, không đổi cách dựng bản nháp; bảng tri thức chưa được chuyên gia duyệt.
+**Hình dung: tủ dụng cụ bên cạnh bàn khám.** Công cụ trong menu Công cụ quanh bản nháp (BHYT, thuốc, xét nghiệm, giấy tờ). Chỉ là gợi ý, không đổi cách dựng bản nháp; bảng tri thức chưa được chuyên gia duyệt.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
@@ -214,7 +256,7 @@ Công cụ trong menu Công cụ quanh bản nháp (BHYT, thuốc, xét nghiệm
 
 ### Dịch vụ, an toàn và minh bạch — `src/he_thong/`
 
-Dịch vụ HTTP mà web gọi vào, cùng các phần an toàn: khử định danh, rào chắn, nhật ký ký duyệt WORM, khai mã nguồn.
+**Hình dung: quầy giao dịch và phòng bảo vệ.** Dịch vụ HTTP mà web gọi vào, cùng các phần an toàn: khử định danh, rào chắn, nhật ký ký duyệt WORM, khai mã nguồn.
 
 | Tệp | Thuộc | Làm gì | Tên cũ |
 |---|---|---|---|
@@ -228,23 +270,30 @@ Dịch vụ HTTP mà web gọi vào, cùng các phần an toàn: khử định d
 | [nhat_ky_ky_duyet_worm.py](src/he_thong/nhat_ky_ky_duyet_worm.py) | An toàn | Ghi nhật ký ký duyệt chỉ thêm, không sửa xoá, nối các dòng bằng chuỗi băm SHA-256 để phát hiện can thiệp. | `src/worm_audit_log.py` |
 | [nhat_ky_loi_nhac.py](src/he_thong/nhat_ky_loi_nhac.py) | Minh bạch | Trích các lời nhắc của người dùng dẫn tới sửa mã nguồn từ bản ghi phiên làm việc, che thông tin nhạy cảm. | `src/nhat_ky_loi_nhac.py` |
 | [rao_chan_an_toan.py](src/he_thong/rao_chan_an_toan.py) | An toàn | Chặn đầu ra không an toàn bằng nhiều tầng kiểm: chất lượng chép lời, nhất quán người nói, hành vi hội thoại, bằng chứng, an toàn lâm sàng. | `src/guardrails.py` |
+| [che_log.py](src/he_thong/che_log.py) | An toàn | Che thông tin định danh trước khi ghi log; khi có lỗi chỉ in tên lớp lỗi, vị trí và thông điệp đã che (thêm 28/11/2026). | — |
 
 ### Lớp cảnh báo — `src/canh_bao/`
 
-| Tệp | Làm gì |
-|---|---|
-| [phat_hien.py](src/canh_bao/phat_hien.py) | Phát hiện lỗi theo từng mệnh đề so với lời thoại: sai người, đảo phủ định, sai số, sai bên trái/phải, sai mức độ, nhầm thời điểm. |
-| [toan_ca.py](src/canh_bao/toan_ca.py) | Cảnh báo ở mức cả ca: thông tin bị bỏ sót, mâu thuẫn giữa các dòng, giá trị đã bị đính chính mà vẫn giữ, ghi lặp. |
-| [bo_sot.py](src/canh_bao/bo_sot.py) | Tìm những đoạn hội thoại có thông tin lâm sàng mà bản nháp chưa ghi, dùng chung cho cả hệ thống. |
-| [lam_sang.py](src/canh_bao/lam_sang.py) | Cảnh báo theo kiến thức lâm sàng: liều vượt trần ngày, tương tác thuốc, kê thuốc cho người đang dị ứng. |
-| [asr.py](src/canh_bao/asr.py) | Cảnh báo dòng bản nháp có thể sai vì lỗi chép giọng nói, tách riêng do xảy ra trước bước mô hình. |
-| [gop.py](src/canh_bao/gop.py) | Chạy mọi bộ phát hiện, gộp cảnh báo trùng, chọn cảnh báo chính và áp chính sách D để quyết định dòng nào bị chặn. |
-| [loai.py](src/canh_bao/loai.py) | Định nghĩa chung của lớp cảnh báo: các loại lỗi, cấu trúc một cảnh báo và mức nghiêm trọng. |
-| [loi_noi.py](src/canh_bao/loi_noi.py) | Chuẩn hoá lời nói tiếng Việt cho các luật: tách ý, nhận câu hỏi, bỏ từ đệm. |
-| [so_lieu.py](src/canh_bao/so_lieu.py) | Tách con số kèm đơn vị trong câu tiếng Việt để so số ghi trong bản nháp với số được nói. |
-| [nhat_ky.py](src/canh_bao/nhat_ky.py) | Ghi các cảnh báo ra tệp nhật ký từng dòng để phục vụ nghiên cứu sau này. |
+**Hình dung: tổ soát lỗi.** Chạy **sau** đường ống, đọc **bảng mệnh đề + lời thoại gốc** (không đọc văn bản nháp), rồi áp **chính sách D**: dòng nào đáng ngờ thì bị kéo sang "Cần xác nhận", kể cả khi đường ống đã cho qua. Mười tệp chia thành bốn vai:
+
+| Vai | Tệp | Câu hỏi nó trả lời | Làm gì |
+|---|---|---|---|
+| Sổ quy định | [loai.py](src/canh_bao/loai.py) | Có những loại lỗi nào? | Định nghĩa 13 nhóm, 56 mã lỗi, mức nghiêm trọng, độ tin cậy của từng bộ bắt lỗi, 7 nhóm chưa bắt được. Không tự bắt lỗi |
+| Bắt lỗi từng dòng | [phat_hien.py](src/canh_bao/phat_hien.py) | Dòng này có khớp lời gốc không? | Sai người, đảo có/không, sai số, sai trái/phải, sai mức độ, nhầm thời điểm |
+| Bắt lỗi cả bản | [toan_ca.py](src/canh_bao/toan_ca.py) | Các dòng có mâu thuẫn, lặp, thiếu không? | Hai dòng trái nhau, ghi lặp, giữ số cũ đã bị sửa, thông tin bị sót (gọi sang `bo_sot.py`) |
+| Bắt lỗi cả bản | [bo_sot.py](src/canh_bao/bo_sot.py) | Còn đoạn nào chưa được ghi? | Bộ tìm chỗ sót dùng chung cho cả hệ thống (công cụ BHYT cũng dùng) |
+| Bắt lỗi kiến thức | [lam_sang.py](src/canh_bao/lam_sang.py) | Thuốc này có an toàn không? | Liều vượt trần, tương tác thuốc, kê thuốc người bệnh đang dị ứng (bảng thuốc chưa duyệt → thử nghiệm) |
+| Bắt lỗi chép âm | [asr.py](src/canh_bao/asr.py) | Máy có nghe nhầm không? | Lỗi xảy ra trước bước AI; chỉ chạy khi đầu vào là ghi âm |
+| **Tổ trưởng** | [gop.py](src/canh_bao/gop.py) | Gộp lại thì dòng nào phải xác nhận? | Gọi mọi bộ bắt lỗi, gộp trùng, giới hạn 2 cảnh báo/dòng, phân 3 tầng, áp chính sách D. **Tệp duy nhất ra quyết định** |
+| Đồ nghề | [loi_noi.py](src/canh_bao/loi_noi.py) | — | Chuẩn hoá lời nói: tách ý, nhận câu hỏi, bỏ từ đệm |
+| Đồ nghề | [so_lieu.py](src/canh_bao/so_lieu.py) | — | Tách con số kèm đơn vị ("500 mg") để so số |
+| Đồ nghề | [nhat_ky.py](src/canh_bao/nhat_ky.py) | — | Ghi cảnh báo ra tệp để đo |
+
+Dễ nhầm: `phat_hien` so **một dòng** với lời gốc; `toan_ca` so **các dòng với nhau**; `lam_sang` so với **kiến thức thuốc** chứ không so với lời nói. Tên tệp dự kiến đổi theo vai (`danh_muc_loi`, `bat_loi_tung_dong`, `bat_loi_ca_ban`…) — xem mục 7.7 của [`docs/GIAI_THICH_CAU_TRUC_DU_AN.md`](docs/GIAI_THICH_CAU_TRUC_DU_AN.md).
 
 ### Âm thanh — `src/audio/`
+
+**Hình dung: tai nghe.** Ghi âm → chép thành chữ → biết ai đang nói. Chạy tại máy, không gửi ghi âm ra ngoài.
 
 | Tệp | Làm gì |
 |---|---|
@@ -260,22 +309,112 @@ Dịch vụ HTTP mà web gọi vào, cùng các phần an toàn: khử định d
 | [adapter.py](src/audio/adapter.py) | Đổi bản chép lời đã được duyệt sang dạng hội thoại mà đường ống dựng bản nháp đọc được. |
 | [preprocessing.py](src/audio/preprocessing.py) | Đưa âm thanh về WAV 16 kHz mono để bộ chép dùng, vẫn giữ nguyên tệp gốc. |
 | [storage.py](src/audio/storage.py) | Lưu phiên âm thanh vào đĩa tại chỗ, bền vững qua các lần chạy, kèm nhật ký sự kiện để kiểm toán. |
+| [config.py](src/audio/config.py) | Đọc tuỳ chọn xử lý âm thanh từ biến môi trường vào một đối tượng cấu hình. |
+| [models.py](src/audio/models.py) | Khai báo kiểu dữ liệu của một phiên âm thanh: trạng thái, vai người nói, đoạn lời. |
+| [providers.py](src/audio/providers.py) | Khai báo giao diện bộ chép lời và bộ tách người nói, kèm bản đơn giản cho demo. |
+| [pyannote_chay.py](src/audio/pyannote_chay.py) | Chạy pyannote trên một tệp WAV trong môi trường riêng, ghi kết quả tách người nói ra JSON. |
+| [phan_tich_am_thanh_v2.py](src/audio/phan_tich_am_thanh_v2.py) | Thống kê số lượt và thời lượng âm thanh trên bộ dữ liệu v2 để kiểm bộ dữ liệu. |
+| [asr/base.py](src/audio/asr/base.py) | Giao diện chung mọi bộ chép lời phải theo; đọc WAV về dạng chuẩn. |
+| [asr/schemas.py](src/audio/asr/schemas.py) | Kiểu dữ liệu đầu ra chung của bộ chép lời và lỗi chuẩn khi chép thất bại. |
+| [asr/sidecar_provider.py](src/audio/asr/sidecar_provider.py) | Đọc bản chép có sẵn từ tệp JSON cạnh âm thanh, dùng cho demo và phép thử lặp lại được. |
+| [asr/contextual_trie_600.py](src/audio/asr/contextual_trie_600.py) | Cây tiền tố từ khoá lâm sàng giúp bộ chép nghiêng về từ y khoa; chỉ gợi ý đối chiếu, không sửa đè chữ gốc. |
 | [api.py](src/audio/api.py) | Mở máy chủ HTTP nhỏ để tải ghi âm lên, xử lý và cho bác sĩ duyệt, sửa lời thoại trên trình duyệt. |
 | [sim2real_v2.py](src/audio/sim2real_v2.py) | Mô phỏng nhiễu, vọng, mất gói trên chữ để thử độ bền chép lời với bộ dữ liệu v2; là mô phỏng, không phải đo ASR thật. |
 
 ### Giao diện và máy chủ web — `web/`
 
+**Hình dung: màn hình của bác sĩ.** Nơi bác sĩ đọc bản nháp, nghe lại, sửa và ký; máy chủ Node nối màn hình với lõi Python.
+
 | Đường dẫn | Làm gì |
 |---|---|
 | `web/server.ts` | Máy chủ Node: nối giao diện với lõi Python và các route bên dưới. |
-| `web/may-chu/routes/` | Các API: ca khám, ký duyệt (sign-off), ASR, BHYT/OCR, công cụ lâm sàng (boost), cổng người bệnh, quản trị, tra cứu, trợ lý, mô hình ngoài. |
-| `web/may-chu/routes/llm-ngoai.ts` | Cổng gọi mô hình AI bên ngoài: mặc định tắt, có giới hạn tần suất, không dùng để viết bản nháp. |
-| `web/may-chu/tro-ly/` | Trợ lý nhiều tác tử: điều phối (dieu-phoi.ts), tác tử tại chỗ, ẩn danh dữ liệu trước khi gửi ra ngoài (an-danh.ts). |
-| `web/may-chu/tra-cuu/` | Tra cứu tài liệu y khoa từ nguồn công khai, phác đồ Bộ Y tế, từ điển, kiểm định số liệu. |
-| `web/may-chu/worm.ts` | Nhật ký ký duyệt chỉ-ghi-thêm có chuỗi băm (phía web). |
-| `web/may-chu/csdl.ts, tai-khoan.ts, hang-doi.ts` | Cơ sở dữ liệu SQLite theo người dùng, tài khoản mã mời, hàng đợi việc nền. |
+| `web/may-chu/` | Máy chủ web: nhận yêu cầu từ màn hình, gọi lõi Python, giữ CSDL, sổ ký, che danh tính. Xem bảng chi tiết bên dưới. |
 | `web/src/components/` | Các màn hình React: soạn bản nháp, duyệt bên cạnh, các hộp công cụ (BHYT, SBAR, cam đoan, đi buồng, dặn dò…). |
-| `web/src/lib/` | Logic phía giao diện: ký duyệt (kyDuyet.ts), ghép bản nháp hiệu lực, SBAR, câu hỏi cờ đỏ, đối chiếu lần khám trước, tô sáng ASR. |
+| `web/src/lib/` | Logic phía giao diện: ký duyệt (kyDuyet.ts), ghép bản nháp hiệu lực (compileEffectiveNote.ts), SBAR, câu hỏi cờ đỏ, đối chiếu lần khám trước, tô sáng ASR. |
+
+#### Máy chủ web — `web/may-chu/`, từng tệp
+
+**Hình dung: các quầy giao dịch phía sau màn hình.** Nguyên tắc chung: **máy chủ không tin trình duyệt**. Việc đã ký chưa, còn mục cần xác nhận không, nội dung có bị sửa sau khi ký không đều do máy chủ tự tính lại.
+
+```
+Màn hình bác sĩ ──/api/...──► web/server.ts ──► web/may-chu/routes/*
+                                                  │
+                 ┌────────────────┬───────────────┼──────────────────┐
+                 ▼                ▼               ▼                  ▼
+            lõi Python       CSDL SQLite      sổ ký WORM      mạng ngoài (mặc định TẮT,
+           (dựng bản nháp)   (csdl.ts)        (worm.ts)       phải qua bộ che danh tính)
+```
+
+Mỗi tệp `x.ts` thường có tệp kiểm thử `x.test.ts` nằm cạnh (chạy bằng `cd web; npm test`). Bảng dưới chỉ ghi tệp mã.
+
+**1. Các quầy nhận yêu cầu — `web/may-chu/routes/`**
+
+| Tệp | Đường API chính | Làm gì |
+|---|---|---|
+| [routes/asr.ts](web/may-chu/routes/asr.ts) ★ | `/api/transcribe`, `/api/assign-roles`, `/api/generate-note`, `/api/error-attribution` | **Luồng chính**: chép lời → gán vai người nói → gọi lõi Python dựng bản nháp → đổi mệnh đề và cảnh báo sang dạng giao diện hiển thị. |
+| [routes/ca-kham.ts](web/may-chu/routes/ca-kham.ts) | `/api/ca-kham/:id`, `/api/health`, `/api/sample-cases` | Lưu, xoá ca khám; kiểm tra máy chủ còn sống; nạp ca mẫu cho demo. |
+| [routes/sign-off.ts](web/may-chu/routes/sign-off.ts) ★ | ký duyệt | **Bác sĩ ký bản nháp.** Số mục chưa xác nhận và mã băm đều do máy chủ tự tính; trình duyệt chỉ được gửi "ký tab nào". |
+| [routes/llm-ngoai.ts](web/may-chu/routes/llm-ngoai.ts) | `/api/external/*`, `/api/edit-note`, `/api/clinical-qa`, `/api/generate-document`… | **Cổng ra AI bên ngoài** (`goiNgoai`). Mặc định tắt, có hạn mức theo người dùng, che danh tính trước khi gửi. Không dùng để viết bản nháp chính. |
+| [routes/tro-ly.ts](web/may-chu/routes/tro-ly.ts) | `/api/tro-ly`, `/api/tro-ly/:id/stream`, `/api/tro-ly/cai-dat` | Trợ lý nhiều tác tử: gửi câu hỏi, theo dõi tiến trình, bật/tắt tác tử. |
+| [routes/tra-cuu.ts](web/may-chu/routes/tra-cuu.ts) | `/api/pubmed-search`, `/api/phac-do/muc-luc`, `/api/lookup-official` | Cửa vào của tính năng tra cứu y khoa (xử lý thật ở `tra-cuu/`). |
+| [routes/boost-lam-sang.ts](web/may-chu/routes/boost-lam-sang.ts) | `/api/clinical/informed-consent`, `/api/inpatient/ward-round-diff`, `/api/lis/parse`, `/api/formulary/upload-csv`… | Công cụ lâm sàng: giấy cam đoan, so sánh buổi đi buồng, đọc phiếu xét nghiệm, nạp danh mục thuốc. Dữ liệu hồ sơ **phải lấy từ bản đã ký**. |
+| [routes/bhyt-ocr.ts](web/may-chu/routes/bhyt-ocr.ts) | đọc phiếu | Đọc chỉ số xét nghiệm và đơn thuốc cũ tại máy, rồi gợi ý chỉnh liều. Không tự bịa tuổi khi giao diện không gửi. |
+| [routes/benh-nhan-portal.ts](web/may-chu/routes/benh-nhan-portal.ts) | `/api/benh-nhan-portal/*` | Cổng người bệnh: tạo mã QR, xem tờ dặn dò, báo dấu hiệu nặng (`danhGiaDauHieuDo`). |
+| [routes/quan-tri-bv.ts](web/may-chu/routes/quan-tri-bv.ts) | `/api/quan-tri-bv/*` | Màn hình quản trị bệnh viện: tổng quan, kiểm toán gói XML BHYT. |
+| [routes/dung-chung.ts](web/may-chu/routes/dung-chung.ts) | — | Hàm dùng chung: địa chỉ lõi Python (`127.0.0.1:8765`), `goiDichVu` để gọi lõi, mã khoá nội bộ, mẫu lỗi công khai. |
+
+**2. Ký duyệt và chống sửa hồ sơ** ★
+
+| Tệp | Làm gì |
+|---|---|
+| [worm.ts](web/may-chu/worm.ts) | **Sổ ký ghi một lần** (WORM). Mỗi dòng nối với dòng trước bằng chuỗi băm có khoá bí mật (HMAC-SHA256); khoá để ngoài thư mục dữ liệu, nên chỉ sửa được tệp SQLite thì vẫn không giả được chuỗi. |
+| [kiem-ky-may-chu.ts](web/may-chu/kiem-ky-may-chu.ts) | Chốt **"đã ký và chưa sửa sau khi ký"** cho mọi đường đưa hồ sơ ra ngoài (QR người bệnh, XML BHYT, FHIR). Nội dung xuất dựng từ bản chụp lúc ký, không lấy từ trình duyệt. |
+| [ho-tro-kiem-thu-ky-duyet.ts](web/may-chu/ho-tro-kiem-thu-ky-duyet.ts) | Chỉ cho kiểm thử: dựng sẵn một ca đã ký đúng quy trình. |
+
+**3. Quyền riêng tư** ★ (Đề cải tiến 1)
+
+| Tệp | Làm gì |
+|---|---|
+| [an-danh-ngoai.ts](web/may-chu/an-danh-ngoai.ts) | Che danh tính trong văn bản tự do trước khi gửi ra AI ngoài, qua 3 lớp: luật tiếng Việt → bộ dò danh tính → kiểm lần cuối. Còn dấu hiệu danh tính thì **từ chối gửi**. |
+| [tro-ly/an-danh.ts](web/may-chu/tro-ly/an-danh.ts) | Ẩn danh cho trợ lý theo **danh sách cho phép**: chỉ trường được liệt kê mới đi ra. |
+| [che-log.ts](web/may-chu/che-log.ts) | Che danh tính trước khi ghi log; che không được thì chỉ ghi độ dài. |
+| [loi-ra-mang.ts](web/may-chu/loi-ra-mang.ts) | **Danh sách duy nhất** các địa chỉ mạng máy chủ được gọi. Thêm `fetch` mới mà không khai báo thì kiểm thử đỏ. |
+| [noi-luu-du-lieu.ts](web/may-chu/noi-luu-du-lieu.ts) | Liệt kê mọi nơi lưu dữ liệu; chỗ chưa làm thì ghi chưa làm. |
+| [sinh-so-do-du-lieu.ts](web/may-chu/sinh-so-do-du-lieu.ts) | Sinh `docs/minh-bach/so-do-du-lieu.md` từ hai danh sách trên; tài liệu lệch với mã thì kiểm thử đỏ. |
+| [do-an-danh-phoner.ts](web/may-chu/do-an-danh-phoner.ts) | Đo bộ che danh tính trên bộ PhoNER_COVID19 (tên người, mã bệnh nhân). |
+| [chan-tep-dev.ts](web/may-chu/chan-tep-dev.ts) | Ở chế độ phát triển, chặn tải tệp nhạy cảm (`meditrace.db`, `.env`, mã máy chủ) khi chưa đăng nhập. |
+
+**4. Tra cứu y khoa — `web/may-chu/tra-cuu/`** (vòng ngoài; cần mạng và cổng AI ngoài)
+
+| Tệp | Làm gì |
+|---|---|
+| [tra-cuu/dich-vu-tra-cuu.ts](web/may-chu/tra-cuu/dich-vu-tra-cuu.ts) | Điều phối: tách từ khoá → tìm song song nhiều nguồn → loại bài lạc đề → soạn câu trả lời có trích dẫn; phát hiện trích số tài liệu không tồn tại. |
+| [tra-cuu/nguon-ngoai.ts](web/may-chu/tra-cuu/nguon-ngoai.ts) | Lấy tài liệu từ PubMed, StatPearls, MedlinePlus, openFDA, Cục KCB, MSD, NICE, WHO, CDC; chấm điểm độ liên quan. |
+| [tra-cuu/phac-do-byt.ts](web/may-chu/tra-cuu/phac-do-byt.ts) | Thư viện phác đồ Bộ Y tế lưu tại máy (`data/phac-do/doan.jsonl`). |
+| [tra-cuu/kiem-dinh-so.ts](web/may-chu/tra-cuu/kiem-dinh-so.ts) | Kiểm con số và đơn vị trong câu trả lời so với tài liệu gốc (`soLech`); không đọc nhầm `0.125 mg` thành `125`. |
+| [tra-cuu/tu-dien.ts](web/may-chu/tra-cuu/tu-dien.ts) | Từ điển, hằng số phân loại y khoa, hàm lọc liên quan (`lienQuan`) dùng chung. |
+
+**5. Trợ lý nhiều tác tử — `web/may-chu/tro-ly/`** (vòng ngoài)
+
+| Tệp | Làm gì |
+|---|---|
+| [tro-ly/dieu-phoi.ts](web/may-chu/tro-ly/dieu-phoi.ts) | AI ngoài lập kế hoạch tối đa 6 bước chỉ từ câu hỏi đã ẩn danh, **không thấy dữ liệu ca**; AI lỗi thì dùng kế hoạch dự phòng bằng luật. |
+| [tro-ly/tac-tu-tai-cho.ts](web/may-chu/tro-ly/tac-tu-tai-cho.ts) | Hai tác tử chạy bằng luật, không ra mạng: "chủ đề nào chưa hỏi" và "đối chiếu thuốc với dị ứng". |
+| [tro-ly/chay-viec.ts](web/may-chu/tro-ly/chay-viec.ts) | Chạy một việc: ẩn danh → xem trước → lập kế hoạch → thực hiện → ghi kết quả. |
+| [tro-ly/viec-tro-ly.ts](web/may-chu/tro-ly/viec-tro-ly.ts) | Hàng đợi việc của trợ lý; khởi động lại thì chạy tiếp, không gọi lại bước đã trả tiền. |
+| [tro-ly/cai-dat-tro-ly.ts](web/may-chu/tro-ly/cai-dat-tro-ly.ts) | Lưu cài đặt: bác sĩ bật tác tử nào; quản trị có bật đường ra ngoài không. |
+| [tro-ly/kieu.ts](web/may-chu/tro-ly/kieu.ts) | Khai báo kiểu dữ liệu dùng chung. |
+
+**6. Hạ tầng**
+
+| Tệp | Làm gì |
+|---|---|
+| [csdl.ts](web/may-chu/csdl.ts) | CSDL SQLite một tệp (`data/meditrace.db`), dùng `node:sqlite` có sẵn; lược đồ ở `db/schema.sql`. |
+| [tai-khoan.ts](web/may-chu/tai-khoan.ts) | Đăng ký, đăng nhập: mật khẩu băm scrypt, cookie HttpOnly, CSDL chỉ giữ mã băm của token. |
+| [hang-doi.ts](web/may-chu/hang-doi.ts) | Hàng đợi việc nền bền vững trên SQLite: dựng bản nháp lâu thì khởi động lại cũng không mất việc. |
+| [env.ts](web/may-chu/env.ts) | Nạp biến môi trường từ `.env.local` / `.env`; phải nạp đầu tiên trong `web/server.ts`. |
+
+**Tìm nhanh theo câu hỏi:** ký duyệt → `routes/sign-off.ts`, `worm.ts`, `kiem-ky-may-chu.ts` · lộ dữ liệu → `an-danh-ngoai.ts`, `tro-ly/an-danh.ts`, `loi-ra-mang.ts` · AI ngoài → `routes/llm-ngoai.ts` · dựng bản nháp từ web → `routes/asr.ts` → `routes/dung-chung.ts` (`goiDichVu`) → `src/he_thong/dich_vu_http.py`.
 
 ### Các thư mục khác
 

@@ -188,9 +188,8 @@ def run_upgrade():
             "Đợt nâng cấp toàn diện tháng 10/2026: Để giải quyết các ranh giới an toàn y khoa và yêu cầu ứng dụng thực tế, "
             "hệ thống được mở rộng từ 6 kiểm tra căn cứ ban đầu lên Kiến trúc Điều phối 8 Chốt An toàn Lâm sàng (8 Clinical Guardrails Orchestrator). "
             "Hệ thống tích hợp bộ phát hiện tương tác thuốc nguy cơ cao (DDI Black-box), hiệu chỉnh liều theo chức năng thận suy (eGFR Cockcroft-Gault/CKD-EPI), "
-            "ma trận cảnh báo đa bệnh lý mạn tính, bộ lọc khử định danh PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP, tác tử chủ động gợi mở triệu chứng lâm sàng SOCRATES "
-            "và xuất dữ liệu liên thông y tế HL7 FHIR R4. Toàn bộ hệ sinh thái đã hoàn thành nghiệm thu kỹ thuật qua chuỗi 1.330 bài kiểm thử tự động "
-            "(tỷ lệ đạt 100%), hoàn thiện giao diện Tờ dặn dò người bệnh xuất viện 4 khung giờ chuẩn quốc tế JCI và Bảng kiểm toán tiến trình AI trực quan hóa chuỗi bóc tách mệnh đề."
+            "ma trận cảnh báo đa bệnh lý mạn tính, bộ lọc khử định danh PII/PHI (dữ liệu sức khỏe là dữ liệu nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP), tác tử chủ động gợi mở triệu chứng lâm sàng SOCRATES "
+            "và xuất dữ liệu liên thông y tế HL7 FHIR R4. Toàn bộ hệ sinh thái đã hoàn thành nghiệm thu kỹ thuật qua 1.330 bài kiểm thử tự động ở lần chạy 18/10/2026 (lần chạy 26/11/2026: 1.942 bài qua, 27 bỏ qua; đây là kiểm tra mã, không phải tỷ lệ đúng trên dữ liệu thật), hoàn thiện giao diện Tờ dặn dò người bệnh xuất viện 4 khung giờ chuẩn quốc tế JCI và Bảng kiểm toán tiến trình AI trực quan hóa chuỗi bóc tách mệnh đề."
         )
         add_p_after(abstract_anchor, doc, abs_text, space_before=Pt(4), space_after=Pt(4))
         print("[OK] Đã bổ sung nội dung nâng cấp vào Tóm tắt.")
@@ -221,13 +220,13 @@ def run_upgrade():
             "Nhằm khắc phục triệt để các rủi ro y khoa trong đơn thuốc và yêu cầu bảo vệ dữ liệu sức khỏe, hệ thống được tái cấu trúc từ "
             "các phép kiểm tuần tự sơ khởi sang bộ điều phối tập trung MediTracePipelineOrchestrator (src/he_thong/dieu_phoi_cac_chot_an_toan.py). "
             "Bộ điều phối kết nối 8 chốt an toàn chuyên sâu theo cơ chế liên hoàn song song và tuần tự:\n"
-            "• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI tuân thủ Nghị định 13/2023/NĐ-CP (src/he_thong/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].\n"
-            "• Chốt 2 — Kiểm khuôn cấu trúc bệnh án SOAP (src/bo_du_lieu/kiem_khuon.py): Đảm bảo bản nháp luôn tuân thủ cấu trúc 4 phần chuẩn mực: Subjective (Chủ quan), Objective (Khách quan), Assessment (Đánh giá) và Plan (Xử trí).\n"
+            "• Chốt 1 — Khử nhận dạng thông tin cá nhân PII/PHI (dữ liệu sức khỏe là dữ liệu nhạy cảm theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP) (src/he_thong/khu_dinh_danh.py): Tự động phát hiện và che giấu các thực thể nhạy cảm gồm số điện thoại, CCCD/CMND, số thẻ BHYT bằng các mã định danh giả lập hai chiều [SDT_1], [CCCD_1], [BHYT_1].\n"
+            "• Chốt 2 — Nhất quán chủ thể và vai người nói (src/he_thong/rao_chan_an_toan.py): Đối soát từng mệnh đề với vai người nói của lượt dẫn, cảnh báo khi thông tin của người nhà hoặc người bệnh khác có nguy cơ bị ghi cho bệnh nhân đang mở hồ sơ.\n"
             "• Chốt 3 — Cảnh báo bất thường cận lâm sàng (src/cong_cu_lam_sang/doi_soat_can_lam_sang.py): Phân tích kết quả xét nghiệm sinh hóa máu, huyết học, điện giải và gắn cờ báo động các chỉ số vượt ngưỡng sinh lý an toàn.\n"
             "• Chốt 4 — Thang điểm lâm sàng và hỗ trợ quyết định y khoa CDSS (src/cong_cu_lam_sang/thang_diem_nguy_co.py): Hiện thực hóa các công thức phân tầng nguy cơ chuẩn hóa quốc tế: CKD-EPI 2021, Cockcroft-Gault, CHA2DS2-VASc (nguy cơ đột quỵ trong rung nhĩ) và HAS-BLED (nguy cơ xuất huyết).\n"
             "• Chốt 5 — Cảnh báo tương tác thuốc nguy cơ cao DDI Black-box (src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py): Tra cứu ma trận tương tác chống chỉ định nguy hiểm theo dược thư quốc gia và FDA. Điển hình là cặp phối hợp Clopidogrel + Omeprazole (chất ức chế CYP2C19 làm giảm hoạt tính Clopidogrel, gây nguy cơ tắc stent mạch vành tái phát); hệ thống tự động phát hiện, đưa cảnh báo đỏ lên đầu bản nháp và khuyến cáo thay thế bằng Pantoprazole/Esomeprazole.\n"
             "• Chốt 6 — Hiệu chỉnh liều thuốc theo độ lọc cầu thận eGFR (src/cong_cu_lam_sang/hieu_chinh_lieu.py): Đối soát chức năng lọc thận với danh mục thuốc đào thải qua thận, tự động cảnh báo giảm liều hoặc đình chỉ sử dụng (ví dụ đình chỉ Metformin khi eGFR < 30 mL/min/1.73m2 và giảm liều khi eGFR từ 30-44 mL/min/1.73m2 để phòng ngừa nhiễm toan lactic).\n"
-            "• Chốt 7 — Kiểm soát xung đột đa bệnh lý mạn tính (src/bo_du_lieu/sinh_ca_da_benh_ly.py): Xử lý tương tác bệnh học phức hợp trên bệnh nhân cao tuổi mắc đồng thời suy tim, đái tháo đường và bệnh thận mạn (ngăn chặn kê đơn NSAID gây suy thận cấp trên nền suy tim).\n"
+            "• Chốt 7 — Tờ dặn dò người bệnh (src/cong_cu_lam_sang/to_dan_do_benh_nhan.py): Soạn bản dặn dò bằng lời dễ hiểu từ bản nháp đã duyệt — lịch uống thuốc theo buổi, việc cần làm, dấu hiệu phải quay lại khám — kèm lưu ý tương tác thuốc với thức ăn lấy từ bước hiệu chỉnh liều.\n"
             "• Chốt 8 — Tác tử gợi mở lâm sàng chủ động SOCRATES (src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py): Ứng dụng quy trình khai thác bệnh sử SOCRATES kinh điển (Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity) để phát hiện triệu chứng thiếu dữ kiện và gợi mở câu hỏi cho bác sĩ."
         )
         curr = add_p_after(curr, doc, txt_38, space_after=Pt(4))
@@ -238,13 +237,13 @@ def run_upgrade():
                            color_rgb=RGBColor(3, 105, 161))
         guardrails_data = [
             ("Chốt", "Tên thành phần", "Mô-đun phụ trách", "Cơ chế kỹ thuật", "Quy chuẩn đối chiếu"),
-            ("Chốt 1", "Khử định danh PII/PHI", "src/he_thong/khu_dinh_danh.py", "Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều", "Nghị định 13/2023/NĐ-CP"),
-            ("Chốt 2", "Kiểm khuôn bệnh án SOAP", "src/bo_du_lieu/kiem_khuon.py", "Kiểm tra tính toàn vẹn 4 phần Subjective-Objective-Assessment-Plan", "Chuẩn cấu trúc SOAP quốc tế"),
+            ("Chốt 1", "Khử định danh PII/PHI", "src/he_thong/khu_dinh_danh.py", "Che giấu CCCD, SĐT, BHYT bằng mã định danh giả lập 2 chiều", "Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP"),
+            ("Chốt 2", "Nhất quán chủ thể & vai người nói", "src/he_thong/rao_chan_an_toan.py", "Đối soát chủ thể mệnh đề với vai người nói của lượt dẫn", "Truy vết căn cứ theo lượt thoại"),
             ("Chốt 3", "Cảnh báo cận lâm sàng", "src/cong_cu_lam_sang/doi_soat_can_lam_sang.py", "Phát hiện chỉ số sinh hóa, huyết học, điện giải vượt ngưỡng", "Khoảng tham chiếu sinh lý Bộ Y tế"),
             ("Chốt 4", "Thang điểm lâm sàng CDSS", "src/cong_cu_lam_sang/thang_diem_nguy_co.py", "Tính điểm eGFR, Cockcroft-Gault, CHA2DS2-VASc, HAS-BLED", "Hướng dẫn ESC / KDIGO"),
             ("Chốt 5", "Tương tác thuốc DDI Black-box", "src/cong_cu_lam_sang/canh_bao_tuong_tac_thuoc.py", "Chặn tương tác mức 1 (Clopidogrel + Omeprazole), đề xuất đổi thuốc", "FDA Black-box Warning & Dược thư QG"),
             ("Chốt 6", "Hiệu chỉnh liều suy thận", "src/cong_cu_lam_sang/hieu_chinh_lieu.py", "Giảm liều hoặc đình chỉ Metformin khi eGFR < 45 / < 30", "Khuyến cáo KDIGO 2023 & ADA 2024"),
-            ("Chốt 7", "Đa bệnh lý mạn tính", "src/bo_du_lieu/sinh_ca_da_benh_ly.py", "Ngăn chặn xung đột thuốc - bệnh (NSAID trên suy tim/suy thận)", "Phác đồ điều trị Bộ Y tế"),
+            ("Chốt 7", "Tờ dặn dò người bệnh", "src/cong_cu_lam_sang/to_dan_do_benh_nhan.py", "Lịch uống thuốc theo buổi, việc cần làm, dấu hiệu phải tái khám", "Ngôn ngữ dễ hiểu cho người bệnh"),
             ("Chốt 8", "Tác tử lâm sàng SOCRATES", "src/cong_cu_lam_sang/goi_y_cau_hoi_socrates.py", "Chủ động phát hiện thiếu tính chất đau/bệnh sử, gợi mở câu hỏi", "Quy trình khai thác triệu chứng SOCRATES")
         ]
         curr = add_table_after(curr, doc, guardrails_data)
@@ -258,7 +257,7 @@ def run_upgrade():
             "Để kết nối thực tế với hệ thống quản lý bệnh viện (HIS/EMR) và hồ sơ bệnh án điện tử, "
             "MediTrace bổ sung module xuất dữ liệu src/cong_cu_lam_sang/xuat_fhir_r4.py. Module tự động đóng gói toàn bộ bản nháp lâm sàng "
             "thành FHIR JSON Bundle chuẩn R4 với các tài nguyên y tế cốt lõi:\n"
-            "• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng bảo mật theo Nghị định 13.\n"
+            "• Patient: Dữ liệu hành chính bệnh nhân đã qua khử nhận dạng (dữ liệu sức khỏe là dữ liệu nhạy cảm theo Luật 91/2025/QH15).\n"
             "• Encounter: Định danh phiên khám, thời gian thực hiện và tài khoản bác sĩ chủ trì.\n"
             "• Condition: Danh mục mã hóa bệnh lý chẩn đoán theo danh pháp quốc tế ICD-10.\n"
             "• Observation: Các dấu hiệu sinh tồn, chỉ số xét nghiệm và kết quả tính toán độ lọc cầu thận eGFR.\n"
@@ -298,14 +297,10 @@ def run_upgrade():
                            color_rgb=RGBColor(15, 23, 42))
         txt_68 = (
             "Đợt nâng cấp toàn diện tháng 10/2026 được nghiệm thu độc lập thông qua chuỗi kiểm thử kỹ thuật và đối soát lâm sàng chuyên sâu:\n"
-            "1. Kết quả kiểm thử tự động toàn diện: Chuỗi 1.330 bài kiểm thử đơn vị và tích hợp (pytest tests/) đạt tỷ lệ thành công 100% "
-            "(1.330 passed, 27 skipped, 0 failed trong 120,35 giây), bao phủ toàn diện 8 chốt an toàn và các cơ chế xử lý ngoại lệ.\n"
-            "2. Nghiệm thu Chốt 5 (DDI Black-box): Trên tập thử nghiệm tương tác thuốc, hệ thống phát hiện chính xác 100% đơn thuốc có cặp "
-            "Clopidogrel + Omeprazole, tự động kích hoạt cảnh báo mức độ 1 và đề xuất thuốc thay thế nhóm PPI an toàn (Pantoprazole/Esomeprazole).\n"
-            "3. Nghiệm thu Chốt 6 (eGFR & Suy thận): Đối soát với công thức chuẩn CKD-EPI 2021, hệ thống tính toán sai số tuyệt đối bằng 0; "
-            "phát hiện và đưa ra cảnh báo chính xác 100% các trường hợp kê liều Metformin khi eGFR < 45 mL/min/1.73m2.\n"
-            "4. Nghiệm thu Chốt 1 (Nghị định 13): Đạt tỷ lệ nhận dạng và ẩn danh 100% các thực thể CCCD, SĐT và mã thẻ BHYT trên tập kiểm tra, "
-            "bảo đảm không có thông tin định danh y tế nào bị rò rỉ qua các cổng gọi API hay nhật ký lưu trữ.\n"
+            "1. Kết quả kiểm thử tự động: lần chạy ngày 18/10/2026 ghi nhận 1.330 bài kiểm thử đơn vị và tích hợp qua, 27 bỏ qua; lần chạy 26/11/2026 (README.md) ghi nhận 1.942 bài qua, 27 bỏ qua. Đây là kiểm tra mã chạy đúng trên ca do nhóm tự viết, không phải tỷ lệ đúng trên dữ liệu thật.\n"
+            "2. Chốt 5 (DDI Black-box): vượt qua các phép thử đơn vị với đơn thuốc do nhóm tự viết có cặp Clopidogrel + Omeprazole (chưa đo trên tập đơn thuốc độc lập), tự động kích hoạt cảnh báo mức độ 1 và đề xuất thuốc thay thế nhóm PPI an toàn (Pantoprazole/Esomeprazole).\n"
+            "3. Chốt 6 (eGFR & Suy thận): phép thử đơn vị đối chiếu với công thức CKD-EPI 2021 cho kết quả trùng khớp trên các ca tự viết; cảnh báo kê liều Metformin khi eGFR < 45 mL/min/1.73m2 vượt qua phép thử đơn vị (chưa đo trên tập độc lập).\n"
+            "4. Chốt 1 (khử định danh): vượt qua phép thử đơn vị với CCCD, SĐT và mã thẻ BHYT theo mẫu do nhóm viết. Trên văn bản báo chí PhoNER_COVID19, bộ khử định danh chỉ che được 10/847 (1,2%) nhãn tên và mã bệnh nhân (docs/ket-qua/da-nguon-doc-lap.json), nên chưa thể khẳng định không có thông tin định danh bị rò rỉ.\n"
             "5. Thử nghiệm trên 3 ca bệnh khó bẫy lâm sàng đối phó câu hỏi Ban Giám khảo:\n"
             "• Ca 1 (Lão khoa - Viêm phổi hít / Suy thận): Hệ thống tính chính xác eGFR = 38 mL/min, cảnh báo đình chỉ Metformin và đề xuất chuyển sang phác đồ Insulin nội viện.\n"
             "• Ca 2 (Tim mạch - Sau can thiệp mạch vành / Xuất huyết tiêu hóa): Hệ thống phát hiện ngay tương tác chống chỉ định Clopidogrel + Omeprazole, cảnh báo nguy cơ huyết khối tắc stent và đề xuất đổi sang Pantoprazole.\n"
@@ -325,8 +320,7 @@ def run_upgrade():
     if sec9_anchor is not None:
         txt_9 = (
             "Đợt nâng cấp toàn diện tháng 10/2026 đánh dấu bước tiến quyết định của MediTrace Sentinel: từ một khung mô hình trích xuất mệnh đề lý thuyết, "
-            "hệ thống đã trở thành giải pháp trợ lý lâm sàng hoàn chỉnh với Kiến trúc 8 Chốt An toàn độc lập, đáp ứng đầy đủ hành lang pháp lý bảo vệ dữ liệu "
-            "sức khỏe của Việt Nam (Nghị định 13/2023/NĐ-CP) và chuẩn hóa liên thông dữ liệu y tế quốc tế HL7 FHIR R4."
+            "hệ thống đã trở thành giải pháp trợ lý lâm sàng hoàn chỉnh với Kiến trúc 8 Chốt An toàn độc lập, hướng tới hành lang pháp lý bảo vệ dữ liệu sức khỏe của Việt Nam (Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP) và chuẩn hóa liên thông dữ liệu y tế quốc tế HL7 FHIR R4."
         )
         add_p_after(sec9_anchor, doc, txt_9, space_before=Pt(4), space_after=Pt(4))
         print("[OK] Đã cập nhật mục 9 (Kết luận).")
