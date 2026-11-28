@@ -19,7 +19,7 @@ stateDiagram-v2
 
 | Bước | Điều xảy ra | Chặn ở đâu | Test chứng minh |
 |---|---|---|---|
-| 1. Bản nháp mới | Chỉ xem được. Bảy lối đưa hồ sơ ra ngoài đều khóa, rê chuột thấy lý do *"Bác sĩ chưa ký duyệt — hồ sơ chỉ được xem, chưa được chép, in hay xuất."* | `web/src/lib/choPhepDungHoSo.ts`, `web/src/components/NoteEditorView.tsx` | `web/src/lib/choPhepDungHoSo.test.ts` |
+| 1. Bản nháp mới | Chỉ xem được. Mọi lối đưa hồ sơ ra ngoài đều khóa, rê chuột thấy lý do *"Bác sĩ chưa ký duyệt — hồ sơ chỉ được xem, chưa được chép, in hay xuất."* | `web/src/lib/choPhepDungHoSo.ts`, `web/src/components/NoteEditorView.tsx` | `web/src/lib/choPhepDungHoSo.test.ts` |
 | 2. Còn mục *Cần bác sĩ xác nhận* | Nút Ký báo *"Cần xác nhận (n)"*, không ký được | `kiemTraDieuKienKyDuyet` trong `web/src/lib/compileEffectiveNote.ts` | `web/src/lib/compileEffectiveNote.test.ts`, `web/src/lib/quyTrinhPheDuyet.test.ts` |
 | 3. Chọn *Sửa* mà để trống | Vẫn chưa đủ điều kiện | như trên | `quyTrinhPheDuyet.test.ts` bước 2 |
 | 4. Mệnh đề không có lượt hội thoại làm căn cứ | Phải sửa hoặc bỏ mới ký được | như trên | `compileEffectiveNote.test.ts` |
@@ -27,7 +27,7 @@ stateDiagram-v2
 | 6. Được dùng hồ sơ | Các nút mở | `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 4 |
 | 7. Sửa sau khi ký | Băm đổi → hồ sơ khóa lại, lý do *"Hồ sơ đã sửa sau lần ký — cần ký lại…"*; đổi quyết định duyệt cũng vậy | `isSignOffStale` + `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 5–6 |
 
-Bảy lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*.
+Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*.
 
 ## Ảnh chụp trên giao diện thật (ca mẫu, máy chủ thử với CSDL tạm)
 
