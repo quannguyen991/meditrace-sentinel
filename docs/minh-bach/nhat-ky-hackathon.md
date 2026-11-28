@@ -30,3 +30,14 @@ Một agent riêng (mô hình mạnh nhất, không thấy quá trình làm) đ�
 | #8 Từ khóa tra cứu do mô hình đặt có thể mang tên thật | `web/may-chu/tra-cuu/loc-tu-khoa.test.ts` | Rà soát xếp "nhỏ"; đội nâng lên |
 | #7 Hook không chạy trên macOS/Linux | `tests/test_kiem_trailer_commit.py` | Thêm quyền chạy, `python3`, `.gitattributes` giữ LF |
 | #6 #9 Tài liệu nói quá ("bật cho từng lần", "tắt cả hai lớp", khóa ở máy chủ) | — | Sửa lời cho khớp mã |
+
+## Gia cố bổ sung (vòng rà soát thứ hai, 28/11)
+
+Sau lượt sửa đầu, đội tiếp tục rà soát và đóng các khoảng trống còn nêu trong mục hạn chế:
+
+| Hạng mục | Kiểm chứng tự động | Ghi chú thực hiện |
+|---|---|---|
+| Chốt bản chụp lúc ký trên máy chủ (`ban_ky_duyet`, `layBanKyDeXuat`) và khóa đủ 6 route xuất (`tao-ma`, `bhyt/precheck`, `bhyt/recompile`, `fhir/recompile`, `informed-consent`, `ward-round-diff`) | `web/may-chu/kiem-ky-may-chu.test.ts`, `web/may-chu/routes/boost-lam-sang.test.ts`, `web/may-chu/routes/bhyt-ocr.test.ts`, `web/may-chu/routes/benh-nhan-portal.test.ts` | Gắn kiểm IDOR `403` trước `409` ở cam đoan PTTT; đồng bộ `CamDoanThuThuatModal.tsx` không fallback đóng dấu offline khi bị `409` |
+| Che `procedureName` trước khi ghi vào bảng `nhat_ky` (`cheLog`) | `web/may-chu/routes/boost-lam-sang.test.ts` | Xác nhận tên/SĐT trong tên thủ thuật không lọt vào CSDL nhật ký |
+| Tự xóa tệp ghi âm: 30 ngày sau duyệt & 7 ngày cho phiên chưa duyệt bị bỏ dở; kích hoạt `don_dinh_ky()` trong `dich_vu_http.py` | `tests/test_audio_xoa_qua_han.py`, `tests/test_dich_vu.py` | Giữ `session.json` + `audit.jsonl`, ghi sự kiện `am_thanh_da_xoa` |
+| Gỡ Google Fonts khỏi `web/index.html`, dùng font hệ thống tiếng Việt | `web/src/lib/khongTaiNguonNgoai.test.ts` | Chặn tuyệt đối kết nối ngoài từ thẻ `<link>` / `<script>` |

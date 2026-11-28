@@ -23,11 +23,11 @@ stateDiagram-v2
 | 2. Còn mục *Cần bác sĩ xác nhận* | Nút Ký báo *"Cần xác nhận (n)"*, không ký được | `kiemTraDieuKienKyDuyet` trong `web/src/lib/compileEffectiveNote.ts` | `web/src/lib/compileEffectiveNote.test.ts`, `web/src/lib/quyTrinhPheDuyet.test.ts` |
 | 3. Chọn *Sửa* mà để trống | Vẫn chưa đủ điều kiện | như trên | `quyTrinhPheDuyet.test.ts` bước 2 |
 | 4. Mệnh đề không có lượt hội thoại làm căn cứ | Phải sửa hoặc bỏ mới ký được | như trên | `compileEffectiveNote.test.ts` |
-| 5. Ký | Máy chủ băm nội dung đã duyệt và các quyết định Giữ/Sửa/Bỏ, ghi vào sổ chỉ được thêm (WORM), ký HMAC | `web/may-chu/worm.ts`, `web/may-chu/routes/sign-off.ts` | `web/may-chu/worm.test.ts`, `web/may-chu/routes/sign-off.test.ts` |
-| 6. Được dùng hồ sơ | Các nút mở | `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 4 |
-| 7. Sửa sau khi ký | Băm đổi → hồ sơ khóa lại, lý do *"Hồ sơ đã sửa sau lần ký — cần ký lại…"*; đổi quyết định duyệt cũng vậy | `isSignOffStale` + `choPhepDungHoSo` | `quyTrinhPheDuyet.test.ts` bước 5–6 |
+| 5. Ký | Máy chủ băm nội dung đã duyệt và các quyết định Giữ/Sửa/Bỏ, ghi vào sổ chỉ được thêm (WORM), ký HMAC và lưu bản chụp lúc ký (`ban_ky_duyet`) | `web/may-chu/worm.ts`, `web/may-chu/routes/sign-off.ts`, `web/may-chu/kiem-ky-may-chu.ts` | `web/may-chu/worm.test.ts`, `web/may-chu/routes/sign-off.test.ts`, `web/may-chu/kiem-ky-may-chu.test.ts` |
+| 6. Được dùng hồ sơ | Các nút mở trên giao diện; máy chủ đối chiếu bản chụp `ban_ky_duyet` cho 6 đường xuất (`tao-ma`, `bhyt/precheck`, `bhyt/recompile`, `fhir/recompile`, `informed-consent`, `ward-round-diff`) | `web/src/lib/choPhepDungHoSo.ts`, `web/may-chu/kiem-ky-may-chu.ts` | `web/src/lib/quyTrinhPheDuyet.test.ts`, `web/may-chu/routes/benh-nhan-portal.test.ts`, `web/may-chu/routes/bhyt-ocr.test.ts`, `web/may-chu/routes/boost-lam-sang.test.ts` |
+| 7. Sửa sau khi ký | Băm đổi → hồ sơ khóa lại ở cả giao diện lẫn máy chủ (`409 chua_ky_duyet` hoặc `422 noi_dung_khac_ban_ky`), đòi ký lại; đổi quyết định duyệt cũng vậy | `isSignOffStale` + `choPhepDungHoSo` + `layBanKyDeXuat` | `web/src/lib/quyTrinhPheDuyet.test.ts` bước 5–6, `web/may-chu/kiem-ky-may-chu.test.ts` |
 
-Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*, *BHYT / ICD-10* (có tải gói XML1–XML5), *Đơn thuốc TT26* (cả lối mở từ bảng an toàn lâm sàng), *Cam đoan PTTT*, *Đi buồng / Trực*. Bốn nhóm cuối do rà soát độc lập phát hiện. Test `web/src/lib/loiRaHoSo.test.ts` đỏ khi có component mới chép/in/tải mà chưa được phân loại, hoặc khi một hộp xuất hồ sơ mở được mà không qua bước kiểm ký.
+Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *Tải .txt*, *Tải .md*, *Tải HL7 FHIR & BHYT (.json)*, *SBAR*, *Chép HIS*, *Tờ dặn dò*, *BHYT / ICD-10* (có tải gói XML1–XML5), *Đơn thuốc TT26* (cả lối mở từ bảng an toàn lâm sàng), *Cam đoan PTTT*, *Đi buồng / Trực*. Bốn nhóm cuối do rà soát độc lập phát hiện. Test `web/src/lib/loiRaHoSo.test.ts` đỏ khi có component mới chép/in/tải mà chưa được phân loại, hoặc khi một hộp xuất hồ sơ mở được mà không qua bước kiểm ký. Phía máy chủ, `web/may-chu/kiem-ky-may-chu.ts` chặn mọi đường đưa hồ sơ ra API khi chưa ký hoặc sửa sau ký.
 
 ## Ảnh chụp trên giao diện thật (ca mẫu, máy chủ thử với CSDL tạm)
 
@@ -38,11 +38,10 @@ Các lối bị khóa: *Sao chép*, *In / Lưu PDF* (hai chỗ trong menu), *T�
 ## Kiểm sổ ký duyệt
 
 - Trong phần mềm: `GET /api/worm/verify` trả `{ hopLe, soBanGhi }` (hàm `xacMinhChuoi` trong `web/may-chu/worm.ts`). Sửa tay một bản ghi trong CSDL thì chuỗi băm gãy và `hopLe` thành `false`.
-- Chạy test: `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts may-chu/worm.test.ts`.
+- Chạy test: `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts may-chu/worm.test.ts may-chu/kiem-ky-may-chu.test.ts`.
 
 ## Giới hạn, nói thẳng
 
-- Việc khóa nằm ở giao diện. Máy chủ chưa tự kiểm chữ ký trước các lệnh xuất (ví dụ tạo mã cổng bệnh nhân, tiền kiểm BHYT).
-- Không chặn được việc bôi đen chữ trên màn hình rồi Ctrl+C. Phần mềm chỉ khóa các nút đưa hồ sơ ra ngoài.
+- Máy chủ đã chặn các đường xuất API qua `ban_ky_duyet` (`409 chua_ky_duyet` / `422`), nhưng thao tác đọc xem bản nháp tại chỗ trên trình duyệt vẫn không chặn được việc bôi đen chữ trên màn hình rồi Ctrl+C. Phần mềm chỉ khóa các nút và API đưa hồ sơ ra ngoài.
 - Không chặn được phím in của trình duyệt (Ctrl+P). Vì vậy bản in khi chưa ký tự mang dòng **"BẢN NHÁP — CHƯA KÝ DUYỆT"** ở đầu trang.
 - Phần mềm chưa đo việc bác sĩ có duyệt bừa hay không. Đó là việc tiếp theo: thử với người dùng, cấy sẵn lỗi nguy hiểm để xem họ bắt được bao nhiêu.

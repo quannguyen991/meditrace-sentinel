@@ -1,6 +1,6 @@
 # Trả lời Đề cải tiến 1 — Làm chủ và bảo vệ dữ liệu sức khỏe
 
-MediTrace Sentinel · 28/11/2026 · nhánh `hackathon-de-1`
+MediTrace Sentinel · 28/11/2026 · nhánh `main` (đã gộp từ `hackathon-de-1`)
 
 > **Đề:** quá trình sử dụng AI để phát triển sản phẩm và phạm vi xử lý thông tin bệnh nhân cần minh bạch hơn. Trình bày quyết định thiết kế, những nội dung AI hỗ trợ và đội tự đánh giá/sửa; không đưa dữ liệu bệnh nhân nhận dạng được vào dịch vụ/log trái phép. Minh chứng: lịch sử sửa đổi, sơ đồ dữ liệu, quy trình bác sĩ phê duyệt trước khi dùng hồ sơ.
 
@@ -80,7 +80,7 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 - Log lỗi của máy chủ web và dịch vụ Python đi qua bộ che: cắt ngắn, che tên và số; còn sót thì chỉ ghi độ dài. Chỗ này gồm cả lỗi do cổng bên thứ ba trả về, vì cổng có thể dội lại nội dung đã gửi.
 - Đầu ra Python hỏng chỉ ghi độ dài và mã băm.
 - `traceback.print_exc()` được thay bằng bản in tên lỗi và vị trí, không in giá trị.
-- Nhật ký hoạt động vốn chỉ ghi siêu dữ liệu.
+- Nhật ký hoạt động (`nhat_ky`) vốn chỉ ghi siêu dữ liệu; trường tên thủ thuật (`procedureName`) khi đóng dấu cam đoan ở `web/may-chu/routes/boost-lam-sang.ts` cũng được đưa qua `cheLog` trước khi ghi.
 
 **Minh chứng:** `web/may-chu/che-log.ts`, `src/he_thong/che_log.py`. Một test quét (`web/may-chu/log-da-che.test.ts`) đỏ nếu còn dòng `console.error/warn` in biến lỗi mà không qua `cheLog`. Bộ che chạy trước rồi mới cắt ngắn, để không chặt đôi một số điện thoại.
 
@@ -94,11 +94,11 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 
 ## 7. Quy trình bác sĩ phê duyệt trước khi dùng hồ sơ
 
-**Chúng tôi làm gì.** Trước ngày 28/11, chỉ nút *Ký* bị chặn khi còn mục chưa xác nhận. Các nút *Sao chép*, *In*, *Tải tệp*, *FHIR/BHYT*, *Chép HIS*, *SBAR*, *Tờ dặn dò* vẫn dùng được khi **chưa ký**. Đây là chỗ hở nặng nhất mà đội tự tìm ra khi rà mã. Nay tất cả, cùng các nút *BHYT / ICD-10 (tải gói XML1–XML5)*, *Đơn thuốc TT26*, *Cam đoan PTTT*, *Đi buồng / Trực*, chỉ mở khi đã ký và khóa lại khi sửa sau ký. Bốn nút sau do **rà soát độc lập** tìm ra; một test quét giờ đỏ ngay nếu xuất hiện lối xuất hồ sơ mới chưa khóa (`web/src/lib/loiRaHoSo.test.ts`). Việc khóa nằm **ở giao diện**: máy chủ chưa tự kiểm chữ ký trước khi trả dữ liệu xuất. Bản in khi chưa ký mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT".
+**Chúng tôi làm gì.** Trước ngày 28/11, chỉ nút *Ký* bị chặn khi còn mục chưa xác nhận. Các nút *Sao chép*, *In*, *Tải tệp*, *FHIR/BHYT*, *Chép HIS*, *SBAR*, *Tờ dặn dò* vẫn dùng được khi **chưa ký**. Đây là chỗ hở nặng nhất mà đội tự tìm ra khi rà mã. Nay tất cả, cùng các nút *BHYT / ICD-10 (tải gói XML1–XML5)*, *Đơn thuốc TT26*, *Cam đoan PTTT*, *Đi buồng / Trực*, chỉ mở khi đã ký và khóa lại khi sửa sau ký. Bốn nút sau do **rà soát độc lập** tìm ra; một test quét giờ đỏ ngay nếu xuất hiện lối xuất hồ sơ mới chưa khóa (`web/src/lib/loiRaHoSo.test.ts`). Khóa được áp **hai tầng**: giao diện (`web/src/lib/choPhepDungHoSo.ts`) **và máy chủ** (`web/may-chu/kiem-ky-may-chu.ts` lưu bản chụp `ban_ky_duyet` lúc ký và chặn `409 chua_ky_duyet` / `422` cho cả 6 đường xuất: `/api/benh-nhan-portal/tao-ma`, `/api/bhyt/precheck`, `/api/bhyt/recompile`, `/api/fhir/recompile`, `/api/clinical/informed-consent`, `/api/inpatient/ward-round-diff`). Bản in khi chưa ký mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT".
 
 **Minh chứng:** [`quy-trinh-phe-duyet.md`](quy-trinh-phe-duyet.md), gồm sơ đồ trạng thái, 3 ảnh chụp trên giao diện thật, và lệnh kiểm sổ ký `GET /api/worm/verify`.
 
-**Kiểm:** `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts src/lib/loiRaHoSo.test.ts`.
+**Kiểm:** `cd web; npx tsx --test src/lib/quyTrinhPheDuyet.test.ts src/lib/choPhepDungHoSo.test.ts src/lib/loiRaHoSo.test.ts may-chu/kiem-ky-may-chu.test.ts may-chu/routes/bhyt-ocr.test.ts may-chu/routes/benh-nhan-portal.test.ts may-chu/routes/boost-lam-sang.test.ts`.
 
 ---
 
@@ -117,27 +117,28 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 | R3 | (rà soát độc lập) Bộ che Python bỏ sót họ tên viết thường; hai bộ che che nhầm "sốt từ thứ 2", "viêm gan B.", "nhóm máu A.", "Thái Lan" | như trên |
 | R4 | (rà soát độc lập) Từ khóa tra cứu do mô hình đặt có thể mang tên thật ra nguồn tài liệu | như trên |
 | R5 | (rà soát độc lập) Hook commit không chạy trên macOS/Linux | như trên |
+| R6 | (gia cố vòng 2) Khóa máy chủ 6 đường xuất qua bản chụp `ban_ky_duyet` + che `procedureName` trong `nhat_ky` | `98bd5de`, `a555bdc`, `web/may-chu/routes/boost-lam-sang.ts` |
+| R7 | (gia cố vòng 2) Tự xóa âm thanh quá hạn: 30 ngày đã duyệt, 7 ngày chưa duyệt; dọn khi `dich_vu_http.py` khởi tạo `AudioPipeline` | `22c61af`, `src/audio/storage.py`, `src/he_thong/dich_vu_http.py` |
+| R8 | (gia cố vòng 2) Gỡ Google Fonts khỏi `web/index.html`, dùng font hệ thống tiếng Việt + test chặn tài nguyên ngoài | `web/index.html`, `web/src/lib/khongTaiNguonNgoai.test.ts` |
+| R9 | (gia cố vòng 2) Xóa bản sao ca khám ở `localStorage` khi đăng xuất, hết phiên `401`, hoặc đổi người dùng | `22c61af`, `web/src/lib/xoaDuLieuTrinhDuyet.ts` |
 
 ## Còn hạn chế (chưa làm, nói thẳng)
 
 - Bộ che đạt 94,0% / 93,8% trên tập test, chưa tới ngưỡng 95%. Phần lọt chủ yếu là tên một tiếng đứng trơ. Sau rà soát độc lập có vá thêm luật; chỉ đo lại trên tập dev (không đổi: 97,5% / 97,3%), **không** đo tập test lần ba.
-- Khóa chép/in/xuất nằm ở giao diện; máy chủ chưa tự chặn các lệnh xuất (ví dụ tạo mã cổng bệnh nhân, tiền kiểm BHYT) khi chưa ký.
-- Âm thanh ghi âm (giọng nói là dữ liệu nhận dạng) **chưa có hạn giữ và tự xóa**.
-- Trình duyệt của bác sĩ giữ bản sao danh sách ca khám để mở nhanh. Bản sao này nằm trên máy bác sĩ, nhưng chưa được mã hóa.
+- Trình duyệt của bác sĩ giữ bản sao danh sách ca khám trong `localStorage` để mở nhanh khi tải lại trang; dữ liệu này tự xóa khi đăng xuất, hết phiên `401` hoặc đổi tài khoản (`web/src/lib/xoaDuLieuTrinhDuyet.ts`), nhưng nếu bác sĩ đóng tab không đăng xuất thì bản sao cục bộ trên máy đó chưa mã hóa.
 - 34 commit cũ chưa xác định công cụ (trong đó có các commit Antigravity 25–27/11). Tác giả sẽ xác nhận dần, máy không đoán.
-- Phông chữ còn tải từ Google Fonts. Việc này không lộ dữ liệu bệnh nhân, chỉ lộ địa chỉ IP.
-- Chưa thử với bác sĩ thật xem họ có duyệt bừa không.
+- Chưa thử với bác sĩ thật xem họ có duyệt bừa không, và chưa chặn được thao tác bôi đen Ctrl+C hoặc Ctrl+P trên trình duyệt (bản in khi chưa ký tự mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT").
 
 ## Kết quả kiểm thử toàn bộ
 
-Chạy ngày 28/11/2026 trên nhánh `hackathon-de-1` (sau lượt sửa theo rà soát độc lập):
+Chạy ngày 28/11/2026 trên nhánh `main` (sau đợt gia cố vòng 2):
 
-| Bộ kiểm | Trước đợt này | Sau đợt này |
+| Bộ kiểm | Trước đợt Đề 1 | Sau đợt gia cố vòng 2 |
 |---|---|---|
-| Python `pytest -q` | 1.960 qua, 27 bỏ qua | **2.030 qua**, 27 bỏ qua, 0 lỗi |
-| Web `npm test` | 96/96 | **170/170** |
+| Python `pytest -q` | 1.960 qua, 27 bỏ qua | **2.106 qua**, 28 bỏ qua (1 ca đo trễ CPU đạt khi chạy riêng) |
+| Web `npm test` | 96/96 | **214/214** |
 | Kiểu `npm run lint` (tsc) | sạch | sạch |
 | Đóng gói `npm run build` | xong | xong |
 | 3 ca demo cho BGK | — | không đổi (test dùng ca mẫu xanh) |
 
-Một test đo tốc độ có sẵn từ trước (`test_tai_kiem_tra_nhanh_do_tre…`, ngưỡng 50 ms) thỉnh thoảng trượt khi máy bận. Đo trên nhánh chính và nhánh này cho kết quả như nhau, nên không do đợt sửa này.
+Trong lần chạy trọn bộ `pytest` dưới tải cao, test đo độ trễ có sẵn từ trước (`test_tai_kiem_tra_nhanh_do_tre_va_tuong_thich_web_python`, ngưỡng 50 ms) ghi nhận `61,98 ms`; khi chạy lại riêng `tests/test_m1_safety_triage_scores.py` cùng nhóm minh bạch thì qua sạch (`93 passed, 1 skipped`).
