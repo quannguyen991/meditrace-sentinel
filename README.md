@@ -10,6 +10,10 @@
 
 > **Báo cáo cải tiến Chặng 1 (AI 2026):** Xem đối chiếu chi tiết từng yêu cầu cải tiến (giảm bỏ sót & chốt chặn không hoàn tất hồ sơ khi thiếu căn cứ; kiểm soát lỗi giữa các bước AI & demo đa người nói; kiểm tra tính độc lập bộ dữ liệu 657 khuôn & kịch bản ngoài khuôn) tại **[`BAO_CAO_CAI_TIEN_CHANG_1.md`](BAO_CAO_CAI_TIEN_CHANG_1.md)**.
 
+> **Đề cải tiến 1 (28/11/2026): làm chủ và bảo vệ dữ liệu sức khỏe.** Bản trả lời tổng hợp: [`docs/minh-bach/TRA_LOI_DE_CAI_TIEN_1.md`](docs/minh-bach/TRA_LOI_DE_CAI_TIEN_1.md). Ba minh chứng BTC yêu cầu: **lịch sử sửa đổi truy nguồn công cụ AI** ([`truy-nguon-commit.md`](docs/minh-bach/truy-nguon-commit.md), hook bắt buộc dòng `Cong-cu-AI:` trong mỗi commit), **sơ đồ dữ liệu** sinh từ mã ([`so-do-du-lieu.md`](docs/minh-bach/so-do-du-lieu.md)), **quy trình bác sĩ phê duyệt** ([`quy-trinh-phe-duyet.md`](docs/minh-bach/quy-trinh-phe-duyet.md)). Kèm [`so-quyet-dinh-thiet-ke.md`](docs/minh-bach/so-quyet-dinh-thiet-ke.md) và [`ai-ho-tro-va-doi-tu-sua.md`](docs/minh-bach/ai-ho-tro-va-doi-tu-sua.md).
+>
+> **Bộ ca để thử ngay:** thư mục [`demo-bgk/`](demo-bgk/HUONG-DAN-DEMO.md): 3 bộ ca tổng hợp (mp3 + lời thoại + đáp án). Kéo-thả tệp `.txt` hoặc `.mp3` vào khung **Lời thoại**. Phiếu bác sĩ duyệt kịch bản đang ở trạng thái **CHƯA DUYỆT** ([`PHIEU-BAC-SI-DUYET.md`](demo-bgk/PHIEU-BAC-SI-DUYET.md)); phần AI tự kiểm không thay bác sĩ duyệt.
+
 1. Mở **https://meditrace-sentinel.meditrace.workers.dev** và đăng nhập bằng tài khoản dùng thử ghi trong hồ sơ dự thi. (Phần mềm yêu cầu tài khoản để bảo vệ dữ liệu của người dùng.)
 2. Ở **Trang chủ**, bấm nút **"Xem thử với ca mẫu"**. Mỗi lần bấm, phần mềm xoay vòng qua **3 ca khám đa người nói dựng sẵn** (*Bác sĩ – Mẹ – Bệnh nhi*, *Hai người bệnh cùng phòng trao đổi*, *Bác sĩ – Cụ ông 74 tuổi – Con gái*), có sẵn bản nháp và mục `Cần xác nhận`, không cần GPU và không phải chờ.
 3. Bấm vào một dòng trong bản nháp để mở **ngăn duyệt** ngay bên cạnh, hoặc bấm nút xanh **"Duyệt từng mệnh đề"** để sang màn duyệt đầy đủ. Bên trái là lời thoại, bên phải là từng thông tin được rút ra kèm chủ thể và đường nối căn cứ. Những thông tin chưa chắc nằm trong mục **Cần xác nhận** kèm lý do — hệ thống **khóa cứng không cho ký duyệt hoàn tất hồ sơ** cho tới khi bác sĩ xác nhận, sửa hoặc bỏ hết các mục này.
@@ -106,7 +110,7 @@ Các tính năng này nằm quanh bản nháp. **Không tính năng nào thay đ
 
 Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa được dược sĩ hay bác sĩ duyệt** (`data/tri_thuc_thuoc.json`, mọi mục `da_duyet = false`). Chúng chỉ là gợi ý để đối chiếu.
 
-### Nhật ký nâng cấp 15–26/11/2026
+### Nhật ký nâng cấp 15–28/11/2026
 
 | Thời gian | Nâng cấp | Chi tiết / minh chứng |
 |---|---|---|
@@ -120,6 +124,9 @@ Các tính năng 6 và 7 dùng bảng tri thức thuốc và mã bệnh **chưa 
 | 26/11 | **Công cụ lâm sàng mở rộng (Boost, M1–M4)** | Menu "Công cụ": tiền kiểm BHYT/ICD-10, đối soát đơn thuốc TT 26 và tương tác thuốc, cam đoan thủ thuật, đi buồng nội trú và bàn giao ca trực. Đọc khám rảnh tay (F2, PhoWhisper tại chỗ); gợi ý vai người nói một chạm; báo động giá trị xét nghiệm nguy kịch, nạp kết quả LIS/HL7 và danh mục thuốc bệnh viện (.csv) ở tab "Ngữ cảnh"; khôi phục mục bỏ sót một chạm; xuất gói HL7 FHIR R4 / BHYT XML 130. Màn "KHTH & Giám định BHYT" (kiểm toán XML 1–5) và cổng QR cho người bệnh. Bảng tri thức đi kèm **chưa được chuyên gia duyệt**. |
 | 26/11 | Giao diện gọn cho bác sĩ | Mở ca là thấy bản nháp (danh sách ca và khung tra cứu thu gọn sẵn); công cụ gom vào một menu; bấm một dòng mở ngăn duyệt bên cạnh; nút "Nghe lại" ghi âm gốc trên từng mệnh đề, nút "Nghe" đọc to từng lượt cho ca chỉ có chữ. |
 | 26/11 | Triển khai mới | Chuyển từ Vercel sang Cloudflare Worker, đường hầm tự cập nhật (mục "Chạy thử trên máy của bạn"). |
+| 28/11 | **Đề cải tiến 1: bảo vệ dữ liệu sức khỏe** | Khóa dùng hồ sơ cho tới khi bác sĩ ký (giao diện và máy chủ; xuất, in, cam đoan, đi buồng đều dựng từ bản chụp lúc ký, đổi dữ liệu sau ký là phải ký lại); danh sách lối ra mạng duy nhất có test quét; che log; đường ra bên thứ ba (AIBOX) mặc định tắt ở hai lớp; hạn giữ âm thanh 30/30/7 ngày (đang tắt trên máy demo tới sau thi); xóa bản sao ca trong trình duyệt khi đăng xuất. Minh chứng ở `docs/minh-bach/`. |
+| 28/11 | Tinh chỉnh nhận dạng giọng nói | LoRA PhoWhisper-small trên VNMed_Speech: WER ViMedCSS-test 0,317 → 0,261, từ tiếng Anh y khoa nhận đúng 10,5% → 19,0%; chưa thay mô hình đang chạy ([`docs/ket-qua/asr-vnmed-lora.md`](docs/ket-qua/asr-vnmed-lora.md)). |
+| 28/11 | Giao diện cho buổi demo | Kéo-thả tệp mp3/txt vào khung Lời thoại; nút "Nghe lại" từng câu từ bản ghi gốc; gợi ý vai khi máy chưa tách giọng; nút bật "Mô hình ngoài" hỏi máy chủ trước; trợ lý hiện rõ đang dùng dữ liệu gì của ca; bản nháp chỉ nằm ở một tab; các ca demo đã chạy trước ra bản nháp dưới 1 giây. |
 
 ---
 
@@ -231,7 +238,9 @@ Rà soát độc lập ngày 26/11/2026 (hai lượt, Python và web) tìm ra 9 
 - Chưa có nghiên cứu với bác sĩ: chưa đo thời gian tiết kiệm được, mức dễ dùng hay tác động an toàn. Bác sĩ được hỏi ý kiến cho biết thời gian ghi hồ sơ chủ yếu tốn ở việc hỏi bệnh chứ không phải ở việc gõ, nên phần mềm **không** hứa là "giảm thời gian làm hồ sơ".
 - Cấu trúc bản nháp là 9 mục cố định, trong khi hồ sơ thật thay đổi theo lý do khám và chuyên khoa. Phần mềm chưa đọc kết quả xét nghiệm.
 - Bước gom người còn một lỗi đã biết: khi mô hình ghi người được nhắc tới là "bố em", cụm này có thể bị gộp nhầm vào người bệnh.
-- Nhận dạng tiếng nói sai tên thuốc ở gần như mọi câu trong thử nghiệm; tách giọng người nói chưa được chạy thử với mô hình thật.
+- Nhận dạng tiếng nói còn sai tên thuốc nhiều (bản tinh chỉnh 28/11 mới nhận đúng khoảng 1/5 từ tiếng Anh y khoa, chưa được đưa vào hệ thống chạy thật); máy chủ demo chưa tách giọng người nói nên gán vai bằng gợi ý từ nội dung câu, bác sĩ kiểm lại.
+- Bộ ca demo và đáp án (`demo-bgk/`) do AI viết, chưa có bác sĩ duyệt; phiếu duyệt đã chuẩn bị nhưng chưa có chữ ký nào.
+- Bộ che định danh đạt 94,0% (TypeScript) và 93,8% (Python) trên tập kiểm tra, chưa tới ngưỡng 95% đặt ra; số cảnh báo trung bình 3,87 mỗi ca sạch, chưa đạt mục tiêu 2.
 - Các tính năng bổ sung 11/2026 (BHYT, chỉnh liều, đối chiếu lần khám, cờ đỏ) mới qua kiểm thử tự động, chưa được bác sĩ dùng thử. Bảng thuốc và mã bệnh chưa qua chuyên gia duyệt.
 - Mô hình trích xuất bản v3 (huấn luyện trên bộ dữ liệu v2) bỏ sót **14,1%** trên 30 ca phát triển, so với 11,8% của bản v1 đo cùng lúc. Hai khoảng tin cậy chồng nhau nên chưa nói được bản nào hơn, nhưng v3 **không** cải thiện. 30 ca này thuộc bộ dữ liệu v1, khác phân phối với dữ liệu train của v3. Đã thử huấn luyện thêm v3 bằng DPO trên 407 cặp lỗi khó (`src/huan_luyen/huan_luyen_dpo.py`). Trên 140 cặp kiểm tra, độ chênh log-prob giữa câu đúng và câu sai tăng từ 20,5 lên 45,1 (tăng ở cả 13 loại lỗi), nhưng log-prob của câu đúng giảm từ −1,38 xuống −4,90 và chưa đo bỏ sót trên ca đầy đủ, nên **chưa** dùng bản DPO trong hệ thống. Chi tiết: [docs/ket-qua/dpo-v3.md](docs/ket-qua/dpo-v3.md).
 
