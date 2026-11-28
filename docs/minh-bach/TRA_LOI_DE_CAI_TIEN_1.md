@@ -121,12 +121,26 @@ Ngưỡng đăng ký trước là 95%. **Trên test chưa đạt** (trên dev đ
 | R7 | (gia cố vòng 2) Tự xóa âm thanh quá hạn: 30 ngày đã duyệt, 7 ngày chưa duyệt; dọn khi `dich_vu_http.py` khởi tạo `AudioPipeline` | `22c61af`, `src/audio/storage.py`, `src/he_thong/dich_vu_http.py` |
 | R8 | (gia cố vòng 2) Gỡ Google Fonts khỏi `web/index.html`, dùng font hệ thống tiếng Việt + test chặn tài nguyên ngoài | `web/index.html`, `web/src/lib/khongTaiNguonNgoai.test.ts` |
 | R9 | (gia cố vòng 2) Xóa bản sao ca khám ở `localStorage` khi đăng xuất, hết phiên `401`, hoặc đổi người dùng | `22c61af`, `web/src/lib/xoaDuLieuTrinhDuyet.ts` |
+| R10 | (rà soát độc lập lần 2, ChatGPT 6.1 Terra) Máy chủ kiểm chữ ký ca A nhưng xuất dữ liệu ca B do trình duyệt gửi; tab chưa sửa che tab đã sửa | `a555bdc` — dữ liệu xuất dựng từ bản chụp lúc ký, chỉ kiểm đúng tab đã ký |
+| R11 | Bản demo công khai vỡ dấu tiếng Việt sau khi gỡ Google Fonts | `e743232` — phông dự phòng hiển thị đúng dấu, có test |
+
+## Đo thêm trong đợt này (đều trên tập phát triển, dữ liệu mô phỏng)
+
+| Phép đo | Kết quả | Minh chứng |
+|---|---|---|
+| Chấm ở nhiều ngưỡng ghép mệnh đề (0,4 → 0,7) | F1 đổi ít ở 3 bộ (0,98 → 0,96); bộ nhiễu nhận dạng giọng nói tụt mạnh 0,88 → 0,71: điểm ở ngưỡng 0,6 phụ thuộc cách chọn ngưỡng | [`../ket-qua/nhieu-nguong-va-sao-chep.md`](../ket-qua/nhieu-nguong-va-sao-chep.md) |
+| Quét lại các vế chưa được trích | Chỉ cứu được khoảng 2% số mệnh đề bị sót: phần lớn "bỏ sót" là mệnh đề **ghi sai nội dung** ở vế đã trích | [`../ket-qua/ve-chua-phu.md`](../ket-qua/ve-chua-phu.md) |
+| Kiểm nội dung mệnh đề với chính câu trích (bản thử) | Bắt 67,4% mệnh đề sai nhưng báo nhầm 21,6% mệnh đề đúng: chỉ đủ để xếp thứ tự cho bác sĩ xem, chưa đủ để chặn | [`../ket-qua/noi-dung-vs-cau-trich.md`](../ket-qua/noi-dung-vs-cau-trich.md) |
+| Giới hạn số cảnh báo hiển thị | 3,87 cảnh báo/ca không lỗi (mục tiêu ≤ 2, **chưa đạt**), độ nhạy hiển thị 0,80 (mục tiêu 0,85, **chưa đạt**); chính sách D giữ 11,8% lọt | [`../ket-qua/canh-bao-ngan-sach.md`](../ket-qua/canh-bao-ngan-sach.md) |
+
+Công cụ cho phần cần người thật đã sẵn: phiếu gán nhãn mù cho hai người và tính Cohen κ (`tools/phieu_gan_nhan_nguoi.py`), kịch bản đọc to để thu giọng thật (`tools/ghi_am_kich_ban.py`). Chưa có người gán nhãn và người đọc.
 
 ## Còn hạn chế (chưa làm, nói thẳng)
 
 - Bộ che đạt 94,0% / 93,8% trên tập test, chưa tới ngưỡng 95%. Phần lọt chủ yếu là tên một tiếng đứng trơ. Sau rà soát độc lập có vá thêm luật; chỉ đo lại trên tập dev (không đổi: 97,5% / 97,3%), **không** đo tập test lần ba.
 - Trình duyệt của bác sĩ giữ bản sao danh sách ca khám trong `localStorage` để mở nhanh khi tải lại trang; dữ liệu này tự xóa khi đăng xuất, hết phiên `401` hoặc đổi tài khoản (`web/src/lib/xoaDuLieuTrinhDuyet.ts`), nhưng nếu bác sĩ đóng tab không đăng xuất thì bản sao cục bộ trên máy đó chưa mã hóa.
 - 34 commit cũ chưa xác định công cụ (trong đó có các commit Antigravity 25–27/11). Tác giả sẽ xác nhận dần, máy không đoán.
+- Trên máy chủ chạy bản demo, việc tự xóa âm thanh **đang tạm tắt** (hạn giữ đặt rất dài) cho tới khi chốt chính sách với âm thanh chưa duyệt; mã tự xóa và test đã có.
 - Chưa thử với bác sĩ thật xem họ có duyệt bừa không, và chưa chặn được thao tác bôi đen Ctrl+C hoặc Ctrl+P trên trình duyệt (bản in khi chưa ký tự mang dòng "BẢN NHÁP — CHƯA KÝ DUYỆT").
 
 ## Kết quả kiểm thử toàn bộ
