@@ -13,12 +13,19 @@ process.env.MEDITRACE_TRO_LY_NGOAI = "bat";
 
 // Cổng mô hình ngoài giả: ghi lại thân yêu cầu và trả lại đúng nội dung người dùng gửi.
 const daNhan: Array<{ body: any; ua: string }> = [];
+/** Khi đặt, cổng giả trả mã 400 với thông điệp lỗi này (mô phỏng cổng bên thứ ba dội lại nội dung). */
+let loiCongGia: string | null = null;
 const mockLlm = http.createServer((req, res) => {
   let raw = "";
   req.on("data", (c) => (raw += c));
   req.on("end", () => {
     const body = JSON.parse(raw || "{}");
     daNhan.push({ body, ua: String(req.headers["user-agent"] || "") });
+    if (loiCongGia) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: { message: loiCongGia } }));
+      return;
+    }
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ model: "gia", choices: [{ message: { content: body.messages?.[1]?.content || "" } }] }));
   });
@@ -133,4 +140,21 @@ test("thiếu allowExternal vẫn 403; /api/external/status không lộ địa c
   assert.equal(st.base, undefined);
   const qt = (await (await fetch(`${base}/api/external/status`, { headers: { "x-test-uid": "3" } })).json()) as any;
   assert.equal(typeof qt.base, "string");
+});
+
+test("log_loi_cong_ngoai_da_che", async (t) => {
+  const daLog: string[] = [];
+  t.mock.method(console, "error", (...a: unknown[]) => void daLog.push(a.map(String).join(" ")));
+  loiCongGia = "bad input: Bệnh nhân Nguyễn Văn An 0912345678";
+  try {
+    const r = await post("/api/clinical-qa", { question: "đau ngực bao lâu?", transcript: "BN: đau 2 ngày", allowExternal: true }, 7);
+    assert.equal(r.status, 502);
+  } finally {
+    loiCongGia = null;
+    datLaiHanMucNgoai();
+  }
+  assert.ok(daLog.length > 0, "phải có dòng log lỗi");
+  for (const dong of daLog) {
+    assert.ok(!dong.includes("Nguyễn Văn An") && !dong.includes("0912345678"), dong);
+  }
 });

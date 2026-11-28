@@ -2,6 +2,7 @@ import type express from "express";
 import fs from "fs";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { anDanhVanBanNgoai, khoiPhucPII } from "../an-danh-ngoai";
+import { cheLog } from "../che-log";
 import { ngoaiBat } from "../tro-ly/cai-dat-tro-ly";
 import { loiCongKhai, traLoi } from "./dung-chung";
 
@@ -151,12 +152,12 @@ export async function goiNgoai(
       abortErr.code = "da_huy";
       throw abortErr;
     }
-    console.error("[mo-hinh-ngoai] không kết nối được:", err?.message || err);
+    console.error("[mo-hinh-ngoai] không kết nối được:", cheLog(err?.message || err));
     throw loiCongKhai("Không kết nối được cổng mô hình ngoài. Thử lại sau.", 502, "ngoai_khong_ket_noi");
   }
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok) {
-    console.error(`[mo-hinh-ngoai] trả mã ${res.status}:`, data?.error?.message || data?.message || "");
+    console.error(`[mo-hinh-ngoai] trả mã ${res.status}:`, cheLog(data?.error?.message || data?.message || ""));
     throw loiCongKhai(`Cổng mô hình ngoài trả mã ${res.status}.`, 502, "ngoai_loi");
   }
   const noiDung = data?.choices?.[0]?.message?.content || "";
@@ -194,7 +195,7 @@ export function dangKyLlmNgoaiRoutes(app: express.Express) {
         ...(laQuanTri ? { base: NGOAI.base } : {}),
       });
     } catch (err: any) {
-      console.error("[mo-hinh-ngoai] /models lỗi:", err?.message || err);
+      console.error("[mo-hinh-ngoai] /models lỗi:", cheLog(err?.message || err));
       res.json({ configured: true, enabled, reachable: false, model: NGOAI.model });
     }
   });

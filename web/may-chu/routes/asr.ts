@@ -19,6 +19,7 @@ function chanPhienLa(res: express.Response) {
 }
 import { taoHangDoi, type TrangThaiViecTra } from "../hang-doi";
 import { goiDichVu, traLoi, TUOI_VIEC_TOI_DA_MS } from "./dung-chung";
+import { cheLog } from "../che-log";
 
 const MUC_PHU = ["CẦN XÁC NHẬN", "CÂU HỎI LÀM RÕ"];
 const CHO_TRUC_TIEP_MS = Number(process.env.MEDITRACE_CHO_NHAP_MS) || 20_000;
@@ -172,7 +173,7 @@ export function dangKyAsrRoutes(app: express.Express) {
         } catch (err: any) {
           const status = Number(err?.status) || 500;
           const anChiTiet = status >= 500 && !err?.congKhai;
-          if (anChiTiet) console.error(`[ban-nhap ${v.id}]`, err?.stack || err?.message || err);
+          if (anChiTiet) console.error(`[ban-nhap ${v.id}]`, cheLog(err?.stack || err?.message || err, 1500));
           hangDoiViec.loi(
             v.id,
             JSON.stringify({

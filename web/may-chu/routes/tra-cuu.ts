@@ -18,6 +18,8 @@ import {
   timTaiLieuTheoTuKhoa,
 } from "../tra-cuu/dich-vu-tra-cuu";
 import { traLoi } from "./dung-chung";
+import { anDanhChoNgoai } from "../an-danh-ngoai";
+import { cheLog } from "../che-log";
 import { chanNeuChuaChoPhep, chayVoiNguoiDung, goiNgoai } from "./llm-ngoai";
 
 export { type TaiLieu, chuanSo, soLech, datTuKhoaTraCuu, timTaiLieuTheoTuKhoa, soanTraLoiCoNguon };
@@ -26,6 +28,14 @@ export function dangKyTraCuuRoutes(app: express.Express) {
   app.get("/api/pubmed-search", async (req, res) => {
     const q = String(req.query.q || "").trim();
     if (!q) return res.status(400).json({ error: "Thiếu từ khoá" });
+    // Từ khóa đi thẳng ra NCBI: có dấu hiệu định danh thì từ chối, không che rồi gửi (che làm hỏng câu tìm).
+    const kiem = anDanhChoNgoai(q);
+    if (!kiem.ok || kiem.van !== q.normalize("NFC")) {
+      return res.status(422).json({
+        error: "Ô tìm tài liệu không nhận tên, mã hay số liên lạc của bệnh nhân. Hãy chỉ gõ từ khóa y khoa.",
+        code: "tu_khoa_co_danh_tinh",
+      });
+    }
     try {
       const nam = Number(req.query.tuNam);
       const bai = await timPubMed(q, 8, req.query.cao === "1", Number.isInteger(nam) && nam > 1900 ? nam : undefined);
@@ -40,7 +50,7 @@ export function dangKyTraCuuRoutes(app: express.Express) {
         })),
       });
     } catch (err: any) {
-      console.error("[pubmed]", err?.message || err);
+      console.error("[pubmed]", cheLog(err?.message || err));
       res.status(502).json({ error: "Không tìm được trên PubMed. Thử lại sau." });
     }
   });

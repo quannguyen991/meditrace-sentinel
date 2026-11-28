@@ -1,8 +1,10 @@
+import crypto from "crypto";
 import express from "express";
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { Agent } from "undici";
+import { cheLog } from "../che-log";
 
 // Thư mục gốc dự án web. Không dùng import.meta.url: bản build (dist/server.cjs, dạng CommonJS) không có nó.
 export const GOC = process.cwd();
@@ -72,7 +74,7 @@ export function traLoi(res: express.Response, err: any) {
   const raw = Number(err?.status || err?.statusCode || err?.ma);
   const status = Number.isInteger(raw) && raw >= 100 && raw <= 599 ? raw : 500;
   if (status >= 500 && !err?.congKhai) {
-    console.error(`[loi ${status}]`, err?.stack || err?.message || err);
+    console.error(`[loi ${status}]`, cheLog(err?.stack || err?.message || err, 1500));
     res.status(status).json({
       error: "Lỗi máy chủ nội bộ. Chi tiết đã ghi vào nhật ký máy chủ.",
       ...(err?.code ? { code: err.code } : {}),
@@ -172,13 +174,13 @@ export async function chayPythonJson(moduleName: string, args: string[], inputOb
         hoanTat(() => {
           if (code !== 0) {
             // stderr của Python có thể chứa đường dẫn máy và traceback: chỉ ghi log, không trả cho người dùng.
-            console.error(`[python ${moduleName}] thoát mã ${code}:`, err.slice(-2000));
+            console.error(`[python ${moduleName}] thoát mã ${code}:`, cheLog(err.slice(-2000), 2000));
             return reject(new Error(`Tác vụ Python ${moduleName} thất bại (mã ${code})`));
           }
           try {
             resolve(JSON.parse(out.trim()));
           } catch {
-            console.error(`[python ${moduleName}] JSON không hợp lệ:`, out.slice(0, 200));
+            console.error(`[python ${moduleName}] JSON không hợp lệ: do_dai=${out.length} bam=${crypto.createHash("sha256").update(out).digest("hex").slice(0, 12)}`);
             reject(new Error(`JSON không hợp lệ từ ${moduleName}`));
           }
         });

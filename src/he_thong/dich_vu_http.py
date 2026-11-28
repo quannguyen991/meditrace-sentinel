@@ -77,11 +77,11 @@ import re
 import sys
 import threading
 import time
-import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from src.he_thong import duong_dan as duong_dan
+from src.he_thong.che_log import in_loi_an_toan
 
 NHANH_CHO_PHEP = ("C_khoa", "C_khoa_v2", "C_khoa_hoi", "C", "B")
 MAX_TOKEN = 3072
@@ -303,7 +303,7 @@ class Loi:
             except LoiDichVu:
                 raise
             except Exception as exc:
-                traceback.print_exc()
+                in_loi_an_toan(exc)
                 raise LoiDichVu("loi_sinh_ho_so", f"{type(exc).__name__}: {exc}", 500)
         elif self.mo_hinh_xa:
             from src.he_thong.khu_dinh_danh import ClinicalDeidentifier
@@ -375,7 +375,7 @@ class Loi:
                 except LoiDichVu:
                     raise
                 except Exception as exc:
-                    traceback.print_exc()
+                    in_loi_an_toan(exc)
                     raise LoiDichVu("loi_sinh_ho_so", f"{type(exc).__name__}: {exc}", 500)
         r = kq[0]
         r["nguon"] = nguon
@@ -923,8 +923,8 @@ class May(BaseHTTPRequestHandler):
             )
             kq["worm_seq"] = worm_ev.get("seq")
             kq["worm_hash"] = worm_ev.get("curr_hash")
-        except Exception:
-            traceback.print_exc()
+        except Exception as exc_log:
+            in_loi_an_toan(exc_log)
         return kq
 
     def _ho_so_tho(self, than):
@@ -960,7 +960,7 @@ class May(BaseHTTPRequestHandler):
     def _bao_loi(self, exc):
         if isinstance(exc, LoiDichVu):
             return self._tra({"loi": exc.ma, "thong_diep": exc.thong_diep}, exc.code)
-        traceback.print_exc()
+        in_loi_an_toan(exc)
         self._tra({"loi": "loi_khong_ro", "thong_diep": f"{type(exc).__name__}: {exc}"}, 500)
 
     def log_message(self, dang, *a):
@@ -987,8 +987,8 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
         ]
         if not r.get("canh_bao"):
             r["canh_bao"] = gop.to_dict(gop.chay(ps, r["input"]))
-    except Exception:
-        traceback.print_exc()
+    except Exception as exc_log:
+        in_loi_an_toan(exc_log)
         r["canh_bao_loi"] = "không tính được lớp cảnh báo cho bản ghi này"
         return r
 
@@ -1058,8 +1058,8 @@ def _them_canh_bao(r, thong_tin_benh_nhan=None, du_lieu_xet_nghiem=None):
                     metadata_am_thanh=r.get("metadata") if isinstance(r.get("metadata"), list) else None,
                 )
             r["lam_sang_nang_cao"] = ls_nang_cao
-        except Exception:
-            traceback.print_exc()
+        except Exception as exc_log:
+            in_loi_an_toan(exc_log)
     return r
 
 
